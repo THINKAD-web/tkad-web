@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  name      String
+  nameEn    String?  @map("name_en")
+  location  String
+  region    String
+  type      String
+  price     Int
+  image     String?
+  width     String?
+  height    String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("media")
+}
+
+model ContactInquiry {
+  id        String   @id @default(cuid())
+  company   String
+  name      String
+  phone     String
+  email     String?
+  budget    String?
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_inquiries")
+}
+
+model CaseStudy {
+  id          String   @id @default(cuid())
+  title       String
+  titleEn     String?  @map("title_en")
+  description String
+  descriptionEn String? @map("description_en")
+  category    String
+  image       String?
+  client      String?
+  results     String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("case_studies")
+}

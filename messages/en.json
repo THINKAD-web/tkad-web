@@ -1,0 +1,177 @@
+{
+  "common": {
+    "siteName": "THINKAD",
+    "siteNameKo": "싱커드",
+    "cta": "Contact Us",
+    "learnMore": "Learn More",
+    "viewAll": "View All",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "submit": "Submit",
+    "loading": "Loading..."
+  },
+  "nav": {
+    "home": "Home",
+    "media": "Media Search",
+    "about": "About",
+    "cases": "Case Studies",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "Everything About Korean OOH Advertising",
+    "subtitle": "Search nationwide outdoor advertising media at a glance and receive optimal advertising solutions.",
+    "cta": "Search Media",
+    "ctaSecondary": "Request Proposal"
+  },
+  "stats": {
+    "media": "Registered Media",
+    "mediaValue": "500+",
+    "experience": "Industry Experience",
+    "experienceValue": "15 Years",
+    "coverage": "Coverage",
+    "coverageValue": "Nationwide",
+    "network": "Network",
+    "networkValue": "Global"
+  },
+  "services": {
+    "title": "Services",
+    "subtitle": "Experience all of OOH advertising with THINKAD",
+    "domestic": {
+      "title": "Domestic OOH",
+      "description": "Search outdoor advertising media across major regions including Seoul, Busan, and Jeju, and get optimal media recommendations."
+    },
+    "crossBorder": {
+      "title": "Cross-Border OOH",
+      "description": "Execute international OOH advertising through our global network. Connected with the XtheX global platform."
+    },
+    "dataConsulting": {
+      "title": "Data Consulting",
+      "description": "We provide data-driven media strategy consulting including foot traffic analysis, exposure measurement, and ROI analysis."
+    }
+  },
+  "featuredMedia": {
+    "title": "Featured Media",
+    "subtitle": "Check out the most popular advertising media"
+  },
+  "caseStudies": {
+    "title": "Case Studies",
+    "subtitle": "See campaign results achieved with THINKAD",
+    "case1": {
+      "title": "Global Beauty Brand Gangnam Campaign",
+      "description": "Achieved 300% brand awareness increase through simultaneous exposure campaign using 10 billboards around Gangnam Station",
+      "category": "Beauty"
+    },
+    "case2": {
+      "title": "Tech Startup COEX Launch",
+      "description": "New product launch campaign using COEX digital signage, achieving 1.5 million exposures in 2 weeks",
+      "category": "Tech"
+    },
+    "case3": {
+      "title": "Entertainment Subway Advertising",
+      "description": "200% increase in first-week album sales through wrapping ads at 7 major Seoul subway stations",
+      "category": "Entertainment"
+    }
+  },
+  "ctaBanner": {
+    "title": "Request a Proposal Now",
+    "description": "THINKAD's expert consultants will propose the optimal OOH advertising solution for you.",
+    "cta": "Free Consultation"
+  },
+  "media": {
+    "title": "Media Search",
+    "subtitle": "Search OOH advertising media nationwide",
+    "region": "Region",
+    "type": "Type",
+    "budget": "Budget",
+    "allRegions": "All Regions",
+    "allTypes": "All Types",
+    "allBudgets": "All Budgets",
+    "regions": {
+      "seoul": "Seoul",
+      "busan": "Busan",
+      "jeju": "Jeju",
+      "national": "Nationwide"
+    },
+    "types": {
+      "billboard": "Billboard",
+      "digital": "Digital",
+      "subway": "Subway",
+      "bus": "Bus"
+    },
+    "budgets": {
+      "under1000": "Under ₩10M",
+      "1000to3000": "₩10M ~ ₩30M",
+      "3000to5000": "₩30M ~ ₩50M",
+      "over5000": "Over ₩50M"
+    },
+    "perMonth": "/ month",
+    "results": "Results",
+    "noResults": "No results found"
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "15 Years of OOH Advertising Expertise",
+    "historyTitle": "History of THINKAD",
+    "historyDescription": "Since its establishment in 2010, THINKAD has been leading the Korean OOH advertising industry. With a nationwide network centered in Seoul and a partnership with the global OOH platform XtheX, we are expanding into cross-border advertising.",
+    "valuesTitle": "Core Values",
+    "value1": {
+      "title": "Data-Driven",
+      "description": "We support data-based decision-making through foot traffic analysis and exposure measurement."
+    },
+    "value2": {
+      "title": "Client First",
+      "description": "We provide customized solutions tailored to advertisers' goals."
+    },
+    "value3": {
+      "title": "Global Network",
+      "description": "Access worldwide OOH media through the XtheX platform."
+    },
+    "teamTitle": "Our Team",
+    "teamDescription": "Experts in OOH advertising, digital marketing, and data analysis come together to create the best results.",
+    "globalTitle": "XtheX Global Platform",
+    "globalDescription": "As the Korean partner of the global OOH advertising platform XtheX, THINKAD provides one-stop support for international campaigns in Korea and Korean advertisers' overseas campaigns."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Get in touch with THINKAD",
+    "formTitle": "Request a Proposal",
+    "company": "Company Name",
+    "companyPlaceholder": "Enter your company name",
+    "name": "Contact Person",
+    "namePlaceholder": "Enter your name",
+    "phone": "Phone",
+    "phonePlaceholder": "010-0000-0000",
+    "email": "Email",
+    "emailPlaceholder": "email@example.com",
+    "budget": "Campaign Budget",
+    "budgetPlaceholder": "Select budget range",
+    "message": "Message",
+    "messagePlaceholder": "Please describe your campaign goals, preferred media, timeline, etc.",
+    "submitButton": "Request Proposal",
+    "infoTitle": "Contact Information",
+    "address": "5F, THINKAD Building, 123 Teheran-ro, Gangnam-gu, Seoul",
+    "phoneNumber": "02-1234-5678",
+    "emailAddress": "contact@tkad.co.kr",
+    "hours": "Business Hours: Mon-Fri 09:00 - 18:00"
+  },
+  "cases": {
+    "title": "Case Studies",
+    "subtitle": "Campaign results achieved with THINKAD",
+    "all": "All",
+    "beauty": "Beauty",
+    "tech": "Tech",
+    "entertainment": "Entertainment",
+    "food": "Food & Beverage",
+    "finance": "Finance"
+  },
+  "footer": {
+    "description": "Korea's No.1 OOH Advertising Agency",
+    "quickLinks": "Quick Links",
+    "contactInfo": "Contact Info",
+    "address": "123 Teheran-ro, Gangnam-gu, Seoul",
+    "phone": "02-1234-5678",
+    "email": "contact@tkad.co.kr",
+    "copyright": "© 2024 THINKAD. All rights reserved."
+  }
+}

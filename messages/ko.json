@@ -1,0 +1,177 @@
+{
+  "common": {
+    "siteName": "THINKAD",
+    "siteNameKo": "싱커드",
+    "cta": "문의하기",
+    "learnMore": "자세히 보기",
+    "viewAll": "전체 보기",
+    "search": "검색",
+    "filter": "필터",
+    "reset": "초기화",
+    "submit": "제출",
+    "loading": "로딩 중..."
+  },
+  "nav": {
+    "home": "홈",
+    "media": "매체 검색",
+    "about": "회사 소개",
+    "cases": "성공 사례",
+    "contact": "문의하기"
+  },
+  "hero": {
+    "title": "한국 OOH 광고의 모든 것",
+    "subtitle": "전국 옥외광고 매체를 한눈에 검색하고, 최적의 광고 솔루션을 제안받으세요.",
+    "cta": "매체 검색하기",
+    "ctaSecondary": "제안 요청하기"
+  },
+  "stats": {
+    "media": "등록 매체",
+    "mediaValue": "500+",
+    "experience": "업계 경력",
+    "experienceValue": "15년",
+    "coverage": "커버리지",
+    "coverageValue": "전국",
+    "network": "네트워크",
+    "networkValue": "글로벌"
+  },
+  "services": {
+    "title": "서비스",
+    "subtitle": "OOH 광고의 모든 것을 THINKAD와 함께하세요",
+    "domestic": {
+      "title": "국내 OOH",
+      "description": "서울, 부산, 제주 등 전국 주요 지역의 옥외광고 매체를 한눈에 검색하고 최적의 매체를 제안받으세요."
+    },
+    "crossBorder": {
+      "title": "크로스보더 OOH",
+      "description": "글로벌 네트워크를 통해 해외 OOH 광고도 원스톱으로 진행하세요. XtheX 글로벌 플랫폼과 연계합니다."
+    },
+    "dataConsulting": {
+      "title": "데이터 컨설팅",
+      "description": "유동인구, 노출도, ROI 분석 등 데이터 기반의 매체 전략 컨설팅을 제공합니다."
+    }
+  },
+  "featuredMedia": {
+    "title": "인기 매체",
+    "subtitle": "가장 주목받는 광고 매체를 확인해보세요"
+  },
+  "caseStudies": {
+    "title": "성공 사례",
+    "subtitle": "THINKAD와 함께한 캠페인 성과를 확인하세요",
+    "case1": {
+      "title": "글로벌 뷰티 브랜드 강남 캠페인",
+      "description": "강남역 일대 빌보드 10면을 활용한 동시 노출 캠페인으로 브랜드 인지도 300% 상승",
+      "category": "뷰티"
+    },
+    "case2": {
+      "title": "테크 스타트업 코엑스 런칭",
+      "description": "코엑스 디지털 사이니지를 활용한 신제품 런칭 캠페인, 2주간 150만 노출 달성",
+      "category": "테크"
+    },
+    "case3": {
+      "title": "엔터테인먼트 지하철 광고",
+      "description": "서울 지하철 주요 7개 역사 랩핑 광고로 앨범 초동 판매 200% 증가",
+      "category": "엔터테인먼트"
+    }
+  },
+  "ctaBanner": {
+    "title": "지금 제안 요청하기",
+    "description": "THINKAD의 전문 컨설턴트가 최적의 OOH 광고 솔루션을 제안해 드립니다.",
+    "cta": "무료 상담 신청"
+  },
+  "media": {
+    "title": "매체 검색",
+    "subtitle": "전국의 OOH 광고 매체를 검색하세요",
+    "region": "지역",
+    "type": "유형",
+    "budget": "예산",
+    "allRegions": "전체 지역",
+    "allTypes": "전체 유형",
+    "allBudgets": "전체 예산",
+    "regions": {
+      "seoul": "서울",
+      "busan": "부산",
+      "jeju": "제주",
+      "national": "전국"
+    },
+    "types": {
+      "billboard": "빌보드",
+      "digital": "디지털",
+      "subway": "지하철",
+      "bus": "버스"
+    },
+    "budgets": {
+      "under1000": "1,000만원 이하",
+      "1000to3000": "1,000~3,000만원",
+      "3000to5000": "3,000~5,000만원",
+      "over5000": "5,000만원 이상"
+    },
+    "perMonth": "/ 월",
+    "results": "검색 결과",
+    "noResults": "검색 결과가 없습니다"
+  },
+  "about": {
+    "title": "회사 소개",
+    "subtitle": "15년 OOH 광고 전문 에이전시",
+    "historyTitle": "THINKAD의 역사",
+    "historyDescription": "2010년 설립 이후, THINKAD(싱커드)는 대한민국 OOH 광고 업계를 선도해 왔습니다. 서울을 중심으로 전국 네트워크를 구축하고, 글로벌 OOH 플랫폼 XtheX와의 파트너십을 통해 크로스보더 광고까지 영역을 확장하고 있습니다.",
+    "valuesTitle": "핵심 가치",
+    "value1": {
+      "title": "데이터 중심",
+      "description": "유동인구 분석, 노출도 측정 등 데이터 기반의 의사결정을 지원합니다."
+    },
+    "value2": {
+      "title": "고객 최우선",
+      "description": "광고주의 목표에 맞춘 맞춤형 솔루션을 제공합니다."
+    },
+    "value3": {
+      "title": "글로벌 네트워크",
+      "description": "XtheX 플랫폼을 통해 전세계 OOH 매체에 접근할 수 있습니다."
+    },
+    "teamTitle": "팀 소개",
+    "teamDescription": "OOH 광고, 디지털 마케팅, 데이터 분석 분야의 전문가들이 모여 최고의 결과를 만들어냅니다.",
+    "globalTitle": "XtheX 글로벌 플랫폼",
+    "globalDescription": "THINKAD는 글로벌 OOH 광고 플랫폼 XtheX의 한국 파트너로서, 해외 광고주의 국내 캠페인과 국내 광고주의 해외 캠페인을 원스톱으로 지원합니다."
+  },
+  "contact": {
+    "title": "문의하기",
+    "subtitle": "THINKAD에 문의해주세요",
+    "formTitle": "제안 요청",
+    "company": "회사명",
+    "companyPlaceholder": "회사명을 입력하세요",
+    "name": "담당자",
+    "namePlaceholder": "담당자명을 입력하세요",
+    "phone": "연락처",
+    "phonePlaceholder": "010-0000-0000",
+    "email": "이메일",
+    "emailPlaceholder": "email@example.com",
+    "budget": "캠페인 예산",
+    "budgetPlaceholder": "예산 범위를 선택하세요",
+    "message": "문의내용",
+    "messagePlaceholder": "캠페인 목표, 희망 매체, 기간 등을 자유롭게 적어주세요",
+    "submitButton": "제안 요청하기",
+    "infoTitle": "연락처 정보",
+    "address": "서울특별시 강남구 테헤란로 123, THINKAD 빌딩 5층",
+    "phoneNumber": "02-1234-5678",
+    "emailAddress": "contact@tkad.co.kr",
+    "hours": "영업시간: 월~금 09:00 - 18:00"
+  },
+  "cases": {
+    "title": "성공 사례",
+    "subtitle": "THINKAD와 함께한 캠페인 성과",
+    "all": "전체",
+    "beauty": "뷰티",
+    "tech": "테크",
+    "entertainment": "엔터테인먼트",
+    "food": "식음료",
+    "finance": "금융"
+  },
+  "footer": {
+    "description": "대한민국 No.1 OOH 광고 에이전시",
+    "quickLinks": "바로가기",
+    "contactInfo": "연락처",
+    "address": "서울특별시 강남구 테헤란로 123",
+    "phone": "02-1234-5678",
+    "email": "contact@tkad.co.kr",
+    "copyright": "© 2024 THINKAD(싱커드). All rights reserved."
+  }
+}
