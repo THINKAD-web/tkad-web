@@ -65,3 +65,85 @@ body {
     border-color: var(--border);
   }
 }
+
+/* Count-up animation for stats */
+@property --num {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+.stat-count-up {
+  animation: countUp 2s ease-out forwards;
+  counter-reset: num var(--num);
+}
+.stat-count-up::after {
+  content: counter(num);
+}
+
+@keyframes countUp {
+  from { --num: 0; }
+}
+
+.stat-count-500::after { content: counter(num) "+"; }
+.stat-count-500 { animation: countUp500 2.2s ease-out forwards; }
+@keyframes countUp500 { from { --num: 0; } to { --num: 500; } }
+
+.stat-count-15::after { content: counter(num) "년"; }
+.stat-count-15 { animation: countUp15 1.8s ease-out forwards; }
+@keyframes countUp15 { from { --num: 0; } to { --num: 15; } }
+
+.stat-count-100::after { content: counter(num) "%"; }
+.stat-count-100 { animation: countUp100 2s ease-out forwards; }
+@keyframes countUp100 { from { --num: 0; } to { --num: 100; } }
+
+.stat-count-50::after { content: counter(num) "+"; }
+.stat-count-50 { animation: countUp50 1.6s ease-out forwards; }
+@keyframes countUp50 { from { --num: 0; } to { --num: 50; } }
+
+/* Hero gradient animation */
+@keyframes heroShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.hero-bg {
+  background: linear-gradient(135deg, #111b30 0%, #1a2744 25%, #243358 50%, #1a2744 75%, #111b30 100%);
+  background-size: 400% 400%;
+  animation: heroShimmer 12s ease infinite;
+}
+
+/* Service card hover lift */
+.service-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.service-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(26, 39, 68, 0.15);
+}
+
+/* Gold underline accent */
+.gold-underline {
+  position: relative;
+  display: inline-block;
+}
+.gold-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 4px;
+  background: #c9a84c;
+  border-radius: 2px;
+}
+
+/* Fade-in on scroll */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s ease-out both;
+}
