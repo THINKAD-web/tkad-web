@@ -13,11 +13,18 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowRight,
   BarChart3,
+  BadgeCheck,
+  CheckCircle,
   Globe,
   MapPin,
   Monitor,
   TrendingUp,
   ChevronDown,
+  ShieldCheck,
+  Eye,
+  FileCheck,
+  Star,
+  Quote,
 } from "lucide-react";
 
 type Props = {
@@ -27,7 +34,6 @@ type Props = {
 const featuredMedia = [
   {
     id: 1,
-    nameKey: "gangnam",
     name: "강남역 빌보드",
     nameEn: "Gangnam Station Billboard",
     location: "서울 강남구",
@@ -37,7 +43,6 @@ const featuredMedia = [
   },
   {
     id: 2,
-    nameKey: "coex",
     name: "코엑스 디지털",
     nameEn: "COEX Digital",
     location: "서울 삼성동",
@@ -47,7 +52,6 @@ const featuredMedia = [
   },
   {
     id: 3,
-    nameKey: "hongdae",
     name: "홍대 지하철",
     nameEn: "Hongdae Subway",
     location: "서울 마포구",
@@ -57,7 +61,6 @@ const featuredMedia = [
   },
   {
     id: 4,
-    nameKey: "myeongdong",
     name: "명동 전광판",
     nameEn: "Myeongdong LED",
     location: "서울 중구",
@@ -74,6 +77,12 @@ const typeLabels: Record<string, { ko: string; en: string }> = {
   bus: { ko: "버스", en: "Bus" },
 };
 
+const partnerLogos = [
+  "Samsung", "LG", "Hyundai", "SK", "Lotte",
+  "CJ", "Kakao", "Naver", "Amorepacific", "Shinsegae",
+  "Hana", "KB", "KT",
+];
+
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -87,7 +96,7 @@ function HomeContent({ locale }: { locale: string }) {
 
   return (
     <>
-      {/* Hero — full viewport, dark gradient background */}
+      {/* Hero */}
       <section className="hero-bg relative flex min-h-screen items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(201,168,76,0.08)_0%,_transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(201,168,76,0.05)_0%,_transparent_50%)]" />
@@ -114,11 +123,18 @@ function HomeContent({ locale }: { locale: string }) {
             )}
           </h1>
 
-          <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-slate-300/90 sm:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300/90 sm:text-xl">
             {t("hero.subtitle")}
           </p>
 
-          <div className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <p className="mx-auto mt-3 flex items-center justify-center gap-2 text-base text-gold/80 font-medium">
+            <BadgeCheck className="h-5 w-5 text-gold" />
+            {isKo
+              ? "싱커드가 직접 검증하고 관리하는 매체만"
+              : "Only media personally verified and managed by THINKAD"}
+          </p>
+
+          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link href="/media">
               <Button
                 size="lg"
@@ -145,14 +161,14 @@ function HomeContent({ locale }: { locale: string }) {
         </div>
       </section>
 
-      {/* Stats — animated count-up */}
+      {/* Stats */}
       <section className="relative border-b bg-white py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             {[
               {
                 animClass: "stat-count-up stat-count-500",
-                label: isKo ? "등록 매체" : "Registered Media",
+                label: isKo ? "검증된 매체" : "Verified Media",
               },
               {
                 animClass: "stat-count-up stat-count-15",
@@ -180,7 +196,78 @@ function HomeContent({ locale }: { locale: string }) {
         </div>
       </section>
 
-      {/* Services — 3 cards with hover effects */}
+      {/* Why THINKAD */}
+      <section className="bg-white py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-sm font-semibold tracking-wider text-gold uppercase">
+              {isKo ? "차별점" : "Why Us"}
+            </p>
+            <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+              {isKo ? "왜 싱커드인가?" : "Why THINKAD?"}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              {isKo
+                ? "검증되지 않은 매체에 광고비를 낭비하지 마세요"
+                : "Don't waste your ad budget on unverified media"}
+            </p>
+          </div>
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
+            {[
+              {
+                icon: Eye,
+                title: isKo ? "직접 현장 검증" : "On-Site Verification",
+                desc: isKo
+                  ? "모든 매체를 담당자가 직접 방문하여 실제 노출 환경, 시인성, 유동인구를 확인합니다. 사진과 리포트로 기록된 검증 데이터를 제공합니다."
+                  : "Our team personally visits every media location to verify actual exposure, visibility, and foot traffic. We provide verification data documented with photos and reports.",
+                highlight: isKo ? "100% 현장 방문" : "100% Site Visits",
+              },
+              {
+                icon: BarChart3,
+                title: isKo ? "1년 이상 효과 데이터" : "1+ Year Performance Data",
+                desc: isKo
+                  ? "단기 캠페인이 아닌, 1년 이상 축적된 매체별 효과 데이터를 기반으로 최적의 매체를 추천합니다. 실제 ROI로 검증된 매체만 제안합니다."
+                  : "We recommend optimal media based on 1+ years of accumulated performance data per media, not short-term campaigns. We only propose media verified by actual ROI.",
+                highlight: isKo ? "데이터 기반 추천" : "Data-Driven",
+              },
+              {
+                icon: FileCheck,
+                title: isKo ? "계약~사후관리 책임" : "Contract to Post-Care",
+                desc: isKo
+                  ? "계약, 설치, 집행, 모니터링, 리포팅, 사후관리까지 전 과정을 싱커드가 책임집니다. 중간 단계 없이 원스톱으로 관리합니다."
+                  : "THINKAD takes full responsibility from contract, installation, execution, monitoring, reporting, to post-campaign management. One-stop management with no middlemen.",
+                highlight: isKo ? "원스톱 관리" : "One-Stop",
+              },
+            ].map((item) => (
+              <Card
+                key={item.title}
+                className="group relative overflow-hidden border-0 bg-gradient-to-b from-white to-slate-50 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
+              >
+                <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
+                <CardHeader className="pb-4">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10 ring-1 ring-gold/20 transition-all group-hover:scale-110 group-hover:bg-gold/20">
+                    <item.icon className="h-7 w-7 text-gold" />
+                  </div>
+                  <CardTitle className="text-xl font-bold text-navy">
+                    {item.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-sm leading-relaxed">
+                    {item.desc}
+                  </CardDescription>
+                  <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold/10 px-3 py-1 text-xs font-bold text-gold-dark">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    {item.highlight}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services */}
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -242,15 +329,16 @@ function HomeContent({ locale }: { locale: string }) {
         </div>
       </section>
 
-      {/* Featured Media */}
+      {/* Featured Media with Verified Badge */}
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "인기 매체" : "Featured"}
-              </p>
-              <h2 className="mt-3 text-3xl font-bold text-navy">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
+                <ShieldCheck className="h-4 w-4" />
+                Verified Media
+              </div>
+              <h2 className="mt-1 text-3xl font-bold text-navy">
                 {t("featuredMedia.title")}
               </h2>
               <p className="mt-2 text-muted-foreground">
@@ -272,6 +360,10 @@ function HomeContent({ locale }: { locale: string }) {
               >
                 <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10 overflow-hidden">
                   <Monitor className="h-12 w-12 text-navy/15 transition-transform group-hover:scale-110" />
+                  <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                    <BadgeCheck className="h-3 w-3" />
+                    Verified
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                 </div>
                 <CardHeader className="pb-2">
@@ -299,6 +391,99 @@ function HomeContent({ locale }: { locale: string }) {
                     <span className="text-xs font-normal text-muted-foreground">
                       {t("media.perMonth")}
                     </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Partner Logos Marquee */}
+      <section className="border-y bg-slate-50 py-16 overflow-hidden">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="mb-10 text-center text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+            {isKo ? "신뢰하는 파트너사" : "Trusted Partners"}
+          </p>
+        </div>
+        <div className="marquee-container">
+          <div className="marquee-track">
+            {[...partnerLogos, ...partnerLogos].map((name, i) => (
+              <div
+                key={`${name}-${i}`}
+                className="mx-8 flex h-12 w-28 shrink-0 items-center justify-center rounded-lg bg-white px-4 shadow-sm ring-1 ring-slate-100"
+              >
+                <span className="text-sm font-bold text-navy/40">{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-sm font-semibold tracking-wider text-gold uppercase">
+              {isKo ? "고객 후기" : "Testimonials"}
+            </p>
+            <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+              {isKo ? "광고주가 직접 전하는 이야기" : "What Our Clients Say"}
+            </h2>
+          </div>
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
+            {[
+              {
+                name: isKo ? "김서연 마케팅 이사" : "Seoyeon Kim, Marketing Director",
+                company: isKo ? "글로벌 뷰티 브랜드 A사" : "Global Beauty Brand A",
+                text: isKo
+                  ? "싱커드 덕분에 강남역 일대 10개 빌보드를 동시에 진행할 수 있었습니다. 무엇보다 매체 하나하나 직접 검증해준 데이터 덕에 안심하고 결정할 수 있었어요. 캠페인 후 브랜드 인지도 300% 상승이라는 결과가 모든 걸 말해줍니다."
+                  : "Thanks to THINKAD, we ran 10 billboards simultaneously around Gangnam Station. The verified data for each media gave us confidence. A 300% increase in brand awareness speaks for itself.",
+                rating: 5,
+              },
+              {
+                name: isKo ? "박준혁 대표" : "Junhyuk Park, CEO",
+                company: isKo ? "테크 스타트업 B사" : "Tech Startup B",
+                text: isKo
+                  ? "스타트업이라 광고 예산이 빠듯했는데, 싱커드가 데이터 기반으로 가장 효율적인 매체 조합을 제안해줬습니다. 코엑스 디지털 캠페인으로 2주 만에 150만 노출을 달성했어요. 계약부터 사후관리까지 원스톱이라 정말 편했습니다."
+                  : "As a startup with a tight budget, THINKAD proposed the most efficient media mix based on data. We achieved 1.5M impressions in 2 weeks with COEX digital. The one-stop service from contract to post-care was incredibly convenient.",
+                rating: 5,
+              },
+              {
+                name: isKo ? "이하은 팀장" : "Haeun Lee, Team Lead",
+                company: isKo ? "엔터테인먼트 C사" : "Entertainment Company C",
+                text: isKo
+                  ? "지하철 랩핑 광고를 처음 해봤는데, 싱커드가 역사별 유동인구 데이터와 실제 시인성까지 꼼꼼하게 분석해줘서 7개 역사를 최적으로 선정할 수 있었습니다. 앨범 초동 판매 200% 증가! 다음 캠페인도 무조건 싱커드입니다."
+                  : "It was our first subway wrapping ad. THINKAD meticulously analyzed foot traffic and visibility for each station, helping us optimally select 7 stations. 200% increase in first-week album sales! Definitely using THINKAD for our next campaign.",
+                rating: 5,
+              },
+            ].map((testimonial) => (
+              <Card
+                key={testimonial.name}
+                className="relative border-0 bg-white shadow-md transition-all hover:shadow-lg"
+              >
+                <CardHeader className="pb-3">
+                  <Quote className="h-8 w-8 text-gold/20" />
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: testimonial.rating }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className="h-4 w-4 fill-gold text-gold"
+                      />
+                    ))}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm leading-relaxed text-navy/80">
+                    &ldquo;{testimonial.text}&rdquo;
+                  </p>
+                  <div className="mt-6 border-t pt-4">
+                    <p className="text-sm font-bold text-navy">
+                      {testimonial.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {testimonial.company}
+                    </p>
                   </div>
                 </CardContent>
               </Card>

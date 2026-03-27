@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Monitor } from "lucide-react";
+import { MapPin, Monitor, BadgeCheck, ShieldCheck } from "lucide-react";
 import { useState, useMemo } from "react";
 
 const mediaData = [
@@ -166,8 +166,14 @@ export default function MediaPage() {
 
             {/* Grid */}
             <div className="flex-1">
-              <div className="mb-4 text-sm text-muted-foreground">
-                {t("media.results")}: {filtered.length}
+              <div className="mb-6 flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {t("media.results")}: {filtered.length}
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
+                  <ShieldCheck className="h-4 w-4" />
+                  Verified Media
+                </div>
               </div>
               {filtered.length === 0 ? (
                 <div className="flex h-64 items-center justify-center rounded-xl border text-muted-foreground">
@@ -180,8 +186,12 @@ export default function MediaPage() {
                       key={media.id}
                       className="overflow-hidden transition-shadow hover:shadow-lg"
                     >
-                      <div className="flex h-40 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
+                      <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
                         <Monitor className="h-10 w-10 text-navy/20" />
+                        <div className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                          <BadgeCheck className="h-3 w-3" />
+                          Verified
+                        </div>
                       </div>
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
