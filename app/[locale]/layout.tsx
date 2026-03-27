@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import QuickInquiryButton from "@/components/quick-inquiry-button";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -56,6 +57,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <QuickInquiryButton />
           <a
             href="https://open.kakao.com/o/placeholder"
             target="_blank"

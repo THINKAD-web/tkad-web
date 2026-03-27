@@ -25,6 +25,12 @@ import {
   FileCheck,
   Star,
   Quote,
+  Search,
+  Camera,
+  Database,
+  ClipboardCheck,
+  Users,
+  Trophy,
 } from "lucide-react";
 
 type Props = {
@@ -161,6 +167,81 @@ function HomeContent({ locale }: { locale: string }) {
         </div>
       </section>
 
+      {/* Verification Process */}
+      <section className="relative border-b bg-white py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,168,76,0.04)_0%,_transparent_70%)]" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-sm font-semibold tracking-wider text-gold uppercase">
+              {isKo ? "검증 프로세스" : "Verification Process"}
+            </p>
+            <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+              {isKo ? "싱커드만의 4단계 매체 검증" : "THINKAD's 4-Step Media Verification"}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              {isKo
+                ? "모든 매체는 엄격한 검증 프로세스를 거쳐야만 등록됩니다"
+                : "Every media must pass our rigorous verification process before registration"}
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: Search,
+                step: "01",
+                title: isKo ? "현장 방문" : "Site Visit",
+                desc: isKo
+                  ? "담당자가 직접 매체 현장을 방문하여 설치 환경과 주변 유동인구를 확인합니다."
+                  : "Our team personally visits the media site to check installation conditions and surrounding foot traffic.",
+              },
+              {
+                icon: Camera,
+                step: "02",
+                title: isKo ? "촬영 및 실측" : "Photo & Measurement",
+                desc: isKo
+                  ? "매체 크기, 시인성, 조도를 정밀 측정하고 다각도 촬영으로 기록합니다."
+                  : "We precisely measure media size, visibility, and illumination with multi-angle photography.",
+              },
+              {
+                icon: Database,
+                step: "03",
+                title: isKo ? "데이터 검증" : "Data Verification",
+                desc: isKo
+                  ? "유동인구 데이터, 차량 통행량, 노출 빈도를 분석하여 매체 효과를 검증합니다."
+                  : "We analyze foot traffic, vehicle flow, and exposure frequency to verify media effectiveness.",
+              },
+              {
+                icon: ClipboardCheck,
+                step: "04",
+                title: isKo ? "매체 등록" : "Media Registration",
+                desc: isKo
+                  ? "검증을 통과한 매체만 싱커드 플랫폼에 등록되어 광고주에게 제안됩니다."
+                  : "Only verified media are registered on the THINKAD platform and proposed to advertisers.",
+              },
+            ].map((item, index) => (
+              <div key={item.step} className="verification-step group relative">
+                {index < 3 && (
+                  <div className="absolute top-10 right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
+                )}
+                <div className="relative flex flex-col items-center text-center">
+                  <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 ring-1 ring-gold/20 transition-all group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-gold/10">
+                    <item.icon className="h-8 w-8 text-gold" />
+                    <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-navy text-[11px] font-bold text-white shadow-md">
+                      {item.step}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-navy">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Stats */}
       <section className="relative border-b bg-white py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -191,6 +272,120 @@ function HomeContent({ locale }: { locale: string }) {
                   {stat.label}
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TOP 3 Recommended Media */}
+      <section className="bg-slate-50 py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-sm font-bold text-gold-dark">
+              <Trophy className="h-4 w-4" />
+              TOP 3
+            </div>
+            <h2 className="mt-1 text-3xl font-bold text-navy sm:text-4xl">
+              {isKo ? "싱커드 추천 매체 TOP 3" : "THINKAD Recommended Media TOP 3"}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              {isKo
+                ? "검증 데이터 기반, 가장 효과적인 매체를 엄선했습니다"
+                : "Curated selection of the most effective media based on verified data"}
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
+            {[
+              {
+                rank: 1,
+                name: isKo ? "강남역 미디어폴" : "Gangnam Station Media Pole",
+                location: isKo ? "서울 강남구 강남대로" : "Gangnam-daero, Gangnam-gu, Seoul",
+                dailyExposure: "320,000",
+                footTraffic: "A+",
+                roi: "4.2x",
+                type: isKo ? "디지털" : "Digital",
+              },
+              {
+                rank: 2,
+                name: isKo ? "코엑스 아티움 대형 LED" : "COEX Artium Large LED",
+                location: isKo ? "서울 삼성동 코엑스몰" : "COEX Mall, Samsung-dong, Seoul",
+                dailyExposure: "280,000",
+                footTraffic: "A+",
+                roi: "3.8x",
+                type: isKo ? "디지털" : "Digital",
+              },
+              {
+                rank: 3,
+                name: isKo ? "홍대입구역 스크린도어" : "Hongdae Station Screen Door",
+                location: isKo ? "서울 마포구 홍대입구역" : "Hongdae Station, Mapo-gu, Seoul",
+                dailyExposure: "210,000",
+                footTraffic: "A",
+                roi: "3.5x",
+                type: isKo ? "지하철" : "Subway",
+              },
+            ].map((media) => (
+              <Card
+                key={media.rank}
+                className="group relative overflow-hidden border-0 bg-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
+              >
+                <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
+                <div className="relative flex h-52 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10 overflow-hidden">
+                  <Monitor className="h-16 w-16 text-navy/10 transition-transform group-hover:scale-110" />
+                  <div className="absolute top-4 left-4 flex h-10 w-10 items-center justify-center rounded-full bg-gold font-bold text-navy text-lg shadow-md">
+                    {media.rank}
+                  </div>
+                  <div className="absolute top-4 right-4 flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+                    <BadgeCheck className="h-3.5 w-3.5" />
+                    Verified
+                  </div>
+                </div>
+                <CardHeader className="pb-3">
+                  <Badge variant="secondary" className="w-fit bg-navy/5 text-navy text-xs font-medium">
+                    {media.type}
+                  </Badge>
+                  <CardTitle className="text-lg font-bold text-navy">
+                    {media.name}
+                  </CardTitle>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {media.location}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-3 rounded-xl bg-slate-50 p-3">
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">
+                        {isKo ? "일일 노출" : "Daily Views"}
+                      </div>
+                      <div className="mt-0.5 text-sm font-bold text-navy">{media.dailyExposure}</div>
+                    </div>
+                    <div className="text-center border-x">
+                      <div className="text-xs text-muted-foreground">
+                        {isKo ? "유동인구" : "Traffic"}
+                      </div>
+                      <div className="mt-0.5 text-sm font-bold text-gold-dark">{media.footTraffic}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">ROI</div>
+                      <div className="mt-0.5 text-sm font-bold text-emerald-600">{media.roi}</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex gap-2">
+                    <Link href="/media" className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full border-navy/20 text-navy text-xs font-semibold hover:bg-navy hover:text-white">
+                        {isKo ? "상세 보기" : "View Details"}
+                      </Button>
+                    </Link>
+                    <Link href="/contact" className="flex-1">
+                      <Button size="sm" className="w-full bg-gold text-navy text-xs font-bold hover:bg-gold-dark">
+                        {isKo ? "문의하기" : "Inquire"}
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
