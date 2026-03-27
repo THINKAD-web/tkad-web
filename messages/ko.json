@@ -159,11 +159,10 @@
     "title": "성공 사례",
     "subtitle": "THINKAD와 함께한 캠페인 성과",
     "all": "전체",
-    "beauty": "뷰티",
-    "tech": "테크",
-    "entertainment": "엔터테인먼트",
-    "food": "식음료",
-    "finance": "금융"
+    "billboard": "빌보드",
+    "digital": "디지털",
+    "transport": "교통",
+    "special": "특수"
   },
   "footer": {
     "description": "대한민국 No.1 OOH 광고 에이전시",

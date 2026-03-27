@@ -20,7 +20,7 @@ const caseStudies = [
     titleEn: "Global Beauty Brand Gangnam Campaign",
     description: "강남역 일대 빌보드 10면을 활용한 동시 노출 캠페인으로 브랜드 인지도 300% 상승을 달성했습니다.",
     descriptionEn: "Achieved 300% brand awareness increase through simultaneous exposure campaign using 10 billboards around Gangnam Station.",
-    category: "beauty",
+    category: "billboard",
     client: "글로벌 뷰티 그룹",
     results: "브랜드 인지도 300% 상승",
   },
@@ -30,7 +30,7 @@ const caseStudies = [
     titleEn: "Tech Startup COEX Launch Campaign",
     description: "코엑스 디지털 사이니지를 활용한 신제품 런칭 캠페인으로 2주간 150만 노출을 달성했습니다.",
     descriptionEn: "Achieved 1.5 million exposures in 2 weeks through new product launch campaign using COEX digital signage.",
-    category: "tech",
+    category: "digital",
     client: "AI 스타트업",
     results: "2주간 150만 노출",
   },
@@ -40,7 +40,7 @@ const caseStudies = [
     titleEn: "Entertainment Subway Campaign",
     description: "서울 지하철 주요 7개 역사 랩핑 광고로 앨범 초동 판매 200% 증가를 이끌었습니다.",
     descriptionEn: "Led to 200% increase in first-week album sales through wrapping ads at 7 major Seoul subway stations.",
-    category: "entertainment",
+    category: "transport",
     client: "대형 엔터테인먼트사",
     results: "초동 판매 200% 증가",
   },
@@ -50,7 +50,7 @@ const caseStudies = [
     titleEn: "F&B Brand National Bus Campaign",
     description: "전국 주요 도시 시내버스 500대를 활용한 신제품 런칭 캠페인으로 매출 40% 증가를 달성했습니다.",
     descriptionEn: "Achieved 40% sales increase through new product launch campaign using 500 city buses across major cities.",
-    category: "food",
+    category: "transport",
     client: "국내 식음료 대기업",
     results: "매출 40% 증가",
   },
@@ -60,7 +60,7 @@ const caseStudies = [
     titleEn: "Financial Corp Yeouido Digital OOH",
     description: "여의도 금융 중심가 디지털 사이니지를 활용한 기업 브랜딩 캠페인으로 투자자 문의 250% 증가를 이끌었습니다.",
     descriptionEn: "Led to 250% increase in investor inquiries through corporate branding campaign using digital signage in Yeouido financial district.",
-    category: "finance",
+    category: "digital",
     client: "대형 증권사",
     results: "투자자 문의 250% 증가",
   },
@@ -70,7 +70,7 @@ const caseStudies = [
     titleEn: "Beauty Brand Myeongdong LED",
     description: "명동 중심가 대형 전광판을 활용한 크로스보더 캠페인으로 해외 관광객 유입 180% 증가를 달성했습니다.",
     descriptionEn: "Achieved 180% increase in foreign tourist visits through cross-border campaign using Myeongdong central LED.",
-    category: "beauty",
+    category: "digital",
     client: "K-뷰티 브랜드",
     results: "관광객 유입 180% 증가",
   },
@@ -80,7 +80,7 @@ const caseStudies = [
     titleEn: "Tech Company Haeundae Billboard",
     description: "해운대 해변 빌보드를 활용한 여름 시즌 캠페인으로 앱 다운로드 120% 증가를 이끌었습니다.",
     descriptionEn: "Led to 120% increase in app downloads through summer season campaign using Haeundae beach billboard.",
-    category: "tech",
+    category: "billboard",
     client: "모바일 플랫폼",
     results: "앱 다운로드 120% 증가",
   },
@@ -90,18 +90,17 @@ const caseStudies = [
     titleEn: "Entertainment Jeju Tourism Campaign",
     description: "제주공항 및 관광단지 디지털 광고를 통한 콘서트 홍보 캠페인으로 티켓 판매 완판을 달성했습니다.",
     descriptionEn: "Achieved sold-out ticket sales through concert promotion campaign via Jeju airport and resort digital ads.",
-    category: "entertainment",
+    category: "special",
     client: "공연 기획사",
     results: "티켓 전석 완판",
   },
 ];
 
 const categoryColors: Record<string, string> = {
-  beauty: "bg-pink-50 text-pink-700",
-  tech: "bg-blue-50 text-blue-700",
-  entertainment: "bg-purple-50 text-purple-700",
-  food: "bg-orange-50 text-orange-700",
-  finance: "bg-emerald-50 text-emerald-700",
+  billboard: "bg-blue-50 text-blue-700",
+  digital: "bg-purple-50 text-purple-700",
+  transport: "bg-orange-50 text-orange-700",
+  special: "bg-emerald-50 text-emerald-700",
 };
 
 export default function CasesPage() {
@@ -112,11 +111,10 @@ export default function CasesPage() {
 
   const categories = [
     { value: "all", label: t("cases.all") },
-    { value: "beauty", label: t("cases.beauty") },
-    { value: "tech", label: t("cases.tech") },
-    { value: "entertainment", label: t("cases.entertainment") },
-    { value: "food", label: t("cases.food") },
-    { value: "finance", label: t("cases.finance") },
+    { value: "billboard", label: t("cases.billboard") },
+    { value: "digital", label: t("cases.digital") },
+    { value: "transport", label: t("cases.transport") },
+    { value: "special", label: t("cases.special") },
   ];
 
   const filtered = useMemo(

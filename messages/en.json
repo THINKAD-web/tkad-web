@@ -159,11 +159,10 @@
     "title": "Case Studies",
     "subtitle": "Campaign results achieved with THINKAD",
     "all": "All",
-    "beauty": "Beauty",
-    "tech": "Tech",
-    "entertainment": "Entertainment",
-    "food": "Food & Beverage",
-    "finance": "Finance"
+    "billboard": "Billboard",
+    "digital": "Digital",
+    "transport": "Transport",
+    "special": "Special"
   },
   "footer": {
     "description": "Korea's No.1 OOH Advertising Agency",

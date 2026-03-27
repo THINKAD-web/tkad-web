@@ -56,6 +56,16 @@ export default async function LocaleLayout({ children, params }: Props) {
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <a
+            href="https://open.kakao.com/o/placeholder"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-6 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110"
+            style={{ backgroundColor: "#FEE500" }}
+            aria-label="카카오톡 문의"
+          >
+            <span className="text-xl">💬</span>
+          </a>
         </NextIntlClientProvider>
       </body>
     </html>

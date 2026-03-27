@@ -10,10 +10,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Mail, MapPin, Phone, Clock } from "lucide-react";
+import { Mail, MapPin, Phone, Clock, CheckCircle } from "lucide-react";
+import { useState } from "react";
 
 export default function ContactPage() {
   const t = useTranslations();
+
+  const [form, setForm] = useState({
+    company: "",
+    name: "",
+    phone: "",
+    email: "",
+    budget: "",
+    message: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const updateField = (field: string, value: string) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
 
   return (
     <>
@@ -38,22 +57,41 @@ export default function ContactPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {submitted ? (
+                    <div className="flex flex-col items-center gap-4 py-12 text-center">
+                      <CheckCircle className="h-12 w-12 text-green-500" />
+                      <p className="text-lg font-semibold text-navy">
+                        문의가 접수되었습니다.
+                      </p>
+                      <p className="text-muted-foreground">
+                        빠른 시일 내에 연락드리겠습니다.
+                      </p>
+                    </div>
+                  ) : (
                   <form
                     className="space-y-5"
-                    onSubmit={(e) => e.preventDefault()}
+                    onSubmit={handleSubmit}
                   >
                     <div className="grid gap-5 sm:grid-cols-2">
                       <div>
                         <label className="mb-1.5 block text-sm font-medium text-navy">
                           {t("contact.company")}
                         </label>
-                        <Input placeholder={t("contact.companyPlaceholder")} />
+                        <Input
+                          placeholder={t("contact.companyPlaceholder")}
+                          value={form.company}
+                          onChange={(e) => updateField("company", e.target.value)}
+                        />
                       </div>
                       <div>
                         <label className="mb-1.5 block text-sm font-medium text-navy">
                           {t("contact.name")}
                         </label>
-                        <Input placeholder={t("contact.namePlaceholder")} />
+                        <Input
+                          placeholder={t("contact.namePlaceholder")}
+                          value={form.name}
+                          onChange={(e) => updateField("name", e.target.value)}
+                        />
                       </div>
                     </div>
                     <div className="grid gap-5 sm:grid-cols-2">
@@ -61,7 +99,11 @@ export default function ContactPage() {
                         <label className="mb-1.5 block text-sm font-medium text-navy">
                           {t("contact.phone")}
                         </label>
-                        <Input placeholder={t("contact.phonePlaceholder")} />
+                        <Input
+                          placeholder={t("contact.phonePlaceholder")}
+                          value={form.phone}
+                          onChange={(e) => updateField("phone", e.target.value)}
+                        />
                       </div>
                       <div>
                         <label className="mb-1.5 block text-sm font-medium text-navy">
@@ -70,6 +112,8 @@ export default function ContactPage() {
                         <Input
                           type="email"
                           placeholder={t("contact.emailPlaceholder")}
+                          value={form.email}
+                          onChange={(e) => updateField("email", e.target.value)}
                         />
                       </div>
                     </div>
@@ -77,7 +121,11 @@ export default function ContactPage() {
                       <label className="mb-1.5 block text-sm font-medium text-navy">
                         {t("contact.budget")}
                       </label>
-                      <select className="w-full rounded-md border px-3 py-2 text-sm">
+                      <select
+                        className="w-full rounded-md border px-3 py-2 text-sm"
+                        value={form.budget}
+                        onChange={(e) => updateField("budget", e.target.value)}
+                      >
                         <option value="">{t("contact.budgetPlaceholder")}</option>
                         <option value="under1000">1,000만원 이하</option>
                         <option value="1000to3000">1,000~3,000만원</option>
@@ -92,6 +140,8 @@ export default function ContactPage() {
                       <Textarea
                         rows={5}
                         placeholder={t("contact.messagePlaceholder")}
+                        value={form.message}
+                        onChange={(e) => updateField("message", e.target.value)}
                       />
                     </div>
                     <Button
@@ -102,6 +152,7 @@ export default function ContactPage() {
                       {t("contact.submitButton")}
                     </Button>
                   </form>
+                  )}
                 </CardContent>
               </Card>
             </div>
