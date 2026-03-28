@@ -126,8 +126,8 @@ function HomeContent({
       {/* Hero */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
         <HeroParallaxBackground />
-        <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_top_right,_rgba(232,213,181,0.12)_0%,_transparent_58%)]" />
-        <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_bottom_left,_rgba(155,60,49,0.1)_0%,_transparent_52%)]" />
+        <div className="pointer-events-none absolute inset-0 z-[2] hero-radial-accent" />
+        <div className="pointer-events-none absolute inset-0 z-[2] hero-radial-cta" />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
           <div className="hero-fade-in hero-fade-in-seq-0 mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">
@@ -171,8 +171,9 @@ function HomeContent({
           <div className="hero-fade-in hero-fade-in-seq-5 mx-auto mt-10 flex w-full max-w-md flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
             <Link href="/contact" className="w-full sm:w-auto">
               <Button
+                variant="cta"
                 size="lg"
-                className="btn-gold h-12 w-full min-h-11 rounded-full px-8 text-base font-semibold shadow-lg shadow-cta/20 sm:h-14 sm:w-auto sm:min-w-[11.5rem] sm:px-10 touch-manipulation"
+                className="btn-gold h-12 w-full min-h-11 rounded-full px-8 text-base font-semibold shadow-lg shadow-cta/25 sm:h-14 sm:w-auto sm:min-w-[11.5rem] sm:px-10 touch-manipulation"
               >
                 <PhoneCall className="mr-2 h-5 w-5" />
                 {isKo ? "무료 상담 신청" : "Free Consultation"}

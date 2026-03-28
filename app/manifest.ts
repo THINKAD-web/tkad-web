@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "대한민국 No.1 OOH 광고 에이전시. 전국 옥외광고 매체 검색 및 캠페인 컨설팅.",
     start_url: "/",
     display: "standalone",
-    background_color: "#d6d9e6",
-    theme_color: "#1a2a6c",
+    background_color: "#D6D9E6",
+    theme_color: "#1A2A6C",
     icons: [
       {
         src: "/pwa-icon/192",

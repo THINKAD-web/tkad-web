@@ -18,7 +18,7 @@ export function OgLayout({
         flexDirection: "column",
         justifyContent: "center",
         padding: "60px 80px",
-        background: "linear-gradient(135deg, #1a2a6c 0%, #1a1a2e 55%, #12121f 100%)",
+        background: "linear-gradient(135deg, #1A2A6C 0%, #121A3A 52%, #0E1228 100%)",
         position: "relative",
       }}
     >
@@ -109,11 +109,11 @@ export function OgLayout({
             justifyContent: "center",
             width: 48,
             height: 48,
-            background: "linear-gradient(135deg, #e8d5b5, #c4b08f)",
+            background: "linear-gradient(135deg, #E8D5B5, #C9B896)",
             borderRadius: 12,
           }}
         >
-          <span style={{ fontSize: 28, fontWeight: 900, color: "#1a2a6c" }}>
+          <span style={{ fontSize: 28, fontWeight: 900, color: "#1A2A6C" }}>
             T
           </span>
         </div>

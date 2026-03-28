@@ -1,8 +1,7 @@
 import type { Config } from "tailwindcss";
 
 /**
- * THINKAD 2025 palette — source of truth for utilities is `app/globals.css` (`@theme inline`).
- * This file documents tokens and sets `content` for tooling that expects a config path.
+ * THINKAD 2025 rebrand — canonical hex. Runtime utilities: `app/globals.css` (`@theme inline`).
  */
 export const brandColors = {
   primary: "#1A2A6C",
@@ -10,8 +9,10 @@ export const brandColors = {
   silver: "#B0B8C4",
   background: "#D6D9E6",
   cta: "#9B3C31",
+  ctaHover: "#85342A",
+  primaryLight: "#2E4078",
+  primaryDark: "#121A3A",
   white: "#FFFFFF",
-  dark: "#1A1A2E",
 } as const;
 
 export default {

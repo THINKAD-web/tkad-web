@@ -157,8 +157,8 @@ export async function generateMetadata({
     other: {
       "naver-site-verification": "",
       "google-site-verification": "",
-      "theme-color": "#1a2a6c",
-      "msapplication-TileColor": "#1a2a6c",
+      "theme-color": "#1A2A6C",
+      "msapplication-TileColor": "#1A2A6C",
     },
   };
 }

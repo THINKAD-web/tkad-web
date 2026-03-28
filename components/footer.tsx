@@ -20,13 +20,13 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/5 bg-gradient-to-b from-navy via-navy-dark to-[#12121f] text-white">
+    <footer className="relative overflow-hidden border-t border-silver/15 bg-gradient-to-b from-primary via-navy-dark to-[#0e1228] text-white">
       <div className="hero-pattern absolute inset-0 opacity-[0.14]" />
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="text-xl font-extrabold tracking-tight">
-              THINK<span className="bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">AD</span>
+              THINK<span className="bg-gradient-to-r from-gold via-gold-light to-silver bg-clip-text text-transparent">AD</span>
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-silver/90">
               {t("footer.description")}
