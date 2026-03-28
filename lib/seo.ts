@@ -41,6 +41,7 @@ export const publicSeoPaths = [
   "/client",
   "/blog",
   "/news",
+  "/planner",
 ] as const;
 
 export function absoluteUrl(path: string): string {
