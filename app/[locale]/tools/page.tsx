@@ -23,11 +23,11 @@ import {
   Monitor,
   Send,
   TrendingUp,
-  X,
   Zap,
 } from "lucide-react";
 import Spinner from "@/components/spinner";
-import ErrorToast from "@/components/error-toast";
+import Modal from "@/components/ui/modal";
+import { useToast } from "@/components/toast-provider";
 
 type RegionKey = "seoul" | "busan" | "jeju" | "national";
 
@@ -106,10 +106,10 @@ export default function ToolsPage() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const [region, setRegion] = useState<RegionKey>("seoul");
+  const { toast } = useToast();
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
   const [leadLoading, setLeadLoading] = useState(false);
-  const [leadError, setLeadError] = useState(false);
   const [company, setCompany] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -121,7 +121,6 @@ export default function ToolsPage() {
   const openModal = () => {
     setShowLeadModal(true);
     setLeadSubmitted(false);
-    setLeadError(false);
     setCompany("");
     setName("");
     setEmail("");
@@ -135,13 +134,13 @@ export default function ToolsPage() {
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLeadError(false);
     setLeadLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setLeadSubmitted(true);
+      toast("success", isKo ? "상담 요청이 접수되었습니다." : "Consultation request submitted.");
     } catch {
-      setLeadError(true);
+      toast("error", isKo ? "일시적 오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.");
     } finally {
       setLeadLoading(false);
     }
@@ -403,133 +402,114 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      {showLeadModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            aria-label={isKo ? "닫기" : "Close"}
-            onClick={closeModal}
-          />
-          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-            <button
-              type="button"
-              onClick={closeModal}
-              className="absolute right-4 top-4 rounded-full p-1 text-navy/50 transition-colors hover:bg-navy/5 hover:text-navy"
-              aria-label={isKo ? "닫기" : "Close"}
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            {!leadSubmitted ? (
-              <>
-                <h3 className="pr-10 text-xl font-bold text-navy">
-                  {isKo ? "도입 상담 요청" : "Request a consultation"}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {isKo
-                    ? "아래 정보를 남겨 주시면 연락드리겠습니다."
-                    : "Leave your details and we will reach out."}
-                </p>
-                {leadError && (
-                  <div className="mt-4">
-                    <ErrorToast
-                      onRetry={() => handleLeadSubmit(new Event("submit") as unknown as React.FormEvent)}
-                      onDismiss={() => setLeadError(false)}
-                    />
-                  </div>
-                )}
-                <form onSubmit={handleLeadSubmit} className="mt-6 space-y-4">
-                  <div>
-                    <label htmlFor="lead-company" className="mb-1.5 block text-xs font-bold text-navy">
-                      {isKo ? "회사명" : "Company"}
-                    </label>
-                    <Input
-                      id="lead-company"
-                      required
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                      className="rounded-xl border-navy/15"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="lead-name" className="mb-1.5 block text-xs font-bold text-navy">
-                      {isKo ? "이름" : "Name"}
-                    </label>
-                    <Input
-                      id="lead-name"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="rounded-xl border-navy/15"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="lead-email" className="mb-1.5 block text-xs font-bold text-navy">
-                      {isKo ? "이메일" : "Email"}
-                    </label>
-                    <Input
-                      id="lead-email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="rounded-xl border-navy/15"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="lead-phone" className="mb-1.5 block text-xs font-bold text-navy">
-                      {isKo ? "전화번호" : "Phone"}
-                    </label>
-                    <Input
-                      id="lead-phone"
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="rounded-xl border-navy/15"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    disabled={leadLoading}
-                    className="mt-2 w-full rounded-xl bg-gold font-bold text-navy hover:bg-gold-dark"
-                  >
-                    {leadLoading ? (
-                      <>
-                        <Spinner className="mr-2" />
-                        {isKo ? "전송 중..." : "Sending..."}
-                      </>
-                    ) : (
-                      <>
-                        <Send className="h-4 w-4" />
-                        {isKo ? "제출하기" : "Submit"}
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </>
-            ) : (
-              <div className="py-8 text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                  <CheckCircle className="h-8 w-8" />
+      <Modal
+        open={showLeadModal}
+        onClose={closeModal}
+        locked={leadSubmitted}
+        ariaLabel={isKo ? "도입 상담 요청" : "Request a consultation"}
+        className="max-w-md"
+      >
+        <div className="p-6">
+          {!leadSubmitted ? (
+            <>
+              <h3 className="pr-10 text-xl font-bold text-navy">
+                {isKo ? "도입 상담 요청" : "Request a consultation"}
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {isKo
+                  ? "아래 정보를 남겨 주시면 연락드리겠습니다."
+                  : "Leave your details and we will reach out."}
+              </p>
+              <form onSubmit={handleLeadSubmit} className="mt-6 space-y-4">
+                <div>
+                  <label htmlFor="lead-company" className="mb-1.5 block text-xs font-bold text-navy">
+                    {isKo ? "회사명" : "Company"}
+                  </label>
+                  <Input
+                    id="lead-company"
+                    required
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    className="rounded-xl border-navy/15"
+                  />
                 </div>
-                <p className="text-lg font-bold text-navy">
-                  {isKo ? "담당자가 24시간 내 연락드립니다" : "We will contact you within 24 hours"}
-                </p>
+                <div>
+                  <label htmlFor="lead-name" className="mb-1.5 block text-xs font-bold text-navy">
+                    {isKo ? "이름" : "Name"}
+                  </label>
+                  <Input
+                    id="lead-name"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="rounded-xl border-navy/15"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lead-email" className="mb-1.5 block text-xs font-bold text-navy">
+                    {isKo ? "이메일" : "Email"}
+                  </label>
+                  <Input
+                    id="lead-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="rounded-xl border-navy/15"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lead-phone" className="mb-1.5 block text-xs font-bold text-navy">
+                    {isKo ? "전화번호" : "Phone"}
+                  </label>
+                  <Input
+                    id="lead-phone"
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="rounded-xl border-navy/15"
+                  />
+                </div>
                 <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-6 rounded-xl border-navy/20 text-navy"
-                  onClick={closeModal}
+                  type="submit"
+                  disabled={leadLoading}
+                  className="mt-2 w-full rounded-xl bg-gold font-bold text-navy hover:bg-gold-dark"
                 >
-                  {isKo ? "닫기" : "Close"}
+                  {leadLoading ? (
+                    <>
+                      <Spinner className="mr-2" />
+                      {isKo ? "전송 중..." : "Sending..."}
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      {isKo ? "제출하기" : "Submit"}
+                    </>
+                  )}
                 </Button>
+              </form>
+            </>
+          ) : (
+            <div className="py-8 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gold/15 ring-2 ring-gold/30">
+                <CheckCircle className="h-8 w-8 text-gold-dark" />
               </div>
-            )}
-          </div>
+              <p className="text-lg font-bold text-navy">
+                {isKo ? "담당자가 24시간 내 연락드립니다" : "We will contact you within 24 hours"}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-6 rounded-xl border-navy/20 text-navy"
+                onClick={closeModal}
+              >
+                {isKo ? "닫기" : "Close"}
+              </Button>
+            </div>
+          )}
         </div>
-      )}
+      </Modal>
     </>
   );
 }

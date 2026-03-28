@@ -13,6 +13,7 @@ import ExitIntentPopup from "@/components/exit-intent-popup";
 import TopLoader from "@/components/top-loader";
 import PageTransition from "@/components/page-transition";
 import ConditionalPublicChrome from "@/components/conditional-public-chrome";
+import ToastProvider from "@/components/toast-provider";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -124,23 +125,25 @@ export default async function LocaleLayout({ children, params }: Props) {
           }}
         />
         <NextIntlClientProvider messages={messages}>
-          <a href="#main-content" className="skip-link">
-            {locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"}
-          </a>
-          <ConditionalPublicChrome>
-            <TopLoader />
-            <Header />
-          </ConditionalPublicChrome>
-          <main id="main-content" className="flex-1">
-            <PageTransition>{children}</PageTransition>
-          </main>
-          <ConditionalPublicChrome>
-            <Footer />
-            <QuickInquiryButton />
-            <FloatingCta />
-            <ExitIntentPopup />
-            <KakaoChannelButton />
-          </ConditionalPublicChrome>
+          <ToastProvider>
+            <a href="#main-content" className="skip-link">
+              {locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"}
+            </a>
+            <ConditionalPublicChrome>
+              <TopLoader />
+              <Header />
+            </ConditionalPublicChrome>
+            <main id="main-content" className="flex-1">
+              <PageTransition>{children}</PageTransition>
+            </main>
+            <ConditionalPublicChrome>
+              <Footer />
+              <QuickInquiryButton />
+              <FloatingCta />
+              <ExitIntentPopup />
+              <KakaoChannelButton />
+            </ConditionalPublicChrome>
+          </ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

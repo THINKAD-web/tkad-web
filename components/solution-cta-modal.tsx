@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-import { X, Sparkles, CheckCircle, Send } from "lucide-react";
+import { Sparkles, CheckCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Modal from "@/components/ui/modal";
 import Spinner from "@/components/spinner";
-import ErrorToast from "@/components/error-toast";
+import { useToast } from "@/components/toast-provider";
 
 const inputClass =
   "h-11 border-slate-200 focus:border-gold focus:ring-gold/20";
@@ -23,9 +24,9 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
   const locale = useLocale();
   const isKo = locale === "ko";
 
+  const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState(false);
   const [adGoal, setAdGoal] = useState<"brand" | "promotion" | "event">("brand");
   const [budget, setBudget] = useState<"under5" | "5to10" | "over10">("under5");
   const [region, setRegion] = useState<"seoul" | "capital" | "nationwide" | "other">(
@@ -57,24 +58,15 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
     return () => window.clearTimeout(id);
   }, [submitted, onClose]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(false);
     setLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setSubmitted(true);
+      toast("success", isKo ? "상담 신청이 접수되었습니다." : "Consultation request submitted.");
     } catch {
-      setSubmitError(true);
+      toast("error", isKo ? "일시적 오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -99,34 +91,19 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
     { value: "other" as const, ko: "기타", en: "Other" },
   ];
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={() => !submitted && onClose()}
-        aria-hidden
-      />
-      <div
-        className="relative w-full max-w-lg animate-fade-in-up rounded-2xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="solution-cta-title"
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-          aria-label={isKo ? "닫기" : "Close"}
-        >
-          <X className="h-4 w-4" />
-        </button>
-
+    <Modal
+      open={open}
+      onClose={onClose}
+      locked={submitted}
+      ariaLabelledBy="solution-cta-title"
+      className="max-w-lg"
+    >
+      <div className="p-6">
         {submitted ? (
           <div className="flex flex-col items-center py-10 text-center">
             <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gold/15 ring-2 ring-gold/30">
-              <CheckCircle className="h-10 w-10 text-gold-dark animate-in zoom-in-50 duration-500" />
+              <CheckCircle className="h-10 w-10 text-gold-dark" />
             </div>
             <p className="text-lg font-bold text-navy">
               {isKo ? "담당자가 24시간 내 연락드립니다" : "We will contact you within 24 hours"}
@@ -150,12 +127,6 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {submitError && (
-                <ErrorToast
-                  onRetry={() => handleSubmit(new Event("submit") as unknown as React.FormEvent)}
-                  onDismiss={() => setSubmitError(false)}
-                />
-              )}
               <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
                 <input type="text" name="website" tabIndex={-1} autoComplete="off" />
               </div>
@@ -320,6 +291,6 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
           </>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

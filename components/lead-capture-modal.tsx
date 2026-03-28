@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle, Download, X } from "lucide-react";
+import { CheckCircle, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Modal from "@/components/ui/modal";
 import Spinner from "@/components/spinner";
-import ErrorToast from "@/components/error-toast";
+import { useToast } from "@/components/toast-provider";
 
 export type LeadData = {
   company: string;
@@ -31,9 +32,9 @@ export function LeadCaptureModal({
   locale = "ko",
 }: LeadCaptureModalProps) {
   const isKo = locale === "ko";
+  const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState(false);
   const [company, setCompany] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -58,50 +59,35 @@ export function LeadCaptureModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(false);
     setLoading(true);
     try {
       onSubmit({ company, name, email });
       setSubmitted(true);
+      toast("success", isKo ? "접수되었습니다!" : "Submitted successfully!");
       window.setTimeout(() => {
         setSubmitted(false);
         onClose();
       }, 2500);
     } catch {
-      setSubmitError(true);
+      toast("error", isKo ? "일시적 오류가 발생했습니다." : "An error occurred.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={() => !submitted && onClose()}
-        aria-hidden
-      />
-      <div
-        className="relative w-full max-w-md animate-fade-in-up rounded-2xl bg-white p-6 shadow-2xl"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="lead-capture-modal-title"
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          disabled={submitted}
-          className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 disabled:pointer-events-none disabled:opacity-50"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
+    <Modal
+      open={open}
+      onClose={onClose}
+      locked={submitted}
+      ariaLabelledBy="lead-capture-modal-title"
+      className="max-w-md"
+    >
+      <div className="p-6">
         {submitted ? (
           <div className="flex flex-col items-center py-8 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-              <CheckCircle className="h-8 w-8 text-emerald-500" />
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold/15 ring-2 ring-gold/30">
+              <CheckCircle className="h-8 w-8 text-gold-dark" />
             </div>
             <h3
               id="lead-capture-modal-title"
@@ -134,12 +120,6 @@ export function LeadCaptureModal({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              {submitError && (
-                <ErrorToast
-                  onRetry={() => handleSubmit(new Event("submit") as unknown as React.FormEvent)}
-                  onDismiss={() => setSubmitError(false)}
-                />
-              )}
               <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
                 <input type="text" name="website" tabIndex={-1} autoComplete="off" />
               </div>
@@ -189,6 +169,6 @@ export function LeadCaptureModal({
           </>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

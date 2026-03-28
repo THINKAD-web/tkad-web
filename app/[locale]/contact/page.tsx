@@ -13,7 +13,7 @@ import {
 import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle, MessageCircle } from "lucide-react";
 import { useState, useCallback } from "react";
 import Spinner from "@/components/spinner";
-import ErrorToast from "@/components/error-toast";
+import { useToast } from "@/components/toast-provider";
 
 type FormFields = {
   company: string;
@@ -61,9 +61,9 @@ export default function ContactPage() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof FormFields, boolean>>>({});
+  const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState(false);
 
   const updateField = useCallback((field: keyof FormFields, value: string) => {
     setForm((prev) => {
@@ -84,7 +84,6 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(false);
 
     const allTouched: typeof touched = {};
     for (const key of Object.keys(form) as (keyof FormFields)[]) {
@@ -95,7 +94,10 @@ export default function ContactPage() {
     const validationErrors = validate(form);
     setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length > 0) return;
+    if (Object.keys(validationErrors).length > 0) {
+      toast("warning", "필수 항목을 모두 입력해 주세요.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -108,8 +110,9 @@ export default function ContactPage() {
         throw new Error("submit failed");
       }
       setSubmitted(true);
+      toast("success", "문의가 접수되었습니다. 빠른 시일 내에 연락드리겠습니다.");
     } catch {
-      setSubmitError(true);
+      toast("error", "일시적 오류가 발생했습니다. 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
@@ -177,13 +180,6 @@ export default function ContactPage() {
                     </div>
                   ) : (
                     <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-                      {submitError && (
-                        <ErrorToast
-                          onRetry={() => handleSubmit(new Event("submit") as unknown as React.FormEvent)}
-                          onDismiss={() => setSubmitError(false)}
-                        />
-                      )}
-
                       <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
                         <label htmlFor="website">Website</label>
                         <input

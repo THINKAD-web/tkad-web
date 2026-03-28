@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useLocale } from "next-intl";
-import { X, PhoneCall, Gift } from "lucide-react";
+import { PhoneCall, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import Modal from "@/components/ui/modal";
 
 const STORAGE_KEY = "tkad-exit-intent-dismissed";
 
@@ -33,35 +34,14 @@ export default function ExitIntentPopup() {
     return () => document.removeEventListener("mouseout", handleMouseLeave);
   }, []);
 
-  useEffect(() => {
-    if (!show) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dismiss();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [show, dismiss]);
-
-  if (!show) return null;
-
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={isKo ? "특별 혜택 안내" : "Special offer"}>
-      <button
-        type="button"
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={dismiss}
-        aria-label={isKo ? "닫기" : "Close"}
-        tabIndex={-1}
-      />
-      <div className="relative w-full max-w-md animate-fade-in-up rounded-2xl bg-white p-8 shadow-2xl">
-        <button
-          onClick={dismiss}
-          aria-label={isKo ? "닫기" : "Close"}
-          className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
+    <Modal
+      open={show}
+      onClose={dismiss}
+      ariaLabel={isKo ? "특별 혜택 안내" : "Special offer"}
+      className="max-w-md"
+    >
+      <div className="p-8">
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold/10">
             <Gift className="h-8 w-8 text-gold" />
@@ -97,6 +77,6 @@ export default function ExitIntentPopup() {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

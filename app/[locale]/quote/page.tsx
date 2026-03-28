@@ -22,7 +22,7 @@ import { useState, useMemo, useCallback } from "react";
 import { mediaData, typeLabels } from "@/lib/media-data";
 import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
-import ErrorToast from "@/components/error-toast";
+import { useToast } from "@/components/toast-provider";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 
@@ -71,9 +71,9 @@ export default function QuotePage() {
   const [touched, setTouched] = useState<
     Partial<Record<keyof FormState | "media", boolean>>
   >({});
+  const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState(false);
 
   const selectedMedia = useMemo(
     () => mediaData.filter((m) => selectedIds.has(m.id)),
@@ -126,7 +126,6 @@ export default function QuotePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(false);
 
     const allTouched: Partial<Record<keyof FormState | "media", boolean>> = {
       name: true,
@@ -143,7 +142,10 @@ export default function QuotePage() {
 
     const validationErrors = validate(form, selectedMedia.length);
     setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
+    if (Object.keys(validationErrors).length > 0) {
+      toast("warning", isKo ? "필수 항목을 모두 입력해 주세요." : "Please fill in all required fields.");
+      return;
+    }
 
     if (form.website.trim()) {
       setSubmitted(true);
@@ -171,8 +173,9 @@ export default function QuotePage() {
       });
       if (!res.ok) throw new Error("submit failed");
       setSubmitted(true);
+      toast("success", isKo ? "견적 요청이 접수되었습니다." : "Your quote request has been submitted.");
     } catch {
-      setSubmitError(true);
+      toast("error", isKo ? "일시적 오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -419,17 +422,6 @@ export default function QuotePage() {
                   </div>
                 ) : (
                   <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-                    {submitError && (
-                      <ErrorToast
-                        onRetry={() =>
-                          handleSubmit(
-                            new Event("submit") as unknown as React.FormEvent
-                          )
-                        }
-                        onDismiss={() => setSubmitError(false)}
-                      />
-                    )}
-
                     <div
                       className="absolute -left-[9999px]"
                       aria-hidden="true"
