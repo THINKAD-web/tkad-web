@@ -13,6 +13,9 @@ export type BuildQuotePdfParams = {
   company: string;
   name: string;
   periodLabel: string;
+  /** 만원 단위; 미입력 시 null */
+  budgetMin: number | null;
+  budgetMax: number | null;
   monthlyCost: number;
   totalCost: number;
   rows: QuotePdfRow[];
@@ -22,6 +25,28 @@ function guessImageFormat(dataUrl: string): "PNG" | "JPEG" | "WEBP" {
   if (dataUrl.startsWith("data:image/png")) return "PNG";
   if (dataUrl.startsWith("data:image/webp")) return "WEBP";
   return "JPEG";
+}
+
+function formatBudgetOverviewLine(
+  isKo: boolean,
+  min: number | null,
+  max: number | null,
+): string | null {
+  if (min == null && max == null) return null;
+  const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
+  if (min != null && max != null) {
+    return isKo
+      ? `희망 예산 범위: ₩${fmt(min)} ~ ₩${fmt(max)}만원`
+      : `Budget range: ₩${fmt(min)} – ₩${fmt(max)} (10K KRW)`;
+  }
+  if (min != null) {
+    return isKo
+      ? `희망 최소 예산: ₩${fmt(min)}만원`
+      : `Min. budget: ₩${fmt(min)} (10K KRW)`;
+  }
+  return isKo
+    ? `희망 최대 예산: ₩${fmt(max!)}만원`
+    : `Max. budget: ₩${fmt(max!)} (10K KRW)`;
 }
 
 export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
@@ -52,7 +77,7 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(isPremium ? 20 : 18);
   doc.setTextColor(isPremium ? 15 : 0, isPremium ? 23 : 0, isPremium ? 42 : 0);
-  const title = p.isKo ? "THINKAD 견적서" : "THINKAD Quote";
+  const title = p.isKo ? "싱커드 견적서" : "THINKAD Quote";
   doc.text(title, margin, y);
   y += isPremium ? 12 : 10;
 
@@ -99,7 +124,18 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
     margin,
     y,
   );
-  y += 10;
+  y += 6;
+
+  const budgetLine = formatBudgetOverviewLine(
+    p.isKo,
+    p.budgetMin,
+    p.budgetMax,
+  );
+  if (budgetLine) {
+    doc.text(budgetLine, margin, y);
+    y += 6;
+  }
+  y += 4;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);

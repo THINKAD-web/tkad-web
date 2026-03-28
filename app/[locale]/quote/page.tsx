@@ -127,6 +127,15 @@ export default function QuotePage() {
 
   const periodLabel = t(`quote.periods.${period}` as `quote.periods.${PeriodKey}`);
 
+  const budgetMinN = useMemo(() => {
+    const n = parseInt(form.budgetMin, 10);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  }, [form.budgetMin]);
+  const budgetMaxN = useMemo(() => {
+    const n = parseInt(form.budgetMax, 10);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  }, [form.budgetMax]);
+
   const pdfParams: BuildQuotePdfParams = useMemo(
     () => ({
       template,
@@ -135,6 +144,8 @@ export default function QuotePage() {
       company: form.company,
       name: form.name,
       periodLabel,
+      budgetMin: budgetMinN,
+      budgetMax: budgetMaxN,
       monthlyCost,
       totalCost,
       rows: selectedMedia.map((m) => ({
@@ -150,6 +161,8 @@ export default function QuotePage() {
       form.company,
       form.name,
       periodLabel,
+      budgetMinN,
+      budgetMaxN,
       monthlyCost,
       totalCost,
       selectedMedia,
@@ -522,6 +535,9 @@ export default function QuotePage() {
 
                   {step === 2 && (
                     <div className="space-y-6">
+                      <p className="text-xs text-muted-foreground">
+                        {t("quote.periodBudgetPdfHint")}
+                      </p>
                       <div>
                         <label className="mb-2 block text-sm font-semibold text-navy">
                           {t("quote.period")}
@@ -683,6 +699,25 @@ export default function QuotePage() {
                               {t("quote.period")}:{" "}
                             </span>
                             {periodLabel}
+                          </li>
+                          <li>
+                            <span className="font-medium text-navy">
+                              {t("quote.budgetRange")}:{" "}
+                            </span>
+                            {budgetMinN != null || budgetMaxN != null ? (
+                              <>
+                                {budgetMinN != null
+                                  ? `₩${budgetMinN.toLocaleString()}`
+                                  : "—"}
+                                {" ~ "}
+                                {budgetMaxN != null
+                                  ? `₩${budgetMaxN.toLocaleString()}`
+                                  : "—"}
+                                {isKo ? "만원" : " (10K)"}
+                              </>
+                            ) : (
+                              t("quote.reviewBudgetUnset")
+                            )}
                           </li>
                           <li>
                             <span className="font-medium text-navy">

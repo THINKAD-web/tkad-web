@@ -69,13 +69,13 @@ export async function POST(request: NextRequest) {
     await sendEmailWithPdfAttachment({
       to: email,
       subject: isKo
-        ? "[THINKAD] 요청하신 견적 PDF입니다"
+        ? "[싱커드] 요청하신 견적 PDF입니다"
         : "[THINKAD] Your quote PDF",
       text: isKo
-        ? "첨부된 PDF는 견적 마법사에서 생성한 참고 견적입니다."
-        : "Attached is the reference quote generated from the quote wizard.",
+        ? "첨부된 PDF는 싱커드 견적 마법사에서 만든 참고 견적입니다."
+        : "Attached is the reference quote generated from the THINKAD quote wizard.",
       html: isKo
-        ? "<p>첨부된 PDF는 견적 마법사에서 생성한 참고 견적입니다.</p>"
+        ? "<p>첨부된 PDF는 싱커드 견적 마법사에서 만든 참고 견적입니다.</p>"
         : "<p>Attached is the reference quote from the THINKAD quote wizard.</p>",
       pdfFilename: "thinkad-quote.pdf",
       pdfBase64,
