@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useLocale } from "next-intl";
 import {
   Card,
@@ -16,7 +17,12 @@ import {
   Trophy,
 } from "lucide-react";
 import { useState } from "react";
-import { LeadCaptureModal } from "@/components/lead-capture-modal";
+
+const LeadCaptureModal = dynamic(() =>
+  import("@/components/lead-capture-modal").then((m) => ({
+    default: m.LeadCaptureModal,
+  })),
+);
 
 type Resource = {
   id: string;

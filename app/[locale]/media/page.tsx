@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import Link from "next/link";
@@ -22,9 +23,15 @@ import {
 import SolutionCtaButton from "@/components/solution-cta-button";
 import ShareButtons from "@/components/share-buttons";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
-import RecentlyViewedMedia from "@/components/recently-viewed-media";
-import CompareBar from "@/components/compare-bar";
 import { useState, useMemo, useCallback } from "react";
+
+const RecentlyViewedMedia = dynamic(
+  () => import("@/components/recently-viewed-media"),
+  { loading: () => null },
+);
+const CompareBar = dynamic(() => import("@/components/compare-bar"), {
+  ssr: false,
+});
 import { mediaData, typeLabels, type MediaItem } from "@/lib/media-data";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
 

@@ -1,12 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useLocale } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { caseStudies, categoryColors, getCaseStudyBySlug } from "@/lib/case-studies";
-import { LeadCaptureModal } from "@/components/lead-capture-modal";
+
+const LeadCaptureModal = dynamic(() =>
+  import("@/components/lead-capture-modal").then((m) => ({
+    default: m.LeadCaptureModal,
+  })),
+);
 import {
   ArrowLeft,
   ArrowRight,

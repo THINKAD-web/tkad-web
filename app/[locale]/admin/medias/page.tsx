@@ -665,6 +665,7 @@ export default function AdminMediasPage() {
                         width={48}
                         height={48}
                         unoptimized
+                        loading="lazy"
                         sizes="48px"
                         className="h-12 w-12 shrink-0 rounded-md object-cover"
                       />

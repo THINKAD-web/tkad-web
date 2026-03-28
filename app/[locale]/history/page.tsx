@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,7 +68,6 @@ const historyData = [
 
 export default function HistoryPage() {
   const locale = useLocale();
-  const t = useTranslations("about");
   const isKo = locale === "ko";
   const [activeYear, setActiveYear] = useState<string>(historyData[0].year);
 

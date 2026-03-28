@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 
+export const dynamic = "force-dynamic";
+
 const limiter = rateLimit({ limit: 5, windowMs: 60_000 });
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
+
+function json(body: unknown, init?: ResponseInit) {
+  const headers = new Headers(init?.headers);
+  headers.set("Cache-Control", "no-store, private");
+  return NextResponse.json(body, { ...init, headers });
+}
 
 function parseOptionalInt(v: unknown): number | null {
   if (v === undefined || v === null || v === "") return null;
@@ -19,7 +27,7 @@ export async function POST(request: NextRequest) {
     "unknown";
 
   if (!limiter.check(ip)) {
-    return NextResponse.json(
+    return json(
       { error: "Too many requests. Please try again later." },
       { status: 429 },
     );
@@ -29,11 +37,11 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return json({ error: "Invalid JSON" }, { status: 400 });
   }
 
   if (body.website) {
-    return NextResponse.json({ success: true }, { status: 201 });
+    return json({ success: true }, { status: 201 });
   }
 
   const {
@@ -61,14 +69,14 @@ export async function POST(request: NextRequest) {
   if (ids.length < 1) errors.push("mediaIds");
 
   if (errors.length > 0) {
-    return NextResponse.json(
+    return json(
       { error: "Validation failed", fields: errors },
       { status: 400 },
     );
   }
 
   if (!isDatabaseConfigured()) {
-    return NextResponse.json(
+    return json(
       { error: "Service temporarily unavailable" },
       { status: 503 },
     );
@@ -96,11 +104,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error("[quote] DB error:", err);
-    return NextResponse.json(
-      { error: "Failed to save quote request" },
-      { status: 500 },
-    );
+    return json({ error: "Failed to save quote request" }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true }, { status: 201 });
+  return json({ success: true }, { status: 201 });
 }

@@ -8,10 +8,7 @@ import { routing } from "@/i18n/routing";
 import { defaultOgImages, siteUrl } from "@/lib/seo";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import QuickInquiryButton from "@/components/quick-inquiry-button";
-import KakaoChannelButton from "@/components/kakao-channel-button";
-import FloatingCta from "@/components/floating-cta";
-import ExitIntentPopup from "@/components/exit-intent-popup";
+import DeferredPublicWidgets from "@/components/deferred-public-widgets";
 import TopLoader from "@/components/top-loader";
 import PageTransition from "@/components/page-transition";
 import ConditionalPublicChrome from "@/components/conditional-public-chrome";
@@ -29,6 +26,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
 });
+
+/** ISR: marketing subtree; admin/client opt out via their own layouts. */
+export const revalidate = 3600;
 
 const ORG_ID = `${siteUrl}/#organization`;
 const LOCAL_ID = `${siteUrl}/#localbusiness`;
@@ -202,10 +202,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             </main>
             <ConditionalPublicChrome>
               <Footer />
-              <QuickInquiryButton />
-              <FloatingCta />
-              <ExitIntentPopup />
-              <KakaoChannelButton />
+              <DeferredPublicWidgets />
             </ConditionalPublicChrome>
           </ToastProvider>
         </NextIntlClientProvider>

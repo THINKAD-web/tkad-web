@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { defaultOgImages } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

@@ -17,7 +17,6 @@ import { mediaData, typeLabels } from "@/lib/media-data";
 import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast-provider";
-import jsPDF from "jspdf";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 
@@ -195,6 +194,7 @@ export default function QuotePage() {
 
     setDownloading(true);
     try {
+      const { default: jsPDF } = await import("jspdf");
       const doc = new jsPDF();
 
       doc.setFont("helvetica", "bold");
@@ -224,7 +224,9 @@ export default function QuotePage() {
 
       doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
-      const periodLabel = t(`quote.periods.${period}` as any);
+      const periodLabel = t(
+        `quote.periods.${period}` as `quote.periods.${PeriodKey}`,
+      );
       doc.text(`집행 기간: ${periodLabel}`, 20, 56);
       doc.text(
         `월 예상 집행비: ₩${monthlyCost.toLocaleString()}만원`,
