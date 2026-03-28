@@ -11,18 +11,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  CheckCircle,
-  Monitor,
-  MapPin,
-  Calculator,
-  Send,
-} from "lucide-react";
+import { CheckCircle, Monitor, MapPin, Calculator, Send, Download } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
 import { mediaData, typeLabels } from "@/lib/media-data";
 import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast-provider";
+import jsPDF from "jspdf";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 
@@ -74,6 +69,7 @@ export default function QuotePage() {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const selectedMedia = useMemo(
     () => mediaData.filter((m) => selectedIds.has(m.id)),
@@ -190,6 +186,135 @@ export default function QuotePage() {
     touched[field] && errors[field]
       ? "border-red-400 focus:border-red-500 focus:ring-red-200"
       : "";
+
+  const handleDownloadPdf = async () => {
+    if (selectedMedia.length === 0) {
+      toast("warning", t("quote.noMediaSelected"));
+      return;
+    }
+
+    setDownloading(true);
+    try {
+      const doc = new jsPDF();
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("SINKERD 견적서", 20, 20);
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        `발행일: ${new Date().toISOString().slice(0, 10)}`,
+        20,
+        30,
+      );
+      if (form.company || form.name) {
+        doc.text(
+          `고객사: ${form.company || "-"} / 담당자: ${
+            form.name || "-"
+          }`,
+          20,
+          36,
+        );
+      }
+
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("캠페인 개요", 20, 48);
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      const periodLabel = t(`quote.periods.${period}` as any);
+      doc.text(`집행 기간: ${periodLabel}`, 20, 56);
+      doc.text(
+        `월 예상 집행비: ₩${monthlyCost.toLocaleString()}만원`,
+        20,
+        62,
+      );
+      doc.text(`총 예상 집행비: ₩${totalCost.toLocaleString()}만원`, 20, 68);
+
+      let y = 80;
+      doc.setFont("helvetica", "bold");
+      doc.text("매체 상세", 20, y);
+      y += 6;
+
+      doc.setFontSize(10);
+      doc.text("매체명", 20, y);
+      doc.text("지역/위치", 90, y);
+      doc.text("월 단가(만원)", 150, y, { align: "right" });
+      y += 4;
+      doc.setLineWidth(0.2);
+      doc.line(20, y, 190, y);
+      y += 5;
+
+      doc.setFont("helvetica", "normal");
+      selectedMedia.forEach((m) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        const name = (isKo ? m.name : m.nameEn) || m.name;
+        const loc = (isKo ? m.location : m.locationEn) || m.location;
+        doc.text(name, 20, y);
+        doc.text(loc, 90, y);
+        doc.text(
+          m.price.toLocaleString(),
+          150,
+          y,
+          { align: "right" },
+        );
+        y += 6;
+      });
+
+      if (y + 16 > 280) {
+        doc.addPage();
+        y = 20;
+      }
+
+      y += 4;
+      doc.setLineWidth(0.2);
+      doc.line(20, y, 190, y);
+      y += 8;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text(
+        `총 예상 집행비 (부가세 별도): ₩${totalCost.toLocaleString()}만원`,
+        20,
+        y,
+      );
+      y += 8;
+
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        "※ 본 견적은 참고용으로, 실제 계약 시 매체 재고 및 세부 조건에 따라 변동될 수 있습니다.",
+        20,
+        y,
+      );
+      y += 5;
+      doc.text(
+        "문의: contact@sinkerd.com / 02-000-0000",
+        20,
+        y,
+      );
+
+      doc.save("sinkerd-quote.pdf");
+      toast(
+        "success",
+        isKo ? "PDF 견적서를 다운로드했습니다." : "Downloaded quote PDF.",
+      );
+    } catch {
+      toast(
+        "error",
+        isKo
+          ? "PDF 생성 중 오류가 발생했습니다."
+          : "Failed to generate PDF.",
+      );
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <>
@@ -396,6 +521,26 @@ export default function QuotePage() {
                         </span>
                       </div>
                     </div>
+                    <Button
+                      type="button"
+                      onClick={handleDownloadPdf}
+                      disabled={downloading || selectedMedia.length === 0}
+                      className="mt-4 flex w-full items-center justify-center gap-2 bg-navy text-white hover:bg-navy/90"
+                    >
+                      {downloading ? (
+                        <>
+                          <Spinner className="h-4 w-4" />
+                          {isKo ? "PDF 생성 중..." : "Generating PDF..."}
+                        </>
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4" />
+                          {isKo
+                            ? "견적서 PDF 다운로드"
+                            : "Download quote PDF"}
+                        </>
+                      )}
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
