@@ -22,6 +22,7 @@ type FormFields = {
   email: string;
   budget: string;
   message: string;
+  website: string; // honeypot
 };
 
 type FormErrors = Partial<Record<keyof FormFields, string>>;
@@ -56,6 +57,7 @@ export default function ContactPage() {
     email: "",
     budget: "",
     message: "",
+    website: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof FormFields, boolean>>>({});
@@ -97,7 +99,14 @@ export default function ContactPage() {
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok && !form.website) {
+        throw new Error("submit failed");
+      }
       setSubmitted(true);
     } catch {
       setSubmitError(true);
@@ -154,6 +163,19 @@ export default function ContactPage() {
                           onDismiss={() => setSubmitError(false)}
                         />
                       )}
+
+                      <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
+                        <label htmlFor="website">Website</label>
+                        <input
+                          type="text"
+                          id="website"
+                          name="website"
+                          value={form.website}
+                          onChange={(e) => updateField("website", e.target.value)}
+                          tabIndex={-1}
+                          autoComplete="off"
+                        />
+                      </div>
 
                       <div className="grid gap-5 sm:grid-cols-2">
                         <div>

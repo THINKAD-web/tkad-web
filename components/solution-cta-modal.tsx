@@ -147,6 +147,9 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
                   onDismiss={() => setSubmitError(false)}
                 />
               )}
+              <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+              </div>
               <fieldset className="space-y-2">
                 <legend className="mb-2 text-sm font-semibold text-navy">
                   {isKo ? "광고 목표" : "Ad goal"}

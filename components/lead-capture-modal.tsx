@@ -140,6 +140,9 @@ export function LeadCaptureModal({
                   onDismiss={() => setSubmitError(false)}
                 />
               )}
+              <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+              </div>
               <Input
                 required
                 value={company}
