@@ -9,6 +9,8 @@ type Props = {
   delay?: number;
   /** "fade-up" (default) | "fade-in" | "count-up" */
   variant?: "fade-up" | "fade-in" | "count-up";
+  threshold?: number;
+  rootMargin?: string;
 };
 
 export default function ScrollAnimate({
@@ -16,12 +18,26 @@ export default function ScrollAnimate({
   className = "",
   delay = 0,
   variant = "fade-up",
+  threshold = 0.1,
+  rootMargin = "0px 0px -32px 0px",
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    if (typeof window !== "undefined") {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced) {
+        if (variant === "count-up") {
+          el.classList.remove("scroll-count-paused");
+        } else {
+          el.classList.add("scroll-visible");
+        }
+        return;
+      }
+    }
 
     if (variant === "count-up") {
       el.classList.add("scroll-count-paused");
@@ -38,12 +54,12 @@ export default function ScrollAnimate({
           observer.unobserve(el);
         }
       },
-      { threshold: 0.1, rootMargin: "0px 0px -32px 0px" },
+      { threshold, rootMargin },
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [variant]);
+  }, [variant, threshold, rootMargin]);
 
   const baseClass =
     variant === "count-up"

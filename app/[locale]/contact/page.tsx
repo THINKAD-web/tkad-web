@@ -16,6 +16,8 @@ import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
 import { ContactFeedbackSurvey } from "@/components/contact-feedback-survey";
 import { cn } from "@/lib/utils";
+import ScrollAnimate from "@/components/scroll-animate";
+import { ScrollStagger } from "@/components/scroll-stagger";
 
 type ContactMainTab = "inquiry" | "feedback";
 
@@ -134,17 +136,17 @@ export default function ContactPage() {
   return (
     <>
       <section className="bg-navy py-28">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+        <ScrollAnimate className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {t("contact.title")}
           </h1>
           <p className="mt-2 text-slate-300">{t("contact.subtitle")}</p>
-        </div>
+        </ScrollAnimate>
       </section>
 
       <section className="py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-5">
+          <ScrollStagger className="grid gap-12 lg:grid-cols-5">
             <div className="lg:col-span-3">
               <Card className="shadow-md">
                 <CardHeader className="space-y-4">
@@ -390,7 +392,7 @@ export default function ContactPage() {
                 </CardContent>
               </Card>
             </div>
-          </div>
+          </ScrollStagger>
         </div>
       </section>
 

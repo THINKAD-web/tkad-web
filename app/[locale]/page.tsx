@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import HeroParallaxBackground from "@/components/hero-parallax-background";
 import ScrollAnimate from "@/components/scroll-animate";
+import { ScrollStagger } from "@/components/scroll-stagger";
 
 const HomeRecentlyViewed = dynamic(
   () => import("@/components/home-recently-viewed"),
@@ -290,7 +291,7 @@ function HomeContent({
         <div className="absolute inset-0 hero-pattern opacity-50" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="count-up">
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-6 lg:gap-8">
+            <ScrollStagger className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-6 lg:gap-8">
               {[
                 {
                   animClass: "stat-count-up stat-count-500",
@@ -326,7 +327,7 @@ function HomeContent({
                   </div>
                 </div>
               ))}
-            </div>
+            </ScrollStagger>
           </ScrollAnimate>
         </div>
       </section>

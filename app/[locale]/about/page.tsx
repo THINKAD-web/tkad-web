@@ -7,6 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AboutHeroStats } from "@/components/about-hero-stats";
+import { ScrollStagger } from "@/components/scroll-stagger";
 import { BarChart3, Globe, Heart, Users } from "lucide-react";
 
 type Props = {
@@ -130,6 +132,7 @@ function AboutContent({
             {t("about.title")}
           </h1>
           <p className="mt-2 text-slate-300">{t("about.subtitle")}</p>
+          <AboutHeroStats isKo={isKo} />
         </div>
       </section>
 
@@ -175,7 +178,7 @@ function AboutContent({
           <h2 className="text-center text-2xl font-bold text-navy">
             {t("about.valuesTitle")}
           </h2>
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
+          <ScrollStagger className="mt-12 grid gap-8 md:grid-cols-3">
             {values.map((v) => (
               <Card key={v.title} className="border-0 bg-white shadow-md">
                 <CardHeader>
@@ -191,7 +194,7 @@ function AboutContent({
                 </CardContent>
               </Card>
             ))}
-          </div>
+          </ScrollStagger>
         </div>
       </section>
 
@@ -208,7 +211,7 @@ function AboutContent({
             </p>
           </div>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <ScrollStagger className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {teamMembers.map((member) => {
               const name = isKo ? member.nameKo : member.nameEn;
               const role = isKo ? member.roleKo : member.roleEn;
@@ -244,7 +247,7 @@ function AboutContent({
                 </Card>
               );
             })}
-          </div>
+          </ScrollStagger>
         </div>
       </section>
 
