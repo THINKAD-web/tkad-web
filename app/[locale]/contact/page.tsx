@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle } from "lucide-react";
+import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle, MessageCircle } from "lucide-react";
 import { useState, useCallback } from "react";
 import Spinner from "@/components/spinner";
 import ErrorToast from "@/components/error-toast";
@@ -154,6 +154,26 @@ export default function ContactPage() {
                       <p className="text-muted-foreground">
                         빠른 시일 내에 연락드리겠습니다.
                       </p>
+
+                      <div className="mt-4 w-full max-w-sm rounded-xl border border-yellow-200 bg-[#FEE500]/10 p-5">
+                        <div className="flex items-center justify-center gap-2 text-sm font-bold text-yellow-800">
+                          <MessageCircle className="h-5 w-5" />
+                          카카오톡 채널 추가하면 빠른 답변!
+                        </div>
+                        <p className="mt-2 text-xs text-yellow-700/70">
+                          카카오톡 채널을 추가하시면 문의 진행 상황을 실시간으로 받아보실 수 있습니다.
+                        </p>
+                        <a
+                          href="https://pf.kakao.com/_thinkad"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-neutral-800 transition-colors hover:brightness-95"
+                          style={{ backgroundColor: "#FEE500" }}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          카카오톡 채널 추가
+                        </a>
+                      </div>
                     </div>
                   ) : (
                     <form className="space-y-5" onSubmit={handleSubmit} noValidate>

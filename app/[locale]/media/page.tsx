@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Monitor, BadgeCheck, ShieldCheck } from "lucide-react";
 import SolutionCtaButton from "@/components/solution-cta-button";
+import ShareButtons from "@/components/share-buttons";
 import { useState, useMemo } from "react";
 
 const mediaData = [
@@ -226,6 +227,14 @@ export default function MediaPage() {
                           <span className="text-xs font-normal text-muted-foreground">
                             만원 {t("media.perMonth")}
                           </span>
+                        </div>
+                        <div className="mt-3 border-t pt-3">
+                          <ShareButtons
+                            url={`/${locale}/media?id=${media.id}`}
+                            title={isKo ? media.name : media.nameEn}
+                            description={`${isKo ? media.location : media.locationEn} - ₩${media.price.toLocaleString()}만원/${t("media.perMonth")}`}
+                            locale={locale}
+                          />
                         </div>
                       </CardContent>
                     </Card>
