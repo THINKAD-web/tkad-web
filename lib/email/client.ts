@@ -24,6 +24,10 @@ const transporter =
       })
     : null;
 
+export function isSmtpConfigured(): boolean {
+  return transporter !== null;
+}
+
 if (!transporter && process.env.NODE_ENV !== "production") {
   console.warn(
     "[email] SMTP configuration not set. Auto-reply emails will be skipped.",
@@ -50,6 +54,29 @@ export async function sendEmail({
     });
   } catch (err) {
     console.error("[email] Failed to send email:", err);
+  }
+}
+
+/** Returns whether the message was handed to SMTP (false if SMTP missing or send failed). */
+export async function sendEmailWithResult(
+  params: SendEmailParams,
+): Promise<{ sent: boolean }> {
+  if (!transporter) return { sent: false };
+
+  const from = process.env.SMTP_FROM!;
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: params.to,
+      subject: params.subject,
+      text: params.text,
+      html: params.html,
+    });
+    return { sent: true };
+  } catch (err) {
+    console.error("[email] Failed to send email:", err);
+    return { sent: false };
   }
 }
 

@@ -3,28 +3,37 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard,
   MessageSquareText,
   Monitor,
   BarChart3,
+  UsersRound,
   ArrowLeft,
   Menu,
 } from "lucide-react";
 
-const navItems = [
-  { href: "/admin", label: "대시보드", icon: LayoutDashboard },
-  { href: "/admin/inquiries", label: "문의 관리", icon: MessageSquareText },
-  { href: "/admin/medias", label: "매체 관리", icon: Monitor },
-  { href: "/admin/analytics", label: "분석", icon: BarChart3 },
+const navDefs = [
+  { href: "/admin", key: "dashboard" as const, icon: LayoutDashboard },
+  { href: "/admin/inquiries", key: "inquiries" as const, icon: MessageSquareText },
+  { href: "/admin/medias", key: "medias" as const, icon: Monitor },
+  { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
+  { href: "/admin/crm", key: "crm" as const, icon: UsersRound },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const tNav = useTranslations("adminNav");
 
   const locale = pathname.split("/")[1] || "ko";
   const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/";
+
+  const navItems = navDefs.map((n) => ({
+    ...n,
+    label: tNav(n.key),
+  }));
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathWithoutLocale === "/admin";
@@ -70,7 +79,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-white/50 transition-colors hover:bg-white/10 hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
-          사이트로 돌아가기
+          {tNav("backToSite")}
         </Link>
       </div>
     </div>
