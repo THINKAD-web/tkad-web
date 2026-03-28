@@ -2,7 +2,9 @@ import {
   type CrmScoringInput,
   repurchaseLikelihood,
   segmentCustomer,
+  segmentRationaleKeys,
   type CustomerSegment,
+  type SegmentRationaleKey,
 } from "@/lib/crm-scoring";
 
 export type CampaignStatus = "active" | "ended" | "scheduled";
@@ -266,10 +268,12 @@ export function buildScoringInput(customer: CrmCustomer): CrmScoringInput {
 export function enrichCustomerRow(customer: CrmCustomer): {
   segment: CustomerSegment;
   repurchase: ReturnType<typeof repurchaseLikelihood>;
+  rationaleKeys: SegmentRationaleKey[];
 } {
   const input = buildScoringInput(customer);
   return {
     segment: segmentCustomer(input),
     repurchase: repurchaseLikelihood(input),
+    rationaleKeys: segmentRationaleKeys(input),
   };
 }

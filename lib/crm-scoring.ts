@@ -56,3 +56,43 @@ export function repurchaseLikelihood(input: CrmScoringInput): RepurchaseResult {
 
   return { score, labelKey };
 }
+
+/** Short bullet keys for admin UI (map with `useTranslations("adminCrm")`). */
+export type SegmentRationaleKey =
+  | "aiRuleBudgetBand4"
+  | "aiRuleBudgetBand3"
+  | "aiRuleBudgetBand2"
+  | "aiRuleBudgetBand1"
+  | "aiRuleMultiCampaign"
+  | "aiRuleSingleCampaign"
+  | "aiRuleNoHistory"
+  | "aiRuleCtrOutperform"
+  | "aiRuleCtrOnTrack"
+  | "aiRuleCtrUnder"
+  | "aiRuleRecencyFresh"
+  | "aiRuleRecencyStale";
+
+export function segmentRationaleKeys(input: CrmScoringInput): SegmentRationaleKey[] {
+  const keys: SegmentRationaleKey[] = [];
+
+  if (input.budgetTier >= 4) keys.push("aiRuleBudgetBand4");
+  else if (input.budgetTier === 3) keys.push("aiRuleBudgetBand3");
+  else if (input.budgetTier === 2) keys.push("aiRuleBudgetBand2");
+  else keys.push("aiRuleBudgetBand1");
+
+  if (input.completedCampaigns >= 2) keys.push("aiRuleMultiCampaign");
+  else if (input.completedCampaigns === 1) keys.push("aiRuleSingleCampaign");
+  else keys.push("aiRuleNoHistory");
+
+  if (input.ctrVsBenchmark >= 1.08) keys.push("aiRuleCtrOutperform");
+  else if (input.ctrVsBenchmark >= 1.0) keys.push("aiRuleCtrOnTrack");
+  else if (input.ctrVsBenchmark < 0.92) keys.push("aiRuleCtrUnder");
+
+  if (input.daysSinceLastCampaignEnd <= 90 && input.completedCampaigns > 0) {
+    keys.push("aiRuleRecencyFresh");
+  } else if (input.daysSinceLastCampaignEnd > 300) {
+    keys.push("aiRuleRecencyStale");
+  }
+
+  return keys.slice(0, 5);
+}

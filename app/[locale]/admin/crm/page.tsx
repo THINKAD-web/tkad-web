@@ -19,6 +19,7 @@ import {
   Brain,
   Gauge,
   Mail,
+  RefreshCw,
   Sparkles,
   Target,
   Users,
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
+import Spinner from "@/components/spinner";
 
 type TabId = "dashboard" | "leads" | "intelligence" | "automation";
 
@@ -54,6 +56,8 @@ export default function AdminCrmPage() {
   const [selectedLeadId, setSelectedLeadId] = useState(initialLeads[0]?.id ?? "");
   const [autoSchedule, setAutoSchedule] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
+  const [segmentRunAt, setSegmentRunAt] = useState<string | null>(null);
+  const [segmentRefreshing, setSegmentRefreshing] = useState(false);
 
   const customer = useMemo(
     () => demoCustomers.find((c) => c.id === customerId) ?? demoCustomers[0]!,
@@ -66,14 +70,20 @@ export default function AdminCrmPage() {
   const dashboardStats = useMemo(() => {
     const list = customer.campaigns.filter((c) => c.status !== "scheduled");
     const totalImp = list.reduce((s, c) => s + c.impressions, 0);
+    const totalSpendMillion = list.reduce((s, c) => s + c.spendMillion, 0);
     const active = customer.campaigns.filter((c) => c.status === "active").length;
     const ended = customer.campaigns.filter((c) => c.status === "ended");
     const avgRatio =
       ended.length > 0
         ? ended.reduce((s, c) => s + c.ctr / c.ctrBenchmark, 0) / ended.length
         : 0;
-    return { totalImp, active, avgRatio };
+    return { totalImp, totalSpendMillion, active, avgRatio };
   }, [customer]);
+
+  const dashboardCompareCampaigns = useMemo(
+    () => customer.campaigns.filter((c) => c.status !== "scheduled"),
+    [customer],
+  );
 
   const endedRows = useMemo(() => {
     const rows: {
@@ -118,6 +128,32 @@ export default function AdminCrmPage() {
     );
   }, []);
 
+  const postCrmEmail = useCallback(
+    async (payload: {
+      kind: "auto_reply" | "feedback_request";
+      to: string;
+      company: string;
+      contactName?: string;
+      campaignName?: string;
+    }) => {
+      const res = await fetch("/api/admin/crm/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...payload,
+          locale,
+          website: "",
+        }),
+      });
+      return (await res.json()) as {
+        ok?: boolean;
+        sent?: boolean;
+        code?: string;
+      };
+    },
+    [locale],
+  );
+
   const sendCrmEmail = useCallback(
     async (
       key: string,
@@ -131,20 +167,7 @@ export default function AdminCrmPage() {
     ) => {
       setSending(key);
       try {
-        const res = await fetch("/api/admin/crm/email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...payload,
-            locale,
-            website: "",
-          }),
-        });
-        const data = (await res.json()) as {
-          ok?: boolean;
-          sent?: boolean;
-          code?: string;
-        };
+        const data = await postCrmEmail(payload);
         if (data.code === "SMTP_DISABLED") {
           toast("warning", t("smtpSkipped"));
         } else if (data.sent) {
@@ -158,8 +181,48 @@ export default function AdminCrmPage() {
         setSending(null);
       }
     },
-    [locale, t, toast],
+    [postCrmEmail, t, toast],
   );
+
+  const sendBatchFeedbackEmails = useCallback(async () => {
+    if (endedRows.length === 0) return;
+    setSending("batch-feedback");
+    let sent = 0;
+    try {
+      for (const { customer: c, campaign: cp } of endedRows) {
+        const data = await postCrmEmail({
+          kind: "feedback_request",
+          to: c.email,
+          company: companyLabel(c),
+          contactName: c.contactName,
+          campaignName: campaignName(cp),
+        });
+        if (data.code === "SMTP_DISABLED") {
+          toast("warning", t("smtpSkipped"));
+          setSending(null);
+          return;
+        }
+        if (data.sent) sent += 1;
+      }
+      toast(
+        "success",
+        t("batchFeedbackResult", { sent, total: endedRows.length }),
+      );
+    } catch {
+      toast("error", t("smtpFailed"));
+    } finally {
+      setSending(null);
+    }
+  }, [campaignName, companyLabel, endedRows, postCrmEmail, t, toast]);
+
+  const refreshSegmentation = useCallback(() => {
+    setSegmentRefreshing(true);
+    window.setTimeout(() => {
+      setSegmentRunAt(new Date().toISOString());
+      setSegmentRefreshing(false);
+      toast("success", t("segmentRefreshed"));
+    }, 600);
+  }, [t, toast]);
 
   const tabs: { id: TabId; icon: typeof Gauge }[] = [
     { id: "dashboard", icon: Gauge },
@@ -253,9 +316,63 @@ export default function AdminCrmPage() {
                       : "—"}
                   </p>
                 </div>
+                <div className="rounded-lg border bg-white px-3 py-2">
+                  <p className="text-[10px] font-medium uppercase text-muted-foreground">
+                    {t("totalSpendAccount")}
+                  </p>
+                  <p className="text-lg font-bold text-navy">
+                    {dashboardStats.totalSpendMillion > 0
+                      ? `₩${(dashboardStats.totalSpendMillion * 100_000).toLocaleString(isKo ? "ko-KR" : "en-US")}`
+                      : "—"}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
+
+          {dashboardCompareCampaigns.length > 0 ? (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">{t("performanceCompareTitle")}</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  {t("performanceCompareDesc")}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {dashboardCompareCampaigns.map((cp) => {
+                  const ratio =
+                    cp.ctrBenchmark > 0 ? cp.ctr / cp.ctrBenchmark : 0;
+                  const barPct = Math.min(100, ratio * 50);
+                  return (
+                    <div key={cp.id}>
+                      <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2 text-xs">
+                        <span className="font-medium text-navy">
+                          {campaignName(cp)}
+                        </span>
+                        <span className="text-muted-foreground">
+                          CTR {cp.ctr}% / {cp.ctrBenchmark}% ·{" "}
+                          <span
+                            className={cn(
+                              "font-semibold",
+                              ratio >= 1 ? "text-emerald-600" : "text-amber-700",
+                            )}
+                          >
+                            {(ratio * 100).toFixed(0)}%
+                          </span>
+                        </span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-navy to-gold"
+                          style={{ width: `${barPct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          ) : null}
 
           <div className="grid gap-4 lg:grid-cols-2">
             {customer.campaigns.map((cp) => (
@@ -437,6 +554,39 @@ export default function AdminCrmPage() {
               <p className="text-sm text-navy/90">{t("modelNote")}</p>
             </CardContent>
           </Card>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-navy">{t("aiSegmentationTitle")}</p>
+              <p className="text-xs text-muted-foreground">{t("aiSegmentationDesc")}</p>
+              {segmentRunAt ? (
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  {t("segmentLastRun", {
+                    time: new Date(segmentRunAt).toLocaleString(isKo ? "ko-KR" : "en-US"),
+                  })}
+                </p>
+              ) : null}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-navy/20"
+              disabled={segmentRefreshing}
+              onClick={refreshSegmentation}
+            >
+              {segmentRefreshing ? (
+                <>
+                  <Spinner className="mr-2 h-4 w-4" />
+                  {t("segmentRunning")}
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {t("segmentRefresh")}
+                </>
+              )}
+            </Button>
+          </div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
@@ -446,47 +596,61 @@ export default function AdminCrmPage() {
               <p className="text-xs text-muted-foreground">{t("segmentHint")}</p>
             </CardHeader>
             <CardContent className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-sm">
+              <table className="w-full min-w-[880px] text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs font-medium text-muted-foreground">
                     <th className="pb-3 pr-3">{t("company")}</th>
                     <th className="pb-3 pr-3">{t("segmentColumn")}</th>
+                    <th className="pb-3 pr-3 min-w-[220px]">{t("rationaleColumn")}</th>
                     <th className="pb-3 pr-3">{t("repurchase")}</th>
                     <th className="pb-3">{t("repurchaseScore")}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {intelligenceRows.map(({ customer: c, segment, repurchase }) => (
-                    <tr key={c.id} className="border-b last:border-0">
-                      <td className="py-3 pr-3 font-medium text-navy">
-                        {companyLabel(c)}
-                      </td>
-                      <td className="py-3 pr-3">
-                        <Badge
-                          variant="outline"
-                          className={cn("font-semibold", segmentBadgeClass(segment))}
-                        >
-                          {segment === "high_value" && t("segmentHigh")}
-                          {segment === "potential" && t("segmentPotential")}
-                          {segment === "standard" && t("segmentStandard")}
-                        </Badge>
-                      </td>
-                      <td className="py-3 pr-3 text-muted-foreground">
-                        {t(repurchase.labelKey)}
-                      </td>
-                      <td className="py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
-                            <div
-                              className="h-full rounded-full bg-navy"
-                              style={{ width: `${repurchase.score}%` }}
-                            />
+                  {intelligenceRows.map(
+                    ({ customer: c, segment, repurchase, rationaleKeys }) => (
+                      <tr key={c.id} className="border-b last:border-0">
+                        <td className="py-3 pr-3 font-medium text-navy align-top">
+                          {companyLabel(c)}
+                        </td>
+                        <td className="py-3 pr-3 align-top">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "font-semibold",
+                              segmentBadgeClass(segment),
+                            )}
+                          >
+                            {segment === "high_value" && t("segmentHigh")}
+                            {segment === "potential" && t("segmentPotential")}
+                            {segment === "standard" && t("segmentStandard")}
+                          </Badge>
+                        </td>
+                        <td className="py-3 pr-3 align-top">
+                          <ul className="max-w-xs list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+                            {rationaleKeys.map((k) => (
+                              <li key={k}>{t(k)}</li>
+                            ))}
+                          </ul>
+                        </td>
+                        <td className="py-3 pr-3 text-muted-foreground align-top">
+                          {t(repurchase.labelKey)}
+                        </td>
+                        <td className="py-3 align-top">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
+                              <div
+                                className="h-full rounded-full bg-navy"
+                                style={{ width: `${repurchase.score}%` }}
+                              />
+                            </div>
+                            <span className="font-semibold text-navy">
+                              {repurchase.score}
+                            </span>
                           </div>
-                          <span className="font-semibold text-navy">{repurchase.score}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </CardContent>
@@ -529,7 +693,9 @@ export default function AdminCrmPage() {
                 <Button
                   type="button"
                   className="w-full bg-navy hover:bg-navy/90"
-                  disabled={!selectedLead || sending === "auto"}
+                  disabled={
+                    !selectedLead || sending === "auto" || sending === "batch-feedback"
+                  }
                   onClick={() => {
                     if (!selectedLead) return;
                     void sendCrmEmail("auto", {
@@ -578,46 +744,79 @@ export default function AdminCrmPage() {
               {endedRows.length === 0 ? (
                 <p className="text-sm text-muted-foreground">{t("noEnded")}</p>
               ) : (
-                <ul className="space-y-2">
-                  {endedRows.map(({ customer: c, campaign: cp }) => (
-                    <li
-                      key={`${c.id}-${cp.id}`}
-                      className="flex flex-col gap-2 rounded-lg border bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
+                <>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      {t("batchFeedbackHint", { count: endedRows.length })}
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="shrink-0 bg-gold font-semibold text-navy hover:bg-gold-dark"
+                      disabled={sending !== null}
+                      onClick={() => void sendBatchFeedbackEmails()}
                     >
-                      <div>
-                        <p className="font-medium text-navy">
-                          {companyLabel(c)} · {campaignName(cp)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {cp.endDate}
-                          {autoSchedule && (
-                            <Badge variant="secondary" className="ml-2 text-[10px]">
-                              {t("scheduledBadge")}
-                            </Badge>
-                          )}
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="shrink-0 border-gold/40"
-                        disabled={sending === `${c.id}-${cp.id}`}
-                        onClick={() =>
-                          void sendCrmEmail(`${c.id}-${cp.id}`, {
-                            kind: "feedback_request",
-                            to: c.email,
-                            company: companyLabel(c),
-                            contactName: c.contactName,
-                            campaignName: campaignName(cp),
-                          })
-                        }
+                      {sending === "batch-feedback" ? (
+                        <>
+                          <Spinner className="mr-2 h-4 w-4" />
+                          {t("sending")}
+                        </>
+                      ) : (
+                        t("sendBatchFeedback")
+                      )}
+                    </Button>
+                  </div>
+                  {autoSchedule ? (
+                    <p className="rounded-lg border border-gold/30 bg-gold/5 px-3 py-2 text-xs text-navy/90">
+                      {t("autoFeedbackQueueNote", { count: endedRows.length })}
+                    </p>
+                  ) : null}
+                  <ul className="space-y-2">
+                    {endedRows.map(({ customer: c, campaign: cp }) => (
+                      <li
+                        key={`${c.id}-${cp.id}`}
+                        className="flex flex-col gap-2 rounded-lg border bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
                       >
-                        {sending === `${c.id}-${cp.id}` ? t("sending") : t("sendFeedback")}
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
+                        <div>
+                          <p className="font-medium text-navy">
+                            {companyLabel(c)} · {campaignName(cp)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {cp.endDate}
+                            {autoSchedule && (
+                              <Badge variant="secondary" className="ml-2 text-[10px]">
+                                {t("scheduledBadge")}
+                              </Badge>
+                            )}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 border-gold/40"
+                          disabled={
+                            sending === `${c.id}-${cp.id}` ||
+                            sending === "batch-feedback"
+                          }
+                          onClick={() =>
+                            void sendCrmEmail(`${c.id}-${cp.id}`, {
+                              kind: "feedback_request",
+                              to: c.email,
+                              company: companyLabel(c),
+                              contactName: c.contactName,
+                              campaignName: campaignName(cp),
+                            })
+                          }
+                        >
+                          {sending === `${c.id}-${cp.id}`
+                            ? t("sending")
+                            : t("sendFeedback")}
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
               )}
             </CardContent>
           </Card>
