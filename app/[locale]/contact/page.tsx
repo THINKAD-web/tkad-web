@@ -12,11 +12,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle, MessageCircle, MessageSquare, ClipboardList } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
 import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
+import { getCaseStudyBySlug } from "@/lib/case-studies";
 import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 const ScrollStagger = dynamic(() =>
@@ -66,6 +70,12 @@ function validate(form: FormFields): FormErrors {
 
 export default function ContactPage() {
   const t = useTranslations();
+  const locale = useLocale();
+  const isKo = locale === "ko";
+  const searchParams = useSearchParams();
+  const caseSlug = searchParams.get("case");
+  const refCase = caseSlug ? getCaseStudyBySlug(caseSlug) : undefined;
+  const casePrefillDone = useRef(false);
 
   const [form, setForm] = useState<FormFields>({
     company: "",
@@ -82,6 +92,21 @@ export default function ContactPage() {
   const [mainTab, setMainTab] = useState<ContactMainTab>("inquiry");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    casePrefillDone.current = false;
+  }, [caseSlug]);
+
+  useEffect(() => {
+    if (!refCase || casePrefillDone.current) return;
+    casePrefillDone.current = true;
+    const title = isKo ? refCase.title : refCase.titleEn;
+    const snippet = t("contact.caseRefMessageTemplate", { title });
+    setForm((prev) => {
+      if (prev.message.trim() !== "") return prev;
+      return { ...prev, message: snippet };
+    });
+  }, [refCase, isKo, t]);
 
   const updateField = useCallback((field: keyof FormFields, value: string) => {
     setForm((prev) => {
@@ -230,6 +255,22 @@ export default function ContactPage() {
                     </div>
                   ) : (
                     <form className="relative space-y-5" onSubmit={handleSubmit} noValidate>
+                      {refCase ? (
+                        <div className="rounded-xl border border-gold/35 bg-gradient-to-br from-gold/15 to-amber-50/80 p-4 text-sm text-navy">
+                          <p className="font-medium leading-relaxed">
+                            {t("contact.caseRefBanner")}
+                          </p>
+                          <p className="mt-1 text-xs text-navy/65">
+                            {isKo ? refCase.title : refCase.titleEn}
+                          </p>
+                          <Link
+                            href={`/cases/${refCase.slug}`}
+                            className="mt-3 inline-flex text-xs font-bold text-gold-dark underline-offset-4 hover:underline"
+                          >
+                            {t("contact.caseRefViewCase")}
+                          </Link>
+                        </div>
+                      ) : null}
                       <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
                         <label htmlFor="website">Website</label>
                         <input

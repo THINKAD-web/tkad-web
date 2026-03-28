@@ -23,6 +23,10 @@ import {
   Search,
   Target,
   Layers,
+  Shirt,
+  Car,
+  UtensilsCrossed,
+  RotateCcw,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Link } from "@/i18n/navigation";
@@ -114,6 +118,23 @@ export default function CasesPage() {
     return map[v];
   };
 
+  const industrySpotlights: {
+    vertical: CaseStudyVertical;
+    icon: typeof Shirt;
+  }[] = [
+    { vertical: "fashion_beauty", icon: Shirt },
+    { vertical: "automotive", icon: Car },
+    { vertical: "fb", icon: UtensilsCrossed },
+  ];
+
+  const resetFilters = () => {
+    setActiveCategory("all");
+    setVerticalTab("all");
+    setRegionKey("all");
+    setScale("all");
+    setQuery("");
+  };
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return caseStudies.filter((c) => {
@@ -127,10 +148,18 @@ export default function CasesPage() {
         c.titleEn,
         c.client,
         c.clientEn,
+        c.description,
+        c.descriptionEn,
         c.results,
         c.resultsEn,
         c.campaignGoal,
         c.campaignGoalEn,
+        c.testimonial,
+        c.testimonialEn,
+        c.testimonialAuthor,
+        c.testimonialAuthorEn,
+        c.managerComment,
+        c.managerCommentEn,
         ...c.mediaUsed,
         ...c.mediaUsedEn,
       ]
@@ -145,12 +174,55 @@ export default function CasesPage() {
 
   return (
     <>
-      <section className="bg-navy py-28">
+      <section className="bg-navy py-24 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {t("cases.title")}
           </h1>
           <p className="mt-2 text-slate-300">{t("cases.subtitle")}</p>
+
+          <div className="mx-auto mt-10 max-w-4xl">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gold/90">
+              {t("cases.heroIndustryTitle")}
+            </p>
+            <p className="mt-1 text-sm text-slate-400">
+              {t("cases.heroIndustrySubtitle")}
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              {industrySpotlights.map(({ vertical, icon: Icon }) => {
+                const active = verticalTab === vertical;
+                return (
+                  <button
+                    key={vertical}
+                    type="button"
+                    onClick={() => setVerticalTab(vertical)}
+                    className={`flex flex-col items-center gap-2 rounded-2xl border px-4 py-5 text-center transition-all touch-manipulation ${
+                      active
+                        ? "border-gold bg-white/10 shadow-lg shadow-gold/10 ring-2 ring-gold/50"
+                        : "border-white/15 bg-white/5 hover:border-white/25 hover:bg-white/[0.08]"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                        active ? "bg-gold text-navy" : "bg-white/10 text-gold"
+                      }`}
+                    >
+                      <Icon className="h-6 w-6" aria-hidden />
+                    </span>
+                    <span className="text-sm font-bold text-white">
+                      {verticalBadgeLabel(vertical)}
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      {t("cases.resultsCount", {
+                        count: caseStudies.filter((c) => c.vertical === vertical)
+                          .length,
+                      })}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -246,6 +318,16 @@ export default function CasesPage() {
                   ))}
                 </select>
               </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-10 shrink-0 border-navy/20"
+                onClick={resetFilters}
+              >
+                <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                {t("cases.resetFilters")}
+              </Button>
             </div>
 
             <p className="text-sm text-navy/60">
@@ -326,7 +408,7 @@ export default function CasesPage() {
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
                         <Eye className="h-3 w-3" />
-                        {isKo ? "노출수" : "Exposures"}
+                        {t("cases.metricExposures")}
                       </div>
                       <div className="mt-0.5 text-sm font-bold text-navy">
                         {isKo ? cs.exposures : cs.exposuresEn}
@@ -335,7 +417,7 @@ export default function CasesPage() {
                     <div className="text-center border-x border-slate-200">
                       <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
                         <Users className="h-3 w-3" />
-                        {isKo ? "도달률" : "Reach"}
+                        {t("cases.metricReach")}
                       </div>
                       <div className="mt-0.5 text-sm font-bold text-emerald-600">
                         {cs.reachIncrease}
@@ -376,6 +458,9 @@ export default function CasesPage() {
                   ) : null}
 
                   <div className="rounded-xl border border-navy/8 bg-navy/[0.03] p-3">
+                    <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-navy/45">
+                      {t("cases.testimonialLabel")}
+                    </p>
                     <Quote className="mb-1 h-4 w-4 text-gold/30" />
                     <p className="text-xs leading-relaxed text-navy/70 italic">
                       &ldquo;{isKo ? cs.testimonial : cs.testimonialEn}&rdquo;
@@ -388,7 +473,7 @@ export default function CasesPage() {
                   <div className="rounded-xl border border-gold/25 bg-gold/8 p-3">
                     <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-gold-dark">
                       <MessageSquareQuote className="h-3.5 w-3.5" />
-                      {isKo ? "THINKAD 매니저 코멘트" : "THINKAD Manager"}
+                      {t("cases.managerCommentTitle")}
                     </div>
                     <p className="text-xs leading-relaxed text-navy/80">
                       &ldquo;{isKo ? cs.managerComment : cs.managerCommentEn}&rdquo;
@@ -408,7 +493,7 @@ export default function CasesPage() {
                         size="sm"
                         className="w-full bg-gold text-xs font-bold text-navy hover:bg-gold-dark"
                       >
-                        {isKo ? "상세 보기" : "View Details"}
+                        {t("cases.viewDetails")}
                         <ArrowRight className="ml-1 h-3.5 w-3.5" />
                       </Button>
                     </Link>

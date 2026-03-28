@@ -1,12 +1,18 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { caseStudies, categoryColors, getCaseStudyBySlug } from "@/lib/case-studies";
+import {
+  caseStudies,
+  categoryColors,
+  getCaseStudyBySlug,
+  verticalColors,
+  type CaseStudyVertical,
+} from "@/lib/case-studies";
 
 const LeadCaptureModal = dynamic(() =>
   import("@/components/lead-capture-modal").then((m) => ({
@@ -47,11 +53,24 @@ export default function CaseStudyDetailPage({ params }: Props) {
   }
   const { slug } = resolved;
   const locale = useLocale();
+  const t = useTranslations();
   const isKo = locale === "ko";
   const [showLeadModal, setShowLeadModal] = useState(false);
 
   const cs = getCaseStudyBySlug(slug);
   if (!cs) notFound();
+
+  const verticalLabel = (v: CaseStudyVertical) => {
+    const map: Record<CaseStudyVertical, string> = {
+      fashion_beauty: t("cases.verticalFashion"),
+      automotive: t("cases.verticalAuto"),
+      fb: t("cases.verticalFb"),
+      tech: t("cases.verticalOther"),
+      entertainment: t("cases.verticalOther"),
+      finance: t("cases.verticalOther"),
+    };
+    return map[v];
+  };
 
   const currentIndex = caseStudies.findIndex((c) => c.slug === slug);
   const prev = currentIndex > 0 ? caseStudies[currentIndex - 1] : null;
@@ -95,6 +114,18 @@ export default function CaseStudyDetailPage({ params }: Props) {
           <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300/90">
             {isKo ? cs.description : cs.descriptionEn}
           </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href={`/contact?case=${encodeURIComponent(cs.slug)}`}>
+              <Button
+                size="lg"
+                className="h-12 rounded-full border-0 bg-gold px-8 text-sm font-bold text-navy shadow-lg shadow-gold/25 hover:bg-gold-dark"
+              >
+                {t("cases.ctaSimilar")}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400">
             <span className="flex items-center gap-2.5">
@@ -156,7 +187,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
             <div>
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gold-dark">
                 <Target className="h-4 w-4" />
-                {isKo ? "캠페인 목표" : "Campaign Goal"}
+                {t("cases.goalLabel")}
               </div>
               <p className="text-lg leading-relaxed text-navy/80">
                 {isKo ? cs.campaignGoal : cs.campaignGoalEn}
@@ -193,7 +224,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
                 {isKo ? cs.exposures : cs.exposuresEn}
               </p>
               <p className="mt-1 text-xs font-medium text-muted-foreground">
-                {isKo ? "총 노출수" : "Total Exposures"}
+                {t("cases.metricExposures")}
               </p>
             </div>
             <div className="rounded-2xl bg-navy/[0.03] p-6 text-center">
@@ -202,7 +233,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
                 {cs.reachIncrease}
               </p>
               <p className="mt-1 text-xs font-medium text-muted-foreground">
-                {isKo ? "도달률 증가" : "Reach Increase"}
+                {t("cases.metricReach")}
               </p>
             </div>
             <div className="rounded-2xl bg-navy/[0.03] p-6 text-center">
@@ -211,7 +242,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
                 {isKo ? cs.results : cs.resultsEn}
               </p>
               <p className="mt-1 text-xs font-medium text-muted-foreground">
-                {isKo ? "핵심 성과" : "Key Result"}
+                {t("cases.resultsLabel")}
               </p>
             </div>
           </div>
@@ -221,7 +252,10 @@ export default function CaseStudyDetailPage({ params }: Props) {
       <section className="border-t bg-slate-50 py-28">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl bg-white p-8 shadow-md">
-            <Quote className="h-8 w-8 text-gold/30" />
+            <p className="text-xs font-bold uppercase tracking-wide text-navy/45">
+              {t("cases.testimonialLabel")}
+            </p>
+            <Quote className="mt-3 h-8 w-8 text-gold/30" />
             <p className="mt-4 text-lg leading-relaxed text-navy/80 italic">
               &ldquo;{isKo ? cs.testimonial : cs.testimonialEn}&rdquo;
             </p>
@@ -242,7 +276,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
           <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/10 to-white p-8 shadow-sm">
             <div className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-gold-dark">
               <MessageSquareQuote className="h-5 w-5" />
-              {isKo ? "THINKAD 매니저 코멘트" : "THINKAD Manager Comment"}
+              {t("cases.managerCommentTitle")}
             </div>
             <p className="text-lg leading-relaxed text-navy/85">
               &ldquo;{isKo ? cs.managerComment : cs.managerCommentEn}&rdquo;
@@ -268,15 +302,15 @@ export default function CaseStudyDetailPage({ params }: Props) {
               className="bg-gold text-navy hover:bg-gold-dark h-14 rounded-full px-10 text-base font-bold shadow-lg shadow-gold/20"
             >
               <Download className="mr-2 h-5 w-5" />
-              {isKo ? "캠페인 리포트 PDF 다운로드" : "Download Campaign Report PDF"}
+              {t("cases.detailDownloadPdf")}
             </Button>
-            <Link href="/contact">
+            <Link href={`/contact?case=${encodeURIComponent(cs.slug)}`}>
               <Button
                 size="lg"
                 variant="outline"
                 className="h-14 rounded-full border-navy/20 px-10 text-base text-navy font-semibold hover:bg-navy hover:text-white"
               >
-                {isKo ? "비슷한 캠페인 문의하기" : "Inquire About Similar Campaign"}
+                {t("cases.detailSimilarCampaign")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -295,7 +329,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
                 >
                   <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
                     <ArrowLeft className="h-3 w-3" />
-                    {isKo ? "이전 사례" : "Previous"}
+                    {t("cases.detailPrev")}
                   </span>
                   <span className="mt-2 text-sm font-bold text-navy group-hover:text-gold-dark transition-colors">
                     {isKo ? prev.title : prev.titleEn}
@@ -310,7 +344,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
                   className="group flex flex-1 flex-col items-end rounded-xl border bg-white p-4 shadow-sm transition-shadow hover:shadow-md text-right"
                 >
                   <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-                    {isKo ? "다음 사례" : "Next"}
+                    {t("cases.detailNext")}
                     <ArrowRight className="h-3 w-3" />
                   </span>
                   <span className="mt-2 text-sm font-bold text-navy group-hover:text-gold-dark transition-colors">
