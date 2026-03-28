@@ -40,6 +40,7 @@ export const publicSeoPaths = [
   "/quote",
   "/portfolio",
   "/client",
+  "/partner",
   "/blog",
   "/news",
   "/planner",
@@ -51,7 +52,9 @@ export function absoluteUrl(path: string): string {
 }
 
 /** Indexed marketing URLs only (excludes login-style /client). */
-export const sitemapPaths = publicSeoPaths.filter((p) => p !== "/client");
+export const sitemapPaths = publicSeoPaths.filter(
+  (p) => p !== "/client" && p !== "/partner",
+);
 
 export function allPublicSitemapPaths(): { locale: string; path: string }[] {
   const out: { locale: string; path: string }[] = [];
