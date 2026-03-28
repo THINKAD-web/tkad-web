@@ -115,7 +115,7 @@ function HomeContent({ locale }: { locale: string }) {
             {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
           </div>
 
-          <h1 className="text-5xl leading-tight font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
+          <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-white sm:text-5xl lg:text-7xl">
             {isKo ? (
               <>
                 당신의 브랜드를
@@ -131,7 +131,7 @@ function HomeContent({ locale }: { locale: string }) {
             )}
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300/90 sm:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300/90 sm:text-lg lg:text-xl">
             {t("hero.subtitle")}
           </p>
 

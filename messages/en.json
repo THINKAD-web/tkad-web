@@ -154,7 +154,14 @@
     "address": "5F, THINKAD Building, 123 Teheran-ro, Gangnam-gu, Seoul",
     "phoneNumber": "02-1234-5678",
     "emailAddress": "contact@tkad.co.kr",
-    "hours": "Business Hours: Mon-Fri 09:00 - 18:00"
+    "hours": "Business Hours: Mon-Fri 09:00 - 18:00",
+    "directionsTitle": "How to Find Us",
+    "subway": "Subway",
+    "subwayDesc": "5 min walk from Gangnam Station Exit 3 (Line 2)",
+    "busTitle": "Bus",
+    "busDesc": "Get off at Gangnam Station stop (Routes: 140, 144, 145 / 3412, 4412)",
+    "parkingTitle": "Parking",
+    "parkingDesc": "Underground parking available (2 hours free)"
   },
   "cases": {
     "title": "Case Studies",
@@ -167,11 +174,19 @@
   },
   "footer": {
     "description": "Korea's No.1 OOH Advertising Agency",
+    "companyName": "THINKAD Inc.",
+    "ceo": "CEO: Jaehan Lee",
+    "bizNumber": "Business Reg: 123-45-67890",
     "quickLinks": "Quick Links",
     "contactInfo": "Contact Info",
     "address": "123 Teheran-ro, Gangnam-gu, Seoul",
     "phone": "02-1234-5678",
     "email": "contact@tkad.co.kr",
-    "copyright": "© 2024 THINKAD. All rights reserved."
+    "services": "Services",
+    "domesticOOH": "Domestic OOH",
+    "crossBorderOOH": "Cross-Border OOH",
+    "dataConsulting": "Data Consulting",
+    "planningTool": "Planning Tool",
+    "copyright": "© 2024 THINKAD Inc. All rights reserved."
   }
 }

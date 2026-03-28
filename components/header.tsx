@@ -71,7 +71,7 @@ export default function Header() {
 
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="h-11 w-11">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
@@ -82,7 +82,7 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted ${
+                  className={`rounded-md px-3 py-3 text-sm font-medium transition-colors hover:bg-muted ${
                     pathname === item.href
                       ? "text-navy font-bold"
                       : "text-muted-foreground"

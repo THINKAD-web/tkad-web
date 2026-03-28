@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Mail, MapPin, Phone, Clock, CheckCircle } from "lucide-react";
+import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle } from "lucide-react";
 import { useState } from "react";
 
 export default function ContactPage() {
@@ -220,6 +220,72 @@ export default function ContactPage() {
               </Card>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Map & Directions */}
+      <section className="bg-slate-50 py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-8 text-center text-2xl font-bold text-navy sm:text-3xl">
+            {t("contact.directionsTitle")}
+          </h2>
+
+          <Card className="overflow-hidden shadow-md">
+            <div className="aspect-video w-full">
+              <iframe
+                title="THINKAD Office Location"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.354!2d127.0276!3d37.4979!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca1500a4e5b6d%3A0x6b8e9e4e2d5d5f6a!2sGangnam+Station!5e0!3m2!1sko!2skr!4v1700000000000"
+                className="h-full w-full border-0"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+
+            <CardContent className="grid gap-6 p-6 sm:grid-cols-3">
+              <div className="flex gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
+                  <Train className="h-5 w-5 text-gold" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-navy">
+                    {t("contact.subway")}
+                  </div>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {t("contact.subwayDesc")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
+                  <Bus className="h-5 w-5 text-gold" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-navy">
+                    {t("contact.busTitle")}
+                  </div>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {t("contact.busDesc")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
+                  <ParkingCircle className="h-5 w-5 text-gold" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-navy">
+                    {t("contact.parkingTitle")}
+                  </div>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {t("contact.parkingDesc")}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </>

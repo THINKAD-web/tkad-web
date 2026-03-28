@@ -154,7 +154,14 @@
     "address": "서울특별시 강남구 테헤란로 123, THINKAD 빌딩 5층",
     "phoneNumber": "02-1234-5678",
     "emailAddress": "contact@tkad.co.kr",
-    "hours": "영업시간: 월~금 09:00 - 18:00"
+    "hours": "영업시간: 월~금 09:00 - 18:00",
+    "directionsTitle": "찾아오시는 길",
+    "subway": "지하철",
+    "subwayDesc": "2호선 강남역 3번 출구에서 도보 5분",
+    "busTitle": "버스",
+    "busDesc": "강남역 정류장 하차 (간선: 140, 144, 145 / 지선: 3412, 4412)",
+    "parkingTitle": "주차",
+    "parkingDesc": "건물 내 지하주차장 이용 가능 (2시간 무료)"
   },
   "cases": {
     "title": "성공 사례",
@@ -167,11 +174,19 @@
   },
   "footer": {
     "description": "대한민국 No.1 OOH 광고 에이전시",
+    "companyName": "주식회사 싱커드",
+    "ceo": "대표: 이재한",
+    "bizNumber": "사업자등록번호: 123-45-67890",
     "quickLinks": "바로가기",
     "contactInfo": "연락처",
     "address": "서울특별시 강남구 테헤란로 123",
     "phone": "02-1234-5678",
     "email": "contact@tkad.co.kr",
-    "copyright": "© 2024 THINKAD(싱커드). All rights reserved."
+    "services": "서비스 안내",
+    "domesticOOH": "국내 OOH 광고",
+    "crossBorderOOH": "크로스보더 OOH",
+    "dataConsulting": "데이터 컨설팅",
+    "planningTool": "플래닝 툴",
+    "copyright": "© 2024 주식회사 싱커드(THINKAD). All rights reserved."
   }
 }

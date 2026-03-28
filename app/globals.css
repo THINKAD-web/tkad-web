@@ -168,3 +168,20 @@ body {
 .marquee-container:hover .marquee-track {
   animation-play-state: paused;
 }
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Minimum touch target utility */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
