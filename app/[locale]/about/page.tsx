@@ -29,11 +29,12 @@ export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  return <AboutContent />;
+  return <AboutContent locale={locale} />;
 }
 
-function AboutContent() {
+function AboutContent({ locale }: { locale: string }) {
   const t = useTranslations();
+   const isKo = locale === "ko";
 
   const values = [
     { icon: BarChart3, ...getValueTranslation(t, "value1") },
@@ -42,12 +43,89 @@ function AboutContent() {
   ];
 
   const milestones = [
-    { year: "2016", event: { ko: "주식회사 싱커드(THINKAD) 설립 · 사업자등록(319-86-00382)", en: "THINKAD Inc. founded (Reg: 319-86-00382)" } },
-    { year: "2017", event: { ko: "통신판매업 신고 · 국내 OOH 매체 네트워크 구축", en: "E-Commerce permit · Domestic OOH network established" } },
-    { year: "2019", event: { ko: "코엑스 K-POP 스퀘어 · 강남대로 미디어폴 운영 시작", en: "COEX K-POP Square & Gangnam-daero Media Pole operations" } },
-    { year: "2021", event: { ko: "글로벌 매체 확장 (뉴욕 타임스퀘어 · 두바이 부르즈 할리파)", en: "Global expansion (NYC Times Square · Dubai Burj Khalifa)" } },
-    { year: "2023", event: { ko: "데이터 기반 컨설팅 서비스 런칭 · 일본 애드트럭 파트너십", en: "Data consulting launch · Japan Ad Truck partnership" } },
-    { year: "2025", event: { ko: "등록 매체 500+ 돌파 · 성수 본사 확장 이전", en: "500+ registered media · Seongsu HQ expansion" } },
+    {
+      year: "2016",
+      event: {
+        ko: "주식회사 싱커드(THINKAD) 설립",
+        en: "THINKAD Inc. founded",
+      },
+    },
+    {
+      year: "2017",
+      event: {
+        ko: "첫 대형 OOH 캠페인 수행",
+        en: "First large-scale OOH campaign",
+      },
+    },
+    {
+      year: "2019",
+      event: {
+        ko: "등록·운영 매체 100개 돌파",
+        en: "Surpassed 100 operated media",
+      },
+    },
+    {
+      year: "2022",
+      event: {
+        ko: "글로벌 매체 네트워크 본격 확장",
+        en: "Global media network expansion",
+      },
+    },
+    {
+      year: "2025",
+      event: {
+        ko: "AI 기반 OOH 플래닝 플랫폼 런칭",
+        en: "Launched AI-powered OOH planning platform",
+      },
+    },
+  ];
+
+  const teamMembers = [
+    {
+      nameKo: "이재한",
+      nameEn: "Jaehan Lee",
+      roleKo: "대표",
+      roleEn: "CEO",
+      bioKo:
+        "OOH 광고 업계 15년 이상, 국내외 랜드마크 캠페인을 리드해온 THINKAD의 대표.",
+      bioEn:
+        "Over 15 years in OOH, leading landmark campaigns in Korea and abroad as CEO of THINKAD.",
+      initials: "JL",
+      highlight: true,
+    },
+    {
+      nameKo: "김민지",
+      nameEn: "Minji Kim",
+      roleKo: "미디어 플래닝 리드",
+      roleEn: "Media Planning Lead",
+      bioKo:
+        "국내 주요 상권 분석과 매체 믹스 전략 수립을 담당하는 OOH 플래닝 전문가.",
+      bioEn:
+        "OOH planning expert in charge of key district analysis and media mix strategy.",
+      initials: "MK",
+    },
+    {
+      nameKo: "박준호",
+      nameEn: "Junho Park",
+      roleKo: "데이터 & AI 리드",
+      roleEn: "Data & AI Lead",
+      bioKo:
+        "유동인구 데이터, 노출도, 성과 분석을 기반으로 한 AI 추천 엔진을 개발합니다.",
+      bioEn:
+        "Builds AI recommendation engines based on traffic data, exposure, and performance analytics.",
+      initials: "JP",
+    },
+    {
+      nameKo: "이수연",
+      nameEn: "Suyeon Lee",
+      roleKo: "크리에이티브 디렉터",
+      roleEn: "Creative Director",
+      bioKo:
+        "브랜드 스토리를 공간과 매체에 녹여내는 OOH 크리에이티브 디렉션을 총괄합니다.",
+      bioEn:
+        "Oversees OOH creative direction that blends brand stories into spaces and media.",
+      initials: "SL",
+    },
   ];
 
   return (
@@ -124,9 +202,9 @@ function AboutContent() {
       </section>
 
       {/* Team */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl">
+      <section className="py-20 bg-slate-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
             <Users className="mx-auto h-12 w-12 text-gold" />
             <h2 className="mt-4 text-2xl font-bold text-navy">
               {t("about.teamTitle")}
@@ -134,6 +212,44 @@ function AboutContent() {
             <p className="mt-4 leading-relaxed text-muted-foreground">
               {t("about.teamDescription")}
             </p>
+          </div>
+
+          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+            {teamMembers.map((member) => {
+              const name = isKo ? member.nameKo : member.nameEn;
+              const role = isKo ? member.roleKo : member.roleEn;
+              const bio = isKo ? member.bioKo : member.bioEn;
+
+              return (
+                <Card
+                  key={member.nameEn}
+                  className={`relative h-full border-0 bg-white shadow-md transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                    member.highlight ? "ring-2 ring-gold/60" : ""
+                  }`}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-light text-sm font-bold text-navy shadow-md">
+                        {member.initials}
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-bold text-navy">
+                          {name}
+                        </div>
+                        <div className="text-xs text-gold-dark font-semibold">
+                          {role}
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-xs leading-relaxed">
+                      {bio}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
