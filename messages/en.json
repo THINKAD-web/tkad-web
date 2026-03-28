@@ -228,7 +228,7 @@
     "parkingDesc": "Underground parking available",
     "tabInquiry": "Contact",
     "tabFeedback": "Feedback survey",
-    "formTitleFeedback": "Customer feedback",
+    "formTitleFeedback": "THINKAD service satisfaction survey",
     "caseRefBanner": "You’re inquiring about a campaign similar to this verified case study.",
     "caseRefMessageTemplate": "[Reference case: {title}]\nWe’d like to explore an OOH campaign under similar conditions and industry.\n\n",
     "caseRefViewCase": "View case again",
@@ -237,7 +237,7 @@
     "academyRefBack": "Back to Academy"
   },
   "contactFeedback": {
-    "intro": "Tell us about service satisfaction and any campaign experience—about 2–3 minutes. You’ll receive a thank-you coupon code when done.",
+    "intro": "Service satisfaction survey for THINKAD. Tell us about satisfaction and any campaign experience—about 2–3 minutes. When you submit, you’ll get a thank-you coupon code. Depending on ops settings, your response may trigger an admin notification email.",
     "email": "Email",
     "emailPh": "Where we’ll send coupon details",
     "name": "Name (optional)",
@@ -263,7 +263,7 @@
     "errorEmail": "Enter a valid email.",
     "errorRequired": "Please complete all required questions.",
     "thankTitle": "Thank you for your feedback",
-    "thankDesc": "We’ll use this to improve how we work with you.",
+    "thankDesc": "We’ll use this to improve how we work with you. Your coupon code is below.",
     "couponTitle": "Thank-you discount code",
     "couponHint": "Share this code on your next quote request.",
     "couponTerms": "Demo: sample benefit is 5% off media planning fees; real offers follow contract and policy. May not combine with other promotions.",
