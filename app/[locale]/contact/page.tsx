@@ -76,6 +76,8 @@ export default function ContactPage() {
   const caseSlug = searchParams.get("case");
   const refCase = caseSlug ? getCaseStudyBySlug(caseSlug) : undefined;
   const casePrefillDone = useRef(false);
+  const academyTopic = searchParams.get("topic") === "academy";
+  const academyPrefillDone = useRef(false);
 
   const [form, setForm] = useState<FormFields>({
     company: "",
@@ -98,6 +100,10 @@ export default function ContactPage() {
   }, [caseSlug]);
 
   useEffect(() => {
+    academyPrefillDone.current = false;
+  }, [academyTopic]);
+
+  useEffect(() => {
     if (!refCase || casePrefillDone.current) return;
     casePrefillDone.current = true;
     const title = isKo ? refCase.title : refCase.titleEn;
@@ -107,6 +113,16 @@ export default function ContactPage() {
       return { ...prev, message: snippet };
     });
   }, [refCase, isKo, t]);
+
+  useEffect(() => {
+    if (caseSlug || !academyTopic || academyPrefillDone.current) return;
+    academyPrefillDone.current = true;
+    const snippet = t("contact.academyRefMessageTemplate");
+    setForm((prev) => {
+      if (prev.message.trim() !== "") return prev;
+      return { ...prev, message: snippet };
+    });
+  }, [caseSlug, academyTopic, t]);
 
   const updateField = useCallback((field: keyof FormFields, value: string) => {
     setForm((prev) => {
@@ -268,6 +284,18 @@ export default function ContactPage() {
                             className="mt-3 inline-flex text-xs font-bold text-gold-dark underline-offset-4 hover:underline"
                           >
                             {t("contact.caseRefViewCase")}
+                          </Link>
+                        </div>
+                      ) : academyTopic ? (
+                        <div className="rounded-xl border border-navy/15 bg-gradient-to-br from-navy/[0.06] to-gold/10 p-4 text-sm text-navy">
+                          <p className="font-medium leading-relaxed">
+                            {t("contact.academyRefBanner")}
+                          </p>
+                          <Link
+                            href="/academy"
+                            className="mt-3 inline-flex text-xs font-bold text-gold-dark underline-offset-4 hover:underline"
+                          >
+                            {t("contact.academyRefBack")}
                           </Link>
                         </div>
                       ) : null}

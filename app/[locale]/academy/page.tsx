@@ -20,6 +20,7 @@ import {
   FileSpreadsheet,
   GraduationCap,
   Loader2,
+  MessageCircle,
   MonitorPlay,
   Presentation,
   Users,
@@ -137,7 +138,7 @@ export default function AcademyPage() {
           <div className="mx-auto mb-4 flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold">
               <GraduationCap className="h-4 w-4" />
-              Academy
+              {t("heroBadge")}
             </span>
           </div>
           <h1 className="text-3xl font-bold text-white sm:text-4xl">{t("heroTitle")}</h1>
@@ -145,8 +146,69 @@ export default function AcademyPage() {
         </div>
       </section>
 
+      <section className="border-b border-navy/8 bg-white py-8">
+        <div className="mx-auto grid max-w-7xl gap-3 px-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-6 lg:px-8">
+          <a
+            href="#academy-basics"
+            className="group flex gap-3 rounded-2xl border border-navy/10 bg-slate-50/90 p-4 shadow-sm transition-all hover:border-gold/35 hover:shadow-md"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
+              <Video className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 text-left">
+              <p className="text-sm font-bold text-navy">{t("valueStripBasics")}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {t("valueStripBasicsDesc")}
+              </p>
+            </div>
+          </a>
+          <a
+            href="#academy-webinars"
+            className="group flex gap-3 rounded-2xl border border-navy/10 bg-slate-50/90 p-4 shadow-sm transition-all hover:border-gold/35 hover:shadow-md"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/20 text-navy group-hover:bg-gold">
+              <Calendar className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 text-left">
+              <p className="text-sm font-bold text-navy">{t("valueStripWebinars")}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {t("valueStripWebinarsDesc")}
+              </p>
+            </div>
+          </a>
+          <a
+            href="#academy-downloads"
+            className="group flex gap-3 rounded-2xl border border-navy/10 bg-slate-50/90 p-4 shadow-sm transition-all hover:border-gold/35 hover:shadow-md"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
+              <Download className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 text-left">
+              <p className="text-sm font-bold text-navy">{t("valueStripDownloads")}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {t("valueStripDownloadsDesc")}
+              </p>
+            </div>
+          </a>
+          <a
+            href="#academy-consult"
+            className="group flex gap-3 rounded-2xl border border-navy/10 bg-slate-50/90 p-4 shadow-sm transition-all hover:border-gold/35 hover:shadow-md"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white">
+              <MessageCircle className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 text-left">
+              <p className="text-sm font-bold text-navy">{t("valueStripConsult")}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {t("valueStripConsultDesc")}
+              </p>
+            </div>
+          </a>
+        </div>
+      </section>
+
       <div className="mx-auto max-w-7xl space-y-16 px-4 py-14 sm:px-6 lg:px-8">
-        <section>
+        <section id="academy-basics" className="scroll-mt-24">
           <div className="mb-8 text-center">
             <h2 className="text-2xl font-bold text-navy">{t("sectionBasics")}</h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -246,7 +308,7 @@ export default function AcademyPage() {
           </div>
         </section>
 
-        <section>
+        <section id="academy-downloads" className="scroll-mt-24">
           <div className="mb-8 text-center">
             <h2 className="text-2xl font-bold text-navy">{t("sectionDownloads")}</h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -325,7 +387,11 @@ export default function AcademyPage() {
           </div>
         </section>
 
-        <section ref={registerRef} id="webinar-register" className="scroll-mt-24">
+        <section
+          ref={registerRef}
+          id="academy-register"
+          className="scroll-mt-24"
+        >
           <Card className="border-navy/10 shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl text-navy">{t("sectionRegister")}</CardTitle>
@@ -406,12 +472,20 @@ export default function AcademyPage() {
         </section>
 
         <section
+          id="academy-consult"
           className={cn(
-            "rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/[0.04] to-gold/10 px-6 py-12 text-center",
+            "scroll-mt-24 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/[0.04] to-gold/10 px-6 py-12 text-center",
           )}
         >
-          <h2 className="text-xl font-bold text-navy sm:text-2xl">{t("ctaTitle")}</h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-navy/70">{t("ctaDesc")}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-gold-dark">
+            {t("consultSectionTitle")}
+          </p>
+          <h2 className="mt-2 text-xl font-bold text-navy sm:text-2xl">
+            {t("ctaTitle")}
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-navy/70">
+            {t("consultSectionDesc")}
+          </p>
           <Button
             asChild
             className="mt-6 bg-gold px-8 font-bold text-navy hover:bg-gold-dark"
