@@ -24,6 +24,7 @@ import Modal from "@/components/ui/modal";
 import {
   Bell,
   FileSignature,
+  LayoutDashboard,
   Loader2,
   Lock,
   LogOut,
@@ -238,6 +239,36 @@ export default function PartnerPortalPage() {
     });
   }, [partner]);
 
+  const portalStats = useMemo(() => {
+    if (!partner) return null;
+    const contractsTotal = partner.contracts.length;
+    const contractsActive = partner.contracts.filter((c) => c.status === "active")
+      .length;
+    const contractsRenewal = partner.contracts.filter(
+      (c) => c.status === "pending_renewal",
+    ).length;
+    const mediaTotal = localMedia.length;
+    const mediaLive = localMedia.filter((m) => m.status === "live").length;
+    const mediaReview = localMedia.filter((m) => m.status === "review").length;
+    const settlementOutstandingMan = partner.settlements
+      .filter((s) => s.status !== "paid")
+      .reduce((a, s) => a + s.amountMan, 0);
+    const settlementPaidRows = partner.settlements.filter(
+      (s) => s.status === "paid",
+    ).length;
+    return {
+      contractsTotal,
+      contractsActive,
+      contractsRenewal,
+      mediaTotal,
+      mediaLive,
+      mediaReview,
+      settlementOutstandingMan,
+      settlementPaidRows,
+      settlementRows: partner.settlements.length,
+    };
+  }, [partner, localMedia]);
+
   const tabs: { id: TabId; label: string; icon: typeof FileSignature }[] = [
     { id: "contracts", label: t("tabContracts"), icon: FileSignature },
     { id: "media", label: t("tabMedia"), icon: PanelLeft },
@@ -260,6 +291,12 @@ export default function PartnerPortalPage() {
         <div className="mx-auto max-w-md px-4">
           <Card className="border-navy/10 shadow-lg">
             <CardHeader>
+              <div className="mb-2 flex flex-wrap gap-2">
+                <Badge className="border-0 bg-navy/90 text-white">{t("loginBadge")}</Badge>
+                <Badge variant="outline" className="border-navy/20 text-navy">
+                  {t("loginPartnerOnly")}
+                </Badge>
+              </div>
               <div className="flex items-center gap-2 text-navy">
                 <ShieldCheck className="h-6 w-6 text-gold" />
                 <CardTitle>{t("loginTitle")}</CardTitle>
@@ -267,6 +304,22 @@ export default function PartnerPortalPage() {
               <CardDescription>{t("loginSubtitle")}</CardDescription>
             </CardHeader>
             <CardContent>
+              {step === "credentials" && (
+                <ul className="mb-5 space-y-1.5 rounded-xl border border-navy/10 bg-slate-50/90 px-3 py-3 text-xs text-navy/75">
+                  <li className="flex gap-2">
+                    <FileSignature className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
+                    {t("loginFeatureContracts")}
+                  </li>
+                  <li className="flex gap-2">
+                    <PanelLeft className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
+                    {t("loginFeatureMedia")}
+                  </li>
+                  <li className="flex gap-2">
+                    <Wallet className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
+                    {t("loginFeatureSettlement")}
+                  </li>
+                </ul>
+              )}
               {step === "credentials" && (
                 <form className="space-y-4" onSubmit={submitCredentials}>
                   <div>
@@ -399,6 +452,131 @@ export default function PartnerPortalPage() {
       </header>
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        {portalStats ? (
+          <section className="mb-8 space-y-3" aria-label={t("overviewTitle")}>
+            <h2 className="flex items-center gap-2 text-base font-extrabold text-navy sm:text-lg">
+              <LayoutDashboard className="h-5 w-5 text-gold" />
+              {t("overviewTitle")}
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Card
+                role="button"
+                tabIndex={0}
+                className="cursor-pointer gap-0 py-5 ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                onClick={() => setTab("contracts")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setTab("contracts");
+                  }
+                }}
+              >
+                <CardHeader className="pb-2 pt-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="text-sm font-semibold text-navy/80">
+                      {t("tabContracts")}
+                    </CardTitle>
+                    <FileSignature className="h-4 w-4 text-gold" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-1 pb-0 pt-0">
+                  <p className="text-2xl font-extrabold text-navy">
+                    {portalStats.contractsActive}
+                    <span className="text-lg font-semibold text-navy/40">
+                      {" "}
+                      / {portalStats.contractsTotal}
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {t("overviewContractsCaption")}
+                  </p>
+                  {portalStats.contractsRenewal > 0 ? (
+                    <p className="text-xs font-medium text-amber-800">
+                      {t("overviewRenewal", { n: portalStats.contractsRenewal })}
+                    </p>
+                  ) : null}
+                  <p className="pt-2 text-xs font-bold text-gold-dark">
+                    {t("overviewOpen")} →
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card
+                role="button"
+                tabIndex={0}
+                className="cursor-pointer gap-0 py-5 ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                onClick={() => setTab("media")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setTab("media");
+                  }
+                }}
+              >
+                <CardHeader className="pb-2 pt-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="text-sm font-semibold text-navy/80">
+                      {t("tabMedia")}
+                    </CardTitle>
+                    <PanelLeft className="h-4 w-4 text-gold" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-1 pb-0 pt-0">
+                  <p className="text-2xl font-extrabold text-navy">
+                    {portalStats.mediaTotal}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {t("overviewMediaCaption")}: {portalStats.mediaLive} ·{" "}
+                    {portalStats.mediaReview}
+                  </p>
+                  <p className="pt-2 text-xs font-bold text-gold-dark">
+                    {t("overviewOpen")} →
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card
+                role="button"
+                tabIndex={0}
+                className="cursor-pointer gap-0 py-5 ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                onClick={() => setTab("settlements")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setTab("settlements");
+                  }
+                }}
+              >
+                <CardHeader className="pb-2 pt-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="text-sm font-semibold text-navy/80">
+                      {t("tabSettlements")}
+                    </CardTitle>
+                    <Wallet className="h-4 w-4 text-gold" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-1 pb-0 pt-0">
+                  <p className="text-2xl font-extrabold text-navy tabular-nums">
+                    {formatMan(portalStats.settlementOutstandingMan, isKo)}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {t("overviewSettlementCaption")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {t("settlementPaidSummary", {
+                      paid: portalStats.settlementPaidRows,
+                      total: portalStats.settlementRows,
+                    })}
+                  </p>
+                  <p className="pt-2 text-xs font-bold text-gold-dark">
+                    {t("overviewOpen")} →
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+        ) : null}
+
         <div className="mb-6 flex flex-wrap gap-2 border-b border-navy/10 pb-4">
           {tabs.map(({ id, label, icon: Icon }) => (
             <Button
@@ -419,7 +597,10 @@ export default function PartnerPortalPage() {
 
         {tab === "contracts" && (
           <section className="space-y-4">
-            <h2 className="text-base font-bold text-navy">{t("contractsTitle")}</h2>
+            <div>
+              <h2 className="text-base font-bold text-navy">{t("contractsTitle")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("contractsSubtitle")}</p>
+            </div>
             {partner.contracts.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("contractsEmpty")}</p>
             ) : (
@@ -474,8 +655,13 @@ export default function PartnerPortalPage() {
 
         {tab === "media" && (
           <section className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-base font-bold text-navy">{t("mediaTitle")}</h2>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 className="text-base font-bold text-navy">{t("mediaTitle")}</h2>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  {t("mediaSubtitle")}
+                </p>
+              </div>
               <Button
                 type="button"
                 className="bg-gold font-bold text-navy hover:bg-gold-dark"
@@ -541,7 +727,12 @@ export default function PartnerPortalPage() {
 
         {tab === "settlements" && (
           <section className="space-y-4">
-            <h2 className="text-base font-bold text-navy">{t("settlementsTitle")}</h2>
+            <div>
+              <h2 className="text-base font-bold text-navy">{t("settlementsTitle")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("settlementsSubtitle")}
+              </p>
+            </div>
             <div className="overflow-x-auto rounded-xl border border-navy/10">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead className="border-b border-navy/10 bg-slate-50 text-xs font-semibold text-navy/70">
