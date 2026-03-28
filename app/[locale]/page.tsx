@@ -130,7 +130,7 @@ function HomeContent({
             {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
           </div>
 
-          <h1 className="text-5xl leading-[1.08] font-extrabold tracking-tight text-white lg:text-7xl">
+          <h1 className="text-3xl leading-[1.12] font-extrabold tracking-tight text-white sm:text-5xl lg:text-7xl">
             {isKo ? (
               <>
                 <span className="hero-fade-in hero-fade-in-seq-1 block">
@@ -163,22 +163,22 @@ function HomeContent({
               : "Only media personally verified and managed by THINKAD"}
           </p>
 
-          <div className="hero-fade-in hero-fade-in-seq-5 mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link href="/contact">
+          <div className="hero-fade-in hero-fade-in-seq-5 mx-auto mt-10 flex w-full max-w-md flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
+            <Link href="/contact" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="btn-gold h-14 min-w-[11.5rem] rounded-full px-10 text-base font-semibold shadow-lg shadow-cta/20"
+                className="btn-gold h-12 w-full min-h-11 rounded-full px-8 text-base font-semibold shadow-lg shadow-cta/20 sm:h-14 sm:w-auto sm:min-w-[11.5rem] sm:px-10 touch-manipulation"
               >
                 <PhoneCall className="mr-2 h-5 w-5" />
                 {isKo ? "무료 상담 신청" : "Free Consultation"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/media">
+            <Link href="/media" className="w-full sm:w-auto">
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 min-w-[11.5rem] rounded-full border-2 border-white/35 bg-white/5 px-10 text-base font-semibold text-white shadow-sm backdrop-blur-sm hover:bg-white/12 hover:border-white/55"
+                className="h-12 w-full min-h-11 rounded-full border-2 border-white/35 bg-white/5 px-8 text-base font-semibold text-white shadow-sm backdrop-blur-sm hover:bg-white/12 hover:border-white/55 sm:h-14 sm:w-auto sm:min-w-[11.5rem] sm:px-10 touch-manipulation"
               >
                 {t("hero.cta")}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -220,7 +220,7 @@ function HomeContent({
             </div>
           </ScrollAnimate>
 
-          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-8">
             {[
               {
                 icon: Search,
@@ -284,7 +284,7 @@ function HomeContent({
         <div className="absolute inset-0 hero-pattern opacity-50" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="count-up">
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-6 lg:gap-8">
               {[
                 {
                   animClass: "stat-count-up stat-count-500",
@@ -345,7 +345,7 @@ function HomeContent({
             </div>
           </ScrollAnimate>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {[
               {
                 rank: 1 as const,
@@ -460,7 +460,7 @@ function HomeContent({
               </p>
             </div>
           </ScrollAnimate>
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
+          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {[
               {
                 icon: Eye,
@@ -532,7 +532,7 @@ function HomeContent({
               </p>
             </div>
           </ScrollAnimate>
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
+          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {[
               {
                 icon: MapPin,
@@ -585,7 +585,7 @@ function HomeContent({
       <section className="section-white py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
-            <div className="flex items-end justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
                   <ShieldCheck className="h-4 w-4" />
@@ -600,13 +600,13 @@ function HomeContent({
               </div>
               <Link
                 href="/media"
-                className="hidden items-center gap-1 text-sm font-semibold text-gold transition-colors duration-300 hover:text-gold-dark md:inline-flex"
+                className="link-underline-grow inline-flex min-h-11 shrink-0 items-center gap-1 self-start text-sm font-semibold text-gold transition-colors duration-300 hover:text-gold-dark sm:min-h-0 sm:self-auto"
               >
                 {t("common.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </ScrollAnimate>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-7">
             {featuredMedia.map((media, i) => (
               <ScrollAnimate key={media.id} delay={i * 100}>
               <Card
@@ -705,7 +705,7 @@ function HomeContent({
               </h2>
             </div>
           </ScrollAnimate>
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
+          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {[
               {
                 name: isKo ? "김서연 마케팅 이사" : "Seoyeon Kim, Marketing Director",
@@ -783,7 +783,7 @@ function HomeContent({
               </p>
             </div>
           </ScrollAnimate>
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
+          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {(["case1", "case2", "case3"] as const).map((key, i) => (
               <ScrollAnimate key={key} delay={i * 100}>
               <Card
@@ -841,7 +841,7 @@ function HomeContent({
               </p>
             </div>
           </ScrollAnimate>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {[
               {
                 icon: BookOpen,
@@ -962,10 +962,11 @@ function HomeContent({
             href="https://open.kakao.com/o/placeholder"
             target="_blank"
             rel="noopener noreferrer"
+            className="w-full sm:w-auto touch-manipulation"
           >
             <Button
               size="lg"
-              className="h-12 rounded-full bg-[#3C1E1E] px-8 font-bold text-[#FEE500] hover:bg-[#2A1515] transition-all duration-300"
+              className="h-12 w-full min-h-11 rounded-full bg-[#3C1E1E] px-8 font-bold text-[#FEE500] transition-all duration-300 hover:bg-[#2A1515] sm:w-auto"
             >
               {isKo ? "채널 추가하기" : "Add Channel"}
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -985,10 +986,10 @@ function HomeContent({
           <p className="mx-auto mt-8 max-w-2xl text-lg text-slate-300/90">
             {t("ctaBanner.description")}
           </p>
-          <Link href="/contact">
+          <Link href="/contact" className="mx-auto block w-full max-w-xs sm:max-w-none touch-manipulation">
             <Button
               size="lg"
-              className="btn-gold mt-10 h-14 rounded-full px-10 text-base font-bold shadow-lg shadow-gold/20 hover:scale-105"
+              className="btn-gold mt-10 h-12 w-full min-h-11 rounded-full px-10 text-base font-bold shadow-lg shadow-gold/20 sm:h-14 sm:w-auto"
             >
               {t("ctaBanner.cta")}
               <ArrowRight className="ml-2 h-4 w-4" />

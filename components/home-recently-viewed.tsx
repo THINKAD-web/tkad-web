@@ -28,7 +28,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
     <section className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollAnimate>
-          <div className="flex items-end justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-1.5 text-sm font-semibold text-navy/70">
                 <Clock className="h-4 w-4" />
@@ -40,17 +40,17 @@ export default function HomeRecentlyViewed({ locale }: Props) {
             </div>
             <Link
               href="/media"
-              className="hidden items-center gap-1 text-sm font-semibold text-gold transition-colors hover:text-gold-dark md:inline-flex"
+              className="link-underline-grow inline-flex min-h-11 shrink-0 items-center gap-1 self-start text-sm font-semibold text-gold transition-colors hover:text-gold-dark sm:min-h-0 sm:self-auto"
             >
               {isKo ? "전체 보기" : "View All"} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         </ScrollAnimate>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           {items.slice(0, 3).map((media, i) => (
             <ScrollAnimate key={media.id} delay={i * 100}>
-              <Link href="/media">
-                <Card className="group cursor-pointer overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5">
+              <Link href="/media" className="block touch-manipulation">
+                <Card className="group cursor-pointer overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-1">
                   <div className="flex h-28 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
                     <Monitor className="h-8 w-8 text-navy/15 transition-transform group-hover:scale-110" />
                   </div>

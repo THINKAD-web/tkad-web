@@ -438,6 +438,13 @@ html {
   min-width: 44px;
 }
 
+/* Mobile: primary buttons meet 44px min touch target */
+@media (max-width: 640px) {
+  [data-slot="button"]:not([data-size="icon"]):not([data-size="icon-xs"]):not([data-size="icon-sm"]):not([data-size="icon-lg"]) {
+    min-height: 44px;
+  }
+}
+
 /* ── Mobile nav sequential item appearance ── */
 @keyframes mobileNavIn {
   from { opacity: 0; transform: translateX(20px); }
@@ -498,11 +505,11 @@ select:focus-visible {
   }
 }
 
-/* Blur overlay for mobile sheet */
+/* Blur overlay for mobile nav sheet (header) */
 .mobile-sheet [data-slot="sheet-overlay"] {
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  background: rgba(26, 42, 108, 0.28);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  background: rgba(26, 26, 46, 0.42);
 }
 
 /* ── Print styles for admin dashboard ── */

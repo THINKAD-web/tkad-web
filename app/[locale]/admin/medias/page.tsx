@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 import {
   Search,
   Plus,
@@ -650,9 +651,13 @@ export default function AdminMediasPage() {
                       key={`${item.file.name}-${idx}`}
                       className="flex items-center gap-3 rounded-lg border p-3"
                     >
-                      <img
+                      <Image
                         src={item.preview}
                         alt={item.file.name}
+                        width={48}
+                        height={48}
+                        unoptimized
+                        sizes="48px"
                         className="h-12 w-12 shrink-0 rounded-md object-cover"
                       />
                       <div className="min-w-0 flex-1 space-y-1.5">

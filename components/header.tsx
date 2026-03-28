@@ -24,7 +24,7 @@ function LanguageToggle() {
       onClick={() => switchLocale(locale === "ko" ? "en" : "ko")}
       disabled={isPending}
       aria-label={locale === "ko" ? "Switch to English" : "한국어로 전환"}
-      className="flex items-center gap-1.5 rounded-full border border-navy/12 bg-white/85 px-3 py-1.5 text-xs font-semibold transition-all duration-300 hover:border-silver/50 hover:bg-white disabled:opacity-60"
+      className="touch-target flex min-h-11 items-center gap-1.5 rounded-full border border-navy/12 bg-white/85 px-3 py-2 text-xs font-semibold transition-all duration-300 hover:border-silver/50 hover:bg-white disabled:opacity-60 touch-manipulation"
     >
       <span className="text-base leading-none">{locale === "ko" ? "🇰🇷" : "🇺🇸"}</span>
       <span className="text-navy/70">{locale === "ko" ? "한국어" : "EN"}</span>
@@ -101,19 +101,19 @@ export default function Header() {
           <LanguageToggle />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="메뉴 열기">
+              <Button variant="ghost" size="icon" className="size-11 touch-manipulation" aria-label="메뉴 열기">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">메뉴 열기</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="mobile-sheet w-72 border-l-0 bg-white/95 backdrop-blur-xl">
+            <SheetContent side="right" className="mobile-sheet border-l-0 bg-white/96 backdrop-blur-xl">
               <nav className="mt-8 flex flex-col gap-1">
                 {navItems.map((item, i) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className={`mobile-nav-item rounded-lg px-4 py-3.5 text-sm font-medium transition-all duration-300 hover:bg-gold/5 motion-safe:active:scale-[0.98] ${
+                    className={`mobile-nav-item touch-manipulation rounded-lg px-4 py-3.5 text-sm font-medium transition-all duration-300 hover:bg-gold/5 motion-safe:active:scale-[0.98] ${
                       pathname === item.href
                         ? "bg-gold/10 text-navy font-bold"
                         : "text-muted-foreground"
@@ -129,7 +129,7 @@ export default function Header() {
                   className="mobile-nav-item"
                   style={{ animationDelay: `${navItems.length * 60}ms` }}
                 >
-                  <Button className="btn-gold mt-3 w-full rounded-full">
+                  <Button className="btn-gold mt-3 h-12 w-full rounded-full touch-manipulation">
                     {t("nav.contact")}
                   </Button>
                 </Link>
