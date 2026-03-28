@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { caseStudies, categoryColors, getCaseStudyBySlug } from "@/lib/case-studies";
-import { LeadCaptureModal, type LeadData } from "@/components/lead-capture-modal";
+import { LeadCaptureModal } from "@/components/lead-capture-modal";
 import {
   ArrowLeft,
   ArrowRight,
@@ -47,7 +47,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
   const prev = currentIndex > 0 ? caseStudies[currentIndex - 1] : null;
   const next = currentIndex < caseStudies.length - 1 ? caseStudies[currentIndex + 1] : null;
 
-  const handleLeadSubmit = (_data: LeadData) => {
+  const handleLeadSubmit = () => {
     const link = document.createElement("a");
     link.href = `/cases/${slug}-report.pdf`;
     link.download = `${slug}-report.pdf`;

@@ -17,6 +17,7 @@ export default function RecentlyViewedMedia({ locale, onSelect }: Props) {
   const [items, setItems] = useState<MediaItem[]>([]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading localStorage on mount
     setItems(getRecentlyViewed());
   }, []);
 

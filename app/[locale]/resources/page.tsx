@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useLocale } from "next-intl";
 import {
   Card,
   CardContent,
@@ -16,7 +16,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { useState } from "react";
-import { LeadCaptureModal, type LeadData } from "@/components/lead-capture-modal";
+import { LeadCaptureModal } from "@/components/lead-capture-modal";
 
 type Resource = {
   id: string;
@@ -69,7 +69,6 @@ const resources: Resource[] = [
 ];
 
 export default function ResourcesPage() {
-  const t = useTranslations();
   const locale = useLocale();
   const isKo = locale === "ko";
 
@@ -83,8 +82,8 @@ export default function ResourcesPage() {
     setModalOpen(true);
   };
 
-  const handleLeadSubmit = (data: LeadData) => {
-    console.log("Lead captured:", data, "Resource:", selectedResource?.id);
+  const handleLeadSubmit = () => {
+    // TODO: persist lead capture to backend
   };
 
   return (

@@ -9,6 +9,7 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   const [displayChildren, setDisplayChildren] = useState(children);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- transition animation on route change
     setShow(false);
     const id = setTimeout(() => {
       setDisplayChildren(children);

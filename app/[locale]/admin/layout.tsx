@@ -10,7 +10,6 @@ import {
   BarChart3,
   ArrowLeft,
   Menu,
-  X,
 } from "lucide-react";
 
 const navItems = [

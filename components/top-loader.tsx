@@ -9,6 +9,7 @@ export default function TopLoader() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- progress bar animation on route change
     setLoading(true);
     setProgress(70);
     const t1 = setTimeout(() => setProgress(90), 200);

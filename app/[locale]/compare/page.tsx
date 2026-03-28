@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,6 @@ import SolutionCtaButton from "@/components/solution-cta-button";
 export default function ComparePage() {
   const searchParams = useSearchParams();
   const locale = useLocale();
-  const t = useTranslations();
   const isKo = locale === "ko";
 
   const ids = (searchParams.get("ids") || "")
