@@ -22,6 +22,8 @@ import {
   TrendingUp,
   Wallet,
   CalendarRange,
+  ArrowRight,
+  MessageCircle,
 } from "lucide-react";
 import { mediaData } from "@/lib/media-data";
 import {
@@ -31,6 +33,10 @@ import {
 } from "@/lib/planner-logic";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
+import {
+  PlannerImpressionsLineChart,
+  PlannerRoiLineChart,
+} from "@/components/planner-charts";
 
 const PERIOD_OPTIONS = [1, 3, 6, 12] as const;
 
@@ -40,10 +46,21 @@ type RegionKey = "all" | "seoul" | "busan" | "jeju" | "national";
 
 const REGIONS: RegionKey[] = ["all", "seoul", "busan", "jeju", "national"];
 
-const CATEGORIES: { key: PlannerCategory; labelKey: "catBillboard" | "catBus" | "catSubway" }[] = [
+const CATEGORIES: {
+  key: PlannerCategory;
+  labelKey: "catDigital" | "catBillboard" | "catBus" | "catSubway";
+}[] = [
+  { key: "digital", labelKey: "catDigital" },
   { key: "billboard", labelKey: "catBillboard" },
   { key: "bus", labelKey: "catBus" },
   { key: "subway", labelKey: "catSubway" },
+];
+
+const DEFAULT_CATEGORIES: PlannerCategory[] = [
+  "digital",
+  "billboard",
+  "bus",
+  "subway",
 ];
 
 export default function PlannerPage() {
@@ -55,7 +72,7 @@ export default function PlannerPage() {
 
   const [region, setRegion] = useState<RegionKey>("all");
   const [categories, setCategories] = useState<Set<PlannerCategory>>(
-    () => new Set<PlannerCategory>(["billboard", "bus", "subway"]),
+    () => new Set<PlannerCategory>(DEFAULT_CATEGORIES),
   );
   const [budget, setBudget] = useState<string>("5000");
   const [months, setMonths] = useState<number>(3);
@@ -92,10 +109,6 @@ export default function PlannerPage() {
         metrics.roiConservative,
         0.1,
       )
-    : 1;
-
-  const impMax = metrics?.cumulativeByMonth.length
-    ? metrics.cumulativeByMonth[metrics.cumulativeByMonth.length - 1].impressions
     : 1;
 
   const savePlan = useCallback(() => {
@@ -141,7 +154,7 @@ export default function PlannerPage() {
                   <Layers className="h-5 w-5 text-gold" />
                   {t("region")}
                 </CardTitle>
-                <CardDescription>{t("subtitle")}</CardDescription>
+                <CardDescription>{t("filtersIntro")}</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-2">
                 {REGIONS.map((r) => (
@@ -169,6 +182,7 @@ export default function PlannerPage() {
                   <BarChart3 className="h-5 w-5 text-gold" />
                   {t("category")}
                 </CardTitle>
+                <CardDescription>{t("mediaMixHint")}</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-2">
                 {CATEGORIES.map(({ key, labelKey }) => (
@@ -207,6 +221,13 @@ export default function PlannerPage() {
                   className="h-12 border-navy/15 text-lg font-semibold"
                   aria-label={t("budget")}
                 />
+                {budgetNum >= 1 ? (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {isKo
+                      ? `입력: ${budgetNum.toLocaleString()}만원 · 기간 ${months}개월 → 월 약 ${Math.round(budgetNum / months).toLocaleString()}만원`
+                      : `Total ${budgetNum.toLocaleString()} (₩10K) · ${months} mo → ~${Math.round(budgetNum / months).toLocaleString()} ₩10K/mo`}
+                  </p>
+                ) : null}
               </CardContent>
             </Card>
 
@@ -368,31 +389,72 @@ export default function PlannerPage() {
 
                 <Card className="border-navy/10 shadow-lg">
                   <CardHeader>
-                    <CardTitle className="text-navy">{t("chartImpTitle")}</CardTitle>
+                    <CardTitle className="text-navy">
+                      {t("chartImpLineTitle")}
+                    </CardTitle>
+                    <CardDescription>{t("chartImpTitle")}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex h-52 items-end justify-stretch gap-1 sm:gap-2">
-                      {metrics.cumulativeByMonth.map(({ month, impressions }) => {
-                        const barH = Math.max(
-                          12,
-                          Math.round((impressions / impMax) * 168),
-                        );
-                        return (
-                          <div
-                            key={month}
-                            className="flex min-w-0 flex-1 flex-col items-center gap-2"
-                          >
-                            <div
-                              className="w-full max-w-[3.25rem] rounded-t-md bg-gradient-to-t from-navy/90 to-gold/80 transition-all"
-                              style={{ height: barH }}
-                              title={impressions.toLocaleString()}
-                            />
-                            <span className="text-[10px] font-medium text-muted-foreground sm:text-xs">
-                              {isKo ? `${month}개월` : `M${month}`}
-                            </span>
-                          </div>
-                        );
-                      })}
+                    <PlannerImpressionsLineChart
+                      data={metrics.cumulativeByMonth}
+                      isKo={isKo}
+                      title={t("chartImpLineTitle")}
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card className="border-navy/10 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-navy">
+                      {t("chartRoiLineTitle")}
+                    </CardTitle>
+                    <CardDescription>{t("chartRoiLineHint")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <PlannerRoiLineChart
+                      data={metrics.roiByMonth}
+                      isKo={isKo}
+                      title={t("chartRoiLineTitle")}
+                      hint={t("chartRoiLineHint")}
+                      legendConservative={t("roiConservative")}
+                      legendExpected={t("roiExpected")}
+                      legendOptimistic={t("roiOptimistic")}
+                      roiUnit={t("roiUnit")}
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-navy via-navy to-navy-dark text-white shadow-xl">
+                  <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+                    <div className="max-w-xl space-y-2">
+                      <h3 className="text-xl font-extrabold tracking-tight text-white sm:text-2xl">
+                        {t("ctaBannerTitle")}
+                      </h3>
+                      <p className="text-sm leading-relaxed text-white/75">
+                        {t("ctaBannerDesc")}
+                      </p>
+                    </div>
+                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[240px]">
+                      <Link href="/quote" className="w-full">
+                        <Button
+                          size="lg"
+                          className="h-12 w-full rounded-full bg-gold font-bold text-navy shadow-lg hover:bg-gold-light"
+                        >
+                          <Send className="mr-2 h-4 w-4" />
+                          {t("ctaQuote")}
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href="/contact" className="w-full">
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          className="h-12 w-full rounded-full border-white/40 bg-white/10 font-semibold text-white hover:bg-white/20"
+                        >
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          {t("ctaContact")}
+                        </Button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>

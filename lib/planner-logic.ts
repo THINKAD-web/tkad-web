@@ -1,6 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 
-export type PlannerCategory = "billboard" | "bus" | "subway";
+export type PlannerCategory = "digital" | "billboard" | "bus" | "subway";
 
 export function matchesPlannerCategory(
   item: MediaItem,
@@ -8,7 +8,8 @@ export function matchesPlannerCategory(
 ): boolean {
   if (cat === "bus") return item.type === "bus";
   if (cat === "subway") return item.type === "subway";
-  return item.type === "billboard" || item.type === "digital";
+  if (cat === "digital") return item.type === "digital";
+  return item.type === "billboard";
 }
 
 export function filterPlannerMedia(
@@ -35,6 +36,13 @@ export type PlannerMetrics = {
   roiExpected: number;
   roiOptimistic: number;
   cumulativeByMonth: { month: number; impressions: number }[];
+  /** Scenario ROI ramp over the campaign (reference curve for charting). */
+  roiByMonth: {
+    month: number;
+    conservative: number;
+    expected: number;
+    optimistic: number;
+  }[];
 };
 
 /**
@@ -84,6 +92,18 @@ export function computePlannerMetrics(
     cumulativeByMonth.push({ month: mo, impressions: acc });
   }
 
+  const roiByMonth: PlannerMetrics["roiByMonth"] = [];
+  for (let mo = 1; mo <= months; mo++) {
+    const t = months <= 1 ? 1 : (mo - 1) / (months - 1);
+    const ramp = 0.88 + 0.12 * t;
+    roiByMonth.push({
+      month: mo,
+      conservative: Math.round(roiConservative * ramp * 10) / 10,
+      expected: Math.round(roiExpected * ramp * 10) / 10,
+      optimistic: Math.round(roiOptimistic * ramp * 10) / 10,
+    });
+  }
+
   return {
     avgMonthlyPrice,
     blendDailyReach,
@@ -93,5 +113,6 @@ export function computePlannerMetrics(
     roiExpected,
     roiOptimistic,
     cumulativeByMonth,
+    roiByMonth,
   };
 }
