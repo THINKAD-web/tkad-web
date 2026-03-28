@@ -18,7 +18,6 @@ import Modal from "@/components/ui/modal";
 import {
   BarChart3,
   BookOpen,
-  Building2,
   CalendarRange,
   Download,
   FileText,
@@ -160,15 +159,69 @@ export default function InsightsPage() {
 
   return (
     <>
-      <section className="bg-navy py-28">
+      <section className="bg-navy py-24 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+          <div className="mb-4 inline-flex flex-wrap items-center justify-center gap-2">
+            <Badge className="border-0 bg-white/15 text-xs font-semibold text-gold">
+              {t("filterMonthly")} · {t("filterQuarterly")}
+            </Badge>
+            <Badge className="border-0 bg-emerald-500/25 text-xs font-semibold text-emerald-100">
+              OOH
+            </Badge>
+          </div>
           <h1 className="text-3xl font-bold text-white sm:text-4xl">{t("heroTitle")}</h1>
           <p className="mx-auto mt-3 max-w-2xl text-slate-300">{t("heroSubtitle")}</p>
         </div>
       </section>
 
+      <section className="border-b border-navy/8 bg-white py-10">
+        <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
+          <a
+            href="#reports"
+            className="group flex gap-4 rounded-2xl border border-navy/10 bg-slate-50/80 p-5 shadow-sm transition-all hover:border-gold/40 hover:shadow-md"
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
+              <CalendarRange className="h-6 w-6" />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-navy">{t("valueStripTrends")}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t("valueStripTrendsDesc")}</p>
+            </div>
+          </a>
+          <a
+            href="#reports"
+            className="group flex gap-4 rounded-2xl border border-navy/10 bg-slate-50/80 p-5 shadow-sm transition-all hover:border-gold/40 hover:shadow-md"
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/20 text-navy group-hover:bg-gold group-hover:text-navy">
+              <Download className="h-6 w-6" />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-navy">{t("valueStripPdf")}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t("valueStripPdfDesc")}</p>
+            </div>
+          </a>
+          <a
+            href="#custom-report"
+            className="group flex gap-4 rounded-2xl border border-navy/10 bg-slate-50/80 p-5 shadow-sm transition-all hover:border-gold/40 hover:shadow-md"
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
+              <Send className="h-6 w-6" />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-navy">{t("valueStripCustom")}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t("valueStripCustomDesc")}</p>
+            </div>
+          </a>
+        </div>
+      </section>
+
       <section className="py-10">
         <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+          <div id="reports" className="scroll-mt-24 space-y-2">
+            <h2 className="text-xl font-extrabold text-navy sm:text-2xl">{t("reportsSectionTitle")}</h2>
+            <p className="max-w-2xl text-sm text-muted-foreground">{t("reportsSectionDesc")}</p>
+          </div>
+
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-navy/45">
               {t("periodLabel")}
@@ -235,14 +288,20 @@ export default function InsightsPage() {
             <p className="py-8 text-center text-sm text-muted-foreground">{t("empty")}</p>
           ) : null}
 
-          <Card className="border-navy/10 shadow-md" id="custom-report">
+          <Card
+            className="border-navy/10 shadow-md scroll-mt-24"
+            id="custom-report"
+          >
             <CardHeader>
               <div className="flex items-start gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gold/15 text-navy">
                   <Send className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-navy">{t("formTitle")}</CardTitle>
+                  <p className="text-xs font-bold uppercase tracking-wide text-gold-dark">
+                    {t("customSectionEyebrow")}
+                  </p>
+                  <CardTitle className="mt-1 text-navy">{t("formTitle")}</CardTitle>
                   <CardDescription>{t("formDesc")}</CardDescription>
                 </div>
               </div>
@@ -456,16 +515,7 @@ function ReportCard({
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button
             type="button"
-            className="flex-1 bg-gold font-bold text-navy hover:bg-gold-dark"
-            onClick={onView}
-          >
-            <BookOpen className="mr-2 h-4 w-4" />
-            {t("viewOnline")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 border-navy/25 font-bold text-navy"
+            className="flex-1 btn-gold font-bold text-navy hover:bg-gold-dark"
             onClick={onDownload}
             disabled={downloading}
           >
@@ -475,6 +525,15 @@ function ReportCard({
               <Download className="mr-2 h-4 w-4" />
             )}
             {t("downloadPdf")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 border-navy/25 font-semibold text-navy"
+            onClick={onView}
+          >
+            <BookOpen className="mr-2 h-4 w-4" />
+            {t("viewOnline")}
           </Button>
         </div>
       </CardContent>
