@@ -26,7 +26,7 @@ export default function FloatingCta() {
 
   return (
     <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-fade-in-up">
-      <Link href="/contact">
+      <Link href="/contact" aria-label={isKo ? "무료 상담 신청하기" : "Request Free Consultation"}>
         <Button
           size="lg"
           className="h-14 rounded-full bg-gold px-8 text-base font-bold text-navy shadow-2xl shadow-gold/30 hover:bg-gold-dark hover:shadow-gold/40"

@@ -23,6 +23,7 @@ function LanguageToggle() {
     <button
       onClick={() => switchLocale(locale === "ko" ? "en" : "ko")}
       disabled={isPending}
+      aria-label={locale === "ko" ? "Switch to English" : "한국어로 전환"}
       className="flex items-center gap-1.5 rounded-full border border-navy/10 bg-white/80 px-3 py-1.5 text-xs font-semibold transition-all hover:border-gold/40 hover:bg-gold/5 disabled:opacity-60"
     >
       <span className="text-base leading-none">{locale === "ko" ? "🇰🇷" : "🇺🇸"}</span>
@@ -101,8 +102,9 @@ export default function Header() {
           <LanguageToggle />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-11 w-11">
+              <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="메뉴 열기">
                 <Menu className="h-5 w-5" />
+                <span className="sr-only">메뉴 열기</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="mobile-sheet w-72 border-l-0 bg-white/95 backdrop-blur-xl">

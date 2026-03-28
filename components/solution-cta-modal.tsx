@@ -57,6 +57,15 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
     return () => window.clearTimeout(id);
   }, [submitted, onClose]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(false);

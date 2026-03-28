@@ -224,6 +224,56 @@ html {
   animation: mobileNavIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+/* ── Focus-visible for keyboard navigation ── */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.3);
+  border-color: var(--ring);
+}
+
+/* Skip-link for keyboard users */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100;
+}
+.skip-link:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  padding: 1rem 2rem;
+  background: var(--accent);
+  color: var(--foreground);
+  font-weight: 700;
+  z-index: 9999;
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Blur overlay for mobile sheet */
 .mobile-sheet [data-slot="sheet-overlay"] {
   backdrop-filter: blur(6px);

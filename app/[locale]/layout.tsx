@@ -17,11 +17,13 @@ import "../globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -59,11 +61,14 @@ export default async function LocaleLayout({ children, params }: Props) {
     >
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider messages={messages}>
+          <a href="#main-content" className="skip-link">
+            {locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"}
+          </a>
           <ConditionalPublicChrome>
             <TopLoader />
             <Header />
           </ConditionalPublicChrome>
-          <main className="flex-1">
+          <main id="main-content" className="flex-1">
             <PageTransition>{children}</PageTransition>
           </main>
           <ConditionalPublicChrome>

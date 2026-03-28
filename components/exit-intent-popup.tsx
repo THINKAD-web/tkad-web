@@ -33,17 +33,30 @@ export default function ExitIntentPopup() {
     return () => document.removeEventListener("mouseout", handleMouseLeave);
   }, []);
 
+  useEffect(() => {
+    if (!show) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dismiss();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [show, dismiss]);
+
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-      <div
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={isKo ? "특별 혜택 안내" : "Special offer"}>
+      <button
+        type="button"
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={dismiss}
+        aria-label={isKo ? "닫기" : "Close"}
+        tabIndex={-1}
       />
       <div className="relative w-full max-w-md animate-fade-in-up rounded-2xl bg-white p-8 shadow-2xl">
         <button
           onClick={dismiss}
+          aria-label={isKo ? "닫기" : "Close"}
           className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
         >
           <X className="h-4 w-4" />

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
 import { MessageSquarePlus, X, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,15 @@ export default function QuickInquiryButton() {
     }
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !submitted) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, submitted]);
+
   return (
     <>
       <button
@@ -47,14 +56,18 @@ export default function QuickInquiryButton() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={isKo ? "빠른 문의" : "Quick Inquiry"}>
+          <button
+            type="button"
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => !submitted && setOpen(false)}
+            aria-label={isKo ? "닫기" : "Close"}
+            tabIndex={-1}
           />
           <div className="relative w-full max-w-md animate-fade-in-up rounded-2xl bg-white p-6 shadow-2xl">
             <button
               onClick={() => setOpen(false)}
+              aria-label={isKo ? "닫기" : "Close"}
               className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
             >
               <X className="h-4 w-4" />

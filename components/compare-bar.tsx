@@ -36,6 +36,7 @@ export default function CompareBar({ items, locale, onRemove, onClear }: Props) 
               </span>
               <button
                 onClick={() => onRemove(media.id)}
+                aria-label={`${isKo ? media.name : media.nameEn} ${isKo ? "제거" : "remove"}`}
                 className="text-muted-foreground hover:text-red-500"
               >
                 <X className="h-3.5 w-3.5" />
