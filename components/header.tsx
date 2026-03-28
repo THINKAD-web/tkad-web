@@ -24,7 +24,7 @@ function LanguageToggle() {
       onClick={() => switchLocale(locale === "ko" ? "en" : "ko")}
       disabled={isPending}
       aria-label={locale === "ko" ? "Switch to English" : "한국어로 전환"}
-      className="flex items-center gap-1.5 rounded-full border border-navy/10 bg-white/80 px-3 py-1.5 text-xs font-semibold transition-all hover:border-gold/40 hover:bg-gold/5 disabled:opacity-60"
+      className="flex items-center gap-1.5 rounded-full border border-navy/10 bg-white/80 px-3 py-1.5 text-xs font-semibold transition-all duration-300 hover:border-gold/40 hover:bg-gold/5 disabled:opacity-60"
     >
       <span className="text-base leading-none">{locale === "ko" ? "🇰🇷" : "🇺🇸"}</span>
       <span className="text-navy/70">{locale === "ko" ? "한국어" : "EN"}</span>
@@ -59,16 +59,16 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+      className={`sticky top-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "border-b bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/90"
+          ? "header-scrolled border-b border-navy/5"
           : "bg-transparent"
       }`}
     >
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="text-2xl font-extrabold tracking-tight text-navy">
-            THINK<span className="text-gold">AD</span>
+        <Link href="/" className="group flex items-center gap-3">
+          <span className="text-2xl font-extrabold tracking-tight text-navy transition-colors duration-300">
+            THINK<span className="bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">AD</span>
           </span>
           <span className="hidden text-[11px] font-medium tracking-wider text-muted-foreground uppercase sm:inline">
             싱커드
@@ -80,9 +80,9 @@ export default function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative rounded-md px-4 py-2 text-sm font-medium transition-colors hover:text-navy ${
+              className={`nav-link rounded-md px-4 py-2 text-sm font-medium transition-colors duration-300 hover:text-navy ${
                 pathname === item.href
-                  ? "text-navy after:absolute after:bottom-0 after:left-1/2 after:h-0.5 after:w-5 after:-translate-x-1/2 after:rounded-full after:bg-gold after:content-['']"
+                  ? "active text-navy"
                   : "text-muted-foreground"
               }`}
             >
@@ -94,7 +94,7 @@ export default function Header() {
         <div className="hidden items-center gap-3 md:flex">
           <LanguageToggle />
           <Link href="/contact">
-            <Button className="bg-gold text-navy hover:bg-gold-dark rounded-full px-6 font-bold shadow-md transition-all hover:shadow-lg">
+            <Button className="btn-gold rounded-full px-6 text-sm font-bold shadow-md">
               {t("nav.contact")}
             </Button>
           </Link>
@@ -132,7 +132,7 @@ export default function Header() {
                   className="mobile-nav-item"
                   style={{ animationDelay: `${navItems.length * 60}ms` }}
                 >
-                  <Button className="mt-3 w-full bg-gold text-navy hover:bg-gold-dark rounded-full font-bold">
+                  <Button className="btn-gold mt-3 w-full rounded-full font-bold">
                     {t("nav.contact")}
                   </Button>
                 </Link>

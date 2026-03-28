@@ -114,47 +114,48 @@ function HomeContent({ locale }: { locale: string }) {
     <>
       {/* Hero */}
       <section className="hero-bg relative flex min-h-screen items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(201,168,76,0.08)_0%,_transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(201,168,76,0.05)_0%,_transparent_50%)]" />
+        <div className="hero-pattern absolute inset-0" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(201,168,76,0.1)_0%,_transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(201,168,76,0.06)_0%,_transparent_50%)]" />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">
+          <div className="hero-fade-in hero-fade-in-1 mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
             {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
           </div>
 
-          <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-white sm:text-5xl lg:text-7xl">
+          <h1 className="hero-fade-in hero-fade-in-2 text-3xl leading-tight font-extrabold tracking-tight text-white sm:text-5xl lg:text-7xl">
             {isKo ? (
               <>
                 생각하는 광고회사
                 <br />
-                <span className="text-gold">싱커드</span>
+                <span className="bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">싱커드</span>
               </>
             ) : (
               <>
                 The Thinking Ad Agency
                 <br />
-                <span className="text-gold">THINKAD</span>
+                <span className="bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">THINKAD</span>
               </>
             )}
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300/90 sm:text-lg lg:text-xl">
+          <p className="hero-fade-in hero-fade-in-3 mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300/90 sm:text-lg lg:text-xl">
             {t("hero.subtitle")}
           </p>
 
-          <p className="mx-auto mt-3 flex items-center justify-center gap-2 text-base text-gold/80 font-medium">
+          <p className="hero-fade-in hero-fade-in-3 mx-auto mt-3 flex items-center justify-center gap-2 text-base text-gold/80 font-medium">
             <BadgeCheck className="h-5 w-5 text-gold" />
             {isKo
               ? "싱커드가 직접 검증하고 관리하는 매체만"
               : "Only media personally verified and managed by THINKAD"}
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <div className="hero-fade-in hero-fade-in-4 mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link href="/contact">
               <Button
                 size="lg"
-                className="bg-gold text-navy hover:bg-gold-dark h-16 rounded-full px-12 text-lg font-extrabold shadow-lg shadow-gold/25 transition-all hover:shadow-xl hover:shadow-gold/40 hover:scale-105"
+                className="btn-gold h-16 rounded-full px-12 text-lg font-extrabold shadow-lg shadow-gold/25 hover:scale-105"
               >
                 <PhoneCall className="mr-2 h-5 w-5" />
                 {isKo ? "무료 상담 신청" : "Free Consultation"}
@@ -165,24 +166,24 @@ function HomeContent({ locale }: { locale: string }) {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 rounded-full border-white/20 px-10 text-base text-white hover:bg-white/10 hover:border-white/40"
+                className="h-14 rounded-full border-white/20 px-10 text-base text-white hover:bg-white/10 hover:border-white/40 transition-all duration-300"
               >
                 {t("hero.cta")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="hero-fade-in hero-fade-in-5 mt-4 text-sm text-slate-400">
             {isKo
               ? "30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
               : "Apply in 30 seconds · Expert consultant contacts within 24h"}
           </p>
-          <div className="mt-3">
+          <div className="hero-fade-in hero-fade-in-5 mt-3">
             <SolutionCtaButton
               label={isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
               size="lg"
               variant="outline"
-              className="h-12 border-gold/30 text-gold hover:bg-gold/10 hover:border-gold"
+              className="h-12 border-gold/30 text-gold hover:bg-gold/10 hover:border-gold transition-all duration-300"
             />
           </div>
         </div>
@@ -193,7 +194,7 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* Verification Process */}
-      <section className="relative border-b bg-white py-24 overflow-hidden">
+      <section className="section-white relative py-28 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,168,76,0.04)_0%,_transparent_70%)]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
@@ -201,10 +202,10 @@ function HomeContent({ locale }: { locale: string }) {
               <p className="text-sm font-semibold tracking-wider text-gold uppercase">
                 {isKo ? "검증 프로세스" : "Verification Process"}
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "싱커드만의 4단계 매체 검증" : "THINKAD's 4-Step Media Verification"}
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
                 {isKo
                   ? "모든 매체는 엄격한 검증 프로세스를 거쳐야만 등록됩니다"
                   : "Every media must pass our rigorous verification process before registration"}
@@ -253,9 +254,9 @@ function HomeContent({ locale }: { locale: string }) {
                   <div className="absolute top-10 right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
                 )}
                 <div className="relative flex flex-col items-center text-center">
-                  <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 ring-1 ring-gold/20 transition-all group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-gold/10">
+                  <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 ring-1 ring-gold/20 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-gold/10">
                     <item.icon className="h-8 w-8 text-gold" />
-                    <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-navy text-[11px] font-bold text-white shadow-md">
+                    <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-navy to-navy-light text-[11px] font-bold text-white shadow-md">
                       {item.step}
                     </span>
                   </div>
@@ -272,8 +273,9 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* Stats */}
-      <section className="relative border-b bg-white py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="section-navy relative py-20">
+        <div className="absolute inset-0 hero-pattern opacity-50" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="count-up">
             <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-6">
               {[
@@ -302,11 +304,11 @@ function HomeContent({ locale }: { locale: string }) {
                   label: isKo ? "글로벌 네트워크" : "Global Network",
                 },
               ].map((stat) => (
-                <div key={stat.label} className="text-center">
+                <div key={stat.label} className="stat-divider text-center">
                   <div
                     className={`text-3xl font-extrabold text-gold sm:text-4xl ${stat.animClass}`}
                   />
-                  <div className="mt-3 text-sm font-medium tracking-wide text-navy/60 uppercase">
+                  <div className="mt-3 text-sm font-medium tracking-wide text-white/60 uppercase">
                     {stat.label}
                   </div>
                 </div>
@@ -317,7 +319,7 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* TOP 3 Recommended Media */}
-      <section className="bg-slate-50 py-24">
+      <section className="section-light py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
@@ -325,10 +327,10 @@ function HomeContent({ locale }: { locale: string }) {
                 <Trophy className="h-4 w-4" />
                 TOP 3
               </div>
-              <h2 className="mt-1 text-3xl font-bold text-navy sm:text-4xl">
+              <h2 className="section-title mt-1 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "싱커드 추천 매체 TOP 3" : "THINKAD Recommended Media TOP 3"}
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
                 {isKo
                   ? "검증 데이터 기반, 가장 효과적인 매체를 엄선했습니다"
                   : "Curated selection of the most effective media based on verified data"}
@@ -368,12 +370,12 @@ function HomeContent({ locale }: { locale: string }) {
             ].map((media, i) => (
               <ScrollAnimate key={media.rank} delay={i * 150}>
               <Card
-                className="group relative overflow-hidden border-0 bg-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
+                className="group relative overflow-hidden border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
                 <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
                 <div className="relative flex h-52 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10 overflow-hidden">
-                  <Monitor className="h-16 w-16 text-navy/10 transition-transform group-hover:scale-110" />
-                  <div className="absolute top-4 left-4 flex h-10 w-10 items-center justify-center rounded-full bg-gold font-bold text-navy text-lg shadow-md">
+                  <Monitor className="h-16 w-16 text-navy/10 transition-transform duration-300 group-hover:scale-110" />
+                  <div className="absolute top-4 left-4 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-light font-bold text-navy text-lg shadow-md">
                     {media.rank}
                   </div>
                   <div className="absolute top-4 right-4 flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
@@ -415,12 +417,12 @@ function HomeContent({ locale }: { locale: string }) {
 
                   <div className="mt-5 flex gap-2">
                     <Link href="/media" className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full border-navy/20 text-navy text-xs font-semibold hover:bg-navy hover:text-white">
+                      <Button variant="outline" size="sm" className="btn-navy-outline w-full text-xs font-semibold rounded-lg">
                         {isKo ? "상세 보기" : "View Details"}
                       </Button>
                     </Link>
                     <Link href="/contact" className="flex-1">
-                      <Button size="sm" className="w-full bg-gold text-navy text-xs font-bold hover:bg-gold-dark">
+                      <Button size="sm" className="btn-gold w-full text-xs font-bold rounded-lg">
                         {isKo ? "문의하기" : "Inquire"}
                       </Button>
                     </Link>
@@ -434,17 +436,17 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* Why THINKAD */}
-      <section className="bg-white py-24">
+      <section className="section-white py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
               <p className="text-sm font-semibold tracking-wider text-gold uppercase">
                 {isKo ? "차별점" : "Why Us"}
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "왜 싱커드인가?" : "Why THINKAD?"}
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
                 {isKo
                   ? "검증되지 않은 매체에 광고비를 낭비하지 마세요"
                   : "Don't waste your ad budget on unverified media"}
@@ -480,11 +482,11 @@ function HomeContent({ locale }: { locale: string }) {
             ].map((item, i) => (
               <ScrollAnimate key={item.title} delay={i * 150}>
               <Card
-                className="group relative overflow-hidden border-0 bg-gradient-to-b from-white to-slate-50 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
+                className="group relative overflow-hidden border-0 bg-gradient-to-b from-white to-slate-50/50 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
-                <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
+                <div className="absolute top-0 left-0 h-[3px] w-full bg-gradient-to-r from-gold to-gold-light" />
                 <CardHeader className="pb-4">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10 ring-1 ring-gold/20 transition-all group-hover:scale-110 group-hover:bg-gold/20">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10 ring-1 ring-gold/20 transition-all duration-300 group-hover:scale-110 group-hover:bg-gold/20">
                     <item.icon className="h-7 w-7 text-gold" />
                   </div>
                   <CardTitle className="text-xl font-bold text-navy">
@@ -508,17 +510,17 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* Services */}
-      <section className="bg-slate-50 py-24">
+      <section className="section-light py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
               <p className="text-sm font-semibold tracking-wider text-gold uppercase">
                 {isKo ? "서비스" : "Services"}
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {t("services.title")}
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
                 {t("services.subtitle")}
               </p>
             </div>
@@ -546,10 +548,10 @@ function HomeContent({ locale }: { locale: string }) {
             ].map((service, i) => (
               <ScrollAnimate key={service.title} delay={i * 150}>
               <Card
-                className="service-card group cursor-pointer border-0 bg-white shadow-md"
+                className="service-card group cursor-pointer border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] rounded-2xl"
               >
                 <CardHeader className="pb-4">
-                  <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${service.accent} ring-1 ring-navy/5 transition-all group-hover:scale-110 group-hover:shadow-lg`}>
+                  <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${service.accent} ring-1 ring-navy/5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}>
                     <service.icon className="h-7 w-7 text-gold" />
                   </div>
                   <CardTitle className="text-xl font-bold text-navy">
@@ -560,7 +562,7 @@ function HomeContent({ locale }: { locale: string }) {
                   <CardDescription className="text-sm leading-relaxed">
                     {service.desc}
                   </CardDescription>
-                  <div className="mt-6 flex items-center gap-1 text-sm font-semibold text-gold opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="mt-6 flex items-center gap-1 text-sm font-semibold text-gold opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                     {isKo ? "자세히 보기" : "Learn more"}
                     <ArrowRight className="h-3.5 w-3.5" />
                   </div>
@@ -573,7 +575,7 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* Featured Media with Verified Badge */}
-      <section className="py-24">
+      <section className="section-white py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="flex items-end justify-between">
@@ -582,7 +584,7 @@ function HomeContent({ locale }: { locale: string }) {
                   <ShieldCheck className="h-4 w-4" />
                   Verified Media
                 </div>
-                <h2 className="mt-1 text-3xl font-bold text-navy">
+                <h2 className="mt-1 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                   {t("featuredMedia.title")}
                 </h2>
                 <p className="mt-2 text-muted-foreground">
@@ -591,7 +593,7 @@ function HomeContent({ locale }: { locale: string }) {
               </div>
               <Link
                 href="/media"
-                className="hidden items-center gap-1 text-sm font-semibold text-gold transition-colors hover:text-gold-dark md:inline-flex"
+                className="hidden items-center gap-1 text-sm font-semibold text-gold transition-colors duration-300 hover:text-gold-dark md:inline-flex"
               >
                 {t("common.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -601,10 +603,10 @@ function HomeContent({ locale }: { locale: string }) {
             {featuredMedia.map((media, i) => (
               <ScrollAnimate key={media.id} delay={i * 100}>
               <Card
-                className="group overflow-hidden border-0 shadow-md transition-all hover:shadow-xl hover:-translate-y-1"
+                className="group overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
                 <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10 overflow-hidden">
-                  <Monitor className="h-12 w-12 text-navy/15 transition-transform group-hover:scale-110" />
+                  <Monitor className="h-12 w-12 text-navy/15 transition-transform duration-300 group-hover:scale-110" />
                   {i < 3 && (
                     <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
                       <Flame className="h-3 w-3" />
@@ -615,7 +617,7 @@ function HomeContent({ locale }: { locale: string }) {
                     <BadgeCheck className="h-3 w-3" />
                     Verified
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </div>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
@@ -655,7 +657,7 @@ function HomeContent({ locale }: { locale: string }) {
       <HomeRecentlyViewed locale={locale} />
 
       {/* Partner Logos Marquee */}
-      <section className="border-y bg-slate-50 py-16 overflow-hidden">
+      <section className="section-light border-y py-20 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="fade-in">
             <div className="mb-10 flex flex-col items-center gap-3 text-center">
@@ -674,7 +676,7 @@ function HomeContent({ locale }: { locale: string }) {
             {[...partnerLogos, ...partnerLogos].map((name, i) => (
               <div
                 key={`${name}-${i}`}
-                className="mx-8 flex h-12 w-28 shrink-0 items-center justify-center rounded-lg bg-white px-4 shadow-sm ring-1 ring-slate-100"
+                className="mx-8 flex h-12 w-28 shrink-0 items-center justify-center rounded-xl bg-white px-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-slate-100 transition-all duration-300 hover:shadow-md"
               >
                 <span className="text-sm font-bold text-navy/40">{name}</span>
               </div>
@@ -684,14 +686,14 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24">
+      <section className="section-white py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
               <p className="text-sm font-semibold tracking-wider text-gold uppercase">
                 {isKo ? "고객 후기" : "Testimonials"}
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "광고주가 직접 전하는 이야기" : "What Our Clients Say"}
               </h2>
             </div>
@@ -725,10 +727,10 @@ function HomeContent({ locale }: { locale: string }) {
             ].map((testimonial, i) => (
               <ScrollAnimate key={testimonial.name} delay={i * 150}>
               <Card
-                className="relative border-0 bg-white shadow-md transition-all hover:shadow-lg"
+                className="relative border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
                 <CardHeader className="pb-3">
-                  <Quote className="h-8 w-8 text-gold/20" />
+                  <Quote className="h-8 w-8 text-gold/30" />
                   <div className="flex gap-0.5">
                     {Array.from({ length: testimonial.rating }).map((_, i) => (
                       <Star
@@ -759,17 +761,17 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* Case Studies */}
-      <section className="bg-slate-50 py-24">
+      <section className="section-light py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
               <p className="text-sm font-semibold tracking-wider text-gold uppercase">
                 {isKo ? "성공 사례" : "Case Studies"}
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {t("caseStudies.title")}
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
                 {t("caseStudies.subtitle")}
               </p>
             </div>
@@ -778,10 +780,10 @@ function HomeContent({ locale }: { locale: string }) {
             {(["case1", "case2", "case3"] as const).map((key, i) => (
               <ScrollAnimate key={key} delay={i * 150}>
               <Card
-                className="group overflow-hidden border-0 shadow-md transition-all hover:shadow-xl hover:-translate-y-1"
+                className="group overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
                 <div className="flex h-48 items-center justify-center bg-gradient-to-br from-gold/10 to-navy/10 overflow-hidden">
-                  <TrendingUp className="h-12 w-12 text-gold/30 transition-transform group-hover:scale-110" />
+                  <TrendingUp className="h-12 w-12 text-gold/30 transition-transform duration-300 group-hover:scale-110" />
                 </div>
                 <CardHeader>
                   <Badge className="w-fit bg-gold/10 text-gold-dark text-xs font-medium">
@@ -805,7 +807,7 @@ function HomeContent({ locale }: { locale: string }) {
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-full border-navy text-navy font-semibold hover:bg-navy hover:text-white"
+                className="btn-navy-outline rounded-full px-8 font-semibold"
               >
                 {t("common.viewAll")} <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -815,17 +817,17 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* Blog / Insight Links */}
-      <section className="bg-white py-24">
+      <section className="section-white py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
               <p className="text-sm font-semibold tracking-wider text-gold uppercase">
                 {isKo ? "인사이트" : "Insights"}
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "OOH 광고 인사이트" : "OOH Advertising Insights"}
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
                 {isKo
                   ? "최신 OOH 광고 트렌드와 전문가 인사이트를 확인하세요"
                   : "Stay up to date with the latest OOH advertising trends and expert insights"}
@@ -860,7 +862,7 @@ function HomeContent({ locale }: { locale: string }) {
               },
             ].map((item, i) => (
               <ScrollAnimate key={item.title} delay={i * 150}>
-                <Card className="group cursor-pointer border-0 bg-gradient-to-b from-white to-slate-50 shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
+                <Card className="group cursor-pointer border-0 bg-gradient-to-b from-white to-slate-50/50 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl">
                   <CardHeader className="pb-3">
                     <Badge className="w-fit bg-navy/5 text-navy text-xs font-medium">
                       {item.tag}
@@ -878,7 +880,7 @@ function HomeContent({ locale }: { locale: string }) {
                     <CardDescription className="text-sm leading-relaxed">
                       {item.desc}
                     </CardDescription>
-                    <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-gold opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-gold opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       {isKo ? "읽어보기" : "Read more"}
                       <ArrowRight className="h-3.5 w-3.5" />
                     </div>
@@ -892,7 +894,7 @@ function HomeContent({ locale }: { locale: string }) {
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-full border-navy/20 font-semibold text-navy hover:bg-navy hover:text-white"
+                className="btn-navy-outline rounded-full px-8 font-semibold"
               >
                 {isKo ? "모든 인사이트 보기" : "View All Insights"}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -903,8 +905,9 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* Newsletter Subscription */}
-      <section className="border-y bg-gradient-to-r from-navy via-navy-light to-navy py-16">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+      <section className="section-navy relative border-y py-20 overflow-hidden">
+        <div className="absolute inset-0 hero-pattern opacity-30" />
+        <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-gold">
               <Newspaper className="h-4 w-4" />
@@ -955,7 +958,7 @@ function HomeContent({ locale }: { locale: string }) {
           >
             <Button
               size="lg"
-              className="h-12 rounded-full bg-[#3C1E1E] px-8 font-bold text-[#FEE500] hover:bg-[#2A1515]"
+              className="h-12 rounded-full bg-[#3C1E1E] px-8 font-bold text-[#FEE500] hover:bg-[#2A1515] transition-all duration-300"
             >
               {isKo ? "채널 추가하기" : "Add Channel"}
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -965,19 +968,20 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* CTA Banner */}
-      <section className="hero-bg relative overflow-hidden py-28">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,168,76,0.06)_0%,_transparent_70%)]" />
+      <section className="hero-bg relative overflow-hidden py-32">
+        <div className="absolute inset-0 hero-pattern opacity-30" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,168,76,0.08)_0%,_transparent_70%)]" />
         <ScrollAnimate className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white sm:text-4xl">
+          <h2 className="section-title text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
             {t("ctaBanner.title")}
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300/90">
+          <p className="mx-auto mt-8 max-w-2xl text-lg text-slate-300/90">
             {t("ctaBanner.description")}
           </p>
           <Link href="/contact">
             <Button
               size="lg"
-              className="mt-10 bg-gold text-navy hover:bg-gold-dark h-14 rounded-full px-10 text-base font-bold shadow-lg shadow-gold/20 transition-all hover:shadow-xl hover:shadow-gold/30"
+              className="btn-gold mt-10 h-14 rounded-full px-10 text-base font-bold shadow-lg shadow-gold/20 hover:scale-105"
             >
               {t("ctaBanner.cta")}
               <ArrowRight className="ml-2 h-4 w-4" />
