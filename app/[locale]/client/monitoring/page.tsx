@@ -16,6 +16,8 @@ import {
   ArrowLeft,
   BarChart3,
   Eye,
+  ExternalLink,
+  Hash,
   LineChart,
   MapPin,
   MousePointerClick,
@@ -32,11 +34,13 @@ import {
   getInProgressProjects,
   getMonitoringPinsForClient,
   sumPinImpressionsToday,
+  sumPinImpressionsTotal,
   type CampaignMapPin,
 } from "@/lib/campaign-monitoring-mock";
 import {
   CampaignMonitoringMap,
   campaignMapProviderLabel,
+  getCampaignMonitoringMapProvider,
   mediaLabel,
 } from "@/components/campaign-monitoring-map";
 import { cn } from "@/lib/utils";
@@ -152,7 +156,15 @@ export default function ClientMonitoringPage() {
         ? inProgress.reduce((a, p) => a + (p.metrics?.ctrPercent ?? 0), 0) /
           inProgress.length
         : 0;
-    return { pinToday, liveTotals, ctrAvg, spots: pins.length };
+    const pinCumulative = sumPinImpressionsTotal(pins);
+    return {
+      pinToday,
+      liveTotals,
+      ctrAvg,
+      spots: pins.length,
+      pinCumulative,
+      inFlightCount: inProgress.length,
+    };
   }, [inProgress, liveImp, pins]);
 
   const onSelectPin = useCallback((id: string | null) => {
@@ -186,6 +198,11 @@ export default function ClientMonitoringPage() {
               </h1>
               <p className="text-xs text-muted-foreground">
                 {client.company} · {campaignMapProviderLabel(isKo)}
+                {getCampaignMonitoringMapProvider() === "kakao"
+                  ? isKo
+                    ? " · 카카오맵 JavaScript"
+                    : " · Kakao Maps JavaScript"
+                  : null}
               </p>
             </div>
           </div>
@@ -193,7 +210,18 @@ export default function ClientMonitoringPage() {
       </header>
 
       <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="space-y-2">
+          <h2 className="text-lg font-extrabold text-navy sm:text-xl">
+            {isKo ? "전체 성과 요약" : "Performance overview"}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {isKo
+              ? `진행 중 캠페인 ${summary.inFlightCount}건 · 지도 핀 ${summary.spots}개 기준 집계입니다.`
+              : `${summary.inFlightCount} in-flight campaign(s), ${summary.spots} placement pin(s).`}
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <Card className="border-navy/10 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-navy/80">
@@ -253,6 +281,22 @@ export default function ClientMonitoringPage() {
               <p className="text-2xl font-bold text-navy">{summary.spots}</p>
               <p className="text-xs text-muted-foreground">
                 {isKo ? "지도 핀 수" : "Pins on map"}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border-navy/10 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-navy/80">
+                {isKo ? "매체 누적 노출 합" : "Cumulative media impressions"}
+              </CardTitle>
+              <Hash className="h-4 w-4 text-gold" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-navy">
+                {formatImp(summary.pinCumulative, isKo)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isKo ? "지도 핀 기준 누적 합산" : "Sum of pin lifetime totals"}
               </p>
             </CardContent>
           </Card>
@@ -399,6 +443,21 @@ function PinDetailCard({ pin, isKo }: { pin: CampaignMapPin; isKo: boolean }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-navy/70">
+          <MapPin className="h-3.5 w-3.5 shrink-0 text-gold-dark" />
+          <span className="font-mono">
+            {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
+          </span>
+        </div>
+        <a
+          href={`https://map.kakao.com/link/map/${encodeURIComponent(isKo ? pin.spotNameKo : pin.spotNameEn)},${pin.lat},${pin.lng}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gold-dark underline-offset-4 hover:underline"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          {isKo ? "카카오맵에서 위치 보기" : "Open in Kakao Map"}
+        </a>
         <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">

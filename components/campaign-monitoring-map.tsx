@@ -1,13 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
+import {
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+  useReducer,
+} from "react";
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CampaignMapPin, CampaignMapMediaType } from "@/lib/campaign-monitoring-mock";
 
 type MapProvider = "kakao" | "google" | "fallback";
 
-function detectProvider(): MapProvider {
+export function getCampaignMonitoringMapProvider(): MapProvider {
   const k = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
   const g = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   if (typeof k === "string" && k.trim().length > 0) return "kakao";
@@ -63,6 +70,19 @@ type Props = {
   className?: string;
 };
 
+type KakaoMapCtx = {
+  map: { setCenter: (p: unknown) => void; setLevel: (n: number) => void };
+  LatLng: new (lat: number, lng: number) => unknown;
+};
+
+type GoogleMapCtx = {
+  map: {
+    panTo: (p: { lat: number; lng: number }) => void;
+    setZoom: (z: number) => void;
+    fitBounds: (b: unknown) => void;
+  };
+};
+
 export function CampaignMonitoringMap({
   pins,
   selectedId,
@@ -70,9 +90,13 @@ export function CampaignMonitoringMap({
   isKo,
   className,
 }: Props) {
-  const provider = useMemo(() => detectProvider(), []);
+  const provider = useMemo(() => getCampaignMonitoringMapProvider(), []);
   const containerRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const kakaoMapCtxRef = useRef<KakaoMapCtx | null>(null);
+  const googleMapCtxRef = useRef<GoogleMapCtx | null>(null);
+  /** Bumps when Kakao/Google map instance is ready so pan-to-selected can run. */
+  const [mapEpoch, bumpMapEpoch] = useReducer((n: number) => n + 1, 0);
 
   const center = useMemo(() => {
     if (pins.length === 0) return { lat: 37.5665, lng: 126.978 };
@@ -124,7 +148,11 @@ export function CampaignMonitoringMap({
               Map: new (
                 el: HTMLElement,
                 opts: { center: { lat: number; lng: number }; zoom: number },
-              ) => { fitBounds: (b: unknown) => void };
+              ) => {
+                fitBounds: (b: unknown) => void;
+                panTo: (p: { lat: number; lng: number }) => void;
+                setZoom: (z: number) => void;
+              };
               LatLngBounds: new () => {
                 extend: (p: { lat: number; lng: number }) => void;
               };
@@ -150,6 +178,9 @@ export function CampaignMonitoringMap({
       }
       map.fitBounds(bounds);
 
+      googleMapCtxRef.current = { map };
+      bumpMapEpoch();
+
       for (const p of pinList) {
         const marker = new googleMaps.Marker({
           position: { lat: p.lat, lng: p.lng },
@@ -161,6 +192,7 @@ export function CampaignMonitoringMap({
       }
 
       cleanupRef.current = () => {
+        googleMapCtxRef.current = null;
         for (const m of markers) m.setMap(null);
         el.innerHTML = "";
       };
@@ -171,7 +203,7 @@ export function CampaignMonitoringMap({
       cleanupRef.current?.();
       cleanupRef.current = null;
     };
-  }, [center, isKo, onSelectPin, pinLayoutKey]);
+  }, [center, isKo, onSelectPin, pinLayoutKey, bumpMapEpoch]);
 
   const mountKakao = useCallback(() => {
     const el = containerRef.current;
@@ -202,6 +234,8 @@ export function CampaignMonitoringMap({
               load: (cb: () => void) => void;
               Map: new (node: HTMLElement, opts: { center: unknown; level: number }) => {
                 setBounds: (b: unknown) => void;
+                setCenter: (p: unknown) => void;
+                setLevel: (n: number) => void;
               };
               LatLng: new (lat: number, lng: number) => unknown;
               LatLngBounds: new () => { extend: (p: unknown) => void };
@@ -235,6 +269,9 @@ export function CampaignMonitoringMap({
         }
         map.setBounds(bounds);
 
+        kakaoMapCtxRef.current = { map, LatLng: K.LatLng };
+        bumpMapEpoch();
+
         for (const p of pinList) {
           const marker = new K.Marker({
             position: new K.LatLng(p.lat, p.lng),
@@ -247,6 +284,7 @@ export function CampaignMonitoringMap({
       });
 
       cleanupRef.current = () => {
+        kakaoMapCtxRef.current = null;
         for (const m of markers) m.setMap(null);
         el.innerHTML = "";
       };
@@ -257,7 +295,7 @@ export function CampaignMonitoringMap({
       cleanupRef.current?.();
       cleanupRef.current = null;
     };
-  }, [center, isKo, onSelectPin, pinLayoutKey]);
+  }, [center, isKo, onSelectPin, pinLayoutKey, bumpMapEpoch]);
 
   useEffect(() => {
     cleanupRef.current?.();
@@ -268,6 +306,27 @@ export function CampaignMonitoringMap({
     if (provider === "kakao") return mountKakao();
     return undefined;
   }, [mountGoogle, mountKakao, pinLayoutKey, pins.length, provider]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const pin = pins.find((p) => p.id === selectedId);
+    if (!pin) return;
+
+    if (provider === "kakao") {
+      const ctx = kakaoMapCtxRef.current;
+      if (!ctx) return;
+      ctx.map.setCenter(new ctx.LatLng(pin.lat, pin.lng));
+      ctx.map.setLevel(4);
+      return;
+    }
+
+    if (provider === "google") {
+      const ctx = googleMapCtxRef.current;
+      if (!ctx) return;
+      ctx.map.panTo({ lat: pin.lat, lng: pin.lng });
+      ctx.map.setZoom(15);
+    }
+  }, [selectedId, pins, provider, mapEpoch]);
 
   if (pins.length === 0) {
     return (
@@ -342,7 +401,7 @@ export function CampaignMonitoringMap({
 }
 
 export function campaignMapProviderLabel(isKo: boolean): string {
-  const p = detectProvider();
+  const p = getCampaignMonitoringMapProvider();
   if (p === "kakao") return isKo ? "카카오맵" : "Kakao Map";
   if (p === "google") return isKo ? "Google 지도" : "Google Maps";
   return isKo ? "데모 지도" : "Demo map";
