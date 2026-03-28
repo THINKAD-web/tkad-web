@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench } from "lucide-react";
+import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench, MessageCircle } from "lucide-react";
 
 export default function Footer() {
   const t = useTranslations();
@@ -8,10 +8,7 @@ export default function Footer() {
   const navItems = [
     { href: "/", label: t("nav.home") },
     { href: "/media", label: t("nav.media") },
-    { href: "/about", label: t("nav.about") },
-    { href: "/tools", label: t("nav.tools") },
     { href: "/cases", label: t("nav.cases") },
-    { href: "/resources", label: t("nav.resources") },
     { href: "/contact", label: t("nav.contact") },
   ];
 
@@ -75,6 +72,17 @@ export default function Footer() {
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0 text-gold/50" />
                 {t("footer.email")}
+              </li>
+              <li className="flex items-center gap-2">
+                <MessageCircle className="h-4 w-4 shrink-0 text-gold/50" />
+                <a
+                  href="https://open.kakao.com/o/placeholder"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gold-light transition-colors duration-300"
+                >
+                  {t("footer.kakaoChannel")}
+                </a>
               </li>
             </ul>
           </div>

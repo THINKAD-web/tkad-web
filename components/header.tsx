@@ -49,12 +49,9 @@ export default function Header() {
   const navItems = [
     { href: "/", label: t("nav.home") },
     { href: "/media", label: t("nav.media") },
-    { href: "/quote", label: t("nav.quote") },
-    { href: "/tools", label: t("nav.tools") },
-    { href: "/about", label: t("nav.about") },
     { href: "/cases", label: t("nav.cases") },
-    { href: "/resources", label: t("nav.resources") },
-    { href: "/faq", label: t("nav.faq") },
+    { href: "/about", label: t("nav.about") },
+    { href: "/contact", label: t("nav.contact") },
   ];
 
   return (

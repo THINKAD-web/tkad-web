@@ -234,6 +234,13 @@
     "crossBorderOOH": "Nationwide Integrated OOH",
     "dataConsulting": "Data Consulting",
     "planningTool": "Planning Tool",
+    "kakaoChannel": "Kakao Channel",
     "copyright": "© 2025 THINKAD Inc. All rights reserved."
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you are looking for may have been removed or the address may have changed.",
+    "backHome": "Back to Home",
+    "browseMedia": "Browse Media"
   }
 }
