@@ -11,12 +11,45 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import Spinner from "@/components/spinner";
+import ErrorToast from "@/components/error-toast";
+
+type FormFields = {
+  company: string;
+  name: string;
+  phone: string;
+  email: string;
+  budget: string;
+  message: string;
+};
+
+type FormErrors = Partial<Record<keyof FormFields, string>>;
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[\d\-+() ]{8,}$/;
+
+function validate(form: FormFields): FormErrors {
+  const errors: FormErrors = {};
+  if (!form.name.trim()) errors.name = "이름을 입력해 주세요.";
+  if (!form.phone.trim()) {
+    errors.phone = "연락처를 입력해 주세요.";
+  } else if (!PHONE_RE.test(form.phone)) {
+    errors.phone = "올바른 연락처 형식이 아닙니다.";
+  }
+  if (!form.email.trim()) {
+    errors.email = "이메일을 입력해 주세요.";
+  } else if (!EMAIL_RE.test(form.email)) {
+    errors.email = "올바른 이메일 형식이 아닙니다.";
+  }
+  if (!form.message.trim()) errors.message = "문의 내용을 입력해 주세요.";
+  return errors;
+}
 
 export default function ContactPage() {
   const t = useTranslations();
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormFields>({
     company: "",
     name: "",
     phone: "",
@@ -24,15 +57,62 @@ export default function ContactPage() {
     budget: "",
     message: "",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof FormFields, boolean>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
 
-  const updateField = (field: string, value: string) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const updateField = useCallback((field: keyof FormFields, value: string) => {
+    setForm((prev) => {
+      const next = { ...prev, [field]: value };
+      setErrors((prevErrors) => {
+        const fieldErrors = validate(next);
+        return { ...prevErrors, [field]: fieldErrors[field] };
+      });
+      return next;
+    });
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleBlur = useCallback((field: keyof FormFields) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const fieldErrors = validate(form);
+    setErrors((prev) => ({ ...prev, [field]: fieldErrors[field] }));
+  }, [form]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitError(false);
+
+    const allTouched: typeof touched = {};
+    for (const key of Object.keys(form) as (keyof FormFields)[]) {
+      allTouched[key] = true;
+    }
+    setTouched(allTouched);
+
+    const validationErrors = validate(form);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) return;
+
+    setLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      setSubmitted(true);
+    } catch {
+      setSubmitError(true);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const fieldError = (field: keyof FormFields) =>
+    touched[field] && errors[field] ? (
+      <p className="mt-1 text-xs font-medium text-red-500">{errors[field]}</p>
+    ) : null;
+
+  const inputErrorClass = (field: keyof FormFields) =>
+    touched[field] && errors[field] ? "border-red-400 focus:border-red-500 focus:ring-red-200" : "";
 
   return (
     <>
@@ -48,7 +128,6 @@ export default function ContactPage() {
       <section className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-5">
-            {/* Form */}
             <div className="lg:col-span-3">
               <Card className="shadow-md">
                 <CardHeader>
@@ -68,96 +147,119 @@ export default function ContactPage() {
                       </p>
                     </div>
                   ) : (
-                  <form
-                    className="space-y-5"
-                    onSubmit={handleSubmit}
-                  >
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("contact.company")}
-                        </label>
-                        <Input
-                          placeholder={t("contact.companyPlaceholder")}
-                          value={form.company}
-                          onChange={(e) => updateField("company", e.target.value)}
+                    <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+                      {submitError && (
+                        <ErrorToast
+                          onRetry={() => handleSubmit(new Event("submit") as unknown as React.FormEvent)}
+                          onDismiss={() => setSubmitError(false)}
                         />
+                      )}
+
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium text-navy">
+                            {t("contact.company")}
+                          </label>
+                          <Input
+                            placeholder={t("contact.companyPlaceholder")}
+                            value={form.company}
+                            onChange={(e) => updateField("company", e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium text-navy">
+                            {t("contact.name")} <span className="text-red-500">*</span>
+                          </label>
+                          <Input
+                            placeholder={t("contact.namePlaceholder")}
+                            value={form.name}
+                            onChange={(e) => updateField("name", e.target.value)}
+                            onBlur={() => handleBlur("name")}
+                            className={inputErrorClass("name")}
+                          />
+                          {fieldError("name")}
+                        </div>
+                      </div>
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium text-navy">
+                            {t("contact.phone")} <span className="text-red-500">*</span>
+                          </label>
+                          <Input
+                            placeholder={t("contact.phonePlaceholder")}
+                            value={form.phone}
+                            onChange={(e) => updateField("phone", e.target.value)}
+                            onBlur={() => handleBlur("phone")}
+                            className={inputErrorClass("phone")}
+                          />
+                          {fieldError("phone")}
+                        </div>
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium text-navy">
+                            {t("contact.email")} <span className="text-red-500">*</span>
+                          </label>
+                          <Input
+                            type="email"
+                            placeholder={t("contact.emailPlaceholder")}
+                            value={form.email}
+                            onChange={(e) => updateField("email", e.target.value)}
+                            onBlur={() => handleBlur("email")}
+                            className={inputErrorClass("email")}
+                          />
+                          {fieldError("email")}
+                        </div>
                       </div>
                       <div>
                         <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("contact.name")}
+                          {t("contact.budget")}
                         </label>
-                        <Input
-                          placeholder={t("contact.namePlaceholder")}
-                          value={form.name}
-                          onChange={(e) => updateField("name", e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("contact.phone")}
-                        </label>
-                        <Input
-                          placeholder={t("contact.phonePlaceholder")}
-                          value={form.phone}
-                          onChange={(e) => updateField("phone", e.target.value)}
-                        />
+                        <select
+                          className="w-full rounded-md border px-3 py-2 text-sm"
+                          value={form.budget}
+                          onChange={(e) => updateField("budget", e.target.value)}
+                        >
+                          <option value="">{t("contact.budgetPlaceholder")}</option>
+                          <option value="under1000">1,000만원 이하</option>
+                          <option value="1000to3000">1,000~3,000만원</option>
+                          <option value="3000to5000">3,000~5,000만원</option>
+                          <option value="over5000">5,000만원 이상</option>
+                        </select>
                       </div>
                       <div>
                         <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("contact.email")}
+                          {t("contact.message")} <span className="text-red-500">*</span>
                         </label>
-                        <Input
-                          type="email"
-                          placeholder={t("contact.emailPlaceholder")}
-                          value={form.email}
-                          onChange={(e) => updateField("email", e.target.value)}
+                        <Textarea
+                          rows={5}
+                          placeholder={t("contact.messagePlaceholder")}
+                          value={form.message}
+                          onChange={(e) => updateField("message", e.target.value)}
+                          onBlur={() => handleBlur("message")}
+                          className={inputErrorClass("message")}
                         />
+                        {fieldError("message")}
                       </div>
-                    </div>
-                    <div>
-                      <label className="mb-1.5 block text-sm font-medium text-navy">
-                        {t("contact.budget")}
-                      </label>
-                      <select
-                        className="w-full rounded-md border px-3 py-2 text-sm"
-                        value={form.budget}
-                        onChange={(e) => updateField("budget", e.target.value)}
+                      <Button
+                        type="submit"
+                        className="w-full bg-gold text-navy hover:bg-gold-dark font-semibold"
+                        size="lg"
+                        disabled={loading}
                       >
-                        <option value="">{t("contact.budgetPlaceholder")}</option>
-                        <option value="under1000">1,000만원 이하</option>
-                        <option value="1000to3000">1,000~3,000만원</option>
-                        <option value="3000to5000">3,000~5,000만원</option>
-                        <option value="over5000">5,000만원 이상</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="mb-1.5 block text-sm font-medium text-navy">
-                        {t("contact.message")}
-                      </label>
-                      <Textarea
-                        rows={5}
-                        placeholder={t("contact.messagePlaceholder")}
-                        value={form.message}
-                        onChange={(e) => updateField("message", e.target.value)}
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-gold text-navy hover:bg-gold-dark font-semibold"
-                      size="lg"
-                    >
-                      {t("contact.submitButton")}
-                    </Button>
-                  </form>
+                        {loading ? (
+                          <>
+                            <Spinner className="mr-2" />
+                            전송 중...
+                          </>
+                        ) : (
+                          t("contact.submitButton")
+                        )}
+                      </Button>
+                    </form>
                   )}
                 </CardContent>
               </Card>
             </div>
 
-            {/* Info */}
             <div className="lg:col-span-2">
               <Card className="shadow-md">
                 <CardHeader>
@@ -171,9 +273,7 @@ export default function ContactPage() {
                       <MapPin className="h-5 w-5 text-gold" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-navy">
-                        Address
-                      </div>
+                      <div className="text-sm font-medium text-navy">Address</div>
                       <div className="text-sm text-muted-foreground">
                         {t("contact.address")}
                       </div>
@@ -184,9 +284,7 @@ export default function ContactPage() {
                       <Phone className="h-5 w-5 text-gold" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-navy">
-                        Phone
-                      </div>
+                      <div className="text-sm font-medium text-navy">Phone</div>
                       <div className="text-sm text-muted-foreground">
                         {t("contact.phoneNumber")}
                       </div>
@@ -197,9 +295,7 @@ export default function ContactPage() {
                       <Mail className="h-5 w-5 text-gold" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-navy">
-                        Email
-                      </div>
+                      <div className="text-sm font-medium text-navy">Email</div>
                       <div className="text-sm text-muted-foreground">
                         {t("contact.emailAddress")}
                       </div>
@@ -223,7 +319,6 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Map & Directions */}
       <section className="bg-slate-50 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-8 text-center text-2xl font-bold text-navy sm:text-3xl">

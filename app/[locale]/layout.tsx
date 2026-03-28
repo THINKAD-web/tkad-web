@@ -8,6 +8,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import QuickInquiryButton from "@/components/quick-inquiry-button";
 import TopLoader from "@/components/top-loader";
+import PageTransition from "@/components/page-transition";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -57,7 +58,9 @@ export default async function LocaleLayout({ children, params }: Props) {
         <NextIntlClientProvider messages={messages}>
           <TopLoader />
           <Header />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1">
+            <PageTransition>{children}</PageTransition>
+          </main>
           <Footer />
           <QuickInquiryButton />
           <a

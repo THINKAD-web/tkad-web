@@ -5,6 +5,8 @@ import { useLocale } from "next-intl";
 import { X, Sparkles, CheckCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Spinner from "@/components/spinner";
+import ErrorToast from "@/components/error-toast";
 
 const inputClass =
   "h-11 border-slate-200 focus:border-gold focus:ring-gold/20";
@@ -22,6 +24,8 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
   const isKo = locale === "ko";
 
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
   const [adGoal, setAdGoal] = useState<"brand" | "promotion" | "event">("brand");
   const [budget, setBudget] = useState<"under5" | "5to10" | "over10">("under5");
   const [region, setRegion] = useState<"seoul" | "capital" | "nationwide" | "other">(
@@ -53,9 +57,18 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
     return () => window.clearTimeout(id);
   }, [submitted, onClose]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitError(false);
+    setLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setSubmitted(true);
+    } catch {
+      setSubmitError(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const adGoalOptions = [
@@ -128,6 +141,12 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {submitError && (
+                <ErrorToast
+                  onRetry={() => handleSubmit(new Event("submit") as unknown as React.FormEvent)}
+                  onDismiss={() => setSubmitError(false)}
+                />
+              )}
               <fieldset className="space-y-2">
                 <legend className="mb-2 text-sm font-semibold text-navy">
                   {isKo ? "광고 목표" : "Ad goal"}
@@ -270,10 +289,20 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
 
               <Button
                 type="submit"
+                disabled={loading}
                 className="h-12 w-full rounded-xl bg-gold font-bold text-navy hover:bg-gold-dark text-sm"
               >
-                <Send className="h-4 w-4" />
-                {isKo ? "맞춤 상담 신청" : "Request consultation"}
+                {loading ? (
+                  <>
+                    <Spinner className="mr-2" />
+                    {isKo ? "전송 중..." : "Sending..."}
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    {isKo ? "맞춤 상담 신청" : "Request consultation"}
+                  </>
+                )}
               </Button>
             </form>
           </>

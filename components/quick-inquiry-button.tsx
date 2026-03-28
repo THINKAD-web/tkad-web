@@ -6,20 +6,33 @@ import { MessageSquarePlus, X, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Spinner from "@/components/spinner";
+import ErrorToast from "@/components/error-toast";
 
 export default function QuickInquiryButton() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setOpen(false);
-    }, 2500);
+    setSubmitError(false);
+    setLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setOpen(false);
+      }, 2500);
+    } catch {
+      setSubmitError(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,6 +92,12 @@ export default function QuickInquiryButton() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-3">
+                  {submitError && (
+                    <ErrorToast
+                      onRetry={() => handleSubmit(new Event("submit") as unknown as React.FormEvent)}
+                      onDismiss={() => setSubmitError(false)}
+                    />
+                  )}
                   <Input
                     required
                     placeholder={isKo ? "회사명" : "Company Name"}
@@ -107,10 +126,20 @@ export default function QuickInquiryButton() {
                   />
                   <Button
                     type="submit"
+                    disabled={loading}
                     className="h-12 w-full bg-gold text-navy font-bold hover:bg-gold-dark rounded-xl text-sm"
                   >
-                    <Send className="mr-2 h-4 w-4" />
-                    {isKo ? "문의 보내기" : "Send Inquiry"}
+                    {loading ? (
+                      <>
+                        <Spinner className="mr-2" />
+                        {isKo ? "전송 중..." : "Sending..."}
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        {isKo ? "문의 보내기" : "Send Inquiry"}
+                      </>
+                    )}
                   </Button>
                 </form>
               </>

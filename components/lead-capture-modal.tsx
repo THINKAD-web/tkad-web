@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { CheckCircle, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Spinner from "@/components/spinner";
+import ErrorToast from "@/components/error-toast";
 
 export type LeadData = {
   company: string;
@@ -30,6 +32,8 @@ export function LeadCaptureModal({
 }: LeadCaptureModalProps) {
   const isKo = locale === "ko";
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
   const [company, setCompany] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -52,14 +56,22 @@ export function LeadCaptureModal({
       ? "정보를 입력하시면 자료를 보내드립니다."
       : "Enter your details and we will send you the materials.");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ company, name, email });
-    setSubmitted(true);
-    window.setTimeout(() => {
-      setSubmitted(false);
-      onClose();
-    }, 2500);
+    setSubmitError(false);
+    setLoading(true);
+    try {
+      onSubmit({ company, name, email });
+      setSubmitted(true);
+      window.setTimeout(() => {
+        setSubmitted(false);
+        onClose();
+      }, 2500);
+    } catch {
+      setSubmitError(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!open) return null;
@@ -122,6 +134,12 @@ export function LeadCaptureModal({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
+              {submitError && (
+                <ErrorToast
+                  onRetry={() => handleSubmit(new Event("submit") as unknown as React.FormEvent)}
+                  onDismiss={() => setSubmitError(false)}
+                />
+              )}
               <Input
                 required
                 value={company}
@@ -149,10 +167,20 @@ export function LeadCaptureModal({
               />
               <Button
                 type="submit"
+                disabled={loading}
                 className="h-12 w-full rounded-xl bg-gold font-bold text-navy text-sm hover:bg-gold-dark"
               >
-                <Download className="mr-2 h-4 w-4" />
-                {isKo ? "자료 받기" : "Get the download"}
+                {loading ? (
+                  <>
+                    <Spinner className="mr-2" />
+                    {isKo ? "전송 중..." : "Sending..."}
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    {isKo ? "자료 받기" : "Get the download"}
+                  </>
+                )}
               </Button>
             </form>
           </>

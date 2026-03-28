@@ -29,7 +29,7 @@ export default function TopLoader() {
 
   return (
     <div
-      className="fixed top-0 left-0 z-[100] h-0.5 bg-gold transition-all duration-300 ease-out"
+      className="fixed top-0 left-0 z-[100] h-[3px] bg-gradient-to-r from-gold via-gold-light to-gold shadow-[0_0_8px_rgba(201,168,76,0.5)] transition-all duration-300 ease-out"
       style={{ width: `${progress}%`, opacity: progress === 100 ? 0 : 1 }}
     />
   );
