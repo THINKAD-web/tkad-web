@@ -49,6 +49,18 @@ const routes = {
       subtitle: "Compare 500+ verified billboards, DOOH, and transit media",
     },
   },
+  recommend: {
+    ko: {
+      badge: "AI",
+      title: "싱커드 AI 매체 추천",
+      subtitle: "목표·예산·지역 입력 → 최적 매체 · 리스트·지도 · 장바구니 견적",
+    },
+    en: {
+      badge: "AI",
+      title: "AI OOH media picks",
+      subtitle: "Goals, budget, region → ranked media · list & map · cart to quote",
+    },
+  },
   casesList: {
     ko: {
       badge: "Case Studies",

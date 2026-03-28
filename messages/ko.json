@@ -23,7 +23,8 @@
     "faq": "FAQ",
     "quote": "견적 요청",
     "contact": "문의하기",
-    "planner": "미디어 플래너"
+    "planner": "미디어 플래너",
+    "recommend": "AI 매체 추천"
   },
   "hero": {
     "title": "한국 OOH 광고의 모든 것",
@@ -159,6 +160,19 @@
       "emptyRun": "조건을 입력한 뒤 AI 추천 받기를 눌러 주세요.",
       "emptyResult": "조건에 맞는 추천이 없습니다. 예산·지역을 조정해 보세요."
     }
+  },
+  "recommend": {
+    "heroTitle": "싱커드 AI 매체 추천",
+    "heroSubtitle": "캠페인 목표·예산·지역을 입력하면 AI가 최적의 OOH 매체를 추천합니다. 리스트와 지도로 살펴보고 장바구니에 담아 한 번에 견적을 요청하세요.",
+    "cartTitle": "장바구니",
+    "cartClear": "비우기",
+    "cartQuote": "견적 요청",
+    "cartRemoveSuffix": "제거",
+    "cartAdd": "장바구니 담기",
+    "addTop3ToCart": "상위 3개 담기",
+    "quoteWithCart": "담은 매체로 견적",
+    "quoteWithTop3": "상위 3개로 견적",
+    "quote": "견적"
   },
   "about": {
     "title": "회사 소개",

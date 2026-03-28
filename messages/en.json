@@ -23,7 +23,8 @@
     "faq": "FAQ",
     "quote": "Get Quote",
     "contact": "Contact",
-    "planner": "Media Planner"
+    "planner": "Media Planner",
+    "recommend": "AI media picks"
   },
   "hero": {
     "title": "Everything About Korean OOH Advertising",
@@ -159,6 +160,19 @@
       "emptyRun": "Fill the form and tap Get AI picks.",
       "emptyResult": "No matches. Try raising budget or changing region."
     }
+  },
+  "recommend": {
+    "heroTitle": "THINKAD AI media recommendation",
+    "heroSubtitle": "Enter campaign goals, budget, and region for AI-ranked OOH media. Browse in list or map view, add to your cart, and request a quote in one step.",
+    "cartTitle": "Cart",
+    "cartClear": "Clear",
+    "cartQuote": "Request quote",
+    "cartRemoveSuffix": "remove",
+    "cartAdd": "Add to cart",
+    "addTop3ToCart": "Add top 3",
+    "quoteWithCart": "Quote cart items",
+    "quoteWithTop3": "Quote top 3",
+    "quote": "Quote"
   },
   "about": {
     "title": "About Us",

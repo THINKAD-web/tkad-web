@@ -40,6 +40,16 @@ type Props = {
   toggleCompare: (m: MediaItem) => void;
   isInCompare: (id: number) => boolean;
   addManyToCompare: (items: MediaItem[]) => void;
+  /** Max items in selection (compare/cart). Default 3. */
+  maxSelectionItems?: number;
+  /** Override button/copy for cart-style flows on /recommend. */
+  labelOverrides?: {
+    addCompare?: string;
+    addTop3?: string;
+    quotePicked?: string;
+    quoteTop3?: string;
+    quoteSingle?: string;
+  };
 };
 
 export default function MediaAiRecommendPanel({
@@ -49,9 +59,20 @@ export default function MediaAiRecommendPanel({
   toggleCompare,
   isInCompare,
   addManyToCompare,
+  maxSelectionItems = 3,
+  labelOverrides,
 }: Props) {
   const t = useTranslations();
   const isKo = locale === "ko";
+
+  const addCompareLabel =
+    labelOverrides?.addCompare ?? t("media.ai.addCompare");
+  const addTop3Label = labelOverrides?.addTop3 ?? t("media.ai.addTop3");
+  const quotePickedLabel =
+    labelOverrides?.quotePicked ?? t("media.ai.quotePicked");
+  const quoteTop3Label = labelOverrides?.quoteTop3 ?? t("media.ai.quoteTop3");
+  const quoteSingleLabel =
+    labelOverrides?.quoteSingle ?? (isKo ? "견적" : "Quote");
 
   const [goal, setGoal] = useState<CampaignGoal>("awareness");
   const [target, setTarget] = useState<TargetAudience>("millennial");
@@ -286,7 +307,7 @@ export default function MediaAiRecommendPanel({
                     disabled={!results.length}
                   >
                     <ShoppingBag className="mr-1.5 h-3.5 w-3.5" />
-                    {t("media.ai.addTop3")}
+                    {addTop3Label}
                   </Button>
                   <Link href={`/quote?media=${quoteQueryPicked}`}>
                     <Button
@@ -296,8 +317,8 @@ export default function MediaAiRecommendPanel({
                     >
                       <Calculator className="mr-1.5 h-3.5 w-3.5" />
                       {compareItems.length > 0
-                        ? t("media.ai.quotePicked")
-                        : t("media.ai.quoteTop3")}
+                        ? quotePickedLabel
+                        : quoteTop3Label}
                     </Button>
                   </Link>
                 </div>
@@ -317,10 +338,11 @@ export default function MediaAiRecommendPanel({
                       inCompare={isInCompare(s.item.id)}
                       onToggleCompare={() => toggleCompare(s.item)}
                       disableCompare={
-                        !isInCompare(s.item.id) && compareItems.length >= 3
+                        !isInCompare(s.item.id) &&
+                        compareItems.length >= maxSelectionItems
                       }
-                      addCompareLabel={t("media.ai.addCompare")}
-                      quoteLabel={isKo ? "견적" : "Quote"}
+                      addCompareLabel={addCompareLabel}
+                      quoteLabel={quoteSingleLabel}
                     />
                   ))}
                 </div>

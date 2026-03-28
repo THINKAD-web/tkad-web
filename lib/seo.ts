@@ -29,6 +29,7 @@ export const publicSeoPaths = [
   "",
   "/about",
   "/media",
+  "/recommend",
   "/cases",
   "/insights",
   "/academy",
