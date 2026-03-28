@@ -40,10 +40,12 @@ import {
   MapPin,
   MessageCircle,
   PencilLine,
+  ChartPie,
   Radio,
   Send,
   User,
   Wallet,
+  Zap,
 } from "lucide-react";
 import {
   CLIENT_SESSION_EMAIL_KEY,
@@ -56,6 +58,7 @@ import {
 } from "@/lib/client-portal-mock";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
+import { ClientMiniSparkline } from "@/components/client-mini-sparkline";
 
 type ChatMessage = {
   id: string;
@@ -86,7 +89,9 @@ export default function ClientDashboardPage() {
   const [client, setClient] = useState<Client | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [liveImp, setLiveImp] = useState<Record<string, number>>({});
+  const [impHistory, setImpHistory] = useState<Record<string, number[]>>({});
   const [chatOpen, setChatOpen] = useState(false);
+  const [chatUnread, setChatUnread] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialChat);
   const [chatInput, setChatInput] = useState("");
   const [modifyOpen, setModifyOpen] = useState(false);
@@ -100,44 +105,80 @@ export default function ClientDashboardPage() {
       const resolved = raw
         ? (findClientByEmail(raw) ?? getDefaultDemoClient())
         : getDefaultDemoClient();
-      const next: Record<string, number> = {};
-      for (const p of resolved.projects) {
-        if (p.status === "in_progress" && p.metrics) {
-          next[p.id] = p.metrics.impressions;
-        }
-      }
       setClient(resolved);
-      setLiveImp(next);
       setHydrated(true);
     });
   }, []);
 
   useEffect(() => {
     if (!client) return;
-    const ids = client.projects
-      .filter((p) => p.status === "in_progress" && p.metrics)
-      .map((p) => p.id);
-    if (ids.length === 0) return;
-    const t = setInterval(() => {
-      setLiveImp((prev) => {
-        const copy = { ...prev };
-        for (const id of ids) {
-          const bump = Math.floor(Math.random() * 800) + 120;
-          copy[id] = (copy[id] ?? 0) + bump;
+    const inProgress = client.projects.filter(
+      (p) => p.status === "in_progress" && p.metrics,
+    );
+    const bases: Record<string, number> = {};
+    for (const p of inProgress) {
+      bases[p.id] = p.metrics!.impressions;
+    }
+
+    setLiveImp((prev) => {
+      const next = { ...prev };
+      for (const id of Object.keys(bases)) {
+        if (next[id] === undefined) next[id] = bases[id];
+      }
+      return next;
+    });
+
+    setImpHistory((prev) => {
+      const nh = { ...prev };
+      for (const p of inProgress) {
+        const b = bases[p.id];
+        if (!nh[p.id]?.length) {
+          nh[p.id] = Array.from(
+            { length: 14 },
+            (_, i) => Math.max(0, b - (13 - i) * 18_000),
+          );
         }
-        return copy;
+      }
+      return nh;
+    });
+
+    if (inProgress.length === 0) return;
+
+    const t = setInterval(() => {
+      setLiveImp((live) => {
+        const next = { ...live };
+        for (const p of inProgress) {
+          const id = p.id;
+          const bump = Math.floor(Math.random() * 800) + 120;
+          next[id] = (next[id] ?? bases[id]) + bump;
+        }
+        setImpHistory((h) => {
+          const nh = { ...h };
+          for (const p of inProgress) {
+            const id = p.id;
+            const arr = [...(nh[id] ?? [])];
+            arr.push(next[id]!);
+            if (arr.length > 20) arr.shift();
+            nh[id] = arr;
+          }
+          return nh;
+        });
+        return next;
       });
     }, 4000);
+
     return () => clearInterval(t);
   }, [client]);
 
   useEffect(() => {
-    if (chatOpen) chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatOpen) {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      setChatUnread(0);
+    }
   }, [chatMessages, chatOpen]);
 
   const activeProjects = useMemo(
-    () =>
-      client?.projects.filter((p) => p.status !== "completed") ?? [],
+    () => client?.projects.filter((p) => p.status !== "completed") ?? [],
     [client],
   );
 
@@ -145,6 +186,42 @@ export default function ClientDashboardPage() {
     () => client?.projects.filter((p) => p.status === "completed") ?? [],
     [client],
   );
+
+  const inProgressWithMetrics = useMemo(
+    () =>
+      client?.projects.filter((p) => p.status === "in_progress" && p.metrics) ??
+      [],
+    [client],
+  );
+
+  const budgetAggregate = useMemo(() => {
+    if (!client) return { total: 0, spent: 0, items: [] as Project[] };
+    const items = client.projects.filter((p) => p.budget);
+    let total = 0;
+    let spent = 0;
+    for (const p of items) {
+      total += p.budget!.totalMan;
+      spent += p.budget!.spentMan;
+    }
+    return { total, spent, items };
+  }, [client]);
+
+  const totalLiveImpressions = useMemo(() => {
+    let s = 0;
+    for (const p of inProgressWithMetrics) {
+      s += liveImp[p.id] ?? p.metrics!.impressions;
+    }
+    return s;
+  }, [inProgressWithMetrics, liveImp]);
+
+  const avgCtrLive = useMemo(() => {
+    if (inProgressWithMetrics.length === 0) return null;
+    const sum = inProgressWithMetrics.reduce(
+      (a, p) => a + (p.metrics?.ctrPercent ?? 0),
+      0,
+    );
+    return sum / inProgressWithMetrics.length;
+  }, [inProgressWithMetrics]);
 
   const allAlerts = useMemo(() => {
     if (!client) return [] as { alert: ScheduleAlert; project: Project }[];
@@ -170,6 +247,12 @@ export default function ClientDashboardPage() {
     setModifyProject(p);
     setModifyNote("");
     setModifyOpen(true);
+  };
+
+  const appendPreset = (line: string) => {
+    setModifyNote((prev) =>
+      prev.trim() ? `${prev.trim()}\n${line}` : line,
+    );
   };
 
   const submitModify = () => {
@@ -208,8 +291,11 @@ export default function ClientDashboardPage() {
             : "Thanks — we’ve received your message and will reply shortly.",
         },
       ]);
+      if (!chatOpen) setChatUnread((u) => u + 1);
     }, 900);
   };
+
+  const openChat = useCallback(() => setChatOpen(true), []);
 
   if (!hydrated || !client) {
     return (
@@ -223,6 +309,96 @@ export default function ClientDashboardPage() {
     typeof window !== "undefined"
       ? localStorage.getItem(CLIENT_SESSION_EMAIL_KEY)
       : null;
+
+  const budgetPct =
+    budgetAggregate.total > 0
+      ? Math.min(100, (budgetAggregate.spent / budgetAggregate.total) * 100)
+      : 0;
+
+  const modifyPresets = isKo
+    ? [
+        "[일정] 집행 기간 연장/단축 요청",
+        "[매체] 일부 면 교체 또는 추가 집행 요청",
+        "[소재] 크리에이티브 수정·A/B 테스트 요청",
+        "[리포트] 주간/월간 성과 리포트 형식 변경",
+      ]
+    : [
+        "[Schedule] Extend or shorten the flight",
+        "[Media] Swap or add placements",
+        "[Creative] Update creative / A/B test",
+        "[Reporting] Change report cadence or format",
+      ];
+
+  const chatPanel = (
+    <>
+      <SheetHeader>
+        <SheetTitle className="text-navy">
+          {isKo ? "1:1 담당자 채팅" : "1:1 account chat"}
+        </SheetTitle>
+        <p className="text-left text-xs text-muted-foreground">
+          {isKo
+            ? "집행·수정·일정 문의를 남기시면 담당 매니저가 확인합니다."
+            : "Ask about delivery, changes, or schedules — your manager will respond."}
+        </p>
+      </SheetHeader>
+      <div className="mt-4 flex flex-1 flex-col gap-3 overflow-hidden">
+        <div className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/80 p-3">
+          {chatMessages.map((m) => (
+            <div
+              key={m.id}
+              className={cn(
+                "max-w-[90%] rounded-2xl px-3 py-2 text-sm",
+                m.from === "admin"
+                  ? "mr-auto bg-white text-navy shadow-sm"
+                  : "ml-auto bg-navy text-white",
+              )}
+            >
+              <p>{m.text}</p>
+              <p
+                className={cn(
+                  "mt-1 text-[10px] opacity-70",
+                  m.from === "client" ? "text-right" : "",
+                )}
+              >
+                {m.time}
+              </p>
+            </div>
+          ))}
+          <div ref={chatEndRef} />
+        </div>
+        <div className="flex gap-2">
+          <Input
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            placeholder={
+              isKo ? "메시지를 입력하세요…" : "Type a message…"
+            }
+            className="flex-1"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendChat();
+              }
+            }}
+          />
+          <Button
+            type="button"
+            className="btn-gold shrink-0"
+            size="icon"
+            onClick={sendChat}
+            aria-label={isKo ? "전송" : "Send"}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          {isKo
+            ? "데모: 자동 응답만 제공됩니다. 실서비스에서는 담당 팀과 연동됩니다."
+            : "Demo: auto-replies only. Production connects to your account team."}
+        </p>
+      </div>
+    </>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-24">
@@ -258,74 +434,19 @@ export default function ClientDashboardPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="touch-manipulation rounded-full border-gold/40"
+                  className="relative touch-manipulation rounded-full border-gold/40"
                 >
                   <MessageCircle className="mr-1.5 h-4 w-4 text-gold" />
-                  {isKo ? "담당자 채팅" : "Chat"}
+                  {isKo ? "1:1 채팅" : "Chat"}
+                  {chatUnread > 0 ? (
+                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cta px-1 text-[9px] font-bold text-white">
+                      {chatUnread > 9 ? "9+" : chatUnread}
+                    </span>
+                  ) : null}
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
-                <SheetHeader>
-                  <SheetTitle className="text-navy">
-                    {isKo ? "1:1 문의 (담당 매니저)" : "1:1 manager chat"}
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="mt-4 flex flex-1 flex-col gap-3 overflow-hidden">
-                  <div className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/80 p-3">
-                    {chatMessages.map((m) => (
-                      <div
-                        key={m.id}
-                        className={cn(
-                          "max-w-[90%] rounded-2xl px-3 py-2 text-sm",
-                          m.from === "admin"
-                            ? "mr-auto bg-white text-navy shadow-sm"
-                            : "ml-auto bg-navy text-white",
-                        )}
-                      >
-                        <p>{m.text}</p>
-                        <p
-                          className={cn(
-                            "mt-1 text-[10px] opacity-70",
-                            m.from === "client" ? "text-right" : "",
-                          )}
-                        >
-                          {m.time}
-                        </p>
-                      </div>
-                    ))}
-                    <div ref={chatEndRef} />
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      placeholder={
-                        isKo ? "메시지를 입력하세요…" : "Type a message…"
-                      }
-                      className="flex-1"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          sendChat();
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      className="btn-gold shrink-0"
-                      size="icon"
-                      onClick={sendChat}
-                      aria-label={isKo ? "전송" : "Send"}
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    {isKo
-                      ? "데모 화면입니다. 실제 서비스에서는 담당자와 실시간 연동됩니다."
-                      : "Demo: in production this connects to your account team."}
-                  </p>
-                </div>
+                {chatPanel}
               </SheetContent>
             </Sheet>
             <Button
@@ -350,11 +471,140 @@ export default function ClientDashboardPage() {
           </div>
         )}
 
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="border-navy/10 shadow-md sm:col-span-2 xl:col-span-1">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-navy">
+                <Zap className="h-4 w-4 text-amber-500" />
+                {isKo ? "실시간 누적 노출" : "Live impressions"}
+              </CardTitle>
+              <CardDescription className="text-[11px]">
+                {isKo ? "집행 중 캠페인 합산 (데모 시뮬.)" : "Sum of live campaigns (demo)"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-extrabold tabular-nums text-navy">
+                {formatImp(totalLiveImpressions, isKo)}
+              </p>
+              <p className="mt-1 flex items-center gap-1 text-[11px] text-emerald-600">
+                <Radio className="h-3 w-3 animate-pulse" />
+                {isKo ? "4초마다 갱신" : "Updates every 4s"}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-navy/10 shadow-md sm:col-span-2 xl:col-span-1">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-navy">
+                <BarChart3 className="h-4 w-4 text-gold" />
+                {isKo ? "평균 CTR (진행)" : "Avg. CTR (live)"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-extrabold tabular-nums text-gold-dark">
+                {avgCtrLive != null ? `${avgCtrLive.toFixed(2)}%` : "—"}
+              </p>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {isKo ? "집행 중 캠페인 기준" : "Across in-flight campaigns"}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-navy/10 shadow-md sm:col-span-2 xl:col-span-1">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-navy">
+                <ChartPie className="h-4 w-4 text-gold" />
+                {isKo ? "예산 사용률" : "Budget used"}
+              </CardTitle>
+              <CardDescription className="text-[11px]">
+                {isKo ? "등록된 모든 캠페인 예산" : "All budgeted projects"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-extrabold tabular-nums text-navy">
+                {budgetPct.toFixed(1)}%
+              </p>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-navy to-gold transition-all duration-500"
+                  style={{ width: `${budgetPct}%` }}
+                />
+              </div>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {formatImp(budgetAggregate.spent, isKo)} /{" "}
+                {formatImp(budgetAggregate.total, isKo)}
+                {isKo ? "만원" : " (₩10K)"}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col justify-center border-gold/25 bg-gradient-to-br from-navy/5 to-gold/10 shadow-md sm:col-span-2 xl:col-span-1">
+            <CardContent className="flex flex-col gap-2 p-4">
+              <p className="text-sm font-bold text-navy">
+                {isKo ? "견적·집행 문의" : "Quotes & delivery"}
+              </p>
+              <Button className="btn-gold w-full rounded-full font-semibold" onClick={openChat}>
+                <MessageCircle className="mr-2 h-4 w-4" />
+                {isKo ? "1:1 채팅 열기" : "Open chat"}
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
+
+        {budgetAggregate.items.length > 0 && (
+          <section>
+            <div className="mb-3 flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-gold" />
+              <h2 className="text-base font-bold text-navy sm:text-lg">
+                {isKo ? "캠페인별 예산 사용 현황" : "Budget by campaign"}
+              </h2>
+            </div>
+            <Card className="border-navy/10">
+              <CardContent className="divide-y divide-slate-100 p-0">
+                {budgetAggregate.items.map((p) => {
+                  const b = p.budget!;
+                  const pct = Math.min(100, (b.spentMan / b.totalMan) * 100);
+                  return (
+                    <div
+                      key={p.id}
+                      className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-navy">{p.title}</p>
+                        <p className="font-mono text-[11px] text-muted-foreground">
+                          {p.id}
+                        </p>
+                      </div>
+                      <div className="w-full max-w-md shrink-0">
+                        <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                          <span>
+                            {formatImp(b.spentMan, isKo)} / {formatImp(b.totalMan, isKo)}
+                            {isKo ? "만원" : ""}
+                          </span>
+                          <span className="tabular-nums font-medium text-navy">
+                            {pct.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-navy to-gold"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
         <section>
           <div className="mb-4 flex items-center gap-2">
             <Radio className="h-5 w-5 animate-pulse text-emerald-500" />
             <h2 className="text-base font-bold text-navy sm:text-lg">
-              {isKo ? "진행 중 캠페인 · 실시간 성과" : "Active campaigns · live stats"}
+              {isKo ? "캠페인 실시간 성과" : "Live campaign performance"}
             </h2>
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
@@ -364,6 +614,7 @@ export default function ClientDashboardPage() {
                 p.status === "in_progress" && p.metrics
                   ? liveImp[p.id] ?? p.metrics.impressions
                   : null;
+              const spark = impHistory[p.id] ?? [];
               return (
                 <Card key={p.id} className="border-navy/10 shadow-md">
                   <CardHeader className="pb-2">
@@ -388,7 +639,7 @@ export default function ClientDashboardPage() {
                         <div className="rounded-xl bg-navy/5 p-3">
                           <p className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
                             <LineChart className="h-3.5 w-3.5 text-gold" />
-                            {isKo ? "누적 노출 (실시간 시뮬.)" : "Impressions (live sim.)"}
+                            {isKo ? "누적 노출 (실시간)" : "Impressions (live)"}
                           </p>
                           <p className="mt-1 text-xl font-extrabold tabular-nums text-navy">
                             {formatImp(imp, isKo)}
@@ -397,6 +648,12 @@ export default function ClientDashboardPage() {
                             +{formatImp(p.metrics.impressionsPerDay, isKo)}{" "}
                             {isKo ? "/ 일 추정 증가" : "/ day est."}
                           </p>
+                          <div className="mt-2 border-t border-slate-200/80 pt-2">
+                            <p className="mb-1 text-[10px] font-medium text-muted-foreground">
+                              {isKo ? "노출 추이" : "Trend"}
+                            </p>
+                            <ClientMiniSparkline values={spark} />
+                          </div>
                         </div>
                         <div className="rounded-xl bg-navy/5 p-3">
                           <p className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
@@ -426,7 +683,7 @@ export default function ClientDashboardPage() {
                         <div className="mb-1 flex items-center justify-between text-xs font-medium text-navy">
                           <span className="inline-flex items-center gap-1">
                             <Wallet className="h-3.5 w-3.5 text-gold" />
-                            {isKo ? "예산 사용 현황" : "Budget usage"}
+                            {isKo ? "이 캠페인 예산" : "This campaign budget"}
                           </span>
                           <span className="tabular-nums text-muted-foreground">
                             {formatImp(p.budget.spentMan, isKo)} /{" "}
@@ -458,6 +715,16 @@ export default function ClientDashboardPage() {
                       >
                         <PencilLine className="mr-1.5 h-3.5 w-3.5" />
                         {isKo ? "캠페인 수정 요청" : "Request changes"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-full text-navy hover:bg-navy/5"
+                        onClick={openChat}
+                      >
+                        <MessageCircle className="mr-1.5 h-3.5 w-3.5 text-gold" />
+                        {isKo ? "담당자 채팅" : "Chat manager"}
                       </Button>
                     </div>
 
@@ -576,6 +843,20 @@ export default function ClientDashboardPage() {
         </section>
       </div>
 
+      <button
+        type="button"
+        onClick={openChat}
+        className="fixed bottom-6 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-transform hover:scale-105 sm:hidden"
+        aria-label={isKo ? "1:1 채팅" : "Open chat"}
+      >
+        <MessageCircle className="h-6 w-6" />
+        {chatUnread > 0 ? (
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-cta px-1 text-[10px] font-bold">
+            {chatUnread > 9 ? "9+" : chatUnread}
+          </span>
+        ) : null}
+      </button>
+
       <Modal
         open={modifyOpen}
         onClose={() => setModifyOpen(false)}
@@ -591,6 +872,23 @@ export default function ClientDashboardPage() {
               <span className="font-mono">({modifyProject.id})</span>
             </p>
           )}
+          <p className="mt-3 text-xs font-medium text-navy">
+            {isKo ? "빠른 선택 (필요 시 여러 개)" : "Quick inserts"}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {modifyPresets.map((line) => (
+              <Button
+                key={line}
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-auto max-w-full whitespace-normal rounded-xl border-navy/15 px-3 py-2 text-left text-[11px] leading-snug"
+                onClick={() => appendPreset(line)}
+              >
+                {line}
+              </Button>
+            ))}
+          </div>
           <Textarea
             className="mt-4 min-h-32 border-navy/15"
             value={modifyNote}
