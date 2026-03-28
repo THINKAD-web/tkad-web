@@ -96,8 +96,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t border-slate-700 pt-8 text-center text-sm text-slate-500">
-          {t("footer.copyright")}
+        <div className="mt-8 border-t border-slate-700 pt-8">
+          <div className="mb-4 text-center text-xs leading-relaxed text-slate-500">
+            <p>{t("footer.companyName")} | {t("footer.ceo")} | {t("footer.bizNumber")}</p>
+            <p>{t("footer.ecommerce")} | {t("footer.address")}</p>
+          </div>
+          <div className="text-center text-sm text-slate-500">
+            {t("footer.copyright")}
+          </div>
         </div>
       </div>
     </footer>

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import SolutionCtaButton from "@/components/solution-cta-button";
 import ScrollAnimate from "@/components/scroll-animate";
 import HomeRecentlyViewed from "@/components/home-recently-viewed";
+import NewsletterForm from "@/components/newsletter-form";
 import {
   ArrowRight,
   BarChart3,
@@ -35,6 +36,12 @@ import {
   Users,
   Trophy,
   Sparkles,
+  PhoneCall,
+  Flame,
+  Building2,
+  BookOpen,
+  Newspaper,
+  MessageCircle,
 } from "lucide-react";
 
 type Props = {
@@ -90,7 +97,8 @@ const typeLabels: Record<string, { ko: string; en: string }> = {
 const partnerLogos = [
   "Samsung", "LG", "Hyundai", "SK", "Lotte",
   "CJ", "Kakao", "Naver", "Amorepacific", "Shinsegae",
-  "Hana", "KB", "KT",
+  "Hana", "KB", "KT", "POSCO", "Hanwha",
+  "GS", "Doosan", "Kumho", "Mirae Asset", "Celltrion",
 ];
 
 export default async function HomePage({ params }: Props) {
@@ -145,26 +153,33 @@ function HomeContent({ locale }: { locale: string }) {
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link href="/media">
+            <Link href="/contact">
               <Button
                 size="lg"
-                className="bg-gold text-navy hover:bg-gold-dark h-14 rounded-full px-10 text-base font-bold shadow-lg shadow-gold/20 transition-all hover:shadow-xl hover:shadow-gold/30"
+                className="bg-gold text-navy hover:bg-gold-dark h-16 rounded-full px-12 text-lg font-extrabold shadow-lg shadow-gold/25 transition-all hover:shadow-xl hover:shadow-gold/40 hover:scale-105"
               >
-                {t("hero.cta")}
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <PhoneCall className="mr-2 h-5 w-5" />
+                {isKo ? "무료 상담 신청" : "Free Consultation"}
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/contact">
+            <Link href="/media">
               <Button
                 size="lg"
                 variant="outline"
                 className="h-14 rounded-full border-white/20 px-10 text-base text-white hover:bg-white/10 hover:border-white/40"
               >
-                {t("hero.ctaSecondary")}
+                {t("hero.cta")}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
-          <div className="mt-4">
+          <p className="mt-4 text-sm text-slate-400">
+            {isKo
+              ? "30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
+              : "Apply in 30 seconds · Expert consultant contacts within 24h"}
+          </p>
+          <div className="mt-3">
             <SolutionCtaButton
               label={isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
               size="lg"
@@ -262,11 +277,19 @@ function HomeContent({ locale }: { locale: string }) {
       <section className="relative border-b bg-white py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="count-up">
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-6">
               {[
                 {
                   animClass: "stat-count-up stat-count-500",
                   label: isKo ? "검증된 매체" : "Verified Media",
+                },
+                {
+                  animClass: "stat-count-up stat-count-100b",
+                  label: isKo ? "누적 집행액" : "Total Ad Spend",
+                },
+                {
+                  animClass: "stat-count-up stat-count-100p",
+                  label: isKo ? "대기업 파트너" : "Enterprise Partners",
                 },
                 {
                   animClass: "stat-count-up stat-count-15",
@@ -283,7 +306,7 @@ function HomeContent({ locale }: { locale: string }) {
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <div
-                    className={`text-4xl font-extrabold text-gold sm:text-5xl ${stat.animClass}`}
+                    className={`text-3xl font-extrabold text-gold sm:text-4xl ${stat.animClass}`}
                   />
                   <div className="mt-3 text-sm font-medium tracking-wide text-navy/60 uppercase">
                     {stat.label}
@@ -584,6 +607,12 @@ function HomeContent({ locale }: { locale: string }) {
               >
                 <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10 overflow-hidden">
                   <Monitor className="h-12 w-12 text-navy/15 transition-transform group-hover:scale-110" />
+                  {i < 3 && (
+                    <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
+                      <Flame className="h-3 w-3" />
+                      {isKo ? "인기" : "Popular"}
+                    </div>
+                  )}
                   <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
                     <BadgeCheck className="h-3 w-3" />
                     Verified
@@ -631,9 +660,15 @@ function HomeContent({ locale }: { locale: string }) {
       <section className="border-y bg-slate-50 py-16 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="fade-in">
-            <p className="mb-10 text-center text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-              {isKo ? "신뢰하는 파트너사" : "Trusted Partners"}
-            </p>
+            <div className="mb-10 flex flex-col items-center gap-3 text-center">
+              <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-sm font-bold text-gold-dark">
+                <Building2 className="h-4 w-4" />
+                {isKo ? "100+ 대기업 파트너" : "100+ Enterprise Partners"}
+              </div>
+              <p className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                {isKo ? "신뢰하는 파트너사" : "Trusted Partners"}
+              </p>
+            </div>
           </ScrollAnimate>
         </div>
         <div className="marquee-container">
@@ -778,6 +813,156 @@ function HomeContent({ locale }: { locale: string }) {
               </Button>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Blog / Insight Links */}
+      <section className="bg-white py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <ScrollAnimate>
+            <div className="text-center">
+              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
+                {isKo ? "인사이트" : "Insights"}
+              </p>
+              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+                {isKo ? "OOH 광고 인사이트" : "OOH Advertising Insights"}
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                {isKo
+                  ? "최신 OOH 광고 트렌드와 전문가 인사이트를 확인하세요"
+                  : "Stay up to date with the latest OOH advertising trends and expert insights"}
+              </p>
+            </div>
+          </ScrollAnimate>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {[
+              {
+                icon: BookOpen,
+                title: isKo ? "2025 OOH 광고 트렌드 리포트" : "2025 OOH Ad Trends Report",
+                desc: isKo
+                  ? "올해 주목해야 할 OOH 광고 트렌드와 디지털 사이니지의 미래를 분석합니다."
+                  : "Analysis of this year's OOH advertising trends and the future of digital signage.",
+                tag: isKo ? "트렌드" : "Trends",
+              },
+              {
+                icon: BarChart3,
+                title: isKo ? "OOH ROI 극대화 가이드" : "OOH ROI Maximization Guide",
+                desc: isKo
+                  ? "데이터 기반으로 OOH 광고 ROI를 극대화하는 5가지 전략을 소개합니다."
+                  : "5 data-driven strategies to maximize your OOH advertising ROI.",
+                tag: isKo ? "가이드" : "Guide",
+              },
+              {
+                icon: Newspaper,
+                title: isKo ? "성공적인 매체 선정 체크리스트" : "Media Selection Checklist",
+                desc: isKo
+                  ? "광고 효과를 극대화하는 매체 선정 기준과 실무 체크리스트를 공유합니다."
+                  : "Practical checklist and criteria for selecting media that maximize advertising effectiveness.",
+                tag: isKo ? "실무 팁" : "Pro Tips",
+              },
+            ].map((item, i) => (
+              <ScrollAnimate key={item.title} delay={i * 150}>
+                <Card className="group cursor-pointer border-0 bg-gradient-to-b from-white to-slate-50 shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
+                  <CardHeader className="pb-3">
+                    <Badge className="w-fit bg-navy/5 text-navy text-xs font-medium">
+                      {item.tag}
+                    </Badge>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/10">
+                        <item.icon className="h-5 w-5 text-gold" />
+                      </div>
+                      <CardTitle className="text-base font-bold text-navy">
+                        {item.title}
+                      </CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm leading-relaxed">
+                      {item.desc}
+                    </CardDescription>
+                    <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-gold opacity-0 transition-opacity group-hover:opacity-100">
+                      {isKo ? "읽어보기" : "Read more"}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </ScrollAnimate>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link href="/resources">
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-full border-navy/20 font-semibold text-navy hover:bg-navy hover:text-white"
+              >
+                {isKo ? "모든 인사이트 보기" : "View All Insights"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Subscription */}
+      <section className="border-y bg-gradient-to-r from-navy via-navy-light to-navy py-16">
+        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+          <ScrollAnimate>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-gold">
+              <Newspaper className="h-4 w-4" />
+              Newsletter
+            </div>
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">
+              {isKo
+                ? "OOH 광고 뉴스레터 구독"
+                : "Subscribe to OOH Newsletter"}
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-slate-300/80">
+              {isKo
+                ? "매월 최신 OOH 광고 트렌드, 성공 사례, 업계 소식을 이메일로 받아보세요."
+                : "Receive the latest OOH advertising trends, case studies, and industry news monthly."}
+            </p>
+            <NewsletterForm />
+            <p className="mt-3 text-xs text-slate-400">
+              {isKo
+                ? "스팸 없이, 언제든 구독 해지 가능합니다."
+                : "No spam. Unsubscribe anytime."}
+            </p>
+          </ScrollAnimate>
+        </div>
+      </section>
+
+      {/* Kakao Channel Banner */}
+      <section className="bg-[#FEE500] py-10">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 px-4 text-center sm:flex-row sm:justify-between sm:text-left">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#3C1E1E] text-2xl shadow-md">
+              <MessageCircle className="h-7 w-7 text-[#FEE500]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-[#3C1E1E]">
+                {isKo ? "카카오채널 친구 추가" : "Add Kakao Channel"}
+              </h3>
+              <p className="text-sm text-[#3C1E1E]/70">
+                {isKo
+                  ? "친구 추가하고 실시간 상담 & 특별 혜택 받으세요!"
+                  : "Add us and get real-time support & exclusive benefits!"}
+              </p>
+            </div>
+          </div>
+          <a
+            href="https://open.kakao.com/o/placeholder"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button
+              size="lg"
+              className="h-12 rounded-full bg-[#3C1E1E] px-8 font-bold text-[#FEE500] hover:bg-[#2A1515]"
+            >
+              {isKo ? "채널 추가하기" : "Add Channel"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </a>
         </div>
       </section>
 

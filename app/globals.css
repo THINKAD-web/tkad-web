@@ -121,6 +121,14 @@ body {
 .stat-count-50 { animation: countUp50 1.6s ease-out forwards; }
 @keyframes countUp50 { from { --num: 0; } to { --num: 50; } }
 
+.stat-count-100b::after { content: counter(num) "억+"; }
+.stat-count-100b { animation: countUp100b 2s ease-out forwards; }
+@keyframes countUp100b { from { --num: 0; } to { --num: 100; } }
+
+.stat-count-100p::after { content: counter(num) "+"; }
+.stat-count-100p { animation: countUp100p 2s ease-out forwards; }
+@keyframes countUp100p { from { --num: 0; } to { --num: 100; } }
+
 /* Hero gradient animation */
 @keyframes heroShimmer {
   0% { background-position: 0% 50%; }

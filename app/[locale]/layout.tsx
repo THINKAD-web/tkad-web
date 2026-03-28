@@ -7,6 +7,8 @@ import { routing } from "@/i18n/routing";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import QuickInquiryButton from "@/components/quick-inquiry-button";
+import FloatingCta from "@/components/floating-cta";
+import ExitIntentPopup from "@/components/exit-intent-popup";
 import TopLoader from "@/components/top-loader";
 import PageTransition from "@/components/page-transition";
 import ConditionalPublicChrome from "@/components/conditional-public-chrome";
@@ -67,6 +69,8 @@ export default async function LocaleLayout({ children, params }: Props) {
           <ConditionalPublicChrome>
             <Footer />
             <QuickInquiryButton />
+            <FloatingCta />
+            <ExitIntentPopup />
             <a
               href="https://open.kakao.com/o/placeholder"
               target="_blank"
