@@ -37,6 +37,7 @@ import {
   History,
   LineChart,
   LogOut,
+  MapPin,
   MessageCircle,
   PencilLine,
   Radio,
@@ -246,6 +247,12 @@ export default function ClientDashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild className="touch-manipulation">
+              <Link href="/client/monitoring">
+                <MapPin className="mr-1.5 h-4 w-4 text-gold" />
+                {isKo ? "실시간 지도" : "Live map"}
+              </Link>
+            </Button>
             <Sheet open={chatOpen} onOpenChange={setChatOpen}>
               <SheetTrigger asChild>
                 <Button
