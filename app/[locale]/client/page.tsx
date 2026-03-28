@@ -1,126 +1,27 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mail, Lock, LogOut, Phone, Building2, User, Loader2 } from "lucide-react";
-
-type ProjectStatus = "received" | "reviewing" | "in_progress" | "completed";
-
-type Project = {
-  id: string;
-  title: string;
-  summary: string;
-  status: ProjectStatus;
-  createdAt: string;
-  updatedAt: string;
-  manager: {
-    name: string;
-    role: string;
-    phone: string;
-    email: string;
-  };
-};
-
-type Client = {
-  id: string;
-  company: string;
-  contactName: string;
-  email: string;
-  phone: string;
-  projects: Project[];
-};
-
-const mockClients: Client[] = [
-  {
-    id: "C-001",
-    company: "삼성전자",
-    contactName: "김영수",
-    email: "client1@example.com",
-    phone: "010-1234-5678",
-    projects: [
-      {
-        id: "P-2026-001",
-        title: "갤럭시 S 시리즈 런칭 OOH 캠페인",
-        summary: "강남/코엑스 중심 디지털 사이니지 및 대형 빌보드 집행",
-        status: "in_progress",
-        createdAt: "2026-03-10",
-        updatedAt: "2026-03-27",
-        manager: {
-          name: "이정민",
-          role: "캠페인 디렉터",
-          phone: "010-5555-1111",
-          email: "jm.lee@sinkerd.com",
-        },
-      },
-      {
-        id: "P-2025-112",
-        title: "연말 브랜드 인지도 캠페인",
-        summary: "전국 주요 거점 옥외 매체 브랜딩 집행",
-        status: "completed",
-        createdAt: "2025-10-01",
-        updatedAt: "2026-01-15",
-        manager: {
-          name: "이정민",
-          role: "캠페인 디렉터",
-          phone: "010-5555-1111",
-          email: "jm.lee@sinkerd.com",
-        },
-      },
-    ],
-  },
-  {
-    id: "C-002",
-    company: "쿠팡",
-    contactName: "서민지",
-    email: "client2@example.com",
-    phone: "010-9999-2222",
-    projects: [
-      {
-        id: "P-2026-014",
-        title: "로켓배송 인지도 강화 캠페인",
-        summary: "전국 고속도로 및 물류센터 인근 빌보드 집행",
-        status: "reviewing",
-        createdAt: "2026-03-18",
-        updatedAt: "2026-03-25",
-        manager: {
-          name: "박성우",
-          role: "미디어 플래너",
-          phone: "010-7777-3333",
-          email: "sw.park@sinkerd.com",
-        },
-      },
-    ],
-  },
-];
-
-const statusMap: Record<
-  ProjectStatus,
-  { label: string; description: string; className: string }
-> = {
-  received: {
-    label: "접수",
-    description: "문의가 정상적으로 접수되었습니다.",
-    className: "bg-slate-100 text-slate-700",
-  },
-  reviewing: {
-    label: "검토중",
-    description: "전략/미디어 플래너가 캠페인을 검토 중입니다.",
-    className: "bg-amber-100 text-amber-700",
-  },
-  in_progress: {
-    label: "진행중",
-    description: "매체 집행 및 운영이 진행 중입니다.",
-    className: "bg-blue-100 text-blue-700",
-  },
-  completed: {
-    label: "완료",
-    description: "캠페인이 정상적으로 종료되었습니다.",
-    className: "bg-emerald-100 text-emerald-700",
-  },
-};
+import {
+  Mail,
+  Lock,
+  LogOut,
+  Phone,
+  Building2,
+  User,
+  Loader2,
+  LayoutDashboard,
+} from "lucide-react";
+import {
+  CLIENT_SESSION_EMAIL_KEY,
+  type Client,
+  mockClients,
+  statusMap,
+} from "@/lib/client-portal-mock";
 
 type Step = "login" | "code" | "portal";
 
@@ -132,10 +33,7 @@ export default function ClientPortalPage() {
   const [error, setError] = useState<string | null>(null);
   const [client, setClient] = useState<Client | null>(null);
 
-  const projects = useMemo(
-    () => client?.projects ?? [],
-    [client],
-  );
+  const projects = useMemo(() => client?.projects ?? [], [client]);
 
   const handleRequestCode = (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,6 +63,11 @@ export default function ClientPortalPage() {
           (c) => c.email.toLowerCase() === email.toLowerCase().trim(),
         ) ?? mockClients[0];
       setClient(matched);
+      try {
+        localStorage.setItem(CLIENT_SESSION_EMAIL_KEY, matched.email);
+      } catch {
+        /* ignore */
+      }
       setStep("portal");
       setLoading(false);
     }, 600);
@@ -176,6 +79,11 @@ export default function ClientPortalPage() {
     setCode("");
     setError(null);
     setStep("login");
+    try {
+      localStorage.removeItem(CLIENT_SESSION_EMAIL_KEY);
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
@@ -242,8 +150,8 @@ export default function ClientPortalPage() {
                     <p>
                       <span className="font-medium text-navy">
                         {email || "you@company.com"}
-                      </span>
-                      {" "}주소로 인증코드를 발송했습니다.
+                      </span>{" "}
+                      주소로 인증코드를 발송했습니다.
                     </p>
                     <p className="mt-1">
                       메일함을 확인 후 아래에 코드를 입력해 주세요.
@@ -320,6 +228,13 @@ export default function ClientPortalPage() {
                     </Button>
                   </div>
 
+                  <Link href="/client/dashboard" className="block">
+                    <Button className="btn-gold w-full font-semibold">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      캠페인 대시보드
+                    </Button>
+                  </Link>
+
                   <div className="space-y-2 rounded-md bg-slate-50 p-3">
                     <p className="text-xs font-medium text-muted-foreground">
                       담당 매니저 안내
@@ -384,7 +299,7 @@ export default function ClientPortalPage() {
                               variant="secondary"
                               className={`${status.className} border-0 text-[11px]`}
                             >
-                              {status.label}
+                              {status.labelKo}
                             </Badge>
                           </div>
                           <p className="text-xs leading-relaxed text-muted-foreground">
@@ -400,7 +315,7 @@ export default function ClientPortalPage() {
                               진행 상태 설명
                             </p>
                             <p className="mt-1 text-xs text-navy">
-                              {status.description}
+                              {status.descriptionKo}
                             </p>
                           </div>
                           <div className="mt-4 border-t border-slate-100 pt-3">
@@ -481,4 +396,3 @@ function LegendItem({
     </div>
   );
 }
-
