@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,10 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Upload,
+  Download,
+  ImagePlus,
+  CheckCircle2,
 } from "lucide-react";
 
 type MediaItem = {
@@ -68,6 +72,14 @@ const emptyForm: Omit<MediaItem, "id"> = {
   active: true,
 };
 
+type UploadItem = {
+  file: File;
+  mediaId: number | null;
+  progress: number;
+  status: "pending" | "uploading" | "done" | "error";
+  preview: string;
+};
+
 const PAGE_SIZE = 8;
 
 export default function AdminMediasPage() {
@@ -80,6 +92,11 @@ export default function AdminMediasPage() {
   const [editing, setEditing] = useState<MediaItem | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = useMemo(() => {
     return medias.filter((m) => {
@@ -141,6 +158,98 @@ export default function AdminMediasPage() {
     );
   }, []);
 
+  const handleExportCSV = useCallback(() => {
+    const BOM = "\uFEFF";
+    const header = ["매체명", "영문명", "위치", "지역", "유형", "가격(만원)", "상태"];
+    const rows = medias.map((m) => [
+      m.name,
+      m.nameEn,
+      m.location,
+      regionLabels[m.region] || m.region,
+      typeLabels[m.type] || m.type,
+      String(m.price),
+      m.active ? "활성" : "비활성",
+    ]);
+    const csv = [header, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([BOM + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `매체목록_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [medias]);
+
+  const handleFilesSelected = useCallback((files: FileList | File[]) => {
+    const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    const newItems: UploadItem[] = imageFiles.map((file) => ({
+      file,
+      mediaId: null,
+      progress: 0,
+      status: "pending",
+      preview: URL.createObjectURL(file),
+    }));
+    setUploadItems((prev) => [...prev, ...newItems]);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      if (e.dataTransfer.files.length > 0) handleFilesSelected(e.dataTransfer.files);
+    },
+    [handleFilesSelected],
+  );
+
+  const assignMediaToUpload = useCallback((index: number, mediaId: number) => {
+    setUploadItems((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, mediaId } : item)),
+    );
+  }, []);
+
+  const removeUploadItem = useCallback((index: number) => {
+    setUploadItems((prev) => {
+      const item = prev[index];
+      if (item) URL.revokeObjectURL(item.preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  }, []);
+
+  const startBulkUpload = useCallback(() => {
+    setUploadItems((prev) =>
+      prev.map((item) => {
+        if (item.status !== "pending" || !item.mediaId) return item;
+        return { ...item, status: "uploading", progress: 0 };
+      }),
+    );
+
+    uploadItems.forEach((item, index) => {
+      if (item.status !== "pending" || !item.mediaId) return;
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 30 + 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          setUploadItems((prev) =>
+            prev.map((it, i) =>
+              i === index ? { ...it, progress: 100, status: "done" } : it,
+            ),
+          );
+        } else {
+          setUploadItems((prev) =>
+            prev.map((it, i) =>
+              i === index ? { ...it, progress: Math.min(progress, 99) } : it,
+            ),
+          );
+        }
+      }, 300 + Math.random() * 400);
+    });
+  }, [uploadItems]);
+
+  const allMapped = uploadItems.length > 0 && uploadItems.every((i) => i.mediaId !== null);
+  const allDone = uploadItems.length > 0 && uploadItems.every((i) => i.status === "done");
+
   return (
     <>
       <div className="space-y-4">
@@ -170,7 +279,7 @@ export default function AdminMediasPage() {
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <div className="relative flex-1 sm:w-56 sm:flex-initial">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -183,6 +292,25 @@ export default function AdminMediasPage() {
                 className="pl-9"
               />
             </div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setUploadItems([]);
+                setUploadModalOpen(true);
+              }}
+              className="shrink-0"
+            >
+              <ImagePlus className="h-4 w-4" />
+              <span className="hidden sm:inline">사진 업로드</span>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleExportCSV}
+              className="shrink-0"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">엑셀 다운로드</span>
+            </Button>
             <Button
               onClick={openAdd}
               className="bg-gold text-navy hover:bg-gold-dark shrink-0"
@@ -446,6 +574,173 @@ export default function AdminMediasPage() {
                   {editing ? "수정" : "추가"}
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Bulk Upload Modal */}
+      {uploadModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setUploadModalOpen(false)}
+          />
+          <Card className="relative z-10 w-full max-w-2xl animate-fade-in-up max-h-[85vh] overflow-hidden flex flex-col">
+            <CardHeader className="flex-row items-start justify-between shrink-0">
+              <CardTitle className="text-lg text-navy">
+                매체 사진 일괄 업로드
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => setUploadModalOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4 overflow-y-auto">
+              {/* Drop Zone */}
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+                  isDragging
+                    ? "border-gold bg-gold/5"
+                    : "border-slate-200 hover:border-gold/50 hover:bg-slate-50"
+                }`}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy/5">
+                  <Upload className="h-6 w-6 text-navy/60" />
+                </div>
+                <div>
+                  <p className="font-medium text-navy">
+                    이미지를 드래그하거나 클릭하여 선택
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    JPG, PNG, WebP 지원 · 여러 파일 동시 선택 가능
+                  </p>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files) handleFilesSelected(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+              </div>
+
+              {/* Upload Items */}
+              {uploadItems.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    업로드 파일 ({uploadItems.length}개)
+                  </p>
+                  {uploadItems.map((item, idx) => (
+                    <div
+                      key={`${item.file.name}-${idx}`}
+                      className="flex items-center gap-3 rounded-lg border p-3"
+                    >
+                      <img
+                        src={item.preview}
+                        alt={item.file.name}
+                        className="h-12 w-12 shrink-0 rounded-md object-cover"
+                      />
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <p className="truncate text-sm font-medium text-navy">
+                          {item.file.name}
+                        </p>
+                        {item.status === "done" ? (
+                          <div className="flex items-center gap-1 text-xs text-emerald-600">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            업로드 완료
+                          </div>
+                        ) : item.status === "uploading" ? (
+                          <div className="space-y-1">
+                            <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                              <div
+                                className="h-full rounded-full bg-gold transition-all"
+                                style={{ width: `${item.progress}%` }}
+                              />
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">
+                              {Math.round(item.progress)}%
+                            </p>
+                          </div>
+                        ) : (
+                          <select
+                            value={item.mediaId ?? ""}
+                            onChange={(e) =>
+                              assignMediaToUpload(
+                                idx,
+                                parseInt(e.target.value),
+                              )
+                            }
+                            className="w-full rounded border px-2 py-1 text-xs"
+                          >
+                            <option value="">매체 선택...</option>
+                            {medias.map((m) => (
+                              <option key={m.id} value={m.id}>
+                                {m.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                      {item.status === "pending" && (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => removeUploadItem(idx)}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Actions */}
+              {uploadItems.length > 0 && (
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      uploadItems.forEach((i) => URL.revokeObjectURL(i.preview));
+                      setUploadItems([]);
+                    }}
+                  >
+                    초기화
+                  </Button>
+                  {allDone ? (
+                    <Button
+                      className="bg-navy text-white hover:bg-navy-light"
+                      onClick={() => setUploadModalOpen(false)}
+                    >
+                      완료
+                    </Button>
+                  ) : (
+                    <Button
+                      className="bg-navy text-white hover:bg-navy-light"
+                      disabled={!allMapped}
+                      onClick={startBulkUpload}
+                    >
+                      <Upload className="h-4 w-4" />
+                      업로드 시작
+                    </Button>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

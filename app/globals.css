@@ -280,3 +280,41 @@ select:focus-visible {
   -webkit-backdrop-filter: blur(6px);
   background: rgba(26, 39, 68, 0.3);
 }
+
+/* ── Print styles for admin dashboard ── */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  aside,
+  header,
+  .print\:hidden,
+  nav {
+    display: none !important;
+  }
+
+  .print-dashboard {
+    padding: 0 !important;
+  }
+
+  .flex.min-h-screen {
+    display: block !important;
+  }
+
+  .flex-1.flex-col {
+    display: block !important;
+  }
+
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  [data-slot="card"] {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+}

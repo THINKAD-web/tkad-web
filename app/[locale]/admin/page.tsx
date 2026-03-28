@@ -10,8 +10,10 @@ import {
   MessageSquareText,
   Monitor,
   Percent,
+  Printer,
   TrendingUp,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -177,7 +179,18 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 print-dashboard">
+      {/* Print Button */}
+      <div className="flex justify-end print:hidden">
+        <Button
+          variant="outline"
+          onClick={() => window.print()}
+        >
+          <Printer className="h-4 w-4" />
+          인쇄
+        </Button>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => {
