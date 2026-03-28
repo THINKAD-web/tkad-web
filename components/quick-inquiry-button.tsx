@@ -135,7 +135,7 @@ export default function QuickInquiryButton() {
             type="button"
             onClick={() => setOpen(true)}
             className="flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all hover:scale-110 hover:shadow-xl"
-            style={{ backgroundColor: "#c9a84c" }}
+            style={{ backgroundColor: "#9b3c31" }}
             aria-label={fullLabel}
           >
             <MessageSquarePlus className="h-6 w-6 text-white" />

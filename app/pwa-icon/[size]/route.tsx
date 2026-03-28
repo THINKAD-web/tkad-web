@@ -16,7 +16,7 @@ export async function GET(
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #1e3a5f 0%, #2a4f7f 100%)",
+          background: "linear-gradient(135deg, #1a2a6c 0%, #1a1a2e 100%)",
           borderRadius: s * 0.2,
         }}
       >
@@ -24,7 +24,7 @@ export async function GET(
           style={{
             fontSize: s * 0.45,
             fontWeight: 900,
-            color: "#c9a84c",
+            color: "#e8d5b5",
             letterSpacing: s * -0.02,
           }}
         >

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   Card,
   CardContent,
@@ -26,15 +26,21 @@ type Props = {
 };
 
 export default async function AboutPage({ params }: Props) {
-  const { locale } = await params;
+  const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
+  const t = await getTranslations();
 
-  return <AboutContent locale={locale} />;
+  return <AboutContent locale={locale} t={t} />;
 }
 
-function AboutContent({ locale }: { locale: string }) {
-  const t = useTranslations();
-   const isKo = locale === "ko";
+function AboutContent({
+  locale,
+  t,
+}: {
+  locale: string;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  const isKo = locale === "ko";
 
   const values = [
     { icon: BarChart3, ...getValueTranslation(t, "value1") },
@@ -271,7 +277,7 @@ function AboutContent({ locale }: { locale: string }) {
 }
 
 function getValueTranslation(
-  t: ReturnType<typeof useTranslations>,
+  t: Awaited<ReturnType<typeof getTranslations>>,
   key: string
 ) {
   return {

@@ -20,8 +20,8 @@ export default function GlobalError({
           margin: 0,
           fontFamily:
             "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-          background: "#ffffff",
-          color: "#1a2744",
+          background: "#d6d9e6",
+          color: "#1a1a2e",
         }}
       >
         <div
@@ -53,7 +53,7 @@ export default function GlobalError({
               style={{
                 fontSize: "3.75rem",
                 fontWeight: 800,
-                color: "#c9a84c",
+                color: "#9b3c31",
                 lineHeight: 1,
               }}
             >
@@ -64,7 +64,7 @@ export default function GlobalError({
                 marginTop: "1rem",
                 fontSize: "1.5rem",
                 fontWeight: 700,
-                color: "#1a2744",
+                color: "#1a1a2e",
               }}
             >
               일시적 오류가 발생했습니다
@@ -87,8 +87,8 @@ export default function GlobalError({
                 marginTop: "2rem",
                 padding: "0.75rem 2rem",
                 borderRadius: "9999px",
-                background: "#c9a84c",
-                color: "#1a2744",
+                background: "#9b3c31",
+                color: "#ffffff",
                 fontWeight: 700,
                 fontSize: "0.875rem",
                 border: "none",

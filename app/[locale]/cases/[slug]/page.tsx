@@ -35,7 +35,11 @@ const categoryLabels: Record<string, { ko: string; en: string }> = {
 };
 
 export default function CaseStudyDetailPage({ params }: Props) {
-  const { slug } = use(params);
+  const resolved = use(params);
+  if (!resolved?.slug) {
+    notFound();
+  }
+  const { slug } = resolved;
   const locale = useLocale();
   const isKo = locale === "ko";
   const [showLeadModal, setShowLeadModal] = useState(false);

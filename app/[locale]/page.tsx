@@ -1,5 +1,5 @@
-import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -100,14 +100,20 @@ const partnerLogos = [
 ];
 
 export default async function HomePage({ params }: Props) {
-  const { locale } = await params;
+  const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
+  const t = await getTranslations();
 
-  return <HomeContent locale={locale} />;
+  return <HomeContent locale={locale} t={t} />;
 }
 
-function HomeContent({ locale }: { locale: string }) {
-  const t = useTranslations();
+function HomeContent({
+  locale,
+  t,
+}: {
+  locale: string;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
   const isKo = locale === "ko";
 
   return (
@@ -115,8 +121,8 @@ function HomeContent({ locale }: { locale: string }) {
       {/* Hero */}
       <section className="hero-bg relative flex min-h-screen items-center justify-center overflow-hidden">
         <div className="hero-pattern absolute inset-0" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(201,168,76,0.1)_0%,_transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(201,168,76,0.06)_0%,_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(232,213,181,0.12)_0%,_transparent_58%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(155,60,49,0.1)_0%,_transparent_52%)]" />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
           <div className="hero-fade-in hero-fade-in-1 mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">
@@ -195,7 +201,7 @@ function HomeContent({ locale }: { locale: string }) {
 
       {/* Verification Process */}
       <section className="section-white relative py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,168,76,0.04)_0%,_transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,213,181,0.06)_0%,_transparent_70%)]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
@@ -970,7 +976,7 @@ function HomeContent({ locale }: { locale: string }) {
       {/* CTA Banner */}
       <section className="hero-bg relative overflow-hidden py-32">
         <div className="absolute inset-0 hero-pattern opacity-30" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,168,76,0.08)_0%,_transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,213,181,0.07)_0%,_transparent_70%)]" />
         <ScrollAnimate className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="section-title text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
             {t("ctaBanner.title")}

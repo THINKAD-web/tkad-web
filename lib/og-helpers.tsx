@@ -18,7 +18,7 @@ export function OgLayout({
         flexDirection: "column",
         justifyContent: "center",
         padding: "60px 80px",
-        background: "linear-gradient(135deg, #1e3a5f 0%, #162d4a 50%, #0f1f33 100%)",
+        background: "linear-gradient(135deg, #1a2a6c 0%, #1a1a2e 55%, #12121f 100%)",
         position: "relative",
       }}
     >
@@ -29,7 +29,7 @@ export function OgLayout({
           right: 0,
           width: 400,
           height: 400,
-          background: "radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(232,213,181,0.14) 0%, transparent 70%)",
           display: "flex",
         }}
       />
@@ -40,7 +40,7 @@ export function OgLayout({
           left: 0,
           width: 300,
           height: 300,
-          background: "radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(155,60,49,0.08) 0%, transparent 70%)",
           display: "flex",
         }}
       />
@@ -56,7 +56,7 @@ export function OgLayout({
           <span
             style={{
               fontSize: 18,
-              color: "#c9a84c",
+              color: "#e8d5b5",
               fontWeight: 700,
               letterSpacing: 2,
               textTransform: "uppercase",
@@ -109,11 +109,11 @@ export function OgLayout({
             justifyContent: "center",
             width: 48,
             height: 48,
-            background: "linear-gradient(135deg, #c9a84c, #b8963f)",
+            background: "linear-gradient(135deg, #e8d5b5, #c4b08f)",
             borderRadius: 12,
           }}
         >
-          <span style={{ fontSize: 28, fontWeight: 900, color: "#1e3a5f" }}>
+          <span style={{ fontSize: 28, fontWeight: 900, color: "#1a2a6c" }}>
             T
           </span>
         </div>
@@ -121,7 +121,7 @@ export function OgLayout({
           <span style={{ fontSize: 22, fontWeight: 800, color: "#ffffff" }}>
             THINKAD
           </span>
-          <span style={{ fontSize: 14, color: "rgba(201,168,76,0.8)" }}>
+          <span style={{ fontSize: 14, color: "rgba(232,213,181,0.85)" }}>
             싱커드 · 대한민국 No.1 OOH 광고
           </span>
         </div>

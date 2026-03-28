@@ -20,18 +20,18 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="relative overflow-hidden border-t bg-gradient-to-b from-navy to-navy-dark text-white">
-      <div className="hero-pattern absolute inset-0 opacity-20" />
+    <footer className="relative overflow-hidden border-t border-white/5 bg-gradient-to-b from-navy via-navy-dark to-[#12121f] text-white">
+      <div className="hero-pattern absolute inset-0 opacity-[0.14]" />
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="text-xl font-extrabold tracking-tight">
               THINK<span className="bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">AD</span>
             </h3>
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">
+            <p className="mt-2 text-sm leading-relaxed text-silver/90">
               {t("footer.description")}
             </p>
-            <div className="mt-5 space-y-1.5 text-sm text-slate-400">
+            <div className="mt-5 space-y-1.5 text-sm text-silver/90">
               <p>{t("footer.companyName")}</p>
               <p>{t("footer.ceo")}</p>
               <p>{t("footer.bizNumber")}</p>
@@ -39,7 +39,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-gold">
+            <h4 className="text-sm font-semibold tracking-wide text-gold">
               {t("footer.quickLinks")}
             </h4>
             <ul className="mt-4 space-y-2.5">
@@ -47,7 +47,7 @@ export default function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-slate-400 transition-colors duration-300 hover:text-gold-light"
+                    className="text-sm text-silver/90 transition-colors duration-300 hover:text-gold-light"
                   >
                     {item.label}
                   </Link>
@@ -57,10 +57,10 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-gold">
+            <h4 className="text-sm font-semibold tracking-wide text-gold">
               {t("footer.contactInfo")}
             </h4>
-            <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
+            <ul className="mt-4 space-y-2.5 text-sm text-silver/90">
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold/50" />
                 {t("footer.address")}
@@ -88,7 +88,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-gold">
+            <h4 className="text-sm font-semibold tracking-wide text-gold">
               {t("footer.services")}
             </h4>
             <ul className="mt-4 space-y-2.5">
@@ -96,7 +96,7 @@ export default function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="flex items-center gap-2 text-sm text-slate-400 transition-colors duration-300 hover:text-gold-light"
+                    className="flex items-center gap-2 text-sm text-silver/90 transition-colors duration-300 hover:text-gold-light"
                   >
                     <item.icon className="h-4 w-4 shrink-0 text-gold/50" />
                     {item.label}
@@ -108,11 +108,11 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 border-t border-white/10 pt-8">
-          <div className="mb-4 text-center text-xs leading-relaxed text-slate-500">
+          <div className="mb-4 text-center text-xs leading-relaxed text-silver/70">
             <p>{t("footer.companyName")} | {t("footer.ceo")} | {t("footer.bizNumber")}</p>
             <p>{t("footer.ecommerce")} | {t("footer.address")}</p>
           </div>
-          <div className="text-center text-sm text-slate-500">
+          <div className="text-center text-sm text-silver/70">
             {t("footer.copyright")}
           </div>
         </div>

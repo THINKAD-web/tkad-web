@@ -3,6 +3,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -67,8 +68,8 @@ export const metadata: Metadata = {
   other: {
     "naver-site-verification": "",
     "google-site-verification": "",
-    "theme-color": "#1e3a5f",
-    "msapplication-TileColor": "#1e3a5f",
+    "theme-color": "#1a2a6c",
+    "msapplication-TileColor": "#1a2a6c",
   },
 };
 
@@ -82,7 +83,7 @@ export function generateStaticParams() {
 }
 
 export default async function LocaleLayout({ children, params }: Props) {
-  const { locale } = await params;
+  const locale = await resolveLocaleParam(params);
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }

@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
-import { setRequestLocale } from "next-intl/server";
-import { useTranslations } from "next-intl";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -8,9 +8,9 @@ type Props = {
 };
 
 export default async function NotFound({ params }: Props) {
-  const { locale } = await params;
+  const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
-  const t = useTranslations();
+  const t = await getTranslations();
 
   return (
     <main className="flex min-h-[60vh] items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 px-4">

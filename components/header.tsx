@@ -24,7 +24,7 @@ function LanguageToggle() {
       onClick={() => switchLocale(locale === "ko" ? "en" : "ko")}
       disabled={isPending}
       aria-label={locale === "ko" ? "Switch to English" : "한국어로 전환"}
-      className="flex items-center gap-1.5 rounded-full border border-navy/10 bg-white/80 px-3 py-1.5 text-xs font-semibold transition-all duration-300 hover:border-gold/40 hover:bg-gold/5 disabled:opacity-60"
+      className="flex items-center gap-1.5 rounded-full border border-navy/12 bg-white/85 px-3 py-1.5 text-xs font-semibold transition-all duration-300 hover:border-silver/50 hover:bg-white disabled:opacity-60"
     >
       <span className="text-base leading-none">{locale === "ko" ? "🇰🇷" : "🇺🇸"}</span>
       <span className="text-navy/70">{locale === "ko" ? "한국어" : "EN"}</span>
@@ -58,7 +58,7 @@ export default function Header() {
     <header
       className={`sticky top-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "header-scrolled border-b border-navy/5"
+          ? "header-scrolled border-b border-navy/8"
           : "bg-transparent"
       }`}
     >
@@ -90,8 +90,8 @@ export default function Header() {
 
         <div className="hidden items-center gap-3 md:flex">
           <LanguageToggle />
-          <Link href="/contact">
-            <Button className="btn-gold rounded-full px-6 text-sm font-bold shadow-md">
+            <Link href="/contact">
+            <Button className="btn-gold rounded-full px-6 shadow-md">
               {t("nav.contact")}
             </Button>
           </Link>
@@ -129,7 +129,7 @@ export default function Header() {
                   className="mobile-nav-item"
                   style={{ animationDelay: `${navItems.length * 60}ms` }}
                 >
-                  <Button className="btn-gold mt-3 w-full rounded-full font-bold">
+                  <Button className="btn-gold mt-3 w-full rounded-full">
                     {t("nav.contact")}
                   </Button>
                 </Link>
