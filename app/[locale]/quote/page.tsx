@@ -11,14 +11,36 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Monitor, MapPin, Calculator, Send, Download } from "lucide-react";
+import {
+  CheckCircle,
+  Monitor,
+  MapPin,
+  Calculator,
+  Send,
+  Download,
+  ChevronRight,
+  ChevronLeft,
+  Sparkles,
+  LayoutTemplate,
+  ImagePlus,
+  Trash2,
+  Mail,
+} from "lucide-react";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { mediaData, typeLabels } from "@/lib/media-data";
 import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast-provider";
+import {
+  saveQuotePdf,
+  quotePdfToBase64,
+  type QuoteTemplateId,
+  type BuildQuotePdfParams,
+} from "@/lib/build-quote-pdf";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const LOGO_MAX_BYTES = 600 * 1024;
 
 type PeriodKey = "1month" | "3months" | "6months" | "12months";
 
@@ -40,18 +62,22 @@ type FormState = {
   budgetMax: string;
 };
 
-type FormErrors = Partial<
-  Record<"name" | "phone" | "media", string>
->;
+type FormErrors = Partial<Record<"name" | "phone" | "media", string>>;
+
+type WizardStep = 1 | 2 | 3 | 4;
 
 export default function QuotePage() {
   const t = useTranslations();
   const locale = useLocale();
   const isKo = locale === "ko";
 
+  const [step, setStep] = useState<WizardStep>(1);
   const [period, setPeriod] = useState<PeriodKey>("1month");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const mediaQueryApplied = useRef(false);
+  const [template, setTemplate] = useState<QuoteTemplateId>("default");
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [emailHoneypot, setEmailHoneypot] = useState("");
 
   useEffect(() => {
     if (mediaQueryApplied.current) return;
@@ -65,6 +91,7 @@ export default function QuotePage() {
       .filter((n) => Number.isFinite(n) && mediaData.some((m) => m.id === n));
     if (ids.length > 0) setSelectedIds(new Set(ids));
   }, []);
+
   const [form, setForm] = useState<FormState>({
     company: "",
     name: "",
@@ -83,19 +110,51 @@ export default function QuotePage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [emailPdfLoading, setEmailPdfLoading] = useState(false);
 
   const selectedMedia = useMemo(
     () => mediaData.filter((m) => selectedIds.has(m.id)),
-    [selectedIds]
+    [selectedIds],
   );
 
   const monthlyCost = useMemo(
     () => selectedMedia.reduce((sum, m) => sum + m.price, 0),
-    [selectedMedia]
+    [selectedMedia],
   );
 
   const periodMonths = PERIOD_MONTHS[period];
   const totalCost = monthlyCost * periodMonths;
+
+  const periodLabel = t(`quote.periods.${period}` as `quote.periods.${PeriodKey}`);
+
+  const pdfParams: BuildQuotePdfParams = useMemo(
+    () => ({
+      template,
+      logoDataUrl,
+      isKo,
+      company: form.company,
+      name: form.name,
+      periodLabel,
+      monthlyCost,
+      totalCost,
+      rows: selectedMedia.map((m) => ({
+        name: (isKo ? m.name : m.nameEn) || m.name,
+        location: (isKo ? m.location : m.locationEn) || m.location,
+        price: m.price,
+      })),
+    }),
+    [
+      template,
+      logoDataUrl,
+      isKo,
+      form.company,
+      form.name,
+      periodLabel,
+      monthlyCost,
+      totalCost,
+      selectedMedia,
+    ],
+  );
 
   const toggleMedia = useCallback((id: number) => {
     setSelectedIds((prev) => {
@@ -130,8 +189,52 @@ export default function QuotePage() {
       }
       return e;
     },
-    [isKo, t]
+    [isKo, t],
   );
+
+  const stepLabels = useMemo(
+    () => [
+      t("quote.stepMedia"),
+      t("quote.stepPeriodBudget"),
+      t("quote.stepTemplate"),
+      t("quote.stepReview"),
+    ],
+    [t],
+  );
+
+  const canGoNext = useCallback(() => {
+    if (step === 1) return selectedMedia.length > 0;
+    return true;
+  }, [step, selectedMedia.length]);
+
+  const goNext = () => {
+    if (!canGoNext()) {
+      toast("warning", t("quote.noMediaSelected"));
+      setTouched((prev) => ({ ...prev, media: true }));
+      setErrors((prev) => ({ ...prev, media: t("quote.noMediaSelected") }));
+      return;
+    }
+    setStep((s) => (s < 4 ? ((s + 1) as WizardStep) : s));
+  };
+
+  const goPrev = () => setStep((s) => (s > 1 ? ((s - 1) as WizardStep) : s));
+
+  const onLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    if (!f.type.startsWith("image/")) {
+      toast("warning", isKo ? "이미지 파일만 올릴 수 있습니다." : "Images only.");
+      return;
+    }
+    if (f.size > LOGO_MAX_BYTES) {
+      toast("warning", t("quote.logoTooLarge"));
+      return;
+    }
+    const r = new FileReader();
+    r.onload = () => setLogoDataUrl(r.result as string);
+    r.readAsDataURL(f);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,7 +255,10 @@ export default function QuotePage() {
     const validationErrors = validate(form, selectedMedia.length);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) {
-      toast("warning", isKo ? "필수 항목을 모두 입력해 주세요." : "Please fill in all required fields.");
+      toast(
+        "warning",
+        isKo ? "필수 항목을 모두 입력해 주세요." : "Please fill in all required fields.",
+      );
       return;
     }
 
@@ -182,9 +288,15 @@ export default function QuotePage() {
       });
       if (!res.ok) throw new Error("submit failed");
       setSubmitted(true);
-      toast("success", isKo ? "견적 요청이 접수되었습니다." : "Your quote request has been submitted.");
+      toast(
+        "success",
+        isKo ? "견적 요청이 접수되었습니다." : "Your quote request has been submitted.",
+      );
     } catch {
-      toast("error", isKo ? "일시적 오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.");
+      toast(
+        "error",
+        isKo ? "일시적 오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -205,130 +317,52 @@ export default function QuotePage() {
       toast("warning", t("quote.noMediaSelected"));
       return;
     }
-
     setDownloading(true);
     try {
-      const { default: jsPDF } = await import("jspdf");
-      const doc = new jsPDF();
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
-      doc.text("SINKERD 견적서", 20, 20);
-
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      doc.text(
-        `발행일: ${new Date().toISOString().slice(0, 10)}`,
-        20,
-        30,
-      );
-      if (form.company || form.name) {
-        doc.text(
-          `고객사: ${form.company || "-"} / 담당자: ${
-            form.name || "-"
-          }`,
-          20,
-          36,
-        );
-      }
-
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text("캠페인 개요", 20, 48);
-
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      const periodLabel = t(
-        `quote.periods.${period}` as `quote.periods.${PeriodKey}`,
-      );
-      doc.text(`집행 기간: ${periodLabel}`, 20, 56);
-      doc.text(
-        `월 예상 집행비: ₩${monthlyCost.toLocaleString()}만원`,
-        20,
-        62,
-      );
-      doc.text(`총 예상 집행비: ₩${totalCost.toLocaleString()}만원`, 20, 68);
-
-      let y = 80;
-      doc.setFont("helvetica", "bold");
-      doc.text("매체 상세", 20, y);
-      y += 6;
-
-      doc.setFontSize(10);
-      doc.text("매체명", 20, y);
-      doc.text("지역/위치", 90, y);
-      doc.text("월 단가(만원)", 150, y, { align: "right" });
-      y += 4;
-      doc.setLineWidth(0.2);
-      doc.line(20, y, 190, y);
-      y += 5;
-
-      doc.setFont("helvetica", "normal");
-      selectedMedia.forEach((m) => {
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-        const name = (isKo ? m.name : m.nameEn) || m.name;
-        const loc = (isKo ? m.location : m.locationEn) || m.location;
-        doc.text(name, 20, y);
-        doc.text(loc, 90, y);
-        doc.text(
-          m.price.toLocaleString(),
-          150,
-          y,
-          { align: "right" },
-        );
-        y += 6;
-      });
-
-      if (y + 16 > 280) {
-        doc.addPage();
-        y = 20;
-      }
-
-      y += 4;
-      doc.setLineWidth(0.2);
-      doc.line(20, y, 190, y);
-      y += 8;
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text(
-        `총 예상 집행비 (부가세 별도): ₩${totalCost.toLocaleString()}만원`,
-        20,
-        y,
-      );
-      y += 8;
-
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      doc.text(
-        "※ 본 견적은 참고용으로, 실제 계약 시 매체 재고 및 세부 조건에 따라 변동될 수 있습니다.",
-        20,
-        y,
-      );
-      y += 5;
-      doc.text(
-        "문의: contact@sinkerd.com / 02-000-0000",
-        20,
-        y,
-      );
-
-      doc.save("sinkerd-quote.pdf");
-      toast(
-        "success",
-        isKo ? "PDF 견적서를 다운로드했습니다." : "Downloaded quote PDF.",
-      );
+      await saveQuotePdf(pdfParams, "thinkad-quote.pdf");
+      toast("success", t("quote.pdfDownloaded"));
     } catch {
-      toast(
-        "error",
-        isKo
-          ? "PDF 생성 중 오류가 발생했습니다."
-          : "Failed to generate PDF.",
-      );
+      toast("error", t("quote.pdfError"));
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const handleEmailPdf = async () => {
+    if (selectedMedia.length === 0) {
+      toast("warning", t("quote.noMediaSelected"));
+      return;
+    }
+    if (!form.email.trim() || !EMAIL_RE.test(form.email.trim())) {
+      toast("warning", t("quote.emailRequiredForPdf"));
+      return;
+    }
+    setEmailPdfLoading(true);
+    try {
+      const pdfBase64 = await quotePdfToBase64(pdfParams);
+      const res = await fetch("/api/quote/email-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.email.trim(),
+          pdfBase64,
+          locale: isKo ? "ko" : "en",
+          website: emailHoneypot,
+        }),
+      });
+      const data = (await res.json()) as { code?: string; error?: string };
+      if (!res.ok) {
+        if (data.code === "SMTP_DISABLED") {
+          toast("warning", t("quote.smtpDisabled"));
+          return;
+        }
+        throw new Error(data.error ?? "fail");
+      }
+      toast("success", t("quote.pdfEmailed"));
+    } catch {
+      toast("error", t("quote.pdfEmailFail"));
+    } finally {
+      setEmailPdfLoading(false);
     }
   };
 
@@ -340,171 +374,574 @@ export default function QuotePage() {
             {t("quote.title")}
           </h1>
           <p className="mt-2 text-slate-300">{t("quote.subtitle")}</p>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
+            {t("quote.wizardSubtitle")}
+          </p>
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-navy/50">
+              {t("quote.wizardTitle")}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+              {([1, 2, 3, 4] as const).map((n) => (
+                <div key={n} className="flex items-center gap-2 sm:gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (n <= step) {
+                        setStep(n);
+                        return;
+                      }
+                      if (selectedMedia.length === 0) {
+                        toast("warning", t("quote.noMediaSelected"));
+                        return;
+                      }
+                      setStep(n);
+                    }}
+                    className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-colors",
+                      step === n
+                        ? "bg-gold text-navy ring-2 ring-gold/40"
+                        : step > n
+                          ? "bg-navy text-white"
+                          : "bg-slate-200 text-slate-500",
+                    )}
+                  >
+                    {step > n ? "✓" : n}
+                  </button>
+                  <span
+                    className={cn(
+                      "hidden max-w-[100px] text-xs font-medium sm:block",
+                      step === n ? "text-navy" : "text-muted-foreground",
+                    )}
+                  >
+                    {stepLabels[n - 1]}
+                  </span>
+                  {n < 4 ? (
+                    <ChevronRight className="hidden h-4 w-4 text-slate-300 sm:block" />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              {t("quote.stepOf", { current: step, total: 4 })}
+            </p>
+          </div>
+
           <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
             <div className="lg:col-span-2">
-              <Card className="shadow-md">
+              <Card className="min-h-[320px] shadow-md">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-xl text-navy">
                     <Monitor className="h-5 w-5 text-gold" />
-                    {t("quote.selectMedia")}
+                    {stepLabels[step - 1]}
                   </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {t("quote.selectMediaDesc")}
-                  </p>
                 </CardHeader>
                 <CardContent>
-                  {touched.media && errors.media ? (
-                    <p className="mb-4 text-sm font-medium text-red-500">
-                      {errors.media}
-                    </p>
-                  ) : null}
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    {mediaData.map((media) => {
-                      const checked = selectedIds.has(media.id);
-                      const typeLabel = typeLabels[media.type];
-                      return (
-                        <label
-                          key={media.id}
-                          className="block cursor-pointer"
+                  {step === 1 && (
+                    <>
+                      {touched.media && errors.media ? (
+                        <p className="mb-4 text-sm font-medium text-red-500">
+                          {errors.media}
+                        </p>
+                      ) : null}
+                      <p className="mb-4 text-sm text-muted-foreground">
+                        {t("quote.selectMediaDesc")}
+                      </p>
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        {mediaData.map((media) => {
+                          const checked = selectedIds.has(media.id);
+                          const typeLabel = typeLabels[media.type];
+                          return (
+                            <label
+                              key={media.id}
+                              className="block cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                className="peer sr-only"
+                                checked={checked}
+                                onChange={() => toggleMedia(media.id)}
+                              />
+                              <Card
+                                className={cn(
+                                  "h-full overflow-hidden border-2 transition-all hover:shadow-md",
+                                  "peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
+                                )}
+                              >
+                                <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
+                                  <Monitor className="h-9 w-9 text-navy/20" />
+                                  <span
+                                    className={cn(
+                                      "absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded border-2 bg-white text-xs",
+                                      checked
+                                        ? "border-gold bg-gold text-navy"
+                                        : "border-navy/20",
+                                    )}
+                                    aria-hidden
+                                  >
+                                    {checked ? "✓" : ""}
+                                  </span>
+                                </div>
+                                <CardHeader className="pb-2">
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-navy/5 text-xs text-navy"
+                                  >
+                                    {isKo ? typeLabel.ko : typeLabel.en}
+                                  </Badge>
+                                  <CardTitle className="pt-1 text-base leading-snug">
+                                    {isKo ? media.name : media.nameEn}
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-2">
+                                  <div className="flex items-start gap-1 text-sm text-muted-foreground">
+                                    <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                    <span>
+                                      {isKo ? media.location : media.locationEn}
+                                    </span>
+                                  </div>
+                                  <div className="text-lg font-bold text-navy">
+                                    ₩{media.price.toLocaleString()}
+                                    <span className="text-xs font-normal text-muted-foreground">
+                                      만원 {t("quote.perMonth")}
+                                    </span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+
+                  {step === 2 && (
+                    <div className="space-y-6">
+                      <div>
+                        <label className="mb-2 block text-sm font-semibold text-navy">
+                          {t("quote.period")}
+                        </label>
+                        <select
+                          value={period}
+                          onChange={(e) =>
+                            setPeriod(e.target.value as PeriodKey)
+                          }
+                          className="w-full rounded-md border px-3 py-2 text-sm"
+                          aria-label={t("quote.period")}
                         >
-                          <input
-                            type="checkbox"
-                            className="peer sr-only"
-                            checked={checked}
-                            onChange={() => toggleMedia(media.id)}
+                          <option value="1month">{t("quote.periods.1month")}</option>
+                          <option value="3months">{t("quote.periods.3months")}</option>
+                          <option value="6months">{t("quote.periods.6months")}</option>
+                          <option value="12months">{t("quote.periods.12months")}</option>
+                        </select>
+                      </div>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1.5 block text-xs font-medium text-navy">
+                            {t("quote.budgetMin")}
+                          </label>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            min={0}
+                            placeholder="0"
+                            value={form.budgetMin}
+                            onChange={(e) =>
+                              updateField("budgetMin", e.target.value)
+                            }
                           />
-                          <Card
+                        </div>
+                        <div>
+                          <label className="mb-1.5 block text-xs font-medium text-navy">
+                            {t("quote.budgetMax")}
+                          </label>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            min={0}
+                            placeholder="0"
+                            value={form.budgetMax}
+                            onChange={(e) =>
+                              updateField("budgetMax", e.target.value)
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 3 && (
+                    <div className="space-y-6">
+                      <div>
+                        <p className="mb-3 text-sm text-muted-foreground">
+                          {t("quote.templateDesc")}
+                        </p>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <button
+                            type="button"
+                            onClick={() => setTemplate("default")}
                             className={cn(
-                              "h-full overflow-hidden border-2 transition-all hover:shadow-md",
-                              "peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
+                              "rounded-xl border-2 p-4 text-left transition-all",
+                              template === "default"
+                                ? "border-gold bg-gold/5 ring-2 ring-gold/20"
+                                : "border-navy/10 hover:border-navy/25",
                             )}
                           >
-                            <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
-                              <Monitor className="h-9 w-9 text-navy/20" />
-                              <span
-                                className={cn(
-                                  "absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded border-2 bg-white text-xs",
-                                  checked
-                                    ? "border-gold bg-gold text-navy"
-                                    : "border-navy/20"
-                                )}
-                                aria-hidden
-                              >
-                                {checked ? "✓" : ""}
-                              </span>
-                            </div>
-                            <CardHeader className="pb-2">
-                              <Badge
-                                variant="secondary"
-                                className="bg-navy/5 text-navy text-xs"
-                              >
-                                {isKo ? typeLabel.ko : typeLabel.en}
-                              </Badge>
-                              <CardTitle className="pt-1 text-base leading-snug">
-                                {isKo ? media.name : media.nameEn}
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-2">
-                              <div className="flex items-start gap-1 text-sm text-muted-foreground">
-                                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                                <span>
-                                  {isKo ? media.location : media.locationEn}
-                                </span>
-                              </div>
-                              <div className="text-lg font-bold text-navy">
-                                ₩{media.price.toLocaleString()}
-                                <span className="text-xs font-normal text-muted-foreground">
-                                  만원 {t("quote.perMonth")}
-                                </span>
-                              </div>
-                            </CardContent>
-                          </Card>
+                            <LayoutTemplate className="mb-2 h-8 w-8 text-navy" />
+                            <p className="font-bold text-navy">
+                              {t("quote.templateDefault")}
+                            </p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {t("quote.templateDefaultDesc")}
+                            </p>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTemplate("premium")}
+                            className={cn(
+                              "rounded-xl border-2 p-4 text-left transition-all",
+                              template === "premium"
+                                ? "border-gold bg-gold/5 ring-2 ring-gold/20"
+                                : "border-navy/10 hover:border-navy/25",
+                            )}
+                          >
+                            <Sparkles className="mb-2 h-8 w-8 text-gold-dark" />
+                            <p className="font-bold text-navy">
+                              {t("quote.templatePremium")}
+                            </p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {t("quote.templatePremiumDesc")}
+                            </p>
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-semibold text-navy">
+                          {t("quote.logoLabel")}
                         </label>
-                      );
-                    })}
-                  </div>
+                        <p className="mb-2 text-xs text-muted-foreground">
+                          {t("quote.logoHint")}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-navy/15 bg-white px-4 py-2 text-sm font-medium text-navy shadow-sm hover:bg-slate-50">
+                            <ImagePlus className="h-4 w-4 text-gold" />
+                            {isKo ? "파일 선택" : "Choose file"}
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg"
+                              className="hidden"
+                              onChange={onLogoChange}
+                            />
+                          </label>
+                          {logoDataUrl ? (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setLogoDataUrl(null)}
+                            >
+                              <Trash2 className="mr-1.5 h-4 w-4" />
+                              {t("quote.logoRemove")}
+                            </Button>
+                          ) : null}
+                        </div>
+                        {logoDataUrl ? (
+                          <div className="mt-4 inline-block rounded-lg border border-navy/10 bg-slate-50 p-3">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={logoDataUrl}
+                              alt=""
+                              className="max-h-24 max-w-[200px] object-contain"
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 4 && !submitted && (
+                    <div className="space-y-6">
+                      <div className="rounded-xl border border-navy/10 bg-slate-50/80 p-4 text-sm">
+                        <p className="font-semibold text-navy">
+                          {t("quote.reviewTitle")}
+                        </p>
+                        <ul className="mt-3 space-y-2 text-muted-foreground">
+                          <li>
+                            <span className="font-medium text-navy">
+                              {t("quote.reviewMediaCount")}:{" "}
+                            </span>
+                            {selectedMedia.length}
+                            {isKo ? "건" : ""}
+                          </li>
+                          <li>
+                            <span className="font-medium text-navy">
+                              {t("quote.period")}:{" "}
+                            </span>
+                            {periodLabel}
+                          </li>
+                          <li>
+                            <span className="font-medium text-navy">
+                              {t("quote.reviewTemplate")}:{" "}
+                            </span>
+                            {template === "premium"
+                              ? t("quote.templatePremium")
+                              : t("quote.templateDefault")}
+                          </li>
+                          <li>
+                            <span className="font-medium text-navy">
+                              {t("quote.reviewLogo")}:{" "}
+                            </span>
+                            {logoDataUrl
+                              ? t("quote.reviewLogoYes")
+                              : t("quote.reviewLogoNo")}
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="flex flex-col gap-3 sm:flex-row">
+                        <Button
+                          type="button"
+                          onClick={handleDownloadPdf}
+                          disabled={downloading || selectedMedia.length === 0}
+                          className="flex-1 bg-navy text-white hover:bg-navy/90"
+                        >
+                          {downloading ? (
+                            <>
+                              <Spinner className="mr-2 h-4 w-4" />
+                              {t("quote.generatingPdf")}
+                            </>
+                          ) : (
+                            <>
+                              <Download className="mr-2 h-4 w-4" />
+                              {t("quote.downloadPdf")}
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="relative rounded-xl border border-gold/30 bg-gold/5 p-4">
+                        <div className="mb-2 flex items-center gap-2 font-semibold text-navy">
+                          <Mail className="h-4 w-4 text-gold-dark" />
+                          {t("quote.emailPdfTitle")}
+                        </div>
+                        <p className="mb-3 text-xs text-muted-foreground">
+                          {t("quote.emailPdfDesc")}
+                        </p>
+                        <div className="absolute -left-[9999px]" aria-hidden>
+                          <input
+                            value={emailHoneypot}
+                            onChange={(e) => setEmailHoneypot(e.target.value)}
+                            tabIndex={-1}
+                            autoComplete="off"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                          <div className="flex-1">
+                            <label className="sr-only" htmlFor="quote-pdf-email">
+                              {t("quote.email")}
+                            </label>
+                            <Input
+                              id="quote-pdf-email"
+                              type="email"
+                              placeholder={t("quote.emailPlaceholder")}
+                              value={form.email}
+                              onChange={(e) =>
+                                updateField("email", e.target.value)
+                              }
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="border-navy/25 font-semibold text-navy"
+                            onClick={handleEmailPdf}
+                            disabled={emailPdfLoading || selectedMedia.length === 0}
+                          >
+                            {emailPdfLoading ? (
+                              <>
+                                <Spinner className="mr-2 h-4 w-4" />
+                                {t("quote.sendingPdf")}
+                              </>
+                            ) : (
+                              <>
+                                <Send className="mr-2 h-4 w-4" />
+                                {t("quote.sendPdfEmail")}
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-navy/10 pt-6">
+                        <h3 className="mb-4 text-lg font-bold text-navy">
+                          {t("quote.getQuote")}
+                        </h3>
+                        <form
+                          className="relative space-y-5"
+                          onSubmit={handleSubmit}
+                          noValidate
+                        >
+                          <div
+                            className="absolute -left-[9999px]"
+                            aria-hidden="true"
+                            tabIndex={-1}
+                          >
+                            <label htmlFor="quote-website">Website</label>
+                            <input
+                              type="text"
+                              id="quote-website"
+                              name="website"
+                              value={form.website}
+                              onChange={(e) =>
+                                updateField("website", e.target.value)
+                              }
+                              tabIndex={-1}
+                              autoComplete="off"
+                            />
+                          </div>
+
+                          <div className="grid gap-5 sm:grid-cols-2">
+                            <div>
+                              <label className="mb-1.5 block text-sm font-medium text-navy">
+                                {t("quote.company")}
+                              </label>
+                              <Input
+                                placeholder={t("quote.companyPlaceholder")}
+                                value={form.company}
+                                onChange={(e) =>
+                                  updateField("company", e.target.value)
+                                }
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-1.5 block text-sm font-medium text-navy">
+                                {t("quote.name")}{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <Input
+                                placeholder={t("quote.namePlaceholder")}
+                                value={form.name}
+                                onChange={(e) =>
+                                  updateField("name", e.target.value)
+                                }
+                                className={inputErrorClass("name")}
+                              />
+                              {fieldError("name")}
+                            </div>
+                            <div>
+                              <label className="mb-1.5 block text-sm font-medium text-navy">
+                                {t("quote.phone")}{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <Input
+                                placeholder={t("quote.phonePlaceholder")}
+                                value={form.phone}
+                                onChange={(e) =>
+                                  updateField("phone", e.target.value)
+                                }
+                                className={inputErrorClass("phone")}
+                              />
+                              {fieldError("phone")}
+                            </div>
+                            <div>
+                              <label className="mb-1.5 block text-sm font-medium text-navy">
+                                {t("quote.email")}
+                              </label>
+                              <Input
+                                type="email"
+                                placeholder={t("quote.emailPlaceholder")}
+                                value={form.email}
+                                onChange={(e) =>
+                                  updateField("email", e.target.value)
+                                }
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="mb-1.5 block text-sm font-medium text-navy">
+                              {t("quote.message")}
+                            </label>
+                            <Textarea
+                              rows={4}
+                              placeholder={t("quote.messagePlaceholder")}
+                              value={form.message}
+                              onChange={(e) =>
+                                updateField("message", e.target.value)
+                              }
+                            />
+                          </div>
+
+                          <Button
+                            type="submit"
+                            className="w-full bg-gold font-semibold text-navy hover:bg-gold-dark"
+                            size="lg"
+                            disabled={loading}
+                          >
+                            {loading ? (
+                              <>
+                                <Spinner className="mr-2" />
+                                {t("quote.submitting")}
+                              </>
+                            ) : (
+                              <>
+                                <Send className="mr-2 h-4 w-4" />
+                                {t("quote.submit")}
+                              </>
+                            )}
+                          </Button>
+                        </form>
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 4 && submitted ? (
+                    <div className="flex flex-col items-center gap-4 py-12 text-center">
+                      <CheckCircle className="h-12 w-12 text-green-500" />
+                      <p className="text-lg font-semibold text-navy">
+                        {t("quote.successTitle")}
+                      </p>
+                      <p className="max-w-md text-muted-foreground">
+                        {t("quote.successDesc")}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {step < 4 || (step === 4 && !submitted) ? (
+                    <div className="mt-8 flex flex-wrap justify-between gap-3 border-t border-navy/10 pt-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={goPrev}
+                        disabled={step === 1}
+                        className="border-navy/20"
+                      >
+                        <ChevronLeft className="mr-1 h-4 w-4" />
+                        {t("quote.prevStep")}
+                      </Button>
+                      {step < 4 ? (
+                        <Button
+                          type="button"
+                          onClick={goNext}
+                          className="bg-gold font-bold text-navy hover:bg-gold-dark"
+                        >
+                          {t("quote.nextStep")}
+                          <ChevronRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </CardContent>
               </Card>
             </div>
 
             <div className="lg:col-span-1">
               <div className="space-y-6 lg:sticky lg:top-24">
-                <Card className="shadow-md">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base text-navy">
-                      {t("quote.period")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <select
-                      value={period}
-                      onChange={(e) =>
-                        setPeriod(e.target.value as PeriodKey)
-                      }
-                      className="w-full rounded-md border px-3 py-2 text-sm"
-                      aria-label={t("quote.period")}
-                    >
-                      <option value="1month">
-                        {t("quote.periods.1month")}
-                      </option>
-                      <option value="3months">
-                        {t("quote.periods.3months")}
-                      </option>
-                      <option value="6months">
-                        {t("quote.periods.6months")}
-                      </option>
-                      <option value="12months">
-                        {t("quote.periods.12months")}
-                      </option>
-                    </select>
-                  </CardContent>
-                </Card>
-
-                <Card className="shadow-md">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base text-navy">
-                      {t("quote.budgetRange")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-navy">
-                        {t("quote.budgetMin")}
-                      </label>
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        placeholder="0"
-                        value={form.budgetMin}
-                        onChange={(e) =>
-                          updateField("budgetMin", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-navy">
-                        {t("quote.budgetMax")}
-                      </label>
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        placeholder="0"
-                        value={form.budgetMax}
-                        onChange={(e) =>
-                          updateField("budgetMax", e.target.value)
-                        }
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
                 <Card className="border-gold/30 shadow-md">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base text-navy">
@@ -537,163 +974,20 @@ export default function QuotePage() {
                         </span>
                       </div>
                     </div>
-                    <Button
-                      type="button"
-                      onClick={handleDownloadPdf}
-                      disabled={downloading || selectedMedia.length === 0}
-                      className="mt-4 flex w-full items-center justify-center gap-2 bg-navy text-white hover:bg-navy/90"
-                    >
-                      {downloading ? (
-                        <>
-                          <Spinner className="h-4 w-4" />
-                          {isKo ? "PDF 생성 중..." : "Generating PDF..."}
-                        </>
-                      ) : (
-                        <>
-                          <Download className="h-4 w-4" />
-                          {isKo
-                            ? "견적서 PDF 다운로드"
-                            : "Download quote PDF"}
-                        </>
-                      )}
-                    </Button>
+                    {step >= 3 ? (
+                      <p className="text-xs text-muted-foreground">
+                        {template === "premium"
+                          ? t("quote.templatePremium")
+                          : t("quote.templateDefault")}
+                        {logoDataUrl
+                          ? ` · ${t("quote.reviewLogoYes")}`
+                          : ""}
+                      </p>
+                    ) : null}
                   </CardContent>
                 </Card>
               </div>
             </div>
-          </div>
-
-          <div className="mt-12">
-            <Card className="shadow-md">
-              <CardHeader>
-                <CardTitle className="text-xl text-navy">
-                  {t("quote.getQuote")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {submitted ? (
-                  <div className="flex flex-col items-center gap-4 py-12 text-center">
-                    <CheckCircle className="h-12 w-12 text-green-500" />
-                    <p className="text-lg font-semibold text-navy">
-                      {t("quote.successTitle")}
-                    </p>
-                    <p className="max-w-md text-muted-foreground">
-                      {t("quote.successDesc")}
-                    </p>
-                  </div>
-                ) : (
-                  <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-                    <div
-                      className="absolute -left-[9999px]"
-                      aria-hidden="true"
-                      tabIndex={-1}
-                    >
-                      <label htmlFor="quote-website">Website</label>
-                      <input
-                        type="text"
-                        id="quote-website"
-                        name="website"
-                        value={form.website}
-                        onChange={(e) =>
-                          updateField("website", e.target.value)
-                        }
-                        tabIndex={-1}
-                        autoComplete="off"
-                      />
-                    </div>
-
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("quote.company")}
-                        </label>
-                        <Input
-                          placeholder={t("quote.companyPlaceholder")}
-                          value={form.company}
-                          onChange={(e) =>
-                            updateField("company", e.target.value)
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("quote.name")}{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <Input
-                          placeholder={t("quote.namePlaceholder")}
-                          value={form.name}
-                          onChange={(e) => updateField("name", e.target.value)}
-                          className={inputErrorClass("name")}
-                        />
-                        {fieldError("name")}
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("quote.phone")}{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <Input
-                          placeholder={t("quote.phonePlaceholder")}
-                          value={form.phone}
-                          onChange={(e) =>
-                            updateField("phone", e.target.value)
-                          }
-                          className={inputErrorClass("phone")}
-                        />
-                        {fieldError("phone")}
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("quote.email")}
-                        </label>
-                        <Input
-                          type="email"
-                          placeholder={t("quote.emailPlaceholder")}
-                          value={form.email}
-                          onChange={(e) =>
-                            updateField("email", e.target.value)
-                          }
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="mb-1.5 block text-sm font-medium text-navy">
-                        {t("quote.message")}
-                      </label>
-                      <Textarea
-                        rows={5}
-                        placeholder={t("quote.messagePlaceholder")}
-                        value={form.message}
-                        onChange={(e) =>
-                          updateField("message", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full bg-gold font-semibold text-navy hover:bg-gold-dark"
-                      size="lg"
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <>
-                          <Spinner className="mr-2" />
-                          {t("quote.submitting")}
-                        </>
-                      ) : (
-                        <>
-                          <Send className="mr-2 h-4 w-4" />
-                          {t("quote.submit")}
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                )}
-              </CardContent>
-            </Card>
           </div>
         </div>
       </section>

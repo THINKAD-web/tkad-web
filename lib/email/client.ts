@@ -53,3 +53,49 @@ export async function sendEmail({
   }
 }
 
+type SendEmailWithPdfParams = {
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
+  pdfFilename: string;
+  /** Raw base64 PDF (no data: prefix) */
+  pdfBase64: string;
+};
+
+export async function sendEmailWithPdfAttachment({
+  to,
+  subject,
+  text,
+  html,
+  pdfFilename,
+  pdfBase64,
+}: SendEmailWithPdfParams): Promise<void> {
+  if (!transporter) {
+    throw new Error("SMTP not configured");
+  }
+
+  const from = process.env.SMTP_FROM!;
+  const pdfBuffer = Buffer.from(pdfBase64, "base64");
+
+  try {
+    await transporter.sendMail({
+      from,
+      to,
+      subject,
+      text,
+      html,
+      attachments: [
+        {
+          filename: pdfFilename,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+  } catch (err) {
+    console.error("[email] Failed to send email with PDF:", err);
+    throw err;
+  }
+}
+
