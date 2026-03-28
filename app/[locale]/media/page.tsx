@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Monitor, BadgeCheck, ShieldCheck } from "lucide-react";
+import SolutionCtaButton from "@/components/solution-cta-button";
 import { useState, useMemo } from "react";
 
 const mediaData = [
@@ -97,6 +98,13 @@ export default function MediaPage() {
             {t("media.title")}
           </h1>
           <p className="mt-2 text-slate-300">{t("media.subtitle")}</p>
+          <div className="mt-6">
+            <SolutionCtaButton
+              label={isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
+              size="lg"
+              className="h-12"
+            />
+          </div>
         </div>
       </section>
 

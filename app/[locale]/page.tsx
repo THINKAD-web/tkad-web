@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import SolutionCtaButton from "@/components/solution-cta-button";
 import {
   ArrowRight,
   BarChart3,
@@ -31,6 +32,7 @@ import {
   ClipboardCheck,
   Users,
   Trophy,
+  Sparkles,
 } from "lucide-react";
 
 type Props = {
@@ -159,6 +161,14 @@ function HomeContent({ locale }: { locale: string }) {
                 {t("hero.ctaSecondary")}
               </Button>
             </Link>
+          </div>
+          <div className="mt-4">
+            <SolutionCtaButton
+              label={isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
+              size="lg"
+              variant="outline"
+              className="h-12 border-gold/30 text-gold hover:bg-gold/10 hover:border-gold"
+            />
           </div>
         </div>
 
