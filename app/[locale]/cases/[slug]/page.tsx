@@ -66,7 +66,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-navy py-20">
+      <section className="relative overflow-hidden bg-navy py-28">
         <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-gold/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-sky-500/8 blur-3xl" />
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -132,7 +132,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-28">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {cs.stats.map((stat, i) => (
@@ -150,7 +150,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="border-y bg-slate-50 py-16">
+      <section className="border-y bg-slate-50 py-28">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 md:grid-cols-2">
             <div>
@@ -184,7 +184,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-28">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl bg-navy/[0.03] p-6 text-center">
@@ -218,7 +218,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="border-t bg-slate-50 py-16">
+      <section className="border-t bg-slate-50 py-28">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl bg-white p-8 shadow-md">
             <Quote className="h-8 w-8 text-gold/30" />
@@ -237,7 +237,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="border-t bg-white py-12">
+      <section className="border-t bg-white py-28">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/10 to-white p-8 shadow-sm">
             <div className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-gold-dark">
@@ -259,7 +259,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-28">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button
@@ -285,7 +285,7 @@ export default function CaseStudyDetailPage({ params }: Props) {
       </section>
 
       {(prev || next) && (
-        <section className="border-t bg-slate-50 py-12">
+        <section className="border-t bg-slate-50 py-28">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-stretch justify-between gap-4">
               {prev ? (

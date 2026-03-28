@@ -127,7 +127,7 @@ export default function MediaPage() {
 
   return (
     <>
-      <section className="bg-navy py-16">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {t("media.title")}
@@ -143,7 +143,7 @@ export default function MediaPage() {
         </div>
       </section>
 
-      <section className="py-12">
+      <section className="py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 flex justify-center">
             <div className="inline-flex rounded-full border border-navy/10 bg-white p-1 shadow-sm">

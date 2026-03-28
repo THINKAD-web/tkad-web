@@ -202,7 +202,7 @@ export default function FaqPage() {
 
   return (
     <>
-      <section className="bg-navy py-16">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {isKo ? "자주 묻는 질문" : "FAQ"}
@@ -236,7 +236,7 @@ export default function FaqPage() {
         </div>
       </section>
 
-      <section className="py-12">
+      <section className="py-28">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
@@ -266,7 +266,7 @@ export default function FaqPage() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-navy/15 bg-slate-50/80 px-6 py-16 text-center">
+            <div className="rounded-xl border border-dashed border-navy/15 bg-slate-50/80 px-6 py-28 text-center">
               <p className="text-navy/70">
                 {isKo
                   ? "검색 조건에 맞는 질문이 없습니다. 다른 키워드나 카테고리를 시도해 보세요."

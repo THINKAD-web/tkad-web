@@ -94,7 +94,7 @@ export default function ResourcesPage() {
 
   return (
     <>
-      <section className="bg-navy py-16">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {isKo ? "리소스 센터" : "Resource Center"}
@@ -107,7 +107,7 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-28">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-6">
             {resources.map((resource) => (

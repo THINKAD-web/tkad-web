@@ -99,7 +99,7 @@ export default function ComparePage() {
 
   return (
     <>
-      <section className="bg-navy py-12">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white">
             {isKo ? "매체 비교" : "Media Comparison"}

@@ -157,7 +157,7 @@ export default function ToolsPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-navy py-20">
+      <section className="relative overflow-hidden bg-navy py-28">
         <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gold/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -201,7 +201,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <section className="border-b bg-gradient-to-b from-slate-50 to-white py-16">
+      <section className="border-b bg-gradient-to-b from-slate-50 to-white py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -289,7 +289,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <section className="bg-navy py-20">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold/20 text-gold">
@@ -380,7 +380,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-28">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-navy sm:text-3xl">
             {isKo ? "캠페인에 맞는 플랜이 필요하신가요?" : "Need a plan that fits your campaign?"}

@@ -133,7 +133,7 @@ export default function ContactPage() {
 
   return (
     <>
-      <section className="bg-navy py-16">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {t("contact.title")}
@@ -142,7 +142,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-5">
             <div className="lg:col-span-3">
@@ -394,7 +394,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-16">
+      <section className="bg-slate-50 py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-8 text-center text-2xl font-bold text-navy sm:text-3xl">
             {t("contact.directionsTitle")}

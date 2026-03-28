@@ -61,8 +61,8 @@ export default function Header() {
     <header
       className={`sticky top-0 z-50 transition-[background,box-shadow,backdrop-filter] duration-500 ${
         scrolled
-          ? "header-scrolled border-b border-navy/8 backdrop-blur-xl supports-[backdrop-filter]:bg-white/75"
-          : "bg-transparent"
+          ? "header-scrolled border-b border-primary/10 supports-[backdrop-filter]:bg-transparent"
+          : "bg-transparent backdrop-blur-0"
       }`}
     >
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -94,7 +94,10 @@ export default function Header() {
         <div className="hidden items-center gap-3 md:flex">
           <LanguageToggle />
             <Link href="/contact">
-            <Button className="btn-gold rounded-full px-6 shadow-md">
+            <Button
+              variant="cta"
+              className="btn-gold rounded-full px-6 shadow-md shadow-cta/25"
+            >
               {t("nav.contact")}
             </Button>
           </Link>

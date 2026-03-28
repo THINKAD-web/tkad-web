@@ -149,7 +149,7 @@ export default function BlogPage() {
 
   return (
     <>
-      <section className="bg-navy py-14">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>

@@ -99,7 +99,7 @@ export default function NewsPage() {
 
   return (
     <>
-      <section className="bg-navy py-16">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
             {isKo ? "뉴스 & 보도자료" : "News & Press"}

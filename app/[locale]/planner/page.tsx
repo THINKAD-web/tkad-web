@@ -117,7 +117,7 @@ export default function PlannerPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <section className="relative overflow-hidden bg-navy py-14 text-white sm:py-18">
+      <section className="relative overflow-hidden bg-navy py-28 text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(232,213,181,0.12),transparent_50%)]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Badge className="border-gold/40 bg-gold/15 text-gold">

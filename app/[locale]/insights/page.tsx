@@ -160,7 +160,7 @@ export default function InsightsPage() {
 
   return (
     <>
-      <section className="bg-navy py-16">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">{t("heroTitle")}</h1>
           <p className="mx-auto mt-3 max-w-2xl text-slate-300">{t("heroSubtitle")}</p>

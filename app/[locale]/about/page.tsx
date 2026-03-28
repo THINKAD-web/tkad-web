@@ -124,7 +124,7 @@ function AboutContent({
 
   return (
     <>
-      <section className="bg-navy py-16">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {t("about.title")}
@@ -134,7 +134,7 @@ function AboutContent({
       </section>
 
       {/* History */}
-      <section className="py-20">
+      <section className="py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
@@ -170,7 +170,7 @@ function AboutContent({
       </section>
 
       {/* Values */}
-      <section className="bg-slate-50 py-20">
+      <section className="bg-slate-50 py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-center text-2xl font-bold text-navy">
             {t("about.valuesTitle")}
@@ -196,7 +196,7 @@ function AboutContent({
       </section>
 
       {/* Team */}
-      <section className="py-20 bg-slate-50">
+      <section className="py-28 bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <Users className="mx-auto h-12 w-12 text-gold" />
@@ -249,7 +249,7 @@ function AboutContent({
       </section>
 
       {/* Global */}
-      <section className="bg-navy py-20">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <Globe className="mx-auto h-12 w-12 text-gold" />
           <h2 className="mt-4 text-2xl font-bold text-white">

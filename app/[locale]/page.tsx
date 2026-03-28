@@ -135,7 +135,7 @@ function HomeContent({
             {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
           </div>
 
-          <h1 className="text-3xl leading-[1.12] font-extrabold tracking-tight text-white sm:text-5xl lg:text-7xl">
+          <h1 className="text-5xl leading-[1.1] font-extrabold tracking-tight text-white lg:text-7xl">
             {isKo ? (
               <>
                 <span className="hero-fade-in hero-fade-in-seq-1 block">
@@ -286,7 +286,7 @@ function HomeContent({
       </section>
 
       {/* Stats */}
-      <section className="section-navy relative py-20">
+      <section className="section-navy relative py-28">
         <div className="absolute inset-0 hero-pattern opacity-50" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="count-up">
@@ -670,7 +670,7 @@ function HomeContent({
       <HomeRecentlyViewed locale={locale} />
 
       {/* Partner Logos Marquee */}
-      <section className="section-light border-y py-20 overflow-hidden">
+      <section className="section-light border-y py-28 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="fade-in">
             <div className="mb-10 flex flex-col items-center gap-3 text-center">
@@ -918,7 +918,7 @@ function HomeContent({
       </section>
 
       {/* Newsletter Subscription */}
-      <section className="section-navy relative border-y py-20 overflow-hidden">
+      <section className="section-navy relative border-y py-28 overflow-hidden">
         <div className="absolute inset-0 hero-pattern opacity-30" />
         <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
           <ScrollAnimate>
@@ -982,7 +982,7 @@ function HomeContent({
       </section>
 
       {/* CTA Banner */}
-      <section className="hero-bg relative overflow-hidden py-32">
+      <section className="hero-bg relative overflow-hidden py-28">
         <div className="absolute inset-0 hero-pattern opacity-30" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,213,181,0.07)_0%,_transparent_70%)]" />
         <ScrollAnimate className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">

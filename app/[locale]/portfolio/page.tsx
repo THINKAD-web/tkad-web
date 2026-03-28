@@ -115,7 +115,7 @@ export default function PortfolioPage() {
 
   return (
     <>
-      <section className="bg-navy py-16">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
             {isKo ? "포트폴리오" : "Portfolio"}

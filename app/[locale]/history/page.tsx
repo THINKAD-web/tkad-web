@@ -94,7 +94,7 @@ export default function HistoryPage() {
 
   return (
     <>
-      <section className="bg-navy py-16">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
@@ -126,7 +126,7 @@ export default function HistoryPage() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Timeline rail */}
           <div className="mb-8 overflow-x-auto">
