@@ -1,19 +1,17 @@
 import { ImageResponse } from "next/og";
 import { ogSize, OgLayout } from "@/lib/og-helpers";
+import { ogForRoute } from "@/lib/og-route-copy";
 
-export const alt = "THINKAD 매체 검색 - 전국 옥외광고 매체";
+export const alt = "THINKAD 옥외광고 매체 검색 | OOH media search";
 export const size = ogSize;
 export const contentType = "image/png";
 
-export default async function Image() {
-  return new ImageResponse(
-    (
-      <OgLayout
-        badge="Verified Media"
-        title="옥외광고 매체 검색"
-        subtitle="전국 500+ 검증된 빌보드·디지털·교통 매체를 한눈에 비교하세요"
-      />
-    ),
-    { ...size }
-  );
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const c = ogForRoute("media", locale);
+  return new ImageResponse(<OgLayout {...c} />, { ...size });
 }

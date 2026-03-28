@@ -306,6 +306,7 @@
     "templatePremiumDesc": "Gold header emphasis",
     "logoLabel": "Company logo (optional)",
     "logoHint": "PNG or JPG, max ~600KB",
+    "logoPreviewAlt": "Preview of uploaded company logo",
     "logoRemove": "Remove logo",
     "reviewTitle": "Summary & PDF",
     "reviewMediaCount": "Selected media",

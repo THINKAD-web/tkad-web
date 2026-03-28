@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
-import { defaultOgImages, siteUrl } from "@/lib/seo";
+import { defaultOgImages, pageAlternates, siteUrl } from "@/lib/seo";
+import { buildStructuredDataGraph } from "@/lib/structured-data";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import DeferredPublicWidgets from "@/components/deferred-public-widgets";
@@ -30,55 +31,7 @@ const geistMono = Geist_Mono({
 /** ISR: marketing subtree; admin/client opt out via their own layouts. */
 export const revalidate = 3600;
 
-const ORG_ID = `${siteUrl}/#organization`;
-const LOCAL_ID = `${siteUrl}/#localbusiness`;
-
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": ORG_ID,
-      name: "THINKAD 싱커드",
-      alternateName: ["THINKAD", "주식회사 싱커드"],
-      url: siteUrl,
-      logo: `${siteUrl}/pwa-icon/512`,
-      description:
-        "대한민국 No.1 OOH 광고 에이전시. 전국 옥외광고 매체 검색 및 캠페인 컨설팅.",
-      foundingDate: "2016",
-      sameAs: ["https://open.kakao.com/o/placeholder"],
-    },
-    {
-      "@type": "LocalBusiness",
-      "@id": LOCAL_ID,
-      parentOrganization: { "@id": ORG_ID },
-      name: "THINKAD 싱커드",
-      image: `${siteUrl}/pwa-icon/512`,
-      url: siteUrl,
-      telephone: "+82-2-515-2772",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress:
-          "뚝섬로17가길 48 성수에이원지식산업센터 1102호",
-        addressLocality: "성동구",
-        addressRegion: "서울특별시",
-        addressCountry: "KR",
-      },
-      geo: {
-        "@type": "GeoCoordinates",
-        latitude: 37.5446,
-        longitude: 127.0557,
-      },
-      openingHoursSpecification: {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        opens: "09:00",
-        closes: "18:00",
-      },
-      priceRange: "$$",
-    },
-  ],
-};
+const structuredData = buildStructuredDataGraph();
 
 type Props = {
   children: React.ReactNode;
@@ -126,14 +79,8 @@ export async function generateMetadata({
     creator: "THINKAD 싱커드",
     publisher: "THINKAD 싱커드",
     formatDetection: { telephone: true, email: true, address: true },
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        ko: `${base.origin}/ko`,
-        en: `${base.origin}/en`,
-        "x-default": `${base.origin}/ko`,
-      },
-    },
+    alternates: pageAlternates(locale, ""),
+    robots: { index: true, follow: true },
     openGraph: {
       type: "website",
       locale: locale === "ko" ? "ko_KR" : "en_US",

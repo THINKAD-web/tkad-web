@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { defaultOgImages } from "@/lib/seo";
+import { defaultOgImages, pageAlternates } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +19,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: pageAlternates(locale, "/partner"),
     robots: { index: false, follow: false },
     openGraph: {
       title: ogTitle,

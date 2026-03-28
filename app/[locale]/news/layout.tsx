@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { defaultOgImages } from "@/lib/seo";
+import { ogAltForRoute } from "@/lib/og-route-copy";
+import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -19,13 +20,11 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: pageAlternates(locale, "/news"),
     openGraph: {
       title: ogTitle,
       description,
-      images: defaultOgImages(locale, {
-        ko: "THINKAD 뉴스 및 보도자료",
-        en: "THINKAD news and press",
-      }),
+      images: segmentOpenGraphImages(locale, "news", ogAltForRoute("news")),
     },
     twitter: {
       card: "summary_large_image",

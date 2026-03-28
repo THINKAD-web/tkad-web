@@ -655,7 +655,7 @@ export default function QuotePage() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={logoDataUrl}
-                              alt=""
+                              alt={t("quote.logoPreviewAlt")}
                               className="max-h-24 max-w-[200px] object-contain"
                             />
                           </div>

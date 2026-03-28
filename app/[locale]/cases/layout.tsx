@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { ogAltForRoute } from "@/lib/og-route-copy";
+import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -21,7 +23,12 @@ export async function generateMetadata({
   return {
     title,
     description,
-    openGraph: { title: ogTitle, description: ogDesc },
+    alternates: pageAlternates(locale, "/cases"),
+    openGraph: {
+      title: ogTitle,
+      description: ogDesc,
+      images: segmentOpenGraphImages(locale, "cases", ogAltForRoute("casesList")),
+    },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,

@@ -1,19 +1,17 @@
 import { ImageResponse } from "next/og";
 import { ogSize, OgLayout } from "@/lib/og-helpers";
+import { ogForRoute } from "@/lib/og-route-copy";
 
-export const alt = "THINKAD 문의하기 - 무료 상담 신청";
+export const alt = "THINKAD 문의 · 무료 OOH 상담 | Contact THINKAD";
 export const size = ogSize;
 export const contentType = "image/png";
 
-export default async function Image() {
-  return new ImageResponse(
-    (
-      <OgLayout
-        badge="Contact Us"
-        title="무료 OOH 광고 상담"
-        subtitle="30초 만에 신청 · 24시간 내 전문 컨설턴트 연락"
-      />
-    ),
-    { ...size }
-  );
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const c = ogForRoute("contact", locale);
+  return new ImageResponse(<OgLayout {...c} />, { ...size });
 }

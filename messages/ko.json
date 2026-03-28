@@ -306,6 +306,7 @@
     "templatePremiumDesc": "브랜드 강조 골드 헤더",
     "logoLabel": "회사 로고 (선택)",
     "logoHint": "PNG·JPG 권장, 600KB 이하",
+    "logoPreviewAlt": "업로드한 회사 로고 미리보기",
     "logoRemove": "로고 제거",
     "reviewTitle": "요약 및 PDF",
     "reviewMediaCount": "선택 매체",

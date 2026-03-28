@@ -69,3 +69,50 @@ export function allPublicSitemapPaths(): { locale: string; path: string }[] {
   }
   return out;
 }
+
+/** hreflang-style alternates + canonical (relative to metadataBase). */
+export function pageAlternates(
+  locale: string,
+  path: string,
+): NonNullable<Metadata["alternates"]> {
+  const p = path === "" ? "" : path.startsWith("/") ? path : `/${path}`;
+  const origin = siteUrl.replace(/\/$/, "");
+  return {
+    canonical: `/${locale}${p}`,
+    languages: {
+      ko: `${origin}/ko${p}`,
+      en: `${origin}/en${p}`,
+      "x-default": `${origin}/ko${p}`,
+    },
+  };
+}
+
+/** Route-specific OG image at `/[locale]/[segment]/opengraph-image` (1200×630). */
+export function segmentOpenGraphImages(
+  locale: string,
+  segment: string,
+  alt: { ko: string; en: string },
+): NonNullable<NonNullable<Metadata["openGraph"]>["images"]> {
+  return [
+    {
+      url: `/${locale}/${segment}/opengraph-image`,
+      ...OG_DIM,
+      alt: locale === "ko" ? alt.ko : alt.en,
+    },
+  ];
+}
+
+/** Dynamic case study OG at `/[locale]/cases/[slug]/opengraph-image` (1200×630). */
+export function caseStudyOpenGraphImages(
+  locale: string,
+  slug: string,
+  alt: { ko: string; en: string },
+): NonNullable<NonNullable<Metadata["openGraph"]>["images"]> {
+  return [
+    {
+      url: `/${locale}/cases/${slug}/opengraph-image`,
+      ...OG_DIM,
+      alt: locale === "ko" ? alt.ko : alt.en,
+    },
+  ];
+}

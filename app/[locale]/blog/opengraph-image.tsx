@@ -2,8 +2,7 @@ import { ImageResponse } from "next/og";
 import { ogSize, OgLayout } from "@/lib/og-helpers";
 import { ogForRoute } from "@/lib/og-route-copy";
 
-export const alt =
-  "THINKAD 싱커드 — Korea OOH agency | 대한민국 No.1 옥외광고 에이전시";
+export const alt = "THINKAD OOH blog";
 export const size = ogSize;
 export const contentType = "image/png";
 
@@ -13,6 +12,6 @@ export default async function Image({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const c = ogForRoute("home", locale);
+  const c = ogForRoute("blog", locale);
   return new ImageResponse(<OgLayout {...c} />, { ...size });
 }

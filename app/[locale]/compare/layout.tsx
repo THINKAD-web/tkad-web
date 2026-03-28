@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { defaultOgImages } from "@/lib/seo";
+import { ogAltForRoute } from "@/lib/og-route-copy";
+import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -22,13 +23,11 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: pageAlternates(locale, "/compare"),
     openGraph: {
       title: ogTitle,
       description: ogDesc,
-      images: defaultOgImages(locale, {
-        ko: "THINKAD 옥외광고 매체 비교",
-        en: "THINKAD OOH media comparison",
-      }),
+      images: segmentOpenGraphImages(locale, "compare", ogAltForRoute("compare")),
     },
     twitter: {
       card: "summary_large_image",

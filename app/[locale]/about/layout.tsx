@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { ogAltForRoute } from "@/lib/og-route-copy";
+import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -18,11 +20,13 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: pageAlternates(locale, "/about"),
     openGraph: {
       title: ogTitle,
       description: isKo
         ? "2016년 설립, 15년 이상 OOH 업력, 100+ 대기업 파트너."
         : "Founded 2016 · 15+ years in OOH · 100+ enterprise partners.",
+      images: segmentOpenGraphImages(locale, "about", ogAltForRoute("about")),
     },
     twitter: {
       card: "summary_large_image",
