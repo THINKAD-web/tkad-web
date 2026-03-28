@@ -1,16 +1,17 @@
 import type { MetadataRoute } from "next";
+import { allPublicSitemapPaths, siteUrl } from "@/lib/seo";
 
-const BASE_URL = process.env.SITE_URL ?? "https://tkad.co.kr";
-const LOCALES = ["ko", "en"];
-const ROUTES = ["", "/about", "/media", "/cases", "/contact", "/tools"];
+const lastModified = new Date();
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return ROUTES.flatMap((route) =>
-    LOCALES.map((locale) => ({
-      url: `${BASE_URL}/${locale}${route}`,
-      lastModified: new Date(),
-      changeFrequency: route === "" ? ("daily" as const) : ("weekly" as const),
-      priority: route === "" ? 1 : 0.8,
-    })),
-  );
+  return allPublicSitemapPaths().map(({ locale, path }) => {
+    const url = `${siteUrl}/${locale}${path === "" ? "" : path}`;
+    const isHome = path === "";
+    return {
+      url,
+      lastModified,
+      changeFrequency: isHome ? "daily" : "weekly",
+      priority: isHome ? 1 : path.startsWith("/cases/") ? 0.75 : 0.8,
+    };
+  });
 }

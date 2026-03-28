@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
@@ -9,17 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { BarChart3, Globe, Heart, Users } from "lucide-react";
-
-export const metadata: Metadata = {
-  title: "회사 소개",
-  description:
-    "싱커드(THINKAD)는 2016년 설립된 대한민국 No.1 OOH 광고 에이전시입니다. 15년 이상의 업력과 100+ 대기업 파트너.",
-  openGraph: {
-    title: "회사 소개 | THINKAD 싱커드",
-    description:
-      "2016년 설립, 15년 이상 OOH 업력, 100+ 대기업 파트너.",
-  },
-};
 
 type Props = {
   params: Promise<{ locale: string }>;

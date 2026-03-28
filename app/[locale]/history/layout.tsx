@@ -9,36 +9,33 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const title = isKo ? "매체 비교" : "Compare media";
+  const title = isKo ? "연혁" : "History";
   const description = isKo
-    ? "옥외광고 매체를 나란히 비교하세요. 위치, 노출량, 가격, ROI를 한눈에 비교 분석."
-    : "Compare OOH placements side by side: location, impressions, pricing, and ROI.";
+    ? "2016년 설립 이후 싱커드(THINKAD)가 걸어온 OOH 광고 에이전시의 발자취와 주요 이정표."
+    : "Milestones since 2016—how THINKAD grew into Korea's OOH partner.";
   const ogTitle = isKo
-    ? "매체 비교 | THINKAD 싱커드"
-    : "OOH media comparison | THINKAD";
-  const ogDesc = isKo
-    ? "옥외광고 매체를 나란히 비교 분석하세요."
-    : "Side-by-side analysis for outdoor advertising options.";
+    ? "회사 연혁 | THINKAD 싱커드"
+    : "Our history | THINKAD";
   return {
     title,
     description,
     openGraph: {
       title: ogTitle,
-      description: ogDesc,
+      description,
       images: defaultOgImages(locale, {
-        ko: "THINKAD 옥외광고 매체 비교",
-        en: "THINKAD OOH media comparison",
+        ko: "THINKAD 싱커드 회사 연혁",
+        en: "THINKAD company timeline",
       }),
     },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
-      description: ogDesc,
+      description,
     },
   };
 }
 
-export default function CompareLayout({
+export default function HistoryLayout({
   children,
 }: {
   children: React.ReactNode;

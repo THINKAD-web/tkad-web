@@ -1,14 +1,20 @@
 import type { MetadataRoute } from "next";
-
-const BASE_URL = process.env.SITE_URL ?? "https://tkad.co.kr";
+import { siteUrl } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/api/"],
+      disallow: [
+        "/api/",
+        "/admin/",
+        "/ko/admin",
+        "/en/admin",
+        "/ko/admin/",
+        "/en/admin/",
+      ],
     },
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

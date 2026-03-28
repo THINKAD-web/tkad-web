@@ -1,14 +1,42 @@
 import type { Metadata } from "next";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { defaultOgImages } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "광고 도구",
-  description:
-    "OOH 광고 ROI 계산기, 매체 효과 분석 등 무료 광고 도구를 활용하세요.",
-  openGraph: {
-    title: "OOH 광고 도구 | THINKAD 싱커드",
-    description: "OOH 광고 ROI 계산기, 매체 효과 분석 등 무료 광고 도구.",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const locale = await resolveLocaleParam(params);
+  const isKo = locale === "ko";
+  const title = isKo ? "광고 도구" : "Ad tools";
+  const description = isKo
+    ? "OOH 광고 ROI 계산기, 매체 효과 분석 등 무료 광고 도구를 활용하세요."
+    : "Free OOH tools: ROI calculators and media performance helpers.";
+  const ogTitle = isKo
+    ? "OOH 광고 도구 | THINKAD 싱커드"
+    : "OOH ad tools | THINKAD";
+  const ogDesc = isKo
+    ? "OOH 광고 ROI 계산기, 매체 효과 분석 등 무료 광고 도구."
+    : "ROI calculators and media analysis tools for OOH.";
+  return {
+    title,
+    description,
+    openGraph: {
+      title: ogTitle,
+      description: ogDesc,
+      images: defaultOgImages(locale, {
+        ko: "THINKAD OOH 광고 도구",
+        en: "THINKAD OOH tools",
+      }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description: ogDesc,
+    },
+  };
+}
 
 export default function ToolsLayout({
   children,

@@ -9,17 +9,22 @@ export const contentType = "image/png";
 export default async function Image({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const cs = caseStudies.find((c) => c.slug === slug);
+  const isKo = locale === "ko";
 
   return new ImageResponse(
     (
       <OgLayout
         badge={cs?.category ?? "Case Study"}
-        title={cs?.title ?? "OOH 광고 성공 사례"}
-        subtitle={cs?.results}
+        title={
+          isKo
+            ? (cs?.title ?? "OOH 광고 성공 사례")
+            : (cs?.titleEn ?? "OOH campaign case study")
+        }
+        subtitle={isKo ? cs?.results : cs?.resultsEn}
       />
     ),
     { ...size }

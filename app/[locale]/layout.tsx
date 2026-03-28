@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
+import { defaultOgImages, siteUrl } from "@/lib/seo";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import QuickInquiryButton from "@/components/quick-inquiry-button";
@@ -29,54 +30,138 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "THINKAD | 싱커드 - 한국 OOH 광고 에이전시",
-    template: "%s | THINKAD",
-  },
-  description:
-    "대한민국 No.1 OOH 광고 에이전시. 전국 500+ 검증된 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 계약~사후관리 원스톱 서비스.",
-  metadataBase: new URL("https://tkad.co.kr"),
-  keywords: [
-    "OOH 광고",
-    "옥외광고",
-    "빌보드 광고",
-    "디지털 사이니지",
-    "전광판 광고",
-    "교통 광고",
-    "광고 에이전시",
-    "싱커드",
-    "THINKAD",
-    "코엑스 전광판",
-    "강남 광고",
+const ORG_ID = `${siteUrl}/#organization`;
+const LOCAL_ID = `${siteUrl}/#localbusiness`;
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": ORG_ID,
+      name: "THINKAD 싱커드",
+      alternateName: ["THINKAD", "주식회사 싱커드"],
+      url: siteUrl,
+      logo: `${siteUrl}/pwa-icon/512`,
+      description:
+        "대한민국 No.1 OOH 광고 에이전시. 전국 옥외광고 매체 검색 및 캠페인 컨설팅.",
+      foundingDate: "2016",
+      sameAs: ["https://open.kakao.com/o/placeholder"],
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": LOCAL_ID,
+      parentOrganization: { "@id": ORG_ID },
+      name: "THINKAD 싱커드",
+      image: `${siteUrl}/pwa-icon/512`,
+      url: siteUrl,
+      telephone: "+82-2-515-2772",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress:
+          "뚝섬로17가길 48 성수에이원지식산업센터 1102호",
+        addressLocality: "성동구",
+        addressRegion: "서울특별시",
+        addressCountry: "KR",
+      },
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: 37.5446,
+        longitude: 127.0557,
+      },
+      openingHoursSpecification: {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "09:00",
+        closes: "18:00",
+      },
+      priceRange: "$$",
+    },
   ],
-  authors: [{ name: "THINKAD 싱커드", url: "https://tkad.co.kr" }],
-  creator: "THINKAD 싱커드",
-  publisher: "THINKAD 싱커드",
-  formatDetection: { telephone: true, email: true, address: true },
-  openGraph: {
-    type: "website",
-    locale: "ko_KR",
-    alternateLocale: "en_US",
-    siteName: "THINKAD 싱커드",
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@thinkad_kr",
-    creator: "@thinkad_kr",
-  },
-  other: {
-    "naver-site-verification": "",
-    "google-site-verification": "",
-    "theme-color": "#1a2a6c",
-    "msapplication-TileColor": "#1a2a6c",
-  },
 };
 
 type Props = {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const locale = await resolveLocaleParam(params);
+  const base = new URL(siteUrl);
+
+  const titleDefault =
+    locale === "ko"
+      ? "THINKAD | 싱커드 - 한국 OOH 광고 에이전시"
+      : "THINKAD | Korea OOH Advertising Agency";
+  const description =
+    locale === "ko"
+      ? "대한민국 No.1 OOH 광고 에이전시. 전국 500+ 검증된 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 계약~사후관리 원스톱 서비스."
+      : "Korea's leading OOH agency. Search 500+ verified OOH media nationwide, data-driven campaign consulting, and end-to-end execution.";
+
+  return {
+    title: {
+      default: titleDefault,
+      template: "%s | THINKAD",
+    },
+    description,
+    metadataBase: base,
+    keywords: [
+      "OOH 광고",
+      "옥외광고",
+      "빌보드 광고",
+      "디지털 사이니지",
+      "전광판 광고",
+      "교통 광고",
+      "광고 에이전시",
+      "싱커드",
+      "THINKAD",
+      "코엑스 전광판",
+      "강남 광고",
+    ],
+    authors: [{ name: "THINKAD 싱커드", url: siteUrl }],
+    creator: "THINKAD 싱커드",
+    publisher: "THINKAD 싱커드",
+    formatDetection: { telephone: true, email: true, address: true },
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        ko: `${base.origin}/ko`,
+        en: `${base.origin}/en`,
+        "x-default": `${base.origin}/ko`,
+      },
+    },
+    openGraph: {
+      type: "website",
+      locale: locale === "ko" ? "ko_KR" : "en_US",
+      alternateLocale: locale === "ko" ? ["en_US"] : ["ko_KR"],
+      siteName: locale === "ko" ? "THINKAD 싱커드" : "THINKAD",
+      url: `/${locale}`,
+      title: titleDefault,
+      description,
+      images: defaultOgImages(locale, {
+        ko: "THINKAD 싱커드 — 대한민국 No.1 OOH 광고 에이전시",
+        en: "THINKAD — Korea's leading OOH advertising agency",
+      }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: "@thinkad_kr",
+      creator: "@thinkad_kr",
+      title: titleDefault,
+      description,
+    },
+    other: {
+      "naver-site-verification": "",
+      "google-site-verification": "",
+      "theme-color": "#1a2a6c",
+      "msapplication-TileColor": "#1a2a6c",
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -100,29 +185,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "THINKAD 싱커드",
-              alternateName: "주식회사 싱커드",
-              url: "https://tkad.co.kr",
-              logo: "https://tkad.co.kr/pwa-icon/512",
-              description:
-                "대한민국 No.1 OOH 광고 에이전시. 전국 옥외광고 매체 검색 및 캠페인 컨설팅.",
-              foundingDate: "2016",
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "서울",
-                addressRegion: "성동구",
-                addressCountry: "KR",
-              },
-              contactPoint: {
-                "@type": "ContactPoint",
-                contactType: "customer service",
-                availableLanguage: ["Korean", "English"],
-              },
-              sameAs: ["https://open.kakao.com/o/placeholder"],
-            }),
+            __html: JSON.stringify(structuredData),
           }}
         />
         <NextIntlClientProvider messages={messages}>

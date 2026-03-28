@@ -646,14 +646,22 @@ export default function AdminMediasPage() {
                   <p className="text-xs font-medium text-muted-foreground">
                     업로드 파일 ({uploadItems.length}개)
                   </p>
-                  {uploadItems.map((item, idx) => (
+                  {uploadItems.map((item, idx) => {
+                    const assigned =
+                      item.mediaId != null
+                        ? medias.find((m) => m.id === item.mediaId)
+                        : undefined;
+                    const previewAlt = assigned
+                      ? `${assigned.name} 광고 매체용 업로드 이미지 미리보기 (${assigned.location})`
+                      : `광고 매체 이미지 업로드 미리보기: ${item.file.name}`;
+                    return (
                     <div
                       key={`${item.file.name}-${idx}`}
                       className="flex items-center gap-3 rounded-lg border p-3"
                     >
                       <Image
                         src={item.preview}
-                        alt={item.file.name}
+                        alt={previewAlt}
                         width={48}
                         height={48}
                         unoptimized
@@ -711,7 +719,8 @@ export default function AdminMediasPage() {
                         </Button>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 

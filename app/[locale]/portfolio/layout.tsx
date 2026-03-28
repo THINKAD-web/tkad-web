@@ -9,36 +9,33 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const title = isKo ? "매체 비교" : "Compare media";
+  const title = isKo ? "포트폴리오" : "Portfolio";
   const description = isKo
-    ? "옥외광고 매체를 나란히 비교하세요. 위치, 노출량, 가격, ROI를 한눈에 비교 분석."
-    : "Compare OOH placements side by side: location, impressions, pricing, and ROI.";
+    ? "빌보드, 디지털 사이니지, 지하철·버스 등 THINKAD가 집행한 대표 OOH 포트폴리오."
+    : "Representative OOH work by THINKAD: billboards, DOOH, transit, and more.";
   const ogTitle = isKo
-    ? "매체 비교 | THINKAD 싱커드"
-    : "OOH media comparison | THINKAD";
-  const ogDesc = isKo
-    ? "옥외광고 매체를 나란히 비교 분석하세요."
-    : "Side-by-side analysis for outdoor advertising options.";
+    ? "OOH 포트폴리오 | THINKAD 싱커드"
+    : "OOH portfolio | THINKAD";
   return {
     title,
     description,
     openGraph: {
       title: ogTitle,
-      description: ogDesc,
+      description,
       images: defaultOgImages(locale, {
-        ko: "THINKAD 옥외광고 매체 비교",
-        en: "THINKAD OOH media comparison",
+        ko: "THINKAD OOH 포트폴리오",
+        en: "THINKAD OOH portfolio",
       }),
     },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
-      description: ogDesc,
+      description,
     },
   };
 }
 
-export default function CompareLayout({
+export default function PortfolioLayout({
   children,
 }: {
   children: React.ReactNode;
