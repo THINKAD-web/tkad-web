@@ -36,6 +36,16 @@ model ContactInquiry {
   @@map("contact_inquiries")
 }
 
+model CustomerFeedback {
+  id        String   @id @default(cuid())
+  email     String
+  answers   Json     @map("answers")
+  coupon    String   @unique @map("coupon_code")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("customer_feedback")
+}
+
 model CaseStudy {
   id          String   @id @default(cuid())
   title       String

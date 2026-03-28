@@ -10,10 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle, MessageCircle } from "lucide-react";
+import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle, MessageCircle, MessageSquare, ClipboardList } from "lucide-react";
 import { useState, useCallback } from "react";
 import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
+import { ContactFeedbackSurvey } from "@/components/contact-feedback-survey";
+import { cn } from "@/lib/utils";
+
+type ContactMainTab = "inquiry" | "feedback";
 
 type FormFields = {
   company: string;
@@ -62,6 +66,7 @@ export default function ContactPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof FormFields, boolean>>>({});
   const { toast } = useToast();
+  const [mainTab, setMainTab] = useState<ContactMainTab>("inquiry");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -142,13 +147,45 @@ export default function ContactPage() {
           <div className="grid gap-12 lg:grid-cols-5">
             <div className="lg:col-span-3">
               <Card className="shadow-md">
-                <CardHeader>
+                <CardHeader className="space-y-4">
+                  <div className="flex flex-wrap gap-2 rounded-xl bg-slate-100/80 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setMainTab("inquiry")}
+                      className={cn(
+                        "inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors min-w-[140px]",
+                        mainTab === "inquiry"
+                          ? "bg-white text-navy shadow-sm"
+                          : "text-muted-foreground hover:text-navy",
+                      )}
+                    >
+                      <MessageSquare className="h-4 w-4 shrink-0 text-gold" />
+                      {t("contact.tabInquiry")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMainTab("feedback")}
+                      className={cn(
+                        "inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors min-w-[140px]",
+                        mainTab === "feedback"
+                          ? "bg-white text-navy shadow-sm"
+                          : "text-muted-foreground hover:text-navy",
+                      )}
+                    >
+                      <ClipboardList className="h-4 w-4 shrink-0 text-gold" />
+                      {t("contact.tabFeedback")}
+                    </button>
+                  </div>
                   <CardTitle className="text-xl text-navy">
-                    {t("contact.formTitle")}
+                    {mainTab === "inquiry"
+                      ? t("contact.formTitle")
+                      : t("contact.formTitleFeedback")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {submitted ? (
+                  {mainTab === "feedback" ? (
+                    <ContactFeedbackSurvey />
+                  ) : submitted ? (
                     <div className="flex flex-col items-center gap-4 py-12 text-center">
                       <CheckCircle className="h-12 w-12 text-green-500" />
                       <p className="text-lg font-semibold text-navy">
@@ -179,7 +216,7 @@ export default function ContactPage() {
                       </div>
                     </div>
                   ) : (
-                    <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+                    <form className="relative space-y-5" onSubmit={handleSubmit} noValidate>
                       <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
                         <label htmlFor="website">Website</label>
                         <input
