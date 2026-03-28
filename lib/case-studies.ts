@@ -1,5 +1,24 @@
 export type CaseStudyCategory = "billboard" | "digital" | "transport" | "special";
 
+/** 업종/버티컬 (리스트·필터용) */
+export type CaseStudyVertical =
+  | "fashion_beauty"
+  | "automotive"
+  | "fb"
+  | "tech"
+  | "entertainment"
+  | "finance";
+
+export type CaseStudyRegionKey = "seoul" | "busan" | "jeju" | "national" | "multi";
+
+export type CaseStudyScale = "large" | "medium" | "small";
+
+export type CaseGalleryItem = {
+  type: "image" | "video";
+  labelKo: string;
+  labelEn: string;
+};
+
 export type CaseStudy = {
   id: number;
   slug: string;
@@ -36,6 +55,10 @@ export type CaseStudy = {
   testimonialEn: string;
   testimonialAuthor: string;
   testimonialAuthorEn: string;
+  vertical: CaseStudyVertical;
+  regionKey: CaseStudyRegionKey;
+  scale: CaseStudyScale;
+  gallery: readonly CaseGalleryItem[];
 };
 
 export const caseStudies: readonly CaseStudy[] = [
@@ -87,6 +110,21 @@ export const caseStudies: readonly CaseStudy[] = [
       "THINKAD's verified data gave us the confidence to run the campaign. The results exceeded our expectations.",
     testimonialAuthor: "김서연 마케팅 이사",
     testimonialAuthorEn: "Seoyeon Kim, Marketing Director",
+    vertical: "fashion_beauty",
+    regionKey: "seoul",
+    scale: "medium",
+    gallery: [
+      {
+        type: "image",
+        labelKo: "강남역 일대 패널 현장",
+        labelEn: "Panels around Gangnam Station",
+      },
+      {
+        type: "video",
+        labelKo: "캠페인 하이라이트 20초",
+        labelEn: "Campaign highlight 20s",
+      },
+    ],
   },
   {
     id: 2,
@@ -136,6 +174,21 @@ export const caseStudies: readonly CaseStudy[] = [
       "Despite a limited budget, the data-driven media recommendations delivered an amazing ROI.",
     testimonialAuthor: "박준혁 대표",
     testimonialAuthorEn: "Junhyuk Park, CEO",
+    vertical: "tech",
+    regionKey: "seoul",
+    scale: "medium",
+    gallery: [
+      {
+        type: "image",
+        labelKo: "코엑스 디지털 미디어",
+        labelEn: "COEX digital media",
+      },
+      {
+        type: "video",
+        labelKo: "런칭 스팟 15초",
+        labelEn: "Launch spot 15s",
+      },
+    ],
   },
   {
     id: 3,
@@ -185,6 +238,26 @@ export const caseStudies: readonly CaseStudy[] = [
       "The foot traffic analysis per station was incredibly accurate. We'll definitely use THINKAD again.",
     testimonialAuthor: "이하은 팀장",
     testimonialAuthorEn: "Haeun Lee, Team Lead",
+    vertical: "entertainment",
+    regionKey: "multi",
+    scale: "large",
+    gallery: [
+      {
+        type: "image",
+        labelKo: "역사 랩핑 클로즈업",
+        labelEn: "Station wrap close-up",
+      },
+      {
+        type: "video",
+        labelKo: "뮤직비디오 연동 크리에이티브",
+        labelEn: "Creative synced with MV",
+      },
+      {
+        type: "image",
+        labelKo: "7개 역 동시 노출 맵",
+        labelEn: "Map of 7 station placements",
+      },
+    ],
   },
   {
     id: 4,
@@ -234,6 +307,21 @@ export const caseStudies: readonly CaseStudy[] = [
       "Managing a national campaign in one stop saved significant internal resources for us.",
     testimonialAuthor: "최민수 브랜드 매니저",
     testimonialAuthorEn: "Minsu Choi, Brand Manager",
+    vertical: "fb",
+    regionKey: "national",
+    scale: "large",
+    gallery: [
+      {
+        type: "image",
+        labelKo: "시내버스 랩 디자인",
+        labelEn: "City bus wrap design",
+      },
+      {
+        type: "video",
+        labelKo: "전국 런칭 티저",
+        labelEn: "National launch teaser",
+      },
+    ],
   },
   {
     id: 5,
@@ -283,6 +371,21 @@ export const caseStudies: readonly CaseStudy[] = [
       "The precise media selection targeting the financial audience was impressive. Inquiries increased dramatically.",
     testimonialAuthor: "정우성 CMO",
     testimonialAuthorEn: "Wooseong Jung, CMO",
+    vertical: "finance",
+    regionKey: "seoul",
+    scale: "medium",
+    gallery: [
+      {
+        type: "image",
+        labelKo: "여의도 금융가 디지털 패널",
+        labelEn: "Yeouido financial district panels",
+      },
+      {
+        type: "video",
+        labelKo: "브랜드 필름 30초",
+        labelEn: "Brand film 30s",
+      },
+    ],
   },
   {
     id: 6,
@@ -332,6 +435,26 @@ export const caseStudies: readonly CaseStudy[] = [
       "The analysis of visitor flows in the Myeongdong district was outstanding. Both traffic and sales grew beyond expectations.",
     testimonialAuthor: "한소희 마케팅본부장",
     testimonialAuthorEn: "Sohee Han, Head of Marketing",
+    vertical: "fashion_beauty",
+    regionKey: "seoul",
+    scale: "medium",
+    gallery: [
+      {
+        type: "image",
+        labelKo: "명동 대형 LED 야간",
+        labelEn: "Myeongdong large LED at night",
+      },
+      {
+        type: "image",
+        labelKo: "상권 유입 히트맵 리포트",
+        labelEn: "District traffic heatmap excerpt",
+      },
+      {
+        type: "video",
+        labelKo: "스킨케어 런칭 모션",
+        labelEn: "Skincare launch motion",
+      },
+    ],
   },
   {
     id: 7,
@@ -381,6 +504,21 @@ export const caseStudies: readonly CaseStudy[] = [
       "The seasonal media strategy was spot-on. We exceeded our summer season KPI targets.",
     testimonialAuthor: "강지호 그로스팀장",
     testimonialAuthorEn: "Jiho Kang, Growth Team Lead",
+    vertical: "tech",
+    regionKey: "busan",
+    scale: "medium",
+    gallery: [
+      {
+        type: "image",
+        labelKo: "해운대 해변 빌보드",
+        labelEn: "Haeundae beach billboard",
+      },
+      {
+        type: "video",
+        labelKo: "시즌 캠페인 클립",
+        labelEn: "Season campaign clip",
+      },
+    ],
   },
   {
     id: 8,
@@ -430,6 +568,95 @@ export const caseStudies: readonly CaseStudy[] = [
       "The campaign design connecting the airport and tourist areas was perfect. It delivered the ultimate result: sold out.",
     testimonialAuthor: "오지영 프로듀서",
     testimonialAuthorEn: "Jiyoung Oh, Producer",
+    vertical: "entertainment",
+    regionKey: "jeju",
+    scale: "medium",
+    gallery: [
+      {
+        type: "image",
+        labelKo: "제주공항 디지털 미디어",
+        labelEn: "Jeju airport digital media",
+      },
+      {
+        type: "video",
+        labelKo: "콘서트 티저 영상",
+        labelEn: "Concert teaser video",
+      },
+      {
+        type: "image",
+        labelKo: "관광단지 패널",
+        labelEn: "Resort district panels",
+      },
+    ],
+  },
+  {
+    id: 9,
+    slug: "premium-ev-gangnam-launch",
+    title: "프리미엄 EV 브랜드 강남 런칭",
+    titleEn: "Premium EV Brand Gangnam Launch",
+    description:
+      "강남 핵심 상권 디지털 OOH와 랜드마크 패널을 결합한 런칭 캠페인으로 시승 예약 220% 증가를 달성했습니다.",
+    descriptionEn:
+      "Combined Gangnam digital OOH and landmark panels for launch, driving 220% more test-drive bookings.",
+    category: "digital",
+    client: "글로벌 프리미엄 자동차 브랜드",
+    clientEn: "Global premium automotive brand",
+    clientLogo: "EV",
+    roi: "4.2x",
+    roiDetail: "광고비 대비 4.2배 리드 효율",
+    roiDetailEn: "4.2x efficiency on lead generation spend",
+    managerComment:
+      "전기차 관심층 동선과 강남 프리미엄 상권을 겹쳐 시승·리드로 연결되는 터치포인트를 설계했습니다.",
+    managerCommentEn:
+      "We overlapped EV-intent journeys with Gangnam premium traffic to drive test-drive leads.",
+    managerName: "윤도현",
+    managerNameEn: "Dohyun Yoon",
+    managerRole: "오토모티브 리드",
+    managerRoleEn: "Automotive Lead",
+    results: "시승 예약 220% 증가",
+    resultsEn: "220% increase in test-drive bookings",
+    exposures: "380만",
+    exposuresEn: "3.8M",
+    reachIncrease: "+210%",
+    campaignGoal: "런칭 구간 프리미엄 이미지 확립 및 시승 리드 확보",
+    campaignGoalEn:
+      "Establish premium launch perception and capture test-drive leads",
+    mediaUsed: ["강남 디지털 OOH", "랜드마크 패널", "프리미엄 상권 패키지"],
+    mediaUsedEn: ["Gangnam digital OOH", "Landmark panels", "Premium district package"],
+    duration: "7주",
+    durationEn: "7 weeks",
+    stats: [
+      { label: "총 노출", labelEn: "Total exposures", value: "380만" },
+      { label: "시승 예약", labelEn: "Test drives", value: "+220%" },
+      { label: "집행 기간", labelEn: "Duration", value: "7주" },
+      { label: "핵심 상권", labelEn: "Core area", value: "강남·신사" },
+    ],
+    testimonial:
+      "브랜드 톤에 맞는 매체 큐레이션이 인상적이었고, 시승 전환까지 이어진 데이터 리포트가 매우 유용했습니다.",
+    testimonialEn:
+      "Media curation matched our brand tone perfectly, and the reporting through to test-drive conversion was invaluable.",
+    testimonialAuthor: "장민호 브랜드 디렉터",
+    testimonialAuthorEn: "Minho Jang, Brand Director",
+    vertical: "automotive",
+    regionKey: "seoul",
+    scale: "large",
+    gallery: [
+      {
+        type: "image",
+        labelKo: "강남 EV 런칭 패널",
+        labelEn: "Gangnam EV launch panel",
+      },
+      {
+        type: "video",
+        labelKo: "프리미엄 런칭 필름 45초",
+        labelEn: "Premium launch film 45s",
+      },
+      {
+        type: "image",
+        labelKo: "시승 부스 연계 OOH",
+        labelEn: "OOH linked to test-drive booth",
+      },
+    ],
   },
 ];
 
@@ -439,6 +666,30 @@ export const categoryColors: Record<CaseStudyCategory, string> = {
   transport: "bg-orange-50 text-orange-700",
   special: "bg-emerald-50 text-emerald-700",
 };
+
+export const verticalColors: Record<CaseStudyVertical, string> = {
+  fashion_beauty: "border border-pink-200/80 bg-pink-50 text-pink-900",
+  automotive: "border border-slate-200 bg-slate-100 text-slate-800",
+  fb: "border border-amber-200/80 bg-amber-50 text-amber-950",
+  tech: "border border-cyan-200/80 bg-cyan-50 text-cyan-900",
+  entertainment: "border border-violet-200/80 bg-violet-50 text-violet-900",
+  finance: "border border-emerald-200/80 bg-emerald-50 text-emerald-900",
+};
+
+const OTHER_VERTICALS: readonly CaseStudyVertical[] = [
+  "tech",
+  "entertainment",
+  "finance",
+];
+
+export function caseMatchesVerticalTab(
+  vertical: CaseStudyVertical,
+  tab: "all" | CaseStudyVertical | "other"
+): boolean {
+  if (tab === "all") return true;
+  if (tab === "other") return OTHER_VERTICALS.includes(vertical);
+  return vertical === tab;
+}
 
 export function getCaseStudyBySlug(slug: string): CaseStudy | undefined {
   return caseStudies.find((c) => c.slug === slug);

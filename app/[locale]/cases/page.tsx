@@ -2,6 +2,7 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -17,16 +18,51 @@ import {
   Quote,
   ArrowRight,
   MessageSquareQuote,
+  Image as ImageIcon,
+  Video,
+  Search,
+  Target,
+  Layers,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Link } from "@/i18n/navigation";
-import { caseStudies, categoryColors } from "@/lib/case-studies";
+import {
+  caseStudies,
+  categoryColors,
+  verticalColors,
+  caseMatchesVerticalTab,
+  type CaseStudyRegionKey,
+  type CaseStudyScale,
+  type CaseStudyVertical,
+} from "@/lib/case-studies";
+
+type VerticalTab = "all" | CaseStudyVertical | "other";
+
+const REGION_KEYS: readonly (CaseStudyRegionKey | "all")[] = [
+  "all",
+  "seoul",
+  "busan",
+  "jeju",
+  "national",
+  "multi",
+];
+
+const SCALE_KEYS: readonly (CaseStudyScale | "all")[] = [
+  "all",
+  "large",
+  "medium",
+  "small",
+];
 
 export default function CasesPage() {
   const t = useTranslations();
   const locale = useLocale();
   const isKo = locale === "ko";
   const [activeCategory, setActiveCategory] = useState("all");
+  const [verticalTab, setVerticalTab] = useState<VerticalTab>("all");
+  const [regionKey, setRegionKey] = useState<CaseStudyRegionKey | "all">("all");
+  const [scale, setScale] = useState<CaseStudyScale | "all">("all");
+  const [query, setQuery] = useState("");
 
   const categories = [
     { value: "all", label: t("cases.all") },
@@ -36,13 +72,76 @@ export default function CasesPage() {
     { value: "special", label: t("cases.special") },
   ];
 
-  const filtered = useMemo(
-    () =>
-      activeCategory === "all"
-        ? caseStudies
-        : caseStudies.filter((c) => c.category === activeCategory),
-    [activeCategory]
-  );
+  const verticalTabs: { value: VerticalTab; label: string }[] = [
+    { value: "all", label: t("cases.all") },
+    { value: "fashion_beauty", label: t("cases.verticalFashion") },
+    { value: "automotive", label: t("cases.verticalAuto") },
+    { value: "fb", label: t("cases.verticalFb") },
+    { value: "other", label: t("cases.verticalOther") },
+  ];
+
+  const regionLabel = (key: CaseStudyRegionKey | "all") => {
+    if (key === "all") return t("cases.regionAll");
+    const map: Record<CaseStudyRegionKey, string> = {
+      seoul: t("cases.regionSeoul"),
+      busan: t("cases.regionBusan"),
+      jeju: t("cases.regionJeju"),
+      national: t("cases.regionNational"),
+      multi: t("cases.regionMulti"),
+    };
+    return map[key];
+  };
+
+  const scaleLabel = (key: CaseStudyScale | "all") => {
+    if (key === "all") return t("cases.scaleAll");
+    const map: Record<CaseStudyScale, string> = {
+      large: t("cases.scaleLarge"),
+      medium: t("cases.scaleMedium"),
+      small: t("cases.scaleSmall"),
+    };
+    return map[key];
+  };
+
+  const verticalBadgeLabel = (v: CaseStudyVertical) => {
+    const map: Record<CaseStudyVertical, string> = {
+      fashion_beauty: t("cases.verticalFashion"),
+      automotive: t("cases.verticalAuto"),
+      fb: t("cases.verticalFb"),
+      tech: t("cases.verticalOther"),
+      entertainment: t("cases.verticalOther"),
+      finance: t("cases.verticalOther"),
+    };
+    return map[v];
+  };
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return caseStudies.filter((c) => {
+      if (activeCategory !== "all" && c.category !== activeCategory) return false;
+      if (!caseMatchesVerticalTab(c.vertical, verticalTab)) return false;
+      if (regionKey !== "all" && c.regionKey !== regionKey) return false;
+      if (scale !== "all" && c.scale !== scale) return false;
+      if (!q) return true;
+      const hay = [
+        c.title,
+        c.titleEn,
+        c.client,
+        c.clientEn,
+        c.results,
+        c.resultsEn,
+        c.campaignGoal,
+        c.campaignGoalEn,
+        ...c.mediaUsed,
+        ...c.mediaUsedEn,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [activeCategory, verticalTab, regionKey, scale, query]);
+
+  const selectClass =
+    "h-9 rounded-md border border-navy/15 bg-white px-2 text-sm text-navy shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40";
 
   return (
     <>
@@ -57,29 +156,108 @@ export default function CasesPage() {
 
       <section className="py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <Button
-                key={cat.value}
-                variant={activeCategory === cat.value ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveCategory(cat.value)}
-                className={
-                  activeCategory === cat.value
-                    ? "bg-navy text-white"
-                    : "border-navy/20 text-navy"
-                }
-              >
-                {cat.label}
-              </Button>
-            ))}
+          <div className="mb-6 space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-navy/50">
+              {t("cases.filterIndustry")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {verticalTabs.map((tab) => (
+                <Button
+                  key={tab.value}
+                  variant={verticalTab === tab.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setVerticalTab(tab.value)}
+                  className={
+                    verticalTab === tab.value
+                      ? "bg-navy text-white"
+                      : "border-navy/20 text-navy"
+                  }
+                >
+                  {tab.label}
+                </Button>
+              ))}
+            </div>
+
+            <p className="text-xs font-semibold uppercase tracking-wide text-navy/50">
+              {t("cases.filterMediaType")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <Button
+                  key={cat.value}
+                  variant={activeCategory === cat.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveCategory(cat.value)}
+                  className={
+                    activeCategory === cat.value
+                      ? "bg-navy text-white"
+                      : "border-navy/20 text-navy"
+                  }
+                >
+                  {cat.label}
+                </Button>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-3 rounded-xl border border-navy/10 bg-slate-50/80 p-4 sm:flex-row sm:flex-wrap sm:items-end">
+              <div className="relative min-w-[200px] flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy/35" />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t("cases.searchPlaceholder")}
+                  className="h-10 border-navy/15 pl-9"
+                  aria-label={t("cases.searchPlaceholder")}
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-navy/55">
+                  {t("cases.filterRegion")}
+                </label>
+                <select
+                  className={selectClass}
+                  value={regionKey}
+                  onChange={(e) =>
+                    setRegionKey(e.target.value as CaseStudyRegionKey | "all")
+                  }
+                >
+                  {REGION_KEYS.map((k) => (
+                    <option key={k} value={k}>
+                      {regionLabel(k)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-navy/55">
+                  {t("cases.filterScale")}
+                </label>
+                <select
+                  className={selectClass}
+                  value={scale}
+                  onChange={(e) =>
+                    setScale(e.target.value as CaseStudyScale | "all")
+                  }
+                >
+                  {SCALE_KEYS.map((k) => (
+                    <option key={k} value={k}>
+                      {scaleLabel(k)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <p className="text-sm text-navy/60">
+              {t("cases.resultsCount", { count: filtered.length })}
+            </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filtered.map((cs) => (
               <Card
                 key={cs.id}
-                className="group overflow-hidden border-0 shadow-md transition-all hover:shadow-xl hover:-translate-y-1"
+                className="group overflow-hidden border-0 shadow-md transition-all hover:-translate-y-1 hover:shadow-xl"
               >
                 <div className="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-gold/10 to-navy/10">
                   <div className="absolute left-3 top-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-navy/15 bg-navy text-[11px] font-extrabold tracking-tight text-gold shadow-sm">
@@ -91,11 +269,18 @@ export default function CasesPage() {
                   <TrendingUp className="h-12 w-12 text-gold/40 transition-transform group-hover:scale-110" />
                 </div>
                 <CardHeader className="pb-3">
-                  <Badge
-                    className={`w-fit text-xs ${categoryColors[cs.category] || ""}`}
-                  >
-                    {categories.find((c) => c.value === cs.category)?.label}
-                  </Badge>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge
+                      className={`w-fit text-xs ${verticalColors[cs.vertical]}`}
+                    >
+                      {verticalBadgeLabel(cs.vertical)}
+                    </Badge>
+                    <Badge
+                      className={`w-fit text-xs ${categoryColors[cs.category]}`}
+                    >
+                      {categories.find((c) => c.value === cs.category)?.label}
+                    </Badge>
+                  </div>
                   <CardTitle className="text-base">
                     {isKo ? cs.title : cs.titleEn}
                   </CardTitle>
@@ -104,6 +289,38 @@ export default function CasesPage() {
                   <CardDescription className="text-sm leading-relaxed">
                     {isKo ? cs.description : cs.descriptionEn}
                   </CardDescription>
+
+                  <div className="space-y-2 rounded-xl border border-navy/8 bg-white p-3">
+                    <div className="flex items-start gap-2 text-xs text-navy/85">
+                      <Target className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-dark" />
+                      <div>
+                        <span className="font-semibold text-navy">
+                          {t("cases.goalLabel")}
+                        </span>
+                        <p className="mt-0.5 leading-relaxed">
+                          {isKo ? cs.campaignGoal : cs.campaignGoalEn}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2 text-xs text-navy/85">
+                      <Layers className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-dark" />
+                      <div>
+                        <span className="font-semibold text-navy">
+                          {t("cases.mediaLabel")}
+                        </span>
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {(isKo ? cs.mediaUsed : cs.mediaUsedEn).map((m) => (
+                            <span
+                              key={m}
+                              className="rounded-md bg-navy/[0.06] px-2 py-0.5 text-[11px] font-medium text-navy"
+                            >
+                              {m}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
                   <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-3">
                     <div className="text-center">
@@ -127,13 +344,36 @@ export default function CasesPage() {
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
                         <TrendingUp className="h-3 w-3" />
-                        {isKo ? "성과" : "Result"}
+                        {t("cases.resultsLabel")}
                       </div>
                       <div className="mt-0.5 text-xs font-bold text-gold-dark">
                         {isKo ? cs.results : cs.resultsEn}
                       </div>
                     </div>
                   </div>
+
+                  {cs.gallery.length > 0 ? (
+                    <div className="rounded-xl border border-navy/8 bg-slate-50/60 p-3">
+                      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-navy/45">
+                        {t("cases.galleryLabel")}
+                      </p>
+                      <ul className="space-y-1.5">
+                        {cs.gallery.map((g, i) => (
+                          <li
+                            key={i}
+                            className="flex items-center gap-2 text-[11px] text-navy/75"
+                          >
+                            {g.type === "video" ? (
+                              <Video className="h-3.5 w-3.5 shrink-0 text-navy/45" />
+                            ) : (
+                              <ImageIcon className="h-3.5 w-3.5 shrink-0 text-navy/45" />
+                            )}
+                            <span>{isKo ? g.labelKo : g.labelEn}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
 
                   <div className="rounded-xl border border-navy/8 bg-navy/[0.03] p-3">
                     <Quote className="mb-1 h-4 w-4 text-gold/30" />
@@ -162,18 +402,43 @@ export default function CasesPage() {
                     </p>
                   </div>
 
-                  <Link href={`/cases/${cs.slug}`}>
-                    <Button
-                      size="sm"
-                      className="w-full bg-gold text-navy text-xs font-bold hover:bg-gold-dark mt-1"
-                    >
-                      {isKo ? "상세 보기" : "View Details"}
-                      <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                    </Button>
-                  </Link>
+                  <div className="flex flex-col gap-2">
+                    <Link href={`/cases/${cs.slug}`}>
+                      <Button
+                        size="sm"
+                        className="w-full bg-gold text-xs font-bold text-navy hover:bg-gold-dark"
+                      >
+                        {isKo ? "상세 보기" : "View Details"}
+                        <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                      </Button>
+                    </Link>
+                    <Link href={`/contact?case=${encodeURIComponent(cs.slug)}`}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full border-navy/25 text-xs font-bold text-navy hover:bg-navy/5"
+                      >
+                        {t("cases.ctaSimilar")}
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             ))}
+          </div>
+
+          <div className="mt-16 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/[0.04] to-gold/10 px-6 py-10 text-center">
+            <h2 className="text-xl font-bold text-navy sm:text-2xl">
+              {t("cases.sectionCtaTitle")}
+            </h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-navy/65">
+              {t("cases.sectionCtaDesc")}
+            </p>
+            <Link href="/contact" className="mt-6 inline-block">
+              <Button className="bg-navy px-8 text-white hover:bg-navy/90">
+                {t("cases.sectionCtaButton")}
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
