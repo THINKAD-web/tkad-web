@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Monitor, MapPin, Calculator, Send, Download } from "lucide-react";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { mediaData, typeLabels } from "@/lib/media-data";
 import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
@@ -51,6 +51,20 @@ export default function QuotePage() {
 
   const [period, setPeriod] = useState<PeriodKey>("1month");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const mediaQueryApplied = useRef(false);
+
+  useEffect(() => {
+    if (mediaQueryApplied.current) return;
+    if (typeof window === "undefined") return;
+    const raw = new URLSearchParams(window.location.search).get("media");
+    if (!raw) return;
+    mediaQueryApplied.current = true;
+    const ids = raw
+      .split(",")
+      .map((x) => parseInt(x, 10))
+      .filter((n) => Number.isFinite(n) && mediaData.some((m) => m.id === n));
+    if (ids.length > 0) setSelectedIds(new Set(ids));
+  }, []);
   const [form, setForm] = useState<FormState>({
     company: "",
     name: "",

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,12 +34,14 @@ const CompareBar = dynamic(() => import("@/components/compare-bar"), {
 });
 import { mediaData, typeLabels, type MediaItem } from "@/lib/media-data";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
+import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 
 export default function MediaPage() {
   const t = useTranslations();
   const locale = useLocale();
   const isKo = locale === "ko";
 
+  const [mainTab, setMainTab] = useState<"search" | "ai">("search");
   const [region, setRegion] = useState("all");
   const [type, setType] = useState("all");
   const [budget, setBudget] = useState("all");
@@ -110,6 +112,17 @@ export default function MediaPage() {
     });
   }, []);
 
+  const addManyToCompare = useCallback((items: MediaItem[]) => {
+    setCompareItems((prev) => {
+      const next = [...prev];
+      for (const m of items) {
+        if (next.length >= 3) break;
+        if (!next.some((x) => x.id === m.id)) next.push(m);
+      }
+      return next;
+    });
+  }, []);
+
   const isInCompare = (id: number) => compareItems.some((m) => m.id === id);
 
   return (
@@ -132,9 +145,46 @@ export default function MediaPage() {
 
       <section className="py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 flex justify-center">
+            <div className="inline-flex rounded-full border border-navy/10 bg-white p-1 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setMainTab("search")}
+                className={`touch-manipulation rounded-full px-5 py-2.5 text-sm font-semibold transition-colors sm:px-8 ${
+                  mainTab === "search"
+                    ? "bg-navy text-white shadow-sm"
+                    : "text-muted-foreground hover:bg-slate-50"
+                }`}
+              >
+                {t("media.ai.tabSearch")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMainTab("ai")}
+                className={`touch-manipulation rounded-full px-5 py-2.5 text-sm font-semibold transition-colors sm:px-8 ${
+                  mainTab === "ai"
+                    ? "bg-gradient-to-r from-navy to-navy/90 text-white shadow-sm"
+                    : "text-muted-foreground hover:bg-slate-50"
+                }`}
+              >
+                {t("media.ai.tabAi")}
+              </button>
+            </div>
+          </div>
+
           {/* Recently Viewed */}
           <RecentlyViewedMedia locale={locale} onSelect={handleMediaView} />
 
+          {mainTab === "ai" ? (
+            <MediaAiRecommendPanel
+              locale={locale}
+              regionOptions={regions}
+              compareItems={compareItems}
+              toggleCompare={toggleCompare}
+              isInCompare={isInCompare}
+              addManyToCompare={addManyToCompare}
+            />
+          ) : (
           <div className="flex flex-col gap-8 lg:flex-row">
             {/* Sidebar */}
             <aside className="w-full shrink-0 lg:w-64">
@@ -296,7 +346,7 @@ export default function MediaPage() {
                         </div>
                         <div className="mt-3">
                           <Link
-                            href={`/${locale}/quote?media=${media.id}`}
+                            href={`/quote?media=${media.id}`}
                             className="flex w-full items-center justify-center gap-1.5 rounded-md bg-gold px-3 py-2 text-sm font-semibold text-navy transition-colors hover:bg-gold-dark"
                           >
                             <Calculator className="h-3.5 w-3.5" />
@@ -310,6 +360,7 @@ export default function MediaPage() {
               )}
             </div>
           </div>
+          )}
         </div>
       </section>
 
