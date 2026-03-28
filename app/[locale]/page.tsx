@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import SolutionCtaButton from "@/components/solution-cta-button";
+import ScrollAnimate from "@/components/scroll-animate";
 import {
   ArrowRight,
   BarChart3,
@@ -181,19 +182,21 @@ function HomeContent({ locale }: { locale: string }) {
       <section className="relative border-b bg-white py-24 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,168,76,0.04)_0%,_transparent_70%)]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-              {isKo ? "검증 프로세스" : "Verification Process"}
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
-              {isKo ? "싱커드만의 4단계 매체 검증" : "THINKAD's 4-Step Media Verification"}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              {isKo
-                ? "모든 매체는 엄격한 검증 프로세스를 거쳐야만 등록됩니다"
-                : "Every media must pass our rigorous verification process before registration"}
-            </p>
-          </div>
+          <ScrollAnimate>
+            <div className="text-center">
+              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
+                {isKo ? "검증 프로세스" : "Verification Process"}
+              </p>
+              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+                {isKo ? "싱커드만의 4단계 매체 검증" : "THINKAD's 4-Step Media Verification"}
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                {isKo
+                  ? "모든 매체는 엄격한 검증 프로세스를 거쳐야만 등록됩니다"
+                  : "Every media must pass our rigorous verification process before registration"}
+              </p>
+            </div>
+          </ScrollAnimate>
 
           <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -230,7 +233,8 @@ function HomeContent({ locale }: { locale: string }) {
                   : "Only verified media are registered on the THINKAD platform and proposed to advertisers.",
               },
             ].map((item, index) => (
-              <div key={item.step} className="verification-step group relative">
+              <ScrollAnimate key={item.step} delay={index * 120}>
+              <div className="verification-step group relative">
                 {index < 3 && (
                   <div className="absolute top-10 right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
                 )}
@@ -247,6 +251,7 @@ function HomeContent({ locale }: { locale: string }) {
                   </p>
                 </div>
               </div>
+              </ScrollAnimate>
             ))}
           </div>
         </div>
@@ -255,60 +260,64 @@ function HomeContent({ locale }: { locale: string }) {
       {/* Stats */}
       <section className="relative border-b bg-white py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            {[
-              {
-                animClass: "stat-count-up stat-count-500",
-                label: isKo ? "검증된 매체" : "Verified Media",
-              },
-              {
-                animClass: "stat-count-up stat-count-15",
-                label: isKo ? "경력" : "Years Experience",
-              },
-              {
-                animClass: "stat-count-up stat-count-100",
-                label: isKo ? "전국 커버리지" : "National Coverage",
-              },
-              {
-                animClass: "stat-count-up stat-count-50",
-                label: isKo ? "글로벌 네트워크" : "Global Network",
-              },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div
-                  className={`text-4xl font-extrabold text-gold sm:text-5xl ${stat.animClass}`}
-                />
-                <div className="mt-3 text-sm font-medium tracking-wide text-navy/60 uppercase">
-                  {stat.label}
+          <ScrollAnimate variant="count-up">
+            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+              {[
+                {
+                  animClass: "stat-count-up stat-count-500",
+                  label: isKo ? "검증된 매체" : "Verified Media",
+                },
+                {
+                  animClass: "stat-count-up stat-count-15",
+                  label: isKo ? "경력" : "Years Experience",
+                },
+                {
+                  animClass: "stat-count-up stat-count-100",
+                  label: isKo ? "전국 커버리지" : "National Coverage",
+                },
+                {
+                  animClass: "stat-count-up stat-count-50",
+                  label: isKo ? "글로벌 네트워크" : "Global Network",
+                },
+              ].map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <div
+                    className={`text-4xl font-extrabold text-gold sm:text-5xl ${stat.animClass}`}
+                  />
+                  <div className="mt-3 text-sm font-medium tracking-wide text-navy/60 uppercase">
+                    {stat.label}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollAnimate>
         </div>
       </section>
 
       {/* TOP 3 Recommended Media */}
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-sm font-bold text-gold-dark">
-              <Trophy className="h-4 w-4" />
-              TOP 3
+          <ScrollAnimate>
+            <div className="text-center">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-sm font-bold text-gold-dark">
+                <Trophy className="h-4 w-4" />
+                TOP 3
+              </div>
+              <h2 className="mt-1 text-3xl font-bold text-navy sm:text-4xl">
+                {isKo ? "싱커드 추천 매체 TOP 3" : "THINKAD Recommended Media TOP 3"}
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                {isKo
+                  ? "검증 데이터 기반, 가장 효과적인 매체를 엄선했습니다"
+                  : "Curated selection of the most effective media based on verified data"}
+              </p>
             </div>
-            <h2 className="mt-1 text-3xl font-bold text-navy sm:text-4xl">
-              {isKo ? "싱커드 추천 매체 TOP 3" : "THINKAD Recommended Media TOP 3"}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              {isKo
-                ? "검증 데이터 기반, 가장 효과적인 매체를 엄선했습니다"
-                : "Curated selection of the most effective media based on verified data"}
-            </p>
-          </div>
+          </ScrollAnimate>
 
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {[
               {
-                rank: 1,
+                rank: 1 as const,
                 name: isKo ? "강남역 미디어폴" : "Gangnam Station Media Pole",
                 location: isKo ? "서울 강남구 강남대로" : "Gangnam-daero, Gangnam-gu, Seoul",
                 dailyExposure: "320,000",
@@ -334,9 +343,9 @@ function HomeContent({ locale }: { locale: string }) {
                 roi: "3.5x",
                 type: isKo ? "지하철" : "Subway",
               },
-            ].map((media) => (
+            ].map((media, i) => (
+              <ScrollAnimate key={media.rank} delay={i * 150}>
               <Card
-                key={media.rank}
                 className="group relative overflow-hidden border-0 bg-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
               >
                 <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
@@ -396,6 +405,7 @@ function HomeContent({ locale }: { locale: string }) {
                   </div>
                 </CardContent>
               </Card>
+              </ScrollAnimate>
             ))}
           </div>
         </div>
@@ -404,19 +414,21 @@ function HomeContent({ locale }: { locale: string }) {
       {/* Why THINKAD */}
       <section className="bg-white py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-              {isKo ? "차별점" : "Why Us"}
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
-              {isKo ? "왜 싱커드인가?" : "Why THINKAD?"}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              {isKo
-                ? "검증되지 않은 매체에 광고비를 낭비하지 마세요"
-                : "Don't waste your ad budget on unverified media"}
-            </p>
-          </div>
+          <ScrollAnimate>
+            <div className="text-center">
+              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
+                {isKo ? "차별점" : "Why Us"}
+              </p>
+              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+                {isKo ? "왜 싱커드인가?" : "Why THINKAD?"}
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                {isKo
+                  ? "검증되지 않은 매체에 광고비를 낭비하지 마세요"
+                  : "Don't waste your ad budget on unverified media"}
+              </p>
+            </div>
+          </ScrollAnimate>
           <div className="mt-16 grid gap-8 md:grid-cols-3">
             {[
               {
@@ -443,9 +455,9 @@ function HomeContent({ locale }: { locale: string }) {
                   : "THINKAD takes full responsibility from contract, installation, execution, monitoring, reporting, to post-campaign management. One-stop management with no middlemen.",
                 highlight: isKo ? "원스톱 관리" : "One-Stop",
               },
-            ].map((item) => (
+            ].map((item, i) => (
+              <ScrollAnimate key={item.title} delay={i * 150}>
               <Card
-                key={item.title}
                 className="group relative overflow-hidden border-0 bg-gradient-to-b from-white to-slate-50 shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
               >
                 <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
@@ -467,6 +479,7 @@ function HomeContent({ locale }: { locale: string }) {
                   </div>
                 </CardContent>
               </Card>
+              </ScrollAnimate>
             ))}
           </div>
         </div>
@@ -475,17 +488,19 @@ function HomeContent({ locale }: { locale: string }) {
       {/* Services */}
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-              {isKo ? "서비스" : "Services"}
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
-              {t("services.title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              {t("services.subtitle")}
-            </p>
-          </div>
+          <ScrollAnimate>
+            <div className="text-center">
+              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
+                {isKo ? "서비스" : "Services"}
+              </p>
+              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+                {t("services.title")}
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                {t("services.subtitle")}
+              </p>
+            </div>
+          </ScrollAnimate>
           <div className="mt-16 grid gap-8 md:grid-cols-3">
             {[
               {
@@ -506,9 +521,9 @@ function HomeContent({ locale }: { locale: string }) {
                 desc: t("services.dataConsulting.description"),
                 accent: "from-gold/10 to-navy/5",
               },
-            ].map((service) => (
+            ].map((service, i) => (
+              <ScrollAnimate key={service.title} delay={i * 150}>
               <Card
-                key={service.title}
                 className="service-card group cursor-pointer border-0 bg-white shadow-md"
               >
                 <CardHeader className="pb-4">
@@ -529,6 +544,7 @@ function HomeContent({ locale }: { locale: string }) {
                   </div>
                 </CardContent>
               </Card>
+              </ScrollAnimate>
             ))}
           </div>
         </div>
@@ -537,30 +553,32 @@ function HomeContent({ locale }: { locale: string }) {
       {/* Featured Media with Verified Badge */}
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
-                <ShieldCheck className="h-4 w-4" />
-                Verified Media
+          <ScrollAnimate>
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
+                  <ShieldCheck className="h-4 w-4" />
+                  Verified Media
+                </div>
+                <h2 className="mt-1 text-3xl font-bold text-navy">
+                  {t("featuredMedia.title")}
+                </h2>
+                <p className="mt-2 text-muted-foreground">
+                  {t("featuredMedia.subtitle")}
+                </p>
               </div>
-              <h2 className="mt-1 text-3xl font-bold text-navy">
-                {t("featuredMedia.title")}
-              </h2>
-              <p className="mt-2 text-muted-foreground">
-                {t("featuredMedia.subtitle")}
-              </p>
+              <Link
+                href="/media"
+                className="hidden items-center gap-1 text-sm font-semibold text-gold transition-colors hover:text-gold-dark md:inline-flex"
+              >
+                {t("common.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
-            <Link
-              href="/media"
-              className="hidden items-center gap-1 text-sm font-semibold text-gold transition-colors hover:text-gold-dark md:inline-flex"
-            >
-              {t("common.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
+          </ScrollAnimate>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredMedia.map((media) => (
+            {featuredMedia.map((media, i) => (
+              <ScrollAnimate key={media.id} delay={i * 100}>
               <Card
-                key={media.id}
                 className="group overflow-hidden border-0 shadow-md transition-all hover:shadow-xl hover:-translate-y-1"
               >
                 <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10 overflow-hidden">
@@ -599,6 +617,7 @@ function HomeContent({ locale }: { locale: string }) {
                   </div>
                 </CardContent>
               </Card>
+              </ScrollAnimate>
             ))}
           </div>
         </div>
@@ -607,9 +626,11 @@ function HomeContent({ locale }: { locale: string }) {
       {/* Partner Logos Marquee */}
       <section className="border-y bg-slate-50 py-16 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="mb-10 text-center text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            {isKo ? "신뢰하는 파트너사" : "Trusted Partners"}
-          </p>
+          <ScrollAnimate variant="fade-in">
+            <p className="mb-10 text-center text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+              {isKo ? "신뢰하는 파트너사" : "Trusted Partners"}
+            </p>
+          </ScrollAnimate>
         </div>
         <div className="marquee-container">
           <div className="marquee-track">
@@ -628,14 +649,16 @@ function HomeContent({ locale }: { locale: string }) {
       {/* Testimonials */}
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-              {isKo ? "고객 후기" : "Testimonials"}
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
-              {isKo ? "광고주가 직접 전하는 이야기" : "What Our Clients Say"}
-            </h2>
-          </div>
+          <ScrollAnimate>
+            <div className="text-center">
+              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
+                {isKo ? "고객 후기" : "Testimonials"}
+              </p>
+              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+                {isKo ? "광고주가 직접 전하는 이야기" : "What Our Clients Say"}
+              </h2>
+            </div>
+          </ScrollAnimate>
           <div className="mt-16 grid gap-8 md:grid-cols-3">
             {[
               {
@@ -662,9 +685,9 @@ function HomeContent({ locale }: { locale: string }) {
                   : "It was our first subway wrapping ad. THINKAD meticulously analyzed foot traffic and visibility for each station, helping us optimally select 7 stations. 200% increase in first-week album sales! Definitely using THINKAD for our next campaign.",
                 rating: 5,
               },
-            ].map((testimonial) => (
+            ].map((testimonial, i) => (
+              <ScrollAnimate key={testimonial.name} delay={i * 150}>
               <Card
-                key={testimonial.name}
                 className="relative border-0 bg-white shadow-md transition-all hover:shadow-lg"
               >
                 <CardHeader className="pb-3">
@@ -692,6 +715,7 @@ function HomeContent({ locale }: { locale: string }) {
                   </div>
                 </CardContent>
               </Card>
+              </ScrollAnimate>
             ))}
           </div>
         </div>
@@ -700,21 +724,23 @@ function HomeContent({ locale }: { locale: string }) {
       {/* Case Studies */}
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-              {isKo ? "성공 사례" : "Case Studies"}
-            </p>
-            <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
-              {t("caseStudies.title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              {t("caseStudies.subtitle")}
-            </p>
-          </div>
+          <ScrollAnimate>
+            <div className="text-center">
+              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
+                {isKo ? "성공 사례" : "Case Studies"}
+              </p>
+              <h2 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
+                {t("caseStudies.title")}
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                {t("caseStudies.subtitle")}
+              </p>
+            </div>
+          </ScrollAnimate>
           <div className="mt-16 grid gap-8 md:grid-cols-3">
-            {(["case1", "case2", "case3"] as const).map((key) => (
+            {(["case1", "case2", "case3"] as const).map((key, i) => (
+              <ScrollAnimate key={key} delay={i * 150}>
               <Card
-                key={key}
                 className="group overflow-hidden border-0 shadow-md transition-all hover:shadow-xl hover:-translate-y-1"
               >
                 <div className="flex h-48 items-center justify-center bg-gradient-to-br from-gold/10 to-navy/10 overflow-hidden">
@@ -734,6 +760,7 @@ function HomeContent({ locale }: { locale: string }) {
                   </CardDescription>
                 </CardContent>
               </Card>
+              </ScrollAnimate>
             ))}
           </div>
           <div className="mt-12 text-center">
@@ -753,7 +780,7 @@ function HomeContent({ locale }: { locale: string }) {
       {/* CTA Banner */}
       <section className="hero-bg relative overflow-hidden py-28">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,168,76,0.06)_0%,_transparent_70%)]" />
-        <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <ScrollAnimate className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-white sm:text-4xl">
             {t("ctaBanner.title")}
           </h2>
@@ -769,7 +796,7 @@ function HomeContent({ locale }: { locale: string }) {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
-        </div>
+        </ScrollAnimate>
       </section>
     </>
   );

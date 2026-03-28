@@ -66,7 +66,27 @@ body {
   }
 }
 
-/* Count-up animation for stats */
+/* ── Intersection Observer scroll animations ── */
+.scroll-fade-up {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.scroll-fade-up.scroll-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-fade {
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.scroll-fade.scroll-visible {
+  opacity: 1;
+}
+
+/* ── Count-up animation for stats (Intersection Observer gated) ── */
 @property --num {
   syntax: "<integer>";
   initial-value: 0;
@@ -74,15 +94,15 @@ body {
 }
 
 .stat-count-up {
-  animation: countUp 2s ease-out forwards;
   counter-reset: num var(--num);
 }
 .stat-count-up::after {
   content: counter(num);
 }
 
-@keyframes countUp {
-  from { --num: 0; }
+.scroll-count-paused .stat-count-up {
+  --num: 0 !important;
+  animation: none !important;
 }
 
 .stat-count-500::after { content: counter(num) "+"; }
@@ -184,4 +204,21 @@ html {
 .touch-target {
   min-height: 44px;
   min-width: 44px;
+}
+
+/* ── Mobile nav sequential item appearance ── */
+@keyframes mobileNavIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.mobile-nav-item {
+  opacity: 0;
+  animation: mobileNavIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Blur overlay for mobile sheet */
+.mobile-sheet [data-slot="sheet-overlay"] {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: rgba(26, 39, 68, 0.3);
 }
