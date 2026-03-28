@@ -1,4 +1,44 @@
-export const caseStudies = [
+export type CaseStudyCategory = "billboard" | "digital" | "transport" | "special";
+
+export type CaseStudy = {
+  id: number;
+  slug: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  category: CaseStudyCategory;
+  client: string;
+  clientEn: string;
+  clientLogo: string;
+  roi: string;
+  roiDetail: string;
+  roiDetailEn: string;
+  managerComment: string;
+  managerCommentEn: string;
+  managerName: string;
+  managerNameEn: string;
+  managerRole: string;
+  managerRoleEn: string;
+  results: string;
+  resultsEn: string;
+  exposures: string;
+  exposuresEn: string;
+  reachIncrease: string;
+  campaignGoal: string;
+  campaignGoalEn: string;
+  mediaUsed: readonly string[];
+  mediaUsedEn: readonly string[];
+  duration: string;
+  durationEn: string;
+  stats: readonly { label: string; labelEn: string; value: string }[];
+  testimonial: string;
+  testimonialEn: string;
+  testimonialAuthor: string;
+  testimonialAuthorEn: string;
+};
+
+export const caseStudies: readonly CaseStudy[] = [
   {
     id: 1,
     slug: "global-beauty-gangnam",
@@ -8,9 +48,21 @@ export const caseStudies = [
       "강남역 일대 빌보드 10면을 활용한 동시 노출 캠페인으로 브랜드 인지도 300% 상승을 달성했습니다.",
     descriptionEn:
       "Achieved 300% brand awareness increase through simultaneous exposure campaign using 10 billboards around Gangnam Station.",
-    category: "billboard" as const,
+    category: "billboard",
     client: "글로벌 뷰티 그룹",
     clientEn: "Global beauty group",
+    clientLogo: "글로",
+    roi: "4.5x",
+    roiDetail: "광고비 대비 4.5배 매출 효과",
+    roiDetailEn: "4.5x return on ad spend",
+    managerComment:
+      "강남 핵심 상권에서 면수와 노출 타이밍을 검증 데이터에 맞춰 집행해 프리미엄 포지셔닝과 인지도 상승을 동시에 끌어냈습니다.",
+    managerCommentEn:
+      "We aligned panel count and flight timing to verified Gangnam traffic data, lifting both premium perception and awareness.",
+    managerName: "이정민",
+    managerNameEn: "Jungmin Lee",
+    managerRole: "수석 컨설턴트",
+    managerRoleEn: "Senior Consultant",
     results: "브랜드 인지도 300% 상승",
     resultsEn: "300% brand awareness increase",
     exposures: "450만",
@@ -45,9 +97,21 @@ export const caseStudies = [
       "코엑스 디지털 사이니지를 활용한 신제품 런칭 캠페인으로 2주간 150만 노출을 달성했습니다.",
     descriptionEn:
       "Achieved 1.5 million exposures in 2 weeks through new product launch campaign using COEX digital signage.",
-    category: "digital" as const,
+    category: "digital",
     client: "AI 스타트업",
     clientEn: "AI startup",
+    clientLogo: "AI",
+    roi: "3.8x",
+    roiDetail: "광고비 대비 3.8배 매출 효과",
+    roiDetailEn: "3.8x return on ad spend",
+    managerComment:
+      "런칭 직후 관심이 몰리는 코엑스 접점에 집중해 B2B·B2C 타겟을 한 번에 잡은 것이 높은 효율로 이어졌습니다.",
+    managerCommentEn:
+      "Focusing on high-intent COEX touchpoints right after launch captured B2B and B2C audiences efficiently.",
+    managerName: "김태호",
+    managerNameEn: "Taeho Kim",
+    managerRole: "캠페인 매니저",
+    managerRoleEn: "Campaign Manager",
     results: "2주간 150만 노출",
     resultsEn: "1.5M exposures in 2 weeks",
     exposures: "150만",
@@ -82,9 +146,21 @@ export const caseStudies = [
       "서울 지하철 주요 7개 역사 랩핑 광고로 앨범 초동 판매 200% 증가를 이끌었습니다.",
     descriptionEn:
       "Led to 200% increase in first-week album sales through wrapping ads at 7 major Seoul subway stations.",
-    category: "transport" as const,
+    category: "transport",
     client: "대형 엔터테인먼트사",
     clientEn: "Major entertainment company",
+    clientLogo: "대형",
+    roi: "5.2x",
+    roiDetail: "광고비 대비 5.2배 매출 효과",
+    roiDetailEn: "5.2x return on ad spend",
+    managerComment:
+      "역별 유동 패턴으로 랩핑 역을 선별해 팬 이동 동선과 맞췄고, 초동 판매와 화제성이 함께 올랐습니다.",
+    managerCommentEn:
+      "Station picks followed foot-traffic patterns and fan flows, lifting both first-week sales and buzz.",
+    managerName: "박소영",
+    managerNameEn: "Soyoung Park",
+    managerRole: "미디어 플래너",
+    managerRoleEn: "Media Planner",
     results: "초동 판매 200% 증가",
     resultsEn: "200% increase in first-week sales",
     exposures: "680만",
@@ -119,9 +195,21 @@ export const caseStudies = [
       "전국 주요 도시 시내버스 500대를 활용한 신제품 런칭 캠페인으로 매출 40% 증가를 달성했습니다.",
     descriptionEn:
       "Achieved 40% sales increase through new product launch campaign using 500 city buses across major cities.",
-    category: "transport" as const,
+    category: "transport",
     client: "국내 식음료 대기업",
     clientEn: "Domestic F&B conglomerate",
+    clientLogo: "국내",
+    roi: "3.2x",
+    roiDetail: "광고비 대비 3.2배 매출 효과",
+    roiDetailEn: "3.2x return on ad spend",
+    managerComment:
+      "도시·노선별 익스포저를 균형 있게 설계해 런칭 메시지가 전국에 동시에 퍼지며 매출 성장으로 연결됐습니다.",
+    managerCommentEn:
+      "Balanced city and route exposure spread the launch message nationwide and converted to sales growth.",
+    managerName: "최윤서",
+    managerNameEn: "Yunseo Choi",
+    managerRole: "시니어 매니저",
+    managerRoleEn: "Senior Manager",
     results: "매출 40% 증가",
     resultsEn: "40% sales increase",
     exposures: "1,200만",
@@ -156,9 +244,21 @@ export const caseStudies = [
       "여의도 금융 중심가 디지털 사이니지를 활용한 기업 브랜딩 캠페인으로 투자자 문의 250% 증가를 이끌었습니다.",
     descriptionEn:
       "Led to 250% increase in investor inquiries through corporate branding campaign using digital signage in Yeouido financial district.",
-    category: "digital" as const,
+    category: "digital",
     client: "대형 증권사",
     clientEn: "Major securities firm",
+    clientLogo: "대형",
+    roi: "4.0x",
+    roiDetail: "광고비 대비 4.0배 매출 효과",
+    roiDetailEn: "4.0x return on ad spend",
+    managerComment:
+      "출퇴근·미팅 동선에 맞춘 디지털 OOH 배치로 투자자 리드의 질과 전환 가능성이 크게 개선됐습니다.",
+    managerCommentEn:
+      "OOH mapped to commute and meeting flows in Yeouido materially improved lead quality from investors.",
+    managerName: "한지우",
+    managerNameEn: "Jiwoo Han",
+    managerRole: "디지털 전략팀장",
+    managerRoleEn: "Digital Strategy Lead",
     results: "투자자 문의 250% 증가",
     resultsEn: "250% increase in investor inquiries",
     exposures: "320만",
@@ -193,9 +293,21 @@ export const caseStudies = [
       "명동 중심가 대형 전광판을 활용한 크로스보더 캠페인으로 해외 관광객 유입 180% 증가를 달성했습니다.",
     descriptionEn:
       "Achieved 180% increase in foreign tourist visits through cross-border campaign using Myeongdong central LED.",
-    category: "digital" as const,
+    category: "digital",
     client: "K-뷰티 브랜드",
     clientEn: "K-beauty brand",
+    clientLogo: "K-",
+    roi: "3.5x",
+    roiDetail: "광고비 대비 3.5배 매출 효과",
+    roiDetailEn: "3.5x return on ad spend",
+    managerComment:
+      "명동 중심 LED와 관광객 국적·체류 패턴 데이터를 결합해 크로스보더 유입을 정확히 겨냥했습니다.",
+    managerCommentEn:
+      "Pairing Myeongdong LED with nationality and dwell-time data targeted cross-border traffic precisely.",
+    managerName: "정다은",
+    managerNameEn: "Daeun Jung",
+    managerRole: "크로스보더 매니저",
+    managerRoleEn: "Cross-border Manager",
     results: "관광객 유입 180% 증가",
     resultsEn: "180% increase in tourist visits",
     exposures: "520만",
@@ -230,9 +342,21 @@ export const caseStudies = [
       "해운대 해변 빌보드를 활용한 여름 시즌 캠페인으로 앱 다운로드 120% 증가를 이끌었습니다.",
     descriptionEn:
       "Led to 120% increase in app downloads through summer season campaign using Haeundae beach billboard.",
-    category: "billboard" as const,
+    category: "billboard",
     client: "모바일 플랫폼",
     clientEn: "Mobile platform",
+    clientLogo: "모바",
+    roi: "4.8x",
+    roiDetail: "광고비 대비 4.8배 매출 효과",
+    roiDetailEn: "4.8x return on ad spend",
+    managerComment:
+      "피크 시즌 관람·체류 데이터를 반영해 앱 설치 전환에 유리한 시간대에 노출을 집중했습니다.",
+    managerCommentEn:
+      "Peak-season dwell data let us weight exposures toward dayparts that favored app installs.",
+    managerName: "김서준",
+    managerNameEn: "Seojun Kim",
+    managerRole: "그로스 컨설턴트",
+    managerRoleEn: "Growth Consultant",
     results: "앱 다운로드 120% 증가",
     resultsEn: "120% increase in app downloads",
     exposures: "280만",
@@ -267,9 +391,21 @@ export const caseStudies = [
       "제주공항 및 관광단지 디지털 광고를 통한 콘서트 홍보 캠페인으로 티켓 판매 완판을 달성했습니다.",
     descriptionEn:
       "Achieved sold-out ticket sales through concert promotion campaign via Jeju airport and resort digital ads.",
-    category: "special" as const,
+    category: "special",
     client: "공연 기획사",
     clientEn: "Concert production company",
+    clientLogo: "공연",
+    roi: "6.0x",
+    roiDetail: "광고비 대비 6.0배 매출 효과",
+    roiDetailEn: "6.0x return on ad spend",
+    managerComment:
+      "공항 입국부터 관광단지 이동까지 터치포인트를 연결해 티켓 구매 의도를 끝까지 밀어 완판으로 이었습니다.",
+    managerCommentEn:
+      "Linking airport arrivals to resort touchpoints sustained intent through to a sold-out outcome.",
+    managerName: "이수빈",
+    managerNameEn: "Subin Lee",
+    managerRole: "스페셜 캠페인 PD",
+    managerRoleEn: "Special Campaign PD",
     results: "티켓 전석 완판",
     resultsEn: "Sold-out tickets",
     exposures: "190만",
@@ -295,11 +431,9 @@ export const caseStudies = [
     testimonialAuthor: "오지영 프로듀서",
     testimonialAuthorEn: "Jiyoung Oh, Producer",
   },
-] as const;
+];
 
-export type CaseStudy = typeof caseStudies[number];
-
-export const categoryColors: Record<CaseStudy["category"], string> = {
+export const categoryColors: Record<CaseStudyCategory, string> = {
   billboard: "bg-blue-50 text-blue-700",
   digital: "bg-purple-50 text-purple-700",
   transport: "bg-orange-50 text-orange-700",

@@ -14,6 +14,7 @@ import {
   Calendar,
   Download,
   Eye,
+  MessageSquareQuote,
   Quote,
   Target,
   TrendingUp,
@@ -86,14 +87,37 @@ export default function CaseStudyDetailPage({ params }: Props) {
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <Users className="h-4 w-4 text-gold/60" />
-              {isKo ? cs.client : cs.clientEn}
+            <span className="flex items-center gap-2.5">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-gold/35 bg-navy text-xs font-extrabold text-gold">
+                {cs.clientLogo}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-gold/60" />
+                {isKo ? cs.client : cs.clientEn}
+              </span>
             </span>
             <span className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-gold/60" />
               {isKo ? cs.duration : cs.durationEn}
             </span>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-gold/15 bg-gradient-to-r from-gold/12 via-gold/8 to-navy/[0.06] py-10">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gold-dark">
+                ROI
+              </p>
+              <p className="mt-1 text-4xl font-extrabold tracking-tight text-navy sm:text-5xl">
+                {cs.roi}
+              </p>
+            </div>
+            <p className="max-w-xl text-base leading-relaxed text-navy/80 sm:text-lg">
+              {isKo ? cs.roiDetail : cs.roiDetailEn}
+            </p>
           </div>
         </div>
       </section>
@@ -197,6 +221,28 @@ export default function CaseStudyDetailPage({ params }: Props) {
               </p>
               <p className="text-xs text-muted-foreground">
                 {isKo ? cs.client : cs.clientEn}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t bg-white py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/10 to-white p-8 shadow-sm">
+            <div className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-gold-dark">
+              <MessageSquareQuote className="h-5 w-5" />
+              {isKo ? "THINKAD 매니저 코멘트" : "THINKAD Manager Comment"}
+            </div>
+            <p className="text-lg leading-relaxed text-navy/85">
+              &ldquo;{isKo ? cs.managerComment : cs.managerCommentEn}&rdquo;
+            </p>
+            <div className="mt-6 border-t border-gold/20 pt-4">
+              <p className="text-sm font-bold text-navy">
+                {isKo ? cs.managerName : cs.managerNameEn}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isKo ? cs.managerRole : cs.managerRoleEn}
               </p>
             </div>
           </div>

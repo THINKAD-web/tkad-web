@@ -7,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import QuickInquiryButton from "@/components/quick-inquiry-button";
+import KakaoChannelButton from "@/components/kakao-channel-button";
 import FloatingCta from "@/components/floating-cta";
 import ExitIntentPopup from "@/components/exit-intent-popup";
 import TopLoader from "@/components/top-loader";
@@ -76,16 +77,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <QuickInquiryButton />
             <FloatingCta />
             <ExitIntentPopup />
-            <a
-              href="https://open.kakao.com/o/placeholder"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="fixed bottom-6 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110"
-              style={{ backgroundColor: "#FEE500" }}
-              aria-label="카카오톡 문의"
-            >
-              <span className="text-xl">💬</span>
-            </a>
+            <KakaoChannelButton />
           </ConditionalPublicChrome>
         </NextIntlClientProvider>
       </body>

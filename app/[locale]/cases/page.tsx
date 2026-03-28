@@ -10,7 +10,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Eye, Users, Quote, ArrowRight } from "lucide-react";
+import {
+  TrendingUp,
+  Eye,
+  Users,
+  Quote,
+  ArrowRight,
+  MessageSquareQuote,
+} from "lucide-react";
 import { useState, useMemo } from "react";
 import { Link } from "@/i18n/navigation";
 import { caseStudies, categoryColors } from "@/lib/case-studies";
@@ -74,7 +81,13 @@ export default function CasesPage() {
                 key={cs.id}
                 className="group overflow-hidden border-0 shadow-md transition-all hover:shadow-xl hover:-translate-y-1"
               >
-                <div className="flex h-48 items-center justify-center bg-gradient-to-br from-gold/10 to-navy/10 overflow-hidden">
+                <div className="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-gold/10 to-navy/10">
+                  <div className="absolute left-3 top-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-navy/15 bg-navy text-[11px] font-extrabold tracking-tight text-gold shadow-sm">
+                    {cs.clientLogo}
+                  </div>
+                  <div className="absolute right-3 top-3 rounded-full bg-gold px-2.5 py-1 text-xs font-extrabold text-navy shadow-md ring-2 ring-gold/40">
+                    ROI {cs.roi}
+                  </div>
                   <TrendingUp className="h-12 w-12 text-gold/40 transition-transform group-hover:scale-110" />
                 </div>
                 <CardHeader className="pb-3">
@@ -122,13 +135,30 @@ export default function CasesPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl bg-navy/[0.03] p-3">
+                  <div className="rounded-xl border border-navy/8 bg-navy/[0.03] p-3">
                     <Quote className="mb-1 h-4 w-4 text-gold/30" />
                     <p className="text-xs leading-relaxed text-navy/70 italic">
                       &ldquo;{isKo ? cs.testimonial : cs.testimonialEn}&rdquo;
                     </p>
                     <p className="mt-2 text-[11px] font-semibold text-navy/50">
                       — {isKo ? cs.testimonialAuthor : cs.testimonialAuthorEn}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-gold/25 bg-gold/8 p-3">
+                    <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-gold-dark">
+                      <MessageSquareQuote className="h-3.5 w-3.5" />
+                      {isKo ? "THINKAD 매니저 코멘트" : "THINKAD Manager"}
+                    </div>
+                    <p className="text-xs leading-relaxed text-navy/80">
+                      &ldquo;{isKo ? cs.managerComment : cs.managerCommentEn}&rdquo;
+                    </p>
+                    <p className="mt-2 text-[11px] font-semibold text-navy">
+                      {isKo ? cs.managerName : cs.managerNameEn}
+                      <span className="font-normal text-navy/55">
+                        {" "}
+                        · {isKo ? cs.managerRole : cs.managerRoleEn}
+                      </span>
                     </p>
                   </div>
 
