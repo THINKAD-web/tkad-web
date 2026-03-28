@@ -36,7 +36,7 @@
     "coverage": "커버리지",
     "coverageValue": "전국",
     "network": "네트워크",
-    "networkValue": "글로벌"
+    "networkValue": "국내"
   },
   "services": {
     "title": "서비스",
@@ -46,8 +46,8 @@
       "description": "서울, 부산, 제주 등 전국 주요 지역의 옥외광고 매체를 한눈에 검색하고 최적의 매체를 제안받으세요."
     },
     "crossBorder": {
-      "title": "크로스보더 OOH",
-      "description": "글로벌 네트워크를 통해 해외 OOH 광고도 원스톱으로 진행하세요. XtheX 글로벌 플랫폼과 연계합니다."
+      "title": "전국 통합 OOH",
+      "description": "서울, 수도권부터 광역시, 관광지까지 국내 주요 거점을 연결한 전국 통합 OOH 캠페인을 설계합니다."
     },
     "dataConsulting": {
       "title": "데이터 컨설팅",
@@ -121,7 +121,7 @@
     "title": "회사 소개",
     "subtitle": "15년 OOH 광고 전문 에이전시",
     "historyTitle": "THINKAD의 역사",
-    "historyDescription": "싱커드(THINKAD)는 '생각하는 광고회사'라는 슬로건 아래, 코엑스 K-POP 스퀘어, 강남대로 미디어폴, 뉴욕 타임스퀘어, 두바이 부르즈 할리파 등 국내외 랜드마크 전광판을 직접 운영·관리하는 OOH 전문 에이전시입니다. 서울 성수동에 본사를 두고 전국 네트워크와 글로벌 파트너십을 통해 크로스보더 광고까지 영역을 확장하고 있습니다.",
+    "historyDescription": "싱커드(THINKAD)는 '생각하는 광고회사'라는 슬로건 아래, 코엑스 K-POP 스퀘어, 강남대로 미디어폴 등 국내 랜드마크 전광판을 직접 운영·관리하는 한국 OOH 미디어랩 전문 에이전시입니다. 서울 성수동에 본사를 두고 전국 네트워크를 기반으로 브랜드의 온·오프라인을 잇는 통합 옥외광고 솔루션을 제공합니다.",
     "valuesTitle": "핵심 가치",
     "value1": {
       "title": "데이터 중심",
@@ -132,13 +132,13 @@
       "description": "광고주의 목표에 맞춘 맞춤형 솔루션을 제공합니다."
     },
     "value3": {
-      "title": "글로벌 네트워크",
-      "description": "XtheX 플랫폼을 통해 전세계 OOH 매체에 접근할 수 있습니다."
+      "title": "현장 중심 운영",
+      "description": "직접 운영·관리하는 국내 랜드마크 매체를 중심으로, 현장 데이터를 기반으로 한 집행 품질을 보장합니다."
     },
     "teamTitle": "팀 소개",
     "teamDescription": "OOH 광고, 디지털 마케팅, 데이터 분석 분야의 전문가들이 모여 최고의 결과를 만들어냅니다.",
-    "globalTitle": "XtheX 글로벌 플랫폼",
-    "globalDescription": "THINKAD는 글로벌 OOH 광고 플랫폼 XtheX의 한국 파트너로서, 해외 광고주의 국내 캠페인과 국내 광고주의 해외 캠페인을 원스톱으로 지원합니다."
+    "globalTitle": "한국 OOH 미디어랩",
+    "globalDescription": "싱커드는 한국 OOH 미디어랩 전문 회사로, 코엑스 K-POP 스퀘어와 강남대로 미디어폴 등 국내 핵심 거점을 중심으로 브랜드의 인지도와 성과를 높이는 옥외광고 캠페인을 기획·운영합니다."
   },
   "contact": {
     "title": "문의하기",
@@ -231,7 +231,7 @@
     "email": "mannote@tkad.co.kr",
     "services": "서비스 안내",
     "domesticOOH": "국내 OOH 광고",
-    "crossBorderOOH": "크로스보더 OOH",
+    "crossBorderOOH": "전국 통합 OOH",
     "dataConsulting": "데이터 컨설팅",
     "planningTool": "플래닝 툴",
     "copyright": "© 2025 주식회사 싱커드(THINKAD). All rights reserved."

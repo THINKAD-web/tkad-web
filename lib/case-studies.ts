@@ -290,9 +290,9 @@ export const caseStudies: readonly CaseStudy[] = [
     title: "뷰티 브랜드 명동 전광판",
     titleEn: "Beauty Brand Myeongdong LED",
     description:
-      "명동 중심가 대형 전광판을 활용한 크로스보더 캠페인으로 해외 관광객 유입 180% 증가를 달성했습니다.",
+      "명동 중심가 대형 전광판을 활용한 캠페인으로 명동 상권 내 방문객 유입 180% 증가를 달성했습니다.",
     descriptionEn:
-      "Achieved 180% increase in foreign tourist visits through cross-border campaign using Myeongdong central LED.",
+      "Achieved 180% increase in visitors to the Myeongdong district through a campaign using the central Myeongdong LED.",
     category: "digital",
     client: "K-뷰티 브랜드",
     clientEn: "K-beauty brand",
@@ -301,21 +301,21 @@ export const caseStudies: readonly CaseStudy[] = [
     roiDetail: "광고비 대비 3.5배 매출 효과",
     roiDetailEn: "3.5x return on ad spend",
     managerComment:
-      "명동 중심 LED와 관광객 국적·체류 패턴 데이터를 결합해 크로스보더 유입을 정확히 겨냥했습니다.",
+      "명동 중심 LED와 방문객 유동·체류 패턴 데이터를 결합해 상권 유입을 정확히 겨냥했습니다.",
     managerCommentEn:
-      "Pairing Myeongdong LED with nationality and dwell-time data targeted cross-border traffic precisely.",
+      "Pairing the Myeongdong LED with visitor flow and dwell-time data precisely targeted store traffic.",
     managerName: "정다은",
     managerNameEn: "Daeun Jung",
-    managerRole: "크로스보더 매니저",
-    managerRoleEn: "Cross-border Manager",
+    managerRole: "캠페인 매니저",
+    managerRoleEn: "Campaign Manager",
     results: "관광객 유입 180% 증가",
-    resultsEn: "180% increase in tourist visits",
+    resultsEn: "180% increase in district visitors",
     exposures: "520만",
     exposuresEn: "5.2M",
     reachIncrease: "+180%",
-    campaignGoal: "해외 관광객 대상 브랜드 인지도 및 매장·온라인 유입",
+    campaignGoal: "명동 상권 방문객 대상 브랜드 인지도 및 매장·온라인 유입",
     campaignGoalEn:
-      "Grow awareness and drive store and online traffic among international visitors",
+      "Grow awareness and drive store and online traffic among visitors to the Myeongdong district",
     mediaUsed: ["대형 LED 전광판", "명동 중심가"],
     mediaUsedEn: ["Large-format LED", "Myeongdong core district"],
     duration: "6주",
@@ -323,15 +323,15 @@ export const caseStudies: readonly CaseStudy[] = [
     stats: [
       { label: "총 노출", labelEn: "Total exposures", value: "520만" },
       { label: "도달 증가", labelEn: "Reach uplift", value: "+180%" },
-      { label: "관광객 유입", labelEn: "Tourist traffic", value: "+180%" },
-      { label: "크로스보더", labelEn: "Cross-border", value: "다국어 크리에이티브" },
+      { label: "방문객 유입", labelEn: "Visitor traffic", value: "+180%" },
+      { label: "핵심 상권", labelEn: "Key district", value: "명동 중심가" },
     ],
     testimonial:
-      "해외 관광객 타겟팅에 대한 데이터 분석이 탁월했습니다. 크로스보더 캠페인의 새로운 기준을 제시했어요.",
+      "명동 상권 유동 데이터 분석이 탁월했습니다. 방문객 유입과 매출 모두 기대 이상으로 성장했습니다.",
     testimonialEn:
-      "Exceptional data analysis for foreign tourist targeting. It set a new standard for cross-border campaigns.",
-    testimonialAuthor: "한소희 해외사업부장",
-    testimonialAuthorEn: "Sohee Han, International Division Head",
+      "The analysis of visitor flows in the Myeongdong district was outstanding. Both traffic and sales grew beyond expectations.",
+    testimonialAuthor: "한소희 마케팅본부장",
+    testimonialAuthorEn: "Sohee Han, Head of Marketing",
   },
   {
     id: 7,

@@ -33,12 +33,12 @@ const FAQ_ITEMS: FaqItem[] = [
   {
     id: "2",
     category: "ad",
-    questionKo: "해외 옥외광고도 가능한가요?",
-    questionEn: "Do you offer international OOH advertising?",
+    questionKo: "전국 단위 OOH 캠페인도 가능한가요?",
+    questionEn: "Do you handle nationwide OOH campaigns across Korea?",
     answerKo:
-      "네, 글로벌 OOH 플랫폼 XtheX와의 파트너십을 통해 뉴욕 타임스퀘어, 두바이 부르즈 할리파 등 전세계 주요 랜드마크 광고를 원스톱으로 진행할 수 있습니다.",
+      "네, 가능합니다. 싱커드는 서울·수도권은 물론, 광역시와 주요 관광지를 아우르는 국내 OOH 미디어랩으로 전국 단위 캠페인을 기획·운영합니다.",
     answerEn:
-      "Yes, through our partnership with XtheX global platform, we can arrange advertising at major landmarks worldwide including New York Times Square and Dubai Burj Khalifa.",
+      "Yes. As a Korean OOH media lab, THINKAD plans and operates nationwide campaigns across Seoul, the capital area, major cities, and key tourist destinations in Korea.",
   },
   {
     id: "3",

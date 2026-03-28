@@ -67,8 +67,8 @@ function AboutContent({ locale }: { locale: string }) {
     {
       year: "2022",
       event: {
-        ko: "글로벌 매체 네트워크 본격 확장",
-        en: "Global media network expansion",
+      ko: "국내 OOH 네트워크 본격 확장",
+      en: "Domestic OOH network expansion",
       },
     },
     {

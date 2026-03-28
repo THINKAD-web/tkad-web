@@ -24,8 +24,8 @@ const monthlyInquiries = [
 const popularMedia = [
   { rank: 1, name: "코엑스 K-POP 스퀘어 전광판", type: "디지털", inquiries: 45, quotes: 18, trend: "+8" },
   { rank: 2, name: "강남대로 미디어폴 G-LIGHT", type: "디지털", inquiries: 38, quotes: 14, trend: "+5" },
-  { rank: 3, name: "뉴욕 타임스퀘어 전광판", type: "디지털", inquiries: 32, quotes: 22, trend: "+12" },
-  { rank: 4, name: "두바이 부르즈 할리파 LED", type: "디지털", inquiries: 28, quotes: 15, trend: "+3" },
+  { rank: 3, name: "코엑스 파르나스 미디어타워", type: "디지털", inquiries: 32, quotes: 22, trend: "+12" },
+  { rank: 4, name: "지하철 2호선 성수역 디지털광고", type: "디지털", inquiries: 28, quotes: 15, trend: "+3" },
   { rank: 5, name: "성수동 반도 외벽광고", type: "빌보드", inquiries: 24, quotes: 9, trend: "+6" },
 ];
 
@@ -40,7 +40,7 @@ const regionData = [
   { region: "서울", count: 198, percentage: 57.1, color: "bg-navy" },
   { region: "부산", count: 52, percentage: 15.0, color: "bg-blue-500" },
   { region: "제주", count: 34, percentage: 9.8, color: "bg-emerald-500" },
-  { region: "전국(해외)", count: 63, percentage: 18.1, color: "bg-amber-500" },
+  { region: "전국", count: 63, percentage: 18.1, color: "bg-amber-500" },
 ];
 
 const conversionData = {

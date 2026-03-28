@@ -44,14 +44,14 @@ const historyData = [
   },
   {
     year: "2022",
-    labelKo: "글로벌 진출",
-    labelEn: "Global Expansion",
-    titleKo: "글로벌 OOH 네트워크 확장",
-    titleEn: "Global OOH Network Expansion",
+    labelKo: "전국 확대",
+    labelEn: "Nationwide Expansion",
+    titleKo: "국내 OOH 네트워크 확장",
+    titleEn: "Korean OOH Network Expansion",
     descriptionKo:
-      "뉴욕 타임스퀘어, 두바이 부르즈 할리파 등 해외 랜드마크 매체와 파트너십을 구축하며 글로벌 네트워크를 확장했습니다.",
+      "코엑스 K-POP 스퀘어, 강남대로 미디어폴를 비롯한 주요 랜드마크와의 파트너십을 강화하며 국내 OOH 네트워크를 확장했습니다.",
     descriptionEn:
-      "Expanded the global network by partnering with landmark media such as New York Times Square and Dubai Burj Khalifa LED.",
+      "Expanded our Korean OOH network by strengthening partnerships with key domestic landmarks such as COEX K-POP Square and Gangnam-daero Media Pole.",
   },
   {
     year: "2025",
@@ -205,8 +205,8 @@ export default function HistoryPage() {
               <CardContent className="space-y-4 text-xs text-slate-700">
                 <p>
                   {isKo
-                    ? "설립 이후 싱커드는 국내 OOH 핵심 거점을 기반으로 매체 네트워크를 확장하고, 글로벌 랜드마크와의 파트너십을 통해 크로스보더 캠페인을 수행해왔습니다."
-                    : "Since its founding, THINKAD has expanded its media network around key domestic OOH hubs and executed cross-border campaigns through partnerships with global landmarks."}
+                    ? "설립 이후 싱커드는 국내 OOH 핵심 거점을 기반으로 매체 네트워크를 확장하며 한국 OOH 미디어랩 전문 회사로 성장해왔습니다."
+                    : "Since its founding, THINKAD has expanded its media network around key domestic OOH hubs and grown into a specialized Korean OOH media lab."}
                 </p>
                 <p>
                   {isKo

@@ -36,7 +36,7 @@
     "coverage": "Coverage",
     "coverageValue": "Nationwide",
     "network": "Network",
-    "networkValue": "Global"
+    "networkValue": "Domestic"
   },
   "services": {
     "title": "Services",
@@ -46,8 +46,8 @@
       "description": "Search outdoor advertising media across major regions including Seoul, Busan, and Jeju, and get optimal media recommendations."
     },
     "crossBorder": {
-      "title": "Cross-Border OOH",
-      "description": "Execute international OOH advertising through our global network. Connected with the XtheX global platform."
+      "title": "Nationwide Integrated OOH",
+      "description": "Design nationwide integrated OOH campaigns across key Korean hubs from Seoul and the capital area to major cities and tourist destinations."
     },
     "dataConsulting": {
       "title": "Data Consulting",
@@ -121,7 +121,7 @@
     "title": "About Us",
     "subtitle": "15 Years of OOH Advertising Expertise",
     "historyTitle": "History of THINKAD",
-    "historyDescription": "THINKAD, 'The Thinking Ad Agency,' is a specialized OOH agency that directly operates and manages landmark displays including COEX K-POP Square, Gangnam-daero Media Pole, New York Times Square, and Dubai Burj Khalifa LED. Headquartered in Seongsu-dong, Seoul, we continue to expand into cross-border advertising through our nationwide network and global partnerships.",
+    "historyDescription": "THINKAD, 'The Thinking Ad Agency,' is a Korean OOH media lab that directly operates and manages domestic landmark displays including COEX K-POP Square and Gangnam-daero Media Pole. Headquartered in Seongsu-dong, Seoul, we provide integrated outdoor advertising solutions that connect brands' online and offline presence across Korea.",
     "valuesTitle": "Core Values",
     "value1": {
       "title": "Data-Driven",
@@ -132,13 +132,13 @@
       "description": "We provide customized solutions tailored to advertisers' goals."
     },
     "value3": {
-      "title": "Global Network",
-      "description": "Access worldwide OOH media through the XtheX platform."
+      "title": "On-site Operations",
+      "description": "We ensure execution quality by directly operating and managing domestic landmark media, backed by on-site data."
     },
     "teamTitle": "Our Team",
     "teamDescription": "Experts in OOH advertising, digital marketing, and data analysis come together to create the best results.",
-    "globalTitle": "XtheX Global Platform",
-    "globalDescription": "As the Korean partner of the global OOH advertising platform XtheX, THINKAD provides one-stop support for international campaigns in Korea and Korean advertisers' overseas campaigns."
+    "globalTitle": "Korean OOH Media Lab",
+    "globalDescription": "THINKAD specializes in Korean OOH media, planning and operating campaigns around core domestic hubs such as COEX K-POP Square and Gangnam-daero Media Pole to elevate brand awareness and performance."
   },
   "contact": {
     "title": "Contact Us",
@@ -231,7 +231,7 @@
     "email": "mannote@tkad.co.kr",
     "services": "Services",
     "domesticOOH": "Domestic OOH",
-    "crossBorderOOH": "Cross-Border OOH",
+    "crossBorderOOH": "Nationwide Integrated OOH",
     "dataConsulting": "Data Consulting",
     "planningTool": "Planning Tool",
     "copyright": "© 2025 THINKAD Inc. All rights reserved."

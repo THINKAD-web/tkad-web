@@ -41,9 +41,9 @@ const posts: BlogPost[] = [
     titleKo: "2025 OOH 광고 트렌드 리포트",
     titleEn: "2025 OOH Advertising Trend Report",
     summaryKo:
-      "디지털 사이니지, DOOH, 크로스보더 캠페인까지 2025년 주목해야 할 OOH 광고 트렌드를 정리했습니다.",
+      "디지털 사이니지, DOOH, 전국 통합 집행까지 2025년 주목해야 할 한국 OOH 광고 트렌드를 정리했습니다.",
     summaryEn:
-      "From digital signage and DOOH to cross-border campaigns, this report summarizes key OOH trends for 2025.",
+      "From digital signage and DOOH to nationwide integrated executions, this report summarizes key Korean OOH trends for 2025.",
   },
   {
     id: 2,
@@ -61,17 +61,17 @@ const posts: BlogPost[] = [
   },
   {
     id: 3,
-    slug: "global-times-square-launch",
+    slug: "coex-landmark-launch",
     category: "case",
     date: "2024-07-20",
     thumbnailColor:
       "from-purple-500/70 via-indigo-500/70 to-navy/80 bg-gradient-to-br border-purple-400/50",
-    titleKo: "뉴욕 타임스퀘어 글로벌 런칭 캠페인",
-    titleEn: "New York Times Square Global Launch",
+    titleKo: "코엑스 랜드마크 런칭 캠페인",
+    titleEn: "COEX Landmark Launch Campaign",
     summaryKo:
-      "글로벌 브랜드의 뉴욕 타임스퀘어 OOH 런칭 캠페인 플래닝과 집행 인사이트를 공유합니다.",
+      "글로벌 뷰티 브랜드의 코엑스 랜드마크 OOH 런칭 캠페인 플래닝과 집행 인사이트를 공유합니다.",
     summaryEn:
-      "Insights from planning and executing a global brand launch campaign in New York Times Square.",
+      "Insights from planning and executing a global beauty brand launch campaign on landmark OOH media around COEX.",
   },
   {
     id: 4,
