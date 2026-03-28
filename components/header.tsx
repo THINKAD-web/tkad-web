@@ -56,9 +56,9 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-500 ${
+      className={`sticky top-0 z-50 transition-[background,box-shadow,backdrop-filter] duration-500 ${
         scrolled
-          ? "header-scrolled border-b border-navy/8"
+          ? "header-scrolled border-b border-navy/8 backdrop-blur-xl supports-[backdrop-filter]:bg-white/75"
           : "bg-transparent"
       }`}
     >
@@ -77,7 +77,7 @@ export default function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className={`nav-link rounded-md px-4 py-2 text-sm font-medium transition-colors duration-300 hover:text-navy ${
+              className={`nav-link rounded-md px-4 py-2 text-sm font-medium transition-colors duration-300 hover:text-navy motion-safe:hover:-translate-y-0.5 ${
                 pathname === item.href
                   ? "active text-navy"
                   : "text-muted-foreground"
@@ -113,7 +113,7 @@ export default function Header() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className={`mobile-nav-item rounded-lg px-4 py-3.5 text-sm font-medium transition-colors hover:bg-gold/5 ${
+                    className={`mobile-nav-item rounded-lg px-4 py-3.5 text-sm font-medium transition-all duration-300 hover:bg-gold/5 motion-safe:active:scale-[0.98] ${
                       pathname === item.href
                         ? "bg-gold/10 text-navy font-bold"
                         : "text-muted-foreground"

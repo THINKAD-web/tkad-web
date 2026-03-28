@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import SolutionCtaButton from "@/components/solution-cta-button";
 import ScrollAnimate from "@/components/scroll-animate";
 import HomeRecentlyViewed from "@/components/home-recently-viewed";
 import NewsletterForm from "@/components/newsletter-form";
@@ -130,7 +129,7 @@ function HomeContent({
             {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
           </div>
 
-          <h1 className="hero-fade-in hero-fade-in-2 text-3xl leading-tight font-extrabold tracking-tight text-white sm:text-5xl lg:text-7xl">
+          <h1 className="hero-fade-in hero-fade-in-2 text-5xl leading-[1.08] font-extrabold tracking-tight text-white lg:text-7xl">
             {isKo ? (
               <>
                 생각하는 광고회사
@@ -161,7 +160,7 @@ function HomeContent({
             <Link href="/contact">
               <Button
                 size="lg"
-                className="btn-gold h-16 rounded-full px-12 text-lg font-extrabold shadow-lg shadow-gold/25 hover:scale-105"
+                className="btn-gold h-14 min-w-[11.5rem] rounded-full px-10 text-base font-semibold shadow-lg shadow-cta/20"
               >
                 <PhoneCall className="mr-2 h-5 w-5" />
                 {isKo ? "무료 상담 신청" : "Free Consultation"}
@@ -172,26 +171,18 @@ function HomeContent({
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 rounded-full border-white/20 px-10 text-base text-white hover:bg-white/10 hover:border-white/40 transition-all duration-300"
+                className="h-14 min-w-[11.5rem] rounded-full border-2 border-white/35 bg-white/5 px-10 text-base font-semibold text-white shadow-sm backdrop-blur-sm hover:bg-white/12 hover:border-white/55"
               >
                 {t("hero.cta")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
-          <p className="hero-fade-in hero-fade-in-5 mt-4 text-sm text-slate-400">
+          <p className="hero-fade-in hero-fade-in-5 mt-5 text-sm text-slate-400">
             {isKo
               ? "30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
               : "Apply in 30 seconds · Expert consultant contacts within 24h"}
           </p>
-          <div className="hero-fade-in hero-fade-in-5 mt-3">
-            <SolutionCtaButton
-              label={isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
-              size="lg"
-              variant="outline"
-              className="h-12 border-gold/30 text-gold hover:bg-gold/10 hover:border-gold transition-all duration-300"
-            />
-          </div>
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
