@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import SolutionCtaButton from "@/components/solution-cta-button";
 import ScrollAnimate from "@/components/scroll-animate";
+import HomeRecentlyViewed from "@/components/home-recently-viewed";
 import {
   ArrowRight,
   BarChart3,
@@ -622,6 +623,9 @@ function HomeContent({ locale }: { locale: string }) {
           </div>
         </div>
       </section>
+
+      {/* Recently Viewed */}
+      <HomeRecentlyViewed locale={locale} />
 
       {/* Partner Logos Marquee */}
       <section className="border-y bg-slate-50 py-16 overflow-hidden">

@@ -109,7 +109,11 @@
     },
     "perMonth": "/ 월",
     "results": "검색 결과",
-    "noResults": "검색 결과가 없습니다"
+    "noResults": "검색 결과가 없습니다",
+    "compare": "비교",
+    "compareTitle": "매체 비교",
+    "compareSubtitle": "선택한 매체를 한눈에 비교해보세요",
+    "recentlyViewed": "최근 본 매체"
   },
   "about": {
     "title": "회사 소개",

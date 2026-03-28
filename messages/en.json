@@ -109,7 +109,11 @@
     },
     "perMonth": "/ month",
     "results": "Results",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "compare": "Compare",
+    "compareTitle": "Media Comparison",
+    "compareSubtitle": "Compare selected media at a glance",
+    "recentlyViewed": "Recently Viewed"
   },
   "about": {
     "title": "About Us",

@@ -1,0 +1,158 @@
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Search, X } from "lucide-react";
+import { mediaData, typeLabels, type MediaItem } from "@/lib/media-data";
+
+interface Props {
+  locale: string;
+  onSelect: (media: MediaItem) => void;
+}
+
+export default function MediaSearchAutocomplete({ locale, onSelect }: Props) {
+  const isKo = locale === "ko";
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<MediaItem[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const search = useCallback(
+    (q: string) => {
+      if (!q.trim()) {
+        setResults([]);
+        setIsOpen(false);
+        return;
+      }
+      const lower = q.toLowerCase();
+      const matched = mediaData
+        .filter(
+          (m) =>
+            m.name.toLowerCase().includes(lower) ||
+            m.nameEn.toLowerCase().includes(lower) ||
+            m.location.toLowerCase().includes(lower) ||
+            m.locationEn.toLowerCase().includes(lower) ||
+            typeLabels[m.type]?.ko.toLowerCase().includes(lower) ||
+            typeLabels[m.type]?.en.toLowerCase().includes(lower)
+        )
+        .slice(0, 5);
+      setResults(matched);
+      setIsOpen(matched.length > 0);
+      setActiveIndex(-1);
+    },
+    []
+  );
+
+  const handleChange = (value: string) => {
+    setQuery(value);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => search(value), 300);
+  };
+
+  const handleSelect = (media: MediaItem) => {
+    setQuery(isKo ? media.name : media.nameEn);
+    setIsOpen(false);
+    onSelect(media);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
+    } else if (e.key === "Enter" && activeIndex >= 0) {
+      e.preventDefault();
+      handleSelect(results[activeIndex]);
+    } else if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        !inputRef.current?.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          onChange={(e) => handleChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => query.trim() && results.length > 0 && setIsOpen(true)}
+          placeholder={isKo ? "매체명, 지역, 유형 검색..." : "Search name, location, type..."}
+          className="w-full rounded-lg border bg-white py-2.5 pl-10 pr-9 text-sm outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
+        />
+        {query && (
+          <button
+            onClick={() => {
+              setQuery("");
+              setResults([]);
+              setIsOpen(false);
+              inputRef.current?.focus();
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-navy"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {isOpen && (
+        <div
+          ref={dropdownRef}
+          className="absolute z-50 mt-1 w-full rounded-lg border bg-white shadow-lg"
+        >
+          {results.map((media, idx) => (
+            <button
+              key={media.id}
+              onClick={() => handleSelect(media)}
+              className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                idx === activeIndex
+                  ? "bg-gold/10 text-navy"
+                  : "hover:bg-slate-50"
+              }`}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-navy truncate">
+                  {isKo ? media.name : media.nameEn}
+                </div>
+                <div className="text-xs text-muted-foreground truncate">
+                  {isKo ? media.location : media.locationEn} ·{" "}
+                  {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
+                </div>
+              </div>
+              <span className="shrink-0 text-xs font-semibold text-gold-dark">
+                ₩{media.price.toLocaleString()}만
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

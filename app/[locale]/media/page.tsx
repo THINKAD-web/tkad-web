@@ -13,32 +13,12 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Monitor, BadgeCheck, ShieldCheck } from "lucide-react";
 import SolutionCtaButton from "@/components/solution-cta-button";
 import ShareButtons from "@/components/share-buttons";
-import { useState, useMemo } from "react";
-
-const mediaData = [
-  { id: 1, name: "강남역 대형 빌보드", nameEn: "Gangnam Station Large Billboard", location: "서울 강남구", locationEn: "Gangnam-gu, Seoul", region: "seoul", type: "billboard", price: 2500 },
-  { id: 2, name: "코엑스 디지털 사이니지", nameEn: "COEX Digital Signage", location: "서울 삼성동", locationEn: "Samsung-dong, Seoul", region: "seoul", type: "digital", price: 3800 },
-  { id: 3, name: "홍대입구역 지하철 광고", nameEn: "Hongdae Station Subway Ad", location: "서울 마포구", locationEn: "Mapo-gu, Seoul", region: "seoul", type: "subway", price: 1200 },
-  { id: 4, name: "명동 대형 전광판", nameEn: "Myeongdong Large LED", location: "서울 중구", locationEn: "Jung-gu, Seoul", region: "seoul", type: "digital", price: 4200 },
-  { id: 5, name: "잠실 롯데월드타워 빌보드", nameEn: "Lotte World Tower Billboard", location: "서울 송파구", locationEn: "Songpa-gu, Seoul", region: "seoul", type: "billboard", price: 5000 },
-  { id: 6, name: "서면역 디지털 스크린", nameEn: "Seomyeon Station Digital Screen", location: "부산 부산진구", locationEn: "Busanjin-gu, Busan", region: "busan", type: "digital", price: 1500 },
-  { id: 7, name: "해운대 해변 빌보드", nameEn: "Haeundae Beach Billboard", location: "부산 해운대구", locationEn: "Haeundae-gu, Busan", region: "busan", type: "billboard", price: 1800 },
-  { id: 8, name: "부산역 지하철 광고", nameEn: "Busan Station Subway Ad", location: "부산 동구", locationEn: "Dong-gu, Busan", region: "busan", type: "subway", price: 900 },
-  { id: 9, name: "제주공항 디지털 광고", nameEn: "Jeju Airport Digital Ad", location: "제주시", locationEn: "Jeju City", region: "jeju", type: "digital", price: 2200 },
-  { id: 10, name: "제주 중문관광단지 빌보드", nameEn: "Jungmun Resort Billboard", location: "서귀포시", locationEn: "Seogwipo City", region: "jeju", type: "billboard", price: 1000 },
-  { id: 11, name: "강남대로 버스 쉘터", nameEn: "Gangnam-daero Bus Shelter", location: "서울 강남구", locationEn: "Gangnam-gu, Seoul", region: "seoul", type: "bus", price: 800 },
-  { id: 12, name: "을지로 지하철 랩핑", nameEn: "Euljiro Subway Wrapping", location: "서울 중구", locationEn: "Jung-gu, Seoul", region: "seoul", type: "subway", price: 2000 },
-  { id: 13, name: "전국 고속도로 빌보드", nameEn: "National Highway Billboard", location: "전국", locationEn: "Nationwide", region: "national", type: "billboard", price: 3500 },
-  { id: 14, name: "전국 시내버스 광고", nameEn: "National City Bus Ad", location: "전국", locationEn: "Nationwide", region: "national", type: "bus", price: 600 },
-  { id: 15, name: "여의도 IFC 디지털", nameEn: "Yeouido IFC Digital", location: "서울 영등포구", locationEn: "Yeongdeungpo-gu, Seoul", region: "seoul", type: "digital", price: 3200 },
-];
-
-const typeLabels: Record<string, { ko: string; en: string }> = {
-  billboard: { ko: "빌보드", en: "Billboard" },
-  digital: { ko: "디지털", en: "Digital" },
-  subway: { ko: "지하철", en: "Subway" },
-  bus: { ko: "버스", en: "Bus" },
-};
+import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
+import RecentlyViewedMedia from "@/components/recently-viewed-media";
+import CompareBar from "@/components/compare-bar";
+import { useState, useMemo, useCallback } from "react";
+import { mediaData, typeLabels, type MediaItem } from "@/lib/media-data";
+import { addRecentlyViewed } from "@/lib/recently-viewed";
 
 export default function MediaPage() {
   const t = useTranslations();
@@ -48,9 +28,17 @@ export default function MediaPage() {
   const [region, setRegion] = useState("all");
   const [type, setType] = useState("all");
   const [budget, setBudget] = useState("all");
+  const [searchTarget, setSearchTarget] = useState<number | null>(null);
+  const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
 
   const filtered = useMemo(() => {
-    return mediaData.filter((m) => {
+    let data = mediaData;
+
+    if (searchTarget) {
+      data = data.filter((m) => m.id === searchTarget);
+    }
+
+    return data.filter((m) => {
       if (region !== "all" && m.region !== region) return false;
       if (type !== "all" && m.type !== type) return false;
       if (budget === "under1000" && m.price > 1000) return false;
@@ -59,7 +47,7 @@ export default function MediaPage() {
       if (budget === "over5000" && m.price < 5000) return false;
       return true;
     });
-  }, [region, type, budget]);
+  }, [region, type, budget, searchTarget]);
 
   const regions = [
     { value: "all", label: t("media.allRegions") },
@@ -89,7 +77,24 @@ export default function MediaPage() {
     setRegion("all");
     setType("all");
     setBudget("all");
+    setSearchTarget(null);
   };
+
+  const handleMediaView = useCallback((media: MediaItem) => {
+    addRecentlyViewed(media);
+    setSearchTarget(media.id);
+  }, []);
+
+  const toggleCompare = useCallback((media: MediaItem) => {
+    setCompareItems((prev) => {
+      const exists = prev.find((m) => m.id === media.id);
+      if (exists) return prev.filter((m) => m.id !== media.id);
+      if (prev.length >= 3) return prev;
+      return [...prev, media];
+    });
+  }, []);
+
+  const isInCompare = (id: number) => compareItems.some((m) => m.id === id);
 
   return (
     <>
@@ -111,10 +116,23 @@ export default function MediaPage() {
 
       <section className="py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Recently Viewed */}
+          <RecentlyViewedMedia locale={locale} onSelect={handleMediaView} />
+
           <div className="flex flex-col gap-8 lg:flex-row">
             {/* Sidebar */}
             <aside className="w-full shrink-0 lg:w-64">
               <div className="sticky top-24 space-y-6 rounded-xl border bg-white p-6 shadow-sm">
+                {/* Search autocomplete */}
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-navy">
+                    {t("common.search")}
+                  </label>
+                  <MediaSearchAutocomplete
+                    locale={locale}
+                    onSelect={handleMediaView}
+                  />
+                </div>
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-navy">
                     {t("media.region")}
@@ -201,6 +219,17 @@ export default function MediaPage() {
                           <BadgeCheck className="h-3 w-3" />
                           Verified
                         </div>
+                        {/* Compare checkbox */}
+                        <label className="absolute top-2.5 left-2.5 flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-navy shadow-sm backdrop-blur-sm cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={isInCompare(media.id)}
+                            onChange={() => toggleCompare(media)}
+                            disabled={!isInCompare(media.id) && compareItems.length >= 3}
+                            className="h-3.5 w-3.5 rounded border-navy/30 text-gold accent-gold"
+                          />
+                          {isKo ? "비교" : "Compare"}
+                        </label>
                       </div>
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
@@ -245,6 +274,17 @@ export default function MediaPage() {
           </div>
         </div>
       </section>
+
+      {/* Floating compare bar */}
+      <CompareBar
+        items={compareItems}
+        locale={locale}
+        onRemove={(id) => setCompareItems((prev) => prev.filter((m) => m.id !== id))}
+        onClear={() => setCompareItems([])}
+      />
+
+      {/* Add bottom padding when compare bar is visible */}
+      {compareItems.length > 0 && <div className="h-20" />}
     </>
   );
 }
