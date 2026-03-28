@@ -19,6 +19,7 @@
     "cases": "성공 사례",
     "resources": "리소스",
     "faq": "FAQ",
+    "quote": "견적 요청",
     "contact": "문의하기"
   },
   "hero": {
@@ -168,6 +169,45 @@
     "busDesc": "성수역 정류장 하차 (간선: 141, 145, 148 / 지선: 2016, 4211)",
     "parkingTitle": "주차",
     "parkingDesc": "건물 내 지하주차장 이용 가능"
+  },
+  "quote": {
+    "title": "견적 요청",
+    "subtitle": "원하는 매체를 선택하고 예상 비용을 확인하세요",
+    "selectMedia": "매체 선택",
+    "selectMediaDesc": "광고를 집행할 매체를 선택해주세요",
+    "period": "광고 기간",
+    "periodPlaceholder": "기간을 선택하세요",
+    "periods": {
+      "1month": "1개월",
+      "3months": "3개월",
+      "6months": "6개월",
+      "12months": "12개월"
+    },
+    "budgetRange": "예산 범위",
+    "budgetMin": "최소 예산 (만원)",
+    "budgetMax": "최대 예산 (만원)",
+    "estimatedCost": "예상 비용",
+    "estimatedCostDesc": "선택한 매체와 기간 기준",
+    "perMonth": "/ 월",
+    "total": "총 예상 비용",
+    "company": "회사명",
+    "companyPlaceholder": "회사명을 입력하세요",
+    "name": "담당자",
+    "namePlaceholder": "담당자명을 입력하세요",
+    "phone": "연락처",
+    "phonePlaceholder": "010-0000-0000",
+    "email": "이메일",
+    "emailPlaceholder": "email@example.com",
+    "message": "추가 요청사항",
+    "messagePlaceholder": "캠페인 목표, 타겟 등 추가 요청사항을 적어주세요",
+    "submit": "견적 요청하기",
+    "submitting": "전송 중...",
+    "successTitle": "견적 요청이 접수되었습니다",
+    "successDesc": "24시간 이내에 상세 견적서를 보내드리겠습니다.",
+    "noMediaSelected": "매체를 1개 이상 선택해주세요",
+    "getQuote": "견적 받기",
+    "popularBadge": "인기",
+    "priceFrom": "월 {price}만원~"
   },
   "cases": {
     "title": "성공 사례",

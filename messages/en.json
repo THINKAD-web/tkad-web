@@ -19,6 +19,7 @@
     "cases": "Case Studies",
     "resources": "Resources",
     "faq": "FAQ",
+    "quote": "Get Quote",
     "contact": "Contact"
   },
   "hero": {
@@ -168,6 +169,45 @@
     "busDesc": "Get off at Seongsu Station stop (Routes: 141, 145, 148 / 2016, 4211)",
     "parkingTitle": "Parking",
     "parkingDesc": "Underground parking available"
+  },
+  "quote": {
+    "title": "Request a Quote",
+    "subtitle": "Select your media and get an estimated cost",
+    "selectMedia": "Select Media",
+    "selectMediaDesc": "Choose the media for your advertising campaign",
+    "period": "Campaign Period",
+    "periodPlaceholder": "Select period",
+    "periods": {
+      "1month": "1 Month",
+      "3months": "3 Months",
+      "6months": "6 Months",
+      "12months": "12 Months"
+    },
+    "budgetRange": "Budget Range",
+    "budgetMin": "Min Budget (₩10K)",
+    "budgetMax": "Max Budget (₩10K)",
+    "estimatedCost": "Estimated Cost",
+    "estimatedCostDesc": "Based on selected media and period",
+    "perMonth": "/ month",
+    "total": "Total Estimated Cost",
+    "company": "Company",
+    "companyPlaceholder": "Enter company name",
+    "name": "Contact Person",
+    "namePlaceholder": "Enter your name",
+    "phone": "Phone",
+    "phonePlaceholder": "010-0000-0000",
+    "email": "Email",
+    "emailPlaceholder": "email@example.com",
+    "message": "Additional Requests",
+    "messagePlaceholder": "Describe your campaign goals, target audience, etc.",
+    "submit": "Request Quote",
+    "submitting": "Submitting...",
+    "successTitle": "Quote request submitted",
+    "successDesc": "We will send you a detailed quote within 24 hours.",
+    "noMediaSelected": "Please select at least one media",
+    "getQuote": "Get Quote",
+    "popularBadge": "Popular",
+    "priceFrom": "From ₩{price}M/mo"
   },
   "cases": {
     "title": "Case Studies",

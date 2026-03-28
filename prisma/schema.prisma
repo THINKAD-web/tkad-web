@@ -52,6 +52,25 @@ model CaseStudy {
   @@map("case_studies")
 }
 
+model QuoteRequest {
+  id             String   @id @default(cuid())
+  company        String
+  name           String
+  phone          String
+  email          String?
+  mediaIds       String   @map("media_ids")
+  period         String?
+  budgetMin      Int?     @map("budget_min")
+  budgetMax      Int?     @map("budget_max")
+  estimatedCost  Int?     @map("estimated_cost")
+  message        String?
+  status         String   @default("pending")
+  region         String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("quote_requests")
+}
+
 model AdminUser {
   id        String   @id @default(cuid())
   email     String   @unique

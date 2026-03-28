@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,7 +11,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Monitor, BadgeCheck, ShieldCheck } from "lucide-react";
+import {
+  MapPin,
+  Monitor,
+  BadgeCheck,
+  ShieldCheck,
+  Flame,
+  Calculator,
+} from "lucide-react";
 import SolutionCtaButton from "@/components/solution-cta-button";
 import ShareButtons from "@/components/share-buttons";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
@@ -30,6 +38,7 @@ export default function MediaPage() {
   const [budget, setBudget] = useState("all");
   const [searchTarget, setSearchTarget] = useState<number | null>(null);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
+  const popularIds = new Set([1, 2, 3, 8, 9]);
 
   const filtered = useMemo(() => {
     let data = mediaData;
@@ -230,6 +239,12 @@ export default function MediaPage() {
                           />
                           {isKo ? "비교" : "Compare"}
                         </label>
+                        {popularIds.has(media.id) && (
+                          <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[10px] font-bold text-navy shadow-sm">
+                            <Flame className="h-3 w-3" />
+                            {isKo ? "인기" : "Popular"}
+                          </div>
+                        )}
                       </div>
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
@@ -251,11 +266,18 @@ export default function MediaPage() {
                           <MapPin className="h-3 w-3" />
                           {isKo ? media.location : media.locationEn}
                         </div>
-                        <div className="mt-2 text-lg font-bold text-navy">
-                          ₩{media.price.toLocaleString()}
-                          <span className="text-xs font-normal text-muted-foreground">
-                            만원 {t("media.perMonth")}
-                          </span>
+                        <div className="mt-2">
+                          <div className="text-lg font-bold text-navy">
+                            ₩{media.price.toLocaleString()}
+                            <span className="text-xs font-normal text-muted-foreground">
+                              만원 {t("media.perMonth")}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {isKo
+                              ? `월 ${media.price.toLocaleString()}만원~`
+                              : `From ₩${media.price.toLocaleString()}M/mo`}
+                          </div>
                         </div>
                         <div className="mt-3 border-t pt-3">
                           <ShareButtons
@@ -264,6 +286,15 @@ export default function MediaPage() {
                             description={`${isKo ? media.location : media.locationEn} - ₩${media.price.toLocaleString()}만원/${t("media.perMonth")}`}
                             locale={locale}
                           />
+                        </div>
+                        <div className="mt-3">
+                          <Link
+                            href={`/${locale}/quote?media=${media.id}`}
+                            className="flex w-full items-center justify-center gap-1.5 rounded-md bg-gold px-3 py-2 text-sm font-semibold text-navy transition-colors hover:bg-gold-dark"
+                          >
+                            <Calculator className="h-3.5 w-3.5" />
+                            {isKo ? "견적 받기" : "Get Quote"}
+                          </Link>
                         </div>
                       </CardContent>
                     </Card>

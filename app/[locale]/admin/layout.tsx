@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   MessageSquareText,
   Monitor,
+  BarChart3,
   ArrowLeft,
   Menu,
   X,
@@ -16,6 +17,7 @@ const navItems = [
   { href: "/admin", label: "대시보드", icon: LayoutDashboard },
   { href: "/admin/inquiries", label: "문의 관리", icon: MessageSquareText },
   { href: "/admin/medias", label: "매체 관리", icon: Monitor },
+  { href: "/admin/analytics", label: "분석", icon: BarChart3 },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
