@@ -1,6 +1,5 @@
 import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email/client";
@@ -117,7 +116,7 @@ export async function POST(request: NextRequest) {
       await db.customerFeedback.create({
         data: {
           email,
-          answers: answers as Prisma.InputJsonValue,
+          answers: JSON.parse(JSON.stringify(answers)),
           coupon: couponCode,
         },
       });
