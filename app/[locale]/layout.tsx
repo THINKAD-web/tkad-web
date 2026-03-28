@@ -9,6 +9,7 @@ import Footer from "@/components/footer";
 import QuickInquiryButton from "@/components/quick-inquiry-button";
 import TopLoader from "@/components/top-loader";
 import PageTransition from "@/components/page-transition";
+import ConditionalPublicChrome from "@/components/conditional-public-chrome";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -56,23 +57,27 @@ export default async function LocaleLayout({ children, params }: Props) {
     >
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider messages={messages}>
-          <TopLoader />
-          <Header />
+          <ConditionalPublicChrome>
+            <TopLoader />
+            <Header />
+          </ConditionalPublicChrome>
           <main className="flex-1">
             <PageTransition>{children}</PageTransition>
           </main>
-          <Footer />
-          <QuickInquiryButton />
-          <a
-            href="https://open.kakao.com/o/placeholder"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="fixed bottom-6 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110"
-            style={{ backgroundColor: "#FEE500" }}
-            aria-label="카카오톡 문의"
-          >
-            <span className="text-xl">💬</span>
-          </a>
+          <ConditionalPublicChrome>
+            <Footer />
+            <QuickInquiryButton />
+            <a
+              href="https://open.kakao.com/o/placeholder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="fixed bottom-6 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110"
+              style={{ backgroundColor: "#FEE500" }}
+              aria-label="카카오톡 문의"
+            >
+              <span className="text-xl">💬</span>
+            </a>
+          </ConditionalPublicChrome>
         </NextIntlClientProvider>
       </body>
     </html>
