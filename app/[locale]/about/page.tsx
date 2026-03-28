@@ -30,12 +30,12 @@ function AboutContent() {
   ];
 
   const milestones = [
-    { year: "2010", event: { ko: "THINKAD(싱커드) 설립", en: "THINKAD founded" } },
-    { year: "2013", event: { ko: "전국 옥외광고 네트워크 구축", en: "Nationwide OOH network established" } },
-    { year: "2016", event: { ko: "디지털 OOH 사업 확장", en: "Digital OOH business expansion" } },
-    { year: "2019", event: { ko: "XtheX 글로벌 플랫폼 파트너십 체결", en: "XtheX global platform partnership" } },
-    { year: "2022", event: { ko: "데이터 기반 컨설팅 서비스 런칭", en: "Data-driven consulting service launch" } },
-    { year: "2024", event: { ko: "등록 매체 500+ 돌파", en: "500+ registered media milestone" } },
+    { year: "2016", event: { ko: "주식회사 싱커드(THINKAD) 설립 · 사업자등록(319-86-00382)", en: "THINKAD Inc. founded (Reg: 319-86-00382)" } },
+    { year: "2017", event: { ko: "통신판매업 신고 · 국내 OOH 매체 네트워크 구축", en: "E-Commerce permit · Domestic OOH network established" } },
+    { year: "2019", event: { ko: "코엑스 K-POP 스퀘어 · 강남대로 미디어폴 운영 시작", en: "COEX K-POP Square & Gangnam-daero Media Pole operations" } },
+    { year: "2021", event: { ko: "글로벌 매체 확장 (뉴욕 타임스퀘어 · 두바이 부르즈 할리파)", en: "Global expansion (NYC Times Square · Dubai Burj Khalifa)" } },
+    { year: "2023", event: { ko: "데이터 기반 컨설팅 서비스 런칭 · 일본 애드트럭 파트너십", en: "Data consulting launch · Japan Ad Truck partnership" } },
+    { year: "2025", event: { ko: "등록 매체 500+ 돌파 · 성수 본사 확장 이전", en: "500+ registered media · Seongsu HQ expansion" } },
   ];
 
   return (

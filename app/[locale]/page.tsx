@@ -51,39 +51,39 @@ type Props = {
 const featuredMedia = [
   {
     id: 1,
-    name: "강남역 빌보드",
-    nameEn: "Gangnam Station Billboard",
-    location: "서울 강남구",
-    locationEn: "Gangnam-gu, Seoul",
-    type: "billboard",
-    price: 2500,
+    name: "코엑스 K-POP 스퀘어 전광판",
+    nameEn: "COEX K-POP Square LED",
+    location: "서울 삼성동 코엑스",
+    locationEn: "COEX, Samsung-dong, Seoul",
+    type: "digital",
+    price: 5000,
   },
   {
     id: 2,
-    name: "코엑스 디지털",
-    nameEn: "COEX Digital",
-    location: "서울 삼성동",
-    locationEn: "Samsung-dong, Seoul",
+    name: "강남대로 미디어폴 G-LIGHT",
+    nameEn: "Gangnam-daero Media Pole G-LIGHT",
+    location: "서울 강남구 강남대로",
+    locationEn: "Gangnam-daero, Gangnam-gu, Seoul",
     type: "digital",
-    price: 3800,
+    price: 3500,
   },
   {
     id: 3,
-    name: "홍대 지하철",
-    nameEn: "Hongdae Subway",
-    location: "서울 마포구",
-    locationEn: "Mapo-gu, Seoul",
-    type: "subway",
-    price: 1200,
+    name: "뉴욕 타임스퀘어 전광판",
+    nameEn: "New York Times Square LED",
+    location: "뉴욕 타임스퀘어",
+    locationEn: "Times Square, New York",
+    type: "digital",
+    price: 8000,
   },
   {
     id: 4,
-    name: "명동 전광판",
-    nameEn: "Myeongdong LED",
-    location: "서울 중구",
-    locationEn: "Jung-gu, Seoul",
+    name: "두바이 부르즈 할리파 LED",
+    nameEn: "Dubai Burj Khalifa LED",
+    location: "두바이 부르즈 할리파",
+    locationEn: "Burj Khalifa, Dubai",
     type: "digital",
-    price: 4200,
+    price: 9500,
   },
 ];
 
@@ -128,15 +128,15 @@ function HomeContent({ locale }: { locale: string }) {
           <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-white sm:text-5xl lg:text-7xl">
             {isKo ? (
               <>
-                당신의 브랜드를
+                생각하는 광고회사
                 <br />
-                <span className="text-gold">도시의 랜드마크</span>로
+                <span className="text-gold">싱커드</span>
               </>
             ) : (
               <>
-                Turn Your Brand Into
+                The Thinking Ad Agency
                 <br />
-                <span className="text-gold">A City Landmark</span>
+                <span className="text-gold">THINKAD</span>
               </>
             )}
           </h1>
@@ -342,7 +342,16 @@ function HomeContent({ locale }: { locale: string }) {
             {[
               {
                 rank: 1 as const,
-                name: isKo ? "강남역 미디어폴" : "Gangnam Station Media Pole",
+                name: isKo ? "코엑스 K-POP 스퀘어 전광판" : "COEX K-POP Square LED",
+                location: isKo ? "서울 삼성동 코엑스" : "COEX, Samsung-dong, Seoul",
+                dailyExposure: "500,000",
+                footTraffic: "A+",
+                roi: "4.5x",
+                type: isKo ? "디지털" : "Digital",
+              },
+              {
+                rank: 2,
+                name: isKo ? "강남대로 미디어폴 G-LIGHT" : "Gangnam-daero Media Pole G-LIGHT",
                 location: isKo ? "서울 강남구 강남대로" : "Gangnam-daero, Gangnam-gu, Seoul",
                 dailyExposure: "320,000",
                 footTraffic: "A+",
@@ -350,22 +359,13 @@ function HomeContent({ locale }: { locale: string }) {
                 type: isKo ? "디지털" : "Digital",
               },
               {
-                rank: 2,
-                name: isKo ? "코엑스 아티움 대형 LED" : "COEX Artium Large LED",
+                rank: 3,
+                name: isKo ? "코엑스 9to9 나인투나인 CUBE" : "COEX 9to9 CUBE",
                 location: isKo ? "서울 삼성동 코엑스몰" : "COEX Mall, Samsung-dong, Seoul",
                 dailyExposure: "280,000",
                 footTraffic: "A+",
                 roi: "3.8x",
                 type: isKo ? "디지털" : "Digital",
-              },
-              {
-                rank: 3,
-                name: isKo ? "홍대입구역 스크린도어" : "Hongdae Station Screen Door",
-                location: isKo ? "서울 마포구 홍대입구역" : "Hongdae Station, Mapo-gu, Seoul",
-                dailyExposure: "210,000",
-                footTraffic: "A",
-                roi: "3.5x",
-                type: isKo ? "지하철" : "Subway",
               },
             ].map((media, i) => (
               <ScrollAnimate key={media.rank} delay={i * 150}>

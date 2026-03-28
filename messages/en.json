@@ -119,7 +119,7 @@
     "title": "About Us",
     "subtitle": "15 Years of OOH Advertising Expertise",
     "historyTitle": "History of THINKAD",
-    "historyDescription": "Since its establishment in 2010, THINKAD has been leading the Korean OOH advertising industry. With a nationwide network centered in Seoul and a partnership with the global OOH platform XtheX, we are expanding into cross-border advertising.",
+    "historyDescription": "THINKAD, 'The Thinking Ad Agency,' is a specialized OOH agency that directly operates and manages landmark displays including COEX K-POP Square, Gangnam-daero Media Pole, New York Times Square, and Dubai Burj Khalifa LED. Headquartered in Seongsu-dong, Seoul, we continue to expand into cross-border advertising through our nationwide network and global partnerships.",
     "valuesTitle": "Core Values",
     "value1": {
       "title": "Data-Driven",
@@ -156,17 +156,17 @@
     "messagePlaceholder": "Please describe your campaign goals, preferred media, timeline, etc.",
     "submitButton": "Request Proposal",
     "infoTitle": "Contact Information",
-    "address": "5F, THINKAD Building, 123 Teheran-ro, Gangnam-gu, Seoul",
-    "phoneNumber": "02-1234-5678",
-    "emailAddress": "contact@tkad.co.kr",
+    "address": "1102, Seongsu A1 Knowledge Industry Center, 48 Ttukseom-ro 17ga-gil, Seongdong-gu, Seoul",
+    "phoneNumber": "02-515-2772",
+    "emailAddress": "mannote@tkad.co.kr",
     "hours": "Business Hours: Mon-Fri 09:00 - 18:00",
     "directionsTitle": "How to Find Us",
     "subway": "Subway",
-    "subwayDesc": "5 min walk from Gangnam Station Exit 3 (Line 2)",
+    "subwayDesc": "5 min walk from Seongsu Station Exit 3 (Line 2)",
     "busTitle": "Bus",
-    "busDesc": "Get off at Gangnam Station stop (Routes: 140, 144, 145 / 3412, 4412)",
+    "busDesc": "Get off at Seongsu Station stop (Routes: 141, 145, 148 / 2016, 4211)",
     "parkingTitle": "Parking",
-    "parkingDesc": "Underground parking available (2 hours free)"
+    "parkingDesc": "Underground parking available"
   },
   "cases": {
     "title": "Case Studies",
@@ -178,21 +178,21 @@
     "special": "Special"
   },
   "footer": {
-    "description": "Korea's No.1 OOH Advertising Agency",
-    "companyName": "THINKAD Inc.",
+    "description": "The Thinking Ad Agency, THINKAD",
+    "companyName": "THINKAD Inc. (주식회사 싱커드)",
     "ceo": "CEO: Jaehan Lee",
-    "bizNumber": "Business Reg: 123-45-67890",
-    "ecommerce": "E-Commerce Permit: 2024-Seoul Gangnam-12345",
+    "bizNumber": "Business Reg: 319-86-00382",
+    "ecommerce": "E-Commerce Permit: 2017-Seoul Seongdong-0681",
     "quickLinks": "Quick Links",
     "contactInfo": "Contact Info",
-    "address": "123 Teheran-ro, Gangnam-gu, Seoul",
-    "phone": "02-1234-5678",
-    "email": "contact@tkad.co.kr",
+    "address": "1102, Seongsu A1 Knowledge Industry Center, 48 Ttukseom-ro 17ga-gil, Seongdong-gu, Seoul",
+    "phone": "02-515-2772",
+    "email": "mannote@tkad.co.kr",
     "services": "Services",
     "domesticOOH": "Domestic OOH",
     "crossBorderOOH": "Cross-Border OOH",
     "dataConsulting": "Data Consulting",
     "planningTool": "Planning Tool",
-    "copyright": "© 2024 THINKAD Inc. All rights reserved."
+    "copyright": "© 2025 THINKAD Inc. All rights reserved."
   }
 }

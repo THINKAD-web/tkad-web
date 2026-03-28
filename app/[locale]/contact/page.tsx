@@ -371,7 +371,7 @@ export default function ContactPage() {
             <div className="aspect-video w-full">
               <iframe
                 title="THINKAD Office Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.354!2d127.0276!3d37.4979!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca1500a4e5b6d%3A0x6b8e9e4e2d5d5f6a!2sGangnam+Station!5e0!3m2!1sko!2skr!4v1700000000000"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3163.5!2d127.056!3d37.5445!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca4e3db3e19fb%3A0x1c5a6d1ef2a1c0d0!2z7ISx7IiY7JeQ7J207JuQ7KeA7Iud7IKw7JeF7IS87YSw!5e0!3m2!1sko!2skr!4v1700000000000"
                 className="h-full w-full border-0"
                 allowFullScreen
                 loading="lazy"

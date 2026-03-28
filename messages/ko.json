@@ -119,7 +119,7 @@
     "title": "회사 소개",
     "subtitle": "15년 OOH 광고 전문 에이전시",
     "historyTitle": "THINKAD의 역사",
-    "historyDescription": "2010년 설립 이후, THINKAD(싱커드)는 대한민국 OOH 광고 업계를 선도해 왔습니다. 서울을 중심으로 전국 네트워크를 구축하고, 글로벌 OOH 플랫폼 XtheX와의 파트너십을 통해 크로스보더 광고까지 영역을 확장하고 있습니다.",
+    "historyDescription": "싱커드(THINKAD)는 '생각하는 광고회사'라는 슬로건 아래, 코엑스 K-POP 스퀘어, 강남대로 미디어폴, 뉴욕 타임스퀘어, 두바이 부르즈 할리파 등 국내외 랜드마크 전광판을 직접 운영·관리하는 OOH 전문 에이전시입니다. 서울 성수동에 본사를 두고 전국 네트워크와 글로벌 파트너십을 통해 크로스보더 광고까지 영역을 확장하고 있습니다.",
     "valuesTitle": "핵심 가치",
     "value1": {
       "title": "데이터 중심",
@@ -156,17 +156,17 @@
     "messagePlaceholder": "캠페인 목표, 희망 매체, 기간 등을 자유롭게 적어주세요",
     "submitButton": "제안 요청하기",
     "infoTitle": "연락처 정보",
-    "address": "서울특별시 강남구 테헤란로 123, THINKAD 빌딩 5층",
-    "phoneNumber": "02-1234-5678",
-    "emailAddress": "contact@tkad.co.kr",
+    "address": "서울특별시 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호",
+    "phoneNumber": "02-515-2772",
+    "emailAddress": "mannote@tkad.co.kr",
     "hours": "영업시간: 월~금 09:00 - 18:00",
     "directionsTitle": "찾아오시는 길",
     "subway": "지하철",
-    "subwayDesc": "2호선 강남역 3번 출구에서 도보 5분",
+    "subwayDesc": "2호선 성수역 3번 출구에서 도보 5분",
     "busTitle": "버스",
-    "busDesc": "강남역 정류장 하차 (간선: 140, 144, 145 / 지선: 3412, 4412)",
+    "busDesc": "성수역 정류장 하차 (간선: 141, 145, 148 / 지선: 2016, 4211)",
     "parkingTitle": "주차",
-    "parkingDesc": "건물 내 지하주차장 이용 가능 (2시간 무료)"
+    "parkingDesc": "건물 내 지하주차장 이용 가능"
   },
   "cases": {
     "title": "성공 사례",
@@ -178,21 +178,21 @@
     "special": "특수"
   },
   "footer": {
-    "description": "대한민국 No.1 OOH 광고 에이전시",
-    "companyName": "주식회사 싱커드",
+    "description": "생각하는 광고회사, 싱커드",
+    "companyName": "주식회사 싱커드 (THINKAD)",
     "ceo": "대표: 이재한",
-    "bizNumber": "사업자등록번호: 123-45-67890",
-    "ecommerce": "통신판매업신고: 제2024-서울강남-12345호",
+    "bizNumber": "사업자등록번호: 319-86-00382",
+    "ecommerce": "통신판매업신고: 2017-서울성동-0681",
     "quickLinks": "바로가기",
     "contactInfo": "연락처",
-    "address": "서울특별시 강남구 테헤란로 123",
-    "phone": "02-1234-5678",
-    "email": "contact@tkad.co.kr",
+    "address": "서울특별시 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호",
+    "phone": "02-515-2772",
+    "email": "mannote@tkad.co.kr",
     "services": "서비스 안내",
     "domesticOOH": "국내 OOH 광고",
     "crossBorderOOH": "크로스보더 OOH",
     "dataConsulting": "데이터 컨설팅",
     "planningTool": "플래닝 툴",
-    "copyright": "© 2024 주식회사 싱커드(THINKAD). All rights reserved."
+    "copyright": "© 2025 주식회사 싱커드(THINKAD). All rights reserved."
   }
 }
