@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RotateCcw, Home } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -12,8 +13,12 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("error");
+
   useEffect(() => {
-    console.error(error);
+    if (process.env.NODE_ENV === "development") {
+      console.error(error);
+    }
   }, [error]);
 
   return (
@@ -23,12 +28,8 @@ export default function ErrorPage({
           <AlertTriangle className="h-10 w-10 text-gold" />
         </div>
         <h1 className="text-6xl font-extrabold text-gold">500</h1>
-        <h2 className="mt-4 text-2xl font-bold text-navy">
-          일시적 오류가 발생했습니다
-        </h2>
-        <p className="mt-3 text-muted-foreground">
-          서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
-        </p>
+        <h2 className="mt-4 text-2xl font-bold text-navy">{t("title")}</h2>
+        <p className="mt-3 text-muted-foreground">{t("description")}</p>
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Button
             onClick={reset}
@@ -36,7 +37,7 @@ export default function ErrorPage({
             size="lg"
           >
             <RotateCcw className="mr-2 h-4 w-4" />
-            다시 시도
+            {t("retry")}
           </Button>
           <Link href="/">
             <Button
@@ -45,7 +46,7 @@ export default function ErrorPage({
               size="lg"
             >
               <Home className="mr-2 h-4 w-4" />
-              홈으로
+              {t("home")}
             </Button>
           </Link>
         </div>

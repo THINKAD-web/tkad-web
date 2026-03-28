@@ -15,6 +15,7 @@ import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle, Mes
 import { useState, useCallback } from "react";
 import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { cn } from "@/lib/utils";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
@@ -216,7 +217,7 @@ export default function ContactPage() {
                           카카오톡 채널을 추가하시면 문의 진행 상황을 실시간으로 받아보실 수 있습니다.
                         </p>
                         <a
-                          href="https://pf.kakao.com/_thinkad"
+                          href={KAKAO_CHANNEL_PUBLIC_URL}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-neutral-800 transition-colors hover:brightness-95"

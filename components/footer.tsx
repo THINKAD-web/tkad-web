@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench, MessageCircle } from "lucide-react";
 
 export default function Footer() {
@@ -76,7 +77,7 @@ export default function Footer() {
               <li className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4 shrink-0 text-gold/50" />
                 <a
-                  href="https://open.kakao.com/o/placeholder"
+                  href={KAKAO_CHANNEL_PUBLIC_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="link-underline-grow hover:text-gold-light transition-colors duration-300"

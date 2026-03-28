@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -970,7 +971,7 @@ function HomeContent({
             </div>
           </div>
           <a
-            href="https://open.kakao.com/o/placeholder"
+            href={KAKAO_CHANNEL_PUBLIC_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto touch-manipulation"

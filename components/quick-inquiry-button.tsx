@@ -12,7 +12,7 @@ import { useToast } from "@/components/toast-provider";
 import { CheckCircle } from "lucide-react";
 
 const STORAGE_KEY = "tkad-quick-inquiry-count";
-const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_thinkad";
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 
 function readInquiryCount(): number {
   if (typeof window === "undefined") return 0;
@@ -242,7 +242,7 @@ export default function QuickInquiryButton() {
                   )}
                 </Button>
                 <a
-                  href={KAKAO_CHANNEL_URL}
+                  href={KAKAO_CHANNEL_PUBLIC_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex h-11 w-full items-center justify-center rounded-xl border-2 border-[#FEE500] bg-[#FEE500]/10 text-sm font-bold text-navy transition-colors hover:bg-[#FEE500]/25"

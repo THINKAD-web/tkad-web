@@ -42,6 +42,15 @@ export default function RootNotFound() {
             </h2>
             <p
               style={{
+                marginTop: "0.5rem",
+                fontSize: "0.9rem",
+                color: "#475569",
+              }}
+            >
+              Page not found — the URL may be invalid or the page has moved.
+            </p>
+            <p
+              style={{
                 marginTop: "0.75rem",
                 color: "#64748b",
                 lineHeight: 1.6,
@@ -49,25 +58,52 @@ export default function RootNotFound() {
             >
               요청하신 페이지가 존재하지 않거나, 이동되었을 수 있습니다.
             </p>
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-            <a
-              href="/ko"
+            <div
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
                 marginTop: "2rem",
-                padding: "0.75rem 2rem",
-                borderRadius: "9999px",
-                background: "#9b3c31",
-                color: "#ffffff",
-                fontWeight: 700,
-                fontSize: "0.875rem",
-                textDecoration: "none",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "0.75rem",
+                justifyContent: "center",
               }}
             >
-              홈으로 돌아가기
-            </a>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              <a
+                href="/ko"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.75rem 1.5rem",
+                  borderRadius: "9999px",
+                  background: "#9b3c31",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  textDecoration: "none",
+                }}
+              >
+                한국어 홈
+              </a>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              <a
+                href="/en"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.75rem 1.5rem",
+                  borderRadius: "9999px",
+                  background: "#1a2a6c",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  textDecoration: "none",
+                }}
+              >
+                English home
+              </a>
+            </div>
           </div>
         </div>
       </body>

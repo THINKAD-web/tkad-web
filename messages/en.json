@@ -644,6 +644,12 @@
     "endedCampaigns": "Ended campaigns",
     "noEnded": "No ended campaigns."
   },
+  "error": {
+    "title": "Something went wrong",
+    "description": "We're having a temporary problem. Please try again in a moment.",
+    "retry": "Try again",
+    "home": "Back to home"
+  },
   "notFound": {
     "title": "Page Not Found",
     "description": "The page you are looking for may have been removed or the address may have changed.",

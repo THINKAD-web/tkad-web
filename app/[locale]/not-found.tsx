@@ -1,14 +1,20 @@
 import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 
 type Props = {
-  params: Promise<{ locale: string }>;
+  params?: Promise<{ locale?: string }>;
 };
 
 export default async function NotFound({ params }: Props) {
-  const locale = await resolveLocaleParam(params);
+  const locale = await resolveLocaleParam(
+    (params ??
+      Promise.resolve({ locale: routing.defaultLocale })) as Promise<{
+      locale: string;
+    }>,
+  );
   setRequestLocale(locale);
   const t = await getTranslations();
 

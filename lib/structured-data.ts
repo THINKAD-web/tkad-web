@@ -1,3 +1,4 @@
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { siteUrl } from "@/lib/seo";
 
 const ORG_ID = `${siteUrl}/#organization`;
@@ -27,7 +28,7 @@ export function buildStructuredDataGraph() {
           "대한민국 No.1 OOH 광고 에이전시. 전국 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 집행 및 사후관리.",
         foundingDate: "2016",
         taxID: "319-86-00382",
-        sameAs: ["https://open.kakao.com/o/placeholder"],
+        sameAs: [KAKAO_CHANNEL_PUBLIC_URL],
         contactPoint: [
           {
             "@type": "ContactPoint",

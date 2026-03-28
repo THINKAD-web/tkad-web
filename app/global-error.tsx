@@ -10,7 +10,9 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    if (process.env.NODE_ENV === "development") {
+      console.error(error);
+    }
   }, [error]);
 
   return (
@@ -71,14 +73,26 @@ export default function GlobalError({
             </h2>
             <p
               style={{
+                marginTop: "0.5rem",
+                fontSize: "0.9rem",
+                color: "#475569",
+                lineHeight: 1.5,
+              }}
+            >
+              Something went wrong. Please try again shortly.
+            </p>
+            <p
+              style={{
                 marginTop: "0.75rem",
                 color: "#64748b",
                 lineHeight: 1.6,
+                fontSize: "0.875rem",
               }}
             >
               서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
             </p>
             <button
+              type="button"
               onClick={reset}
               style={{
                 display: "inline-flex",
@@ -95,7 +109,7 @@ export default function GlobalError({
                 cursor: "pointer",
               }}
             >
-              다시 시도
+              다시 시도 / Try again
             </button>
           </div>
         </div>

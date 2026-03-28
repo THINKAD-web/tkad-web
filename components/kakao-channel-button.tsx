@@ -2,8 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { MessageCircle } from "lucide-react";
-
-const KAKAO_URL = "https://pf.kakao.com/_thinkad";
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 
 export default function KakaoChannelButton() {
   const locale = useLocale();
@@ -12,7 +11,7 @@ export default function KakaoChannelButton() {
   return (
     <div className="group fixed bottom-6 right-4 z-50">
       <a
-        href={KAKAO_URL}
+        href={KAKAO_CHANNEL_PUBLIC_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="relative flex h-12 w-12 items-center justify-center"
