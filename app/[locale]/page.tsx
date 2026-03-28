@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import HeroParallaxBackground from "@/components/hero-parallax-background";
 import ScrollAnimate from "@/components/scroll-animate";
 import HomeRecentlyViewed from "@/components/home-recently-viewed";
 import NewsletterForm from "@/components/newsletter-form";
@@ -118,45 +119,51 @@ function HomeContent({
   return (
     <>
       {/* Hero */}
-      <section className="hero-bg relative flex min-h-screen items-center justify-center overflow-hidden">
-        <div className="hero-pattern absolute inset-0" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(232,213,181,0.12)_0%,_transparent_58%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(155,60,49,0.1)_0%,_transparent_52%)]" />
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
+        <HeroParallaxBackground />
+        <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_top_right,_rgba(232,213,181,0.12)_0%,_transparent_58%)]" />
+        <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_bottom_left,_rgba(155,60,49,0.1)_0%,_transparent_52%)]" />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
-          <div className="hero-fade-in hero-fade-in-1 mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">
+          <div className="hero-fade-in hero-fade-in-seq-0 mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
             {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
           </div>
 
-          <h1 className="hero-fade-in hero-fade-in-2 text-5xl leading-[1.08] font-extrabold tracking-tight text-white lg:text-7xl">
+          <h1 className="text-5xl leading-[1.08] font-extrabold tracking-tight text-white lg:text-7xl">
             {isKo ? (
               <>
-                생각하는 광고회사
-                <br />
-                <span className="bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">싱커드</span>
+                <span className="hero-fade-in hero-fade-in-seq-1 block">
+                  생각하는 광고회사
+                </span>
+                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">
+                  싱커드
+                </span>
               </>
             ) : (
               <>
-                The Thinking Ad Agency
-                <br />
-                <span className="bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">THINKAD</span>
+                <span className="hero-fade-in hero-fade-in-seq-1 block">
+                  The Thinking Ad Agency
+                </span>
+                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">
+                  THINKAD
+                </span>
               </>
             )}
           </h1>
 
-          <p className="hero-fade-in hero-fade-in-3 mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300/90 sm:text-lg lg:text-xl">
+          <p className="hero-fade-in hero-fade-in-seq-3 mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300/90 sm:text-lg lg:text-xl">
             {t("hero.subtitle")}
           </p>
 
-          <p className="hero-fade-in hero-fade-in-3 mx-auto mt-3 flex items-center justify-center gap-2 text-base text-gold/80 font-medium">
+          <p className="hero-fade-in hero-fade-in-seq-4 mx-auto mt-3 flex items-center justify-center gap-2 text-base text-gold/80 font-medium">
             <BadgeCheck className="h-5 w-5 text-gold" />
             {isKo
               ? "싱커드가 직접 검증하고 관리하는 매체만"
               : "Only media personally verified and managed by THINKAD"}
           </p>
 
-          <div className="hero-fade-in hero-fade-in-4 mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <div className="hero-fade-in hero-fade-in-seq-5 mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link href="/contact">
               <Button
                 size="lg"
@@ -178,15 +185,18 @@ function HomeContent({
               </Button>
             </Link>
           </div>
-          <p className="hero-fade-in hero-fade-in-5 mt-5 text-sm text-slate-400">
+          <p className="hero-fade-in hero-fade-in-seq-6 mt-5 text-sm text-slate-400">
             {isKo
               ? "30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
               : "Apply in 30 seconds · Expert consultant contacts within 24h"}
           </p>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <ChevronDown className="h-6 w-6 text-white/40" />
+        <div
+          className="hero-fade-in hero-fade-in-seq-7 absolute bottom-8 left-1/2 -translate-x-1/2 motion-reduce:animate-none"
+          aria-hidden
+        >
+          <ChevronDown className="hero-chevron-bounce h-6 w-6 text-white/50 motion-reduce:animate-none" />
         </div>
       </section>
 
@@ -245,7 +255,7 @@ function HomeContent({
                   : "Only verified media are registered on the THINKAD platform and proposed to advertisers.",
               },
             ].map((item, index) => (
-              <ScrollAnimate key={item.step} delay={index * 120}>
+              <ScrollAnimate key={item.step} delay={index * 100}>
               <div className="verification-step group relative">
                 {index < 3 && (
                   <div className="absolute top-10 right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
@@ -365,7 +375,7 @@ function HomeContent({
                 type: isKo ? "디지털" : "Digital",
               },
             ].map((media, i) => (
-              <ScrollAnimate key={media.rank} delay={i * 150}>
+              <ScrollAnimate key={media.rank} delay={i * 100}>
               <Card
                 className="group relative overflow-hidden border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
@@ -477,7 +487,7 @@ function HomeContent({
                 highlight: isKo ? "원스톱 관리" : "One-Stop",
               },
             ].map((item, i) => (
-              <ScrollAnimate key={item.title} delay={i * 150}>
+              <ScrollAnimate key={item.title} delay={i * 100}>
               <Card
                 className="group relative overflow-hidden border-0 bg-gradient-to-b from-white to-slate-50/50 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
@@ -543,7 +553,7 @@ function HomeContent({
                 accent: "from-gold/10 to-navy/5",
               },
             ].map((service, i) => (
-              <ScrollAnimate key={service.title} delay={i * 150}>
+              <ScrollAnimate key={service.title} delay={i * 100}>
               <Card
                 className="service-card group cursor-pointer border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] rounded-2xl"
               >
@@ -722,7 +732,7 @@ function HomeContent({
                 rating: 5,
               },
             ].map((testimonial, i) => (
-              <ScrollAnimate key={testimonial.name} delay={i * 150}>
+              <ScrollAnimate key={testimonial.name} delay={i * 100}>
               <Card
                 className="relative border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
@@ -775,7 +785,7 @@ function HomeContent({
           </ScrollAnimate>
           <div className="mt-16 grid gap-8 md:grid-cols-3">
             {(["case1", "case2", "case3"] as const).map((key, i) => (
-              <ScrollAnimate key={key} delay={i * 150}>
+              <ScrollAnimate key={key} delay={i * 100}>
               <Card
                 className="group overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
@@ -858,7 +868,7 @@ function HomeContent({
                 tag: isKo ? "실무 팁" : "Pro Tips",
               },
             ].map((item, i) => (
-              <ScrollAnimate key={item.title} delay={i * 150}>
+              <ScrollAnimate key={item.title} delay={i * 100}>
                 <Card className="group cursor-pointer border-0 bg-gradient-to-b from-white to-slate-50/50 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl">
                   <CardHeader className="pb-3">
                     <Badge className="w-fit bg-navy/5 text-navy text-xs font-medium">

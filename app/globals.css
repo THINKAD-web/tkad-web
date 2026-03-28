@@ -82,21 +82,25 @@ body {
 /* ── Intersection Observer scroll animations ── */
 .scroll-fade-up {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(32px);
+  will-change: transform, opacity;
+  transition: opacity 0.8s cubic-bezier(0.33, 1, 0.68, 1),
+              transform 0.8s cubic-bezier(0.33, 1, 0.68, 1);
 }
 .scroll-fade-up.scroll-visible {
   opacity: 1;
   transform: translateY(0);
+  will-change: auto;
 }
 
 .scroll-fade {
   opacity: 0;
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity;
+  transition: opacity 0.75s cubic-bezier(0.33, 1, 0.68, 1);
 }
 .scroll-fade.scroll-visible {
   opacity: 1;
+  will-change: auto;
 }
 
 /* ── Count-up animation for stats (Intersection Observer gated) ── */
@@ -119,27 +123,27 @@ body {
 }
 
 .stat-count-500::after { content: counter(num) "+"; }
-.stat-count-500 { animation: countUp500 2.2s ease-out forwards; }
+.stat-count-500 { animation: countUp500 2.2s cubic-bezier(0.22, 1, 0.45, 1) forwards; }
 @keyframes countUp500 { from { --num: 0; } to { --num: 500; } }
 
 .stat-count-15::after { content: counter(num) "년"; }
-.stat-count-15 { animation: countUp15 1.8s ease-out forwards; }
+.stat-count-15 { animation: countUp15 1.85s cubic-bezier(0.22, 1, 0.45, 1) forwards; }
 @keyframes countUp15 { from { --num: 0; } to { --num: 15; } }
 
 .stat-count-100::after { content: counter(num) "%"; }
-.stat-count-100 { animation: countUp100 2s ease-out forwards; }
+.stat-count-100 { animation: countUp100 2.05s cubic-bezier(0.22, 1, 0.45, 1) forwards; }
 @keyframes countUp100 { from { --num: 0; } to { --num: 100; } }
 
 .stat-count-50::after { content: counter(num) "+"; }
-.stat-count-50 { animation: countUp50 1.6s ease-out forwards; }
+.stat-count-50 { animation: countUp50 1.65s cubic-bezier(0.22, 1, 0.45, 1) forwards; }
 @keyframes countUp50 { from { --num: 0; } to { --num: 50; } }
 
 .stat-count-100b::after { content: counter(num) "억+"; }
-.stat-count-100b { animation: countUp100b 2s ease-out forwards; }
+.stat-count-100b { animation: countUp100b 2.05s cubic-bezier(0.22, 1, 0.45, 1) forwards; }
 @keyframes countUp100b { from { --num: 0; } to { --num: 100; } }
 
 .stat-count-100p::after { content: counter(num) "+"; }
-.stat-count-100p { animation: countUp100p 2s ease-out forwards; }
+.stat-count-100p { animation: countUp100p 2.05s cubic-bezier(0.22, 1, 0.45, 1) forwards; }
 @keyframes countUp100p { from { --num: 0; } to { --num: 100; } }
 
 /* ── Premium Hero gradient animation ── */
@@ -201,7 +205,7 @@ body {
   transition: opacity 0.25s ease;
 }
 .premium-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   box-shadow: 0 12px 28px rgba(26, 42, 108, 0.08);
   border-color: rgba(26, 42, 108, 0.12);
 }
@@ -288,6 +292,25 @@ body {
   border-color: #1a2a6c;
 }
 
+/* ── Animated link underline (grow from left) ── */
+.link-underline-grow {
+  position: relative;
+  display: inline-block;
+}
+.link-underline-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.35s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.link-underline-grow:hover::after {
+  width: 100%;
+}
+
 /* ── Header scroll transition ── */
 .header-scrolled {
   background: rgba(255, 255, 255, 0.88) !important;
@@ -326,7 +349,7 @@ body {
 @keyframes fadeInSlideUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(22px);
   }
   to {
     opacity: 1;
@@ -336,13 +359,25 @@ body {
 
 .hero-fade-in {
   opacity: 0;
-  animation: fadeInSlideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: fadeInSlideUp 0.75s cubic-bezier(0.33, 1, 0.68, 1) forwards;
 }
-.hero-fade-in-1 { animation-delay: 0.1s; }
-.hero-fade-in-2 { animation-delay: 0.3s; }
-.hero-fade-in-3 { animation-delay: 0.5s; }
-.hero-fade-in-4 { animation-delay: 0.7s; }
-.hero-fade-in-5 { animation-delay: 0.9s; }
+/* Sequential hero reveals (title lines, CTAs, etc.) */
+.hero-fade-in-seq-0 { animation-delay: 0.08s; }
+.hero-fade-in-seq-1 { animation-delay: 0.22s; }
+.hero-fade-in-seq-2 { animation-delay: 0.38s; }
+.hero-fade-in-seq-3 { animation-delay: 0.52s; }
+.hero-fade-in-seq-4 { animation-delay: 0.66s; }
+.hero-fade-in-seq-5 { animation-delay: 0.8s; }
+.hero-fade-in-seq-6 { animation-delay: 0.94s; }
+.hero-fade-in-seq-7 { animation-delay: 1.08s; }
+
+@keyframes heroChevronBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  50% { transform: translateY(10px); opacity: 0.85; }
+}
+.hero-chevron-bounce {
+  animation: heroChevronBounce 2.1s ease-in-out infinite;
+}
 
 /* Fade-in on scroll */
 @keyframes fadeInUp {

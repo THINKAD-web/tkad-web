@@ -14,14 +14,14 @@ export default function PageTransition({ children }: { children: ReactNode }) {
     const id = setTimeout(() => {
       setDisplayChildren(children);
       setShow(true);
-    }, 150);
+    }, 120);
     return () => clearTimeout(id);
   }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
-      className={`transition-[opacity,transform] duration-300 ease-out ${
-        show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+      className={`transition-opacity duration-500 ease-out motion-reduce:transition-none ${
+        show ? "opacity-100" : "opacity-0"
       }`}
     >
       {displayChildren}

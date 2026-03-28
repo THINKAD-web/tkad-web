@@ -5,6 +5,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 type Props = {
   children: ReactNode;
   className?: string;
+  /** Delay in ms; use `index * 100` for staggered cards (0.1s steps). */
   delay?: number;
   /** "fade-up" (default) | "fade-in" | "count-up" */
   variant?: "fade-up" | "fade-in" | "count-up";
@@ -37,7 +38,7 @@ export default function ScrollAnimate({
           observer.unobserve(el);
         }
       },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" },
+      { threshold: 0.1, rootMargin: "0px 0px -32px 0px" },
     );
 
     observer.observe(el);

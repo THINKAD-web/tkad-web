@@ -47,7 +47,7 @@ export default function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-silver/90 transition-colors duration-300 hover:text-gold-light"
+                    className="link-underline-grow inline-block text-sm text-silver/90 transition-colors duration-300 hover:text-gold-light"
                   >
                     {item.label}
                   </Link>
@@ -79,7 +79,7 @@ export default function Footer() {
                   href="https://open.kakao.com/o/placeholder"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-gold-light transition-colors duration-300"
+                  className="link-underline-grow hover:text-gold-light transition-colors duration-300"
                 >
                   {t("footer.kakaoChannel")}
                 </a>
@@ -96,7 +96,7 @@ export default function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="flex items-center gap-2 text-sm text-silver/90 transition-colors duration-300 hover:text-gold-light"
+                    className="link-underline-grow flex items-center gap-2 text-sm text-silver/90 transition-colors duration-300 hover:text-gold-light"
                   >
                     <item.icon className="h-4 w-4 shrink-0 text-gold/50" />
                     {item.label}
