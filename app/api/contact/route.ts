@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { sendEmail } from "@/lib/email/client";
+import { getContactConfirmationEmail } from "@/lib/email/contact-confirmation";
 
 const limiter = rateLimit({ limit: 5, windowMs: 60_000 });
 
@@ -74,6 +76,23 @@ export async function POST(request: NextRequest) {
       { error: "Failed to save inquiry" },
       { status: 500 },
     );
+  }
+
+  if (email?.trim()) {
+    try {
+      const { subject, text, html } = getContactConfirmationEmail({
+        name: name?.trim(),
+      });
+      await sendEmail({
+        to: email.trim(),
+        subject,
+        text,
+        html,
+      });
+    } catch (err) {
+      console.error("[contact] Failed to send confirmation email:", err);
+      // Do not fail the request if email sending fails
+    }
   }
 
   return NextResponse.json({ success: true }, { status: 201 });

@@ -1,0 +1,245 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useLocale } from "next-intl";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, ExternalLink, Link as LinkIcon, Filter } from "lucide-react";
+
+type NewsCategory = "press" | "award" | "event" | "all";
+
+type NewsItem = {
+  id: number;
+  date: string;
+  titleKo: string;
+  titleEn: string;
+  summaryKo: string;
+  summaryEn: string;
+  category: Exclude<NewsCategory, "all">;
+  link?: string;
+  external?: boolean;
+};
+
+const categoryMeta: {
+  key: NewsCategory;
+  getLabel: (isKo: boolean) => string;
+}[] = [
+  { key: "all", getLabel: (isKo) => (isKo ? "전체" : "All") },
+  { key: "press", getLabel: (isKo) => (isKo ? "보도자료" : "Press") },
+  { key: "award", getLabel: (isKo) => (isKo ? "수상" : "Awards") },
+  { key: "event", getLabel: (isKo) => (isKo ? "이벤트" : "Events") },
+];
+
+const NEWS_ITEMS: NewsItem[] = [
+  {
+    id: 1,
+    date: "2025-03-12",
+    category: "press",
+    titleKo: "THINKAD, AI 기반 OOH 미디어 추천 엔진 공식 출시",
+    titleEn: "THINKAD launches AI-powered OOH media recommendation engine",
+    summaryKo:
+      "캠페인 목적·타겟·예산을 기반으로 최적의 매체 조합을 제안하는 AI 추천 엔진을 런칭했습니다.",
+    summaryEn:
+      "Launched an AI engine that suggests optimal OOH media mix based on campaign goals, target audience and budget.",
+    link: "https://news.example.com/thinkad-ai-ooh",
+    external: true,
+  },
+  {
+    id: 2,
+    date: "2024-11-28",
+    category: "award",
+    titleKo: "2024 대한민국 OOH 어워즈 통합 캠페인 부문 수상",
+    titleEn: "Winner of 2024 Korea OOH Awards Integrated Campaign category",
+    summaryKo:
+      "글로벌 뷰티 브랜드와 진행한 도심 랜드마크 통합 OOH 캠페인으로 통합 캠페인 부문 본상을 수상했습니다.",
+    summaryEn:
+      "Received the Integrated Campaign award for a landmark OOH campaign with a global beauty brand.",
+  },
+  {
+    id: 3,
+    date: "2024-09-05",
+    category: "event",
+    titleKo: "OOH & DOOH 인사이트 웨비나 개최",
+    titleEn: "OOH & DOOH Insights Webinar",
+    summaryKo:
+      "마케터를 위한 옥외·디지털OOH 집행 전략과 실제 캠페인 사례를 공유하는 온라인 웨비나를 진행했습니다.",
+    summaryEn:
+      "Hosted an online webinar for marketers covering OOH/DOOH strategies and real-world case studies.",
+    link: "https://events.example.com/thinkad-ooh-webinar",
+    external: true,
+  },
+];
+
+export default function NewsPage() {
+  const locale = useLocale();
+  const isKo = locale === "ko";
+
+  const [selectedCategory, setSelectedCategory] =
+    useState<NewsCategory>("all");
+
+  const items = useMemo(() => {
+    return NEWS_ITEMS.filter((item) =>
+      selectedCategory === "all" ? true : item.category === selectedCategory,
+    );
+  }, [selectedCategory]);
+
+  const formatDate = (iso: string) => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    if (isKo) {
+      return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+    }
+    return d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  return (
+    <>
+      <section className="bg-navy py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+            {isKo ? "뉴스 & 보도자료" : "News & Press"}
+          </p>
+          <h1 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
+            {isKo
+              ? "THINKAD 뉴스·보도자료"
+              : "THINKAD News & Press Releases"}
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm text-slate-300">
+            {isKo
+              ? "회사 소식, 보도자료, 수상 소식과 이벤트 정보를 한눈에 확인하세요."
+              : "Browse press releases, awards and event updates from THINKAD."}
+          </p>
+        </div>
+      </section>
+
+      <section className="border-b bg-slate-50/60 py-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-1 text-xs font-semibold text-slate-600">
+            <Filter className="h-3.5 w-3.5" />
+            {isKo ? "카테고리" : "Category"}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {categoryMeta.map((cat) => {
+              const isActive = selectedCategory === cat.key;
+              return (
+                <Button
+                  key={cat.key}
+                  type="button"
+                  size="sm"
+                  variant={isActive ? "default" : "outline"}
+                  className={`h-8 rounded-full border text-xs ${
+                    isActive
+                      ? "border-gold bg-gold text-navy hover:bg-gold-dark"
+                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
+                  onClick={() => setSelectedCategory(cat.key)}
+                >
+                  {cat.getLabel(isKo)}
+                </Button>
+              );
+            })}
+          </div>
+          <div className="ml-auto text-xs text-slate-500">
+            {isKo ? "총" : "Total"}{" "}
+            <span className="font-semibold text-navy">{items.length}</span>
+            {isKo ? "건" : ""}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => {
+              const title = isKo ? item.titleKo : item.titleEn;
+              const summary = isKo ? item.summaryKo : item.summaryEn;
+              const categoryLabel = categoryMeta.find(
+                (c) => c.key === item.category,
+              )?.getLabel(isKo);
+
+              const TagIcon =
+                item.category === "press"
+                  ? ExternalLink
+                  : item.category === "award"
+                  ? LinkIcon
+                  : Calendar;
+
+              return (
+                <Card
+                  key={item.id}
+                  className="group flex h-full flex-col overflow-hidden border-0 bg-white shadow-[0_6px_24px_rgba(15,23,42,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(15,23,42,0.20)] rounded-2xl"
+                >
+                  <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-navy/90 via-navy/70 to-slate-900 py-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-[11px] font-medium text-slate-200">
+                        <Calendar className="h-3.5 w-3.5 text-gold" />
+                        <span>{formatDate(item.date)}</span>
+                      </div>
+                      {categoryLabel && (
+                        <Badge className="bg-black/40 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-100 backdrop-blur">
+                          {categoryLabel}
+                        </Badge>
+                      )}
+                    </div>
+                    <CardTitle className="mt-3 text-sm font-bold leading-snug text-white sm:text-base">
+                      {title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-1 flex-col justify-between p-4">
+                    <p className="text-xs leading-relaxed text-slate-700 sm:text-sm">
+                      {summary}
+                    </p>
+                    <div className="mt-4 flex items-center justify-between text-[11px] font-semibold text-gold group-hover:text-gold-dark">
+                      {item.link ? (
+                        <a
+                          href={item.link}
+                          target={item.external ? "_blank" : undefined}
+                          rel={item.external ? "noopener noreferrer" : undefined}
+                          className="inline-flex items-center gap-1.5"
+                        >
+                          <TagIcon className="h-3.5 w-3.5" />
+                          <span>
+                            {isKo
+                              ? item.external
+                                ? "자세히 보기 (외부 링크)"
+                                : "자세히 보기"
+                              : item.external
+                              ? "Read more (external)"
+                              : "Read more"}
+                          </span>
+                        </a>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-slate-400">
+                          <TagIcon className="h-3.5 w-3.5" />
+                          <span>
+                            {isKo
+                              ? "자세히 보기 (준비 중)"
+                              : "Details coming soon"}
+                          </span>
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {items.length === 0 && (
+            <div className="mt-10 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
+              {isKo
+                ? "선택하신 카테고리에 해당하는 소식이 없습니다. 다른 카테고리를 선택해 보세요."
+                : "No news items for the selected category."}
+            </div>
+          )}
+        </div>
+      </section>
+    </>
+  );
+}
+
