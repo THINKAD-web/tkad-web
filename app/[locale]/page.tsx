@@ -12,14 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import HeroParallaxBackground from "@/components/hero-parallax-background";
-import ScrollAnimate from "@/components/scroll-animate";
-import { ScrollStagger } from "@/components/scroll-stagger";
-
-const HomeRecentlyViewed = dynamic(
-  () => import("@/components/home-recently-viewed"),
-  { loading: () => null },
-);
-const NewsletterForm = dynamic(() => import("@/components/newsletter-form"));
 import {
   ArrowRight,
   BarChart3,
@@ -47,6 +39,18 @@ import {
   Newspaper,
   MessageCircle,
 } from "lucide-react";
+
+const HomeRecentlyViewed = dynamic(
+  () => import("@/components/home-recently-viewed"),
+  { loading: () => null },
+);
+const NewsletterForm = dynamic(() => import("@/components/newsletter-form"));
+const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
+const ScrollStagger = dynamic(() =>
+  import("@/components/scroll-stagger").then((m) => ({
+    default: m.ScrollStagger,
+  })),
+);
 
 type Props = {
   params: Promise<{ locale: string }>;

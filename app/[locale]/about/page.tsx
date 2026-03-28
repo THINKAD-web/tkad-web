@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
@@ -7,9 +8,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AboutHeroStats } from "@/components/about-hero-stats";
-import { ScrollStagger } from "@/components/scroll-stagger";
 import { BarChart3, Globe, Heart, Users } from "lucide-react";
+
+const AboutHeroStats = dynamic(() =>
+  import("@/components/about-hero-stats").then((m) => ({
+    default: m.AboutHeroStats,
+  })),
+);
+const ScrollStagger = dynamic(() =>
+  import("@/components/scroll-stagger").then((m) => ({
+    default: m.ScrollStagger,
+  })),
+);
 
 type Props = {
   params: Promise<{ locale: string }>;

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,10 +15,19 @@ import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle, Mes
 import { useState, useCallback } from "react";
 import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
-import { ContactFeedbackSurvey } from "@/components/contact-feedback-survey";
 import { cn } from "@/lib/utils";
-import ScrollAnimate from "@/components/scroll-animate";
-import { ScrollStagger } from "@/components/scroll-stagger";
+
+const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
+const ScrollStagger = dynamic(() =>
+  import("@/components/scroll-stagger").then((m) => ({
+    default: m.ScrollStagger,
+  })),
+);
+const ContactFeedbackSurvey = dynamic(() =>
+  import("@/components/contact-feedback-survey").then((m) => ({
+    default: m.ContactFeedbackSurvey,
+  })),
+);
 
 type ContactMainTab = "inquiry" | "feedback";
 
