@@ -146,8 +146,68 @@ function AboutContent({
         </div>
       </section>
 
+      {/* Introduction */}
+      <section className="py-28 bg-white">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-semibold tracking-wider text-gold uppercase mb-3">About THINKAD</p>
+            <h2 className="text-2xl font-bold text-navy sm:text-3xl">
+              {isKo ? "광고주의 성공을 먼저 생각하는 종합광고대행사" : "A Full-Service Agency That Puts Client Success First"}
+            </h2>
+          </div>
+          
+          <div className="space-y-12">
+            <div className="bg-gradient-to-br from-slate-50 to-white p-8 rounded-2xl border border-slate-100">
+              <h3 className="text-lg font-bold text-navy mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center text-gold text-sm">01</span>
+                {isKo ? "싱커드 소개" : "About THINKAD"}
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {isKo 
+                  ? "싱커드는 창의적인 미디어렙을 목표로 인정받는 종합 마케팅 솔루션 회사입니다. 다양한 광고 매체를 활용하여 효과적인 광고마케팅을 제안하고, 모든 직원들이 책임감을 갖고 광고주의 입장에서 생각하는 광고주가 가장 선호하는 미디어렙으로 자리매김 하겠습니다."
+                  : "THINKAD is a comprehensive marketing solutions company recognized as a creative media rep. We propose effective advertising marketing utilizing various media, and all employees take responsibility to think from the advertiser's perspective."}
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-navy/5 to-white p-8 rounded-2xl border border-navy/10">
+              <h3 className="text-lg font-bold text-navy mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center text-gold text-sm">02</span>
+                {isKo ? "우리의 철학" : "Our Philosophy"}
+              </h3>
+              <blockquote className="text-gold-dark font-medium italic mb-4 pl-4 border-l-4 border-gold/30">
+                {isKo 
+                  ? "\"지금 눈에 보이는 부분만이 광고대행사의 실력을 말해주는 것은 아닙니다.\""
+                  : "\"What you see now is not the only measure of an agency's capabilities.\""}
+              </blockquote>
+              <p className="text-muted-foreground leading-relaxed">
+                {isKo 
+                  ? "싱커드는 빈틈없는 전략과 정확한 타깃설정, 효과적인 커뮤니케이션으로 광고주의 시각으로 브랜드 전략을 구상합니다. 전문화된 각 조직의 기능과 아이디어를 효율적으로 통합하여 소비자를 실질적으로 움직일 수 있는 마케팅 커뮤니케이션을 지향하며, 이를 통해 광고주와 브랜드의 가치를 극대화하고 있습니다."
+                  : "THINKAD designs brand strategies from the advertiser's perspective with seamless strategy, precise targeting, and effective communication. We integrate the functions and ideas of specialized organizations efficiently to create marketing communications that truly move consumers, maximizing the value of advertisers and brands."}
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-gold/5 to-white p-8 rounded-2xl border border-gold/20">
+              <h3 className="text-lg font-bold text-navy mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center text-gold text-sm">03</span>
+                Full Media Solution
+              </h3>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                {isKo 
+                  ? "싱커드는 오픈, 공유, 확산이라는 새로운 법칙의 중심에 서 있는 소비자와의 소통을 위해 끊임없는 열정으로 전략적인 Full Media Solution을 제공합니다. 기업의 브랜드뿐 아니라, 공공기관 등 퍼블릭 분야에서 실험적인 광고회사로 이름을 알리고 있습니다."
+                  : "THINKAD provides strategic Full Media Solutions with endless passion for communication with consumers at the center of the new rules of openness, sharing, and diffusion. We are known as an experimental advertising company not only for corporate brands but also in the public sector."}
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                {isKo 
+                  ? "세상을 우리 브랜드에 중독되게 하기 위해 온-오프라인 광고의 경계를 넘어선 캠페인을 진행합니다. 싱커드는 국내외 온·오프라인 광고를 기획 및 집행하는 캠페인 에이전시로서 일반 광고회사가 아닌 당신의 브랜드 파트너로서 당신의 시작, 당신의 위기, 당신의 성공을 언제나 함께 하겠습니다."
+                  : "To make the world addicted to our brand, we conduct campaigns that transcend the boundaries of online and offline advertising. As a campaign agency that plans and executes domestic and international on/offline advertising, THINKAD will always be with you as your brand partner—through your start, your challenges, and your success."}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* History */}
-      <section className="py-28">
+      <section className="py-28 bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
