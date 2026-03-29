@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Loader2, AlertCircle, MapPin } from "lucide-react";
-import { NETWORK_TYPE_LABELS } from "@/lib/media-network-public";
+import { NETWORK_TYPE_LABELS } from "@/lib/media-network-types";
 
 export type AdminNetworkListRow = {
   id: string;

@@ -12,7 +12,7 @@ import { ArrowLeft, Loader2, AlertCircle, Upload } from "lucide-react";
 import {
   NETWORK_TYPE_CODES,
   NETWORK_TYPE_LABELS,
-} from "@/lib/media-network-public";
+} from "@/lib/media-network-types";
 import { parseNetworkLocationsCsv } from "@/lib/network-locations-csv";
 
 export type SerializedNetwork = {

@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { typeLabels, type MediaItem } from "@/lib/media-data";
-import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-public";
+import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast-provider";

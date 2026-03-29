@@ -57,7 +57,7 @@ import {
   PlannerMonthCompareChart,
 } from "@/components/planner-charts";
 import { PlannerRegionMap } from "@/components/planner-region-map";
-import { mediaItemDetailPath } from "@/lib/media-network-public";
+import { mediaItemDetailPath } from "@/lib/media-network-types";
 
 const BUDGET_MIN = 100;
 const BUDGET_MAX = 10_000;

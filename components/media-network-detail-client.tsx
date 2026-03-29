@@ -11,7 +11,7 @@ import type { MediaItem } from "@/lib/media-data";
 import {
   NETWORK_TYPE_LABELS,
   computeNetworkMonthlyPrice,
-} from "@/lib/media-network-public";
+} from "@/lib/media-network-types";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,

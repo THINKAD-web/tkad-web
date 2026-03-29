@@ -60,7 +60,7 @@ import {
 import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
-import { mediaItemDetailPath } from "@/lib/media-network-public";
+import { mediaItemDetailPath } from "@/lib/media-network-types";
 
 export default function MediaBrowseClient({
   catalog,

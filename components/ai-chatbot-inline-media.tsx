@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
-import { mediaItemDetailPath } from "@/lib/media-network-public";
+import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { typeLabels } from "@/lib/media-data";
 import { Monitor } from "lucide-react";
 
