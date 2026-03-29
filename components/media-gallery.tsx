@@ -159,7 +159,7 @@ export default function MediaGallery({
 
       {lightboxOpen ? (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/92 p-3 pt-14 pb-8 backdrop-blur-sm sm:p-4"
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-white/90 p-3 pt-14 pb-8 backdrop-blur-md sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-label={L.expand}
@@ -171,7 +171,7 @@ export default function MediaGallery({
               e.stopPropagation();
               closeLightbox();
             }}
-            className="absolute top-4 right-4 z-[82] flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+            className="absolute top-4 right-4 z-[82] flex h-11 w-11 items-center justify-center rounded-full border border-navy/10 bg-white text-navy shadow-md transition hover:bg-slate-50"
             aria-label={L.close}
           >
             <X className="h-5 w-5" />
@@ -185,7 +185,7 @@ export default function MediaGallery({
                   e.stopPropagation();
                   goPrev();
                 }}
-                className="absolute top-1/2 left-2 z-[82] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 sm:left-4"
+                className="absolute top-1/2 left-2 z-[82] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-navy/10 bg-white text-navy shadow-md transition hover:bg-slate-50 sm:left-4"
                 aria-label={L.prev}
               >
                 <ChevronLeft className="h-6 w-6" />
@@ -196,7 +196,7 @@ export default function MediaGallery({
                   e.stopPropagation();
                   goNext();
                 }}
-                className="absolute top-1/2 right-2 z-[82] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 sm:right-4"
+                className="absolute top-1/2 right-2 z-[82] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-navy/10 bg-white text-navy shadow-md transition hover:bg-slate-50 sm:right-4"
                 aria-label={L.next}
               >
                 <ChevronRight className="h-6 w-6" />
@@ -205,22 +205,22 @@ export default function MediaGallery({
           ) : null}
 
           <div
-            className="relative z-[81] mx-auto flex min-h-0 w-full max-w-[min(96vw,100%)] items-center justify-center px-2"
+            className="relative z-[81] mx-auto flex min-h-0 w-full max-w-[min(96vw,100%)] items-center justify-center rounded-2xl bg-slate-100/80 px-2 py-4 ring-1 ring-navy/5"
             onClick={(e) => e.stopPropagation()}
           >
             {lightboxImgFailed ? (
-              <div className="max-w-md rounded-xl bg-white/10 px-5 py-8 text-center text-white">
+              <div className="max-w-md rounded-xl border border-navy/10 bg-white px-5 py-8 text-center text-navy shadow-sm">
                 <p className="text-sm font-semibold">
                   이미지를 불러올 수 없습니다.
                 </p>
-                <p className="mt-1 text-xs text-white/65">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Could not load image. Open in a new tab or check the URL.
                 </p>
                 <a
                   href={lightboxSrc}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-5 inline-block text-sm font-semibold text-gold underline underline-offset-4 hover:text-gold/90"
+                  className="mt-5 inline-block text-sm font-semibold text-gold-dark underline underline-offset-4 hover:text-navy"
                 >
                   새 탭에서 열기 / Open in new tab
                 </a>
@@ -231,7 +231,7 @@ export default function MediaGallery({
                 key={lightboxSrc}
                 src={lightboxSrc}
                 alt={`${altBase} — ${lightboxIndex + 1} / ${n}`}
-                className="mx-auto max-h-[min(82dvh,85vh)] w-auto max-w-full object-contain shadow-2xl"
+                className="mx-auto max-h-[min(82dvh,85vh)] w-auto max-w-full rounded-lg object-contain shadow-lg ring-1 ring-black/5"
                 loading="eager"
                 decoding="async"
                 onError={() => setLightboxImgFailed(true)}

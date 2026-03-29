@@ -28,7 +28,20 @@
     "quoteCta": "Go to quote request",
     "thinking": "Thinking…",
     "errorGeneric": "Could not get a response. Please try again.",
-    "disclaimer": "AI answers are for guidance only; confirmed quotes and contracts need a human consultant."
+    "disclaimer": "AI answers are for guidance only; confirmed quotes and contracts need a human consultant.",
+    "tabChat": "AI chat",
+    "tabCompare": "Compare",
+    "tabInquiry": "Contact",
+    "compareEmpty": "No items yet. Add media from Media Search with “Compare”.",
+    "compareGoMedia": "Browse media",
+    "compareCount": "{count}/{max}",
+    "compareNow": "Compare now",
+    "compareClear": "Clear",
+    "removeFromCompareAria": "Remove from compare list",
+    "kakaoTabLead": "Chat with us quickly on Kakao Channel.",
+    "kakaoOpen": "Open KakaoTalk channel",
+    "contactOther": "Contact another way",
+    "dialogLabel": "Chat · compare · contact"
   },
   "nav": {
     "home": "Home",

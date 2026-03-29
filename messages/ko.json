@@ -28,7 +28,20 @@
     "quoteCta": "견적 요청 바로가기",
     "thinking": "답변을 준비하고 있어요…",
     "errorGeneric": "응답을 가져오지 못했습니다. 잠시 후 다시 시도해 주세요.",
-    "disclaimer": "AI 답변은 참고용이며, 확정 견적·계약은 담당자 상담이 필요합니다."
+    "disclaimer": "AI 답변은 참고용이며, 확정 견적·계약은 담당자 상담이 필요합니다.",
+    "tabChat": "AI 상담",
+    "tabCompare": "비교함",
+    "tabInquiry": "문의",
+    "compareEmpty": "담긴 매체가 없습니다. 매체 검색에서 ‘비교’로 담을 수 있어요.",
+    "compareGoMedia": "매체 검색",
+    "compareCount": "{count}/{max}",
+    "compareNow": "비교하기",
+    "compareClear": "초기화",
+    "removeFromCompareAria": "비교함에서 제거",
+    "kakaoTabLead": "카카오채널에서 빠르게 상담받으세요.",
+    "kakaoOpen": "카카오톡 채널 열기",
+    "contactOther": "다른 방법으로 문의하기",
+    "dialogLabel": "상담 · 비교함 · 문의"
   },
   "nav": {
     "home": "홈",

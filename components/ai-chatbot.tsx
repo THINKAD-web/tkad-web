@@ -2,12 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { FileText, MessageCircle, Send, X } from "lucide-react";
+import { BarChart3, FileText, MessageCircle, Send, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { AiChatbotMessage } from "@/components/ai-chatbot-message";
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 import { cn } from "@/lib/utils";
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
+import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import {
+  getCompareCartEntries,
+  setCompareCartEntries,
+  subscribeCompareCart,
+  type CompareCartEntry,
+} from "@/lib/compare-cart-client";
 
 export type ChatTurn = {
   role: "user" | "assistant";
@@ -15,19 +23,37 @@ export type ChatTurn = {
   media?: AiChatbotMediaCard[];
 };
 
-const SUGGESTION_KEYS = ["suggestion1", "suggestion2", "suggestion3", "suggestion4"] as const;
+const SUGGESTION_KEYS = [
+  "suggestion1",
+  "suggestion2",
+  "suggestion3",
+  "suggestion4",
+] as const;
+
+type PanelTab = "chat" | "compare" | "inquiry";
 
 export default function AiChatbot() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const t = useTranslations("aiChatbot");
   const [open, setOpen] = useState(false);
+  const [panelTab, setPanelTab] = useState<PanelTab>("chat");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatTurn[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [compareEntries, setCompareEntries] = useState<CompareCartEntry[]>([]);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const refreshCompare = useCallback(() => {
+    setCompareEntries(getCompareCartEntries());
+  }, []);
+
+  useEffect(() => {
+    refreshCompare();
+    return subscribeCompareCart(refreshCompare);
+  }, [refreshCompare]);
 
   useEffect(() => {
     if (!open) return;
@@ -38,8 +64,8 @@ export default function AiChatbot() {
   }, [messages, open, loading]);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
+    if (open && panelTab === "chat") inputRef.current?.focus();
+  }, [open, panelTab]);
 
   useEffect(() => {
     if (!open) return;
@@ -97,9 +123,26 @@ export default function AiChatbot() {
     void send(q);
   };
 
+  const removeCompare = (id: string) => {
+    const next = getCompareCartEntries().filter((e) => e.id !== id);
+    setCompareCartEntries(next);
+    setCompareEntries(next);
+  };
+
+  const clearCompare = () => {
+    setCompareCartEntries([]);
+    setCompareEntries([]);
+  };
+
+  const tabs: { id: PanelTab; label: string }[] = [
+    { id: "chat", label: t("tabChat") },
+    { id: "compare", label: t("tabCompare") },
+    { id: "inquiry", label: t("tabInquiry") },
+  ];
+
   return (
     <>
-      <div className="group/button fixed bottom-6 right-[4.75rem] z-[55] sm:right-[4.75rem]">
+      <div className="group/button fixed bottom-6 right-4 z-[55] sm:right-6">
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -120,7 +163,7 @@ export default function AiChatbot() {
           )}
         </button>
         <span
-          className="pointer-events-none absolute bottom-full right-0 mb-2 hidden max-w-[10rem] rounded-lg bg-navy px-2.5 py-1.5 text-center text-[11px] font-semibold text-white shadow-md opacity-0 transition-opacity group-hover/button:opacity-100 sm:block"
+          className="pointer-events-none absolute bottom-full right-0 mb-2 hidden max-w-[11rem] rounded-lg bg-navy px-2.5 py-1.5 text-center text-[11px] font-semibold text-white shadow-md opacity-0 transition-opacity group-hover/button:opacity-100 sm:block"
           role="tooltip"
         >
           {t("tooltip")}
@@ -129,7 +172,7 @@ export default function AiChatbot() {
 
       {open ? (
         <div
-          className="fixed inset-0 z-[54] bg-black/30 sm:bg-transparent sm:pointer-events-none"
+          className="fixed inset-0 z-[54] bg-black/30 sm:pointer-events-none sm:bg-transparent"
           aria-hidden={false}
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
@@ -137,114 +180,251 @@ export default function AiChatbot() {
           role="presentation"
         >
           <div
-            className="pointer-events-auto fixed bottom-6 right-4 z-[56] flex h-[min(500px,85vh)] w-[min(400px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl sm:right-[4.75rem]"
+            className="pointer-events-auto fixed bottom-6 right-4 z-[56] flex h-[min(520px,88vh)] w-[min(400px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl sm:right-6"
             role="dialog"
-            aria-label={t("title")}
+            aria-label={t("dialogLabel")}
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-navy/8 bg-navy px-4 py-3 text-white">
-              <p className="text-sm font-bold tracking-tight">{t("title")}</p>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-full p-1.5 text-white/90 hover:bg-white/10"
-                aria-label={t("closeAria")}
+            <div className="flex shrink-0 flex-col border-b border-navy/8 bg-navy text-white">
+              <div className="flex items-center justify-between px-3 py-2 sm:px-4">
+                <p className="text-xs font-bold tracking-tight sm:text-sm">
+                  {t("title")}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="rounded-full p-1.5 text-white/90 hover:bg-white/10"
+                  aria-label={t("closeAria")}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div
+                className="flex border-t border-white/10 px-1"
+                role="tablist"
+                aria-label={t("dialogLabel")}
               >
-                <X className="h-5 w-5" />
-              </button>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={panelTab === tab.id}
+                    onClick={() => setPanelTab(tab.id)}
+                    className={cn(
+                      "min-w-0 flex-1 touch-manipulation border-b-2 py-2.5 text-center text-[11px] font-semibold transition-colors sm:text-xs",
+                      panelTab === tab.id
+                        ? "border-gold text-gold"
+                        : "border-transparent text-white/70 hover:text-white",
+                    )}
+                  >
+                    {tab.id === "chat" ? "💬 " : tab.id === "compare" ? "📊 " : "💛 "}
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div
-              ref={listRef}
-              className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-3"
-            >
-              {messages.length === 0 && !loading ? (
-                <>
-                  <p className="px-1 text-center text-xs leading-relaxed text-muted-foreground">
-                    {t("emptyState")}
-                  </p>
-                  <div className="flex flex-col gap-2 px-1">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-navy/50">
-                      {t("suggestionsLabel")}
+            {panelTab === "chat" ? (
+              <>
+                <div
+                  ref={listRef}
+                  className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-3"
+                >
+                  {messages.length === 0 && !loading ? (
+                    <>
+                      <p className="px-1 text-center text-xs leading-relaxed text-muted-foreground">
+                        {t("emptyState")}
+                      </p>
+                      <div className="flex flex-col gap-2 px-1">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-navy/50">
+                          {t("suggestionsLabel")}
+                        </p>
+                        <div className="flex flex-col gap-1.5">
+                          {SUGGESTION_KEYS.map((key) => (
+                            <button
+                              key={key}
+                              type="button"
+                              disabled={loading}
+                              onClick={() => applySuggestion(t(key))}
+                              className="rounded-xl border border-navy/10 bg-slate-50 px-3 py-2 text-left text-xs leading-snug text-navy transition hover:border-gold/40 hover:bg-white disabled:opacity-50"
+                            >
+                              {t(key)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : null}
+                  {messages.map((msg, i) => (
+                    <AiChatbotMessage
+                      key={`${i}-${msg.role}-${msg.content.slice(0, 24)}`}
+                      role={msg.role}
+                      content={msg.content}
+                      media={msg.media}
+                      isKo={isKo}
+                    />
+                  ))}
+                  {loading ? (
+                    <p className="text-xs text-muted-foreground">
+                      {t("thinking")}
                     </p>
-                    <div className="flex flex-col gap-1.5">
-                      {SUGGESTION_KEYS.map((key) => (
-                        <button
-                          key={key}
-                          type="button"
-                          disabled={loading}
-                          onClick={() => applySuggestion(t(key))}
-                          className="rounded-xl border border-navy/10 bg-slate-50 px-3 py-2 text-left text-xs leading-snug text-navy transition hover:border-gold/40 hover:bg-white disabled:opacity-50"
+                  ) : null}
+                  {error ? (
+                    <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-800">
+                      {error}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="shrink-0 border-t border-navy/8 bg-white p-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mb-3 w-full rounded-full border-gold/40 text-xs font-semibold text-navy hover:bg-gold/10"
+                    asChild
+                  >
+                    <Link href="/quote">
+                      <FileText className="mr-2 h-3.5 w-3.5" />
+                      {t("quoteCta")}
+                    </Link>
+                  </Button>
+                  <div className="flex gap-2">
+                    <textarea
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          void send();
+                        }
+                      }}
+                      placeholder={t("placeholder")}
+                      rows={2}
+                      className="min-h-[2.75rem] flex-1 resize-none rounded-xl border border-navy/15 bg-slate-50 px-3 py-2 text-sm outline-none ring-gold/30 placeholder:text-muted-foreground focus:border-gold/40 focus:ring-2"
+                      disabled={loading}
+                    />
+                    <Button
+                      type="button"
+                      variant="cta"
+                      size="icon"
+                      className="btn-gold h-11 w-11 shrink-0 rounded-xl"
+                      disabled={loading || !input.trim()}
+                      onClick={() => void send()}
+                      aria-label={t("send")}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
+                    {t("disclaimer")}
+                  </p>
+                </div>
+              </>
+            ) : panelTab === "compare" ? (
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-navy/8 px-4 py-3 text-sm font-bold text-navy">
+                  <BarChart3 className="h-4 w-4" />
+                  {t("tabCompare")}{" "}
+                  <span className="text-muted-foreground">
+                    (
+                    {t("compareCount", {
+                      count: compareEntries.length,
+                      max: COMPARE_MAX_ITEMS,
+                    })}
+                    )
+                  </span>
+                </div>
+                <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+                  {compareEntries.length === 0 ? (
+                    <div className="flex flex-col items-center gap-4 py-8 text-center">
+                      <p className="text-sm text-muted-foreground">
+                        {t("compareEmpty")}
+                      </p>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href="/media">{t("compareGoMedia")}</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <ul className="space-y-2">
+                      {compareEntries.map((e) => (
+                        <li
+                          key={e.id}
+                          className="flex items-center gap-2 rounded-xl border border-navy/10 bg-slate-50/90 px-3 py-2.5 text-xs shadow-sm"
                         >
-                          {t(key)}
-                        </button>
+                          <span className="min-w-0 flex-1 truncate font-medium text-navy">
+                            {isKo ? e.name : e.nameEn || e.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeCompare(e.id)}
+                            className="shrink-0 rounded-full p-1 text-muted-foreground hover:bg-red-50 hover:text-red-600"
+                            aria-label={t("removeFromCompareAria")}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </li>
                       ))}
+                    </ul>
+                  )}
+                </div>
+                {compareEntries.length > 0 ? (
+                  <div className="shrink-0 space-y-2 border-t border-navy/8 p-3">
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="flex-1 text-xs font-semibold text-navy/70"
+                        onClick={clearCompare}
+                      >
+                        {t("compareClear")}
+                      </Button>
+                      {compareEntries.length >= 2 ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="flex-1 rounded-full bg-navy text-xs font-bold text-white"
+                          asChild
+                        >
+                          <Link
+                            href={`/compare?ids=${compareEntries.map((x) => x.id).join(",")}`}
+                          >
+                            {t("compareNow")}
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="flex-1 rounded-full bg-navy/40 text-xs font-bold text-white"
+                          disabled
+                        >
+                          {t("compareNow")}
+                        </Button>
+                      )}
                     </div>
                   </div>
-                </>
-              ) : null}
-              {messages.map((msg, i) => (
-                <AiChatbotMessage
-                  key={`${i}-${msg.role}-${msg.content.slice(0, 24)}`}
-                  role={msg.role}
-                  content={msg.content}
-                  media={msg.media}
-                  isKo={isKo}
-                />
-              ))}
-              {loading ? (
-                <p className="text-xs text-muted-foreground">{t("thinking")}</p>
-              ) : null}
-              {error ? (
-                <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-800">
-                  {error}
+                ) : null}
+              </div>
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-6">
+                <p className="text-sm text-muted-foreground">
+                  {t("kakaoTabLead")}
                 </p>
-              ) : null}
-            </div>
-
-            <div className="shrink-0 border-t border-navy/8 bg-white p-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="mb-3 w-full rounded-full border-gold/40 text-xs font-semibold text-navy hover:bg-gold/10"
-                asChild
-              >
-                <Link href="/quote">
-                  <FileText className="mr-2 h-3.5 w-3.5" />
-                  {t("quoteCta")}
-                </Link>
-              </Button>
-              <div className="flex gap-2">
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      void send();
-                    }
-                  }}
-                  placeholder={t("placeholder")}
-                  rows={2}
-                  className="min-h-[2.75rem] flex-1 resize-none rounded-xl border border-navy/15 bg-slate-50 px-3 py-2 text-sm outline-none ring-gold/30 placeholder:text-muted-foreground focus:border-gold/40 focus:ring-2"
-                  disabled={loading}
-                />
-                <Button
-                  type="button"
-                  variant="cta"
-                  size="icon"
-                  className="btn-gold h-11 w-11 shrink-0 rounded-xl"
-                  disabled={loading || !input.trim()}
-                  onClick={() => void send()}
-                  aria-label={t("send")}
+                <a
+                  href={KAKAO_CHANNEL_PUBLIC_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-12 w-full items-center justify-center rounded-xl border-2 border-[#FEE500] bg-[#FEE500]/15 text-sm font-bold text-[#191919] transition-colors hover:bg-[#FEE500]/30"
                 >
-                  <Send className="h-4 w-4" />
+                  {t("kakaoOpen")}
+                </a>
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/contact">{t("contactOther")}</Link>
                 </Button>
               </div>
-              <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
-                {t("disclaimer")}
-              </p>
-            </div>
+            )}
           </div>
         </div>
       ) : null}

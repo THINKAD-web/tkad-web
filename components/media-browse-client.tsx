@@ -26,7 +26,20 @@ import {
 import SolutionCtaButton from "@/components/solution-cta-button";
 import ShareButtons from "@/components/share-buttons";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
+import {
+  getCompareCartEntries,
+  setCompareCartEntries,
+  subscribeCompareCart,
+  entriesToCompareMediaItems,
+} from "@/lib/compare-cart-client";
 
 const RecentlyViewedMedia = dynamic(
   () => import("@/components/recently-viewed-media"),
@@ -66,7 +79,34 @@ export default function MediaBrowseClient({
   const [browseMode, setBrowseMode] = useState<"list" | "map">("list");
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
+  const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
+
+  useLayoutEffect(() => {
+    setCompareItems(entriesToCompareMediaItems(getCompareCartEntries(), catalog));
+  }, [catalog]);
+
+  useEffect(() => {
+    return subscribeCompareCart(() => {
+      setCompareItems(
+        entriesToCompareMediaItems(getCompareCartEntries(), catalog),
+      );
+    });
+  }, [catalog]);
+
+  useEffect(() => {
+    if (skipFirstComparePersist.current) {
+      skipFirstComparePersist.current = false;
+      return;
+    }
+    setCompareCartEntries(
+      compareItems.map((m) => ({
+        id: m.id,
+        name: m.name,
+        nameEn: m.nameEn,
+      })),
+    );
+  }, [compareItems]);
 
   /** DB(또는 폴백) `catalog`의 region·type·price와 동일 필드로 필터링 */
   const filtered = useMemo(() => {
@@ -490,6 +530,7 @@ export default function MediaBrowseClient({
                             </div>
                             <div className="mt-3 border-t pt-3">
                               <ShareButtons
+                                compact
                                 url={`/${locale}/media/${media.id}`}
                                 title={isKo ? media.name : media.nameEn}
                                 description={`${isKo ? media.location : media.locationEn} - ₩${media.price.toLocaleString()}만원/${t("media.perMonth")}`}

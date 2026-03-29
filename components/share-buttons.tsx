@@ -10,6 +10,8 @@ type ShareButtonsProps = {
   title: string;
   description?: string;
   locale?: string;
+  /** 카드 등 좁은 영역용 작은 버튼 */
+  compact?: boolean;
 };
 
 export default function ShareButtons({
@@ -17,6 +19,7 @@ export default function ShareButtons({
   title,
   description,
   locale = "ko",
+  compact = false,
 }: ShareButtonsProps) {
   const isKo = locale === "ko";
   const [copied, setCopied] = useState(false);
@@ -57,33 +60,51 @@ export default function ShareButtons({
 
   const supportsNativeShare = typeof navigator !== "undefined" && !!navigator.share;
 
+  const iconSm = compact ? "size-3.5 shrink-0" : "size-5 shrink-0";
+
   return (
-    <div className="flex flex-wrap items-center gap-2.5">
+    <div
+      className={
+        compact
+          ? "flex flex-wrap items-center gap-1.5"
+          : "flex flex-wrap items-center gap-2.5"
+      }
+    >
       <Button
         variant="outline"
-        size="lg"
+        size={compact ? "xs" : "lg"}
         onClick={handleKakaoShare}
-        className="h-11 min-h-11 gap-2 rounded-full border-yellow-300 bg-[#FEE500]/10 px-5 text-base font-semibold text-yellow-800 hover:bg-[#FEE500]/30"
+        title={isKo ? "카카오톡" : "KakaoTalk"}
+        className={
+          compact
+            ? "h-7 min-h-7 gap-1 rounded-full border-yellow-300/80 bg-[#FEE500]/10 px-2.5 text-[11px] font-semibold text-yellow-900 hover:bg-[#FEE500]/25"
+            : "h-11 min-h-11 gap-2 rounded-full border-yellow-300 bg-[#FEE500]/10 px-5 text-base font-semibold text-yellow-800 hover:bg-[#FEE500]/30"
+        }
       >
-        <MessageCircle className="size-5 shrink-0" />
+        <MessageCircle className={iconSm} />
         {isKo ? "카카오톡" : "KakaoTalk"}
       </Button>
 
       <Button
         variant="outline"
-        size="lg"
+        size={compact ? "xs" : "lg"}
         onClick={handleCopyLink}
-        className="h-11 min-h-11 gap-2 rounded-full px-5 text-base font-semibold"
+        title={isKo ? "링크 복사" : "Copy link"}
+        className={
+          compact
+            ? "h-7 min-h-7 gap-1 rounded-full px-2.5 text-[11px] font-semibold"
+            : "h-11 min-h-11 gap-2 rounded-full px-5 text-base font-semibold"
+        }
       >
         {copied ? (
           <>
-            <Check className="size-5 shrink-0 text-emerald-500" />
-            {isKo ? "복사됨!" : "Copied!"}
+            <Check className={`${iconSm} text-emerald-500`} />
+            {isKo ? "복사됨" : "Copied"}
           </>
         ) : (
           <>
-            <Link2 className="size-5 shrink-0" />
-            {isKo ? "링크 복사" : "Copy Link"}
+            <Link2 className={iconSm} />
+            {isKo ? "링크 복사" : "Copy"}
           </>
         )}
       </Button>
@@ -91,17 +112,28 @@ export default function ShareButtons({
       {supportsNativeShare && (
         <Button
           variant="outline"
-          size="lg"
+          size={compact ? "xs" : "lg"}
           onClick={handleNativeShare}
-          className="h-11 min-h-11 gap-2 rounded-full px-5 text-base font-semibold"
+          title={isKo ? "공유" : "Share"}
+          className={
+            compact
+              ? "h-7 min-h-7 gap-1 rounded-full px-2.5 text-[11px] font-semibold"
+              : "h-11 min-h-11 gap-2 rounded-full px-5 text-base font-semibold"
+          }
         >
-          <Share2 className="size-5 shrink-0" />
+          <Share2 className={iconSm} />
           {isKo ? "공유" : "Share"}
         </Button>
       )}
 
       {copied && (
-        <span className="animate-fade-in-up text-xs font-medium text-emerald-600">
+        <span
+          className={
+            compact
+              ? "w-full text-[10px] font-medium text-emerald-600"
+              : "animate-fade-in-up text-xs font-medium text-emerald-600"
+          }
+        >
           {isKo ? "링크가 복사되었습니다!" : "Link copied to clipboard!"}
         </span>
       )}

@@ -2,6 +2,8 @@
  * Admin quick-add: JSON pasted from external tools → Prisma Media create payload.
  */
 
+import type { Prisma } from "@prisma/client";
+
 export type QuickAddMediaJson = {
   media_name: string;
   description: string;
@@ -277,6 +279,131 @@ export type MediaQuickAddCreate = {
   nearbyLandmarks: string | null;
   pastAdvertisers: string | null;
 };
+
+export function mediaQuickAddCreateToPrismaUpdate(
+  p: MediaQuickAddCreate,
+): Prisma.MediaUpdateInput {
+  return {
+    name: p.name,
+    nameEn: p.nameEn,
+    location: p.location,
+    region: p.region,
+    type: p.type,
+    price: p.price,
+    image: p.image,
+    width: p.width,
+    height: p.height,
+    description: p.description,
+    subCategory: p.subCategory,
+    tags: p.tags,
+    district: p.district,
+    city: p.city,
+    latitude: p.latitude,
+    longitude: p.longitude,
+    priceNote: p.priceNote,
+    widthM: p.widthM,
+    heightM: p.heightM,
+    resolution: p.resolution,
+    operatingHours: p.operatingHours,
+    dailyFootfall: p.dailyFootfall,
+    weekdayFootfall: p.weekdayFootfall,
+    targetAge: p.targetAge,
+    impressions: p.impressions,
+    reach: p.reach,
+    frequency: p.frequency,
+    cpm: p.cpm,
+    engagementRate: p.engagementRate,
+    visibilityScore: p.visibilityScore,
+    effectMemo: p.effectMemo,
+    extractedImages: p.extractedImages,
+    nearbyFacilities: p.nearbyFacilities,
+    nearbyStations: p.nearbyStations,
+    nearbyLandmarks: p.nearbyLandmarks,
+    pastAdvertisers: p.pastAdvertisers,
+  };
+}
+
+/** DB Media 행 → quick-add JSON (편집기·GET API용) */
+export function mediaDbRowToQuickAddJson(m: {
+  name: string;
+  description: string | null;
+  subCategory: string | null;
+  tags: string[];
+  location: string;
+  district: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  price: number;
+  priceNote: string | null;
+  widthM: number | null;
+  heightM: number | null;
+  resolution: string | null;
+  operatingHours: string | null;
+  dailyFootfall: number | null;
+  weekdayFootfall: number | null;
+  targetAge: string | null;
+  impressions: number | null;
+  reach: number | null;
+  frequency: number | null;
+  cpm: number | null;
+  engagementRate: number | null;
+  visibilityScore: number;
+  effectMemo: string | null;
+  extractedImages: string[];
+  nearbyFacilities: string | null;
+  nearbyStations: string | null;
+  nearbyLandmarks: string | null;
+  pastAdvertisers: string | null;
+}): QuickAddMediaJson {
+  return {
+    media_name: m.name,
+    description: m.description ?? "",
+    sub_category: m.subCategory ?? "",
+    tags: [...(m.tags ?? [])],
+    full_address: m.location,
+    district: m.district ?? "",
+    city: m.city ?? "",
+    latitude: m.latitude,
+    longitude: m.longitude,
+    price_per_month: m.price,
+    price_note: m.priceNote ?? "",
+    width_m: m.widthM,
+    height_m: m.heightM,
+    resolution: m.resolution,
+    operating_hours: m.operatingHours ?? "",
+    daily_footfall: m.dailyFootfall,
+    weekday_footfall: m.weekdayFootfall,
+    target_age: m.targetAge ?? "",
+    impressions: m.impressions,
+    reach: m.reach,
+    frequency: m.frequency,
+    cpm: m.cpm,
+    engagement_rate: m.engagementRate,
+    visibility_score: m.visibilityScore,
+    effect_memo: m.effectMemo ?? "",
+    extracted_images: [...(m.extractedImages ?? [])],
+    nearby_facilities: m.nearbyFacilities ?? "",
+    nearby_stations: m.nearbyStations ?? "",
+    nearby_landmarks: m.nearbyLandmarks ?? "",
+    past_advertisers: m.pastAdvertisers ?? "",
+  };
+}
+
+/**
+ * 에디터에 표시할 객체: quick-add 필드 + 문서용 별칭 키
+ * (surrounding_facilities / nearby_subway / advertiser_history)
+ */
+export function quickAddJsonWithAliasKeys(
+  row: QuickAddMediaJson,
+): Record<string, unknown> {
+  return {
+    ...row,
+    surrounding_facilities: row.nearby_facilities,
+    nearby_subway: row.nearby_stations,
+    advertiser_history: row.past_advertisers,
+  };
+}
 
 export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
   const location =

@@ -1,6 +1,18 @@
-import type Anthropic from "@anthropic-ai/sdk";
 import type { MediaItem } from "@/lib/media-data";
 import { matchesMediaTextQuery, typeLabels } from "@/lib/media-data";
+
+/** JSON Schema object for tool `parameters` (OpenAI / xAI 호환) */
+export type AiChatbotToolInputSchema = {
+  type: "object";
+  properties: Record<string, unknown>;
+  required?: string[];
+};
+
+export type AiChatbotToolSpec = {
+  name: string;
+  description: string;
+  input_schema: AiChatbotToolInputSchema;
+};
 
 export type AiChatbotMediaCard = {
   id: string;
@@ -59,7 +71,7 @@ function matchesSearchQuery(m: MediaItem, query: string): boolean {
   return tokens.every((t) => blob.includes(t));
 }
 
-export function getAiChatbotTools(): Anthropic.Tool[] {
+export function getAiChatbotTools(): AiChatbotToolSpec[] {
   return [
     {
       name: "searchMedia",

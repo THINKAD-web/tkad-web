@@ -106,23 +106,23 @@ export default function MediaDetailExtras({
             </p>
             <p className="text-base font-semibold text-navy">{regionDisplay}</p>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-2 border-t border-navy/10 pt-5">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-navy/10 pt-5">
             <a
               href={kakaoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-gold hover:text-gold-dark"
+              className="text-sm font-semibold text-navy underline decoration-navy/30 underline-offset-[3px] transition-colors hover:text-navy-light hover:decoration-navy/50"
             >
               {labels.openKakao}
             </a>
-            <span className="text-muted-foreground" aria-hidden>
+            <span className="text-sm text-navy/35 select-none" aria-hidden>
               ·
             </span>
             <a
               href={googleUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-gold hover:text-gold-dark"
+              className="text-sm font-semibold text-navy underline decoration-navy/30 underline-offset-[3px] transition-colors hover:text-navy-light hover:decoration-navy/50"
             >
               {labels.openGoogle}
             </a>

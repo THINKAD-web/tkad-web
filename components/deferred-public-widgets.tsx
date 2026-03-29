@@ -7,14 +7,6 @@
  */
 import dynamic from "next/dynamic";
 
-const QuickInquiryButton = dynamic(
-  () => import("@/components/quick-inquiry-button"),
-  { ssr: false },
-);
-const KakaoChannelButton = dynamic(
-  () => import("@/components/kakao-channel-button"),
-  { ssr: false },
-);
 const AiChatbot = dynamic(() => import("@/components/ai-chatbot"), {
   ssr: false,
 });
@@ -29,10 +21,8 @@ const ExitIntentPopup = dynamic(
 export default function DeferredPublicWidgets() {
   return (
     <>
-      <QuickInquiryButton />
       <FloatingCta />
       <ExitIntentPopup />
-      <KakaoChannelButton />
       <AiChatbot />
     </>
   );

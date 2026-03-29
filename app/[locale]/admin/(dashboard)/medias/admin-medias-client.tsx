@@ -1166,7 +1166,12 @@ export default function AdminMediasClient({
                           />
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="flex flex-wrap items-center justify-center gap-1">
+                            <Button variant="outline" size="xs" asChild>
+                              <Link href={`/admin/medias/${media.id}/edit`}>
+                                JSON 수정
+                              </Link>
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon-xs"
