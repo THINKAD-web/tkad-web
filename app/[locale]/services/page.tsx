@@ -11,12 +11,17 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  BarChart3,
+  Check,
   ClipboardList,
   Lightbulb,
-  ListChecks,
   MapPinned,
   Radio,
 } from "lucide-react";
+import { SectionHeading } from "@/components/section-heading";
+import { AnimatedCard } from "@/components/animated-card";
+import { Timeline } from "@/components/timeline";
+import { ServicesFaq } from "@/components/services-faq";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -46,127 +51,195 @@ export default async function ServicesPage({ params }: Props) {
   ] as const;
 
   const steps = [
-    { n: 1, title: t("step1Title"), body: t("step1Body") },
-    { n: 2, title: t("step2Title"), body: t("step2Body") },
-    { n: 3, title: t("step3Title"), body: t("step3Body") },
-    { n: 4, title: t("step4Title"), body: t("step4Body") },
-    { n: 5, title: t("step5Title"), body: t("step5Body") },
+    { label: "1", title: t("step1Title"), body: t("step1Body") },
+    { label: "2", title: t("step2Title"), body: t("step2Body") },
+    { label: "3", title: t("step3Title"), body: t("step3Body") },
+    { label: "4", title: t("step4Title"), body: t("step4Body") },
+    { label: "5", title: t("step5Title"), body: t("step5Body") },
+  ];
+
+  const differentiators = [
+    t("diff1"),
+    t("diff2"),
+    t("diff3"),
+    t("diff4"),
+  ];
+
+  const faqItems = [
+    { question: t("faq1Q"), answer: t("faq1A") },
+    { question: t("faq2Q"), answer: t("faq2A") },
+    { question: t("faq3Q"), answer: t("faq3A") },
+    { question: t("faq4Q"), answer: t("faq4A") },
   ];
 
   return (
     <div className="relative overflow-hidden">
-      <div className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.06]" />
+      <div
+        className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.06]"
+        aria-hidden
+      />
 
-      <section className="relative border-b border-primary/8 bg-gradient-to-b from-primary/[0.04] to-transparent">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+      <section className="relative border-b border-navy/8 bg-gradient-to-b from-navy/[0.04] via-white to-white">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
           <Badge
             variant="secondary"
-            className="mb-4 border-gold/25 bg-gold/10 text-xs font-semibold tracking-wide text-primary"
+            className="mb-5 border-gold/25 bg-gold/10 text-xs font-semibold tracking-wide text-navy"
           >
             {t("heroBadge")}
           </Badge>
-          <h1 className="max-w-3xl text-3xl font-extrabold tracking-tight text-primary sm:text-4xl lg:text-5xl">
+          <h1 className="max-w-4xl text-3xl font-extrabold tracking-tight text-navy sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
             {t("heroTitle")}
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {t("heroSubtitle")}
           </p>
-          <div className="mt-10 flex flex-wrap gap-3">
+          <div className="mt-12 flex flex-wrap gap-3">
             <Button variant="cta" className="btn-gold rounded-full px-8" asChild>
               <Link href="/quote">{t("ctaButton")}</Link>
             </Button>
-            <Button variant="outline" className="rounded-full border-primary/20" asChild>
+            <Button
+              variant="outline"
+              className="rounded-full border-navy/15 text-navy hover:bg-navy/[0.04]"
+              asChild
+            >
               <Link href="/media">{t("ctaSecondary")}</Link>
             </Button>
           </div>
         </div>
       </section>
 
-      <section className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-        <div className="mb-10 max-w-2xl">
-          <h2 className="text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-            {t("pillarsTitle")}
-          </h2>
-        </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {pillars.map((p) => {
-            const Icon = p.icon;
-            return (
-              <Card
-                key={p.title}
-                className="border-primary/10 bg-card/80 shadow-sm backdrop-blur-sm transition-shadow duration-300 hover:shadow-md"
-              >
-                <CardHeader className="space-y-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/15 text-primary">
-                    <Icon className="h-6 w-6" aria-hidden />
-                  </div>
-                  <CardTitle className="text-lg text-primary">{p.title}</CardTitle>
-                  <CardDescription className="text-sm leading-relaxed">
-                    {p.body}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            );
-          })}
+      <section className="relative bg-white py-24 sm:py-28 lg:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="Services"
+            title={t("pillarsTitle")}
+            className="mb-14"
+          />
+          <div className="grid gap-8 md:grid-cols-3">
+            {pillars.map((p, i) => {
+              const Icon = p.icon;
+              return (
+                <AnimatedCard key={p.title} delay={i * 100}>
+                  <Card className="group h-full rounded-2xl border border-navy/8 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-gold/[0.06] hover:shadow-md">
+                    <CardHeader className="space-y-4 pb-4">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/12 text-navy transition-colors duration-300 group-hover:bg-gold/20">
+                        <Icon className="h-8 w-8" aria-hidden />
+                      </div>
+                      <CardTitle className="text-xl text-navy">{p.title}</CardTitle>
+                      <CardDescription className="text-sm leading-relaxed sm:text-[15px]">
+                        {p.body}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </AnimatedCard>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      <section className="relative border-t border-primary/8 bg-muted/30">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+      <section className="relative border-t border-navy/8 bg-slate-50 py-24 sm:py-28 lg:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-4 flex items-center gap-2 text-gold">
-            <ListChecks className="h-5 w-5" aria-hidden />
-            <span className="text-sm font-semibold uppercase tracking-wider">
-              Process
+            <BarChart3 className="h-5 w-5" aria-hidden />
+            <span className="text-xs font-semibold uppercase tracking-[0.2em]">
+              {t("processBadge")}
             </span>
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-primary sm:text-3xl">
-            {t("processTitle")}
-          </h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">{t("processIntro")}</p>
+          <SectionHeading
+            title={t("processTitle")}
+            subtitle={t("processIntro")}
+            align="left"
+            className="mb-12 max-w-2xl"
+          />
 
-          <ol className="mt-12 space-y-0">
-            {steps.map((step, i) => (
-              <li
-                key={step.n}
-                className="relative flex gap-4 pb-12 last:pb-0 md:gap-6"
-              >
-                {i < steps.length - 1 ? (
-                  <div
-                    className="absolute left-[1.125rem] top-12 hidden h-[calc(100%-0.5rem)] w-px bg-gradient-to-b from-gold/50 to-primary/10 md:block"
-                    aria-hidden
-                  />
-                ) : null}
-                <div className="flex shrink-0 flex-col items-center">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-gold-light shadow-sm">
-                    {step.n}
-                  </span>
-                </div>
-                <Card className="flex-1 border-primary/10 bg-card/90 shadow-sm">
-                  <CardHeader className="pb-2 pt-4">
-                    <CardTitle className="text-base text-primary sm:text-lg">
-                      {step.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pb-4 pt-0">
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      {step.body}
-                    </p>
-                  </CardContent>
-                </Card>
-              </li>
-            ))}
-          </ol>
+          <div className="md:hidden">
+            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
+              {steps.map((step, i) => (
+                <AnimatedCard
+                  key={step.label}
+                  delay={i * 60}
+                  className="min-w-[min(100%,22rem)] shrink-0 snap-center"
+                >
+                  <Card className="h-full rounded-2xl border border-navy/8 bg-white shadow-sm">
+                    <CardHeader className="pb-2">
+                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy text-sm font-bold text-gold-light shadow-sm">
+                        {step.label}
+                      </span>
+                      <CardTitle className="pt-2 text-base text-navy">
+                        {step.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <p className="text-sm leading-relaxed text-muted-foreground">
+                        {step.body}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </AnimatedCard>
+              ))}
+            </div>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              {t("processSwipeHint")}
+            </p>
+          </div>
+
+          <div className="hidden md:block">
+            <Timeline
+              items={steps.map((s) => ({
+                label: s.label,
+                title: s.title,
+                description: s.body,
+              }))}
+            />
+          </div>
         </div>
       </section>
 
-      <section className="relative border-t border-primary/10 bg-gradient-to-br from-primary via-navy-dark to-[#0e1228] py-16 text-white sm:py-20">
-        <div className="hero-pattern absolute inset-0 opacity-[0.12]" />
+      <section className="relative bg-white py-24 sm:py-28 lg:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-navy/8 bg-slate-50/80 px-6 py-12 shadow-sm sm:px-10 sm:py-14 lg:px-14">
+            <SectionHeading
+              eyebrow="Why us"
+              title={t("diffTitle")}
+              align="left"
+              className="mb-10"
+            />
+            <ul className="grid gap-5 sm:grid-cols-2">
+              {differentiators.map((line) => (
+                <li key={line} className="flex gap-3 text-sm leading-relaxed sm:text-base">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold/15 text-navy">
+                    <Check className="h-3.5 w-3.5 text-gold" strokeWidth={2.5} />
+                  </span>
+                  <span className="text-muted-foreground">{line}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative border-t border-navy/8 bg-white py-24 sm:py-28 lg:py-32">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <ServicesFaq title={t("faqTitle")} items={faqItems} />
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden border-t border-navy/10 py-24 sm:py-28">
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-navy via-navy to-[#0c1024]"
+          aria-hidden
+        />
+        <div
+          className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.12]"
+          aria-hidden
+        />
         <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <ClipboardList className="mx-auto h-10 w-10 text-gold" aria-hidden />
-          <h2 className="mt-6 text-2xl font-extrabold tracking-tight sm:text-3xl">
+          <h2 className="mt-6 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
             {t("ctaTitle")}
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-silver/90 sm:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
             {t("ctaSubtitle")}
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">

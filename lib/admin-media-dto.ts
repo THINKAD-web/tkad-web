@@ -47,6 +47,10 @@ export type AdminMediaDto = {
   availability: MediaAvailability;
   /** 목록 노출·운영 on/off (예약 가용과 별개) */
   isActive: boolean;
+  /** 홈 추천 매체 */
+  isFeatured: boolean;
+  /** 추천 노출 순서 (작을수록 앞) */
+  featuredOrder: number | null;
 };
 
 const AVAIL: MediaAvailability[] = ["available", "reserved", "maintenance"];
@@ -204,6 +208,8 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     ),
     availability,
     isActive,
+    isFeatured: pickBool(r, "isFeatured", "is_featured", false),
+    featuredOrder: pickInt(r, "featuredOrder", "featured_order"),
   };
 }
 
@@ -271,5 +277,7 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     autoPopulatedAt: m.autoPopulatedAt?.toISOString() ?? null,
     availability: m.availability as MediaAvailability,
     isActive: m.isActive,
+    isFeatured: m.isFeatured,
+    featuredOrder: m.featuredOrder,
   };
 }

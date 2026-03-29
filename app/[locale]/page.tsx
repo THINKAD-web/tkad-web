@@ -13,8 +13,11 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import HeroParallaxBackground from "@/components/hero-parallax-background";
-import { resolveMediaGallery, type MediaItem } from "@/lib/media-data";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import {
+  resolveMediaGallery,
+  type MediaItem,
+} from "@/lib/media-data";
+import { fetchHomeFeaturedMedia } from "@/lib/public-media-catalog";
 import {
   ArrowRight,
   BarChart3,
@@ -59,22 +62,6 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-/** Prefer these sample ids when present; otherwise fill from catalog order. */
-const HOME_FEATURED_SAMPLE_IDS = ["1", "2", "6", "10"] as const;
-
-function pickHomeFeaturedMedia(catalog: MediaItem[]): MediaItem[] {
-  const picked: MediaItem[] = [];
-  for (const id of HOME_FEATURED_SAMPLE_IDS) {
-    const m = catalog.find((x) => x.id === id);
-    if (m) picked.push(m);
-  }
-  for (const m of catalog) {
-    if (picked.length >= 4) break;
-    if (!picked.some((x) => x.id === m.id)) picked.push(m);
-  }
-  return picked.slice(0, 4);
-}
-
 const typeLabels: Record<string, { ko: string; en: string }> = {
   billboard: { ko: "빌보드", en: "Billboard" },
   digital: { ko: "디지털", en: "Digital" },
@@ -93,8 +80,11 @@ export default async function HomePage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const t = await getTranslations();
-  const catalog = await fetchPublicMediaCatalog();
-  const featuredCatalog = pickHomeFeaturedMedia(catalog);
+  /**
+   * 추천 매체: Prisma `isFeatured`·`featuredOrder`(홈 하드코딩 ID 없음).
+   * DB 연결 시 실제 행만; 미연결 시에만 샘플 카탈로그.
+   */
+  const featuredCatalog = await fetchHomeFeaturedMedia(6);
 
   return (
     <HomeContent locale={locale} t={t} featuredCatalog={featuredCatalog} />
@@ -111,6 +101,8 @@ function HomeContent({
   featuredCatalog: MediaItem[];
 }) {
   const isKo = locale === "ko";
+  const topThreeFeatured = featuredCatalog.slice(0, 3);
+  const featuredGridItems = featuredCatalog.slice(0, 4);
 
   return (
     <>
@@ -342,103 +334,122 @@ function HomeContent({
             </div>
           </ScrollAnimate>
 
+          {topThreeFeatured.length === 0 ? (
+            <p className="mt-10 text-center text-sm text-muted-foreground">
+              {isKo
+                ? "추천 매체를 불러오는 중입니다. 잠시 후 다시 확인해 주세요."
+                : "Featured media will appear here once available."}
+            </p>
+          ) : (
           <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-            {[
-              {
-                rank: 1 as const,
-                name: isKo ? "코엑스 K-POP 스퀘어 전광판" : "COEX K-POP Square LED",
-                location: isKo ? "서울 삼성동 코엑스" : "COEX, Samsung-dong, Seoul",
-                dailyExposure: "500,000",
-                footTraffic: "A+",
-                roi: "4.5x",
-                type: isKo ? "디지털" : "Digital",
-                detailMediaId: 1,
-              },
-              {
-                rank: 2,
-                name: isKo ? "강남대로 미디어폴 G-LIGHT" : "Gangnam-daero Media Pole G-LIGHT",
-                location: isKo ? "서울 강남구 강남대로" : "Gangnam-daero, Gangnam-gu, Seoul",
-                dailyExposure: "320,000",
-                footTraffic: "A+",
-                roi: "4.2x",
-                type: isKo ? "디지털" : "Digital",
-                detailMediaId: 2,
-              },
-              {
-                rank: 3,
-                name: isKo ? "코엑스 파르나스 미디어타워" : "COEX Parnas Media Tower",
-                location: isKo ? "삼성역 코엑스" : "COEX, Samsung Station, Seoul",
-                dailyExposure: "280,000",
-                footTraffic: "A+",
-                roi: "3.8x",
-                type: isKo ? "디지털" : "Digital",
-                detailMediaId: 10,
-              },
-            ].map((media, i) => (
-              <ScrollAnimate key={media.rank} delay={i * 100}>
-              <Card
-                className="group relative overflow-hidden border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
-              >
-                <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
-                <div className="relative flex h-52 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10 overflow-hidden">
-                  <Monitor className="h-16 w-16 text-navy/10 transition-transform duration-300 group-hover:scale-110" />
-                  <div className="absolute top-4 left-4 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-light font-bold text-navy text-lg shadow-md">
-                    {media.rank}
-                  </div>
-                  <div className="absolute top-4 right-4 flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
-                    <BadgeCheck className="h-3.5 w-3.5" />
-                    Verified
-                  </div>
-                </div>
-                <CardHeader className="pb-3">
-                  <Badge variant="secondary" className="w-fit bg-navy/5 text-navy text-xs font-medium">
-                    {media.type}
-                  </Badge>
-                  <CardTitle className="text-lg font-bold text-navy">
-                    {media.name}
-                  </CardTitle>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {media.location}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-3 rounded-xl bg-slate-50 p-3">
-                    <div className="text-center">
-                      <div className="text-xs text-muted-foreground">
-                        {isKo ? "일일 노출" : "Daily Views"}
+            {topThreeFeatured.map((media, i) => {
+              const rank = i + 1;
+              const thumb = resolveMediaGallery(media)[0];
+              const typeLabel = isKo
+                ? (typeLabels[media.type]?.ko ?? media.type)
+                : (typeLabels[media.type]?.en ?? media.type);
+              const daily =
+                media.dailyFootTraffic > 0
+                  ? media.dailyFootTraffic.toLocaleString()
+                  : "—";
+              const vis =
+                media.visibilityScore != null
+                  ? String(media.visibilityScore)
+                  : "—";
+              const monthlyImp =
+                media.monthlyFootTraffic != null
+                  ? media.monthlyFootTraffic.toLocaleString()
+                  : "—";
+              return (
+                <ScrollAnimate key={media.id} delay={i * 100}>
+                  <Card className="group relative overflow-hidden border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl">
+                    <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
+                    <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-navy/5 to-navy/10">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={thumb}
+                        alt=""
+                        className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-navy/45 via-transparent to-transparent" />
+                      <Monitor className="relative z-0 h-16 w-16 text-white/20 transition-transform duration-300 group-hover:scale-110" />
+                      <div className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-light text-lg font-bold text-navy shadow-md">
+                        {rank}
                       </div>
-                      <div className="mt-0.5 text-sm font-bold text-navy">{media.dailyExposure}</div>
-                    </div>
-                    <div className="text-center border-x">
-                      <div className="text-xs text-muted-foreground">
-                        {isKo ? "유동인구" : "Traffic"}
+                      <div className="absolute top-4 right-4 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+                        <BadgeCheck className="h-3.5 w-3.5" />
+                        Verified
                       </div>
-                      <div className="mt-0.5 text-sm font-bold text-gold-dark">{media.footTraffic}</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-xs text-muted-foreground">ROI</div>
-                      <div className="mt-0.5 text-sm font-bold text-emerald-600">{media.roi}</div>
-                    </div>
-                  </div>
+                    <CardHeader className="pb-3">
+                      <Badge
+                        variant="secondary"
+                        className="w-fit bg-navy/5 text-xs font-medium text-navy"
+                      >
+                        {typeLabel}
+                      </Badge>
+                      <CardTitle className="text-lg font-bold text-navy">
+                        {isKo ? media.name : media.nameEn}
+                      </CardTitle>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5" />
+                        {isKo ? media.location : media.locationEn}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-3 gap-3 rounded-xl bg-slate-50 p-3">
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground">
+                            {isKo ? "일 유동(명)" : "Daily footfall"}
+                          </div>
+                          <div className="mt-0.5 text-sm font-bold text-navy">
+                            {daily}
+                          </div>
+                        </div>
+                        <div className="border-x text-center">
+                          <div className="text-xs text-muted-foreground">
+                            {isKo ? "가시성" : "Visibility"}
+                          </div>
+                          <div className="mt-0.5 text-sm font-bold text-gold-dark">
+                            {vis}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground">
+                            {isKo ? "월 노출" : "Mo. impr."}
+                          </div>
+                          <div className="mt-0.5 text-sm font-bold text-emerald-600">
+                            {monthlyImp}
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="mt-5 flex gap-2">
-                    <Link href={`/media/${media.detailMediaId}`} className="flex-1">
-                      <Button variant="outline" size="sm" className="btn-navy-outline w-full text-xs font-semibold rounded-lg">
-                        {isKo ? "상세 보기" : "View Details"}
-                      </Button>
-                    </Link>
-                    <Link href="/contact" className="flex-1">
-                      <Button size="sm" className="btn-gold w-full text-xs font-bold rounded-lg">
-                        {isKo ? "문의하기" : "Inquire"}
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-              </ScrollAnimate>
-            ))}
+                      <div className="mt-5 flex gap-2">
+                        <Link href={`/media/${media.id}`} className="flex-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="btn-navy-outline w-full rounded-lg text-xs font-semibold"
+                          >
+                            {isKo ? "상세 보기" : "View Details"}
+                          </Button>
+                        </Link>
+                        <Link href="/contact" className="flex-1">
+                          <Button
+                            size="sm"
+                            className="btn-gold w-full rounded-lg text-xs font-bold"
+                          >
+                            {isKo ? "문의하기" : "Inquire"}
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </ScrollAnimate>
+              );
+            })}
           </div>
+          )}
         </div>
       </section>
 
@@ -606,8 +617,15 @@ function HomeContent({
               </Link>
             </div>
           </ScrollAnimate>
+          {featuredGridItems.length === 0 ? (
+            <p className="mt-10 text-center text-sm text-muted-foreground">
+              {isKo
+                ? "등록된 추천 매체가 없습니다. 매체 검색에서 전체 목록을 확인해 주세요."
+                : "No featured media yet. Browse the full catalog on Media search."}
+            </p>
+          ) : (
           <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-7">
-            {featuredCatalog.map((media, i) => {
+            {featuredGridItems.map((media, i) => {
               const thumb = resolveMediaGallery(media)[0];
               return (
               <ScrollAnimate key={media.id} delay={i * 100}>
@@ -678,6 +696,7 @@ function HomeContent({
               );
             })}
           </div>
+          )}
         </div>
       </section>
 

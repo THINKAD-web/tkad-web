@@ -29,6 +29,7 @@ import {
   Code2,
   Loader2,
   AlertCircle,
+  Star,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
@@ -641,6 +642,32 @@ export default function AdminMediasClient({
     }
   }, []);
 
+  const patchFeaturedFields = useCallback(
+    async (
+      m: AdminMediaDto,
+      patch: { isFeatured?: boolean; featuredOrder?: number | null },
+    ) => {
+      listFetchGenRef.current += 1;
+      try {
+        const res = await fetch(`/api/admin/medias/${m.id}`, {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch),
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as { media?: unknown };
+        const row = data.media ? normalizeAdminMediaRow(data.media) : null;
+        if (row) {
+          setMedias((prev) => prev.map((x) => (x.id === m.id ? row : x)));
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+    [],
+  );
+
   const handleExportCSV = useCallback(() => {
     const BOM = "\uFEFF";
     const header = [
@@ -659,6 +686,8 @@ export default function AdminMediasClient({
       "이미지수",
       "가용상태",
       "활성(목록)",
+      "추천(홈)",
+      "추천순서",
     ];
     const rows = medias.map((m) => [
       m.id,
@@ -676,6 +705,8 @@ export default function AdminMediasClient({
       String((m.extractedImages ?? []).length),
       m.availability,
       m.isActive ? "활성" : "비활성",
+      m.isFeatured ? "Y" : "",
+      m.featuredOrder != null ? String(m.featuredOrder) : "",
     ]);
     const csv = [header, ...rows]
       .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
@@ -1001,6 +1032,8 @@ export default function AdminMediasClient({
                     <th className="px-4 py-3">유형</th>
                     <th className="px-4 py-3">가격(원)</th>
                     <th className="px-4 py-3 text-center">상태</th>
+                    <th className="px-4 py-3 text-center">추천</th>
+                    <th className="px-4 py-3 text-center w-[5.5rem]">순서</th>
                     <th className="px-4 py-3 text-center">관리</th>
                   </tr>
                 </thead>
@@ -1008,7 +1041,7 @@ export default function AdminMediasClient({
                   {listLoading ? (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={8}
                         className="px-4 py-12 text-center text-muted-foreground"
                       >
                         <Loader2 className="mx-auto h-8 w-8 animate-spin text-navy/40" />
@@ -1018,7 +1051,7 @@ export default function AdminMediasClient({
                   ) : paginated.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={8}
                         className="px-4 py-12 text-center text-muted-foreground"
                       >
                         {medias.length === 0
@@ -1076,6 +1109,61 @@ export default function AdminMediasClient({
                               } mt-0.5`}
                             />
                           </button>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            type="button"
+                            title={
+                              media.isFeatured
+                                ? "추천 해제"
+                                : "홈 추천 매체로 지정"
+                            }
+                            onClick={() =>
+                              void patchFeaturedFields(media, {
+                                isFeatured: !media.isFeatured,
+                              })
+                            }
+                            className="inline-flex touch-manipulation rounded-full p-1.5 transition-colors hover:bg-amber-50"
+                          >
+                            <Star
+                              className={`h-5 w-5 ${
+                                media.isFeatured
+                                  ? "fill-amber-400 text-amber-500"
+                                  : "text-slate-300"
+                              }`}
+                            />
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Input
+                            key={`fo-${media.id}-${media.featuredOrder ?? "n"}`}
+                            type="number"
+                            min={1}
+                            max={99}
+                            placeholder="—"
+                            disabled={!media.isFeatured}
+                            defaultValue={
+                              media.featuredOrder != null
+                                ? String(media.featuredOrder)
+                                : ""
+                            }
+                            className="mx-auto h-8 w-14 text-center text-xs disabled:opacity-40"
+                            onBlur={(e) => {
+                              if (!media.isFeatured) return;
+                              const raw = e.target.value.trim();
+                              if (!raw) {
+                                void patchFeaturedFields(media, {
+                                  featuredOrder: null,
+                                });
+                                return;
+                              }
+                              const n = parseInt(raw, 10);
+                              if (!Number.isFinite(n)) return;
+                              void patchFeaturedFields(media, {
+                                featuredOrder: n,
+                              });
+                            }}
+                          />
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center gap-1">

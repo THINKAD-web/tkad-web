@@ -55,8 +55,6 @@ export default function Header() {
     { href: "/cases", label: t("nav.cases") },
     { href: "/insights", label: t("nav.insights") },
     { href: "/academy", label: t("nav.academy") },
-    { href: "/about", label: t("nav.about") },
-    { href: "/contact", label: t("nav.contact") },
   ];
 
   return (

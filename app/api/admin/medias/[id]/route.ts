@@ -176,6 +176,30 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     data.isActive = body.isActive;
   }
 
+  if (body.isFeatured !== undefined) {
+    if (typeof body.isFeatured !== "boolean") {
+      return json({ error: "isFeatured must be boolean" }, 400);
+    }
+    data.isFeatured = body.isFeatured;
+    if (!body.isFeatured) {
+      data.featuredOrder = null;
+    }
+  }
+  if (body.featuredOrder !== undefined) {
+    if (body.featuredOrder === null) {
+      data.featuredOrder = null;
+    } else {
+      const n = Math.round(Number(body.featuredOrder));
+      if (!Number.isFinite(n)) {
+        return json(
+          { error: "featuredOrder must be a number or null" },
+          400,
+        );
+      }
+      data.featuredOrder = n;
+    }
+  }
+
   if (body.nearbyFacilities !== undefined) {
     if (body.nearbyFacilities === null) {
       data.nearbyFacilities = null;

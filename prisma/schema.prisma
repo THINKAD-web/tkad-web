@@ -41,6 +41,30 @@ enum FinancialDocStatus {
   cancelled
 }
 
+/// 고객 /quote 파이프라인 (관리자 정식 Quote `quotes` 테이블과 별도)
+enum OoHQuoteStatus {
+  draft
+  sent
+  booking_requested
+  booking_pending
+  booking_confirmed
+  invoice_sent
+  payment_pending
+  payment_confirmed
+  contract_confirmed
+  in_progress
+  completed
+  cancelled
+}
+
+/// 전자계약 (`/quote/[id]/contract`) — 관리자 Quote와 무관
+enum OohContractStatus {
+  pending
+  signed
+  confirmed
+  cancelled
+}
+
 model Media {
   id        String   @id @default(cuid())
   name      String
@@ -91,6 +115,10 @@ model Media {
 
   availability MediaAvailability @default(available) @map("availability")
   isActive     Boolean           @default(true) @map("is_active")
+  /// 홈(`page.tsx`) 추천 영역 — `fetchHomeFeaturedMedia`가 `isFeatured=true` 우선 조회
+  isFeatured    Boolean @default(false) @map("is_featured")
+  /// 홈 추천 정렬: 오름차순, null은 뒤로
+  featuredOrder Int?    @map("featured_order")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -99,6 +127,7 @@ model Media {
   bookings              MediaBooking[]
   advertiserExecutions  MediaAdvertiserExecution[]
 
+  @@index([isFeatured, featuredOrder])
   @@map("media")
 }
 
@@ -234,6 +263,7 @@ model Campaign {
   quoteRequests   QuoteRequest[]
   proofPhotos     CampaignProofPhoto[]
   successCase     SuccessCase?
+  oohQuote        OoHQuote?
 
   @@index([status])
   @@map("campaigns")
@@ -358,9 +388,91 @@ model QuoteRequest {
   createdAt     DateTime @default(now()) @map("created_at")
 
   campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  oohQuote OoHQuote?
 
   @@index([campaignId])
   @@map("quote_requests")
+}
+
+/// 공개 견적·부킹·계약 파이프라인 (`/quote`, `/quote/[id]`)
+model OoHQuote {
+  id     String         @id @default(cuid())
+  status OoHQuoteStatus @default(draft)
+
+  clientName    String  @map("client_name")
+  clientEmail   String  @map("client_email")
+  clientPhone   String? @map("client_phone")
+  clientCompany String? @map("client_company")
+
+  mediaIds    String[] @map("media_ids")
+  totalAmount Int      @map("total_amount")
+  period      String
+  periodKey   String?  @map("period_key")
+  budgetMin   Int?     @map("budget_min")
+  budgetMax   Int?     @map("budget_max")
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+
+  bookingRequestedAt  DateTime? @map("booking_requested_at")
+  bookingConfirmedAt  DateTime? @map("booking_confirmed_at")
+  invoiceSentAt       DateTime? @map("invoice_sent_at")
+  paymentAmount       Int?      @map("payment_amount")
+  paymentConfirmedAt  DateTime? @map("payment_confirmed_at")
+  contractConfirmedAt DateTime? @map("contract_confirmed_at")
+
+  adminNote    String? @map("admin_note")
+  cancelReason String? @map("cancel_reason")
+  pdfTemplate  String  @default("default") @map("pdf_template")
+  locale       String  @default("ko")
+  quotePdfSentAt DateTime? @map("quote_pdf_sent_at")
+  contractDocUrl String? @map("contract_doc_url")
+  invoiceDocUrl  String? @map("invoice_doc_url")
+
+  campaignId String?   @unique @map("campaign_id")
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  quoteRequestId String?      @unique @map("quote_request_id")
+  quoteRequest   QuoteRequest? @relation(fields: [quoteRequestId], references: [id], onDelete: SetNull)
+
+  oohContract OohContract?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("ooh_quotes")
+}
+
+/// OOH 표준 계약서 + 전자서명 (OoHQuote 1:1)
+model OohContract {
+  id         String @id @default(cuid())
+  ooHQuoteId String @unique @map("ooh_quote_id")
+  ooHQuote   OoHQuote @relation(fields: [ooHQuoteId], references: [id], onDelete: Cascade)
+
+  /** 서명 완료 PDF (Base64). 공개 다운로드는 API에서 제공 */
+  signedPdfBase64 String? @map("signed_pdf_base64") @db.Text
+  /** 감사용: inline | cloud URL 확장 시 */
+  contractPdfUrl String @default("") @map("contract_pdf_url")
+
+  signedAt       DateTime? @map("signed_at")
+  signerName     String?   @map("signer_name")
+  signerEmail    String?   @map("signer_email")
+  signerIp       String?   @map("signer_ip")
+  signerAgent    String?   @map("signer_agent") @db.Text
+  signatureImage String?   @map("signature_image") @db.Text
+  agreementAcceptedAt DateTime? @map("agreement_accepted_at")
+
+  documentSha256 String? @map("document_sha256")
+  specialTerms   String? @map("special_terms") @db.Text
+
+  status OohContractStatus @default(pending)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("ooh_contracts")
 }
 
 /** 관리자 견적(정규화 라인 아이템) */

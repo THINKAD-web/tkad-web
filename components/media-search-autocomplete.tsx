@@ -2,11 +2,15 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Search, X } from "lucide-react";
-import { mediaData, typeLabels, type MediaItem } from "@/lib/media-data";
+import {
+  matchesMediaTextQuery,
+  typeLabels,
+  type MediaItem,
+} from "@/lib/media-data";
 
 interface Props {
-  /** When omitted, uses static `mediaData` (e.g. Storybook). */
-  catalog?: MediaItem[];
+  /** 서버 `fetchPublicMediaCatalog()` 등에서 내려준 공개 매체 목록(필수). */
+  catalog: MediaItem[];
   locale: string;
   onSelect: (media: MediaItem) => void;
   /** Fired when the user clicks Search or presses Enter (without picking a dropdown row). */
@@ -17,7 +21,7 @@ interface Props {
 }
 
 export default function MediaSearchAutocomplete({
-  catalog = mediaData,
+  catalog,
   locale,
   onSelect,
   onSearchSubmit,
@@ -42,15 +46,7 @@ export default function MediaSearchAutocomplete({
       }
       const lower = q.toLowerCase();
       const matched = catalog
-        .filter(
-          (m) =>
-            m.name.toLowerCase().includes(lower) ||
-            m.nameEn.toLowerCase().includes(lower) ||
-            m.location.toLowerCase().includes(lower) ||
-            m.locationEn.toLowerCase().includes(lower) ||
-            typeLabels[m.type]?.ko.toLowerCase().includes(lower) ||
-            typeLabels[m.type]?.en.toLowerCase().includes(lower)
-        )
+        .filter((m) => matchesMediaTextQuery(m, lower))
         .slice(0, 5);
       setResults(matched);
       setIsOpen(matched.length > 0);

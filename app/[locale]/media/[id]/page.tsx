@@ -95,7 +95,7 @@ export default async function MediaDetailPage({ params }: Props) {
           aria-hidden
         />
         <div className="relative z-10 flex h-full min-h-0 flex-col justify-between px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
             <Link href="/media">
               <Button
                 variant="ghost"
@@ -108,8 +108,8 @@ export default async function MediaDetailPage({ params }: Props) {
             </Link>
             <MediaDetailAdminActions />
           </div>
-          <div className="max-w-4xl pb-1">
-            <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-sm">
+          <div className="max-w-4xl min-w-0 pb-1">
+            <h1 className="break-words text-2xl font-bold tracking-tight text-white drop-shadow-sm sm:text-3xl md:text-4xl">
               {isKo ? media.name : media.nameEn}
             </h1>
             <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-white/88 sm:text-lg">
@@ -132,12 +132,14 @@ export default async function MediaDetailPage({ params }: Props) {
                 </>
               ) : null}
             </p>
-            <p className="mt-5 text-2xl font-bold text-gold">
-              ₩{media.price.toLocaleString()}
-              <span className="ml-1.5 text-sm font-normal text-white/70">
+            <div className="mt-5 flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
+              <span className="break-words text-xl font-bold tabular-nums text-gold sm:text-2xl">
+                ₩{media.price.toLocaleString()}
+              </span>
+              <span className="text-sm font-normal text-white/70 sm:shrink-0">
                 {t("perMonth")}
               </span>
-            </p>
+            </div>
           </div>
         </div>
       </section>
@@ -191,7 +193,7 @@ export default async function MediaDetailPage({ params }: Props) {
                 label={t("priceTitle")}
                 value={
                   <>
-                    <span className="text-base font-semibold text-gold-dark sm:text-lg">
+                    <span className="break-all text-base font-semibold tabular-nums text-gold-dark sm:text-lg">
                       ₩{media.price.toLocaleString()}
                     </span>
                     <span className="mt-1 block text-xs font-normal text-muted-foreground">

@@ -15,6 +15,9 @@ const KakaoChannelButton = dynamic(
   () => import("@/components/kakao-channel-button"),
   { ssr: false },
 );
+const AiChatbot = dynamic(() => import("@/components/ai-chatbot"), {
+  ssr: false,
+});
 const FloatingCta = dynamic(() => import("@/components/floating-cta"), {
   ssr: false,
 });
@@ -30,6 +33,7 @@ export default function DeferredPublicWidgets() {
       <FloatingCta />
       <ExitIntentPopup />
       <KakaoChannelButton />
+      <AiChatbot />
     </>
   );
 }

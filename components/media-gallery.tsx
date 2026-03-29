@@ -33,6 +33,7 @@ export default function MediaGallery({
   const [active, setActive] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxImgFailed, setLightboxImgFailed] = useState(false);
   const lightboxIndexRef = useRef(0);
 
   useEffect(() => {
@@ -47,6 +48,11 @@ export default function MediaGallery({
   const n = safe.length;
   const mainIdx = Math.min(active, n - 1);
   const mainSrc = safe[mainIdx];
+  const lightboxSrc = safe[Math.min(lightboxIndex, n - 1)] ?? safe[0];
+
+  useEffect(() => {
+    setLightboxImgFailed(false);
+  }, [lightboxOpen, lightboxIndex, lightboxSrc]);
 
   const thumbIndices = safe
     .map((_, i) => i)
@@ -120,6 +126,8 @@ export default function MediaGallery({
             src={mainSrc}
             alt={`${altBase} — ${mainIdx + 1} / ${n}`}
             className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+            loading="lazy"
+            decoding="async"
           />
         </button>
 
@@ -142,6 +150,8 @@ export default function MediaGallery({
               src={safe[idx]}
               alt=""
               className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+              loading="lazy"
+              decoding="async"
             />
           </button>
         ))}
@@ -149,7 +159,7 @@ export default function MediaGallery({
 
       {lightboxOpen ? (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/92 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/92 p-3 pt-14 pb-8 backdrop-blur-sm sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-label={L.expand}
@@ -195,15 +205,38 @@ export default function MediaGallery({
           ) : null}
 
           <div
-            className="relative z-[81] flex max-h-[min(88vh,100%)] max-w-[min(96vw,100%)] items-center justify-center"
+            className="relative z-[81] mx-auto flex min-h-0 w-full max-w-[min(96vw,100%)] items-center justify-center px-2"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={safe[lightboxIndex]}
-              alt={`${altBase} — ${lightboxIndex + 1} / ${n}`}
-              className="max-h-[min(88vh,100%)] max-w-full object-contain shadow-2xl"
-            />
+            {lightboxImgFailed ? (
+              <div className="max-w-md rounded-xl bg-white/10 px-5 py-8 text-center text-white">
+                <p className="text-sm font-semibold">
+                  이미지를 불러올 수 없습니다.
+                </p>
+                <p className="mt-1 text-xs text-white/65">
+                  Could not load image. Open in a new tab or check the URL.
+                </p>
+                <a
+                  href={lightboxSrc}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 inline-block text-sm font-semibold text-gold underline underline-offset-4 hover:text-gold/90"
+                >
+                  새 탭에서 열기 / Open in new tab
+                </a>
+              </div>
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                key={lightboxSrc}
+                src={lightboxSrc}
+                alt={`${altBase} — ${lightboxIndex + 1} / ${n}`}
+                className="mx-auto max-h-[min(82dvh,85vh)] w-auto max-w-full object-contain shadow-2xl"
+                loading="eager"
+                decoding="async"
+                onError={() => setLightboxImgFailed(true)}
+              />
+            )}
           </div>
         </div>
       ) : null}

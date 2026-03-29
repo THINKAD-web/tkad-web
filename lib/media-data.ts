@@ -13,6 +13,16 @@ export interface MediaItem {
   location: string;
   locationEn: string;
   region: string;
+  /** 세부 카테고리 (DB `sub_category`) */
+  subCategory?: string;
+  /** 검색·표시용 태그 */
+  tags?: string[];
+  city?: string;
+  district?: string;
+  /** 가까운 지하철역 요약 */
+  nearbyStations?: string;
+  /** 주변 랜드마크 요약 */
+  nearbyLandmarks?: string;
   type: string;
   price: number;
   lat: number;
@@ -82,14 +92,39 @@ export function getSimilarMediaFromCatalog(
   return scored.slice(0, limit).map((x) => x.m);
 }
 
+/** 동일 URL이 `image` + `extractedImages` 등으로 중복될 때 한 번만 노출 */
+export function dedupeImageUrls(urls: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const u of urls) {
+    const s = typeof u === "string" ? u.trim() : "";
+    if (!s || seen.has(s)) continue;
+    seen.add(s);
+    out.push(s);
+  }
+  return out;
+}
+
 /** Gallery URLs: uses Cloudinary demo / Picsum when catalog has no uploads yet */
 export function resolveMediaGallery(m: MediaItem): string[] {
-  if (m.sampleImages.length > 0) return m.sampleImages;
-  return [
+  const fallback = [
     `https://picsum.photos/seed/tkad-m-${m.id}-1/1200/800`,
     `https://picsum.photos/seed/tkad-m-${m.id}-2/1200/800`,
     `https://picsum.photos/seed/tkad-m-${m.id}-3/1200/800`,
   ];
+  const raw =
+    m.sampleImages.length > 0 ? m.sampleImages : fallback;
+  return dedupeImageUrls(raw);
+}
+
+/**
+ * DB `image` / `extractedImages` 등으로 채워진 `sampleImages` 중 첫 URL만 반환.
+ * 없으면 null — 목업(Picsum) 대신 플레이스홀더 UI를 쓰려 할 때 사용.
+ */
+export function getPrimaryMediaImageUrl(m: MediaItem): string | null {
+  const urls = dedupeImageUrls(m.sampleImages ?? []);
+  const first = urls[0]?.trim();
+  return first || null;
 }
 
 export function latLngToFallbackPercent(lat: number, lng: number): { x: number; y: number } {
@@ -113,7 +148,6 @@ function mediaTypeToMapType(type: string): CampaignMapMediaType {
 
 export function mediaItemsToCampaignPins(
   items: readonly MediaItem[],
-  isKo: boolean,
 ): CampaignMapPin[] {
   const gallery = (m: MediaItem) => resolveMediaGallery(m)[0] ?? "";
   return items.map((m) => {
@@ -558,3 +592,28 @@ export const typeLabels: Record<string, { ko: string; en: string }> = {
   subway: { ko: "지하철", en: "Subway" },
   bus: { ko: "버스/트럭", en: "Bus/Truck" },
 };
+
+/** 텍스트 검색: 매체명·주소·구/시·역·시설·랜드마크·태그·세부 카테고리·유형 라벨 */
+export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
+  const fields: (string | null | undefined)[] = [
+    m.name,
+    m.nameEn,
+    m.location,
+    m.locationEn,
+    m.district,
+    m.city,
+    m.nearbyStations,
+    m.nearbyFacilities,
+    m.nearbyFacilitiesEn,
+    m.nearbyLandmarks,
+    m.subCategory,
+    typeLabels[m.type]?.ko,
+    typeLabels[m.type]?.en,
+  ];
+  if (fields.some((f) => f != null && f.toLowerCase().includes(lower))) {
+    return true;
+  }
+  return (m.tags ?? []).some(
+    (tag) => tag != null && tag.toLowerCase().includes(lower),
+  );
+}

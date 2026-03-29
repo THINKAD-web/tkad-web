@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { OoHQuoteStatus } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { autoLinkQuoteRequestToCampaign } from "@/lib/quote-campaign-link";
 import { rateLimit } from "@/lib/rate-limit";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import {
+  isEmailConfigured,
+  sendEmailWithPdfAttachment,
+} from "@/lib/email/client";
+import {
+  estimateEndDate,
+  OOH_PERIOD_MONTHS,
+  periodLabelFromKey,
+} from "@/lib/ooh-quote";
+import { ooHQuotePdfToBase64 } from "@/lib/server-ooh-quote-pdf";
+import {
+  adminOohQuoteUrl,
+  sendTelegramMessage,
+} from "@/lib/telegram-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +72,8 @@ export async function POST(request: NextRequest) {
     budgetMax,
     estimatedCost,
     message,
+    pdfTemplate,
+    locale: localeBody,
   } = body as Record<string, unknown>;
 
   const ids = Array.isArray(mediaIds)
@@ -95,34 +112,133 @@ export async function POST(request: NextRequest) {
   const budgetMaxN = parseOptionalInt(budgetMax);
   const estimatedN = parseOptionalInt(estimatedCost);
 
+  const periodKeyRaw = period != null ? String(period).trim() : "1month";
+  const periodKey =
+    periodKeyRaw in OOH_PERIOD_MONTHS ? periodKeyRaw : "1month";
+  const localeStr =
+    String(localeBody ?? "").toLowerCase() === "en" ? "en" : "ko";
+  const periodHuman = periodLabelFromKey(periodKey, localeStr);
+  const tplRaw = String(pdfTemplate ?? "").trim();
+  const pdfTpl = tplRaw === "premium" ? "premium" : "default";
+  const startDate = new Date();
+  const endDate = estimateEndDate(startDate, periodKey);
+  const totalAmount =
+    estimatedN != null && Number.isFinite(estimatedN)
+      ? Math.round(estimatedN)
+      : 0;
+
   try {
     const db = getPrisma();
     const emailNorm = String(email ?? "").trim() || null;
-    const created = await db.quoteRequest.create({
+    const clientEmailNorm = emailNorm ?? "";
+
+    const result = await db.$transaction(async (tx) => {
+      const created = await tx.quoteRequest.create({
+        data: {
+          company: String(company ?? "").trim(),
+          name: String(name).trim(),
+          phone: String(phone).trim(),
+          email: emailNorm,
+          mediaIds: JSON.stringify(ids),
+          period: periodKey,
+          budgetMin: budgetMinN,
+          budgetMax: budgetMaxN,
+          estimatedCost: estimatedN,
+          message: String(message ?? "").trim() || null,
+        },
+      });
+
+      const ooh = await tx.ooHQuote.create({
+        data: {
+          status: OoHQuoteStatus.draft,
+          clientName: String(name).trim(),
+          clientEmail: clientEmailNorm,
+          clientPhone: String(phone).trim(),
+          clientCompany: String(company ?? "").trim() || null,
+          mediaIds: ids,
+          totalAmount,
+          period: periodHuman,
+          periodKey,
+          budgetMin: budgetMinN,
+          budgetMax: budgetMaxN,
+          startDate,
+          endDate,
+          pdfTemplate: pdfTpl,
+          locale: localeStr,
+          quoteRequestId: created.id,
+        },
+      });
+
+      return { quoteRequest: created, oohQuote: ooh };
+    });
+
+    const { quoteRequest: created, oohQuote: ooh } = result;
+
+    let pdfEmailed = false;
+    if (clientEmailNorm && isEmailConfigured()) {
+      try {
+        const pdfBase64 = await ooHQuotePdfToBase64(db, {
+          clientCompany: ooh.clientCompany,
+          clientName: ooh.clientName,
+          period: ooh.period,
+          budgetMin: ooh.budgetMin,
+          budgetMax: ooh.budgetMax,
+          pdfTemplate: ooh.pdfTemplate,
+          locale: ooh.locale,
+          mediaIds: ooh.mediaIds,
+          totalAmount: ooh.totalAmount,
+        });
+        const isKo = localeStr === "ko";
+        await sendEmailWithPdfAttachment({
+          to: clientEmailNorm,
+          subject: isKo
+            ? "[싱커드] 견적서가 도착했습니다"
+            : "[THINKAD] Your quote",
+          text: isKo
+            ? "첨부 PDF는 요청하신 매체 기준 참고 견적입니다. 진행을 원하시면 메일의 링크 또는 사이트에서 확인해 주세요."
+            : "Please find your reference quote attached. You can proceed from the link on our site.",
+          html: isKo
+            ? "<p>첨부 PDF는 요청하신 매체 기준 참고 견적입니다.</p>"
+            : "<p>Please find your reference quote attached.</p>",
+          pdfFilename: "thinkad-quote.pdf",
+          pdfBase64,
+        });
+        pdfEmailed = true;
+      } catch (e) {
+        console.error("[quote] PDF email failed:", e);
+      }
+    }
+
+    await db.ooHQuote.update({
+      where: { id: ooh.id },
       data: {
-        company: String(company ?? "").trim(),
-        name: String(name).trim(),
-        phone: String(phone).trim(),
-        email: emailNorm,
-        mediaIds: JSON.stringify(ids),
-        period: period != null ? String(period) : null,
-        budgetMin: budgetMinN,
-        budgetMax: budgetMaxN,
-        estimatedCost: estimatedN,
-        message: String(message ?? "").trim() || null,
+        status: OoHQuoteStatus.sent,
+        quotePdfSentAt: pdfEmailed ? new Date() : null,
       },
     });
+
     void postInternalAlert({
       type: "quote_request",
-      title: "새 견적 요청",
-      body: `${String(company ?? "").trim() || "-"} / ${String(name).trim()} · 매체 ${ids.length}건`,
-      meta: { email: emailNorm, mediaCount: ids.length },
+      title: "새 견적 요청 (OOH 파이프라인)",
+      body: `${String(company ?? "").trim() || "-"} / ${String(name).trim()} · ₩${totalAmount.toLocaleString("ko-KR")}만 · ${periodHuman}`,
+      meta: {
+        email: emailNorm,
+        mediaCount: ids.length,
+        oohQuoteId: ooh.id,
+      },
     }).catch(() => {});
+
+    const adminUrl = adminOohQuoteUrl(ooh.id);
+    void sendTelegramMessage(
+      `<b>새 견적 요청</b>\n${String(name).trim()} · ${String(company ?? "").trim() || "-"}\n매체 ${ids.length}건 · ₩${totalAmount.toLocaleString("ko-KR")}만 · ${periodHuman}`,
+      { buttons: [{ text: "확인하기", url: adminUrl }] },
+    ).catch(() => {});
+
     await autoLinkQuoteRequestToCampaign(db, created.id, emailNorm);
+
+    return json({ success: true, quoteId: ooh.id }, { status: 201 });
   } catch (err) {
     console.error("[quote] DB error:", err);
     return json({ error: "Failed to save quote request" }, { status: 500 });
   }
-
-  return json({ success: true }, { status: 201 });
 }

@@ -31,6 +31,7 @@ import { typeLabels, type MediaItem } from "@/lib/media-data";
 import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast-provider";
+import { useRouter } from "@/i18n/navigation";
 import {
   saveQuotePdf,
   quotePdfToBase64,
@@ -107,6 +108,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     Partial<Record<keyof FormState | "media", boolean>>
   >({});
   const { toast } = useToast();
+  const router = useRouter();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -297,9 +299,20 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           estimatedCost: totalCost,
           message: form.message,
           website: form.website,
+          pdfTemplate: template,
+          locale: isKo ? "ko" : "en",
         }),
       });
       if (!res.ok) throw new Error("submit failed");
+      const payload = (await res.json()) as { quoteId?: string };
+      if (payload.quoteId) {
+        toast(
+          "success",
+          isKo ? "견적이 접수되었습니다. 견적서 페이지로 이동합니다." : "Quote saved. Opening your quote page.",
+        );
+        router.push(`/quote/${payload.quoteId}`);
+        return;
+      }
       setSubmitted(true);
       toast(
         "success",

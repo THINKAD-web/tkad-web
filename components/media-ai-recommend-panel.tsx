@@ -22,7 +22,11 @@ import {
   Calculator,
   BadgeCheck,
 } from "lucide-react";
-import { mediaData, type MediaItem, typeLabels } from "@/lib/media-data";
+import {
+  type MediaItem,
+  typeLabels,
+  getPrimaryMediaImageUrl,
+} from "@/lib/media-data";
 import {
   recommendMedia,
   mediaToMapPosition,
@@ -37,8 +41,8 @@ import { cn } from "@/lib/utils";
 type Props = {
   locale: string;
   regionOptions: { value: string; label: string }[];
-  /** Catalog for scoring (defaults to static samples). */
-  catalog?: MediaItem[];
+  /** 서버 `fetchPublicMediaCatalog()` 등 — 부모가 DB(또는 폴백) 카탈로그를 넘깁니다. */
+  catalog: MediaItem[];
   compareItems: MediaItem[];
   toggleCompare: (m: MediaItem) => void;
   isInCompare: (id: string) => boolean;
@@ -58,7 +62,7 @@ type Props = {
 export default function MediaAiRecommendPanel({
   locale,
   regionOptions,
-  catalog = mediaData,
+  catalog,
   compareItems,
   toggleCompare,
   isInCompare,
@@ -92,16 +96,19 @@ export default function MediaAiRecommendPanel({
     setLoading(true);
     setResults(null);
     window.setTimeout(() => {
-      const scored = recommendMedia(
-        {
-          goal,
-          target,
-          budgetMaxMan: cap || 999999,
-          region,
-          industry,
-        },
-        catalog,
-      );
+      const scored =
+        catalog.length === 0
+          ? []
+          : recommendMedia(
+              {
+                goal,
+                target,
+                budgetMaxMan: cap || 999999,
+                region,
+                industry,
+              },
+              catalog,
+            );
       setResults(scored);
       setLoading(false);
     }, 850);
@@ -228,7 +235,7 @@ export default function MediaAiRecommendPanel({
                 type="button"
                 className="btn-gold h-11 w-full font-semibold"
                 onClick={runRecommend}
-                disabled={loading}
+                disabled={loading || catalog.length === 0}
               >
                 {loading ? (
                   <>
@@ -250,13 +257,18 @@ export default function MediaAiRecommendPanel({
         </div>
 
         <div className="lg:col-span-8">
-          {results === null && !loading && (
+          {catalog.length === 0 ? (
+            <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-amber-200 bg-amber-50/80 p-8 text-center text-sm text-amber-950">
+              {t("media.ai.emptyCatalog")}
+            </div>
+          ) : null}
+          {catalog.length > 0 && results === null && !loading && (
             <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-navy/15 bg-slate-50/80 p-8 text-center text-sm text-muted-foreground">
               {t("media.ai.emptyRun")}
             </div>
           )}
 
-          {loading && (
+          {catalog.length > 0 && loading && (
             <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-xl border bg-white p-8">
               <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-gold" />
               <p className="text-sm font-medium text-navy">
@@ -265,7 +277,7 @@ export default function MediaAiRecommendPanel({
             </div>
           )}
 
-          {results !== null && !loading && (
+          {catalog.length > 0 && results !== null && !loading && (
             <>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -339,7 +351,7 @@ export default function MediaAiRecommendPanel({
                 <div className="grid gap-4 sm:grid-cols-2">
                   {results.map((s) => (
                     <AiResultCard
-                      key={s.item.id}
+                      key={`${s.item.id}-${getPrimaryMediaImageUrl(s.item) ?? "none"}`}
                       scored={s}
                       isKo={isKo}
                       inCompare={isInCompare(s.item.id)}
@@ -426,11 +438,29 @@ function AiResultCard({
 }) {
   const m = scored.item;
   const tl = typeLabels[m.type];
+  const primaryUrl = getPrimaryMediaImageUrl(m);
+  const [imgFailed, setImgFailed] = useState(false);
+  const showPlaceholder = !primaryUrl || imgFailed;
 
   return (
     <Card className="overflow-hidden border-navy/10 shadow-md transition-shadow hover:shadow-lg">
-      <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-navy/8 to-gold/10">
-        <Monitor className="h-9 w-9 text-navy/25" />
+      <div className="relative h-32 overflow-hidden bg-gradient-to-br from-navy/8 to-gold/10">
+        {showPlaceholder ? (
+          <div className="flex h-full w-full items-center justify-center">
+            <Monitor className="h-9 w-9 text-navy/25" aria-hidden />
+          </div>
+        ) : (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={primaryUrl}
+              alt=""
+              className="h-full w-full object-cover"
+              onError={() => setImgFailed(true)}
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/50 via-navy/5 to-transparent" />
+          </>
+        )}
         <Badge className="absolute top-2 right-2 border-0 bg-navy text-white">
           {scored.score}
         </Badge>

@@ -1,4 +1,4 @@
-import { mediaData, type MediaItem } from "@/lib/media-data";
+import type { MediaItem } from "@/lib/media-data";
 
 export type CampaignGoal = "awareness" | "consideration" | "launch";
 
@@ -245,9 +245,13 @@ function scoreOne(m: MediaItem, input: AiRecommendInput): ScoredMedia {
 
 export function recommendMedia(
   input: AiRecommendInput,
-  catalog: MediaItem[] = mediaData,
+  catalog: readonly MediaItem[],
 ): ScoredMedia[] {
-  return catalog
+  const valid = catalog.filter(
+    (m) => m != null && typeof m.id === "string" && m.id.trim().length > 0,
+  );
+  if (valid.length === 0) return [];
+  return [...valid]
     .map((m) => scoreOne(m, input))
     .filter((s) => s.score >= 38)
     .sort((a, b) => b.score - a.score)

@@ -120,7 +120,7 @@ type SuccessCaseToolInput = {
   testimonialKo?: string | null;
 };
 
-function getAnthropicClient(): Anthropic {
+export function getAnthropicClient(): Anthropic {
   const key = process.env.ANTHROPIC_API_KEY?.trim();
   if (!key) {
     throw new Error(
@@ -130,7 +130,7 @@ function getAnthropicClient(): Anthropic {
   return new Anthropic({ apiKey: key });
 }
 
-function resolveModel(): string {
+export function resolveModel(): string {
   return process.env.ANTHROPIC_MODEL?.trim() || ANTHROPIC_DEFAULT_MODEL;
 }
 

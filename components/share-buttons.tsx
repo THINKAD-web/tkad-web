@@ -58,31 +58,31 @@ export default function ShareButtons({
   const supportsNativeShare = typeof navigator !== "undefined" && !!navigator.share;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2.5">
       <Button
         variant="outline"
-        size="sm"
+        size="lg"
         onClick={handleKakaoShare}
-        className="gap-1.5 rounded-full border-yellow-300 bg-[#FEE500]/10 text-sm font-medium text-yellow-800 hover:bg-[#FEE500]/30"
+        className="h-11 min-h-11 gap-2 rounded-full border-yellow-300 bg-[#FEE500]/10 px-5 text-base font-semibold text-yellow-800 hover:bg-[#FEE500]/30"
       >
-        <MessageCircle className="h-4 w-4" />
+        <MessageCircle className="size-5 shrink-0" />
         {isKo ? "카카오톡" : "KakaoTalk"}
       </Button>
 
       <Button
         variant="outline"
-        size="sm"
+        size="lg"
         onClick={handleCopyLink}
-        className="gap-1.5 rounded-full text-sm font-medium"
+        className="h-11 min-h-11 gap-2 rounded-full px-5 text-base font-semibold"
       >
         {copied ? (
           <>
-            <Check className="h-4 w-4 text-emerald-500" />
+            <Check className="size-5 shrink-0 text-emerald-500" />
             {isKo ? "복사됨!" : "Copied!"}
           </>
         ) : (
           <>
-            <Link2 className="h-4 w-4" />
+            <Link2 className="size-5 shrink-0" />
             {isKo ? "링크 복사" : "Copy Link"}
           </>
         )}
@@ -91,11 +91,11 @@ export default function ShareButtons({
       {supportsNativeShare && (
         <Button
           variant="outline"
-          size="sm"
+          size="lg"
           onClick={handleNativeShare}
-          className="gap-1.5 rounded-full text-sm font-medium"
+          className="h-11 min-h-11 gap-2 rounded-full px-5 text-base font-semibold"
         >
-          <Share2 className="h-4 w-4" />
+          <Share2 className="size-5 shrink-0" />
           {isKo ? "공유" : "Share"}
         </Button>
       )}

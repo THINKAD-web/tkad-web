@@ -23,10 +23,7 @@ export default function MediaBrowseMap({
   showFooterCaption?: boolean;
 }) {
   const isKo = locale === "ko";
-  const pins = useMemo(
-    () => mediaItemsToCampaignPins(items, isKo),
-    [items, isKo],
-  );
+  const pins = useMemo(() => mediaItemsToCampaignPins(items), [items]);
   return (
     <CampaignMonitoringMap
       pins={pins}

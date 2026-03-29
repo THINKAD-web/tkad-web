@@ -1,6 +1,7 @@
 import type { Media, MediaAdvertiserExecution } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
+  dedupeImageUrls,
   getMediaById,
   mediaData,
   type MediaItem,
@@ -40,8 +41,10 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
   const lat = m.latitude ?? 37.5665;
   const lng = m.longitude ?? 126.978;
   const daily = m.dailyFootfall ?? 0;
-  const imgs = [...(m.image ? [m.image] : []), ...m.extractedImages].filter(
-    Boolean,
+  const imgs = dedupeImageUrls(
+    [...(m.image ? [m.image] : []), ...m.extractedImages].filter(
+      (x): x is string => typeof x === "string" && Boolean(x.trim()),
+    ),
   );
 
   const size =
@@ -61,6 +64,12 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     location: m.location,
     locationEn,
     region: m.region,
+    subCategory: m.subCategory?.trim() || undefined,
+    tags: m.tags?.length ? [...m.tags] : undefined,
+    city: m.city?.trim() || undefined,
+    district: m.district?.trim() || undefined,
+    nearbyStations: m.nearbyStations?.trim() || undefined,
+    nearbyLandmarks: m.nearbyLandmarks?.trim() || undefined,
     type: m.type,
     price: m.price,
     lat,
@@ -99,6 +108,13 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
  * Active media for public browse. Uses DB when configured and non-empty;
  * otherwise falls back to `mediaData` samples.
  */
+const catalogInclude = {
+  advertiserExecutions: {
+    select: { advertiserName: true } as const,
+    orderBy: { createdAt: "desc" as const },
+  },
+} as const;
+
 export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
   if (!isDatabaseConfigured()) {
     return mediaData;
@@ -108,12 +124,7 @@ export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
     const rows = await db.media.findMany({
       where: { isActive: true },
       orderBy: { updatedAt: "desc" },
-      include: {
-        advertiserExecutions: {
-          select: { advertiserName: true },
-          orderBy: { createdAt: "desc" },
-        },
-      },
+      include: catalogInclude,
     });
     if (rows.length === 0) {
       return mediaData;
@@ -121,6 +132,75 @@ export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
     return rows.map(prismaMediaToMediaItem);
   } catch {
     return mediaData;
+  }
+}
+
+/**
+ * 홈 추천 매체 (`app/[locale]/page.tsx` TOP 3·Verified 그리드).
+ * - DB 연결됨: `isFeatured=true`만 우선, `featuredOrder` 오름차순(null은 뒤). 없으면 활성 매체 최신순.
+ * - DB에 행이 없거나 쿼리 실패: 빈 배열(목업 `mediaData` 미사용).
+ * - DB 미설정(로컬 등): 샘플 `mediaData` 상한만 반환.
+ */
+export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
+  if (!isDatabaseConfigured()) {
+    return mediaData.slice(0, max);
+  }
+  try {
+    const db = getPrisma();
+    const featured = await db.media.findMany({
+      where: { isActive: true, isFeatured: true },
+      include: catalogInclude,
+    });
+    if (featured.length > 0) {
+      const sorted = [...featured].sort((a, b) => {
+        const ao = a.featuredOrder ?? 9999;
+        const bo = b.featuredOrder ?? 9999;
+        if (ao !== bo) return ao - bo;
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      });
+      return sorted.slice(0, max).map(prismaMediaToMediaItem);
+    }
+    const fallback = await db.media.findMany({
+      where: { isActive: true },
+      orderBy: { updatedAt: "desc" },
+      take: max,
+      include: catalogInclude,
+    });
+    if (fallback.length > 0) {
+      return fallback.map(prismaMediaToMediaItem);
+    }
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * 플래너 전용: 활성 매체만. DB 미설정·조회 오류·0건이면 빈 목록(목업 `mediaData` 미사용).
+ */
+export async function fetchPlannerMediaCatalog(): Promise<{
+  catalog: MediaItem[];
+  databaseEmpty: boolean;
+}> {
+  if (!isDatabaseConfigured()) {
+    return { catalog: [], databaseEmpty: true };
+  }
+  try {
+    const db = getPrisma();
+    const rows = await db.media.findMany({
+      where: { isActive: true },
+      orderBy: { updatedAt: "desc" },
+      include: catalogInclude,
+    });
+    if (rows.length === 0) {
+      return { catalog: [], databaseEmpty: true };
+    }
+    return {
+      catalog: rows.map(prismaMediaToMediaItem),
+      databaseEmpty: false,
+    };
+  } catch {
+    return { catalog: [], databaseEmpty: true };
   }
 }
 

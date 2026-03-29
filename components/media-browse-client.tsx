@@ -38,21 +38,15 @@ const CompareBar = dynamic(() => import("@/components/compare-bar"), {
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
 });
-import { typeLabels, type MediaItem, resolveMediaGallery } from "@/lib/media-data";
+import {
+  matchesMediaTextQuery,
+  typeLabels,
+  type MediaItem,
+  resolveMediaGallery,
+} from "@/lib/media-data";
 import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
-
-function matchesTextQuery(m: MediaItem, lower: string) {
-  return (
-    m.name.toLowerCase().includes(lower) ||
-    m.nameEn.toLowerCase().includes(lower) ||
-    m.location.toLowerCase().includes(lower) ||
-    m.locationEn.toLowerCase().includes(lower) ||
-    typeLabels[m.type]?.ko.toLowerCase().includes(lower) ||
-    typeLabels[m.type]?.en.toLowerCase().includes(lower)
-  );
-}
 
 export default function MediaBrowseClient({
   catalog,
@@ -74,6 +68,7 @@ export default function MediaBrowseClient({
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
 
+  /** DB(또는 폴백) `catalog`의 region·type·price와 동일 필드로 필터링 */
   const filtered = useMemo(() => {
     let data = catalog;
 
@@ -81,7 +76,7 @@ export default function MediaBrowseClient({
       data = data.filter((m) => m.id === searchTarget);
     } else if (textFilter.trim()) {
       const lower = textFilter.toLowerCase();
-      data = data.filter((m) => matchesTextQuery(m, lower));
+      data = data.filter((m) => matchesMediaTextQuery(m, lower));
     }
 
     return data.filter((m) => {
