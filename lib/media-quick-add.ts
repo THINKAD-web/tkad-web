@@ -35,6 +35,8 @@ export type QuickAddMediaJson = {
   nearby_stations: string;
   /** 비우면 자동(백화점·대학·관광 등) */
   nearby_landmarks: string;
+  /** 광고주 이력 (쉼표 구분) */
+  past_advertisers: string;
 };
 
 type QuickAddMediaJsonInput = Record<string, unknown>;
@@ -213,9 +215,10 @@ export function validateQuickAddItem(
     visibility_score: vis,
     effect_memo: str("effect_memo", ""),
     extracted_images: images,
-    nearby_facilities: str("nearby_facilities", ""),
-    nearby_stations: str("nearby_stations", ""),
+    nearby_facilities: str("nearby_facilities", "") || str("surrounding_facilities", ""),
+    nearby_stations: str("nearby_stations", "") || str("nearby_subway", ""),
     nearby_landmarks: str("nearby_landmarks", ""),
+    past_advertisers: str("past_advertisers", "") || str("advertiser_history", ""),
   };
 
   return { ok: true, item };
@@ -272,6 +275,7 @@ export type MediaQuickAddCreate = {
   nearbyFacilities: string | null;
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
+  pastAdvertisers: string | null;
 };
 
 export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
@@ -321,5 +325,6 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     nearbyFacilities: row.nearby_facilities.trim() || null,
     nearbyStations: row.nearby_stations.trim() || null,
     nearbyLandmarks: row.nearby_landmarks.trim() || null,
+    pastAdvertisers: row.past_advertisers.trim() || null,
   };
 }
