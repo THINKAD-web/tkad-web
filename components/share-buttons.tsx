@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { Link2, MessageCircle, Share2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 
 type ShareButtonsProps = {
   url: string;
@@ -42,9 +43,8 @@ export default function ShareButtons({
   }, [fullUrl]);
 
   const handleKakaoShare = useCallback(() => {
-    const kakaoUrl = `https://story.kakao.com/share?url=${encodeURIComponent(fullUrl)}`;
-    window.open(kakaoUrl, "_blank", "width=600,height=400,noopener,noreferrer");
-  }, [fullUrl]);
+    window.open(KAKAO_CHANNEL_PUBLIC_URL, "_blank", "noopener,noreferrer");
+  }, []);
 
   const handleNativeShare = useCallback(async () => {
     if (!navigator.share) return;
