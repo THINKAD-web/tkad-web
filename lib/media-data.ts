@@ -23,6 +23,8 @@ export interface MediaItem {
   resolution?: string;
   brightness?: string;
   targetAge?: string;
+  /** 가시성 점수 0–100 (DB `visibility_score`) */
+  visibilityScore?: number;
   features?: string;
   featuresEn?: string;
   dailyExposure?: string;
@@ -31,8 +33,10 @@ export interface MediaItem {
   operatingHours?: string;
   operatingHoursEn?: string;
   installYear?: number;
+  /** 과거 집행 브랜드 등 (예: "삼성, LG, 현대") — DB는 집행 이력에서 집계 */
   advertiserHistory?: string;
   advertiserHistoryEn?: string;
+  /** 주변 시설·역·랜드마크 요약 (예: "코엑스몰, 삼성역 2호선") */
   nearbyFacilities?: string;
   nearbyFacilitiesEn?: string;
   /** 진행·집행 사례 사진 (관리·콘텐츠용) */

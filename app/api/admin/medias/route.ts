@@ -2,6 +2,9 @@ import type { Prisma } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
+import { enrichNewMediaLocationFromKakao } from "@/lib/media-location-enrich";
+import { maybeEstimateDailyFootfall } from "@/lib/media-daily-footfall-estimate";
+import { maybeAutoFillNearbyMediaFields } from "@/lib/media-nearby-facilities";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -125,9 +128,61 @@ export async function POST(request: NextRequest) {
   if (em !== undefined) data.effectMemo = em;
   const ex = optStrArr(body.extractedImages);
   if (ex !== undefined) data.extractedImages = ex;
+  const pa = optStr(body.pastAdvertisers);
+  if (pa !== undefined) data.pastAdvertisers = pa;
+  const nf = optStr(body.nearbyFacilities);
+  if (nf !== undefined) data.nearbyFacilities = nf;
+  const ns = optStr(body.nearbyStations);
+  if (ns !== undefined) data.nearbyStations = ns;
+  const nl = optStr(body.nearbyLandmarks);
+  if (nl !== undefined) data.nearbyLandmarks = nl;
 
   if (typeof body.isActive === "boolean") {
     data.isActive = body.isActive;
+  }
+
+  const filled = await enrichNewMediaLocationFromKakao({
+    location: data.location,
+    latitude: data.latitude ?? null,
+    longitude: data.longitude ?? null,
+    city: data.city ?? null,
+    district: data.district ?? null,
+  });
+  data.latitude = filled.latitude;
+  data.longitude = filled.longitude;
+  data.city = filled.city;
+  data.district = filled.district;
+  data.addressVerified = filled.addressVerified;
+
+  const nearbyAuto = await maybeAutoFillNearbyMediaFields({
+    existingFacilities: data.nearbyFacilities ?? null,
+    existingStations: data.nearbyStations ?? null,
+    existingLandmarks: data.nearbyLandmarks ?? null,
+    latitude: data.latitude ?? null,
+    longitude: data.longitude ?? null,
+  });
+  if (nearbyAuto) {
+    if (nearbyAuto.nearbyFacilities != null) {
+      data.nearbyFacilities = nearbyAuto.nearbyFacilities;
+    }
+    if (nearbyAuto.nearbyStations != null) {
+      data.nearbyStations = nearbyAuto.nearbyStations;
+    }
+    if (nearbyAuto.nearbyLandmarks != null) {
+      data.nearbyLandmarks = nearbyAuto.nearbyLandmarks;
+    }
+    data.autoPopulatedAt = nearbyAuto.autoPopulatedAt;
+  }
+
+  const foot = await maybeEstimateDailyFootfall({
+    existingDaily: data.dailyFootfall ?? null,
+    latitude: data.latitude ?? null,
+    longitude: data.longitude ?? null,
+    city: data.city ?? null,
+    district: data.district ?? null,
+  });
+  if (foot != null) {
+    data.dailyFootfall = foot;
   }
 
   const db = getPrisma();

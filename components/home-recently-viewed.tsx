@@ -5,7 +5,11 @@ import { Clock, MapPin, Monitor, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
-import { getRecentlyViewed } from "@/lib/recently-viewed";
+import {
+  fetchRecentlyViewedItems,
+  readRecentlyViewedIds,
+  subscribeRecentlyViewedChanged,
+} from "@/lib/recently-viewed";
 import { typeLabels, type MediaItem } from "@/lib/media-data";
 import ScrollAnimate from "@/components/scroll-animate";
 
@@ -16,12 +20,42 @@ interface Props {
 export default function HomeRecentlyViewed({ locale }: Props) {
   const isKo = locale === "ko";
   const [items, setItems] = useState<MediaItem[]>([]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading localStorage on mount
-    setItems(getRecentlyViewed());
+    const ids = readRecentlyViewedIds();
+    if (ids.length === 0) {
+      setReady(true);
+      return;
+    }
+    let cancelled = false;
+    void fetchRecentlyViewedItems()
+      .then((data) => {
+        if (!cancelled) {
+          setItems(data);
+          setReady(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setItems([]);
+          setReady(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  useEffect(() => {
+    return subscribeRecentlyViewedChanged(() => {
+      void fetchRecentlyViewedItems()
+        .then(setItems)
+        .catch(() => setItems([]));
+    });
+  }, []);
+
+  if (!ready) return null;
   if (items.length === 0) return null;
 
   return (

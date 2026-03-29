@@ -27,6 +27,7 @@ import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
+import TrackMediaView from "@/components/track-media-view";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
@@ -80,6 +81,7 @@ export default async function MediaDetailPage({ params }: Props) {
 
   return (
     <>
+      <TrackMediaView mediaId={media.id} />
       <section className="relative w-full overflow-hidden bg-navy aspect-video">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

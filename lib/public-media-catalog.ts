@@ -1,4 +1,4 @@
-import type { Media } from "@prisma/client";
+import type { Media, MediaAdvertiserExecution } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   getMediaById,
@@ -6,8 +6,37 @@ import {
   type MediaItem,
 } from "@/lib/media-data";
 
+/** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
+export type MediaWithAdvertiserExecutions = Media & {
+  advertiserExecutions?: Pick<MediaAdvertiserExecution, "advertiserName">[];
+};
+
+function buildPastAdvertisersFromExecutions(
+  executions: Pick<MediaAdvertiserExecution, "advertiserName">[] | undefined,
+): string | undefined {
+  if (!executions?.length) return undefined;
+  const seen = new Set<string>();
+  const names: string[] = [];
+  for (const e of executions) {
+    const n = e.advertiserName.trim();
+    if (!n || seen.has(n)) continue;
+    seen.add(n);
+    names.push(n);
+  }
+  return names.length ? names.join(", ") : undefined;
+}
+
+/** nearby_facilities + stations + landmarks 를 비교·목록용 한 줄로 */
+function buildNearbyFacilitiesDisplay(m: Media): string | undefined {
+  const parts = [m.nearbyFacilities, m.nearbyStations, m.nearbyLandmarks]
+    .map((x) => (typeof x === "string" ? x.trim() : ""))
+    .filter(Boolean);
+  if (parts.length === 0) return undefined;
+  return parts.join(", ");
+}
+
 /** Map Prisma row → public `MediaItem` (list/detail/compare). */
-export function prismaMediaToMediaItem(m: Media): MediaItem {
+export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaItem {
   const lat = m.latitude ?? 37.5665;
   const lng = m.longitude ?? 126.978;
   const daily = m.dailyFootfall ?? 0;
@@ -42,6 +71,7 @@ export function prismaMediaToMediaItem(m: Media): MediaItem {
     resolution: m.resolution ?? undefined,
     brightness: undefined,
     targetAge: m.targetAge ?? undefined,
+    visibilityScore: m.visibilityScore,
     features: m.effectMemo ?? m.description ?? undefined,
     featuresEn: m.effectMemo ?? m.description ?? undefined,
     dailyExposure:
@@ -50,10 +80,17 @@ export function prismaMediaToMediaItem(m: Media): MediaItem {
     operatingHours: m.operatingHours ?? undefined,
     operatingHoursEn: m.operatingHours ?? undefined,
     installYear: undefined,
-    advertiserHistory: undefined,
-    advertiserHistoryEn: undefined,
-    nearbyFacilities: undefined,
-    nearbyFacilitiesEn: undefined,
+    ...(() => {
+      const manual = m.pastAdvertisers?.trim() || undefined;
+      const fromExec = buildPastAdvertisersFromExecutions(m.advertiserExecutions);
+      const line = manual || fromExec;
+      return {
+        advertiserHistory: line,
+        advertiserHistoryEn: line,
+      };
+    })(),
+    nearbyFacilities: buildNearbyFacilitiesDisplay(m),
+    nearbyFacilitiesEn: buildNearbyFacilitiesDisplay(m),
     caseStudyPhotos: undefined,
   };
 }
@@ -71,6 +108,12 @@ export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
     const rows = await db.media.findMany({
       where: { isActive: true },
       orderBy: { updatedAt: "desc" },
+      include: {
+        advertiserExecutions: {
+          select: { advertiserName: true },
+          orderBy: { createdAt: "desc" },
+        },
+      },
     });
     if (rows.length === 0) {
       return mediaData;
@@ -92,6 +135,12 @@ export async function resolveMediaForDetail(
     const db = getPrisma();
     const row = await db.media.findFirst({
       where: { id, isActive: true },
+      include: {
+        advertiserExecutions: {
+          select: { advertiserName: true },
+          orderBy: { createdAt: "desc" },
+        },
+      },
     });
     return row ? prismaMediaToMediaItem(row) : null;
   } catch {

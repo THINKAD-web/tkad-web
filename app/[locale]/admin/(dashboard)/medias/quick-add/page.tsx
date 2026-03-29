@@ -124,7 +124,20 @@ export default function AdminMediaQuickAddPage() {
           <h2 className="text-xl font-bold text-navy">매체 간편 등록 (JSON)</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             객체 하나 또는 배열을 붙여넣으면 실시간으로 검증·미리보기됩니다. 등록 시 DB에
-            저장되며 매체 관리·미디어 허브에서 동일하게 조회됩니다.
+            저장되며 매체 관리·미디어 허브에서 동일하게 조회됩니다. 서버에{" "}
+            <code className="rounded bg-slate-100 px-1">KAKAO_REST_API_KEY</code>가
+            설정되어 있으면 <code className="rounded bg-slate-100 px-1">full_address</code>
+            만으로도 위도·경도·시·구를 카카오 주소 API로 자동 보강합니다 (이미 넣은 값은
+            덮어쓰지 않습니다). 좌표가 잡히면 500m 이내 지하철역·백화점·쇼핑몰·대학·관광지
+            명칭을 모아 <code className="rounded bg-slate-100 px-1">nearby_facilities</code>에
+            저장합니다 (<code className="rounded bg-slate-100 px-1">nearby_facilities</code>를
+            직접 넣으면 자동 수집은 건너뜁니다).{" "}
+            <code className="rounded bg-slate-100 px-1">DATA_GO_KR_SERVICE_KEY</code>가
+            있으면 500m 이내 지하철역 승하차(공공데이터)로{" "}
+            <code className="rounded bg-slate-100 px-1">daily_footfall</code>을 추정하고,
+            없거나 비서울역이면 시·구 단위 상권 휴리스틱으로 채웁니다 (
+            <code className="rounded bg-slate-100 px-1">daily_footfall</code>을 이미 넣으면
+            덮어쓰지 않습니다).
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={loadSample}>

@@ -1,0 +1,96 @@
+import { NextRequest, NextResponse } from "next/server";
+import { comparePdfBuffer, type ComparePdfMediaRow } from "@/lib/build-compare-pdf";
+import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import type { MediaItem } from "@/lib/media-data";
+
+export const dynamic = "force-dynamic";
+
+function parseIds(raw: string | null): string[] {
+  if (!raw?.trim()) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const part of raw.split(",")) {
+    const id = part.trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+    if (out.length >= COMPARE_MAX_ITEMS) break;
+  }
+  return out;
+}
+
+function mediaToPdfRow(m: MediaItem, isKo: boolean): ComparePdfMediaRow {
+  return {
+    name: (isKo ? m.name : m.nameEn) || m.name,
+    location: (isKo ? m.location : m.locationEn) || m.location,
+    price: m.price,
+    size: m.size || "—",
+    resolution: m.resolution || "—",
+    dailyFootTraffic: m.dailyFootTraffic,
+    operatingHours:
+      (isKo ? m.operatingHours : m.operatingHoursEn) || "—",
+    targetAge: m.targetAge || "—",
+    advertiserHistory:
+      (isKo ? m.advertiserHistory : m.advertiserHistoryEn) || "—",
+    nearbyFacilities:
+      (isKo ? m.nearbyFacilities : m.nearbyFacilitiesEn) || "—",
+    visibilityScore: Math.min(
+      100,
+      Math.max(0, Math.round(m.visibilityScore ?? 0)),
+    ),
+  };
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const ids = parseIds(searchParams.get("ids"));
+  const isKo = searchParams.get("lang") !== "en";
+
+  if (ids.length < 2) {
+    return NextResponse.json(
+      { error: "At least two valid media ids are required." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const catalog = await fetchPublicMediaCatalog();
+    const byId = new Map(catalog.map((m) => [m.id, m]));
+    const items: MediaItem[] = [];
+    for (const id of ids) {
+      const m = byId.get(id);
+      if (m) items.push(m);
+    }
+
+    if (items.length < 2) {
+      return NextResponse.json(
+        { error: "Could not resolve at least two media from the catalog." },
+        { status: 404 },
+      );
+    }
+
+    const rows = items.map((m) => mediaToPdfRow(m, isKo));
+    const generatedAt = new Date().toISOString().slice(0, 10);
+    const buf = await comparePdfBuffer({ isKo, generatedAt, rows });
+
+    const filename = isKo
+      ? `thinkad-media-compare-${generatedAt}.pdf`
+      : `thinkad-media-compare-${generatedAt}.pdf`;
+
+    return new NextResponse(new Uint8Array(buf), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Cache-Control": "private, no-store",
+      },
+    });
+  } catch (e) {
+    console.error("[compare pdf]", e);
+    return NextResponse.json(
+      { error: "Failed to generate PDF." },
+      { status: 500 },
+    );
+  }
+}

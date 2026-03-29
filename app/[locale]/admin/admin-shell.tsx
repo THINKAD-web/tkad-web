@@ -17,6 +17,8 @@ import {
   ContactRound,
   Database,
   FileText,
+  Calculator,
+  ClipboardList,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -44,6 +46,8 @@ const navDefs = [
   { href: "/admin/medias", key: "medias" as const, icon: Monitor },
   { href: "/admin/media-hub", key: "mediaHub" as const, icon: Database },
   { href: "/admin/quote-templates", key: "quoteTemplates" as const, icon: FileText },
+  { href: "/admin/quotes", key: "quotesList" as const, icon: ClipboardList },
+  { href: "/admin/quotes/new", key: "quotesNew" as const, icon: Calculator },
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
 ];
 
@@ -62,6 +66,13 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathWithoutLocale === "/admin";
+    if (href === "/admin/quotes") {
+      return (
+        pathWithoutLocale === "/admin/quotes" ||
+        (pathWithoutLocale.startsWith("/admin/quotes/") &&
+          !pathWithoutLocale.startsWith("/admin/quotes/new"))
+      );
+    }
     return pathWithoutLocale.startsWith(href);
   };
 

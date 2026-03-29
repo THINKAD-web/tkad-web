@@ -31,6 +31,7 @@ import {
   type Industry,
   type ScoredMedia,
 } from "@/lib/ai-media-recommend";
+import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -42,7 +43,7 @@ type Props = {
   toggleCompare: (m: MediaItem) => void;
   isInCompare: (id: string) => boolean;
   addManyToCompare: (items: MediaItem[]) => void;
-  /** Max items in selection (compare/cart). Default 3. */
+  /** Max items in selection (compare/cart). Default `COMPARE_MAX_ITEMS`. */
   maxSelectionItems?: number;
   /** Override button/copy for cart-style flows on /recommend. */
   labelOverrides?: {
@@ -62,7 +63,7 @@ export default function MediaAiRecommendPanel({
   toggleCompare,
   isInCompare,
   addManyToCompare,
-  maxSelectionItems = 3,
+  maxSelectionItems = COMPARE_MAX_ITEMS,
   labelOverrides,
 }: Props) {
   const t = useTranslations();
@@ -108,8 +109,8 @@ export default function MediaAiRecommendPanel({
 
   const top3Ids = useMemo(() => {
     if (!results?.length) return [];
-    return results.slice(0, 3).map((s) => s.item.id);
-  }, [results]);
+    return results.slice(0, maxSelectionItems).map((s) => s.item.id);
+  }, [results, maxSelectionItems]);
 
   const quoteQueryPicked =
     compareItems.length > 0
@@ -118,8 +119,8 @@ export default function MediaAiRecommendPanel({
 
   const addTop3ToCompare = useCallback(() => {
     if (!results?.length) return;
-    addManyToCompare(results.slice(0, 3).map((s) => s.item));
-  }, [results, addManyToCompare]);
+    addManyToCompare(results.slice(0, maxSelectionItems).map((s) => s.item));
+  }, [results, addManyToCompare, maxSelectionItems]);
 
   return (
     <div className="space-y-8">

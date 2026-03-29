@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import {
   useState,
   useMemo,
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import {
   Search,
+  MapPin,
   Plus,
   Pencil,
   Trash2,
@@ -35,6 +37,16 @@ import {
   normalizeAdminMediaRow,
   parseAdminMediaListFromApiJson,
 } from "@/lib/admin-media-dto";
+
+const AdminMediaDraggableMap = dynamic(
+  () => import("@/components/admin-media-draggable-map"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[260px] animate-pulse rounded-lg bg-slate-100" />
+    ),
+  },
+);
 
 type Props = {
   initialMedias: AdminMediaDto[];
@@ -72,11 +84,19 @@ type AdminMediaForm = {
   name: string;
   nameEn: string;
   location: string;
+  city: string;
+  district: string;
   region: string;
   type: string;
   price: number;
   latitude: string;
   longitude: string;
+  nearbyFacilities: string;
+  nearbyStations: string;
+  nearbyLandmarks: string;
+  addressVerified: boolean;
+  /** ISO, display-only (서버 자동 수집 시각) */
+  autoPopulatedAt: string;
   dailyFootfall: string;
   weekdayFootfall: string;
   operatingHours: string;
@@ -99,17 +119,26 @@ type AdminMediaForm = {
   engagementRate: string;
   visibilityScore: string;
   effectMemo: string;
+  /** 광고주 이력 (쉼표 구분) */
+  pastAdvertisers: string;
 };
 
 const emptyForm: AdminMediaForm = {
   name: "",
   nameEn: "",
   location: "",
+  city: "",
+  district: "",
   region: "seoul",
   type: "digital",
   price: 0,
   latitude: "",
   longitude: "",
+  nearbyFacilities: "",
+  nearbyStations: "",
+  nearbyLandmarks: "",
+  addressVerified: false,
+  autoPopulatedAt: "",
   dailyFootfall: "",
   weekdayFootfall: "",
   operatingHours: "",
@@ -132,6 +161,7 @@ const emptyForm: AdminMediaForm = {
   engagementRate: "",
   visibilityScore: "0",
   effectMemo: "",
+  pastAdvertisers: "",
 };
 
 function apiToForm(m: AdminMediaDto): AdminMediaForm {
@@ -139,11 +169,18 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     name: m.name,
     nameEn: m.nameEn ?? "",
     location: m.location,
+    city: m.city ?? "",
+    district: m.district ?? "",
     region: m.region,
     type: m.type,
     price: m.price,
     latitude: m.latitude != null ? String(m.latitude) : "",
     longitude: m.longitude != null ? String(m.longitude) : "",
+    nearbyFacilities: m.nearbyFacilities ?? "",
+    nearbyStations: m.nearbyStations ?? "",
+    nearbyLandmarks: m.nearbyLandmarks ?? "",
+    addressVerified: m.addressVerified ?? false,
+    autoPopulatedAt: m.autoPopulatedAt ?? "",
     dailyFootfall:
       m.dailyFootfall != null ? String(m.dailyFootfall) : "",
     weekdayFootfall:
@@ -169,6 +206,7 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
       m.engagementRate != null ? String(m.engagementRate) : "",
     visibilityScore: String(m.visibilityScore ?? 0),
     effectMemo: m.effectMemo ?? "",
+    pastAdvertisers: m.pastAdvertisers ?? "",
   };
 }
 
@@ -209,6 +247,12 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     description: form.description.trim() || null,
     subCategory: form.subCategory.trim() || null,
     tags,
+    city: form.city.trim() || null,
+    district: form.district.trim() || null,
+    nearbyFacilities: form.nearbyFacilities.trim() || null,
+    nearbyStations: form.nearbyStations.trim() || null,
+    nearbyLandmarks: form.nearbyLandmarks.trim() || null,
+    addressVerified: form.addressVerified,
     latitude: parseOptFloat(form.latitude),
     longitude: parseOptFloat(form.longitude),
     priceNote: form.priceNote.trim() || null,
@@ -226,6 +270,7 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     engagementRate: parseOptFloat(form.engagementRate),
     visibilityScore: Number.isFinite(vis) ? Math.max(0, Math.min(100, vis)) : 0,
     effectMemo: form.effectMemo.trim() || null,
+    pastAdvertisers: form.pastAdvertisers.trim() || null,
     extractedImages,
   };
 }
@@ -266,8 +311,123 @@ export default function AdminMediasClient({
   const [uploadRunning, setUploadRunning] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formPrimaryImageInputRef = useRef<HTMLInputElement>(null);
+  const formGalleryImageInputRef = useRef<HTMLInputElement>(null);
+  const [formImageUploadBusy, setFormImageUploadBusy] = useState(false);
   /** 목록 GET이 저장/삭제보다 늦게 끝나면 옛 데이터로 덮어쓰는 레이스 방지 */
   const listFetchGenRef = useRef(0);
+
+  const [nearbyPreview, setNearbyPreview] = useState<{
+    nearbyFacilities: string | null;
+    nearestSubway: { name: string; distanceM: number } | null;
+  } | null>(null);
+  const [nearbyPreviewLoading, setNearbyPreviewLoading] = useState(false);
+  const [geoLookupLoading, setGeoLookupLoading] = useState(false);
+  const [geoLookupError, setGeoLookupError] = useState<string | null>(null);
+
+  const fetchNearbyPreview = useCallback(async (lat: number, lng: number) => {
+    setNearbyPreviewLoading(true);
+    try {
+      const res = await fetch("/api/admin/geo/nearby-preview", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude: lat, longitude: lng }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        nearbyFacilities?: string | null;
+        nearestSubway?: { name: string; distanceM: number } | null;
+      };
+      if (!res.ok) {
+        setNearbyPreview(null);
+        return;
+      }
+      setNearbyPreview({
+        nearbyFacilities: data.nearbyFacilities ?? null,
+        nearestSubway: data.nearestSubway ?? null,
+      });
+    } catch {
+      setNearbyPreview(null);
+    } finally {
+      setNearbyPreviewLoading(false);
+    }
+  }, []);
+
+  const onGeocodeFromAddress = useCallback(async () => {
+    const q = form.location.trim();
+    if (!q) {
+      setGeoLookupError("위치(주소)를 입력하세요.");
+      return;
+    }
+    setGeoLookupError(null);
+    setGeoLookupLoading(true);
+    try {
+      const res = await fetch("/api/admin/geo/lookup", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        latitude?: number;
+        longitude?: number;
+        city?: string;
+        district?: string;
+      };
+      if (!res.ok) {
+        setGeoLookupError(data.error ?? "주소를 찾지 못했습니다.");
+        return;
+      }
+      if (data.latitude == null || data.longitude == null) {
+        setGeoLookupError("좌표가 없습니다.");
+        return;
+      }
+      setForm((f) => ({
+        ...f,
+        latitude: String(data.latitude),
+        longitude: String(data.longitude),
+        city: data.city ?? f.city,
+        district: data.district ?? f.district,
+      }));
+    } catch {
+      setGeoLookupError("주소 검색 요청 실패");
+    } finally {
+      setGeoLookupLoading(false);
+    }
+  }, [form.location]);
+
+  const onMapPositionChange = useCallback((lat: number, lng: number) => {
+    setForm((f) => ({
+      ...f,
+      latitude: lat.toFixed(6),
+      longitude: lng.toFixed(6),
+    }));
+  }, []);
+
+  useEffect(() => {
+    if (!modalOpen) {
+      setNearbyPreview(null);
+      setGeoLookupError(null);
+      setNearbyPreviewLoading(false);
+      setGeoLookupLoading(false);
+    }
+  }, [modalOpen]);
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    const lat = parseOptFloat(form.latitude);
+    const lng = parseOptFloat(form.longitude);
+    if (lat == null || lng == null) {
+      setNearbyPreview(null);
+      return;
+    }
+    const t = window.setTimeout(() => {
+      void fetchNearbyPreview(lat, lng);
+    }, 480);
+    return () => clearTimeout(t);
+  }, [modalOpen, form.latitude, form.longitude, fetchNearbyPreview]);
 
   const loadMedias = useCallback(async (opts?: { showSpinner?: boolean }) => {
     const showSpinner = opts?.showSpinner ?? false;
@@ -562,6 +722,85 @@ export default function AdminMediasClient({
     [],
   );
 
+  const uploadFileToCloudinary = useCallback(async (file: File): Promise<string> => {
+    const sigRes = await fetch("/api/admin/upload/cloudinary", {
+      method: "POST",
+      credentials: "include",
+    });
+    if (!sigRes.ok) {
+      throw new Error("Cloudinary 서명 실패");
+    }
+    const sig = (await sigRes.json()) as {
+      timestamp: number;
+      signature: string;
+      folder: string;
+      cloudName: string;
+      apiKey: string;
+    };
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("api_key", sig.apiKey);
+    fd.append("timestamp", String(sig.timestamp));
+    fd.append("signature", sig.signature);
+    fd.append("folder", sig.folder);
+    const up = await fetch(
+      `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
+      { method: "POST", body: fd },
+    );
+    const upJson = (await up.json()) as {
+      secure_url?: string;
+      error?: { message: string };
+    };
+    if (!up.ok || !upJson.secure_url) {
+      throw new Error(upJson.error?.message ?? "업로드 실패");
+    }
+    return upJson.secure_url;
+  }, []);
+
+  const handleFormPrimaryImagePicked = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file?.type.startsWith("image/")) return;
+      setFormImageUploadBusy(true);
+      setSaveError(null);
+      try {
+        const url = await uploadFileToCloudinary(file);
+        setForm((f) => ({ ...f, image: url }));
+      } catch {
+        setSaveError("대표 이미지 업로드에 실패했습니다.");
+      } finally {
+        setFormImageUploadBusy(false);
+      }
+    },
+    [uploadFileToCloudinary],
+  );
+
+  const handleFormGalleryImagePicked = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file?.type.startsWith("image/")) return;
+      setFormImageUploadBusy(true);
+      setSaveError(null);
+      try {
+        const url = await uploadFileToCloudinary(file);
+        setForm((f) => {
+          const cur = f.extractedImagesText.trim();
+          return {
+            ...f,
+            extractedImagesText: cur ? `${cur}\n${url}` : url,
+          };
+        });
+      } catch {
+        setSaveError("추가 이미지 업로드에 실패했습니다.");
+      } finally {
+        setFormImageUploadBusy(false);
+      }
+    },
+    [uploadFileToCloudinary],
+  );
+
   const removeUploadItem = useCallback((index: number) => {
     setUploadItems((prev) => {
       const item = prev[index];
@@ -584,37 +823,7 @@ export default function AdminMediasClient({
         ),
       );
       try {
-        const sigRes = await fetch("/api/admin/upload/cloudinary", {
-          method: "POST",
-          credentials: "include",
-        });
-        if (!sigRes.ok) {
-          throw new Error("Cloudinary 서명 실패");
-        }
-        const sig = (await sigRes.json()) as {
-          timestamp: number;
-          signature: string;
-          folder: string;
-          cloudName: string;
-          apiKey: string;
-        };
-        const fd = new FormData();
-        fd.append("file", item.file);
-        fd.append("api_key", sig.apiKey);
-        fd.append("timestamp", String(sig.timestamp));
-        fd.append("signature", sig.signature);
-        fd.append("folder", sig.folder);
-        const up = await fetch(
-          `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-          { method: "POST", body: fd },
-        );
-        const upJson = (await up.json()) as {
-          secure_url?: string;
-          error?: { message: string };
-        };
-        if (!up.ok || !upJson.secure_url) {
-          throw new Error(upJson.error?.message ?? "업로드 실패");
-        }
+        const secureUrl = await uploadFileToCloudinary(item.file);
         const mid = item.mediaId!;
         const detailRes = await fetch(`/api/admin/medias/${mid}`, {
           credentials: "include",
@@ -626,8 +835,8 @@ export default function AdminMediasClient({
           ? normalizeAdminMediaRow(detailJson.media)
           : null;
         const prevUrls = detail?.extractedImages ?? [];
-        const nextUrls = [...prevUrls, upJson.secure_url];
-        const primary = detail?.image ?? upJson.secure_url;
+        const nextUrls = [...prevUrls, secureUrl];
+        const primary = detail?.image ?? secureUrl;
         const patchRes = await fetch(`/api/admin/medias/${mid}`, {
           method: "PATCH",
           credentials: "include",
@@ -659,7 +868,7 @@ export default function AdminMediasClient({
       }
     }
     setUploadRunning(false);
-  }, [uploadItems]);
+  }, [uploadItems, uploadFileToCloudinary]);
 
   const allMapped =
     uploadItems.length > 0 && uploadItems.every((i) => i.mediaId !== null);
@@ -931,7 +1140,7 @@ export default function AdminMediasClient({
             onClick={() => setModalOpen(false)}
             aria-hidden
           />
-          <Card className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col animate-fade-in-up overflow-hidden">
+          <Card className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col animate-fade-in-up overflow-hidden">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between">
               <CardTitle className="text-lg text-navy">
                 {editing ? "매체 수정" : "매체 추가"}
@@ -974,16 +1183,202 @@ export default function AdminMediasClient({
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  위치 *
+                  위치(주소) *
                 </label>
-                <Input
-                  value={form.location}
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <Input
+                    className="flex-1"
+                    value={form.location}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, location: e.target.value }))
+                    }
+                    placeholder="서울 강남구 테헤란로 123"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0 border-navy/20"
+                    disabled={geoLookupLoading}
+                    onClick={() => void onGeocodeFromAddress()}
+                  >
+                    {geoLookupLoading ? (
+                      <>
+                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        검색 중…
+                      </>
+                    ) : (
+                      "주소로 지도 이동"
+                    )}
+                  </Button>
+                </div>
+                {geoLookupError && (
+                  <p className="mt-1 text-xs text-amber-700">{geoLookupError}</p>
+                )}
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  카카오 주소 검색(KAKAO_REST_API_KEY)으로 위도·경도·시·구를 채웁니다.
+                </p>
+              </div>
+
+              <AdminMediaDraggableMap
+                latitude={parseOptFloat(form.latitude)}
+                longitude={parseOptFloat(form.longitude)}
+                onPositionChange={onMapPositionChange}
+                heightPx={260}
+              />
+
+              <div className="rounded-lg border border-navy/10 bg-slate-50/80 p-3">
+                <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-navy">
+                  <MapPin className="h-3.5 w-3.5 text-gold" />
+                  주변 정보 미리보기
+                </div>
+                {nearbyPreviewLoading ? (
+                  <p className="text-xs text-muted-foreground">불러오는 중…</p>
+                ) : nearbyPreview ? (
+                  <div className="space-y-2 text-xs">
+                    {nearbyPreview.nearestSubway && (
+                      <p>
+                        <span className="font-medium text-navy">인근 지하철: </span>
+                        {nearbyPreview.nearestSubway.name}
+                        <span className="text-muted-foreground">
+                          {" "}
+                          (약 {Math.round(nearbyPreview.nearestSubway.distanceM)}m)
+                        </span>
+                      </p>
+                    )}
+                    <p>
+                      <span className="font-medium text-navy">주변 시설 요약: </span>
+                      {nearbyPreview.nearbyFacilities?.trim() ? (
+                        <span>{nearbyPreview.nearbyFacilities}</span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          카카오 REST 키가 없거나 반경 내 결과가 없습니다.
+                        </span>
+                      )}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className="h-8 text-xs"
+                      disabled={
+                        !nearbyPreview.nearbyFacilities?.trim() &&
+                        !nearbyPreview.nearestSubway
+                      }
+                      onClick={() =>
+                        setForm((f) => {
+                          const fac = nearbyPreview.nearbyFacilities?.trim();
+                          const sub = nearbyPreview.nearestSubway;
+                          const stationLine = sub
+                            ? `${sub.name} (약 ${Math.round(sub.distanceM)}m)`
+                            : null;
+                          return {
+                            ...f,
+                            nearbyFacilities: fac ?? f.nearbyFacilities,
+                            nearbyStations: stationLine ?? f.nearbyStations,
+                          };
+                        })
+                      }
+                    >
+                      미리보기를 필드에 반영
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    위도·경도를 입력하거나 지도에서 핀을 놓으면 표시됩니다.
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    시·도 (자동/수정)
+                  </label>
+                  <Input
+                    value={form.city}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, city: e.target.value }))
+                    }
+                    placeholder="서울"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    구·군
+                  </label>
+                  <Input
+                    value={form.district}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, district: e.target.value }))
+                    }
+                    placeholder="강남구"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  주변 시설 요약 (저장 시 DB)
+                </label>
+                <Textarea
+                  value={form.nearbyFacilities}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, location: e.target.value }))
+                    setForm((f) => ({ ...f, nearbyFacilities: e.target.value }))
                   }
-                  placeholder="서울 강남구"
+                  placeholder="미리보기에서 반영하거나 직접 입력. 비우면 저장 시 서버가 자동 수집할 수 있습니다."
+                  rows={2}
+                  className="text-sm"
                 />
               </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  가까운 지하철역
+                </label>
+                <Textarea
+                  value={form.nearbyStations}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, nearbyStations: e.target.value }))
+                  }
+                  placeholder="예: 강남역 (약 120m)"
+                  rows={2}
+                  className="text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  주변 랜드마크
+                </label>
+                <Textarea
+                  value={form.nearbyLandmarks}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, nearbyLandmarks: e.target.value }))
+                  }
+                  placeholder="카페, 백화점 등 (비우면 저장 시 자동 수집 가능)"
+                  rows={2}
+                  className="text-sm"
+                />
+              </div>
+
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={form.addressVerified}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, addressVerified: e.target.checked }))
+                  }
+                />
+                주소·좌표 카카오 검증 완료 (addressVerified)
+              </label>
+              {form.autoPopulatedAt.trim() ? (
+                <p className="text-[11px] text-muted-foreground">
+                  자동 수집 시각:{" "}
+                  {Number.isNaN(Date.parse(form.autoPopulatedAt))
+                    ? form.autoPopulatedAt
+                    : new Date(form.autoPopulatedAt).toLocaleString("ko-KR")}
+                </p>
+              ) : null}
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -1188,13 +1583,42 @@ export default function AdminMediasClient({
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   대표 이미지 URL
                 </label>
-                <Input
-                  value={form.image}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, image: e.target.value }))
-                  }
-                  placeholder="https://…"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    className="min-w-0 flex-1"
+                    value={form.image}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, image: e.target.value }))
+                    }
+                    placeholder="https://…"
+                  />
+                  <input
+                    ref={formPrimaryImageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => void handleFormPrimaryImagePicked(e)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 gap-1.5"
+                    disabled={formImageUploadBusy}
+                    onClick={() => formPrimaryImageInputRef.current?.click()}
+                  >
+                    {formImageUploadBusy ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    업로드
+                  </Button>
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Cloudinary에 올린 뒤 URL이 대표 이미지에 채워집니다. 저장을 눌러
+                  반영하세요.
+                </p>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -1210,6 +1634,28 @@ export default function AdminMediasClient({
                     }))
                   }
                 />
+                <input
+                  ref={formGalleryImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => void handleFormGalleryImagePicked(e)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 gap-1.5"
+                  disabled={formImageUploadBusy}
+                  onClick={() => formGalleryImageInputRef.current?.click()}
+                >
+                  {formImageUploadBusy ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ImagePlus className="h-4 w-4" />
+                  )}
+                  파일에서 URL 추가
+                </Button>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -1307,6 +1753,24 @@ export default function AdminMediasClient({
                     }
                   />
                 </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  광고주 이력 (쉼표 구분)
+                </label>
+                <Textarea
+                  rows={2}
+                  value={form.pastAdvertisers}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, pastAdvertisers: e.target.value }))
+                  }
+                  placeholder="예: 삼성, LG, 현대"
+                  className="text-sm"
+                />
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  비우면 공개 카탈로그·비교표에는 집행 이력(MediaAdvertiserExecution)에서
+                  자동 요약됩니다.
+                </p>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">

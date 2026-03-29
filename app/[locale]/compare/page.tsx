@@ -1,4 +1,5 @@
 import ComparePageClient from "@/components/compare-page-client";
+import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import type { MediaItem } from "@/lib/media-data";
 
@@ -15,7 +16,11 @@ export default async function ComparePage({
   const raw = sp.ids;
   const idsParam = Array.isArray(raw) ? raw[0] : raw ?? "";
   const catalog = await fetchPublicMediaCatalog();
-  const idList = idsParam.split(",").map((s) => s.trim()).filter(Boolean);
+  const idList = idsParam
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, COMPARE_MAX_ITEMS);
   const items: MediaItem[] = [];
   for (const id of idList) {
     const m = catalog.find((x) => x.id === id);

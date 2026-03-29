@@ -39,8 +39,9 @@ const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
 });
 import { typeLabels, type MediaItem, resolveMediaGallery } from "@/lib/media-data";
-import { addRecentlyViewed } from "@/lib/recently-viewed";
+import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
+import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 
 function matchesTextQuery(m: MediaItem, lower: string) {
   return (
@@ -135,7 +136,7 @@ export default function MediaBrowseClient({
   };
 
   const handleMediaView = useCallback((media: MediaItem) => {
-    addRecentlyViewed(media);
+    addRecentlyViewedId(media.id);
     setSearchTarget(media.id);
     setTextFilter("");
     setMapSelectedId(media.id);
@@ -145,7 +146,7 @@ export default function MediaBrowseClient({
     setCompareItems((prev) => {
       const exists = prev.find((m) => m.id === media.id);
       if (exists) return prev.filter((m) => m.id !== media.id);
-      if (prev.length >= 3) return prev;
+      if (prev.length >= COMPARE_MAX_ITEMS) return prev;
       return [...prev, media];
     });
   }, []);
@@ -154,7 +155,7 @@ export default function MediaBrowseClient({
     setCompareItems((prev) => {
       const next = [...prev];
       for (const m of items) {
-        if (next.length >= 3) break;
+        if (next.length >= COMPARE_MAX_ITEMS) break;
         if (!next.some((x) => x.id === m.id)) next.push(m);
       }
       return next;
@@ -218,8 +219,6 @@ export default function MediaBrowseClient({
               </button>
             </div>
           </div>
-
-          <RecentlyViewedMedia locale={locale} />
 
           {mainTab === "ai" ? (
             <MediaAiRecommendPanel
@@ -442,7 +441,7 @@ export default function MediaBrowseClient({
                                 onChange={() => toggleCompare(media)}
                                 disabled={
                                   !isInCompare(media.id) &&
-                                  compareItems.length >= 3
+                                  compareItems.length >= COMPARE_MAX_ITEMS
                                 }
                                 className="h-3.5 w-3.5 rounded border-navy/30 text-gold accent-gold"
                               />
@@ -526,6 +525,8 @@ export default function MediaBrowseClient({
               </div>
             </div>
           )}
+
+          <RecentlyViewedMedia locale={locale} />
         </div>
       </section>
 
@@ -538,7 +539,7 @@ export default function MediaBrowseClient({
         onClear={() => setCompareItems([])}
       />
 
-      {compareItems.length > 0 && <div className="h-20" />}
+      {compareItems.length > 0 && <div className="h-24 md:h-28" />}
     </>
   );
 }

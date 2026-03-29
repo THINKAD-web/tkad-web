@@ -2,6 +2,9 @@ import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { getPrisma } from "@/lib/prisma";
+import { enrichQuickAddMediaFromKakao } from "@/lib/media-location-enrich";
+import { maybeEstimateDailyFootfall } from "@/lib/media-daily-footfall-estimate";
+import { maybeAutoFillNearbyMediaFields } from "@/lib/media-nearby-facilities";
 import {
   mapQuickAddToDb,
   validateQuickAddItems,
@@ -39,13 +42,51 @@ export async function POST(request: NextRequest) {
 
   await db.$transaction(async (tx) => {
     for (const row of validated.items) {
-      const data = mapQuickAddToDb(row);
-      const media = await tx.media.create({ data });
+      const { row: enriched, addressVerified: geoVerified } =
+        await enrichQuickAddMediaFromKakao(row);
+      const autoNear = await maybeAutoFillNearbyMediaFields({
+        existingFacilities: enriched.nearby_facilities,
+        existingStations: enriched.nearby_stations,
+        existingLandmarks: enriched.nearby_landmarks,
+        latitude: enriched.latitude,
+        longitude: enriched.longitude,
+      });
+      let withNearby = enriched;
+      if (autoNear) {
+        withNearby = {
+          ...withNearby,
+          nearby_facilities:
+            autoNear.nearbyFacilities ?? withNearby.nearby_facilities,
+          nearby_stations:
+            autoNear.nearbyStations ?? withNearby.nearby_stations,
+          nearby_landmarks:
+            autoNear.nearbyLandmarks ?? withNearby.nearby_landmarks,
+        };
+      }
+      const foot = await maybeEstimateDailyFootfall({
+        existingDaily: withNearby.daily_footfall,
+        latitude: withNearby.latitude,
+        longitude: withNearby.longitude,
+        city: withNearby.city,
+        district: withNearby.district,
+      });
+      const withFoot =
+        foot != null
+          ? { ...withNearby, daily_footfall: foot }
+          : withNearby;
+      const base = mapQuickAddToDb(withFoot);
+      const media = await tx.media.create({
+        data: {
+          ...base,
+          addressVerified: geoVerified,
+          autoPopulatedAt: autoNear?.autoPopulatedAt ?? null,
+        },
+      });
       await tx.mediaPriceSnapshot.create({
         data: {
           mediaId: media.id,
           price: media.price,
-          note: data.priceNote?.slice(0, 200) || "quick-add",
+          note: base.priceNote?.slice(0, 200) || "quick-add",
         },
       });
       created.push({ id: media.id, name: media.name });

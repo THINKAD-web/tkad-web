@@ -37,6 +37,13 @@ export type AdminMediaDto = {
   visibilityScore: number;
   effectMemo: string | null;
   extractedImages: string[];
+  /** 광고주 이력 (쉼표 구분) */
+  pastAdvertisers: string | null;
+  nearbyFacilities: string | null;
+  nearbyStations: string | null;
+  nearbyLandmarks: string | null;
+  addressVerified: boolean;
+  autoPopulatedAt: string | null;
   availability: MediaAvailability;
   /** 목록 노출·운영 on/off (예약 가용과 별개) */
   isActive: boolean;
@@ -89,6 +96,31 @@ function pickInt(
   const n = pickNum(r, camel, snake);
   if (n === null) return null;
   return Math.round(n);
+}
+
+function pickBool(
+  r: Record<string, unknown>,
+  camel: string,
+  snake: string,
+  defaultVal: boolean,
+): boolean {
+  const v = r[camel] ?? r[snake];
+  if (typeof v === "boolean") return v;
+  if (v === "true" || v === 1 || v === "1") return true;
+  if (v === "false" || v === 0 || v === "0") return false;
+  return defaultVal;
+}
+
+function pickIsoDateTime(
+  r: Record<string, unknown>,
+  camel: string,
+  snake: string,
+): string | null {
+  const v = r[camel] ?? r[snake];
+  if (v == null) return null;
+  if (typeof v === "string") return v;
+  if (v instanceof Date) return v.toISOString();
+  return null;
 }
 
 /** API/Prisma JSON 한 건 → DTO (snake_case·누락 필드 방어) */
@@ -160,6 +192,16 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     })(),
     effectMemo: pickStr(r, "effectMemo", "effect_memo"),
     extractedImages: pickStrArr(r, "extractedImages", "extracted_images"),
+    pastAdvertisers: pickStr(r, "pastAdvertisers", "past_advertisers"),
+    nearbyFacilities: pickStr(r, "nearbyFacilities", "nearby_facilities"),
+    nearbyStations: pickStr(r, "nearbyStations", "nearby_stations"),
+    nearbyLandmarks: pickStr(r, "nearbyLandmarks", "nearby_landmarks"),
+    addressVerified: pickBool(r, "addressVerified", "address_verified", false),
+    autoPopulatedAt: pickIsoDateTime(
+      r,
+      "autoPopulatedAt",
+      "auto_populated_at",
+    ),
     availability,
     isActive,
   };
@@ -221,6 +263,12 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     visibilityScore: m.visibilityScore,
     effectMemo: m.effectMemo,
     extractedImages: m.extractedImages ?? [],
+    pastAdvertisers: m.pastAdvertisers,
+    nearbyFacilities: m.nearbyFacilities,
+    nearbyStations: m.nearbyStations,
+    nearbyLandmarks: m.nearbyLandmarks,
+    addressVerified: m.addressVerified,
+    autoPopulatedAt: m.autoPopulatedAt?.toISOString() ?? null,
     availability: m.availability as MediaAvailability,
     isActive: m.isActive,
   };

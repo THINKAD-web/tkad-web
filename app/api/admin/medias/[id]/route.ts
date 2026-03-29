@@ -3,6 +3,9 @@ import { MediaAvailability } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
+import { kakaoFillForMediaPatch } from "@/lib/media-location-enrich";
+import { maybeEstimateDailyFootfall } from "@/lib/media-daily-footfall-estimate";
+import { maybeAutoFillNearbyMediaFields } from "@/lib/media-nearby-facilities";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +40,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
+
+  const db = getPrisma();
+  const existing = await db.media.findUnique({ where: { id } });
+  if (!existing) return json({ error: "Not found" }, 404);
 
   const data: Prisma.MediaUpdateInput = {};
   if (body.name != null) data.name = String(body.name).trim();
@@ -137,6 +144,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
   if (body.effectMemo !== undefined)
     data.effectMemo = String(body.effectMemo ?? "").trim() || null;
+  if (body.pastAdvertisers !== undefined) {
+    if (body.pastAdvertisers === null) {
+      data.pastAdvertisers = null;
+    } else {
+      data.pastAdvertisers = String(body.pastAdvertisers).trim() || null;
+    }
+  }
   if (body.extractedImages !== undefined) {
     if (
       !Array.isArray(body.extractedImages) ||
@@ -162,7 +176,175 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     data.isActive = body.isActive;
   }
 
-  const db = getPrisma();
+  if (body.nearbyFacilities !== undefined) {
+    if (body.nearbyFacilities === null) {
+      data.nearbyFacilities = null;
+    } else {
+      data.nearbyFacilities = String(body.nearbyFacilities).trim() || null;
+    }
+  }
+  if (body.nearbyStations !== undefined) {
+    if (body.nearbyStations === null) {
+      data.nearbyStations = null;
+    } else {
+      data.nearbyStations = String(body.nearbyStations).trim() || null;
+    }
+  }
+  if (body.nearbyLandmarks !== undefined) {
+    if (body.nearbyLandmarks === null) {
+      data.nearbyLandmarks = null;
+    } else {
+      data.nearbyLandmarks = String(body.nearbyLandmarks).trim() || null;
+    }
+  }
+  if (body.addressVerified !== undefined) {
+    if (typeof body.addressVerified !== "boolean") {
+      return json({ error: "addressVerified must be boolean" }, 400);
+    }
+    data.addressVerified = body.addressVerified;
+  }
+
+  if ("location" in body) {
+    const trimmed = String(body.location ?? "").trim();
+    const geo = await kakaoFillForMediaPatch(body, trimmed);
+    if (geo) Object.assign(data, geo);
+  }
+
+  let mergedLat: number | null = existing.latitude;
+  if ("latitude" in body) {
+    if (body.latitude === null) mergedLat = null;
+    else {
+      const n = Number(body.latitude);
+      mergedLat = Number.isFinite(n) ? n : null;
+    }
+  } else if (data.latitude !== undefined) {
+    const v = data.latitude;
+    mergedLat =
+      v === null
+        ? null
+        : typeof v === "number" && Number.isFinite(v)
+          ? v
+          : existing.latitude;
+  }
+
+  let mergedLng: number | null = existing.longitude;
+  if ("longitude" in body) {
+    if (body.longitude === null) mergedLng = null;
+    else {
+      const n = Number(body.longitude);
+      mergedLng = Number.isFinite(n) ? n : null;
+    }
+  } else if (data.longitude !== undefined) {
+    const v = data.longitude;
+    mergedLng =
+      v === null
+        ? null
+        : typeof v === "number" && Number.isFinite(v)
+          ? v
+          : existing.longitude;
+  }
+
+  const mergedNearby =
+    "nearbyFacilities" in body
+      ? body.nearbyFacilities === null || body.nearbyFacilities === undefined
+        ? null
+        : String(body.nearbyFacilities).trim() || null
+      : existing.nearbyFacilities;
+
+  const mergedStations =
+    "nearbyStations" in body
+      ? body.nearbyStations === null || body.nearbyStations === undefined
+        ? null
+        : String(body.nearbyStations).trim() || null
+      : existing.nearbyStations;
+
+  const mergedLandmarks =
+    "nearbyLandmarks" in body
+      ? body.nearbyLandmarks === null || body.nearbyLandmarks === undefined
+        ? null
+        : String(body.nearbyLandmarks).trim() || null
+      : existing.nearbyLandmarks;
+
+  const nearbyKeysTouched =
+    "nearbyFacilities" in body ||
+    "nearbyStations" in body ||
+    "nearbyLandmarks" in body;
+
+  const needNearbyAuto =
+    !mergedNearby?.trim() ||
+    !mergedStations?.trim() ||
+    !mergedLandmarks?.trim();
+
+  if (
+    !nearbyKeysTouched &&
+    mergedLat != null &&
+    mergedLng != null &&
+    needNearbyAuto
+  ) {
+    const auto = await maybeAutoFillNearbyMediaFields({
+      existingFacilities: mergedNearby,
+      existingStations: mergedStations,
+      existingLandmarks: mergedLandmarks,
+      latitude: mergedLat,
+      longitude: mergedLng,
+    });
+    if (auto) {
+      if (auto.nearbyFacilities != null) data.nearbyFacilities = auto.nearbyFacilities;
+      if (auto.nearbyStations != null) data.nearbyStations = auto.nearbyStations;
+      if (auto.nearbyLandmarks != null) data.nearbyLandmarks = auto.nearbyLandmarks;
+      data.autoPopulatedAt = auto.autoPopulatedAt;
+    }
+  }
+
+  let mergedCity: string | null = existing.city;
+  if ("city" in body) {
+    mergedCity =
+      body.city === null || body.city === undefined
+        ? null
+        : String(body.city).trim() || null;
+  } else if (Object.prototype.hasOwnProperty.call(data, "city")) {
+    const c = data.city as string | null | undefined;
+    mergedCity =
+      c === null || c === undefined ? null : String(c).trim() || null;
+  }
+
+  let mergedDistrict: string | null = existing.district;
+  if ("district" in body) {
+    mergedDistrict =
+      body.district === null || body.district === undefined
+        ? null
+        : String(body.district).trim() || null;
+  } else if (Object.prototype.hasOwnProperty.call(data, "district")) {
+    const d = data.district as string | null | undefined;
+    mergedDistrict =
+      d === null || d === undefined ? null : String(d).trim() || null;
+  }
+
+  let mergedDaily: number | null = existing.dailyFootfall;
+  if ("dailyFootfall" in body) {
+    if (body.dailyFootfall === null) mergedDaily = null;
+    else {
+      const n = Math.round(Number(body.dailyFootfall));
+      mergedDaily = Number.isFinite(n) ? n : null;
+    }
+  }
+
+  if (
+    !("dailyFootfall" in body) &&
+    mergedLat != null &&
+    mergedLng != null &&
+    (mergedDaily == null || mergedDaily === 0)
+  ) {
+    const est = await maybeEstimateDailyFootfall({
+      existingDaily: mergedDaily,
+      latitude: mergedLat,
+      longitude: mergedLng,
+      city: mergedCity,
+      district: mergedDistrict,
+    });
+    if (est != null) data.dailyFootfall = est;
+  }
+
   try {
     const media = await db.media.update({ where: { id }, data });
     if (isAdminAuthDebugEnabled()) {
