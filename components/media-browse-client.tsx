@@ -462,8 +462,8 @@ export default function MediaBrowseClient({
                                 className="bg-navy/5 text-xs text-navy"
                               >
                                 {isKo
-                                  ? typeLabels[media.type].ko
-                                  : typeLabels[media.type].en}
+                                  ? (typeLabels[media.type]?.ko ?? media.type)
+                                  : (typeLabels[media.type]?.en ?? media.type)}
                               </Badge>
                               <Link
                                 href={`/media/${media.id}`}

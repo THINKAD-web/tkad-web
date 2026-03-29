@@ -505,7 +505,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     variant="secondary"
                                     className="bg-navy/5 text-xs text-navy"
                                   >
-                                    {isKo ? typeLabel.ko : typeLabel.en}
+                                    {isKo ? (typeLabel?.ko ?? media.type) : (typeLabel?.en ?? media.type)}
                                   </Badge>
                                   <CardTitle className="pt-1 text-base leading-snug">
                                     {isKo ? media.name : media.nameEn}

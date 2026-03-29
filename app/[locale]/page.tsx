@@ -642,8 +642,8 @@ function HomeContent({
                       className="bg-navy/5 text-navy text-xs font-medium"
                     >
                       {isKo
-                        ? typeLabels[media.type].ko
-                        : typeLabels[media.type].en}
+                        ? (typeLabels[media.type]?.ko ?? media.type)
+                        : (typeLabels[media.type]?.en ?? media.type)}
                     </Badge>
                   </div>
                   <CardTitle className="text-base font-bold">
