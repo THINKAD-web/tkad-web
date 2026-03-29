@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -170,6 +171,15 @@ const statusMap: Record<string, { label: string; className: string }> = {
   completed: { label: "완료", className: "bg-emerald-100 text-emerald-700" },
 };
 
+type LiveStats = {
+  configured: boolean;
+  monthlyRevenueKrw: number;
+  inquiryConversionPct: number;
+  topMedia: { id: string; name: string; picks: number }[];
+  inquiries30d: number;
+  quotes30d: number;
+};
+
 export default function AdminDashboardPage() {
   const pathname = usePathname();
   const locale = pathname.split("/")[1] || "ko";
@@ -177,6 +187,35 @@ export default function AdminDashboardPage() {
   const maxConversionRate = Math.max(
     ...conversionData.monthlyRates.map((d) => d.rate),
   );
+
+  const [live, setLive] = useState<LiveStats | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/stats")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled) setLive(data as LiveStats);
+      })
+      .catch(() => {
+        if (!cancelled) setLive(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const popularMediaForCard = useMemo(() => {
+    if (live?.configured && live.topMedia.length > 0) {
+      return live.topMedia.slice(0, 10).map((m, i) => ({
+        rank: i + 1,
+        name: m.name,
+        type: "견적 포함",
+        inquiries: m.picks,
+        trend: "" as string,
+      }));
+    }
+    return popularMedia;
+  }, [live]);
 
   return (
     <div className="space-y-6 print-dashboard">
@@ -227,6 +266,62 @@ export default function AdminDashboardPage() {
           );
         })}
       </div>
+
+      {live?.configured ? (
+        <Card className="border-gold/30 bg-gold/5 print:hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-navy">
+              DB 연동 지표 (실데이터)
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              최근 30일 문의·견적, 이번 달 유료 확정 금액, 견적 요청에 많이 포함된 매체
+              TOP 10
+            </p>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">
+                이번 달 매출 (유료 확정)
+              </p>
+              <p className="mt-1 text-2xl font-bold text-navy">
+                {(live.monthlyRevenueKrw / 10000).toLocaleString()}만원
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">
+                문의 → 견적 전환 (30일)
+              </p>
+              <p className="mt-1 text-2xl font-bold text-navy">
+                {live.inquiryConversionPct}%
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                문의 {live.inquiries30d} · 견적 {live.quotes30d}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">
+                인기 매체 (견적에 포함된 횟수)
+              </p>
+              <ol className="mt-2 max-h-36 space-y-1 overflow-y-auto text-xs">
+                {live.topMedia.slice(0, 10).map((m, i) => (
+                  <li key={m.id} className="flex justify-between gap-2">
+                    <span className="truncate text-navy">
+                      {i + 1}. {m.name}
+                    </span>
+                    <span className="shrink-0 text-muted-foreground">
+                      {m.picks}회
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </CardContent>
+        </Card>
+      ) : live && !live.configured ? (
+        <p className="text-xs text-muted-foreground print:hidden">
+          DATABASE_URL을 설정하면 위 카드에 실데이터 지표가 표시됩니다.
+        </p>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-5">
         {/* Recent Inquiries */}
@@ -319,12 +414,14 @@ export default function AdminDashboardPage() {
         <Card className="xl:col-span-1">
           <CardHeader className="flex-row items-center gap-2">
             <Award className="h-4 w-4 text-gold" />
-            <CardTitle className="text-base">인기 매체 TOP 5</CardTitle>
+            <CardTitle className="text-base">
+              인기 매체 TOP {popularMediaForCard.length}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {popularMedia.map((item) => (
+            {popularMediaForCard.map((item) => (
               <div
-                key={item.rank}
+                key={`${item.rank}-${item.name}`}
                 className="flex items-center gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0"
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold text-sm font-bold text-navy">
@@ -335,13 +432,17 @@ export default function AdminDashboardPage() {
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <Badge variant="secondary">{item.type}</Badge>
                     <span className="text-xs text-muted-foreground">
-                      문의 {item.inquiries}건
+                      {item.type === "견적 포함"
+                        ? `${item.inquiries}회`
+                        : `문의 ${item.inquiries}건`}
                     </span>
                   </div>
                 </div>
-                <span className="shrink-0 text-sm font-semibold text-emerald-600">
-                  {item.trend}
-                </span>
+                {item.trend ? (
+                  <span className="shrink-0 text-sm font-semibold text-emerald-600">
+                    {item.trend}
+                  </span>
+                ) : null}
               </div>
             ))}
           </CardContent>
@@ -355,8 +456,15 @@ export default function AdminDashboardPage() {
           <CardContent className="space-y-4">
             <div>
               <p className="text-4xl font-bold text-gold">
-                {conversionData.rate}%
+                {live?.configured
+                  ? `${live.inquiryConversionPct}%`
+                  : `${conversionData.rate}%`}
               </p>
+              {live?.configured ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  최근 30일 문의 대비 견적 요청 비율 (실데이터)
+                </p>
+              ) : null}
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 <span>
                   총 문의{" "}

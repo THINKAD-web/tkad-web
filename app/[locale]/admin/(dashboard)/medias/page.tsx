@@ -18,17 +18,35 @@ import {
   Download,
   ImagePlus,
   CheckCircle2,
+  Code2,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Link } from "@/i18n/navigation";
 
 type MediaItem = {
   id: number;
   name: string;
   nameEn: string;
   location: string;
+  locationEn: string;
   region: string;
   type: string;
   price: number;
   active: boolean;
+  lat: number;
+  lng: number;
+  dailyFootTraffic: number;
+  monthlyFootTraffic: number;
+  size: string;
+  resolution: string;
+  brightness: string;
+  operatingHours: string;
+  installYear: number;
+  advertiserHistory: string;
+  nearbyFacilities: string;
+  features: string;
+  featuresEn: string;
+  sampleImages: string[];
 };
 
 const typeLabels: Record<string, string> = {
@@ -45,28 +63,48 @@ const regionLabels: Record<string, string> = {
   national: "전국",
 };
 
+const mediaDefaults: Omit<MediaItem, "id" | "name" | "nameEn" | "location" | "region" | "type" | "price" | "active"> = {
+  locationEn: "",
+  lat: 37.5665,
+  lng: 126.978,
+  dailyFootTraffic: 0,
+  monthlyFootTraffic: 0,
+  size: "",
+  resolution: "",
+  brightness: "",
+  operatingHours: "",
+  installYear: 0,
+  advertiserHistory: "",
+  nearbyFacilities: "",
+  features: "",
+  featuresEn: "",
+  sampleImages: [],
+};
+
 const initialMedia: MediaItem[] = [
-  { id: 1, name: "강남역 대형 빌보드", nameEn: "Gangnam Station Large Billboard", location: "서울 강남구", region: "seoul", type: "billboard", price: 2500, active: true },
-  { id: 2, name: "코엑스 디지털 사이니지", nameEn: "COEX Digital Signage", location: "서울 삼성동", region: "seoul", type: "digital", price: 3800, active: true },
-  { id: 3, name: "홍대입구역 지하철 광고", nameEn: "Hongdae Station Subway Ad", location: "서울 마포구", region: "seoul", type: "subway", price: 1200, active: true },
-  { id: 4, name: "명동 대형 전광판", nameEn: "Myeongdong Large LED", location: "서울 중구", region: "seoul", type: "digital", price: 4200, active: true },
-  { id: 5, name: "잠실 롯데월드타워 빌보드", nameEn: "Lotte World Tower Billboard", location: "서울 송파구", region: "seoul", type: "billboard", price: 5000, active: false },
-  { id: 6, name: "서면역 디지털 스크린", nameEn: "Seomyeon Station Digital Screen", location: "부산 부산진구", region: "busan", type: "digital", price: 1500, active: true },
-  { id: 7, name: "해운대 해변 빌보드", nameEn: "Haeundae Beach Billboard", location: "부산 해운대구", region: "busan", type: "billboard", price: 1800, active: true },
-  { id: 8, name: "부산역 지하철 광고", nameEn: "Busan Station Subway Ad", location: "부산 동구", region: "busan", type: "subway", price: 900, active: false },
-  { id: 9, name: "제주공항 디지털 광고", nameEn: "Jeju Airport Digital Ad", location: "제주시", region: "jeju", type: "digital", price: 2200, active: true },
-  { id: 10, name: "제주 중문관광단지 빌보드", nameEn: "Jungmun Resort Billboard", location: "서귀포시", region: "jeju", type: "billboard", price: 1000, active: true },
-  { id: 11, name: "강남대로 버스 쉘터", nameEn: "Gangnam-daero Bus Shelter", location: "서울 강남구", region: "seoul", type: "bus", price: 800, active: true },
-  { id: 12, name: "을지로 지하철 랩핑", nameEn: "Euljiro Subway Wrapping", location: "서울 중구", region: "seoul", type: "subway", price: 2000, active: true },
-  { id: 13, name: "전국 고속도로 빌보드", nameEn: "National Highway Billboard", location: "전국", region: "national", type: "billboard", price: 3500, active: true },
-  { id: 14, name: "전국 시내버스 광고", nameEn: "National City Bus Ad", location: "전국", region: "national", type: "bus", price: 600, active: false },
-  { id: 15, name: "여의도 IFC 디지털", nameEn: "Yeouido IFC Digital", location: "서울 영등포구", region: "seoul", type: "digital", price: 3200, active: true },
+  { ...mediaDefaults, id: 1, name: "강남역 대형 빌보드", nameEn: "Gangnam Station Large Billboard", location: "서울 강남구", locationEn: "Gangnam-gu, Seoul", region: "seoul", type: "billboard", price: 2500, active: true, lat: 37.498, lng: 127.0276, dailyFootTraffic: 320000, monthlyFootTraffic: 9600000 },
+  { ...mediaDefaults, id: 2, name: "코엑스 디지털 사이니지", nameEn: "COEX Digital Signage", location: "서울 삼성동", locationEn: "Samseong-dong, Seoul", region: "seoul", type: "digital", price: 3800, active: true, lat: 37.512, lng: 127.059, dailyFootTraffic: 400000 },
+  { ...mediaDefaults, id: 3, name: "홍대입구역 지하철 광고", nameEn: "Hongdae Station Subway Ad", location: "서울 마포구", locationEn: "Mapo-gu, Seoul", region: "seoul", type: "subway", price: 1200, active: true, lat: 37.5567, lng: 126.9236, dailyFootTraffic: 95000 },
+  { ...mediaDefaults, id: 4, name: "명동 대형 전광판", nameEn: "Myeongdong Large LED", location: "서울 중구", locationEn: "Jung-gu, Seoul", region: "seoul", type: "digital", price: 4200, active: true, lat: 37.5636, lng: 126.9826, dailyFootTraffic: 280000 },
+  { ...mediaDefaults, id: 5, name: "잠실 롯데월드타워 빌보드", nameEn: "Lotte World Tower Billboard", location: "서울 송파구", locationEn: "Songpa-gu, Seoul", region: "seoul", type: "billboard", price: 5000, active: false, lat: 37.5125, lng: 127.1025, dailyFootTraffic: 310000 },
+  { ...mediaDefaults, id: 6, name: "서면역 디지털 스크린", nameEn: "Seomyeon Station Digital Screen", location: "부산 부산진구", locationEn: "Busanjin-gu, Busan", region: "busan", type: "digital", price: 1500, active: true, lat: 35.1579, lng: 129.0593, dailyFootTraffic: 140000, monthlyFootTraffic: 4200000 },
+  { ...mediaDefaults, id: 7, name: "해운대 해변 빌보드", nameEn: "Haeundae Beach Billboard", location: "부산 해운대구", locationEn: "Haeundae-gu, Busan", region: "busan", type: "billboard", price: 1800, active: true, lat: 35.1587, lng: 129.1604, dailyFootTraffic: 120000 },
+  { ...mediaDefaults, id: 8, name: "부산역 지하철 광고", nameEn: "Busan Station Subway Ad", location: "부산 동구", locationEn: "Dong-gu, Busan", region: "busan", type: "subway", price: 900, active: false, lat: 35.115, lng: 129.041, dailyFootTraffic: 85000 },
+  { ...mediaDefaults, id: 9, name: "제주공항 디지털 광고", nameEn: "Jeju Airport Digital Ad", location: "제주시", locationEn: "Jeju City", region: "jeju", type: "digital", price: 2200, active: true, lat: 33.506, lng: 126.493, dailyFootTraffic: 110000 },
+  { ...mediaDefaults, id: 10, name: "제주 중문관광단지 빌보드", nameEn: "Jungmun Resort Billboard", location: "서귀포시", locationEn: "Seogwipo", region: "jeju", type: "billboard", price: 1000, active: true, lat: 33.252, lng: 126.412, dailyFootTraffic: 65000 },
+  { ...mediaDefaults, id: 11, name: "강남대로 버스 쉘터", nameEn: "Gangnam-daero Bus Shelter", location: "서울 강남구", locationEn: "Gangnam-gu, Seoul", region: "seoul", type: "bus", price: 800, active: true, lat: 37.4979, lng: 127.0276, dailyFootTraffic: 180000 },
+  { ...mediaDefaults, id: 12, name: "을지로 지하철 랩핑", nameEn: "Euljiro Subway Wrapping", location: "서울 중구", locationEn: "Jung-gu, Seoul", region: "seoul", type: "subway", price: 2000, active: true, lat: 37.5663, lng: 126.985, dailyFootTraffic: 150000 },
+  { ...mediaDefaults, id: 13, name: "전국 고속도로 빌보드", nameEn: "National Highway Billboard", location: "전국", locationEn: "Nationwide", region: "national", type: "billboard", price: 3500, active: true, lat: 37.5, lng: 127.0, dailyFootTraffic: 220000 },
+  { ...mediaDefaults, id: 14, name: "전국 시내버스 광고", nameEn: "National City Bus Ad", location: "전국", locationEn: "Nationwide", region: "national", type: "bus", price: 600, active: false, lat: 36.5, lng: 127.9, dailyFootTraffic: 350000 },
+  { ...mediaDefaults, id: 15, name: "여의도 IFC 디지털", nameEn: "Yeouido IFC Digital", location: "서울 영등포구", locationEn: "Yeongdeungpo-gu, Seoul", region: "seoul", type: "digital", price: 3200, active: true, lat: 37.525, lng: 126.925, dailyFootTraffic: 210000 },
 ];
 
 const emptyForm: Omit<MediaItem, "id"> = {
+  ...mediaDefaults,
   name: "",
   nameEn: "",
   location: "",
+  locationEn: "",
   region: "seoul",
   type: "billboard",
   price: 0,
@@ -126,10 +164,25 @@ export default function AdminMediasPage() {
       name: media.name,
       nameEn: media.nameEn,
       location: media.location,
+      locationEn: media.locationEn,
       region: media.region,
       type: media.type,
       price: media.price,
       active: media.active,
+      lat: media.lat,
+      lng: media.lng,
+      dailyFootTraffic: media.dailyFootTraffic,
+      monthlyFootTraffic: media.monthlyFootTraffic,
+      size: media.size,
+      resolution: media.resolution,
+      brightness: media.brightness,
+      operatingHours: media.operatingHours,
+      installYear: media.installYear,
+      advertiserHistory: media.advertiserHistory,
+      nearbyFacilities: media.nearbyFacilities,
+      features: media.features,
+      featuresEn: media.featuresEn,
+      sampleImages: media.sampleImages ?? [],
     });
     setModalOpen(true);
   }, []);
@@ -161,14 +214,36 @@ export default function AdminMediasPage() {
 
   const handleExportCSV = useCallback(() => {
     const BOM = "\uFEFF";
-    const header = ["매체명", "영문명", "위치", "지역", "유형", "가격(만원)", "상태"];
+    const header = [
+      "매체명",
+      "영문명",
+      "위치",
+      "위치(영문)",
+      "지역",
+      "유형",
+      "가격(만원)",
+      "위도",
+      "경도",
+      "일일유동",
+      "월간유동",
+      "운영시간",
+      "이미지URL수",
+      "상태",
+    ];
     const rows = medias.map((m) => [
       m.name,
       m.nameEn,
       m.location,
+      m.locationEn,
       regionLabels[m.region] || m.region,
       typeLabels[m.type] || m.type,
       String(m.price),
+      String(m.lat),
+      String(m.lng),
+      String(m.dailyFootTraffic),
+      String(m.monthlyFootTraffic),
+      m.operatingHours,
+      String(m.sampleImages?.length ?? 0),
       m.active ? "활성" : "비활성",
     ]);
     const csv = [header, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -232,6 +307,17 @@ export default function AdminMediasPage() {
         if (progress >= 100) {
           progress = 100;
           clearInterval(interval);
+          const mid = item.mediaId;
+          if (mid != null) {
+            const demoUrl = `https://res.cloudinary.com/demo/image/upload/w_800,h_450,c_fill/sample.jpg?v=${Date.now()}-${index}`;
+            setMedias((ms) =>
+              ms.map((m) =>
+                m.id === mid
+                  ? { ...m, sampleImages: [...m.sampleImages, demoUrl] }
+                  : m,
+              ),
+            );
+          }
           setUploadItems((prev) =>
             prev.map((it, i) =>
               i === index ? { ...it, progress: 100, status: "done" } : it,
@@ -311,6 +397,15 @@ export default function AdminMediasPage() {
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">엑셀 다운로드</span>
+            </Button>
+            <Button variant="outline" className="shrink-0" asChild>
+              <Link
+                href="/admin/medias/quick-add"
+                className="inline-flex items-center gap-2"
+              >
+                <Code2 className="h-4 w-4" />
+                <span className="hidden sm:inline">JSON 간편 등록</span>
+              </Link>
             </Button>
             <Button
               onClick={openAdd}
@@ -459,8 +554,8 @@ export default function AdminMediasPage() {
             className="absolute inset-0 bg-black/40"
             onClick={() => setModalOpen(false)}
           />
-          <Card className="relative z-10 w-full max-w-md animate-fade-in-up">
-            <CardHeader className="flex-row items-start justify-between">
+          <Card className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col animate-fade-in-up overflow-hidden">
+            <CardHeader className="flex shrink-0 flex-row items-start justify-between">
               <CardTitle className="text-lg text-navy">
                 {editing ? "매체 수정" : "매체 추가"}
               </CardTitle>
@@ -472,7 +567,7 @@ export default function AdminMediasPage() {
                 <X className="h-4 w-4" />
               </Button>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   매체명 (한국어) *
@@ -507,6 +602,18 @@ export default function AdminMediasPage() {
                     setForm((f) => ({ ...f, location: e.target.value }))
                   }
                   placeholder="서울 강남구"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  위치 (영문)
+                </label>
+                <Input
+                  value={form.locationEn}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, locationEn: e.target.value }))
+                  }
+                  placeholder="Gangnam-gu, Seoul"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -547,23 +654,221 @@ export default function AdminMediasPage() {
                   </select>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    가격 (만원)
+                  </label>
+                  <Input
+                    type="number"
+                    value={form.price || ""}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        price: parseInt(e.target.value, 10) || 0,
+                      }))
+                    }
+                    placeholder="2500"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    설치 연도
+                  </label>
+                  <Input
+                    type="number"
+                    value={form.installYear || ""}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        installYear: parseInt(e.target.value, 10) || 0,
+                      }))
+                    }
+                    placeholder="2022"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    위도
+                  </label>
+                  <Input
+                    type="number"
+                    step="any"
+                    value={form.lat}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        lat: parseFloat(e.target.value) || 0,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    경도
+                  </label>
+                  <Input
+                    type="number"
+                    step="any"
+                    value={form.lng}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        lng: parseFloat(e.target.value) || 0,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    일일 유동인구
+                  </label>
+                  <Input
+                    type="number"
+                    value={form.dailyFootTraffic || ""}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        dailyFootTraffic: parseInt(e.target.value, 10) || 0,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    월간 유동인구
+                  </label>
+                  <Input
+                    type="number"
+                    value={form.monthlyFootTraffic || ""}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        monthlyFootTraffic: parseInt(e.target.value, 10) || 0,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  가격 (만원)
+                  운영 시간
                 </label>
                 <Input
-                  type="number"
-                  value={form.price || ""}
+                  value={form.operatingHours}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, operatingHours: e.target.value }))
+                  }
+                  placeholder="06:00–24:00"
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    크기
+                  </label>
+                  <Input
+                    value={form.size}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, size: e.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    해상도
+                  </label>
+                  <Input
+                    value={form.resolution}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, resolution: e.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    밝기
+                  </label>
+                  <Input
+                    value={form.brightness}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, brightness: e.target.value }))
+                    }
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  광고주 이력
+                </label>
+                <Textarea
+                  rows={2}
+                  value={form.advertiserHistory}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, advertiserHistory: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  주변 시설
+                </label>
+                <Textarea
+                  rows={2}
+                  value={form.nearbyFacilities}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, nearbyFacilities: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  특징 (한국어)
+                </label>
+                <Textarea
+                  rows={2}
+                  value={form.features}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, features: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  특징 (영어)
+                </label>
+                <Textarea
+                  rows={2}
+                  value={form.featuresEn}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, featuresEn: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  이미지 URL (한 줄에 하나, Cloudinary 등)
+                </label>
+                <Textarea
+                  rows={4}
+                  value={form.sampleImages.join("\n")}
                   onChange={(e) =>
                     setForm((f) => ({
                       ...f,
-                      price: parseInt(e.target.value) || 0,
+                      sampleImages: e.target.value
+                        .split("\n")
+                        .map((s) => s.trim())
+                        .filter(Boolean),
                     }))
                   }
-                  placeholder="2500"
+                  placeholder="https://res.cloudinary.com/.../image1.jpg"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 border-t pt-4 pb-1">
                 <Button variant="outline" onClick={() => setModalOpen(false)}>
                   취소
                 </Button>

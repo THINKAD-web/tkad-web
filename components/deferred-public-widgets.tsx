@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Floating widgets use `ssr: false` so the server HTML omits them; they mount only
+ * on the client (localStorage, window, exit intent). That avoids hydration
+ * mismatches for markup that depends on browser-only state.
+ */
 import dynamic from "next/dynamic";
 
 const QuickInquiryButton = dynamic(

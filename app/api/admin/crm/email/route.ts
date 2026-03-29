@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import {
-  isSmtpConfigured,
+  isEmailConfigured,
   sendEmailWithResult,
 } from "@/lib/email/client";
+import { isAdminRequestAuthorized } from "@/lib/require-admin-request";
 import { siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,10 @@ function json(body: unknown, init?: ResponseInit) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!isAdminRequestAuthorized(request)) {
+    return json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     request.headers.get("x-real-ip") ??
@@ -54,12 +59,12 @@ export async function POST(request: NextRequest) {
     return json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  if (!isSmtpConfigured()) {
+  if (!isEmailConfigured()) {
     return json(
       {
         ok: true,
         sent: false,
-        code: "SMTP_DISABLED" as const,
+        code: "EMAIL_DISABLED" as const,
       },
       { status: 200 },
     );

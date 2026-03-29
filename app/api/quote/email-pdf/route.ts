@@ -82,11 +82,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
-    if (msg === "SMTP not configured") {
+    if (msg === "Email not configured") {
       return json(
         {
           error: "Email unavailable",
-          code: "SMTP_DISABLED",
+          code: "EMAIL_DISABLED",
         },
         { status: 503 },
       );

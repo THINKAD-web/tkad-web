@@ -3,6 +3,7 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email/client";
 import { getContactConfirmationEmail } from "@/lib/email/contact-confirmation";
+import { getContactAdminNotifyEmail } from "@/lib/email/contact-admin-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,23 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error("[contact] DB error:", err);
     return json({ error: "Failed to save inquiry" }, { status: 500 });
+  }
+
+  const alertTo = process.env.CONTACT_ALERT_EMAIL?.trim();
+  if (alertTo) {
+    try {
+      const { subject, text, html } = getContactAdminNotifyEmail({
+        company: company?.trim() ?? "",
+        name: name!.trim(),
+        phone: phone!.trim(),
+        email: email?.trim() ?? "",
+        budget: budget?.trim() ?? "",
+        message: message!.trim(),
+      });
+      await sendEmail({ to: alertTo, subject, text, html });
+    } catch (err) {
+      console.error("[contact] Admin notify email failed:", err);
+    }
   }
 
   if (email?.trim()) {

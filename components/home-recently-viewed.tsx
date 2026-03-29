@@ -49,7 +49,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           {items.slice(0, 3).map((media, i) => (
             <ScrollAnimate key={media.id} delay={i * 100}>
-              <Link href="/media" className="block touch-manipulation">
+              <Link href={`/media/${media.id}`} className="block touch-manipulation">
                 <Card className="group cursor-pointer overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-1">
                   <div className="flex h-28 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
                     <Monitor className="h-8 w-8 text-navy/15 transition-transform group-hover:scale-110" />

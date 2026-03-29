@@ -7,9 +7,20 @@ import { mediaData, typeLabels, type MediaItem } from "@/lib/media-data";
 interface Props {
   locale: string;
   onSelect: (media: MediaItem) => void;
+  /** Fired when the user clicks Search or presses Enter (without picking a dropdown row). */
+  onSearchSubmit?: (query: string) => void;
+  /** Fired on every input change so the parent can clear text filters when the field is emptied. */
+  onQueryChange?: (query: string) => void;
+  searchButtonLabel?: string;
 }
 
-export default function MediaSearchAutocomplete({ locale, onSelect }: Props) {
+export default function MediaSearchAutocomplete({
+  locale,
+  onSelect,
+  onSearchSubmit,
+  onQueryChange,
+  searchButtonLabel,
+}: Props) {
   const isKo = locale === "ko";
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<MediaItem[]>([]);
@@ -47,8 +58,15 @@ export default function MediaSearchAutocomplete({ locale, onSelect }: Props) {
 
   const handleChange = (value: string) => {
     setQuery(value);
+    onQueryChange?.(value);
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => search(value), 300);
+  };
+
+  const submitTextSearch = () => {
+    const q = query.trim();
+    onSearchSubmit?.(q);
+    setIsOpen(false);
   };
 
   const handleSelect = (media: MediaItem) => {
@@ -58,17 +76,29 @@ export default function MediaSearchAutocomplete({ locale, onSelect }: Props) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isOpen) return;
-    if (e.key === "ArrowDown") {
+    if (e.key === "ArrowDown" && isOpen && results.length > 0) {
       e.preventDefault();
       setActiveIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
-    } else if (e.key === "ArrowUp") {
+      return;
+    }
+    if (e.key === "ArrowUp" && isOpen && results.length > 0) {
       e.preventDefault();
       setActiveIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
-    } else if (e.key === "Enter" && activeIndex >= 0) {
-      e.preventDefault();
-      handleSelect(results[activeIndex]);
-    } else if (e.key === "Escape") {
+      return;
+    }
+    if (e.key === "Enter") {
+      if (isOpen && activeIndex >= 0 && results[activeIndex]) {
+        e.preventDefault();
+        handleSelect(results[activeIndex]);
+        return;
+      }
+      if (onSearchSubmit) {
+        e.preventDefault();
+        submitTextSearch();
+      }
+      return;
+    }
+    if (e.key === "Escape") {
       setIsOpen(false);
     }
   };
@@ -93,31 +123,46 @@ export default function MediaSearchAutocomplete({ locale, onSelect }: Props) {
     };
   }, []);
 
+  const btnLabel = searchButtonLabel ?? (isKo ? "검색" : "Search");
+
   return (
     <div className="relative">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => handleChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => query.trim() && results.length > 0 && setIsOpen(true)}
-          placeholder={isKo ? "매체명, 지역, 유형 검색..." : "Search name, location, type..."}
-          className="w-full rounded-lg border bg-white py-2.5 pl-10 pr-9 text-sm outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
-        />
-        {query && (
+      <div className="flex gap-2">
+        <div className="relative min-w-0 flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => handleChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => query.trim() && results.length > 0 && setIsOpen(true)}
+            placeholder={isKo ? "매체명, 지역, 유형 검색..." : "Search name, location, type..."}
+            className="w-full rounded-lg border bg-white py-2.5 pl-10 pr-9 text-sm outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                onQueryChange?.("");
+                setResults([]);
+                setIsOpen(false);
+                inputRef.current?.focus();
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-navy"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        {onSearchSubmit && (
           <button
-            onClick={() => {
-              setQuery("");
-              setResults([]);
-              setIsOpen(false);
-              inputRef.current?.focus();
-            }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-navy"
+            type="button"
+            onClick={submitTextSearch}
+            className="shrink-0 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-navy/90"
           >
-            <X className="h-4 w-4" />
+            {btnLabel}
           </button>
         )}
       </div>

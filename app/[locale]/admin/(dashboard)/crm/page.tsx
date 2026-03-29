@@ -168,7 +168,7 @@ export default function AdminCrmPage() {
       setSending(key);
       try {
         const data = await postCrmEmail(payload);
-        if (data.code === "SMTP_DISABLED") {
+        if (data.code === "EMAIL_DISABLED" || data.code === "SMTP_DISABLED") {
           toast("warning", t("smtpSkipped"));
         } else if (data.sent) {
           toast("success", t("smtpSent"));
@@ -197,7 +197,7 @@ export default function AdminCrmPage() {
           contactName: c.contactName,
           campaignName: campaignName(cp),
         });
-        if (data.code === "SMTP_DISABLED") {
+        if (data.code === "EMAIL_DISABLED" || data.code === "SMTP_DISABLED") {
           toast("warning", t("smtpSkipped"));
           setSending(null);
           return;

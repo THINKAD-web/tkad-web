@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { autoLinkQuoteRequestToCampaign } from "@/lib/quote-campaign-link";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -88,12 +89,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const db = getPrisma();
-    await db.quoteRequest.create({
+    const emailNorm = String(email ?? "").trim() || null;
+    const created = await db.quoteRequest.create({
       data: {
         company: String(company ?? "").trim(),
         name: String(name).trim(),
         phone: String(phone).trim(),
-        email: String(email ?? "").trim() || null,
+        email: emailNorm,
         mediaIds: JSON.stringify(ids),
         period: period != null ? String(period) : null,
         budgetMin: budgetMinN,
@@ -102,6 +104,7 @@ export async function POST(request: NextRequest) {
         message: String(message ?? "").trim() || null,
       },
     });
+    await autoLinkQuoteRequestToCampaign(db, created.id, emailNorm);
   } catch (err) {
     console.error("[quote] DB error:", err);
     return json({ error: "Failed to save quote request" }, { status: 500 });

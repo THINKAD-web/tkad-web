@@ -5,8 +5,21 @@ import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Monitor, BadgeCheck, Eye, Sparkles } from "lucide-react";
-import { mediaData, typeLabels, type MediaItem } from "@/lib/media-data";
+import {
+  ArrowLeft,
+  MapPin,
+  Monitor,
+  BadgeCheck,
+  Eye,
+  Sparkles,
+  ExternalLink,
+} from "lucide-react";
+import {
+  mediaData,
+  typeLabels,
+  type MediaItem,
+  resolveMediaGallery,
+} from "@/lib/media-data";
 import SolutionCtaButton from "@/components/solution-cta-button";
 
 export default function ComparePage() {
@@ -61,37 +74,101 @@ export default function ComparePage() {
       label: isKo ? "위치" : "Location",
       render: (m) => (
         <span className="flex items-center gap-1 text-sm">
-          <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+          <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           {isKo ? m.location : m.locationEn}
         </span>
       ),
     },
     {
-      label: isKo ? "월 가격" : "Monthly Price",
+      label: isKo ? "좌표" : "Coordinates",
+      render: (m) => (
+        <span className="font-mono text-xs text-muted-foreground">
+          {m.lat.toFixed(4)}, {m.lng.toFixed(4)}
+        </span>
+      ),
+    },
+    {
+      label: isKo ? "월 가격" : "Monthly price",
       render: (m) => (
         <span className="text-lg font-bold text-navy">
           ₩{m.price.toLocaleString()}
           <span className="text-xs font-normal text-muted-foreground">
-            만원
+            {isKo ? "만원" : " (10K)"}
           </span>
         </span>
       ),
     },
     {
-      label: isKo ? "일일 노출수" : "Daily Exposure",
+      label: isKo ? "일일 유동" : "Daily foot traffic",
       render: (m) => (
         <span className="flex items-center gap-1 text-sm font-semibold text-navy">
           <Eye className="h-3.5 w-3.5 text-gold" />
-          {m.dailyExposure || "-"}
+          {m.dailyFootTraffic.toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      label: isKo ? "월간 유동(추정)" : "Monthly foot traffic (est.)",
+      render: (m) => (
+        <span className="text-sm font-semibold text-navy">
+          {(m.monthlyFootTraffic ?? m.dailyFootTraffic * 30).toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      label: isKo ? "일일 노출(표기)" : "Daily exposure (label)",
+      render: (m) => (
+        <span className="text-sm text-navy">{m.dailyExposure || "—"}</span>
+      ),
+    },
+    {
+      label: isKo ? "크기" : "Size",
+      render: (m) => <span className="text-sm">{m.size || "—"}</span>,
+    },
+    {
+      label: isKo ? "해상도" : "Resolution",
+      render: (m) => <span className="text-sm">{m.resolution || "—"}</span>,
+    },
+    {
+      label: isKo ? "밝기" : "Brightness",
+      render: (m) => <span className="text-sm">{m.brightness || "—"}</span>,
+    },
+    {
+      label: isKo ? "운영시간" : "Hours",
+      render: (m) => (
+        <span className="text-sm">
+          {(isKo ? m.operatingHours : m.operatingHoursEn) || "—"}
+        </span>
+      ),
+    },
+    {
+      label: isKo ? "설치연도" : "Install year",
+      render: (m) => (
+        <span className="text-sm">{m.installYear ? String(m.installYear) : "—"}</span>
+      ),
+    },
+    {
+      label: isKo ? "광고주 이력" : "Advertiser history",
+      render: (m) => (
+        <span className="text-sm leading-snug">
+          {(isKo ? m.advertiserHistory : m.advertiserHistoryEn) || "—"}
+        </span>
+      ),
+    },
+    {
+      label: isKo ? "주변 시설" : "Nearby",
+      render: (m) => (
+        <span className="text-sm leading-snug">
+          {(isKo ? m.nearbyFacilities : m.nearbyFacilitiesEn) || "—"}
         </span>
       ),
     },
     {
       label: isKo ? "특징" : "Features",
       render: (m) => (
-        <span className="flex items-center gap-1 text-sm">
-          <Sparkles className="h-3.5 w-3.5 text-gold" />
-          {(isKo ? m.features : m.featuresEn) || "-"}
+        <span className="flex items-start gap-1 text-sm text-left">
+          <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
+          {(isKo ? m.features : m.featuresEn) || "—"}
         </span>
       ),
     },
@@ -123,53 +200,79 @@ export default function ComparePage() {
             </Link>
           </div>
 
-          {/* Header cards */}
-          <div className="grid gap-4" style={{ gridTemplateColumns: `180px repeat(${items.length}, 1fr)` }}>
+          <div
+            className="grid gap-4"
+            style={{ gridTemplateColumns: `180px repeat(${items.length}, minmax(0,1fr))` }}
+          >
             <div />
             {items.map((media) => (
               <div
                 key={media.id}
                 className="overflow-hidden rounded-xl border bg-white shadow-sm"
               >
-                <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
-                  <Monitor className="h-10 w-10 text-navy/15" />
-                  <div className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                <div className="relative flex h-32 items-center justify-center overflow-hidden bg-gradient-to-br from-navy/5 to-navy/10">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={resolveMediaGallery(media)[0]}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy/50 to-transparent" />
+                  <Monitor className="relative z-0 h-10 w-10 text-white/25" />
+                  <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white">
                     <BadgeCheck className="h-3 w-3" />
                     Verified
                   </div>
                 </div>
-                <div className="p-4 text-center">
+                <div className="space-y-2 p-4 text-center">
                   <h3 className="font-bold text-navy">
                     {isKo ? media.name : media.nameEn}
                   </h3>
+                  <Link href={`/media/${media.id}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs font-semibold"
+                    >
+                      <ExternalLink className="mr-1 h-3 w-3" />
+                      {isKo ? "상세 페이지" : "Detail page"}
+                    </Button>
+                  </Link>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Comparison table */}
-          <div className="mt-4 overflow-hidden rounded-xl border bg-white shadow-sm">
-            {rows.map((row, i) => (
-              <div
-                key={row.label}
-                className={`grid items-center ${i % 2 === 0 ? "bg-slate-50/50" : "bg-white"}`}
-                style={{ gridTemplateColumns: `180px repeat(${items.length}, 1fr)` }}
-              >
-                <div className="px-5 py-4 text-sm font-semibold text-navy/70">
-                  {row.label}
-                </div>
-                {items.map((media) => (
-                  <div key={media.id} className="px-5 py-4 text-center">
-                    {row.render(media)}
+          <div className="mt-4 overflow-x-auto rounded-xl border bg-white shadow-sm">
+            <div className="min-w-[720px]">
+              {rows.map((row, i) => (
+                <div
+                  key={row.label}
+                  className={`grid items-start ${i % 2 === 0 ? "bg-slate-50/50" : "bg-white"}`}
+                  style={{
+                    gridTemplateColumns: `180px repeat(${items.length}, minmax(0,1fr))`,
+                  }}
+                >
+                  <div className="px-5 py-4 text-sm font-semibold text-navy/70">
+                    {row.label}
                   </div>
-                ))}
-              </div>
-            ))}
+                  {items.map((media) => (
+                    <div key={media.id} className="px-5 py-4 text-center">
+                      {row.render(media)}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mt-10 text-center">
             <SolutionCtaButton
-              label={isKo ? "이 매체로 캠페인 제안 받기" : "Get Campaign Proposal for These Media"}
+              label={
+                isKo
+                  ? "이 매체로 캠페인 제안 받기"
+                  : "Get Campaign Proposal for These Media"
+              }
               size="lg"
               className="h-12"
             />

@@ -73,8 +73,8 @@ function AboutContent({
     {
       year: "2022",
       event: {
-      ko: "국내 OOH 네트워크 본격 확장",
-      en: "Domestic OOH network expansion",
+        ko: "국내 OOH 네트워크 본격 확장",
+        en: "Domestic OOH network expansion",
       },
     },
     {

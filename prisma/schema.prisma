@@ -6,6 +6,27 @@ datasource db {
   provider = "postgresql"
 }
 
+enum CampaignStatus {
+  proposal
+  contract
+  airing
+  completed
+}
+
+enum FinancialDocKind {
+  quote
+  contract
+  invoice
+}
+
+enum FinancialDocStatus {
+  draft
+  sent
+  paid
+  overdue
+  cancelled
+}
+
 model Media {
   id        String   @id @default(cuid())
   name      String
@@ -17,10 +38,205 @@ model Media {
   image     String?
   width     String?
   height    String?
+
+  description      String?
+  subCategory      String?  @map("sub_category")
+  tags             String[] @default([])
+  district         String?
+  city             String?
+  latitude         Float?
+  longitude        Float?
+  priceNote        String?  @map("price_note")
+  widthM           Float?   @map("width_m")
+  heightM          Float?   @map("height_m")
+  resolution       String?
+  operatingHours   String?  @map("operating_hours")
+  dailyFootfall    Int?     @map("daily_footfall")
+  weekdayFootfall  Int?     @map("weekday_footfall")
+  targetAge        String?  @map("target_age")
+  impressions      Int?
+  reach            Float?
+  frequency        Float?
+  cpm              Float?
+  engagementRate   Float?   @map("engagement_rate")
+  visibilityScore  Int      @default(0) @map("visibility_score")
+  effectMemo       String?  @map("effect_memo")
+  extractedImages  String[] @default([]) @map("extracted_images")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  priceSnapshots MediaPriceSnapshot[]
+  bookings       MediaBooking[]
+
   @@map("media")
+}
+
+model MediaPriceSnapshot {
+  id            String   @id @default(cuid())
+  mediaId       String   @map("media_id")
+  price         Int
+  note          String?
+  effectiveFrom DateTime @default(now()) @map("effective_from")
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([mediaId])
+  @@map("media_price_snapshots")
+}
+
+model MediaBooking {
+  id         String    @id @default(cuid())
+  mediaId    String    @map("media_id")
+  title      String
+  startsAt   DateTime  @map("starts_at")
+  endsAt     DateTime  @map("ends_at")
+  status     String    @default("hold")
+  campaignId String?   @map("campaign_id")
+  notes      String?
+
+  media    Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([mediaId])
+  @@index([startsAt, endsAt])
+  @@map("media_bookings")
+}
+
+model CrmAccount {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  company   String
+  name      String
+  phone     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  campaigns   Campaign[]
+  contactLogs CrmContactLog[]
+  notes       CrmNote[]
+  followUps   CrmFollowUp[]
+
+  @@map("crm_accounts")
+}
+
+model CrmContactLog {
+  id        String   @id @default(cuid())
+  accountId String   @map("account_id")
+  channel   String
+  summary   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  account CrmAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@map("crm_contact_logs")
+}
+
+model CrmNote {
+  id        String   @id @default(cuid())
+  accountId String   @map("account_id")
+  body      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  account CrmAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@map("crm_notes")
+}
+
+model CrmFollowUp {
+  id               String    @id @default(cuid())
+  accountId        String    @map("account_id")
+  title            String
+  dueAt            DateTime  @map("due_at")
+  doneAt           DateTime? @map("done_at")
+  remindEmail      String?   @map("remind_email")
+  reminderSentAt   DateTime? @map("reminder_sent_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  account CrmAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([dueAt])
+  @@map("crm_follow_ups")
+}
+
+model Campaign {
+  id            String          @id @default(cuid())
+  name          String
+  clientCompany String          @map("client_company")
+  clientName    String          @map("client_name")
+  clientEmail   String          @map("client_email")
+  clientPhone   String?         @map("client_phone")
+  status        CampaignStatus  @default(proposal)
+  budgetMin     Int?            @map("budget_min")
+  budgetMax     Int?            @map("budget_max")
+  startDate     DateTime?       @map("start_date")
+  endDate       DateTime?       @map("end_date")
+  notes         String?
+  accountId     String?         @map("account_id")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  account         CrmAccount?             @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  scheduleEvents  CampaignScheduleEvent[]
+  financialDocs   CampaignFinancialDoc[]
+  mediaBookings   MediaBooking[]
+  quoteRequests   QuoteRequest[]
+
+  @@index([status])
+  @@map("campaigns")
+}
+
+model CampaignScheduleEvent {
+  id         String   @id @default(cuid())
+  campaignId String   @map("campaign_id")
+  title      String
+  startsAt   DateTime @map("starts_at")
+  endsAt     DateTime @map("ends_at")
+  kind       String   @default("broadcast")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([startsAt])
+  @@map("campaign_schedule_events")
+}
+
+model CampaignFinancialDoc {
+  id          String             @id @default(cuid())
+  campaignId  String             @map("campaign_id")
+  kind        FinancialDocKind
+  title       String
+  amountKrw   Int?               @map("amount_krw")
+  status      FinancialDocStatus @default(draft)
+  dueDate     DateTime?          @map("due_date")
+  documentUrl String?            @map("document_url")
+  paidAt      DateTime?          @map("paid_at")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([dueDate])
+  @@index([kind, status])
+  @@map("campaign_financial_docs")
+}
+
+model QuoteTemplate {
+  id         String   @id @default(cuid())
+  name       String
+  headerHtml String?  @map("header_html")
+  footerHtml String?  @map("footer_html")
+  bodyHtml   String   @map("body_html")
+  isDefault  Boolean  @default(false) @map("is_default")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("quote_templates")
 }
 
 model ContactInquiry {
@@ -47,37 +263,41 @@ model CustomerFeedback {
 }
 
 model CaseStudy {
-  id          String   @id @default(cuid())
-  title       String
-  titleEn     String?  @map("title_en")
-  description String
-  descriptionEn String? @map("description_en")
-  category    String
-  image       String?
-  client      String?
-  results     String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(cuid())
+  title         String
+  titleEn       String?  @map("title_en")
+  description   String
+  descriptionEn String?  @map("description_en")
+  category      String
+  image         String?
+  client        String?
+  results       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("case_studies")
 }
 
 model QuoteRequest {
-  id             String   @id @default(cuid())
-  company        String
-  name           String
-  phone          String
-  email          String?
-  mediaIds       String   @map("media_ids")
-  period         String?
-  budgetMin      Int?     @map("budget_min")
-  budgetMax      Int?     @map("budget_max")
-  estimatedCost  Int?     @map("estimated_cost")
-  message        String?
-  status         String   @default("pending")
-  region         String?
-  createdAt      DateTime @default(now()) @map("created_at")
+  id            String   @id @default(cuid())
+  company       String
+  name          String
+  phone         String
+  email         String?
+  mediaIds      String   @map("media_ids")
+  period        String?
+  budgetMin     Int?     @map("budget_min")
+  budgetMax     Int?     @map("budget_max")
+  estimatedCost Int?     @map("estimated_cost")
+  message       String?
+  status        String   @default("pending")
+  region        String?
+  campaignId    String?  @map("campaign_id")
+  createdAt     DateTime @default(now()) @map("created_at")
 
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId])
   @@map("quote_requests")
 }
 

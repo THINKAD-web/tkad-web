@@ -4,15 +4,15 @@ import { useState, useEffect } from "react";
 import { Clock, MapPin, Monitor } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "@/i18n/navigation";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
 import { typeLabels, type MediaItem } from "@/lib/media-data";
 
 interface Props {
   locale: string;
-  onSelect?: (media: MediaItem) => void;
 }
 
-export default function RecentlyViewedMedia({ locale, onSelect }: Props) {
+export default function RecentlyViewedMedia({ locale }: Props) {
   const isKo = locale === "ko";
   const [items, setItems] = useState<MediaItem[]>([]);
 
@@ -33,10 +33,9 @@ export default function RecentlyViewedMedia({ locale, onSelect }: Props) {
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((media) => (
+          <Link key={media.id} href={`/media/${media.id}`} className="block">
           <Card
-            key={media.id}
             className="cursor-pointer overflow-hidden transition-shadow hover:shadow-md"
-            onClick={() => onSelect?.(media)}
           >
             <div className="flex h-24 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
               <Monitor className="h-8 w-8 text-navy/15" />
@@ -62,6 +61,7 @@ export default function RecentlyViewedMedia({ locale, onSelect }: Props) {
               </div>
             </CardContent>
           </Card>
+          </Link>
         ))}
       </div>
     </section>

@@ -365,7 +365,7 @@ export default function QuotePage() {
       });
       const data = (await res.json()) as { code?: string; error?: string };
       if (!res.ok) {
-        if (data.code === "SMTP_DISABLED") {
+        if (data.code === "EMAIL_DISABLED" || data.code === "SMTP_DISABLED") {
           toast("warning", t("quote.smtpDisabled"));
           return;
         }

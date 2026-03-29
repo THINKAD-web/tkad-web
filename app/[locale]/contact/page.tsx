@@ -19,6 +19,7 @@ import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { getCaseStudyBySlug } from "@/lib/case-studies";
+import { getMediaById } from "@/lib/media-data";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 
@@ -78,6 +79,8 @@ export default function ContactPage() {
   const casePrefillDone = useRef(false);
   const academyTopic = searchParams.get("topic") === "academy";
   const academyPrefillDone = useRef(false);
+  const mediaIdParam = searchParams.get("media");
+  const mediaPrefillDone = useRef(false);
 
   const [form, setForm] = useState<FormFields>({
     company: "",
@@ -102,6 +105,26 @@ export default function ContactPage() {
   useEffect(() => {
     academyPrefillDone.current = false;
   }, [academyTopic]);
+
+  useEffect(() => {
+    mediaPrefillDone.current = false;
+  }, [mediaIdParam]);
+
+  useEffect(() => {
+    if (!mediaIdParam || mediaPrefillDone.current) return;
+    const mid = Number(mediaIdParam);
+    const refMedia = Number.isFinite(mid) ? getMediaById(mid) : undefined;
+    if (!refMedia) return;
+    mediaPrefillDone.current = true;
+    const title = isKo ? refMedia.name : refMedia.nameEn;
+    const snippet = isKo
+      ? `매체 "${title}" (ID ${refMedia.id}) 관련 문의드립니다.\n`
+      : `Inquiry regarding media "${title}" (ID ${refMedia.id}).\n`;
+    setForm((prev) => {
+      if (prev.message.trim() !== "") return prev;
+      return { ...prev, message: snippet };
+    });
+  }, [mediaIdParam, isKo]);
 
   useEffect(() => {
     if (!refCase || casePrefillDone.current) return;
