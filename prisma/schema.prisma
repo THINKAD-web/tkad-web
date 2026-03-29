@@ -233,6 +233,7 @@ model Campaign {
   mediaBookings   MediaBooking[]
   quoteRequests   QuoteRequest[]
   proofPhotos     CampaignProofPhoto[]
+  successCase     SuccessCase?
 
   @@index([status])
   @@map("campaigns")
@@ -411,4 +412,90 @@ model AdminUser {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("admin_users")
+}
+
+model TrendReport {
+  id                 String    @id @default(cuid())
+  month              String    @unique
+  status             String    @default("draft")
+  titleKo            String    @map("title_ko")
+  titleEn            String?   @map("title_en")
+  contentKo          String    @map("content_ko") @db.Text
+  summaryKo          String[]  @map("summary_ko")
+  marketTrendKo      String[]  @map("market_trend_ko")
+  doohTrendKo        String[]  @map("dooh_trend_ko")
+  verticalStrategies Json?     @map("vertical_strategies")
+  thumbnailUrl       String?   @map("thumbnail_url")
+  publishedAt        DateTime? @map("published_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  @@map("trend_reports")
+}
+
+model SuccessCase {
+  id             String    @id @default(cuid())
+  campaignId     String?   @unique @map("campaign_id")
+  campaign       Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  status         String    @default("draft")
+  clientName     String    @map("client_name")
+  industry       String
+  titleKo        String    @map("title_ko")
+  titleEn        String?   @map("title_en")
+  summaryKo      String    @map("summary_ko")
+  challengeKo    String    @map("challenge_ko") @db.Text
+  solutionKo     String    @map("solution_ko") @db.Text
+  resultsKo      String[]  @map("results_ko")
+  metricsJson    Json?     @map("metrics_json")
+  mediaUsed      String[]  @map("media_used")
+  periodStart    DateTime? @map("period_start")
+  periodEnd      DateTime? @map("period_end")
+  thumbnailUrl   String?   @map("thumbnail_url")
+  galleryUrls    String[]  @default([]) @map("gallery_urls")
+  testimonialKo  String?   @map("testimonial_ko") @db.Text
+  publishedAt    DateTime? @map("published_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([publishedAt])
+  @@map("success_cases")
+}
+
+model AcademyLesson {
+  id             String    @id @default(cuid())
+  courseId       String    @map("course_id")
+  order          Int       @map("lesson_order")
+  status         String    @default("draft")
+  titleKo        String    @map("title_ko")
+  titleEn        String?   @map("title_en")
+  descriptionKo  String    @map("description_ko")
+  objectivesKo   String[]  @map("objectives_ko")
+  chapters       Json      @map("chapters")
+  quizzes        Json?     @map("quizzes")
+  durationMin    Int       @default(15) @map("duration_min")
+  thumbnailUrl   String?   @map("thumbnail_url")
+  publishedAt    DateTime? @map("published_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([courseId, order])
+  @@map("academy_lessons")
+}
+
+/// type: trend_report | academy_lesson | success_case | campaign_report | campaign_completion_pdf
+model GenerationLog {
+  id         String   @id @default(cuid())
+  type       String
+  targetId   String?  @map("target_id")
+  prompt     String   @db.Text
+  response   String?  @db.Text
+  model      String   @map("model_name")
+  tokensUsed Int?     @map("tokens_used")
+  status     String
+  errorMsg   String?  @map("error_msg")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([type, createdAt])
+  @@map("generation_logs")
 }

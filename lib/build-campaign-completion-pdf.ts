@@ -23,6 +23,16 @@ export type CompletionPdfFinancial = {
   status: string;
 };
 
+export type CompletionPdfMediaBooking = {
+  title: string;
+  mediaName: string;
+  location: string;
+  type: string;
+  startsAt: Date;
+  endsAt: Date;
+  status: string;
+};
+
 export type BuildCampaignCompletionPdfParams = {
   campaignName: string;
   clientCompany: string;
@@ -33,6 +43,13 @@ export type BuildCampaignCompletionPdfParams = {
   scheduleEvents: CompletionPdfSchedule[];
   proofPhotos: CompletionPdfProof[];
   financialDocs: CompletionPdfFinancial[];
+  /** 예약된 매체 행 */
+  mediaBookings?: CompletionPdfMediaBooking[];
+  /** AI 생성 섹션 (한국어) */
+  aiOverviewKo?: string | null;
+  aiMediaDetailKo?: string | null;
+  aiPerformanceKo?: string | null;
+  aiInsightsKo?: string | null;
 };
 
 export async function createCampaignCompletionPdfDoc(
@@ -61,6 +78,40 @@ export async function createCampaignCompletionPdfDoc(
     y,
   );
   y += 8;
+
+  const pageBottom = 275;
+  const ensureSpace = (need: number) => {
+    if (y + need > pageBottom) {
+      doc.addPage();
+      y = 20;
+    }
+  };
+
+  const writeHeading = (label: string) => {
+    ensureSpace(12);
+    doc.setFont(fam, hasKrFont ? "normal" : "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    doc.text(label, margin, y);
+    y += 7;
+    doc.setFont(fam, "normal");
+    doc.setFontSize(10);
+  };
+
+  const writeBody = (text: string | null | undefined) => {
+    if (!text?.trim()) return;
+    for (const w of doc.splitTextToSize(text.trim(), pageW - 2 * margin)) {
+      ensureSpace(6);
+      doc.text(w, margin, y);
+      y += 5;
+    }
+    y += 4;
+  };
+
+  if (p.aiOverviewKo?.trim()) {
+    writeHeading("캠페인 개요 (AI)");
+    writeBody(p.aiOverviewKo);
+  }
 
   doc.setFontSize(11);
   doc.setTextColor(15, 23, 42);
@@ -91,6 +142,27 @@ export async function createCampaignCompletionPdfDoc(
     }
   }
   y += 6;
+
+  const bookings = p.mediaBookings ?? [];
+  if (bookings.length > 0) {
+    writeHeading("예약 매체 (시스템)");
+    doc.setFontSize(9);
+    for (const b of bookings) {
+      const line = `· ${b.mediaName} · ${b.location} (${b.type}) — ${b.title} [${b.status}] ${b.startsAt.toISOString().slice(0, 10)}~${b.endsAt.toISOString().slice(0, 10)}`;
+      for (const w of doc.splitTextToSize(line, pageW - 2 * margin)) {
+        ensureSpace(5);
+        doc.text(w, margin, y);
+        y += 4.5;
+      }
+    }
+    y += 4;
+    doc.setFontSize(10);
+  }
+
+  if (p.aiMediaDetailKo?.trim()) {
+    writeHeading("매체·집행 상세 (AI)");
+    writeBody(p.aiMediaDetailKo);
+  }
 
   doc.setFont(fam, hasKrFont ? "normal" : "bold");
   doc.setFontSize(11);
@@ -141,6 +213,11 @@ export async function createCampaignCompletionPdfDoc(
   }
   y += 6;
 
+  if (p.aiPerformanceKo?.trim()) {
+    writeHeading("성과 분석 (AI)");
+    writeBody(p.aiPerformanceKo);
+  }
+
   doc.setFont(fam, hasKrFont ? "normal" : "bold");
   doc.setFontSize(11);
   doc.text("견적·계약·청구 요약", margin, y);
@@ -166,6 +243,11 @@ export async function createCampaignCompletionPdfDoc(
     }
   }
 
+  if (p.aiInsightsKo?.trim()) {
+    writeHeading("AI 인사이트 · 다음 캠페인 제안");
+    writeBody(p.aiInsightsKo);
+  }
+
   y += 10;
   if (y > 260) {
     doc.addPage();
@@ -174,7 +256,7 @@ export async function createCampaignCompletionPdfDoc(
   doc.setFontSize(8);
   doc.setTextColor(100, 100, 100);
   doc.text(
-    "※ 본 보고서는 관리 시스템 데이터를 기준으로 자동 생성되었습니다.",
+    "※ 본 보고서는 관리 시스템 데이터 및 AI 초안을 기준으로 생성되었습니다. 수치·표현은 최종 검증이 필요합니다.",
     margin,
     y,
   );

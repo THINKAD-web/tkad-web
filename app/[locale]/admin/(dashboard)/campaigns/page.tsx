@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,6 +78,9 @@ const DOC_STATUS_LIST: { value: FinancialDocStatus; label: string }[] = [
 ];
 
 export default function AdminCampaignsPage() {
+  const pathname = usePathname();
+  const adminLocale = pathname.split("/")[1] || "ko";
+
   const [list, setList] = useState<CampaignRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,6 +129,8 @@ export default function AdminCampaignsPage() {
     { id: string; imageUrl: string; caption: string | null; createdAt: string }[]
   >([]);
   const [proofMsg, setProofMsg] = useState<string | null>(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [successCaseBusy, setSuccessCaseBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -323,6 +329,67 @@ export default function AdminCampaignsPage() {
       body: JSON.stringify({ status }),
     });
     await load();
+    if (selectedId === id) await loadDetail(id);
+  };
+
+  const downloadAiCompletionPdf = async () => {
+    if (!selectedId) return;
+    setPdfBusy(true);
+    try {
+      const res = await fetch(
+        `/api/admin/campaigns/${selectedId}/generate-report`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      if (!res.ok) {
+        const j = (await res.json().catch(() => ({}))) as { error?: string };
+        window.alert(j.error ?? "PDF 생성 실패");
+        return;
+      }
+      const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition");
+      let name = "thinkad-campaign-completion.pdf";
+      const m = cd?.match(/filename="([^"]+)"/);
+      if (m?.[1]) name = m[1];
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
+  const createDraftSuccessCase = async () => {
+    if (!selectedId) return;
+    setSuccessCaseBusy(true);
+    try {
+      const res = await fetch(
+        `/api/admin/campaigns/${selectedId}/draft-success-case`,
+        { method: "POST", credentials: "include" },
+      );
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        successCaseId?: string | null;
+      };
+      if (!res.ok) {
+        window.alert(data.error ?? "실패");
+        return;
+      }
+      if (data.successCaseId) {
+        window.open(
+          `/${adminLocale}/admin/ai-content/edit/${data.successCaseId}?type=success_case`,
+          "_blank",
+          "noopener,noreferrer",
+        );
+      }
+    } finally {
+      setSuccessCaseBusy(false);
+    }
   };
 
   const addEvent = async () => {
@@ -643,18 +710,42 @@ export default function AdminCampaignsPage() {
                   </ul>
                 </div>
 
-                <div>
-                  <a
-                    href={`/api/admin/campaigns/${selectedId}/completion-report`}
-                    className="inline-flex items-center gap-1.5 rounded border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <FileDown className="h-4 w-4" />
-                    완료 보고서 PDF
-                  </a>
-                  <p className="mt-1 text-[11px] text-muted-foreground">
-                    일정·증빙·문서 요약 PDF (관리자 세션 필요)
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      className="gap-1.5"
+                      disabled={successCaseBusy}
+                      onClick={() => void createDraftSuccessCase()}
+                    >
+                      {successCaseBusy ? "…" : null}
+                      성공사례 초안 (AI)
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="gap-1.5 bg-navy text-white hover:bg-navy/90"
+                      disabled={pdfBusy}
+                      onClick={() => void downloadAiCompletionPdf()}
+                    >
+                      <FileDown className="h-4 w-4" />
+                      {pdfBusy ? "생성 중…" : "완료 보고서 PDF (AI)"}
+                    </Button>
+                    <a
+                      href={`/api/admin/campaigns/${selectedId}/completion-report`}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <FileText className="h-4 w-4" />
+                      간단 PDF
+                    </a>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    AI 보고서는 노출·성과·인사이트 섹션을 포함합니다. 간단 PDF는
+                    일정·증빙·문서만 포함합니다.
                   </p>
                 </div>
 

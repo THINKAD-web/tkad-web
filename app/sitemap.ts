@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { caseStudies } from "@/lib/case-studies";
+import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
 
 const lastModified = new Date();
@@ -25,8 +25,9 @@ function sitemapEntry(path: string): MetadataRoute.Sitemap[number] {
   };
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPart = sitemapPaths.map((p) => sitemapEntry(p));
-  const casePart = caseStudies.map((cs) => sitemapEntry(`/cases/${cs.slug}`));
+  const cases = await getPublishedSuccessCases();
+  const casePart = cases.map((c) => sitemapEntry(`/cases/${c.id}`));
   return [...staticPart, ...casePart];
 }

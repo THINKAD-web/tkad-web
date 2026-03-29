@@ -254,10 +254,11 @@ export type PeriodFilter = "all" | InsightsPeriodType;
 export type VerticalFilter = "all" | InsightVerticalTag;
 
 export function filterInsightReports(
+  reports: readonly InsightReport[],
   period: PeriodFilter,
   vertical: VerticalFilter,
 ): InsightReport[] {
-  return INSIGHT_REPORTS.filter((r) => {
+  return reports.filter((r) => {
     if (period !== "all" && r.period !== period) return false;
     if (vertical === "all") return true;
     return r.verticalTags.includes(vertical) || r.verticalTags.includes("general");

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { routing } from "@/i18n/routing";
-import { caseStudies } from "@/lib/case-studies";
+import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 
 export const OG_DIM = { width: 1200, height: 630 } as const;
 
@@ -59,14 +59,17 @@ export const sitemapPaths = publicSeoPaths.filter(
   (p) => p !== "/client" && p !== "/partner",
 );
 
-export function allPublicSitemapPaths(): { locale: string; path: string }[] {
+export async function allPublicSitemapPaths(): Promise<
+  { locale: string; path: string }[]
+> {
+  const cases = await getPublishedSuccessCases();
   const out: { locale: string; path: string }[] = [];
   for (const locale of routing.locales) {
     for (const path of sitemapPaths) {
       out.push({ locale, path });
     }
-    for (const cs of caseStudies) {
-      out.push({ locale, path: `/cases/${cs.slug}` });
+    for (const cs of cases) {
+      out.push({ locale, path: `/cases/${cs.id}` });
     }
   }
   return out;

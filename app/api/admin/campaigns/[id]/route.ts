@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { CampaignStatus } from "@prisma/client";
+import { upsertDraftSuccessCaseFromCampaign } from "@/lib/auto-success-case-from-campaign";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 
@@ -39,6 +40,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
 
   const db = getPrisma();
+  const existing = await db.campaign.findUnique({ where: { id } });
+  if (!existing) return json({ error: "Not found" }, 404);
+
   const data: Record<string, unknown> = {};
 
   if (body.name != null) data.name = String(body.name).trim();
@@ -77,6 +81,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       where: { id },
       data,
     });
+    const becameCompleted =
+      campaign.status === CampaignStatus.completed &&
+      existing.status !== CampaignStatus.completed;
+    if (becameCompleted) {
+      void upsertDraftSuccessCaseFromCampaign(id).catch((err) => {
+        console.error("[campaigns] auto success case draft", err);
+      });
+    }
     return json({ campaign });
   } catch {
     return json({ error: "Not found" }, 404);

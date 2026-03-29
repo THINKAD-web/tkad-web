@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { getCaseStudyBySlug } from "@/lib/case-studies";
+import { getPublishedSuccessCaseById } from "@/lib/public-content-queries";
 import { caseStudyOpenGraphImages, pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -10,13 +10,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: loc, slug } = await params;
   const locale = await resolveLocaleParam(Promise.resolve({ locale: loc }));
-  const cs = getCaseStudyBySlug(slug);
-  if (!cs) {
+  const row = await getPublishedSuccessCaseById(slug);
+  if (!row) {
     return { title: "Case study" };
   }
   const isKo = locale === "ko";
-  const title = isKo ? cs.title : cs.titleEn;
-  const description = isKo ? cs.description : cs.descriptionEn;
+  const title = isKo ? row.titleKo : row.titleEn ?? row.titleKo;
+  const description = row.summaryKo;
   const ogTitle = `${title} | THINKAD`;
   return {
     title,

@@ -18,7 +18,6 @@ import { useLocale } from "next-intl";
 import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
-import { getCaseStudyBySlug } from "@/lib/case-studies";
 import { getMediaById, type MediaItem } from "@/lib/media-data";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
@@ -51,6 +50,7 @@ type FormErrors = Partial<Record<keyof FormFields, string>>;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
+const CASE_CUID_RE = /^c[a-z0-9]{24,}$/i;
 
 function validate(form: FormFields): FormErrors {
   const errors: FormErrors = {};
@@ -75,8 +75,12 @@ export default function ContactPage() {
   const isKo = locale === "ko";
   const searchParams = useSearchParams();
   const caseSlug = searchParams.get("case");
-  const refCase = caseSlug ? getCaseStudyBySlug(caseSlug) : undefined;
-  const casePrefillDone = useRef(false);
+  const [publishedCaseRef, setPublishedCaseRef] = useState<{
+    id: string;
+    titleKo: string;
+    titleEn: string | null;
+  } | null>(null);
+  const casePrefillDone = useRef<string | null>(null);
   const academyTopic = searchParams.get("topic") === "academy";
   const academyPrefillDone = useRef(false);
   const mediaIdParam = searchParams.get("media");
@@ -99,7 +103,7 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    casePrefillDone.current = false;
+    casePrefillDone.current = null;
   }, [caseSlug]);
 
   useEffect(() => {
@@ -152,15 +156,50 @@ export default function ContactPage() {
   }, [mediaIdParam, isKo]);
 
   useEffect(() => {
-    if (!refCase || casePrefillDone.current) return;
-    casePrefillDone.current = true;
-    const title = isKo ? refCase.title : refCase.titleEn;
+    if (!caseSlug || !CASE_CUID_RE.test(caseSlug)) {
+      setPublishedCaseRef(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/public/success-cases/${caseSlug}`);
+        if (!res.ok || cancelled) {
+          if (!cancelled) setPublishedCaseRef(null);
+          return;
+        }
+        const j = (await res.json()) as {
+          id: string;
+          titleKo: string;
+          titleEn: string | null;
+        };
+        if (!cancelled) setPublishedCaseRef(j);
+      } catch {
+        if (!cancelled) setPublishedCaseRef(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [caseSlug]);
+
+  useEffect(() => {
+    if (!caseSlug) casePrefillDone.current = null;
+  }, [caseSlug]);
+
+  useEffect(() => {
+    if (!publishedCaseRef) return;
+    if (casePrefillDone.current === publishedCaseRef.id) return;
+    casePrefillDone.current = publishedCaseRef.id;
+    const title = isKo
+      ? publishedCaseRef.titleKo
+      : publishedCaseRef.titleEn ?? publishedCaseRef.titleKo;
     const snippet = t("contact.caseRefMessageTemplate", { title });
     setForm((prev) => {
       if (prev.message.trim() !== "") return prev;
       return { ...prev, message: snippet };
     });
-  }, [refCase, isKo, t]);
+  }, [publishedCaseRef, isKo, t]);
 
   useEffect(() => {
     if (caseSlug || !academyTopic || academyPrefillDone.current) return;
@@ -319,16 +358,19 @@ export default function ContactPage() {
                     </div>
                   ) : (
                     <form className="relative space-y-5" onSubmit={handleSubmit} noValidate>
-                      {refCase ? (
+                      {publishedCaseRef ? (
                         <div className="rounded-xl border border-gold/35 bg-gradient-to-br from-gold/15 to-amber-50/80 p-4 text-sm text-navy">
                           <p className="font-medium leading-relaxed">
                             {t("contact.caseRefBanner")}
                           </p>
                           <p className="mt-1 text-xs text-navy/65">
-                            {isKo ? refCase.title : refCase.titleEn}
+                            {isKo
+                              ? publishedCaseRef.titleKo
+                              : publishedCaseRef.titleEn ??
+                                publishedCaseRef.titleKo}
                           </p>
                           <Link
-                            href={`/cases/${refCase.slug}`}
+                            href={`/cases/${publishedCaseRef.id}`}
                             className="mt-3 inline-flex text-xs font-bold text-gold-dark underline-offset-4 hover:underline"
                           >
                             {t("contact.caseRefViewCase")}

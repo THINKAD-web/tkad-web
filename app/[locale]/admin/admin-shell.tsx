@@ -19,6 +19,7 @@ import {
   FileText,
   Calculator,
   ClipboardList,
+  Sparkles,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -49,6 +50,7 @@ const navDefs = [
   { href: "/admin/quotes", key: "quotesList" as const, icon: ClipboardList },
   { href: "/admin/quotes/new", key: "quotesNew" as const, icon: Calculator },
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
+  { href: "/admin/ai-content", key: "aiContent" as const, icon: Sparkles },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {
