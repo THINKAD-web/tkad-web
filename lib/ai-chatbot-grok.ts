@@ -71,7 +71,7 @@ export async function completeGrokChatbot(params: {
     throw new Error("XAI_API_KEY is not set");
   }
 
-  const model = process.env.XAI_MODEL?.trim() || "grok-2-latest";
+  const model = process.env.XAI_MODEL?.trim() || "grok-3";
   const maxTokensRaw = process.env.XAI_MAX_TOKENS?.trim();
   const max_tokens = maxTokensRaw
     ? Math.min(8192, Math.max(256, parseInt(maxTokensRaw, 10) || 1000))
