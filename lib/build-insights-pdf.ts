@@ -85,8 +85,10 @@ function writeVerticalBlock(
 
 export async function buildInsightReportPdf(
   report: InsightReport,
-  isKo: boolean,
+  _isKo: boolean,
 ): Promise<import("jspdf").default> {
+  // Force English for PDF (Korean font not embedded)
+  const isKo = false;
   const { default: jsPDF } = await import("jspdf");
   const doc = new jsPDF();
   const x = 20;

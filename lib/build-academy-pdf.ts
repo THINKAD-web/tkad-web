@@ -2,8 +2,10 @@ import type { AcademyDownload, AcademyLesson } from "@/lib/academy-content";
 
 export async function downloadAcademyOutlinePdf(
   lesson: AcademyLesson,
-  isKo: boolean,
+  _isKo: boolean,
 ): Promise<void> {
+  // Force English for PDF (Korean font not embedded)
+  const isKo = false;
   const { default: jsPDF } = await import("jspdf");
   const doc = new jsPDF();
   const title = isKo ? lesson.titleKo : lesson.titleEn;
@@ -66,8 +68,10 @@ export async function downloadAcademyOutlinePdf(
 
 export async function downloadAcademyAssetPdf(
   asset: AcademyDownload,
-  isKo: boolean,
+  _isKo: boolean,
 ): Promise<void> {
+  // Force English for PDF (Korean font not embedded)
+  const isKo = false;
   const { default: jsPDF } = await import("jspdf");
   const doc = new jsPDF();
   const title = isKo ? asset.titleKo : asset.titleEn;
