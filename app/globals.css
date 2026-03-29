@@ -221,16 +221,17 @@ body {
 }
 
 .hero-bg {
-  background: linear-gradient(
-    125deg,
-    #121a3a 0%,
-    #1a2a6c 24%,
-    #2e4078 44%,
-    #1a2a6c 64%,
-    #16224e 100%
-  );
-  background-size: 400% 400%;
-  animation: heroShimmer 16s ease infinite;
+  background: 
+    linear-gradient(
+      135deg,
+      rgba(18, 26, 58, 0.92) 0%,
+      rgba(26, 42, 108, 0.88) 50%,
+      rgba(22, 34, 78, 0.9) 100%
+    ),
+    url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1920&q=80');
+  background-size: cover, cover;
+  background-position: center, center;
+  background-attachment: fixed, fixed;
 }
 
 .hero-pattern {
