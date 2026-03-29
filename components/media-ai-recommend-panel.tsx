@@ -22,7 +22,7 @@ import {
   Calculator,
   BadgeCheck,
 } from "lucide-react";
-import { type MediaItem, typeLabels } from "@/lib/media-data";
+import { mediaData, type MediaItem, typeLabels } from "@/lib/media-data";
 import {
   recommendMedia,
   mediaToMapPosition,
@@ -36,9 +36,11 @@ import { cn } from "@/lib/utils";
 type Props = {
   locale: string;
   regionOptions: { value: string; label: string }[];
+  /** Catalog for scoring (defaults to static samples). */
+  catalog?: MediaItem[];
   compareItems: MediaItem[];
   toggleCompare: (m: MediaItem) => void;
-  isInCompare: (id: number) => boolean;
+  isInCompare: (id: string) => boolean;
   addManyToCompare: (items: MediaItem[]) => void;
   /** Max items in selection (compare/cart). Default 3. */
   maxSelectionItems?: number;
@@ -55,6 +57,7 @@ type Props = {
 export default function MediaAiRecommendPanel({
   locale,
   regionOptions,
+  catalog = mediaData,
   compareItems,
   toggleCompare,
   isInCompare,
@@ -88,17 +91,20 @@ export default function MediaAiRecommendPanel({
     setLoading(true);
     setResults(null);
     window.setTimeout(() => {
-      const scored = recommendMedia({
-        goal,
-        target,
-        budgetMaxMan: cap || 999999,
-        region,
-        industry,
-      });
+      const scored = recommendMedia(
+        {
+          goal,
+          target,
+          budgetMaxMan: cap || 999999,
+          region,
+          industry,
+        },
+        catalog,
+      );
       setResults(scored);
       setLoading(false);
     }, 850);
-  }, [goal, target, budgetMax, region, industry]);
+  }, [goal, target, budgetMax, region, industry, catalog]);
 
   const top3Ids = useMemo(() => {
     if (!results?.length) return [];

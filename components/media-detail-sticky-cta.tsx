@@ -9,7 +9,7 @@ export default function MediaDetailStickyCta({
   mediaId,
   compareHref,
 }: {
-  mediaId: number;
+  mediaId: string;
   compareHref: string;
 }) {
   const t = useTranslations("media.detail");

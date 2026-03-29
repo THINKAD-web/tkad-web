@@ -15,12 +15,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  getMediaById,
   getAllMediaIds,
-  getSimilarMedia,
+  getSimilarMediaFromCatalog,
   resolveMediaGallery,
   typeLabels,
 } from "@/lib/media-data";
+import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
 import MediaDetailPerformance from "@/components/media-detail-performance";
@@ -31,6 +31,8 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
+export const revalidate = 120;
+
 export function generateStaticParams() {
   return getAllMediaIds().map((id) => ({ id: String(id) }));
 }
@@ -38,7 +40,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const { id } = await params;
-  const media = getMediaById(Number(id));
+  const media = await resolveMediaForDetail(id);
   if (!media) return { title: "Media" };
   const title =
     locale === "ko" ? `${media.name} | THINKAD` : `${media.nameEn} | THINKAD`;
@@ -53,10 +55,10 @@ export default async function MediaDetailPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const { id: idStr } = await params;
-  const id = Number(idStr);
-  const media = getMediaById(id);
+  const media = await resolveMediaForDetail(idStr);
   if (!media) notFound();
 
+  const catalog = await fetchPublicMediaCatalog();
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const isKo = locale === "ko";
 
@@ -64,7 +66,7 @@ export default async function MediaDetailPage({ params }: Props) {
     media.monthlyFootTraffic ??
     Math.round(media.dailyFootTraffic * 30);
 
-  const similar = getSimilarMedia(media, 4);
+  const similar = getSimilarMediaFromCatalog(catalog, media, 4);
   const casePhotos = media.caseStudyPhotos ?? [];
   const heroImage = resolveMediaGallery(media)[0];
   const typeLabel =

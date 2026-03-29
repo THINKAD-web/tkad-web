@@ -20,7 +20,10 @@ export type MediaPerformanceMetrics = {
 export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMetrics {
   const monthly =
     media.monthlyFootTraffic ?? Math.round(media.dailyFootTraffic * 30);
-  const seed = media.id * 1103 + media.dailyFootTraffic % 997;
+  const idHash = media.id
+    .split("")
+    .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  const seed = idHash * 1103 + (media.dailyFootTraffic % 997);
   const visibilityScore = 58 + (seed % 35);
 
   let peak = 32 + (seed % 26);

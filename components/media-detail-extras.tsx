@@ -39,7 +39,7 @@ export default function MediaDetailExtras({
 }) {
   const isKo = locale === "ko";
   const tMedia = useTranslations("media");
-  const [mapSelectedId, setMapSelectedId] = useState<number | null>(media.id);
+  const [mapSelectedId, setMapSelectedId] = useState<string | null>(media.id);
   const gallery = resolveMediaGallery(media);
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(isKo ? media.name : media.nameEn)},${media.lat},${media.lng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${media.lat},${media.lng}`;

@@ -8,7 +8,7 @@ import type { MediaItem } from "@/lib/media-data";
 interface Props {
   items: MediaItem[];
   locale: string;
-  onRemove: (id: number) => void;
+  onRemove: (id: string) => void;
   onClear: () => void;
 }
 

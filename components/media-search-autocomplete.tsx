@@ -5,6 +5,8 @@ import { Search, X } from "lucide-react";
 import { mediaData, typeLabels, type MediaItem } from "@/lib/media-data";
 
 interface Props {
+  /** When omitted, uses static `mediaData` (e.g. Storybook). */
+  catalog?: MediaItem[];
   locale: string;
   onSelect: (media: MediaItem) => void;
   /** Fired when the user clicks Search or presses Enter (without picking a dropdown row). */
@@ -15,6 +17,7 @@ interface Props {
 }
 
 export default function MediaSearchAutocomplete({
+  catalog = mediaData,
   locale,
   onSelect,
   onSearchSubmit,
@@ -38,7 +41,7 @@ export default function MediaSearchAutocomplete({
         return;
       }
       const lower = q.toLowerCase();
-      const matched = mediaData
+      const matched = catalog
         .filter(
           (m) =>
             m.name.toLowerCase().includes(lower) ||
@@ -53,7 +56,7 @@ export default function MediaSearchAutocomplete({
       setIsOpen(matched.length > 0);
       setActiveIndex(-1);
     },
-    []
+    [catalog]
   );
 
   const handleChange = (value: string) => {

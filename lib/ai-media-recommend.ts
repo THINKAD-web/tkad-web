@@ -243,8 +243,11 @@ function scoreOne(m: MediaItem, input: AiRecommendInput): ScoredMedia {
   };
 }
 
-export function recommendMedia(input: AiRecommendInput): ScoredMedia[] {
-  return mediaData
+export function recommendMedia(
+  input: AiRecommendInput,
+  catalog: MediaItem[] = mediaData,
+): ScoredMedia[] {
+  return catalog
     .map((m) => scoreOne(m, input))
     .filter((s) => s.score >= 38)
     .sort((a, b) => b.score - a.score)

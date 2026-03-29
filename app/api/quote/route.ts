@@ -60,7 +60,14 @@ export async function POST(request: NextRequest) {
   } = body as Record<string, unknown>;
 
   const ids = Array.isArray(mediaIds)
-    ? mediaIds.filter((id): id is number => typeof id === "number")
+    ? mediaIds
+        .map((id) => {
+          if (typeof id === "string") return id.trim();
+          if (typeof id === "number" && Number.isFinite(id))
+            return String(Math.trunc(id));
+          return "";
+        })
+        .filter(Boolean)
     : [];
 
   const errors: string[] = [];

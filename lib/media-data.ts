@@ -7,7 +7,7 @@ export type MediaCaseStudyPhoto = {
 };
 
 export interface MediaItem {
-  id: number;
+  id: string;
   name: string;
   nameEn: string;
   location: string;
@@ -39,27 +39,42 @@ export interface MediaItem {
   caseStudyPhotos?: MediaCaseStudyPhoto[];
 }
 
-export function getMediaById(id: number): MediaItem | undefined {
-  return mediaData.find((m) => m.id === id);
+export function getMediaById(id: string | number): MediaItem | undefined {
+  const key = String(id);
+  return mediaData.find((m) => m.id === key);
 }
 
-export function getAllMediaIds(): number[] {
+export function getAllMediaIds(): string[] {
   return mediaData.map((m) => m.id);
+}
+
+function scoreSimilarPair(item: MediaItem, m: MediaItem): number {
+  let s = 0;
+  if (m.region === item.region) s += 4;
+  if (m.type === item.type) s += 3;
+  const pr = Math.abs(m.price - item.price) / Math.max(item.price, 1);
+  if (pr < 0.25) s += 2;
+  else if (pr < 0.5) s += 1;
+  return s;
 }
 
 /** Same region/type 우선, 가격대 유사도 보조 */
 export function getSimilarMedia(item: MediaItem, limit = 4): MediaItem[] {
-  const others = mediaData.filter((m) => m.id !== item.id);
-  const scored = others.map((m) => {
-    let s = 0;
-    if (m.region === item.region) s += 4;
-    if (m.type === item.type) s += 3;
-    const pr = Math.abs(m.price - item.price) / Math.max(item.price, 1);
-    if (pr < 0.25) s += 2;
-    else if (pr < 0.5) s += 1;
-    return { m, s };
-  });
-  scored.sort((a, b) => b.s - a.s || Math.abs(a.m.price - item.price) - Math.abs(b.m.price - item.price));
+  return getSimilarMediaFromCatalog(mediaData, item, limit);
+}
+
+export function getSimilarMediaFromCatalog(
+  catalog: MediaItem[],
+  item: MediaItem,
+  limit = 4,
+): MediaItem[] {
+  const others = catalog.filter((m) => m.id !== item.id);
+  const scored = others.map((m) => ({ m, s: scoreSimilarPair(item, m) }));
+  scored.sort(
+    (a, b) =>
+      b.s - a.s ||
+      Math.abs(a.m.price - item.price) - Math.abs(b.m.price - item.price),
+  );
   return scored.slice(0, limit).map((x) => x.m);
 }
 
@@ -123,7 +138,7 @@ export function mediaItemsToCampaignPins(
 
 export const mediaData: MediaItem[] = [
   {
-    id: 1,
+    id: "1",
     name: "코엑스 K-POP 스퀘어",
     nameEn: "COEX K-POP Square LED",
     location: "서울 강남구 영동대로 513 코엑스",
@@ -168,7 +183,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 2,
+    id: "2",
     name: "강남대로 미디어폴 G-LIGHT",
     nameEn: "Gangnam-daero Media Pole G-LIGHT",
     location: "강남역-신논현역 760m 구간",
@@ -207,7 +222,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 3,
+    id: "3",
     name: "신논현역 DSG빌딩 전광판",
     nameEn: "Sinnonhyeon DSG Building LED",
     location: "강남대로 신논현역 사거리",
@@ -238,7 +253,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 4,
+    id: "4",
     name: "청담동 학동사거리 SS타워 전광판",
     nameEn: "Cheongdam SS Tower LED",
     location: "서울 강남구 학동사거리",
@@ -270,7 +285,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 5,
+    id: "5",
     name: "성수동 반도 외벽광고",
     nameEn: "Seongsu Bando Exterior Ad",
     location: "서울 성동구 성수동2가",
@@ -308,7 +323,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 6,
+    id: "6",
     name: "지하철 2호선 성수역 디지털광고",
     nameEn: "Seongsu Station Line 2 Digital Ad",
     location: "서울 성동구 성수역",
@@ -339,7 +354,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 10,
+    id: "10",
     name: "코엑스 파르나스 미디어타워",
     nameEn: "COEX Parnas Media Tower",
     location: "삼성역 코엑스",
@@ -382,7 +397,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 7,
+    id: "7",
     name: "서면역 디지털 스크린",
     nameEn: "Seomyeon Station Digital Screen",
     location: "부산 부산진구",
@@ -407,7 +422,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 8,
+    id: "8",
     name: "부산역 지하철 광고",
     nameEn: "Busan Station Subway Ad",
     location: "부산 동구",
@@ -432,7 +447,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 9,
+    id: "9",
     name: "제주공항 디지털 광고",
     nameEn: "Jeju Airport Digital Ad",
     location: "제주시",
@@ -457,7 +472,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 11,
+    id: "11",
     name: "중문관광단지 입구 빌보드",
     nameEn: "Jungmun Resort Entrance Billboard",
     location: "서귀포시",
@@ -482,7 +497,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 12,
+    id: "12",
     name: "전국 시내버스 루프",
     nameEn: "National City Bus Loop",
     location: "전국 주요 도시",
@@ -507,7 +522,7 @@ export const mediaData: MediaItem[] = [
     ],
   },
   {
-    id: 13,
+    id: "13",
     name: "전국 고속도로 빌보드 패키지",
     nameEn: "National Highway Billboard Package",
     location: "전국 고속도로",

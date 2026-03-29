@@ -19,7 +19,7 @@ import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { getCaseStudyBySlug } from "@/lib/case-studies";
-import { getMediaById } from "@/lib/media-data";
+import { getMediaById, type MediaItem } from "@/lib/media-data";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 
@@ -112,18 +112,43 @@ export default function ContactPage() {
 
   useEffect(() => {
     if (!mediaIdParam || mediaPrefillDone.current) return;
-    const mid = Number(mediaIdParam);
-    const refMedia = Number.isFinite(mid) ? getMediaById(mid) : undefined;
-    if (!refMedia) return;
-    mediaPrefillDone.current = true;
-    const title = isKo ? refMedia.name : refMedia.nameEn;
-    const snippet = isKo
-      ? `매체 "${title}" (ID ${refMedia.id}) 관련 문의드립니다.\n`
-      : `Inquiry regarding media "${title}" (ID ${refMedia.id}).\n`;
-    setForm((prev) => {
-      if (prev.message.trim() !== "") return prev;
-      return { ...prev, message: snippet };
-    });
+    const idKey = mediaIdParam.trim();
+    if (!idKey) return;
+
+    const applySnippet = (refMedia: MediaItem) => {
+      mediaPrefillDone.current = true;
+      const title = isKo ? refMedia.name : refMedia.nameEn;
+      const snippet = isKo
+        ? `매체 "${title}" (ID ${refMedia.id}) 관련 문의드립니다.\n`
+        : `Inquiry regarding media "${title}" (ID ${refMedia.id}).\n`;
+      setForm((prev) => {
+        if (prev.message.trim() !== "") return prev;
+        return { ...prev, message: snippet };
+      });
+    };
+
+    const fromStatic = getMediaById(idKey);
+    if (fromStatic) {
+      applySnippet(fromStatic);
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/public/media-catalog");
+        if (!res.ok || cancelled) return;
+        const catalog = (await res.json()) as MediaItem[];
+        const refMedia = catalog.find((m) => m.id === idKey);
+        if (!refMedia || cancelled) return;
+        applySnippet(refMedia);
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [mediaIdParam, isKo]);
 
   useEffect(() => {

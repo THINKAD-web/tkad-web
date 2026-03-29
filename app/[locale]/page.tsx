@@ -13,11 +13,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import HeroParallaxBackground from "@/components/hero-parallax-background";
-import {
-  mediaData,
-  resolveMediaGallery,
-  type MediaItem,
-} from "@/lib/media-data";
+import { resolveMediaGallery, type MediaItem } from "@/lib/media-data";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import {
   ArrowRight,
   BarChart3,
@@ -62,13 +59,20 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-/** 메인 추천 매체 — 카탈로그(`mediaData`) id와 일치 (상세 페이지로 연결) */
-const HOME_FEATURED_IDS = [1, 2, 6, 10] as const;
+/** Prefer these sample ids when present; otherwise fill from catalog order. */
+const HOME_FEATURED_SAMPLE_IDS = ["1", "2", "6", "10"] as const;
 
-function getHomeFeaturedCatalog(): MediaItem[] {
-  return HOME_FEATURED_IDS.map((id) => mediaData.find((m) => m.id === id)).filter(
-    (m): m is MediaItem => m != null,
-  );
+function pickHomeFeaturedMedia(catalog: MediaItem[]): MediaItem[] {
+  const picked: MediaItem[] = [];
+  for (const id of HOME_FEATURED_SAMPLE_IDS) {
+    const m = catalog.find((x) => x.id === id);
+    if (m) picked.push(m);
+  }
+  for (const m of catalog) {
+    if (picked.length >= 4) break;
+    if (!picked.some((x) => x.id === m.id)) picked.push(m);
+  }
+  return picked.slice(0, 4);
 }
 
 const typeLabels: Record<string, { ko: string; en: string }> = {
@@ -89,19 +93,24 @@ export default async function HomePage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const t = await getTranslations();
+  const catalog = await fetchPublicMediaCatalog();
+  const featuredCatalog = pickHomeFeaturedMedia(catalog);
 
-  return <HomeContent locale={locale} t={t} />;
+  return (
+    <HomeContent locale={locale} t={t} featuredCatalog={featuredCatalog} />
+  );
 }
 
 function HomeContent({
   locale,
   t,
+  featuredCatalog,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
+  featuredCatalog: MediaItem[];
 }) {
   const isKo = locale === "ko";
-  const featuredCatalog = getHomeFeaturedCatalog();
 
   return (
     <>

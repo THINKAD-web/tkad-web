@@ -16,8 +16,8 @@ export default function MediaBrowseMap({
 }: {
   items: readonly MediaItem[];
   locale: string;
-  selectedId: number | null;
-  onSelectId: (id: number | null) => void;
+  selectedId: string | null;
+  onSelectId: (id: string | null) => void;
   className?: string;
   fixedMapHeightPx?: number;
   showFooterCaption?: boolean;
@@ -27,13 +27,11 @@ export default function MediaBrowseMap({
     () => mediaItemsToCampaignPins(items, isKo),
     [items, isKo],
   );
-  const sid = selectedId != null ? String(selectedId) : null;
-
   return (
     <CampaignMonitoringMap
       pins={pins}
-      selectedId={sid}
-      onSelectPin={(id) => onSelectId(id == null ? null : Number(id))}
+      selectedId={selectedId}
+      onSelectPin={(id) => onSelectId(id)}
       isKo={isKo}
       className={className}
       fixedMapHeightPx={fixedMapHeightPx}

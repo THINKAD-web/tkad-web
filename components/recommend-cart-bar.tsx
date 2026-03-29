@@ -10,7 +10,7 @@ type Props = {
   items: MediaItem[];
   locale: string;
   maxItems: number;
-  onRemove: (id: number) => void;
+  onRemove: (id: string) => void;
   onClear: () => void;
 };
 
