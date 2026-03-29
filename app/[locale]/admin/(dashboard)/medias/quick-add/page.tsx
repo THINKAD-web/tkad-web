@@ -100,7 +100,9 @@ export default function AdminMediaQuickAddPage() {
         setSubmitError(data.error ?? "등록 실패");
         return;
       }
-      router.push("/admin/medias");
+      // 목록 페이지가 bfcache·클라이언트 상태로 옛 데이터를 보이지 않도록 쿼리로 재조회 유도
+      router.push(`/admin/medias?updated=${Date.now()}`);
+      router.refresh();
     } catch {
       setSubmitError("네트워크 오류");
     } finally {
@@ -122,7 +124,7 @@ export default function AdminMediaQuickAddPage() {
           <h2 className="text-xl font-bold text-navy">매체 간편 등록 (JSON)</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             객체 하나 또는 배열을 붙여넣으면 실시간으로 검증·미리보기됩니다. 등록 시 DB에
-            저장되며, 미디어 허브에서도 확인할 수 있습니다.
+            저장되며 매체 관리·미디어 허브에서 동일하게 조회됩니다.
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={loadSample}>

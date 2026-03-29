@@ -1,6 +1,8 @@
 import type { Prisma } from "@prisma/client";
+import { MediaAvailability } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
+import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +19,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     include: {
       priceSnapshots: { orderBy: { effectiveFrom: "desc" }, take: 30 },
       bookings: { orderBy: { startsAt: "asc" }, take: 60 },
+      advertiserExecutions: { orderBy: { createdAt: "desc" }, take: 50 },
     },
   });
   if (!media) return json({ error: "Not found" }, 404);
@@ -65,12 +68,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (body.city !== undefined)
     data.city = String(body.city ?? "").trim() || null;
   if (body.latitude !== undefined) {
-    const n = Number(body.latitude);
-    data.latitude = Number.isFinite(n) ? n : null;
+    if (body.latitude === null) {
+      data.latitude = null;
+    } else {
+      const n = Number(body.latitude);
+      data.latitude = Number.isFinite(n) ? n : null;
+    }
   }
   if (body.longitude !== undefined) {
-    const n = Number(body.longitude);
-    data.longitude = Number.isFinite(n) ? n : null;
+    if (body.longitude === null) {
+      data.longitude = null;
+    } else {
+      const n = Number(body.longitude);
+      data.longitude = Number.isFinite(n) ? n : null;
+    }
   }
   if (body.priceNote !== undefined)
     data.priceNote = String(body.priceNote ?? "").trim() || null;
@@ -136,9 +147,30 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     data.extractedImages = body.extractedImages;
   }
 
+  if (body.availability != null) {
+    const a = String(body.availability);
+    if (!Object.values(MediaAvailability).includes(a as MediaAvailability)) {
+      return json({ error: "Invalid availability" }, 400);
+    }
+    data.availability = a as MediaAvailability;
+  }
+
+  if (body.isActive !== undefined) {
+    if (typeof body.isActive !== "boolean") {
+      return json({ error: "isActive must be boolean" }, 400);
+    }
+    data.isActive = body.isActive;
+  }
+
   const db = getPrisma();
   try {
     const media = await db.media.update({ where: { id }, data });
+    if (isAdminAuthDebugEnabled()) {
+      console.log("[admin-api] media PATCH persisted", {
+        id: media.id,
+        name: media.name,
+      });
+    }
     return json({ media });
   } catch {
     return json({ error: "Not found" }, 404);

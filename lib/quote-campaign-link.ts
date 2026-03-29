@@ -2,7 +2,9 @@ import { CampaignStatus, type PrismaClient } from "@prisma/client";
 
 const LINK_STATUSES: CampaignStatus[] = [
   CampaignStatus.proposal,
+  CampaignStatus.negotiation,
   CampaignStatus.contract,
+  CampaignStatus.production,
   CampaignStatus.airing,
 ];
 

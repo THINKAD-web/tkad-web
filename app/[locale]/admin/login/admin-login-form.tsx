@@ -4,6 +4,24 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
+function mapAdminLoginError(
+  api: string | undefined,
+  t: ReturnType<typeof useTranslations<"adminLogin">>,
+): string {
+  switch (api) {
+    case "Admin login is not configured":
+      return t("errorNotConfigured");
+    case "Set ADMIN_SESSION_SECRET in production to enable admin login":
+      return t("errorNoSessionSecret");
+    case "Invalid credentials":
+      return t("errorInvalidCredentials");
+    case "Too many requests":
+      return t("errorRateLimit");
+    default:
+      return api?.trim() ? api : t("errorGeneric");
+  }
+}
+
 export function AdminLoginForm({ locale }: { locale: string }) {
   const t = useTranslations("adminLogin");
   const router = useRouter();
@@ -25,7 +43,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
-        setError(data.error ?? t("errorGeneric"));
+        setError(mapAdminLoginError(data.error, t));
         return;
       }
       const from = searchParams.get("from");

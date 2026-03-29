@@ -4,6 +4,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email/client";
 import { getContactConfirmationEmail } from "@/lib/email/contact-confirmation";
 import { getContactAdminNotifyEmail } from "@/lib/email/contact-admin-notify";
+import { postInternalAlert } from "@/lib/internal-webhook";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +84,16 @@ export async function POST(request: NextRequest) {
     console.error("[contact] DB error:", err);
     return json({ error: "Failed to save inquiry" }, { status: 500 });
   }
+
+  void postInternalAlert({
+    type: "contact_inquiry",
+    title: "새 문의 접수",
+    body: `${company?.trim() || "(회사미입력)"} / ${name!.trim()} / ${phone!.trim()}`,
+    meta: {
+      email: email?.trim() ?? "",
+      source: "contact_form",
+    },
+  }).catch(() => {});
 
   const alertTo = process.env.CONTACT_ALERT_EMAIL?.trim();
   if (alertTo) {

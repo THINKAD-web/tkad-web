@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { CrmTier } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 
@@ -39,6 +40,15 @@ export async function POST(request: NextRequest) {
     return json({ error: "email, company, name required" }, 400);
   }
 
+  let tier: CrmTier = CrmTier.standard;
+  if (body.tier != null) {
+    const t = String(body.tier);
+    if (!Object.values(CrmTier).includes(t as CrmTier)) {
+      return json({ error: "Invalid tier" }, 400);
+    }
+    tier = t as CrmTier;
+  }
+
   const db = getPrisma();
   try {
     const account = await db.crmAccount.create({
@@ -47,6 +57,7 @@ export async function POST(request: NextRequest) {
         company,
         name,
         phone: String(body.phone ?? "").trim() || null,
+        tier,
       },
     });
     return json({ account }, 201);

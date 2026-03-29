@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* THINKAD 2025 — Primary #1A2A6C · Accent #E8D5B5 · Silver #B0B8C4 · Page #D6D9E6 · CTA #9B3C31 */
 @theme inline {

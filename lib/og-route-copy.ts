@@ -217,6 +217,18 @@ const routes = {
       subtitle: "Get a tailored estimate quickly",
     },
   },
+  services: {
+    ko: {
+      badge: "Services",
+      title: "싱커드 OOH 서비스",
+      subtitle: "기획 · 매체 선정 · 송출 관리까지 한 번에",
+    },
+    en: {
+      badge: "Services",
+      title: "THINKAD OOH services",
+      subtitle: "Planning, selection, and flight management",
+    },
+  },
 } as const;
 
 export type OgRouteId = keyof typeof routes;

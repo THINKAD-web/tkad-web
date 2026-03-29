@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import {
+  CampaignStatus,
   FinancialDocKind,
   FinancialDocStatus,
 } from "@prisma/client";
@@ -10,6 +11,21 @@ export const dynamic = "force-dynamic";
 
 function startOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+function parseMediaIds(raw: string): string[] {
+  const t = raw.trim();
+  if (t.startsWith("[")) {
+    try {
+      const arr = JSON.parse(t) as unknown;
+      if (Array.isArray(arr)) {
+        return arr.map((x) => String(x)).filter(Boolean);
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+  return t.split(/[,\s]+/).filter(Boolean);
 }
 
 export async function GET(request: NextRequest) {
@@ -24,6 +40,21 @@ export async function GET(request: NextRequest) {
       topMedia: [] as { id: string; name: string; picks: number }[],
       inquiries30d: 0,
       quotes30d: 0,
+      monthlySeries: [] as {
+        key: string;
+        label: string;
+        inquiries: number;
+        quotes: number;
+        revenueKrw: number;
+      }[],
+      funnel: {
+        inquiries: 0,
+        quotes: 0,
+        pastProposal: 0,
+        contracted: 0,
+      },
+      regionQuotes: [] as { region: string; count: number }[],
+      typeRevenueKrw: [] as { type: string; totalKrw: number }[],
     });
   }
 
@@ -58,20 +89,6 @@ export async function GET(request: NextRequest) {
     select: { mediaIds: true },
     take: 2000,
   });
-  function parseMediaIds(raw: string): string[] {
-    const t = raw.trim();
-    if (t.startsWith("[")) {
-      try {
-        const arr = JSON.parse(t) as unknown;
-        if (Array.isArray(arr)) {
-          return arr.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        /* fall through */
-      }
-    }
-    return t.split(/[,\s]+/).filter(Boolean);
-  }
 
   const counts = new Map<string, number>();
   for (const q of quotes) {
@@ -95,6 +112,128 @@ export async function GET(request: NextRequest) {
     }));
   }
 
+  const monthBuckets: { key: string; label: string; start: Date; end: Date }[] =
+    [];
+  for (let i = 5; i >= 0; i--) {
+    const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const isCurrent =
+      start.getMonth() === now.getMonth() &&
+      start.getFullYear() === now.getFullYear();
+    const end = isCurrent
+      ? now
+      : new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999);
+    monthBuckets.push({
+      key: `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}`,
+      label: `${start.getMonth() + 1}월`,
+      start,
+      end,
+    });
+  }
+
+  const monthlySeries = await Promise.all(
+    monthBuckets.map(async (b) => {
+      const [inquiries, quotes, revenueAgg] = await Promise.all([
+        db.contactInquiry.count({
+          where: { createdAt: { gte: b.start, lte: b.end } },
+        }),
+        db.quoteRequest.count({
+          where: { createdAt: { gte: b.start, lte: b.end } },
+        }),
+        db.campaignFinancialDoc.aggregate({
+          where: {
+            status: FinancialDocStatus.paid,
+            paidAt: { gte: b.start, lte: b.end },
+            kind: {
+              in: [FinancialDocKind.invoice, FinancialDocKind.contract],
+            },
+          },
+          _sum: { amountKrw: true },
+        }),
+      ]);
+      return {
+        key: b.key,
+        label: b.label,
+        inquiries,
+        quotes,
+        revenueKrw: revenueAgg._sum.amountKrw ?? 0,
+      };
+    }),
+  );
+
+  const [
+    inquiriesTotal,
+    quotesTotal,
+    pastProposal,
+    contracted,
+    regionRows,
+  ] = await Promise.all([
+    db.contactInquiry.count(),
+    db.quoteRequest.count(),
+    db.campaign.count({
+      where: { status: { not: CampaignStatus.proposal } },
+    }),
+    db.campaign.count({
+      where: {
+        status: {
+          in: [
+            CampaignStatus.contract,
+            CampaignStatus.production,
+            CampaignStatus.airing,
+            CampaignStatus.completed,
+          ],
+        },
+      },
+    }),
+    db.quoteRequest.groupBy({
+      by: ["region"],
+      where: {
+        region: { not: null },
+      },
+      _count: { _all: true },
+    }),
+  ]);
+
+  const regionQuotes = regionRows
+    .filter((r) => (r.region ?? "").trim().length > 0)
+    .map((r) => ({
+      region: r.region!.trim(),
+      count: r._count._all,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 12);
+
+  const bookings = await db.mediaBooking.findMany({
+    where: { campaignId: { not: null } },
+    select: {
+      campaignId: true,
+      media: { select: { type: true } },
+    },
+    take: 3000,
+    orderBy: { startsAt: "desc" },
+  });
+  const campaignType = new Map<string, string>();
+  for (const b of bookings) {
+    if (b.campaignId && !campaignType.has(b.campaignId)) {
+      campaignType.set(b.campaignId, b.media.type);
+    }
+  }
+  const paidInvoices = await db.campaignFinancialDoc.findMany({
+    where: {
+      status: FinancialDocStatus.paid,
+      kind: FinancialDocKind.invoice,
+    },
+    select: { campaignId: true, amountKrw: true },
+    take: 2000,
+  });
+  const typeTotals = new Map<string, number>();
+  for (const p of paidInvoices) {
+    const t = campaignType.get(p.campaignId) ?? "기타";
+    typeTotals.set(t, (typeTotals.get(t) ?? 0) + (p.amountKrw ?? 0));
+  }
+  const typeRevenueKrw = [...typeTotals.entries()]
+    .map(([type, totalKrw]) => ({ type, totalKrw }))
+    .sort((a, b) => b.totalKrw - a.totalKrw);
+
   return json({
     configured: true,
     monthlyRevenueKrw,
@@ -102,5 +241,14 @@ export async function GET(request: NextRequest) {
     topMedia,
     inquiries30d,
     quotes30d,
+    monthlySeries,
+    funnel: {
+      inquiries: inquiriesTotal,
+      quotes: quotesTotal,
+      pastProposal,
+      contracted,
+    },
+    regionQuotes,
+    typeRevenueKrw,
   });
 }

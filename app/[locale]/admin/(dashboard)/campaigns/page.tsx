@@ -5,9 +5,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { CalendarRange, FileText, Link2, Plus, Trash2 } from "lucide-react";
+import {
+  CalendarRange,
+  Camera,
+  FileDown,
+  FileText,
+  Link2,
+  Plus,
+  Trash2,
+} from "lucide-react";
 
-type CampaignStatus = "proposal" | "contract" | "airing" | "completed";
+type CampaignStatus =
+  | "proposal"
+  | "negotiation"
+  | "contract"
+  | "production"
+  | "airing"
+  | "completed";
 type FinancialDocKind = "quote" | "contract" | "invoice";
 type FinancialDocStatus =
   | "draft"
@@ -41,7 +55,9 @@ type LinkedQuoteRow = {
 
 const STATUS_LABEL: Record<CampaignStatus, string> = {
   proposal: "제안",
+  negotiation: "협의",
   contract: "계약",
+  production: "제작",
   airing: "송출",
   completed: "완료",
 };
@@ -105,6 +121,10 @@ export default function AdminCampaignsPage() {
   const [linkedQuotes, setLinkedQuotes] = useState<LinkedQuoteRow[]>([]);
   const [unlinkedQuotes, setUnlinkedQuotes] = useState<LinkedQuoteRow[]>([]);
   const [attachQuoteId, setAttachQuoteId] = useState("");
+  const [proofs, setProofs] = useState<
+    { id: string; imageUrl: string; caption: string | null; createdAt: string }[]
+  >([]);
+  const [proofMsg, setProofMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -141,6 +161,12 @@ export default function AdminCampaignsPage() {
           scheduleEvents: typeof events;
           financialDocs: typeof docs;
           quoteRequests: LinkedQuoteRow[];
+          proofPhotos: {
+            id: string;
+            imageUrl: string;
+            caption: string | null;
+            createdAt: string;
+          }[];
         };
       };
       const uJson = (await uRes.json()) as { quotes?: LinkedQuoteRow[] };
@@ -149,6 +175,7 @@ export default function AdminCampaignsPage() {
         setEvents([]);
         setDocs([]);
         setLinkedQuotes([]);
+        setProofs([]);
         setUnlinkedQuotes(uJson.quotes ?? []);
         return;
       }
@@ -173,13 +200,75 @@ export default function AdminCampaignsPage() {
           createdAt: new Date(q.createdAt).toISOString().slice(0, 16),
         })),
       );
+      setProofs(
+        (c.proofPhotos ?? []).map((p) => ({
+          ...p,
+          createdAt: new Date(p.createdAt).toISOString().slice(0, 16),
+        })),
+      );
       setUnlinkedQuotes(uJson.quotes ?? []);
     } catch {
       setEvents([]);
       setDocs([]);
       setLinkedQuotes([]);
+      setProofs([]);
       setUnlinkedQuotes([]);
     }
+  };
+
+  const uploadProofImage = async (file: File) => {
+    if (!selectedId) return;
+    setProofMsg(null);
+    const sigRes = await fetch("/api/admin/upload/cloudinary", {
+      method: "POST",
+    });
+    if (!sigRes.ok) {
+      setProofMsg("Cloudinary 미설정");
+      return;
+    }
+    const sig = (await sigRes.json()) as {
+      timestamp: number;
+      signature: string;
+      folder: string;
+      cloudName: string;
+      apiKey: string;
+    };
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("api_key", sig.apiKey);
+    fd.append("timestamp", String(sig.timestamp));
+    fd.append("signature", sig.signature);
+    fd.append("folder", sig.folder);
+    const up = await fetch(
+      `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
+      { method: "POST", body: fd },
+    );
+    const upJson = (await up.json()) as {
+      secure_url?: string;
+      error?: { message: string };
+    };
+    if (!up.ok || !upJson.secure_url) {
+      setProofMsg(upJson.error?.message ?? "업로드 실패");
+      return;
+    }
+    const post = await fetch(`/api/admin/campaigns/${selectedId}/proofs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageUrl: upJson.secure_url }),
+    });
+    if (!post.ok) {
+      setProofMsg("증빙 저장 실패");
+      return;
+    }
+    setProofMsg("증빙이 등록되었습니다.");
+    await loadDetail(selectedId);
+  };
+
+  const delProof = async (photoId: string) => {
+    await fetch(`/api/admin/campaign-proof-photos/${photoId}`, {
+      method: "DELETE",
+    });
+    if (selectedId) await loadDetail(selectedId);
   };
 
   const attachQuote = async () => {
@@ -304,8 +393,8 @@ export default function AdminCampaignsPage() {
       <div>
         <h2 className="text-lg font-bold text-navy">캠페인 관리</h2>
         <p className="text-sm text-muted-foreground">
-          제안 → 계약 → 송출 → 완료 파이프라인, 송출 일정, 견적·계약·청구 문서를
-          한 곳에서 관리합니다.
+          제안 → 협의 → 계약 → 제작 → 송출 → 완료 파이프라인, 송출 일정, 견적·계약·청구,
+          송출 증빙 사진을 한 곳에서 관리합니다.
         </p>
       </div>
 
@@ -501,6 +590,72 @@ export default function AdminCampaignsPage() {
                       ))
                     )}
                   </ul>
+                </div>
+
+                <div>
+                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-navy">
+                    <Camera className="h-4 w-4" />
+                    송출 증빙 사진
+                  </h3>
+                  <label className="mb-2 inline-flex cursor-pointer items-center gap-2 rounded border border-dashed border-slate-300 px-3 py-2 text-xs hover:bg-slate-50">
+                    이미지 업로드
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        e.target.value = "";
+                        if (f) void uploadProofImage(f);
+                      }}
+                    />
+                  </label>
+                  {proofMsg ? (
+                    <p className="mb-2 text-xs text-navy">{proofMsg}</p>
+                  ) : null}
+                  <ul className="flex flex-wrap gap-2">
+                    {proofs.length === 0 ? (
+                      <li className="text-xs text-muted-foreground">
+                        등록된 증빙 없음
+                      </li>
+                    ) : (
+                      proofs.map((p) => (
+                        <li
+                          key={p.id}
+                          className="relative w-24 shrink-0 overflow-hidden rounded border"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={p.imageUrl}
+                            alt=""
+                            className="aspect-square w-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            className="absolute right-0 top-0 bg-rose-600/90 px-1 text-[10px] text-white"
+                            onClick={() => delProof(p.id)}
+                          >
+                            삭제
+                          </button>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+
+                <div>
+                  <a
+                    href={`/api/admin/campaigns/${selectedId}/completion-report`}
+                    className="inline-flex items-center gap-1.5 rounded border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FileDown className="h-4 w-4" />
+                    완료 보고서 PDF
+                  </a>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    일정·증빙·문서 요약 PDF (관리자 세션 필요)
+                  </p>
                 </div>
 
                 <div>

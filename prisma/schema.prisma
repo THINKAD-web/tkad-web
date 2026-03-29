@@ -8,9 +8,23 @@ datasource db {
 
 enum CampaignStatus {
   proposal
+  negotiation
   contract
+  production
   airing
   completed
+}
+
+enum MediaAvailability {
+  available
+  reserved
+  maintenance
+}
+
+enum CrmTier {
+  vip
+  standard
+  lead
 }
 
 enum FinancialDocKind {
@@ -63,11 +77,15 @@ model Media {
   effectMemo       String?  @map("effect_memo")
   extractedImages  String[] @default([]) @map("extracted_images")
 
+  availability MediaAvailability @default(available) @map("availability")
+  isActive     Boolean           @default(true) @map("is_active")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  priceSnapshots MediaPriceSnapshot[]
-  bookings       MediaBooking[]
+  priceSnapshots        MediaPriceSnapshot[]
+  bookings              MediaBooking[]
+  advertiserExecutions  MediaAdvertiserExecution[]
 
   @@map("media")
 }
@@ -103,12 +121,29 @@ model MediaBooking {
   @@map("media_bookings")
 }
 
+model MediaAdvertiserExecution {
+  id             String    @id @default(cuid())
+  mediaId        String    @map("media_id")
+  advertiserName String    @map("advertiser_name")
+  campaignLabel  String?   @map("campaign_label")
+  periodStart    DateTime? @map("period_start")
+  periodEnd      DateTime? @map("period_end")
+  note           String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([mediaId])
+  @@map("media_advertiser_executions")
+}
+
 model CrmAccount {
   id        String   @id @default(cuid())
   email     String   @unique
   company   String
   name      String
   phone     String?
+  tier      CrmTier  @default(standard)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -185,9 +220,23 @@ model Campaign {
   financialDocs   CampaignFinancialDoc[]
   mediaBookings   MediaBooking[]
   quoteRequests   QuoteRequest[]
+  proofPhotos     CampaignProofPhoto[]
 
   @@index([status])
   @@map("campaigns")
+}
+
+model CampaignProofPhoto {
+  id         String   @id @default(cuid())
+  campaignId String   @map("campaign_id")
+  imageUrl   String   @map("image_url")
+  caption    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("campaign_proof_photos")
 }
 
 model CampaignScheduleEvent {

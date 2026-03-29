@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { autoLinkQuoteRequestToCampaign } from "@/lib/quote-campaign-link";
 import { rateLimit } from "@/lib/rate-limit";
+import { postInternalAlert } from "@/lib/internal-webhook";
 
 export const dynamic = "force-dynamic";
 
@@ -104,6 +105,12 @@ export async function POST(request: NextRequest) {
         message: String(message ?? "").trim() || null,
       },
     });
+    void postInternalAlert({
+      type: "quote_request",
+      title: "새 견적 요청",
+      body: `${String(company ?? "").trim() || "-"} / ${String(name).trim()} · 매체 ${ids.length}건`,
+      meta: { email: emailNorm, mediaCount: ids.length },
+    }).catch(() => {});
     await autoLinkQuoteRequestToCampaign(db, created.id, emailNorm);
   } catch (err) {
     console.error("[quote] DB error:", err);

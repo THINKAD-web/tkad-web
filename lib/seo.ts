@@ -28,6 +28,7 @@ export const siteUrl = (
 export const publicSeoPaths = [
   "",
   "/about",
+  "/services",
   "/media",
   "/recommend",
   "/cases",

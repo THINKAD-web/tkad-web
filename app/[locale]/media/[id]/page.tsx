@@ -1,16 +1,32 @@
 import type { Metadata } from "next";
+import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, MapPin } from "lucide-react";
+import {
+  ArrowLeft,
+  CircleDollarSign,
+  MapPin,
+  Monitor,
+  Ruler,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   getMediaById,
   getAllMediaIds,
+  getSimilarMedia,
+  resolveMediaGallery,
   typeLabels,
 } from "@/lib/media-data";
+import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
+import MediaDetailPerformance from "@/components/media-detail-performance";
+import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
+import MediaSimilarCarousel from "@/components/media-similar-carousel";
+import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
@@ -48,41 +64,81 @@ export default async function MediaDetailPage({ params }: Props) {
     media.monthlyFootTraffic ??
     Math.round(media.dailyFootTraffic * 30);
 
+  const similar = getSimilarMedia(media, 4);
+  const casePhotos = media.caseStudyPhotos ?? [];
+  const heroImage = resolveMediaGallery(media)[0];
+  const typeLabel =
+    (isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en) ?? "";
+  const featuresText = isKo ? media.features : media.featuresEn;
+  const performanceMetrics = resolvePerformanceMetrics(media);
+  const compareHref =
+    similar.length > 0
+      ? `/compare?ids=${media.id},${similar[0].id}`
+      : "/media";
+
   return (
     <>
-      <section className="bg-navy py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <Link href="/media">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mb-6 -ml-2 text-white/80 hover:bg-white/10 hover:text-white"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              {t("back")}
-            </Button>
-          </Link>
-          <Badge variant="secondary" className="bg-white/10 text-xs text-white">
-            {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
-          </Badge>
-          <h1 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
-            {isKo ? media.name : media.nameEn}
-          </h1>
-          <p className="mt-2 flex items-center gap-2 text-slate-300">
-            <MapPin className="h-4 w-4 shrink-0" />
-            {isKo ? media.location : media.locationEn}
-          </p>
-          <p className="mt-4 text-2xl font-bold text-gold">
-            ₩{media.price.toLocaleString()}
-            <span className="text-sm font-normal text-slate-300">
-              {" "}
-              {t("perMonth")}
-            </span>
-          </p>
+      <section className="relative w-full overflow-hidden bg-navy aspect-video">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={heroImage}
+          alt={isKo ? media.name : media.nameEn}
+          className="absolute inset-0 h-full w-full object-cover"
+          fetchPriority="high"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25"
+          aria-hidden
+        />
+        <div className="relative z-10 flex h-full min-h-0 flex-col justify-between px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Link href="/media">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="-ml-2 text-white/85 hover:bg-white/10 hover:text-white"
+              >
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                {t("back")}
+              </Button>
+            </Link>
+            <MediaDetailAdminActions />
+          </div>
+          <div className="max-w-4xl pb-1">
+            <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-sm">
+              {isKo ? media.name : media.nameEn}
+            </h1>
+            <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-white/88 sm:text-lg">
+              <span className="inline-flex items-center gap-2">
+                <MapPin
+                  className="h-4 w-4 shrink-0 opacity-90"
+                  aria-hidden
+                />
+                {isKo ? media.location : media.locationEn}
+              </span>
+              {typeLabel ? (
+                <>
+                  <span
+                    className="hidden text-white/35 sm:inline"
+                    aria-hidden
+                  >
+                    ·
+                  </span>
+                  <span className="font-medium text-white/95">{typeLabel}</span>
+                </>
+              ) : null}
+            </p>
+            <p className="mt-5 text-2xl font-bold text-gold">
+              ₩{media.price.toLocaleString()}
+              <span className="ml-1.5 text-sm font-normal text-white/70">
+                {t("perMonth")}
+              </span>
+            </p>
+          </div>
         </div>
       </section>
 
-      <section className="py-12">
+      <section className="py-12 pb-28 sm:pb-32">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <MediaDetailExtras
             media={media}
@@ -93,15 +149,78 @@ export default async function MediaDetailPage({ params }: Props) {
               openGoogle: t("openGoogle"),
               inquiry: t("inquiry"),
               quote: t("quote"),
+              galleryLightboxClose: t("galleryLightboxClose"),
+              galleryLightboxPrev: t("galleryLightboxPrev"),
+              galleryLightboxNext: t("galleryLightboxNext"),
+              galleryExpand: t("galleryExpand"),
+              locationAddressLabel: t("locationAddressLabel"),
+              locationRegionLabel: t("locationRegionLabel"),
+              kakaoMapEmbedBadge: t("kakaoMapEmbedBadge"),
             }}
           />
+
+          <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
+            {t("coreInfoTitle")}
+          </h2>
+          <div className="rounded-2xl border border-navy/10 bg-white p-5 shadow-lg shadow-navy/5 sm:p-6">
+            <div className="grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4">
+              <CoreFact
+                icon={Ruler}
+                label={t("size")}
+                value={
+                  <span className="font-semibold">
+                    {media.size || t("empty")}
+                  </span>
+                }
+              />
+              <CoreFact
+                icon={Monitor}
+                label={t("resolution")}
+                value={
+                  <span className="font-semibold">
+                    {media.resolution || t("empty")}
+                  </span>
+                }
+              />
+              <CoreFact
+                icon={CircleDollarSign}
+                label={t("priceTitle")}
+                value={
+                  <>
+                    <span className="text-base font-semibold text-gold-dark sm:text-lg">
+                      ₩{media.price.toLocaleString()}
+                    </span>
+                    <span className="mt-1 block text-xs font-normal text-muted-foreground">
+                      {t("priceUnit")}
+                    </span>
+                  </>
+                }
+              />
+              <CoreFact
+                icon={Users}
+                label={t("footTrafficTitle")}
+                value={
+                  <>
+                    <span className="block text-lg font-bold leading-tight text-navy sm:text-xl">
+                      {monthly.toLocaleString()}
+                    </span>
+                    <span className="mt-0.5 block text-xs font-medium text-muted-foreground">
+                      {t("monthly")}
+                    </span>
+                    <span className="mt-2 block text-sm text-muted-foreground">
+                      {t("daily")}{" "}
+                      {media.dailyFootTraffic.toLocaleString()}
+                    </span>
+                  </>
+                }
+              />
+            </div>
+          </div>
 
           <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
             {t("specsTitle")}
           </h2>
           <dl className="grid gap-3 rounded-xl border bg-white p-6 sm:grid-cols-2">
-            <SpecRow label={t("size")} value={media.size} />
-            <SpecRow label={t("resolution")} value={media.resolution} />
             <SpecRow label={t("brightness")} value={media.brightness} />
             <SpecRow
               label={t("operatingHours")}
@@ -121,65 +240,197 @@ export default async function MediaDetailPage({ params }: Props) {
             />
           </dl>
 
-          <h2 className="mb-4 mt-10 text-lg font-bold text-navy">
-            {t("footTrafficTitle")}
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border bg-slate-50 p-5">
-              <p className="text-xs font-semibold uppercase text-muted-foreground">
-                {t("daily")}
-              </p>
-              <p className="mt-1 text-2xl font-bold text-navy">
-                {media.dailyFootTraffic.toLocaleString()}
-              </p>
+          <MediaDetailPerformance metrics={performanceMetrics} />
+
+          <section
+            aria-labelledby="media-detail-description-heading"
+            className="mt-10 border-t border-navy/10 py-12"
+          >
+            <h2
+              id="media-detail-description-heading"
+              className="mb-10 text-xl font-bold tracking-tight text-navy sm:text-2xl"
+            >
+              {t("detailDescriptionTitle")}
+            </h2>
+            <div className="space-y-12">
+              <div>
+                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("historyTitle")}
+                </h3>
+                <div
+                  className={[
+                    "prose prose-slate max-w-none",
+                    "prose-p:text-[15px] prose-p:leading-[1.8] prose-p:text-navy/88",
+                    "prose-headings:scroll-mt-24 prose-headings:font-bold prose-headings:text-navy",
+                    "prose-strong:font-semibold prose-strong:text-navy",
+                  ].join(" ")}
+                >
+                  <ProseParagraphs
+                    text={
+                      (isKo
+                        ? media.advertiserHistory
+                        : media.advertiserHistoryEn) || t("empty")
+                    }
+                  />
+                </div>
+              </div>
+              <div>
+                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("nearbyTitle")}
+                </h3>
+                <div
+                  className={[
+                    "prose prose-slate max-w-none",
+                    "prose-p:text-[15px] prose-p:leading-[1.8] prose-p:text-navy/88",
+                    "prose-headings:font-bold prose-headings:text-navy",
+                    "prose-strong:font-semibold prose-strong:text-navy",
+                  ].join(" ")}
+                >
+                  <ProseParagraphs
+                    text={
+                      (isKo ? media.nearbyFacilities : media.nearbyFacilitiesEn) ||
+                      t("empty")
+                    }
+                  />
+                </div>
+              </div>
+              {featuresText ? (
+                <EffectMemoCallout title={t("effectMemoTitle")}>
+                  <div
+                    className={[
+                      "prose prose-slate max-w-none",
+                      "prose-p:mt-0 prose-p:text-[15px] prose-p:leading-[1.8] prose-p:text-navy/90",
+                      "prose-strong:font-semibold prose-strong:text-navy",
+                    ].join(" ")}
+                  >
+                    <ProseParagraphs text={featuresText} />
+                  </div>
+                </EffectMemoCallout>
+              ) : null}
             </div>
-            <div className="rounded-xl border bg-slate-50 p-5">
-              <p className="text-xs font-semibold uppercase text-muted-foreground">
-                {t("monthly")}
-              </p>
-              <p className="mt-1 text-2xl font-bold text-navy">
-                {monthly.toLocaleString()}
-              </p>
-            </div>
-          </div>
+          </section>
 
-          <h2 className="mb-4 mt-10 text-lg font-bold text-navy">
-            {t("priceTitle")}
-          </h2>
-          <p className="rounded-xl border bg-white p-5 text-lg font-semibold text-navy">
-            ₩{media.price.toLocaleString()}
-            {t("priceUnit")}
-          </p>
-
-          <h2 className="mb-4 mt-10 text-lg font-bold text-navy">
-            {t("historyTitle")}
-          </h2>
-          <p className="rounded-xl border bg-white p-5 text-sm leading-relaxed text-muted-foreground">
-            {(isKo ? media.advertiserHistory : media.advertiserHistoryEn) ||
-              t("empty")}
-          </p>
-
-          <h2 className="mb-4 mt-10 text-lg font-bold text-navy">
-            {t("nearbyTitle")}
-          </h2>
-          <p className="rounded-xl border bg-white p-5 text-sm leading-relaxed text-muted-foreground">
-            {(isKo ? media.nearbyFacilities : media.nearbyFacilitiesEn) ||
-              t("empty")}
-          </p>
-
-          {(isKo ? media.features : media.featuresEn) && (
+          {casePhotos.length > 0 && (
             <>
-              <h2 className="mb-4 mt-10 text-lg font-bold text-navy">
-                {t("featuresTitle")}
+              <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
+                {t("caseStudiesTitle")}
               </h2>
-              <p className="rounded-xl border bg-white p-5 text-sm leading-relaxed text-muted-foreground">
-                {isKo ? media.features : media.featuresEn}
-              </p>
+              <div className="grid gap-6 sm:grid-cols-2">
+                {casePhotos.map((p, i) => {
+                  const cap = isKo
+                    ? p.captionKo || p.captionEn
+                    : p.captionEn || p.captionKo;
+                  return (
+                    <figure
+                      key={`${p.url}-${i}`}
+                      className="overflow-hidden rounded-xl border bg-white shadow-sm"
+                    >
+                      <div className="relative aspect-[16/10] bg-slate-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={p.url}
+                          alt={cap || ""}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      {cap ? (
+                        <figcaption className="border-t px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+                          {cap}
+                        </figcaption>
+                      ) : null}
+                    </figure>
+                  );
+                })}
+              </div>
             </>
           )}
+
+          <MediaSimilarCarousel
+            items={similar}
+            isKo={isKo}
+            title={t("similarTitle")}
+            priceSuffix={isKo ? "만원/월" : " (10K ₩)/mo"}
+          />
         </div>
       </section>
+
+      <MediaDetailStickyCta mediaId={media.id} compareHref={compareHref} />
     </>
+  );
+}
+
+function ProseParagraphs({ text }: { text: string }) {
+  const normalized = text.trim();
+  if (!normalized) {
+    return null;
+  }
+  const blocks = normalized.split(/\n\s*\n/).filter(Boolean);
+  if (blocks.length <= 1) {
+    return <p>{normalized}</p>;
+  }
+  return (
+    <>
+      {blocks.map((block, i) => (
+        <p key={i}>{block.replace(/\s*\n\s*/g, " ").trim()}</p>
+      ))}
+    </>
+  );
+}
+
+function EffectMemoCallout({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-gold-dark/45 bg-gradient-to-br from-gold-light/50 via-white to-gold/18 px-5 py-6 shadow-md shadow-navy/[0.07] ring-1 ring-inset ring-white/60 sm:px-8 sm:py-7">
+      <div
+        className="pointer-events-none absolute inset-y-5 left-0 w-1 rounded-full bg-gradient-to-b from-gold-dark/75 to-gold-dark/20"
+        aria-hidden
+      />
+      <div className="relative flex gap-4 pl-3 sm:pl-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy/[0.07] text-gold-dark">
+          <Sparkles className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1 pt-0.5">
+          <p className="text-xs font-semibold uppercase tracking-wider text-navy/75">
+            {title}
+          </p>
+          <div className="mt-3">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CoreFact({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="flex gap-3">
+      <div
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold/12 text-gold-dark"
+        aria-hidden
+      >
+        <Icon className="h-5 w-5" strokeWidth={1.75} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+        <div className="mt-1.5 min-w-0 text-sm leading-snug text-navy">
+          {value}
+        </div>
+      </div>
+    </div>
   );
 }
 

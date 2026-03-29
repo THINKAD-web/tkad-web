@@ -1,11 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CalendarDays, CloudUpload, ImageIcon, Tag, Code2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  CloudUpload,
+  ImageIcon,
+  Tag,
+  Code2,
+  Users,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
+
+type MediaAvailability = "available" | "reserved" | "maintenance";
 
 type MediaRow = {
   id: string;
@@ -14,7 +26,38 @@ type MediaRow = {
   type: string;
   price: number;
   image: string | null;
+  availability?: MediaAvailability;
 };
+
+const AVAIL_LABEL: Record<MediaAvailability, string> = {
+  available: "예약가능",
+  reserved: "예약중",
+  maintenance: "점검중",
+};
+
+function startOfDay(d: Date) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+
+function endOfDay(d: Date) {
+  const x = new Date(d);
+  x.setHours(23, 59, 59, 999);
+  return x;
+}
+
+function bookingTouchesDay(
+  day: Date,
+  startsAt: string,
+  endsAt: string,
+): boolean {
+  const s = new Date(startsAt);
+  const e = new Date(endsAt);
+  const a = startOfDay(day).getTime();
+  const b = endOfDay(day).getTime();
+  return s.getTime() <= b && e.getTime() >= a;
+}
 
 export default function AdminMediaHubPage() {
   const [list, setList] = useState<MediaRow[]>([]);
@@ -31,6 +74,19 @@ export default function AdminMediaHubPage() {
       status: string;
     }[]
   >([]);
+  const [advertiserExecs, setAdvertiserExecs] = useState<
+    {
+      id: string;
+      advertiserName: string;
+      campaignLabel: string | null;
+      periodStart: string | null;
+      periodEnd: string | null;
+      note: string | null;
+    }[]
+  >([]);
+  const [availability, setAvailability] =
+    useState<MediaAvailability>("available");
+  const [calMonth, setCalMonth] = useState(() => new Date());
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [uploadMsg, setUploadMsg] = useState<string | null>(null);
@@ -41,6 +97,13 @@ export default function AdminMediaHubPage() {
     startsAt: "",
     endsAt: "",
     status: "hold",
+  });
+  const [execForm, setExecForm] = useState({
+    advertiserName: "",
+    campaignLabel: "",
+    periodStart: "",
+    periodEnd: "",
+    note: "",
   });
 
   const [newMedia, setNewMedia] = useState({
@@ -54,11 +117,45 @@ export default function AdminMediaHubPage() {
     height: "",
   });
 
+  const priceByMonth = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of prices) {
+      const d = new Date(p.effectiveFrom);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      m.set(key, p.price);
+    }
+    return [...m.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-12);
+  }, [prices]);
+
+  const maxMonthPrice = useMemo(
+    () => Math.max(1, ...priceByMonth.map(([, v]) => v)),
+    [priceByMonth],
+  );
+
+  const calendarCells = useMemo(() => {
+    const y = calMonth.getFullYear();
+    const mo = calMonth.getMonth();
+    const first = new Date(y, mo, 1);
+    const last = new Date(y, mo + 1, 0);
+    const startPad = (first.getDay() + 6) % 7;
+    const days: ({ day: number; date: Date } | null)[] = [];
+    for (let i = 0; i < startPad; i++) days.push(null);
+    for (let d = 1; d <= last.getDate(); d++) {
+      days.push({ day: d, date: new Date(y, mo, d) });
+    }
+    while (days.length % 7 !== 0) days.push(null);
+    return days;
+  }, [calMonth]);
+
   const loadList = useCallback(async () => {
     setLoading(true);
     setErr(null);
     try {
-      const res = await fetch("/api/admin/medias");
+      const res = await fetch("/api/admin/medias", {
+        credentials: "include",
+      });
       const data = (await res.json()) as { medias?: MediaRow[]; error?: string };
       if (!res.ok) throw new Error(data.error ?? "fail");
       setList(data.medias ?? []);
@@ -79,6 +176,7 @@ export default function AdminMediaHubPage() {
     const price = Math.round(Number(newMedia.price) || 0);
     const res = await fetch("/api/admin/medias", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: newMedia.name.trim(),
@@ -108,50 +206,99 @@ export default function AdminMediaHubPage() {
   const loadDetail = async (m: MediaRow) => {
     setSel(m);
     try {
-      const [pRes, bRes] = await Promise.all([
-        fetch(`/api/admin/medias/${m.id}/prices`),
-        fetch(`/api/admin/medias/${m.id}/bookings`),
-      ]);
-      const pJson = (await pRes.json()) as {
-        snapshots?: {
-          id: string;
-          price: number;
-          note: string | null;
-          effectiveFrom: string;
-        }[];
+      const res = await fetch(`/api/admin/medias/${m.id}`, {
+        credentials: "include",
+      });
+      const data = (await res.json()) as {
+        media?: {
+          priceSnapshots: {
+            id: string;
+            price: number;
+            note: string | null;
+            effectiveFrom: string;
+          }[];
+          bookings: {
+            id: string;
+            title: string;
+            startsAt: string;
+            endsAt: string;
+            status: string;
+          }[];
+          advertiserExecutions: {
+            id: string;
+            advertiserName: string;
+            campaignLabel: string | null;
+            periodStart: string | null;
+            periodEnd: string | null;
+            note: string | null;
+          }[];
+          availability?: MediaAvailability;
+          image: string | null;
+        };
       };
-      const bJson = (await bRes.json()) as {
-        bookings?: {
-          id: string;
-          title: string;
-          startsAt: string;
-          endsAt: string;
-          status: string;
-        }[];
-      };
+      const media = data.media;
+      if (!media) {
+        setPrices([]);
+        setBookings([]);
+        setAdvertiserExecs([]);
+        return;
+      }
+      setAvailability(
+        (media.availability as MediaAvailability) ?? "available",
+      );
       setPrices(
-        (pJson.snapshots ?? []).map((s) => ({
+        (media.priceSnapshots ?? []).map((s) => ({
           ...s,
           effectiveFrom: new Date(s.effectiveFrom).toISOString().slice(0, 16),
         })),
       );
       setBookings(
-        (bJson.bookings ?? []).map((b) => ({
+        (media.bookings ?? []).map((b) => ({
           ...b,
           startsAt: new Date(b.startsAt).toISOString().slice(0, 16),
           endsAt: new Date(b.endsAt).toISOString().slice(0, 16),
         })),
       );
+      setAdvertiserExecs(
+        (media.advertiserExecutions ?? []).map((x) => ({
+          ...x,
+          periodStart: x.periodStart
+            ? new Date(x.periodStart).toISOString().slice(0, 10)
+            : null,
+          periodEnd: x.periodEnd
+            ? new Date(x.periodEnd).toISOString().slice(0, 10)
+            : null,
+        })),
+      );
+      setSel((prev) =>
+        prev && prev.id === m.id
+          ? { ...prev, image: media.image ?? prev.image, availability: media.availability as MediaAvailability | undefined }
+          : prev,
+      );
     } catch {
       setPrices([]);
       setBookings([]);
+      setAdvertiserExecs([]);
     }
+  };
+
+  const saveAvailability = async (v: MediaAvailability) => {
+    if (!sel) return;
+    setAvailability(v);
+    await fetch(`/api/admin/medias/${sel.id}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ availability: v }),
+    });
+    await loadList();
   };
 
   const addPrice = async () => {
     if (!sel || !newPrice.price) return;
     await fetch(`/api/admin/medias/${sel.id}/prices`, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         price: Number(newPrice.price),
@@ -167,6 +314,7 @@ export default function AdminMediaHubPage() {
     if (!sel || !book.title || !book.startsAt || !book.endsAt) return;
     await fetch(`/api/admin/medias/${sel.id}/bookings`, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: book.title,
@@ -180,7 +328,42 @@ export default function AdminMediaHubPage() {
   };
 
   const delBooking = async (id: string) => {
-    await fetch(`/api/admin/media-bookings/${id}`, { method: "DELETE" });
+    await fetch(`/api/admin/media-bookings/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    if (sel) await loadDetail(sel);
+  };
+
+  const addAdvertiserExec = async () => {
+    if (!sel || !execForm.advertiserName.trim()) return;
+    await fetch(`/api/admin/medias/${sel.id}/advertiser-executions`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        advertiserName: execForm.advertiserName.trim(),
+        campaignLabel: execForm.campaignLabel.trim() || undefined,
+        periodStart: execForm.periodStart || undefined,
+        periodEnd: execForm.periodEnd || undefined,
+        note: execForm.note.trim() || undefined,
+      }),
+    });
+    setExecForm({
+      advertiserName: "",
+      campaignLabel: "",
+      periodStart: "",
+      periodEnd: "",
+      note: "",
+    });
+    await loadDetail(sel);
+  };
+
+  const delAdvertiserExec = async (id: string) => {
+    await fetch(`/api/admin/media-advertiser-executions/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
     if (sel) await loadDetail(sel);
   };
 
@@ -191,6 +374,7 @@ export default function AdminMediaHubPage() {
     setUploadMsg(null);
     const sigRes = await fetch("/api/admin/upload/cloudinary", {
       method: "POST",
+      credentials: "include",
     });
     if (!sigRes.ok) {
       setUploadMsg("Cloudinary 미설정 또는 서명 실패");
@@ -215,7 +399,10 @@ export default function AdminMediaHubPage() {
       `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
       { method: "POST", body: fd },
     );
-    const upJson = (await up.json()) as { secure_url?: string; error?: { message: string } };
+    const upJson = (await up.json()) as {
+      secure_url?: string;
+      error?: { message: string };
+    };
     if (!up.ok || !upJson.secure_url) {
       setUploadMsg(upJson.error?.message ?? "업로드 실패");
       return;
@@ -223,6 +410,7 @@ export default function AdminMediaHubPage() {
 
     await fetch(`/api/admin/medias/${sel.id}`, {
       method: "PATCH",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ image: upJson.secure_url }),
     });
@@ -238,8 +426,9 @@ export default function AdminMediaHubPage() {
       <div>
         <h2 className="text-lg font-bold text-navy">매체 허브 (DB)</h2>
         <p className="text-sm text-muted-foreground">
-          Cloudinary 이미지 업로드, 가격 변경 이력, 예약(송출) 캘린더 슬롯을
-          관리합니다. 기존 &quot;매체 관리&quot; 화면은 데모용으로 유지됩니다.
+          가용 상태, Cloudinary 이미지, 월별 가격 이력, 예약 캘린더, 광고주 집행
+          이력을 관리합니다. 목록·간편 등록은 &quot;매체 관리&quot;와 동일 DB를
+          사용합니다.
         </p>
         <Link
           href="/admin/medias/quick-add"
@@ -348,7 +537,14 @@ export default function AdminMediaHubPage() {
                     sel?.id === m.id ? "border-gold bg-gold/5" : "border-slate-200"
                   }`}
                 >
-                  <p className="font-semibold text-navy">{m.name}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-navy">{m.name}</p>
+                    {m.availability ? (
+                      <Badge variant="secondary" className="text-[10px]">
+                        {AVAIL_LABEL[m.availability]}
+                      </Badge>
+                    ) : null}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     {m.region} · {m.type}
                   </p>
@@ -366,7 +562,7 @@ export default function AdminMediaHubPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">이미지 · 가격 이력 · 예약</CardTitle>
+            <CardTitle className="text-base">상세 · 캘린더 · 이력</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {!sel ? (
@@ -375,6 +571,25 @@ export default function AdminMediaHubPage() {
               </p>
             ) : (
               <>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-sm font-semibold text-navy">가용 상태</span>
+                  <select
+                    className="rounded border border-slate-200 px-2 py-1.5 text-sm"
+                    value={availability}
+                    onChange={(e) =>
+                      saveAvailability(e.target.value as MediaAvailability)
+                    }
+                  >
+                    {(Object.keys(AVAIL_LABEL) as MediaAvailability[]).map(
+                      (k) => (
+                        <option key={k} value={k}>
+                          {AVAIL_LABEL[k]}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </div>
+
                 <div>
                   <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
                     <CloudUpload className="h-4 w-4" />
@@ -398,8 +613,32 @@ export default function AdminMediaHubPage() {
                 <div>
                   <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
                     <Tag className="h-4 w-4" />
-                    가격 히스토리
+                    가격 히스토리 (월별 스냅샷)
                   </h3>
+                  {priceByMonth.length > 0 ? (
+                    <div
+                      className="mb-3 flex items-end gap-1"
+                      style={{ height: 72 }}
+                    >
+                      {priceByMonth.map(([key, val]) => (
+                        <div
+                          key={key}
+                          className="flex flex-1 flex-col items-center gap-0.5"
+                          title={`${key}: ${val.toLocaleString()}원`}
+                        >
+                          <div
+                            className="w-full rounded-t-sm bg-navy/80"
+                            style={{
+                              height: `${Math.max(4, (val / maxMonthPrice) * 48)}px`,
+                            }}
+                          />
+                          <span className="text-[9px] text-muted-foreground">
+                            {key.slice(2)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                   <div className="flex flex-wrap gap-2">
                     <Input
                       className="w-32"
@@ -432,10 +671,82 @@ export default function AdminMediaHubPage() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
-                    <CalendarDays className="h-4 w-4" />
-                    예약 / 송출 슬롯
-                  </h3>
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="flex items-center gap-1 text-sm font-semibold">
+                      <CalendarDays className="h-4 w-4" />
+                      예약 현황 (월)
+                    </h3>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() =>
+                          setCalMonth(
+                            new Date(
+                              calMonth.getFullYear(),
+                              calMonth.getMonth() - 1,
+                              1,
+                            ),
+                          )
+                        }
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="min-w-[100px] text-center text-xs font-medium">
+                        {calMonth.getFullYear()}년 {calMonth.getMonth() + 1}월
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() =>
+                          setCalMonth(
+                            new Date(
+                              calMonth.getFullYear(),
+                              calMonth.getMonth() + 1,
+                              1,
+                            ),
+                          )
+                        }
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] text-muted-foreground">
+                    {["월", "화", "수", "목", "금", "토", "일"].map((d) => (
+                      <div key={d}>{d}</div>
+                    ))}
+                  </div>
+                  <div className="mt-1 grid grid-cols-7 gap-0.5 text-center text-[10px]">
+                    {calendarCells.map((cell, idx) => {
+                      if (!cell) {
+                        return <div key={idx} className="h-7" />;
+                      }
+                      const busy = bookings.some((b) =>
+                        bookingTouchesDay(cell.date, b.startsAt, b.endsAt),
+                      );
+                      return (
+                        <div
+                          key={idx}
+                          className={`flex h-7 items-center justify-center rounded ${
+                            busy
+                              ? "bg-gold/30 font-semibold text-navy"
+                              : "bg-slate-50 text-navy"
+                          }`}
+                        >
+                          {cell.day}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <h4 className="mb-2 mt-4 text-xs font-semibold text-navy">
+                    슬롯 추가
+                  </h4>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <Input
                       placeholder="제목"
@@ -497,6 +808,89 @@ export default function AdminMediaHubPage() {
                           size="sm"
                           className="text-rose-600"
                           onClick={() => delBooking(b.id)}
+                        >
+                          삭제
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
+                    <Users className="h-4 w-4" />
+                    광고주 집행 이력
+                  </h3>
+                  <div className="mb-2 grid gap-2 sm:grid-cols-2">
+                    <Input
+                      placeholder="광고주명 *"
+                      value={execForm.advertiserName}
+                      onChange={(e) =>
+                        setExecForm((f) => ({
+                          ...f,
+                          advertiserName: e.target.value,
+                        }))
+                      }
+                    />
+                    <Input
+                      placeholder="캠페인/브랜드명"
+                      value={execForm.campaignLabel}
+                      onChange={(e) =>
+                        setExecForm((f) => ({
+                          ...f,
+                          campaignLabel: e.target.value,
+                        }))
+                      }
+                    />
+                    <Input
+                      type="date"
+                      value={execForm.periodStart}
+                      onChange={(e) =>
+                        setExecForm((f) => ({
+                          ...f,
+                          periodStart: e.target.value,
+                        }))
+                      }
+                    />
+                    <Input
+                      type="date"
+                      value={execForm.periodEnd}
+                      onChange={(e) =>
+                        setExecForm((f) => ({ ...f, periodEnd: e.target.value }))
+                      }
+                    />
+                    <Input
+                      className="sm:col-span-2"
+                      placeholder="메모"
+                      value={execForm.note}
+                      onChange={(e) =>
+                        setExecForm((f) => ({ ...f, note: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <Button type="button" size="sm" onClick={addAdvertiserExec}>
+                    이력 추가
+                  </Button>
+                  <ul className="mt-2 space-y-2 text-xs">
+                    {advertiserExecs.map((x) => (
+                      <li
+                        key={x.id}
+                        className="flex items-start justify-between gap-2 rounded border p-2"
+                      >
+                        <div>
+                          <p className="font-medium">{x.advertiserName}</p>
+                          <p className="text-muted-foreground">
+                            {x.campaignLabel ?? "—"} ·{" "}
+                            {x.periodStart ?? "?"} ~ {x.periodEnd ?? "?"}
+                          </p>
+                          {x.note ? <p>{x.note}</p> : null}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="shrink-0 text-rose-600"
+                          onClick={() => delAdvertiserExec(x.id)}
                         >
                           삭제
                         </Button>

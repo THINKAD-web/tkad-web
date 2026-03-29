@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
+import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { getPrisma } from "@/lib/prisma";
 import {
   mapQuickAddToDb,
@@ -50,6 +51,13 @@ export async function POST(request: NextRequest) {
       created.push({ id: media.id, name: media.name });
     }
   });
+
+  if (isAdminAuthDebugEnabled()) {
+    console.log("[admin-api] quick-add persisted", {
+      count: created.length,
+      ids: created.map((c) => c.id),
+    });
+  }
 
   return json({ ok: true, count: created.length, created }, 201);
 }

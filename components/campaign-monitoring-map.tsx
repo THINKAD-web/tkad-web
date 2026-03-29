@@ -68,6 +68,10 @@ type Props = {
   onSelectPin: (id: string | null) => void;
   isKo: boolean;
   className?: string;
+  /** Fixed map height in px (e.g. 400). Default: responsive 360 / 440. */
+  fixedMapHeightPx?: number;
+  /** Show helper line under the map (provider hint). Default true. */
+  showFooterCaption?: boolean;
 };
 
 type KakaoMapCtx = {
@@ -89,6 +93,8 @@ export function CampaignMonitoringMap({
   onSelectPin,
   isKo,
   className,
+  fixedMapHeightPx,
+  showFooterCaption = true,
 }: Props) {
   const provider = useMemo(() => getCampaignMonitoringMapProvider(), []);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -345,7 +351,15 @@ export function CampaignMonitoringMap({
     return (
       <div className={cn("relative overflow-hidden rounded-xl border border-navy/10", className)}>
         <div
-          className="relative min-h-[360px] w-full bg-[linear-gradient(160deg,#e2e8f0_0%,#cbd5e1_45%,#94a3b8_100%)] md:min-h-[440px]"
+          className={cn(
+            "relative w-full bg-[linear-gradient(160deg,#e2e8f0_0%,#cbd5e1_45%,#94a3b8_100%)]",
+            fixedMapHeightPx == null && "min-h-[360px] md:min-h-[440px]",
+          )}
+          style={
+            fixedMapHeightPx != null
+              ? { height: fixedMapHeightPx, minHeight: fixedMapHeightPx }
+              : undefined
+          }
           role="application"
           aria-label={isKo ? "캠페인 위치(데모 지도)" : "Campaign locations (demo map)"}
         >
@@ -383,19 +397,27 @@ export function CampaignMonitoringMap({
     <div className={cn("relative overflow-hidden rounded-xl border border-navy/10", className)}>
       <div
         ref={containerRef}
-        className="h-[360px] w-full md:h-[440px]"
+        className={cn(
+          "w-full",
+          fixedMapHeightPx == null && "h-[360px] md:h-[440px]",
+        )}
+        style={
+          fixedMapHeightPx != null ? { height: fixedMapHeightPx } : undefined
+        }
         role="application"
         aria-label={isKo ? "캠페인 위치 지도" : "Campaign location map"}
       />
-      <p className="border-t border-navy/10 bg-white px-3 py-2 text-[11px] text-muted-foreground">
-        {provider === "kakao"
-          ? isKo
-            ? "카카오맵 · 핀을 눌러 매체 상세를 확인하세요."
-            : "Kakao Map · tap a pin for placement details."
-          : isKo
-            ? "Google 지도 · 핀을 눌러 매체 상세를 확인하세요."
-            : "Google Maps · tap a pin for placement details."}
-      </p>
+      {showFooterCaption ? (
+        <p className="border-t border-navy/10 bg-white px-3 py-2 text-[11px] text-muted-foreground">
+          {provider === "kakao"
+            ? isKo
+              ? "카카오맵 · 핀을 눌러 매체 상세를 확인하세요."
+              : "Kakao Map · tap a pin for placement details."
+            : isKo
+              ? "Google 지도 · 핀을 눌러 매체 상세를 확인하세요."
+              : "Google Maps · tap a pin for placement details."}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -7,13 +7,22 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Bell, MessageSquare, StickyNote, UserRound } from "lucide-react";
 
+type CrmTier = "vip" | "standard" | "lead";
+
 type AccountRow = {
   id: string;
   email: string;
   company: string;
   name: string;
   phone: string | null;
+  tier: CrmTier;
   _count: { contactLogs: number; notes: number; followUps: number };
+};
+
+const TIER_LABEL: Record<CrmTier, string> = {
+  vip: "VIP",
+  standard: "일반",
+  lead: "신규",
 };
 
 export default function AdminCrmRecordsPage() {
@@ -31,6 +40,10 @@ export default function AdminCrmRecordsPage() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [accountTier, setAccountTier] = useState<CrmTier>("standard");
+  const [preferredMedia, setPreferredMedia] = useState<
+    { id: string; name: string; type: string; picks: number }[]
+  >([]);
 
   const [newAcc, setNewAcc] = useState({
     email: "",
@@ -69,7 +82,14 @@ export default function AdminCrmRecordsPage() {
     setSel(id);
     const res = await fetch(`/api/admin/crm/accounts/${id}`);
     const data = (await res.json()) as {
+      preferredMedia?: {
+        id: string;
+        name: string;
+        type: string;
+        picks: number;
+      }[];
       account?: {
+        tier?: CrmTier;
         contactLogs: { id: string; channel: string; summary: string; createdAt: string }[];
         notes: { id: string; body: string; updatedAt: string }[];
         followUps: {
@@ -80,9 +100,15 @@ export default function AdminCrmRecordsPage() {
         }[];
       };
     };
+    setPreferredMedia(data.preferredMedia ?? []);
     if (data.account) {
+      setAccountTier(data.account.tier ?? "standard");
+      const logs = [...data.account.contactLogs].sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
       setDetail({
-        contactLogs: data.account.contactLogs.map((x) => ({
+        contactLogs: logs.map((x) => ({
           ...x,
           createdAt: new Date(x.createdAt).toISOString().slice(0, 16),
         })),
@@ -96,6 +122,17 @@ export default function AdminCrmRecordsPage() {
         })),
       });
     }
+  };
+
+  const patchTier = async (tier: CrmTier) => {
+    if (!sel) return;
+    await fetch(`/api/admin/crm/accounts/${sel}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tier }),
+    });
+    setAccountTier(tier);
+    await loadList();
   };
 
   const createAccount = async () => {
@@ -238,6 +275,9 @@ export default function AdminCrmRecordsPage() {
                   </div>
                   <p className="text-xs text-muted-foreground">{a.email}</p>
                   <div className="mt-1 flex flex-wrap gap-1">
+                    <Badge variant="outline" className="text-[10px]">
+                      {TIER_LABEL[a.tier ?? "standard"]}
+                    </Badge>
                     <Badge variant="secondary">로그 {a._count.contactLogs}</Badge>
                     <Badge variant="secondary">메모 {a._count.notes}</Badge>
                     <Badge variant="secondary">
@@ -261,10 +301,46 @@ export default function AdminCrmRecordsPage() {
               </p>
             ) : (
               <>
+                <div className="flex flex-wrap items-center gap-2 rounded border border-slate-100 bg-slate-50/80 p-3">
+                  <span className="text-sm font-semibold text-navy">고객 등급</span>
+                  <select
+                    className="rounded border border-slate-200 bg-white px-2 py-1 text-sm"
+                    value={accountTier}
+                    onChange={(e) => patchTier(e.target.value as CrmTier)}
+                  >
+                    {(Object.keys(TIER_LABEL) as CrmTier[]).map((t) => (
+                      <option key={t} value={t}>
+                        {TIER_LABEL[t]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {preferredMedia.length > 0 ? (
+                  <div>
+                    <h3 className="mb-2 text-sm font-semibold text-navy">
+                      선호 매체 (연결 캠페인 견적 기준)
+                    </h3>
+                    <ul className="space-y-1 text-xs">
+                      {preferredMedia.map((m) => (
+                        <li
+                          key={m.id}
+                          className="flex justify-between gap-2 rounded border bg-white px-2 py-1.5"
+                        >
+                          <span className="font-medium text-navy">{m.name}</span>
+                          <span className="text-muted-foreground">
+                            {m.type} · {m.picks}회
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
                 <div>
                   <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
                     <MessageSquare className="h-4 w-4" />
-                    연락 기록
+                    상담 히스토리 (타임라인)
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     <select

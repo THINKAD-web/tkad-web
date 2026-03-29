@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
+import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -125,6 +126,10 @@ export async function POST(request: NextRequest) {
   const ex = optStrArr(body.extractedImages);
   if (ex !== undefined) data.extractedImages = ex;
 
+  if (typeof body.isActive === "boolean") {
+    data.isActive = body.isActive;
+  }
+
   const db = getPrisma();
   const media = await db.media.create({ data });
 
@@ -135,6 +140,13 @@ export async function POST(request: NextRequest) {
       note: "initial",
     },
   });
+
+  if (isAdminAuthDebugEnabled()) {
+    console.log("[admin-api] media POST persisted", {
+      id: media.id,
+      name: media.name,
+    });
+  }
 
   return json({ media }, 201);
 }

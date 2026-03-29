@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "npx tsx prisma/seed.ts",
-    "postinstall": "prisma generate"
+    "db:push": "node scripts/ensure-database-url.mjs && prisma db push",
+    "postinstall": "prisma generate && node scripts/ensure-noto-kr-font.mjs"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20",
     "@types/nodemailer": "^7.0.11",
     "@types/pg": "^8.20.0",

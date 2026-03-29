@@ -18,6 +18,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       scheduleEvents: { orderBy: { startsAt: "asc" } },
       financialDocs: { orderBy: { createdAt: "desc" } },
       quoteRequests: { orderBy: { createdAt: "desc" }, take: 80 },
+      proofPhotos: { orderBy: { createdAt: "desc" }, take: 40 },
       account: true,
     },
   });

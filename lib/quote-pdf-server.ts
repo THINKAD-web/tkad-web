@@ -1,4 +1,8 @@
 import { jsPDF } from "jspdf";
+import {
+  krFontFamily,
+  registerNotoSansKrIfAvailable,
+} from "@/lib/jspdf-register-noto-kr";
 
 export function applyTemplateVars(
   template: string,
@@ -29,11 +33,16 @@ export function htmlToPlainLines(html: string): string[] {
 
 export function buildQuotePdfBase64(lines: string[]): string {
   const doc = new jsPDF();
+  const wantKr = lines.some((l) => /[\uAC00-\uD7A3]/.test(l));
+  const hasKrFont = wantKr && registerNotoSansKrIfAvailable(doc);
+  const fam = krFontFamily(hasKrFont);
   let y = 18;
   doc.setFontSize(14);
+  doc.setFont(fam, "normal");
   doc.text("THINKAD · Quote / 견적", 20, y);
   y += 12;
   doc.setFontSize(10);
+  doc.setFont(fam, "normal");
   for (const line of lines) {
     const wrapped = doc.splitTextToSize(line, 170);
     for (const w of wrapped) {

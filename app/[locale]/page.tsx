@@ -14,6 +14,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import HeroParallaxBackground from "@/components/hero-parallax-background";
 import {
+  mediaData,
+  resolveMediaGallery,
+  type MediaItem,
+} from "@/lib/media-data";
+import {
   ArrowRight,
   BarChart3,
   BadgeCheck,
@@ -57,44 +62,14 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-const featuredMedia = [
-  {
-    id: 1,
-    name: "코엑스 K-POP 스퀘어 전광판",
-    nameEn: "COEX K-POP Square LED",
-    location: "서울 삼성동 코엑스",
-    locationEn: "COEX, Samsung-dong, Seoul",
-    type: "digital",
-    price: 5000,
-  },
-  {
-    id: 2,
-    name: "강남대로 미디어폴 G-LIGHT",
-    nameEn: "Gangnam-daero Media Pole G-LIGHT",
-    location: "서울 강남구 강남대로",
-    locationEn: "Gangnam-daero, Gangnam-gu, Seoul",
-    type: "digital",
-    price: 3500,
-  },
-  {
-    id: 3,
-    name: "뉴욕 타임스퀘어 전광판",
-    nameEn: "New York Times Square LED",
-    location: "뉴욕 타임스퀘어",
-    locationEn: "Times Square, New York",
-    type: "digital",
-    price: 8000,
-  },
-  {
-    id: 4,
-    name: "두바이 부르즈 할리파 LED",
-    nameEn: "Dubai Burj Khalifa LED",
-    location: "두바이 부르즈 할리파",
-    locationEn: "Burj Khalifa, Dubai",
-    type: "digital",
-    price: 9500,
-  },
-];
+/** 메인 추천 매체 — 카탈로그(`mediaData`) id와 일치 (상세 페이지로 연결) */
+const HOME_FEATURED_IDS = [1, 2, 6, 10] as const;
+
+function getHomeFeaturedCatalog(): MediaItem[] {
+  return HOME_FEATURED_IDS.map((id) => mediaData.find((m) => m.id === id)).filter(
+    (m): m is MediaItem => m != null,
+  );
+}
 
 const typeLabels: Record<string, { ko: string; en: string }> = {
   billboard: { ko: "빌보드", en: "Billboard" },
@@ -126,6 +101,7 @@ function HomeContent({
   t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   const isKo = locale === "ko";
+  const featuredCatalog = getHomeFeaturedCatalog();
 
   return (
     <>
@@ -367,6 +343,7 @@ function HomeContent({
                 footTraffic: "A+",
                 roi: "4.5x",
                 type: isKo ? "디지털" : "Digital",
+                detailMediaId: 1,
               },
               {
                 rank: 2,
@@ -376,15 +353,17 @@ function HomeContent({
                 footTraffic: "A+",
                 roi: "4.2x",
                 type: isKo ? "디지털" : "Digital",
+                detailMediaId: 2,
               },
               {
                 rank: 3,
-                name: isKo ? "코엑스 9to9 나인투나인 CUBE" : "COEX 9to9 CUBE",
-                location: isKo ? "서울 삼성동 코엑스몰" : "COEX Mall, Samsung-dong, Seoul",
+                name: isKo ? "코엑스 파르나스 미디어타워" : "COEX Parnas Media Tower",
+                location: isKo ? "삼성역 코엑스" : "COEX, Samsung Station, Seoul",
                 dailyExposure: "280,000",
                 footTraffic: "A+",
                 roi: "3.8x",
                 type: isKo ? "디지털" : "Digital",
+                detailMediaId: 10,
               },
             ].map((media, i) => (
               <ScrollAnimate key={media.rank} delay={i * 100}>
@@ -435,7 +414,7 @@ function HomeContent({
                   </div>
 
                   <div className="mt-5 flex gap-2">
-                    <Link href="/media" className="flex-1">
+                    <Link href={`/media/${media.detailMediaId}`} className="flex-1">
                       <Button variant="outline" size="sm" className="btn-navy-outline w-full text-xs font-semibold rounded-lg">
                         {isKo ? "상세 보기" : "View Details"}
                       </Button>
@@ -619,20 +598,29 @@ function HomeContent({
             </div>
           </ScrollAnimate>
           <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-7">
-            {featuredMedia.map((media, i) => (
+            {featuredCatalog.map((media, i) => {
+              const thumb = resolveMediaGallery(media)[0];
+              return (
               <ScrollAnimate key={media.id} delay={i * 100}>
               <Card
                 className="group overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
-                <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10 overflow-hidden">
-                  <Monitor className="h-12 w-12 text-navy/15 transition-transform duration-300 group-hover:scale-110" />
+                <div className="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-navy/5 to-navy/10">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={thumb}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy/50 via-transparent to-transparent" />
+                  <Monitor className="relative z-0 h-12 w-12 text-white/25 transition-transform duration-300 group-hover:scale-110" />
                   {i < 3 && (
-                    <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
+                    <div className="absolute top-3 left-3 z-10 flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
                       <Flame className="h-3 w-3" />
                       {isKo ? "인기" : "Popular"}
                     </div>
                   )}
-                  <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
                     <BadgeCheck className="h-3 w-3" />
                     Verified
                   </div>
@@ -664,10 +652,22 @@ function HomeContent({
                       {t("media.perMonth")}
                     </span>
                   </div>
+                  <div className="mt-4">
+                    <Link href={`/media/${media.id}`} className="block">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="btn-navy-outline w-full text-xs font-semibold rounded-lg"
+                      >
+                        {isKo ? "상세 보기" : "View details"}
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
               </ScrollAnimate>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

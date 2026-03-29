@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# Korean PDF font (fetched by scripts/ensure-noto-kr-font.mjs on postinstall)
+public/fonts/*.otf
+
 # debug
 npm-debug.log*
 yarn-debug.log*

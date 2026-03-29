@@ -1,5 +1,11 @@
 import type { CampaignMapMediaType, CampaignMapPin } from "@/lib/campaign-monitoring-mock";
 
+export type MediaCaseStudyPhoto = {
+  url: string;
+  captionKo?: string;
+  captionEn?: string;
+};
+
 export interface MediaItem {
   id: number;
   name: string;
@@ -29,6 +35,8 @@ export interface MediaItem {
   advertiserHistoryEn?: string;
   nearbyFacilities?: string;
   nearbyFacilitiesEn?: string;
+  /** 진행·집행 사례 사진 (관리·콘텐츠용) */
+  caseStudyPhotos?: MediaCaseStudyPhoto[];
 }
 
 export function getMediaById(id: number): MediaItem | undefined {
@@ -37,6 +45,22 @@ export function getMediaById(id: number): MediaItem | undefined {
 
 export function getAllMediaIds(): number[] {
   return mediaData.map((m) => m.id);
+}
+
+/** Same region/type 우선, 가격대 유사도 보조 */
+export function getSimilarMedia(item: MediaItem, limit = 4): MediaItem[] {
+  const others = mediaData.filter((m) => m.id !== item.id);
+  const scored = others.map((m) => {
+    let s = 0;
+    if (m.region === item.region) s += 4;
+    if (m.type === item.type) s += 3;
+    const pr = Math.abs(m.price - item.price) / Math.max(item.price, 1);
+    if (pr < 0.25) s += 2;
+    else if (pr < 0.5) s += 1;
+    return { m, s };
+  });
+  scored.sort((a, b) => b.s - a.s || Math.abs(a.m.price - item.price) - Math.abs(b.m.price - item.price));
+  return scored.slice(0, limit).map((x) => x.m);
 }
 
 /** Gallery URLs: uses Cloudinary demo / Picsum when catalog has no uploads yet */
@@ -130,6 +154,18 @@ export const mediaData: MediaItem[] = [
       "https://res.cloudinary.com/demo/image/upload/w_1200,h_675,c_fill/docs/models",
       "https://res.cloudinary.com/demo/image/upload/w_1200,h_675,c_fill/dog.jpg",
     ],
+    caseStudyPhotos: [
+      {
+        url: "https://res.cloudinary.com/demo/image/upload/w_900,h_500,c_fill/sample.jpg",
+        captionKo: "글로벌 IT 브랜드 런칭 — 야간 송출",
+        captionEn: "Global IT brand launch — night broadcast",
+      },
+      {
+        url: "https://res.cloudinary.com/demo/image/upload/w_900,h_500,c_fill/coffee.jpg",
+        captionKo: "애너모픽 3D 특수 크리에이티브",
+        captionEn: "Anamorphic 3D special creative",
+      },
+    ],
   },
   {
     id: 2,
@@ -161,6 +197,13 @@ export const mediaData: MediaItem[] = [
     sampleImages: [
       "https://res.cloudinary.com/demo/image/upload/w_1200,h_675,c_fill/coffee.jpg",
       "https://res.cloudinary.com/demo/image/upload/w_1200,h_675,c_fill/sheep.jpg",
+    ],
+    caseStudyPhotos: [
+      {
+        url: "https://res.cloudinary.com/demo/image/upload/w_900,h_500,c_fill/sheep.jpg",
+        captionKo: "미디어폴 18기 동시 송출 캠페인",
+        captionEn: "18-pole simultaneous campaign",
+      },
     ],
   },
   {
@@ -256,6 +299,13 @@ export const mediaData: MediaItem[] = [
     sampleImages: [
       "https://res.cloudinary.com/demo/image/upload/w_1200,h_675,c_fill/sheep.jpg",
     ],
+    caseStudyPhotos: [
+      {
+        url: "https://res.cloudinary.com/demo/image/upload/w_900,h_500,c_fill/dog.jpg",
+        captionKo: "패션 브랜드 시즌 캠페인 — 외벽 패널",
+        captionEn: "Fashion season campaign — exterior panel",
+      },
+    ],
   },
   {
     id: 6,
@@ -317,6 +367,18 @@ export const mediaData: MediaItem[] = [
     nearbyFacilitiesEn: "Parnas Mall, Samsung Stn",
     sampleImages: [
       "https://res.cloudinary.com/demo/image/upload/w_1200,h_675,c_fill/sample.jpg",
+    ],
+    caseStudyPhotos: [
+      {
+        url: "https://res.cloudinary.com/demo/image/upload/w_900,h_500,c_fill/docs/models",
+        captionKo: "B2B 글로벌 컨퍼런스 연계 노출",
+        captionEn: "B2B global conference tie-in exposure",
+      },
+      {
+        url: "https://res.cloudinary.com/demo/image/upload/w_900,h_500,c_fill/coffee.jpg",
+        captionKo: "삼성역 코엑스권 프리미엄 집행 사례",
+        captionEn: "Premium placement near Samsung / COEX",
+      },
     ],
   },
   {

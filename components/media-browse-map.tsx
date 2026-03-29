@@ -11,12 +11,16 @@ export default function MediaBrowseMap({
   selectedId,
   onSelectId,
   className,
+  fixedMapHeightPx,
+  showFooterCaption,
 }: {
   items: readonly MediaItem[];
   locale: string;
   selectedId: number | null;
   onSelectId: (id: number | null) => void;
   className?: string;
+  fixedMapHeightPx?: number;
+  showFooterCaption?: boolean;
 }) {
   const isKo = locale === "ko";
   const pins = useMemo(
@@ -32,6 +36,8 @@ export default function MediaBrowseMap({
       onSelectPin={(id) => onSelectId(id == null ? null : Number(id))}
       isKo={isKo}
       className={className}
+      fixedMapHeightPx={fixedMapHeightPx}
+      showFooterCaption={showFooterCaption}
     />
   );
 }
