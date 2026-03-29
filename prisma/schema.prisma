@@ -434,6 +434,9 @@ model OoHQuote {
   quoteRequestId String?      @unique @map("quote_request_id")
   quoteRequest   QuoteRequest? @relation(fields: [quoteRequestId], references: [id], onDelete: SetNull)
 
+  /** 네트워크 매체 선택 시 [{ networkId, units, regions, lineTotal만원 }] */
+  networkSelections Json? @map("network_selections")
+
   oohContract OohContract?
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -442,6 +445,54 @@ model OoHQuote {
   @@index([status])
   @@index([createdAt])
   @@map("ooh_quotes")
+}
+
+/// 버스쉘터·아파트 등 다지점 패키지 매체
+model MediaNetwork {
+  id          String  @id @default(cuid())
+  name        String
+  nameEn      String? @map("name_en")
+  description String? @db.Text
+  /// bus_shelter | apartment | subway_pillar | convenience_store | golf_course | highway_rest
+  type        String
+
+  pricePerUnit Int? @map("price_per_unit")
+  pricePackage Int? @map("price_package")
+  minUnits     Int  @default(1) @map("min_units")
+
+  totalLocations Int      @map("total_locations")
+  regions        String[] @default([])
+
+  image         String?
+  galleryImages String[] @default([]) @map("gallery_images")
+  features      String?  @db.Text
+  /// [{ "units": 100, "price": 5000 }, ...] 만원 단위
+  packageOptions Json?   @map("package_options")
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  locations MediaNetworkLocation[]
+
+  @@index([isActive, type])
+  @@map("media_networks")
+}
+
+model MediaNetworkLocation {
+  id        String       @id @default(cuid())
+  networkId String       @map("network_id")
+  network   MediaNetwork @relation(fields: [networkId], references: [id], onDelete: Cascade)
+
+  name      String
+  address   String?
+  latitude  Float?
+  longitude Float?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([networkId])
+  @@map("media_network_locations")
 }
 
 /// OOH 표준 계약서 + 전자서명 (OoHQuote 1:1)

@@ -3,6 +3,20 @@
  */
 
 import type { Prisma } from "@prisma/client";
+import {
+  CATALOG_MEDIA_TYPES,
+  inferCatalogTypeFromMediaContent,
+  isValidCatalogMediaType,
+} from "@/lib/media-auto-categorize";
+import {
+  deriveRegionFromAddress,
+  deriveTypeFromSubCategory,
+  enrichCityDistrictFromAddress,
+  extractAutoTags,
+  inferSubCategoryFromText,
+  mergeManualAndAutoTags,
+  normalizeSubCategory,
+} from "@/lib/media-json-enrich";
 
 export type QuickAddMediaJson = {
   media_name: string;
@@ -39,6 +53,11 @@ export type QuickAddMediaJson = {
   nearby_landmarks: string;
   /** 광고주 이력 (쉼표 구분) */
   past_advertisers: string;
+  /**
+   * 비우면 `inferCatalogTypeFromMediaContent`로 자동 분류.
+   * 지정 시: {CATALOG_MEDIA_TYPES} 중 하나.
+   */
+  type?: string;
 };
 
 type QuickAddMediaJsonInput = Record<string, unknown>;
@@ -67,29 +86,13 @@ function optStr(v: unknown): string | null {
   return null;
 }
 
+/** @deprecated full_address까지 반영하려면 `deriveRegionFromAddress` 사용 */
 export function deriveRegion(city: string, district: string): string {
-  const blob = `${city} ${district}`.toLowerCase();
-  if (blob.includes("부산")) return "busan";
-  if (blob.includes("제주") || blob.includes("서귀포")) return "jeju";
-  if (blob.includes("서울")) return "seoul";
-  if (
-    blob.includes("대구") ||
-    blob.includes("인천") ||
-    blob.includes("광주") ||
-    blob.includes("대전") ||
-    blob.includes("울산")
-  )
-    return "national";
-  return "national";
+  return deriveRegionFromAddress(city, district, "");
 }
 
 export function deriveType(subCategory: string): string {
-  const s = subCategory.toLowerCase();
-  if (s.includes("빌보드") || s.includes("billboard")) return "billboard";
-  if (s.includes("지하철") || s.includes("역") || s.includes("subway"))
-    return "subway";
-  if (s.includes("버스") || s.includes("bus")) return "bus";
-  return "digital";
+  return deriveTypeFromSubCategory(subCategory);
 }
 
 /** Parse textarea → one object or array of objects. */
@@ -190,6 +193,14 @@ export function validateQuickAddItem(
     vis = Math.max(0, Math.min(100, Math.round(o.visibility_score)));
   }
 
+  const typeRaw = str("type", "").trim();
+  if (typeRaw && !isValidCatalogMediaType(typeRaw)) {
+    return {
+      ok: false,
+      error: `${prefix} type은 다음 중 하나여야 합니다: ${CATALOG_MEDIA_TYPES.join(", ")}`,
+    };
+  }
+
   const item: QuickAddMediaJson = {
     media_name: o.media_name.trim(),
     description: str("description", ""),
@@ -221,6 +232,7 @@ export function validateQuickAddItem(
     nearby_stations: str("nearby_stations", "") || str("nearby_subway", ""),
     nearby_landmarks: str("nearby_landmarks", ""),
     past_advertisers: str("past_advertisers", "") || str("advertiser_history", ""),
+    ...(typeRaw ? { type: typeRaw.toLowerCase() } : {}),
   };
 
   return { ok: true, item };
@@ -326,6 +338,7 @@ export function mediaQuickAddCreateToPrismaUpdate(
 /** DB Media 행 → quick-add JSON (편집기·GET API용) */
 export function mediaDbRowToQuickAddJson(m: {
   name: string;
+  type: string;
   description: string | null;
   subCategory: string | null;
   tags: string[];
@@ -360,6 +373,7 @@ export function mediaDbRowToQuickAddJson(m: {
     media_name: m.name,
     description: m.description ?? "",
     sub_category: m.subCategory ?? "",
+    type: m.type,
     tags: [...(m.tags ?? [])],
     full_address: m.location,
     district: m.district ?? "",
@@ -411,10 +425,51 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     [row.city, row.district].filter(Boolean).join(" ").trim() ||
     row.city ||
     "(주소 미입력)";
-  const region = deriveRegion(row.city, row.district);
-  const type = deriveType(row.sub_category || "digital");
+
+  const locEnriched = enrichCityDistrictFromAddress(
+    row.city,
+    row.district,
+    location,
+  );
+  const city = locEnriched.city.trim();
+  const district = locEnriched.district.trim();
+
+  let subRaw = row.sub_category.trim();
+  if (!subRaw) {
+    subRaw = inferSubCategoryFromText(row.media_name, row.description);
+  }
+  const subNormalized = normalizeSubCategory(subRaw) || subRaw;
+  const region = deriveRegionFromAddress(city, district, location);
   const price = Math.round(row.price_per_month);
   const imgs = row.extracted_images.filter(Boolean);
+
+  const autoTags = extractAutoTags({
+    name: row.media_name,
+    location,
+    description: row.description,
+    nearbyStations: row.nearby_stations,
+    nearbyLandmarks: row.nearby_landmarks,
+    nearbyFacilities: row.nearby_facilities,
+    city,
+    district,
+    subCategory: subNormalized,
+  });
+  const tags = mergeManualAndAutoTags(row.tags, autoTags);
+
+  const inferredType = inferCatalogTypeFromMediaContent({
+    subCategory: `${subRaw} ${subNormalized}`,
+    name: row.media_name,
+    description: row.description,
+    location,
+    tags,
+    nearbyFacilities: row.nearby_facilities,
+    nearbyStations: row.nearby_stations,
+    nearbyLandmarks: row.nearby_landmarks,
+  });
+  const type =
+    row.type && isValidCatalogMediaType(row.type)
+      ? row.type.trim().toLowerCase()
+      : inferredType;
 
   return {
     name: row.media_name,
@@ -427,10 +482,10 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     width: row.width_m != null ? String(row.width_m) : null,
     height: row.height_m != null ? String(row.height_m) : null,
     description: row.description.trim() || null,
-    subCategory: row.sub_category.trim() || null,
-    tags: row.tags,
-    district: row.district.trim() || null,
-    city: row.city.trim() || null,
+    subCategory: subNormalized.trim() || null,
+    tags,
+    district: district || null,
+    city: city || null,
     latitude: row.latitude,
     longitude: row.longitude,
     priceNote: row.price_note.trim() || null,

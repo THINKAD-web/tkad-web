@@ -1,33 +1,164 @@
-import type { jsPDF } from "jspdf";
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-
-const FONT_FILE = "NotoSansKR-Regular.otf";
-const FONT_FAMILY = "NotoSansKR";
-
 /**
- * Registers subset Noto Sans KR for jsPDF (server-side only).
- * Place file at public/fonts/NotoSansKR-Regular.otf (see Noto CJK subset KR).
+ * Noto Sans KR registration for jsPDF (Identity-H). Used by admin / campaign / formal
+ * quote helpers that still embed Korean.
+ *
+ * **Customer-facing quote PDF** (`build-quote-pdf.ts`) and **media compare PDF**
+ * (`build-compare-pdf.ts`) intentionally use **Helvetica + English-only copy** so
+ * text never relies on CJK font embedding or encoding.
  */
-export function registerNotoSansKrIfAvailable(doc: jsPDF): boolean {
+import type { jsPDF } from "jspdf";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { NOTO_KR_FONT_FAMILY } from "@/lib/jspdf-kr-font-constants";
+
+export const NOTO_KR_FONT_FILE = "NotoSansKR-Regular.otf";
+
+function isVerboseFontLog(): boolean {
+  return process.env.QUOTE_PDF_FONT_DEBUG === "1";
+}
+
+/** Vercel·로컬 등에서 `process.cwd()`와 무관하게 `public/fonts`를 찾기 위한 후보 경로 */
+export function notoKrFontPathCandidates(): string[] {
+  const name = NOTO_KR_FONT_FILE;
+  const cwd = process.cwd();
+  const custom = process.env.QUOTE_PDF_KR_FONT_PATH?.trim();
+  const paths: string[] = [];
+
+  if (custom) {
+    paths.push(join(cwd, custom));
+    if (custom.startsWith("/")) paths.push(custom);
+  }
+
+  paths.push(join(cwd, "public", "fonts", name));
+
+  // 빌드 산출물 기준 (일부 배포에서 chunk 위치 기준)
   try {
-    const custom = process.env.QUOTE_PDF_KR_FONT_PATH?.trim();
-    const p = custom
-      ? join(process.cwd(), custom)
-      : join(process.cwd(), "public", "fonts", FONT_FILE);
-    if (!existsSync(p)) return false;
-    const buf = readFileSync(p);
+    const here = dirname(fileURLToPath(import.meta.url));
+    paths.push(join(here, "..", "..", "..", "public", "fonts", name));
+    paths.push(join(here, "..", "..", "public", "fonts", name));
+    paths.push(join(here, "..", "public", "fonts", name));
+  } catch {
+    /* import.meta.url 없는 환경 무시 */
+  }
+
+  const seen = new Set<string>();
+  return paths.filter((p) => {
+    const n = p.trim();
+    if (!n || seen.has(n)) return false;
+    seen.add(n);
+    return true;
+  });
+}
+
+export function notoKrFontResolvedPath(): string {
+  const found = findReadableNotoKrFontPath();
+  if (found) return found;
+  const c = notoKrFontPathCandidates();
+  return c[0] ?? join(process.cwd(), "public", "fonts", NOTO_KR_FONT_FILE);
+}
+
+function findReadableNotoKrFontPath(): string | null {
+  for (const p of notoKrFontPathCandidates()) {
+    try {
+      if (!existsSync(p)) continue;
+      const st = statSync(p);
+      if (!st.isFile() || st.size < 1000) continue;
+      return p;
+    } catch {
+      /* next candidate */
+    }
+  }
+  return null;
+}
+
+export function notoKrFontFileExists(): boolean {
+  return findReadableNotoKrFontPath() !== null;
+}
+
+function logFontProbe(context: string, extra?: Record<string, unknown>) {
+  if (!isVerboseFontLog()) return;
+  console.log("[jspdf-kr] probe", {
+    context,
+    cwd: process.cwd(),
+    VERCEL: process.env.VERCEL,
+    candidates: notoKrFontPathCandidates(),
+    resolved: findReadableNotoKrFontPath(),
+    ...extra,
+  });
+}
+
+function logFontLoadFailure(candidates: string[]) {
+  const existsFlags = candidates.map((p) => {
+    try {
+      return { path: p, exists: existsSync(p) };
+    } catch {
+      return { path: p, exists: false as const };
+    }
+  });
+  console.warn("[jspdf-kr] Noto KR unavailable — compare/quote PDF uses Helvetica + English fallback", {
+    cwd: process.cwd(),
+    VERCEL: process.env.VERCEL,
+    NODE_ENV: process.env.NODE_ENV,
+    candidatesChecked: existsFlags,
+  });
+}
+
+/** Attach pre-read font bytes (Node Buffer). */
+export function attachNotoSansKrBuffer(doc: jsPDF, buf: Buffer): boolean {
+  try {
     const binary = buf.toString("latin1");
-    doc.addFileToVFS(FONT_FILE, binary);
-    doc.addFont(FONT_FILE, FONT_FAMILY, "normal", undefined, "Identity-H");
-    doc.setFont(FONT_FAMILY, "normal");
+    doc.addFileToVFS(NOTO_KR_FONT_FILE, binary);
+    doc.addFont(
+      NOTO_KR_FONT_FILE,
+      NOTO_KR_FONT_FAMILY,
+      "normal",
+      undefined,
+      "Identity-H",
+    );
+    doc.setFont(NOTO_KR_FONT_FAMILY, "normal");
     return true;
   } catch (e) {
-    console.warn("[jspdf-kr] font register failed:", e);
+    console.warn("[jspdf-kr] attach buffer failed:", e);
     return false;
   }
 }
 
-export function krFontFamily(hasKrFont: boolean): string {
-  return hasKrFont ? FONT_FAMILY : "helvetica";
+/**
+ * Registers subset Noto Sans KR for jsPDF (server-side only).
+ * Tries every candidate path; never throws to the caller.
+ */
+export function registerNotoSansKrIfAvailable(doc: jsPDF): boolean {
+  logFontProbe("register:start");
+  try {
+    const candidates = notoKrFontPathCandidates();
+    for (const p of candidates) {
+      try {
+        if (!existsSync(p)) {
+          if (isVerboseFontLog()) console.log("[jspdf-kr] missing:", p);
+          continue;
+        }
+        const st = statSync(p);
+        if (!st.isFile() || st.size < 1000) {
+          console.warn("[jspdf-kr] skip invalid file:", p, "size", st.size);
+          continue;
+        }
+        const buf = readFileSync(p);
+        if (attachNotoSansKrBuffer(doc, buf)) {
+          if (isVerboseFontLog()) console.log("[jspdf-kr] loaded:", p, "bytes", buf.length);
+          return true;
+        }
+      } catch (e) {
+        console.warn("[jspdf-kr] candidate failed:", p, e);
+      }
+    }
+    logFontProbe("register:fail", { tried: candidates.length });
+    logFontLoadFailure(candidates);
+    return false;
+  } catch (e) {
+    console.error("[jspdf-kr] registerNotoSansKrIfAvailable unexpected:", e);
+    return false;
+  }
 }
+
+export { krFontFamily } from "@/lib/jspdf-kr-font-constants";

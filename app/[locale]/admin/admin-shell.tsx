@@ -20,6 +20,7 @@ import {
   Calculator,
   ClipboardList,
   Sparkles,
+  Share2,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -45,6 +46,7 @@ const navDefs = [
   { href: "/admin/crm-records", key: "crmRecords" as const, icon: ContactRound },
   { href: "/admin/crm", key: "crm" as const, icon: UsersRound },
   { href: "/admin/medias", key: "medias" as const, icon: Monitor },
+  { href: "/admin/networks", key: "networks" as const, icon: Share2 },
   { href: "/admin/media-hub", key: "mediaHub" as const, icon: Database },
   { href: "/admin/quote-templates", key: "quoteTemplates" as const, icon: FileText },
   { href: "/admin/quotes", key: "quotesList" as const, icon: ClipboardList },

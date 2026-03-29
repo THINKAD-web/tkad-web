@@ -6,6 +6,7 @@ import {
   mediaData,
   type MediaItem,
 } from "@/lib/media-data";
+import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 
 /** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
 export type MediaWithAdvertiserExecutions = Media & {
@@ -126,10 +127,10 @@ export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
       orderBy: { updatedAt: "desc" },
       include: catalogInclude,
     });
-    if (rows.length === 0) {
-      return mediaData;
-    }
-    return rows.map(prismaMediaToMediaItem);
+    const mediaItems =
+      rows.length === 0 ? mediaData : rows.map(prismaMediaToMediaItem);
+    const networks = await fetchPublicMediaNetworks();
+    return networks.length > 0 ? [...mediaItems, ...networks] : mediaItems;
   } catch {
     return mediaData;
   }

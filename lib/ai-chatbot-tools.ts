@@ -1,5 +1,14 @@
 import type { MediaItem } from "@/lib/media-data";
-import { matchesMediaTextQuery, typeLabels } from "@/lib/media-data";
+import {
+  getPrimaryMediaImageUrl,
+  matchesMediaTextQuery,
+  typeLabels,
+} from "@/lib/media-data";
+import { CATALOG_MEDIA_TYPES } from "@/lib/media-auto-categorize";
+import {
+  matchesPlannerCategory,
+  type PlannerCategory,
+} from "@/lib/planner-logic";
 
 /** JSON Schema object for tool `parameters` (OpenAI / xAI 호환) */
 export type AiChatbotToolInputSchema = {
@@ -22,6 +31,8 @@ export type AiChatbotMediaCard = {
   price: number;
   type: string;
   region: string;
+  /** 썸네일 URL (없으면 카드에서 플레이스홀더) */
+  imageUrl?: string | null;
 };
 
 function compact(m: MediaItem): AiChatbotMediaCard {
@@ -33,6 +44,7 @@ function compact(m: MediaItem): AiChatbotMediaCard {
     price: m.price,
     type: m.type,
     region: m.region,
+    imageUrl: getPrimaryMediaImageUrl(m),
   };
 }
 
@@ -118,7 +130,7 @@ export function getAiChatbotTools(): AiChatbotToolSpec[] {
     {
       name: "recommendMedia",
       description:
-        "Recommend media using optional region (seoul|busan|jeju|national), type (billboard|digital|subway|bus), max monthly price in 만원, and optional keywords/goals for text matching. Combines filters and sorts by relevance.",
+        "Recommend media using optional region (seoul|busan|jeju|national), type (billboard|digital|subway|bus for broad groups, or apartment|premium|highway|network|indoor for specific), max monthly price in 만원, and optional keywords/goals for text matching. Combines filters and sorts by relevance.",
       input_schema: {
         type: "object",
         properties: {
@@ -132,7 +144,8 @@ export function getAiChatbotTools(): AiChatbotToolSpec[] {
           },
           type: {
             type: "string",
-            description: "billboard | digital | subway | bus — or empty",
+            description:
+              "Broad: billboard|digital|subway|bus. Specific: apartment|premium|highway|network|indoor. Empty = any.",
           },
           maxPrice: {
             type: "number",
@@ -225,7 +238,20 @@ export function executeChatbotTool(
     if (region && ["seoul", "busan", "jeju", "national"].includes(region)) {
       pool = pool.filter((m) => m.region === region);
     }
-    if (typeFilter && ["billboard", "digital", "subway", "bus"].includes(typeFilter)) {
+    const plannerCats: PlannerCategory[] = [
+      "billboard",
+      "digital",
+      "subway",
+      "bus",
+    ];
+    if (typeFilter && plannerCats.includes(typeFilter as PlannerCategory)) {
+      pool = pool.filter((m) =>
+        matchesPlannerCategory(m, typeFilter as PlannerCategory),
+      );
+    } else if (
+      typeFilter &&
+      (CATALOG_MEDIA_TYPES as readonly string[]).includes(typeFilter)
+    ) {
       pool = pool.filter((m) => m.type === typeFilter);
     }
     if (maxPrice != null && Number.isFinite(maxPrice) && maxPrice >= 0) {

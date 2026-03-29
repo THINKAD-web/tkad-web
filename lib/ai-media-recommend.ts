@@ -16,7 +16,7 @@ export type Industry =
 export type AiRecommendInput = {
   goal: CampaignGoal;
   target: TargetAudience;
-  /** 월 예산 상한 (만원) */
+  /** 월 예산 상한 (만원). 0 또는 미입력 = 제한 없음 */
   budgetMaxMan: number;
   region: string;
   industry: Industry;
@@ -30,216 +30,326 @@ export type ScoredMedia = {
   reasons: MatchReason[];
 };
 
-function industryBoost(
-  industry: Industry,
-  m: MediaItem,
-): { add: number; reason?: MatchReason } {
-  const f = `${m.features ?? ""} ${m.targetAge ?? ""}`.toLowerCase();
-  const fe = `${m.featuresEn ?? ""}`.toLowerCase();
+/** score = budget*0.4 + target*0.3 + region*0.2 + visibility*0.1 (각 0–100) */
+const W_BUDGET = 0.4;
+const W_TARGET = 0.3;
+const W_REGION = 0.2;
+const W_VISIBILITY = 0.1;
 
-  if (industry === "entertainment" && (f.includes("k-pop") || f.includes("팬"))) {
-    return {
-      add: 12,
-      reason: {
-        ko: "엔터·팬 타깃과 궁합이 좋은 랜드마크 매체",
-        en: "Strong fit for entertainment & fan audiences",
-      },
-    };
+function mediaHaystack(m: MediaItem): string {
+  return [
+    m.location,
+    m.locationEn,
+    m.city,
+    m.district,
+    m.nearbyStations,
+    m.nearbyLandmarks,
+    m.features,
+    m.featuresEn,
+    m.subCategory,
+    m.name,
+    m.nameEn,
+    m.networkSubtype,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+/** 서울 선택 시 부산·제주 명시 매체는 제외, 서울·수도권 동선 위주 */
+export function regionMatchesMedia(m: MediaItem, code: string): boolean {
+  if (code === "all") return true;
+  if (m.region === code) return true;
+  const h = mediaHaystack(m);
+  if (code === "seoul") {
+    if (m.region === "busan" || m.region === "jeju") return false;
+    if (m.region === "seoul") return true;
+    if (
+      m.region === "national" &&
+      /서울|수도권|강남|홍대|명동|테헤란|광화문|여의도|마포|송파|종로|영등포|코엑스|판교|분당|강북|노원|동대문/i.test(
+        h,
+      )
+    ) {
+      return true;
+    }
+    return false;
+  }
+  if (code === "busan") {
+    return m.region === "busan" || /부산|해운대|센텀|광안/i.test(h);
+  }
+  if (code === "jeju") {
+    return m.region === "jeju" || /제주/i.test(h);
+  }
+  return m.region === code;
+}
+
+function targetAudienceBand(t: TargetAudience): { min: number; max: number } {
+  switch (t) {
+    case "genz":
+      return { min: 15, max: 28 };
+    case "millennial":
+      return { min: 24, max: 42 };
+    case "family":
+      return { min: 28, max: 55 };
+    case "biz":
+      return { min: 28, max: 58 };
+    default:
+      return { min: 18, max: 65 };
+  }
+}
+
+function parseMediaAgeRanges(raw: string | undefined): { min: number; max: number }[] {
+  if (!raw?.trim()) return [];
+  const t = raw.replace(/\s/g, "");
+  const out: { min: number; max: number }[] = [];
+  const rangeRe = /(\d{1,2})\s*[~\-–]\s*(\d{1,2})(?:세)?/g;
+  let mm: RegExpExecArray | null;
+  while ((mm = rangeRe.exec(t)) !== null) {
+    const a = Math.min(Number(mm[1]), Number(mm[2]));
+    const b = Math.max(Number(mm[1]), Number(mm[2]));
+    if (Number.isFinite(a) && Number.isFinite(b)) out.push({ min: a, max: b });
+  }
+  const genRe = /(\d{1,2})대/g;
+  while ((mm = genRe.exec(t)) !== null) {
+    const d = Number(mm[1]);
+    if (Number.isFinite(d)) out.push({ min: d, max: d + 9 });
+  }
+  if (/mz|청년|z세대|10대|20대/i.test(t) && out.length === 0) {
+    out.push({ min: 15, max: 34 });
+  }
+  if (/중장년|30대|40대|50대|직장인|가장/i.test(t) && out.length === 0) {
+    out.push({ min: 30, max: 58 });
+  }
+  return out;
+}
+
+/** 타겟 매칭 — 연령 구간 겹침 0–100 */
+function subscoreAgeOverlap(mediaText: string | undefined, target: TargetAudience): number {
+  const spans = parseMediaAgeRanges(mediaText);
+  if (spans.length === 0) return 52;
+  const band = targetAudienceBand(target);
+  let best = 0;
+  for (const s of spans) {
+    const lo = Math.max(s.min, band.min);
+    const hi = Math.min(s.max, band.max);
+    if (hi >= lo) {
+      const overlap = hi - lo + 1;
+      const den = Math.max(band.max - band.min + 1, 1);
+      best = Math.max(best, overlap / den);
+    }
+  }
+  return Math.round(28 + best * 72);
+}
+
+function youthDistrictHit(target: TargetAudience, m: MediaItem): boolean {
+  if (target !== "genz" && target !== "millennial") return false;
+  const h = mediaHaystack(m);
+  return /홍대|강남|신촌|이태원|성수|건대|대학|연남|망원|을지로|명동|디지털|지하철|subway|코엑스|역세권/i.test(
+    h,
+  );
+}
+
+function matureCorridorHit(target: TargetAudience, m: MediaItem): boolean {
+  if (target !== "family" && target !== "biz") return false;
+  const h = mediaHaystack(m);
+  return /골프|고속|휴게|highway|rest|강남대로|테헤란|여의도|업무|cbd|판교|분당|빌보드|billboard/i.test(
+    h,
+  );
+}
+
+function industryHit(industry: Industry, m: MediaItem): boolean {
+  const h = mediaHaystack(m);
+  if (industry === "beauty" || industry === "retail") {
+    if (/강남|홍대|명동|청담|가로수|성수|패션|뷰티|백화|코스메/i.test(h)) return true;
+  }
+  if (industry === "auto") {
+    if (/고속|휴게|highway|강남대로|자동차|드라이브|간선/i.test(h)) return true;
+  }
+  if (industry === "fmcg") {
+    if (/역|지하철|상권|유동|대형|마트|편의|먹거리|fb|f&b|카페|식음/i.test(h)) return true;
   }
   if (industry === "fintech") {
-    if (m.type === "digital" && (f.includes("직장") || fe.includes("business"))) {
-      return {
-        add: 10,
-        reason: {
-          ko: "비즈니스·금융 타깃 유동인구와 연계",
-          en: "Aligns with business district traffic",
-        },
-      };
-    }
+    if (/테헤란|판교|여의도|강남|코엑스|it|금융|비즈|직장/i.test(h)) return true;
   }
-  if (industry === "auto" && (f.includes("고속") || fe.includes("highway"))) {
-    return {
-      add: 10,
-      reason: { ko: "자동차 브랜드에 적합한 노출 환경", en: "Suited for auto brand visibility" },
-    };
+  if (industry === "entertainment") {
+    if (/k-pop|팬|홍대|강남|공연|엔터|디지털|지하철/i.test(h)) return true;
   }
-  if (industry === "fmcg" || industry === "retail") {
-    if (m.dailyFootTraffic >= 200000) {
-      return {
-        add: 8,
-        reason: {
-          ko: "대중 소비재에 유리한 고유동 노출",
-          en: "High footfall for mass-market goods",
-        },
-      };
-    }
-  }
-  if (industry === "beauty" && (f.includes("프리미엄") || f.includes("청담"))) {
-    return {
-      add: 8,
-      reason: {
-        ko: "뷰티·프리미엄 이미지에 맞는 상권",
-        en: "Premium district fit for beauty brands",
-      },
-    };
-  }
-  return { add: 0 };
+  return false;
 }
 
-function audienceBoost(
-  target: TargetAudience,
-  m: MediaItem,
-): { add: number; reason?: MatchReason } {
-  if (target === "genz" || target === "millennial") {
-    if (m.type === "digital" || m.type === "subway") {
-      return {
-        add: 10,
-        reason: {
-          ko: "MZ층 도달에 유리한 디지털/교통 매체",
-          en: "Digital & transit effective for younger audiences",
-        },
-      };
-    }
-  }
-  if (target === "family") {
-    if (m.type === "subway" || m.region === "national") {
-      return {
-        add: 8,
-        reason: {
-          ko: "가족 단위 이동 동선과 겹치는 매체",
-          en: "Covers family mobility patterns",
-        },
-      };
-    }
-  }
-  if (target === "biz") {
-    if (m.type === "digital" && m.region === "seoul") {
-      return {
-        add: 10,
-        reason: {
-          ko: "서울 상권 B2B·직장인 노출",
-          en: "Seoul business district reach",
-        },
-      };
-    }
-  }
-  if (target === "mass") {
-    if (m.dailyFootTraffic >= 250000) {
-      return {
-        add: 8,
-        reason: { ko: "대중 도달 규모가 큼", en: "Broad reach volume" },
-      };
-    }
-  }
-  return { add: 0 };
+function industryFmcgRetailFootfall(industry: Industry, m: MediaItem): boolean {
+  return (
+    (industry === "fmcg" || industry === "retail") && m.dailyFootTraffic >= 200000
+  );
 }
 
-function goalBoost(
-  goal: CampaignGoal,
-  m: MediaItem,
-): { add: number; reason?: MatchReason } {
+function goalRawPoints(goal: CampaignGoal, m: MediaItem): number {
   if (goal === "awareness") {
-    let add = Math.min(18, Math.round(m.dailyFootTraffic / 45000));
-    const reason: MatchReason = {
-      ko: "브랜드 인지도 확대에 유리한 노출 규모",
-      en: "Scale suited for awareness goals",
-    };
-    if (m.type === "digital" || m.type === "billboard") add += 6;
-    return { add, reason };
+    let pts = Math.min(55, Math.round(m.dailyFootTraffic / 35000));
+    if (m.type === "digital" || m.type === "billboard" || m.type === "network") {
+      pts += 18;
+    }
+    return Math.min(100, pts);
   }
   if (goal === "consideration") {
-    if (m.type === "subway" || m.type === "digital") {
-      return {
-        add: 14,
-        reason: {
-          ko: "반복 노출로 관심·고려 단계 강화",
-          en: "Frequency-friendly for consideration stage",
-        },
-      };
-    }
-    return { add: 6 };
+    if (m.type === "subway" || m.type === "digital") return 82;
+    return 48;
   }
   if (goal === "launch") {
-    if (m.type === "digital" || m.dailyFootTraffic >= 300000) {
-      return {
-        add: 16,
-        reason: {
-          ko: "런칭 집중도를 높이는 임팩트 포맷",
-          en: "High-impact format for launch bursts",
-        },
-      };
-    }
-    return { add: 8 };
+    if (m.type === "digital" || m.dailyFootTraffic >= 300000) return 88;
+    return 52;
   }
-  return { add: 0 };
+  return 50;
 }
 
-function scoreOne(m: MediaItem, input: AiRecommendInput): ScoredMedia {
-  let score = 42;
-  const reasons: MatchReason[] = [];
+/** 타겟 매칭 (연령·동선·업종·캠페인 목표) 0–100 */
+function subscoreTargetMatch(m: MediaItem, input: AiRecommendInput): number {
+  const age = subscoreAgeOverlap(m.targetAge, input.target);
+  let district = 42;
+  if (youthDistrictHit(input.target, m)) district = 88;
+  else if (matureCorridorHit(input.target, m)) district = 85;
 
-  if (input.region !== "all") {
-    if (m.region === input.region) {
-      score += 18;
-      reasons.push({
-        ko: "선택한 지역과 일치",
-        en: "Matches your selected region",
-      });
-    } else {
-      score -= 22;
-    }
-  } else {
-    score += 4;
-    reasons.push({
-      ko: "전국 단위 노출 옵션",
-      en: "Nationwide placement option",
-    });
+  let ind = 44;
+  if (industryHit(input.industry, m)) ind = 86;
+  else if (industryFmcgRetailFootfall(input.industry, m)) ind = 72;
+
+  const gl = goalRawPoints(input.goal, m);
+
+  return Math.min(
+    100,
+    Math.round(age * 0.38 + district * 0.22 + ind * 0.22 + gl * 0.18),
+  );
+}
+
+/** 지역 적합도 0–100 (필터 통과 매체 기준으로 강도만 차등) */
+function subscoreRegion(m: MediaItem, code: string): number {
+  if (code === "all") return 76;
+  if (m.region === code) return 100;
+  const h = mediaHaystack(m);
+  if (code === "seoul" && m.region === "national") {
+    if (/서울|수도권|강남|홍대|명동|테헤란|판교|분당/i.test(h)) return 84;
+    return 68;
   }
+  if (code === "busan" && m.region !== "busan") return 74;
+  if (code === "jeju" && m.region !== "jeju") return 74;
+  return 78;
+}
 
-  if (input.budgetMaxMan > 0) {
-    if (m.price <= input.budgetMaxMan) {
-      score += 20;
-      reasons.push({
-        ko: "월 예산 상한 내 단가",
-        en: "Within your monthly budget cap",
-      });
-    } else {
-      score -= 18;
-      reasons.push({
-        ko: "예산 대비 단가 확인 필요",
-        en: "May exceed budget — review with planner",
-      });
-    }
+/** 가시성 0–100 */
+function subscoreVisibility(m: MediaItem): number {
+  const v = m.visibilityScore;
+  if (v != null && Number.isFinite(v)) {
+    return Math.max(0, Math.min(100, Math.round(v)));
   }
+  const f = m.dailyFootTraffic;
+  if (f <= 0) return 38;
+  return Math.min(100, Math.round(36 + 64 * (1 - Math.exp(-f / 220000))));
+}
 
-  const g = goalBoost(input.goal, m);
-  score += g.add;
-  if (g.reason) reasons.push(g.reason);
+/** 예산 적합도 0–100 (상한 없음: 중립, 상한 있음: 여유가 클수록 높음) */
+function subscoreBudget(
+  m: MediaItem,
+  budgetCap: number | null,
+): number {
+  if (budgetCap == null || budgetCap <= 0) return 78;
+  const cap = budgetCap;
+  const p = Math.max(0, m.price);
+  if (p <= 0) return 92;
+  const ratio = Math.min(1, p / cap);
+  return Math.round(45 + 55 * (1 - ratio));
+}
 
-  const a = audienceBoost(input.target, m);
-  score += a.add;
-  if (a.reason) reasons.push(a.reason);
-
-  const i = industryBoost(input.industry, m);
-  score += i.add;
-  if (i.reason) reasons.push(i.reason);
-
-  score += Math.min(10, Math.round(m.dailyFootTraffic / 120000));
-
+function dedupeReasons(reasons: MatchReason[]): MatchReason[] {
   const uniq: MatchReason[] = [];
   const seen = new Set<string>();
   for (const r of reasons) {
-    const k = r.ko;
-    if (!seen.has(k)) {
-      seen.add(k);
+    if (!seen.has(r.ko)) {
+      seen.add(r.ko);
       uniq.push(r);
     }
   }
+  return uniq.slice(0, 4);
+}
+
+function scoreOne(
+  m: MediaItem,
+  input: AiRecommendInput,
+  budgetCap: number | null,
+): ScoredMedia {
+  const reasons: MatchReason[] = [];
+
+  const budgetFit = subscoreBudget(m, budgetCap);
+  if (budgetCap != null && budgetCap > 0) {
+    reasons.push({
+      ko: "예산 상한 대비 단가 적합도",
+      en: "Budget fit vs. monthly cap",
+    });
+  } else {
+    reasons.push({
+      ko: "예산 제한 없음 (중립 적합도)",
+      en: "No budget cap (neutral budget fit)",
+    });
+  }
+
+  const targetMatching = subscoreTargetMatch(m, input);
+  const age = subscoreAgeOverlap(m.targetAge, input.target);
+  if (age >= 72) {
+    reasons.push({
+      ko: "타겟 연령대와 매체 타깃이 잘 맞음",
+      en: "Target age aligns with media profile",
+    });
+  }
+  if (youthDistrictHit(input.target, m)) {
+    reasons.push({
+      ko: "20–30대 동선·상권과 잘 맞는 위치",
+      en: "Strong fit for Gen Z / millennial corridors",
+    });
+  }
+  if (matureCorridorHit(input.target, m)) {
+    reasons.push({
+      ko: "가족·직장인·장거리 동선에 맞는 환경",
+      en: "Suited to family / commuter / highway visibility",
+    });
+  }
+  if (industryHit(input.industry, m)) {
+    reasons.push({
+      ko: "선택 업종과 상권·포맷이 잘 맞음",
+      en: "Industry–location/format fit",
+    });
+  }
+
+  const regionFit = subscoreRegion(m, input.region);
+  if (input.region === "all") {
+    reasons.push({
+      ko: "전국·복수 지역 노출 옵션",
+      en: "Nationwide / multi-region options",
+    });
+  } else {
+    reasons.push({
+      ko: "선택 지역과의 적합도",
+      en: "Region fit for your selection",
+    });
+  }
+
+  const visibility = subscoreVisibility(m);
+  if (visibility >= 70) {
+    reasons.push({
+      ko: "가시성·유동 규모 측면에서 유리",
+      en: "Strong visibility / footfall signal",
+    });
+  }
+
+  const score = Math.round(
+    budgetFit * W_BUDGET +
+      targetMatching * W_TARGET +
+      regionFit * W_REGION +
+      visibility * W_VISIBILITY,
+  );
 
   return {
     item: m,
-    score: Math.max(0, Math.min(100, Math.round(score))),
-    reasons: uniq.slice(0, 4),
+    score: Math.max(0, Math.min(100, score)),
+    reasons: dedupeReasons(reasons),
   };
 }
 
@@ -251,9 +361,20 @@ export function recommendMedia(
     (m) => m != null && typeof m.id === "string" && m.id.trim().length > 0,
   );
   if (valid.length === 0) return [];
-  return [...valid]
-    .map((m) => scoreOne(m, input))
-    .filter((s) => s.score >= 38)
+
+  const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
+  let pool = valid;
+  if (budgetCap != null) {
+    pool = pool.filter((m) => m.price <= budgetCap);
+  }
+  if (input.region !== "all") {
+    pool = pool.filter((m) => regionMatchesMedia(m, input.region));
+  }
+  if (pool.length === 0) return [];
+
+  return [...pool]
+    .map((m) => scoreOne(m, input, budgetCap))
+    .filter((s) => s.score >= 22)
     .sort((a, b) => b.score - a.score)
     .slice(0, 15);
 }

@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { typeLabels, type MediaItem } from "@/lib/media-data";
+import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-public";
 import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast-provider";
@@ -50,6 +51,14 @@ const PERIOD_MONTHS: Record<PeriodKey, number> = {
   "3months": 3,
   "6months": 6,
   "12months": 12,
+};
+
+/** PDF uses Helvetica only — English period line */
+const PERIOD_LABEL_PDF_EN: Record<PeriodKey, string> = {
+  "1month": "1 month",
+  "3months": "3 months",
+  "6months": "6 months",
+  "12months": "12 months",
 };
 
 type FormState = {
@@ -75,6 +84,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [step, setStep] = useState<WizardStep>(1);
   const [period, setPeriod] = useState<PeriodKey>("1month");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [networkQuoteOptions, setNetworkQuoteOptions] = useState<
+    Record<string, { units: number; regionScope: string }>
+  >({});
   const mediaQueryApplied = useRef(false);
   const [template, setTemplate] = useState<QuoteTemplateId>("default");
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
@@ -92,6 +104,25 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       .filter((id) => catalog.some((m) => m.id === id));
     if (ids.length > 0) setSelectedIds(new Set(ids));
   }, [catalog]);
+
+  useEffect(() => {
+    setNetworkQuoteOptions((prev) => {
+      const next = { ...prev };
+      for (const id of selectedIds) {
+        const m = catalog.find((x) => x.id === id);
+        if (m?.catalogSource === "network" && !next[id]) {
+          next[id] = {
+            units: Math.max(m.networkMinUnits ?? 1, 1),
+            regionScope: "all",
+          };
+        }
+      }
+      for (const k of Object.keys(next)) {
+        if (!selectedIds.has(k)) delete next[k];
+      }
+      return next;
+    });
+  }, [selectedIds, catalog]);
 
   const [form, setForm] = useState<FormState>({
     company: "",
@@ -120,8 +151,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   );
 
   const monthlyCost = useMemo(
-    () => selectedMedia.reduce((sum, m) => sum + m.price, 0),
-    [selectedMedia],
+    () =>
+      selectedMedia.reduce((sum, m) => {
+        if (m.catalogSource !== "network") return sum + m.price;
+        const opt = networkQuoteOptions[m.id];
+        const u = opt?.units ?? m.networkMinUnits ?? 1;
+        return sum + computeNetworkMonthlyFromMediaItem(m, u);
+      }, 0),
+    [selectedMedia, networkQuoteOptions],
   );
 
   const periodMonths = PERIOD_MONTHS[period];
@@ -145,16 +182,48 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       isKo,
       company: form.company,
       name: form.name,
-      periodLabel,
+      periodLabelPdf: PERIOD_LABEL_PDF_EN[period],
       budgetMin: budgetMinN,
       budgetMax: budgetMaxN,
       monthlyCost,
       totalCost,
-      rows: selectedMedia.map((m) => ({
-        name: (isKo ? m.name : m.nameEn) || m.name,
-        location: (isKo ? m.location : m.locationEn) || m.location,
-        price: m.price,
-      })),
+      rows: selectedMedia.map((m) => {
+        const isNw = m.catalogSource === "network";
+        const opt = networkQuoteOptions[m.id];
+        const units = isNw ? opt?.units ?? m.networkMinUnits ?? 1 : 0;
+        const line = isNw
+          ? computeNetworkMonthlyFromMediaItem(m, units)
+          : m.price;
+        const baseName = (isKo ? m.name : m.nameEn) || m.name;
+        const name =
+          isNw && units
+            ? `${baseName} (${units}${isKo ? "개소" : " sites"})`
+            : baseName;
+        const location =
+          isNw && opt
+            ? opt.regionScope === "all"
+              ? isKo
+                ? "지역: 전체"
+                : "Regions: all"
+              : opt.regionScope
+            : (isKo ? m.location : m.locationEn) || m.location;
+        const nameAsciiBase = (m.nameEn || m.name).trim();
+        const nameAscii =
+          isNw && units ? `${nameAsciiBase} (${units} sites)` : nameAsciiBase;
+        const locationAscii =
+          m.catalogSource === "network" && opt
+            ? opt.regionScope === "all"
+              ? "Regions: all"
+              : String(opt.regionScope)
+            : (m.locationEn || m.location || "").trim();
+        return {
+          name,
+          location,
+          price: line,
+          nameAscii,
+          locationAscii,
+        };
+      }),
     }),
     [
       template,
@@ -162,12 +231,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       isKo,
       form.company,
       form.name,
-      periodLabel,
+      period,
       budgetMinN,
       budgetMaxN,
       monthlyCost,
       totalCost,
       selectedMedia,
+      networkQuoteOptions,
     ],
   );
 
@@ -301,6 +371,20 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           website: form.website,
           pdfTemplate: template,
           locale: isKo ? "ko" : "en",
+          networkSelections: selectedMedia
+            .filter((m) => m.catalogSource === "network")
+            .map((m) => {
+              const opt = networkQuoteOptions[m.id] ?? {
+                units: Math.max(m.networkMinUnits ?? 1, 1),
+                regionScope: "all",
+              };
+              return {
+                catalogId: m.id,
+                units: opt.units,
+                regionScope: opt.regionScope,
+                lineTotal: computeNetworkMonthlyFromMediaItem(m, opt.units),
+              };
+            }),
         }),
       });
       if (!res.ok) throw new Error("submit failed");
@@ -482,64 +566,142 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         {catalog.map((media) => {
                           const checked = selectedIds.has(media.id);
                           const typeLabel = typeLabels[media.type];
+                          const nwOpt = networkQuoteOptions[media.id];
+                          const isNw = media.catalogSource === "network";
+                          const displayPrice = isNw
+                            ? computeNetworkMonthlyFromMediaItem(
+                                media,
+                                nwOpt?.units ??
+                                  media.networkMinUnits ??
+                                  1,
+                              )
+                            : media.price;
                           return (
-                            <label
-                              key={media.id}
-                              className="block cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                className="peer sr-only"
-                                checked={checked}
-                                onChange={() => toggleMedia(media.id)}
-                              />
-                              <Card
-                                className={cn(
-                                  "h-full overflow-hidden border-2 transition-all hover:shadow-md",
-                                  "peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
-                                )}
-                              >
-                                <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
-                                  <Monitor className="h-9 w-9 text-navy/20" />
-                                  <span
-                                    className={cn(
-                                      "absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded border-2 bg-white text-xs",
-                                      checked
-                                        ? "border-gold bg-gold text-navy"
-                                        : "border-navy/20",
-                                    )}
-                                    aria-hidden
-                                  >
-                                    {checked ? "✓" : ""}
-                                  </span>
+                            <div key={media.id} className="space-y-2">
+                              <label className="block cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="peer sr-only"
+                                  checked={checked}
+                                  onChange={() => toggleMedia(media.id)}
+                                />
+                                <Card
+                                  className={cn(
+                                    "h-full overflow-hidden border-2 transition-all hover:shadow-md",
+                                    "peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
+                                  )}
+                                >
+                                  <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
+                                    <Monitor className="h-9 w-9 text-navy/20" />
+                                    <span
+                                      className={cn(
+                                        "absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded border-2 bg-white text-xs",
+                                        checked
+                                          ? "border-gold bg-gold text-navy"
+                                          : "border-navy/20",
+                                      )}
+                                      aria-hidden
+                                    >
+                                      {checked ? "✓" : ""}
+                                    </span>
+                                  </div>
+                                  <CardHeader className="pb-2">
+                                    <Badge
+                                      variant="secondary"
+                                      className="bg-navy/5 text-xs text-navy"
+                                    >
+                                      {isKo
+                                        ? (typeLabel?.ko ?? media.type)
+                                        : (typeLabel?.en ?? media.type)}
+                                    </Badge>
+                                    <CardTitle className="pt-1 text-base leading-snug">
+                                      {isKo ? media.name : media.nameEn}
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-2">
+                                    <div className="flex items-start gap-1 text-sm text-muted-foreground">
+                                      <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                      <span>
+                                        {isKo
+                                          ? media.location
+                                          : media.locationEn}
+                                      </span>
+                                    </div>
+                                    <div className="text-lg font-bold text-navy">
+                                      ₩{displayPrice.toLocaleString()}
+                                      <span className="text-xs font-normal text-muted-foreground">
+                                        만원 {t("quote.perMonth")}
+                                      </span>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </label>
+                              {checked && isNw ? (
+                                <div className="space-y-2 rounded-lg border border-navy/10 bg-slate-50 p-3 text-sm">
+                                  <div>
+                                    <label className="mb-1 block text-xs font-semibold text-navy">
+                                      {t("quote.networkUnits")}
+                                    </label>
+                                    <Input
+                                      type="number"
+                                      min={media.networkMinUnits ?? 1}
+                                      max={media.networkTotalLocations ?? 99999}
+                                      value={nwOpt?.units ?? media.networkMinUnits ?? 1}
+                                      onChange={(e) => {
+                                        const v = parseInt(e.target.value, 10);
+                                        const lo = media.networkMinUnits ?? 1;
+                                        const hi =
+                                          media.networkTotalLocations ?? 99999;
+                                        const u = Number.isFinite(v)
+                                          ? Math.min(hi, Math.max(lo, v))
+                                          : lo;
+                                        setNetworkQuoteOptions((p) => ({
+                                          ...p,
+                                          [media.id]: {
+                                            units: u,
+                                            regionScope:
+                                              p[media.id]?.regionScope ?? "all",
+                                          },
+                                        }));
+                                      }}
+                                      className="h-9"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1 block text-xs font-semibold text-navy">
+                                      {t("quote.networkRegion")}
+                                    </label>
+                                    <select
+                                      className="w-full rounded-md border border-navy/15 bg-white px-2 py-1.5 text-sm"
+                                      value={nwOpt?.regionScope ?? "all"}
+                                      onChange={(e) =>
+                                        setNetworkQuoteOptions((p) => ({
+                                          ...p,
+                                          [media.id]: {
+                                            units:
+                                              p[media.id]?.units ??
+                                              media.networkMinUnits ??
+                                              1,
+                                            regionScope: e.target.value,
+                                          },
+                                        }))
+                                      }
+                                    >
+                                      <option value="all">
+                                        {t("quote.networkRegionAll")}
+                                      </option>
+                                      {(media.networkRegionLabels ?? []).map(
+                                        (r) => (
+                                          <option key={r} value={r}>
+                                            {r}
+                                          </option>
+                                        ),
+                                      )}
+                                    </select>
+                                  </div>
                                 </div>
-                                <CardHeader className="pb-2">
-                                  <Badge
-                                    variant="secondary"
-                                    className="bg-navy/5 text-xs text-navy"
-                                  >
-                                    {isKo ? (typeLabel?.ko ?? media.type) : (typeLabel?.en ?? media.type)}
-                                  </Badge>
-                                  <CardTitle className="pt-1 text-base leading-snug">
-                                    {isKo ? media.name : media.nameEn}
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
-                                  <div className="flex items-start gap-1 text-sm text-muted-foreground">
-                                    <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                                    <span>
-                                      {isKo ? media.location : media.locationEn}
-                                    </span>
-                                  </div>
-                                  <div className="text-lg font-bold text-navy">
-                                    ₩{media.price.toLocaleString()}
-                                    <span className="text-xs font-normal text-muted-foreground">
-                                      만원 {t("quote.perMonth")}
-                                    </span>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </label>
+                              ) : null}
+                            </div>
                           );
                         })}
                       </div>

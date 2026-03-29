@@ -2,7 +2,9 @@
 
 import { Link } from "@/i18n/navigation";
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
+import { mediaItemDetailPath } from "@/lib/media-network-public";
 import { typeLabels } from "@/lib/media-data";
+import { Monitor } from "lucide-react";
 
 export function AiChatbotMediaCards({
   items,
@@ -13,28 +15,48 @@ export function AiChatbotMediaCards({
 }) {
   if (!items.length) return null;
   return (
-    <div className="mt-2 flex w-full max-w-[min(100%,22rem)] gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {items.map((m) => (
-        <Link
-          key={m.id}
-          href={`/media/${m.id}`}
-          className="min-w-[9.75rem] max-w-[11rem] shrink-0 rounded-xl border border-navy/10 bg-slate-50/90 px-3 py-2 text-left shadow-sm transition hover:border-gold/45 hover:bg-white"
-        >
-          <p className="line-clamp-2 text-xs font-semibold leading-snug text-navy">
-            {isKo ? m.name : m.nameEn}
-          </p>
-          <p className="mt-1 line-clamp-1 text-[10px] text-muted-foreground">
-            {m.location}
-          </p>
-          <p className="mt-1 text-[11px] font-bold tabular-nums text-gold">
-            ₩{m.price.toLocaleString()}
-            {isKo ? "만/월" : "M/mo"}
-          </p>
-          <p className="text-[10px] text-navy/55">
-            {isKo ? typeLabels[m.type]?.ko : typeLabels[m.type]?.en}
-          </p>
-        </Link>
-      ))}
+    <div className="mt-3 flex w-full max-w-[min(100%,22rem)] flex-col gap-2.5">
+      {items.map((m) => {
+        const href = mediaItemDetailPath(m.id);
+        const label = isKo ? m.name : m.nameEn || m.name;
+        const thumb = m.imageUrl?.trim();
+        return (
+          <Link
+            key={m.id}
+            href={href}
+            className="group flex overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm ring-1 ring-black/[0.03] transition hover:border-gold/50 hover:shadow-md hover:ring-gold/20"
+          >
+            <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden bg-gradient-to-br from-navy/8 to-gold/15">
+              {thumb ? (
+                <img
+                  src={thumb}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-navy/35">
+                  <Monitor className="h-8 w-8" strokeWidth={1.25} />
+                </div>
+              )}
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-2">
+              <p className="line-clamp-2 text-xs font-bold leading-snug text-navy group-hover:text-navy-dark">
+                {label}
+              </p>
+              <p className="mt-0.5 text-[11px] font-bold tabular-nums text-gold-dark">
+                ₩{m.price.toLocaleString()}
+                <span className="font-semibold text-navy/55">
+                  {isKo ? "만/월" : " (10K/mo)"}
+                </span>
+              </p>
+              <p className="mt-0.5 text-[10px] text-navy/45">
+                {isKo ? typeLabels[m.type]?.ko : typeLabels[m.type]?.en}
+              </p>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }

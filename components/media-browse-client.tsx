@@ -60,6 +60,7 @@ import {
 import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { mediaItemDetailPath } from "@/lib/media-network-public";
 
 export default function MediaBrowseClient({
   catalog,
@@ -151,6 +152,11 @@ export default function MediaBrowseClient({
     { value: "digital", label: t("media.types.digital") },
     { value: "subway", label: t("media.types.subway") },
     { value: "bus", label: t("media.types.bus") },
+    { value: "network", label: t("media.types.network") },
+    { value: "apartment", label: t("media.types.apartment") },
+    { value: "premium", label: t("media.types.premium") },
+    { value: "highway", label: t("media.types.highway") },
+    { value: "indoor", label: t("media.types.indoor") },
   ];
 
   const budgets = [
@@ -423,7 +429,7 @@ export default function MediaBrowseClient({
                             </p>
                           </div>
                           <div className="flex flex-wrap gap-2">
-                            <Link href={`/media/${mapSelectedMedia.id}`}>
+                            <Link href={mediaItemDetailPath(mapSelectedMedia.id)}>
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -465,18 +471,27 @@ export default function MediaBrowseClient({
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/10 to-transparent" />
                             <Monitor className="relative z-0 h-10 w-10 text-white/30" />
-                            <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
-                              <BadgeCheck className="h-3 w-3" />
-                              Verified
-                            </div>
+                            {media.catalogSource !== "network" ? (
+                              <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                                <BadgeCheck className="h-3 w-3" />
+                                Verified
+                              </div>
+                            ) : (
+                              <div className="absolute top-2.5 right-2.5 z-10 rounded-full bg-navy/90 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                                {t("media.networkSitesBadge", {
+                                  count: media.networkTotalLocations ?? 0,
+                                })}
+                              </div>
+                            )}
                             <label className="absolute top-2.5 left-2.5 z-10 flex cursor-pointer select-none items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-navy shadow-sm backdrop-blur-sm">
                               <input
                                 type="checkbox"
                                 checked={isInCompare(media.id)}
                                 onChange={() => toggleCompare(media)}
                                 disabled={
-                                  !isInCompare(media.id) &&
-                                  compareItems.length >= COMPARE_MAX_ITEMS
+                                  media.catalogSource === "network" ||
+                                  (!isInCompare(media.id) &&
+                                    compareItems.length >= COMPARE_MAX_ITEMS)
                                 }
                                 className="h-3.5 w-3.5 rounded border-navy/30 text-gold accent-gold"
                               />
@@ -500,7 +515,7 @@ export default function MediaBrowseClient({
                                   : (typeLabels[media.type]?.en ?? media.type)}
                               </Badge>
                               <Link
-                                href={`/media/${media.id}`}
+                                href={mediaItemDetailPath(media.id)}
                                 className="text-xs font-semibold text-gold hover:text-gold-dark"
                               >
                                 {t("media.cardDetail")}
@@ -531,7 +546,7 @@ export default function MediaBrowseClient({
                             <div className="mt-3 border-t pt-3">
                               <ShareButtons
                                 compact
-                                url={`/${locale}/media/${media.id}`}
+                                url={`/${locale}${mediaItemDetailPath(media.id)}`}
                                 title={isKo ? media.name : media.nameEn}
                                 description={`${isKo ? media.location : media.locationEn} - ₩${media.price.toLocaleString()}만원/${t("media.perMonth")}`}
                                 locale={locale}
@@ -539,7 +554,7 @@ export default function MediaBrowseClient({
                             </div>
                             <div className="mt-3 flex flex-col gap-2">
                               <Link
-                                href={`/media/${media.id}`}
+                                href={mediaItemDetailPath(media.id)}
                                 className="flex w-full items-center justify-center gap-1.5 rounded-md border border-navy/15 bg-white px-3 py-2 text-sm font-semibold text-navy transition-colors hover:bg-slate-50"
                               >
                                 {t("media.cardDetail")}

@@ -103,7 +103,7 @@ export default function MediaAiRecommendPanel({
               {
                 goal,
                 target,
-                budgetMaxMan: cap || 999999,
+                budgetMaxMan: cap,
                 region,
                 industry,
               },

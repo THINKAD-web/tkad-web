@@ -38,12 +38,14 @@ export async function GET(
       clientCompany: row.clientCompany,
       clientName: row.clientName,
       period: row.period,
+      periodKey: row.periodKey,
       budgetMin: row.budgetMin,
       budgetMax: row.budgetMax,
       pdfTemplate: row.pdfTemplate,
       locale: row.locale,
       mediaIds: row.mediaIds,
       totalAmount: row.totalAmount,
+      networkSelections: row.networkSelections ?? undefined,
     });
     const buf = Buffer.from(b64, "base64");
     return new NextResponse(buf, {

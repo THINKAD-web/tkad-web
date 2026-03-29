@@ -13,7 +13,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Layers, RotateCcw, Search, TrendingUp } from "lucide-react";
+import {
+  ArrowRight,
+  Layers,
+  RotateCcw,
+  Search,
+  TrendingUp,
+} from "lucide-react";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
 
 type Props = { initialCases: PublicSuccessCaseListItem[] };
@@ -26,7 +32,9 @@ export default function CasesPageClient({ initialCases }: Props) {
   const [query, setQuery] = useState("");
 
   const industries = useMemo(() => {
-    const set = new Set(initialCases.map((c) => c.industry.trim()).filter(Boolean));
+    const set = new Set(
+      initialCases.map((c) => c.industry.trim()).filter(Boolean),
+    );
     return ["all", ...[...set].sort((a, b) => a.localeCompare(b, "ko"))];
   }, [initialCases]);
 
@@ -48,32 +56,123 @@ export default function CasesPageClient({ initialCases }: Props) {
     });
   }, [initialCases, industry, query]);
 
-  const preparing = initialCases.length === 0;
+  const empty = initialCases.length === 0;
+
+  const featureCards = [
+    {
+      titleKey: "cases.reportFeature1Title" as const,
+      descKey: "cases.reportFeature1Desc" as const,
+    },
+    {
+      titleKey: "cases.reportFeature2Title" as const,
+      descKey: "cases.reportFeature2Desc" as const,
+    },
+    {
+      titleKey: "cases.reportFeature3Title" as const,
+      descKey: "cases.reportFeature3Desc" as const,
+    },
+  ];
 
   return (
     <>
       <section className="bg-navy py-24 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
-            {t("cases.title")}
+            {empty ? t("cases.reportHeroTitle") : t("cases.title")}
           </h1>
-          <p className="mt-2 text-slate-300">{t("cases.subtitle")}</p>
+          <p className="mt-2 text-slate-300 sm:text-lg">
+            {empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
+          </p>
         </div>
       </section>
 
       <section className="py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {preparing ? (
-            <div className="mx-auto max-w-lg rounded-2xl border border-navy/10 bg-slate-50 px-8 py-14 text-center">
-              <p className="text-lg font-semibold text-navy">
-                {t("cases.preparingCases")}
+          {empty ? (
+            <div className="space-y-16">
+              <p className="mx-auto max-w-3xl text-center text-lg font-medium leading-relaxed text-navy sm:text-xl">
+                {t("cases.reportLead")}
               </p>
-              <p className="mt-2 text-sm text-navy/65">
-                {t("cases.preparingCasesDesc")}
-              </p>
+
+              <div className="grid gap-6 md:grid-cols-3">
+                {featureCards.map((card) => (
+                  <Card
+                    key={card.titleKey}
+                    className="border-navy/10 bg-white shadow-md shadow-navy/5"
+                  >
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base leading-snug text-navy">
+                        {t(card.titleKey)}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm leading-relaxed text-navy/70">
+                        {t(card.descKey)}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div>
+                <div className="mx-auto max-w-2xl rounded-2xl border-2 border-dashed border-navy/15 bg-gradient-to-br from-slate-50 to-gold/5 p-6 sm:p-8">
+                  <div className="mb-4 flex items-center justify-between gap-2">
+                    <Badge
+                      variant="secondary"
+                      className="bg-navy/10 text-xs font-semibold text-navy"
+                    >
+                      {t("cases.reportSampleBadge")}
+                    </Badge>
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-navy/40">
+                      {t("cases.reportSampleLabel")}
+                    </span>
+                  </div>
+                  <div className="space-y-3 rounded-xl border border-navy/8 bg-white p-4 shadow-sm">
+                    <div className="h-2.5 w-3/4 rounded bg-navy/10" />
+                    <div className="h-2 w-1/2 rounded bg-navy/[0.07]" />
+                    <div className="mt-4 space-y-2 border-t border-navy/8 pt-4">
+                      <p className="text-xs font-semibold text-navy">
+                        {t("cases.reportSampleLine1")}
+                      </p>
+                      <div className="h-16 rounded-lg bg-navy/[0.04]" />
+                      <p className="text-xs font-semibold text-navy">
+                        {t("cases.reportSampleLine2")}
+                      </p>
+                      <div className="flex gap-2">
+                        <div className="h-12 flex-1 rounded-md bg-gold/15" />
+                        <div className="h-12 flex-1 rounded-md bg-navy/[0.06]" />
+                        <div className="h-12 flex-1 rounded-md bg-navy/[0.06]" />
+                      </div>
+                      <p className="pt-1 text-xs font-semibold text-navy">
+                        {t("cases.reportSampleLine3")}
+                      </p>
+                      <div className="h-2 w-full rounded bg-navy/[0.06]" />
+                      <div className="h-2 w-5/6 rounded bg-navy/[0.05]" />
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-4 text-center text-sm text-navy/65">
+                  {t("cases.reportSampleCaption")}
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center justify-center">
+                <Link href="/quote" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    className="w-full bg-gold font-bold text-navy hover:bg-gold-dark sm:min-w-[220px]"
+                  >
+                    {t("cases.reportCtaQuote")}
+                  </Button>
+                </Link>
+              </div>
             </div>
           ) : (
             <>
+              <p className="mb-8 text-center text-base text-navy/75 sm:text-lg">
+                {t("cases.listIntro")}
+              </p>
+
               <div className="mb-6 space-y-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-navy/50">
                   {t("cases.filterIndustry")}

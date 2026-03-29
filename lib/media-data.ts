@@ -51,6 +51,16 @@ export interface MediaItem {
   nearbyFacilitiesEn?: string;
   /** 진행·집행 사례 사진 (관리·콘텐츠용) */
   caseStudyPhotos?: MediaCaseStudyPhoto[];
+  /** DB 단일 매체 | 합성 네트워크 패키지 */
+  catalogSource?: "media" | "network";
+  networkSubtype?: string;
+  networkTotalLocations?: number;
+  networkMinUnits?: number;
+  networkPricePerUnit?: number | null;
+  networkPricePackage?: number | null;
+  networkPackageTiers?: { units: number; price: number }[];
+  /** 네트워크 견적 시 지역 선택용 (한글 라벨) */
+  networkRegionLabels?: string[];
 }
 
 export function getMediaById(id: string | number): MediaItem | undefined {
@@ -141,8 +151,16 @@ export function latLngToFallbackPercent(lat: number, lng: number): { x: number; 
 }
 
 function mediaTypeToMapType(type: string): CampaignMapMediaType {
-  if (type === "billboard") return "billboard";
-  if (type === "digital") return "digital";
+  if (type === "billboard" || type === "highway") return "billboard";
+  if (
+    type === "digital" ||
+    type === "network" ||
+    type === "premium" ||
+    type === "indoor" ||
+    type === "apartment"
+  ) {
+    return "digital";
+  }
   return "transport";
 }
 
@@ -591,6 +609,11 @@ export const typeLabels: Record<string, { ko: string; en: string }> = {
   digital: { ko: "디지털", en: "Digital" },
   subway: { ko: "지하철", en: "Subway" },
   bus: { ko: "버스/트럭", en: "Bus/Truck" },
+  network: { ko: "네트워크/패키지", en: "Network / package" },
+  apartment: { ko: "아파트", en: "Apartment" },
+  premium: { ko: "프리미엄(호텔·골프 등)", en: "Premium (hotel, golf, etc.)" },
+  highway: { ko: "고속도로", en: "Highway" },
+  indoor: { ko: "실내", en: "Indoor" },
 };
 
 /** 텍스트 검색: 매체명·주소·구/시·역·시설·랜드마크·태그·세부 카테고리·유형 라벨 */
@@ -607,6 +630,7 @@ export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
     m.nearbyFacilitiesEn,
     m.nearbyLandmarks,
     m.subCategory,
+    m.networkSubtype,
     typeLabels[m.type]?.ko,
     typeLabels[m.type]?.en,
   ];

@@ -45,8 +45,6 @@ function mediaToPdfRow(m: MediaItem, isKo: boolean): ComparePdfMediaRow {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const ids = parseIds(searchParams.get("ids"));
-  const isKo = searchParams.get("lang") !== "en";
-
   if (ids.length < 2) {
     return NextResponse.json(
       { error: "At least two valid media ids are required." },
@@ -70,13 +68,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const rows = items.map((m) => mediaToPdfRow(m, isKo));
+    const rows = items.map((m) => mediaToPdfRow(m, false));
     const generatedAt = new Date().toISOString().slice(0, 10);
-    const buf = await comparePdfBuffer({ isKo, generatedAt, rows });
+    const buf = await comparePdfBuffer({ generatedAt, rows });
 
-    const filename = isKo
-      ? `thinkad-media-compare-${generatedAt}.pdf`
-      : `thinkad-media-compare-${generatedAt}.pdf`;
+    const filename = `thinkad-media-compare-${generatedAt}.pdf`;
 
     return new NextResponse(new Uint8Array(buf), {
       status: 200,
@@ -87,9 +83,19 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (e) {
-    console.error("[compare pdf]", e);
+    const err = e instanceof Error ? e : new Error(String(e));
+    console.error("[compare pdf] Failed to generate PDF", {
+      message: err.message,
+      stack: err.stack,
+      name: err.name,
+      cause: err.cause,
+    });
     return NextResponse.json(
-      { error: "Failed to generate PDF." },
+      {
+        error: "Failed to generate PDF.",
+        detail:
+          process.env.NODE_ENV === "development" ? err.message : undefined,
+      },
       { status: 500 },
     );
   }

@@ -4,15 +4,20 @@ export type QuotePdfRow = {
   name: string;
   location: string;
   price: number;
+  /** Preferred for PDF (English / romanized). */
+  nameAscii?: string;
+  locationAscii?: string;
 };
 
 export type BuildQuotePdfParams = {
   template: QuoteTemplateId;
   logoDataUrl: string | null;
-  isKo: boolean;
+  /** Site UI locale — logged only; PDF is always English + Helvetica. */
+  isKo?: boolean;
   company: string;
   name: string;
-  periodLabel: string;
+  /** English period line for PDF (e.g. "3 months") — avoids CJK in Helvetica. */
+  periodLabelPdf: string;
   /** 만원 단위; 미입력 시 null */
   budgetMin: number | null;
   budgetMax: number | null;
@@ -21,6 +26,26 @@ export type BuildQuotePdfParams = {
   rows: QuotePdfRow[];
 };
 
+const HELV = "helvetica";
+
+/** Helvetica cannot render Hangul; prefer ASCII fields, then strip non‑Latin. */
+function pdfSafeLine(s: string | undefined, fallback: string): string {
+  const raw = (s ?? "").trim();
+  if (!raw) return fallback;
+  const ascii = raw.replace(/[^\x20-\x7E]/g, "").trim();
+  if (ascii.length >= 2) return ascii.slice(0, 500);
+  return fallback;
+}
+
+function rowForPdf(row: QuotePdfRow): { name: string; location: string } {
+  const name = pdfSafeLine(row.nameAscii, pdfSafeLine(row.name, "Media"));
+  const location = pdfSafeLine(
+    row.locationAscii,
+    pdfSafeLine(row.location, "—"),
+  );
+  return { name, location };
+}
+
 function guessImageFormat(dataUrl: string): "PNG" | "JPEG" | "WEBP" {
   if (dataUrl.startsWith("data:image/png")) return "PNG";
   if (dataUrl.startsWith("data:image/webp")) return "WEBP";
@@ -28,30 +53,45 @@ function guessImageFormat(dataUrl: string): "PNG" | "JPEG" | "WEBP" {
 }
 
 function formatBudgetOverviewLine(
-  isKo: boolean,
   min: number | null,
   max: number | null,
 ): string | null {
   if (min == null && max == null) return null;
-  const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
+  const fmt = (n: number) => n.toLocaleString("en-US");
   if (min != null && max != null) {
-    return isKo
-      ? `희망 예산 범위: ₩${fmt(min)} ~ ₩${fmt(max)}만원`
-      : `Budget range: ₩${fmt(min)} – ₩${fmt(max)} (10K KRW)`;
+    return `Budget range: ₩${fmt(min)} – ₩${fmt(max)} (10K KRW / month)`;
   }
   if (min != null) {
-    return isKo
-      ? `희망 최소 예산: ₩${fmt(min)}만원`
-      : `Min. budget: ₩${fmt(min)} (10K KRW)`;
+    return `Min. budget: ₩${fmt(min)} (10K KRW / month)`;
   }
-  return isKo
-    ? `희망 최대 예산: ₩${fmt(max!)}만원`
-    : `Max. budget: ₩${fmt(max!)} (10K KRW)`;
+  return `Max. budget: ₩${fmt(max!)} (10K KRW / month)`;
+}
+
+function setHelv(
+  doc: import("jspdf").jsPDF,
+  style: "normal" | "bold" | "italic",
+) {
+  try {
+    if (style === "bold") doc.setFont(HELV, "bold");
+    else if (style === "italic") doc.setFont(HELV, "italic");
+    else doc.setFont(HELV, "normal");
+  } catch {
+    doc.setFont(HELV, "normal");
+  }
 }
 
 export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
   const { default: JsPDF } = await import("jspdf");
   const doc = new JsPDF();
+
+  console.log("[pdf:quote]", {
+    rowCount: p.rows.length,
+    uiKo: p.isKo,
+    mode: "english+helvetica",
+    monthlyCost: p.monthlyCost,
+    totalCost: p.totalCost,
+  });
+
   const isPremium = p.template === "premium";
   const margin = 20;
   const pageW = doc.internal.pageSize.getWidth();
@@ -74,72 +114,56 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
     }
   }
 
-  doc.setFont("helvetica", "bold");
+  setHelv(doc, "bold");
   doc.setFontSize(isPremium ? 20 : 18);
   doc.setTextColor(isPremium ? 15 : 0, isPremium ? 23 : 0, isPremium ? 42 : 0);
-  const title = p.isKo ? "싱커드 견적서" : "THINKAD Quote";
-  doc.text(title, margin, y);
+  doc.text("THINKAD Quote", margin, y);
   y += isPremium ? 12 : 10;
 
   doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
+  setHelv(doc, "normal");
   doc.setTextColor(60, 60, 60);
-  doc.text(
-    p.isKo
-      ? `발행일: ${new Date().toISOString().slice(0, 10)}`
-      : `Date: ${new Date().toISOString().slice(0, 10)}`,
-    margin,
-    y,
-  );
+  doc.text(`Date: ${new Date().toISOString().slice(0, 10)}`, margin, y);
   y += 6;
 
-  const clientLine = p.isKo
-    ? `고객사: ${p.company || "-"} / 담당자: ${p.name || "-"}`
-    : `Company: ${p.company || "-"} / Contact: ${p.name || "-"}`;
-  doc.text(clientLine, margin, y);
+  const companyLine = pdfSafeLine(p.company, "—");
+  const nameLine = pdfSafeLine(p.name, "—");
+  doc.text(`Company: ${companyLine} / Contact: ${nameLine}`, margin, y);
   y += 8;
 
-  doc.setFont("helvetica", "bold");
+  setHelv(doc, "bold");
   doc.setFontSize(12);
   doc.setTextColor(15, 23, 42);
-  doc.text(p.isKo ? "캠페인 개요" : "Campaign overview", margin, y);
+  doc.text("Campaign overview", margin, y);
   y += 7;
 
   doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
+  setHelv(doc, "normal");
+  doc.text(`Period: ${p.periodLabelPdf}`, margin, y);
+  y += 6;
   doc.text(
-    `${p.isKo ? "집행 기간" : "Period"}: ${p.periodLabel}`,
+    `Est. monthly: ₩${p.monthlyCost.toLocaleString("en-US")} (10K KRW)`,
     margin,
     y,
   );
   y += 6;
   doc.text(
-    `${p.isKo ? "월 예상 집행비" : "Est. monthly"}: ₩${p.monthlyCost.toLocaleString(p.isKo ? "ko-KR" : "en-US")}${p.isKo ? "만원" : " (10K KRW)"}`,
-    margin,
-    y,
-  );
-  y += 6;
-  doc.text(
-    `${p.isKo ? "총 예상 집행비" : "Est. total"}: ₩${p.totalCost.toLocaleString(p.isKo ? "ko-KR" : "en-US")}${p.isKo ? "만원" : " (10K KRW)"}`,
+    `Est. total: ₩${p.totalCost.toLocaleString("en-US")} (10K KRW)`,
     margin,
     y,
   );
   y += 6;
 
-  const budgetLine = formatBudgetOverviewLine(
-    p.isKo,
-    p.budgetMin,
-    p.budgetMax,
-  );
+  const budgetLine = formatBudgetOverviewLine(p.budgetMin, p.budgetMax);
   if (budgetLine) {
     doc.text(budgetLine, margin, y);
     y += 6;
   }
   y += 4;
 
-  doc.setFont("helvetica", "bold");
+  setHelv(doc, "bold");
   doc.setFontSize(11);
-  doc.text(p.isKo ? "매체 상세" : "Media detail", margin, y);
+  doc.text("Media detail", margin, y);
   y += 5;
 
   if (isPremium) {
@@ -151,30 +175,26 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
   }
 
   doc.setFontSize(9);
-  doc.text(p.isKo ? "매체명" : "Media", margin, y);
-  doc.text(p.isKo ? "지역/위치" : "Location", 88, y);
-  doc.text(
-    p.isKo ? "월 단가" : "Monthly",
-    pageW - margin,
-    y,
-    { align: "right" },
-  );
+  doc.text("Media", margin, y);
+  doc.text("Location", 88, y);
+  doc.text("Monthly", pageW - margin, y, { align: "right" });
   y += 3;
   doc.line(margin, y, pageW - margin, y);
   y += 5;
 
-  doc.setFont("helvetica", "normal");
+  setHelv(doc, "normal");
   for (const row of p.rows) {
     if (y > 270) {
       doc.addPage();
       y = 20;
     }
-    const nameLines = doc.splitTextToSize(row.name, 60);
-    doc.text(nameLines[0] ?? row.name, margin, y);
-    const locLines = doc.splitTextToSize(row.location, 58);
-    doc.text(locLines[0] ?? row.location, 88, y);
+    const { name: rn, location: rl } = rowForPdf(row);
+    const nameLines = doc.splitTextToSize(rn, 60);
+    doc.text(nameLines[0] ?? rn, margin, y);
+    const locLines = doc.splitTextToSize(rl, 58);
+    doc.text(locLines[0] ?? rl, 88, y);
     doc.text(
-      row.price.toLocaleString(p.isKo ? "ko-KR" : "en-US"),
+      row.price.toLocaleString("en-US"),
       pageW - margin,
       y,
       { align: "right" },
@@ -190,21 +210,21 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
   doc.line(margin, y, pageW - margin, y);
   y += 8;
 
-  doc.setFont("helvetica", "bold");
+  setHelv(doc, "bold");
   doc.setFontSize(11);
   doc.text(
-    `${p.isKo ? "총 예상 집행비 (부가세 별도)" : "Total (excl. VAT)"}: ₩${p.totalCost.toLocaleString(p.isKo ? "ko-KR" : "en-US")}${p.isKo ? "만원" : " (10K)"}`,
+    `Total (excl. VAT): ₩${p.totalCost.toLocaleString("en-US")} (10K KRW)`,
     margin,
     y,
   );
   y += 10;
 
   doc.setFontSize(8);
-  doc.setFont("helvetica", "italic");
+  setHelv(doc, "italic");
   doc.setTextColor(100, 100, 100);
-  const disc = p.isKo
-    ? "※ 본 견적은 참고용이며, 실제 계약 시 매체 재고·조건에 따라 달라질 수 있습니다."
-    : "※ Illustrative quote only; final terms depend on inventory and contract.";
+  const disc =
+    "Illustrative quote only; final terms depend on inventory and contract. " +
+    "Korean names and addresses: see the online quote or email confirmation for full text.";
   for (const line of doc.splitTextToSize(disc, pageW - 2 * margin)) {
     if (y > 285) {
       doc.addPage();
@@ -214,13 +234,8 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
     y += 4;
   }
   y += 2;
-  doc.text(
-    p.isKo
-      ? "문의: mannote@tkad.co.kr · 02-515-2772"
-      : "Contact: mannote@tkad.co.kr · +82-2-515-2772",
-    margin,
-    y,
-  );
+  setHelv(doc, "normal");
+  doc.text("Contact: mannote@tkad.co.kr · +82-2-515-2772", margin, y);
 
   return doc;
 }

@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
     message,
     pdfTemplate,
     locale: localeBody,
+    networkSelections: networkSelectionsRaw,
   } = body as Record<string, unknown>;
 
   const ids = Array.isArray(mediaIds)
@@ -118,6 +119,28 @@ export async function POST(request: NextRequest) {
   const localeStr =
     String(localeBody ?? "").toLowerCase() === "en" ? "en" : "ko";
   const periodHuman = periodLabelFromKey(periodKey, localeStr);
+
+  let networkSelectionsJson: unknown = undefined;
+  if (Array.isArray(networkSelectionsRaw)) {
+    const cleaned = networkSelectionsRaw
+      .filter((x) => x && typeof x === "object")
+      .map((x) => {
+        const o = x as Record<string, unknown>;
+        return {
+          catalogId:
+            typeof o.catalogId === "string" ? o.catalogId.trim() : "",
+          units: typeof o.units === "number" ? Math.round(o.units) : undefined,
+          regionScope:
+            typeof o.regionScope === "string" ? o.regionScope : "all",
+          lineTotal:
+            typeof o.lineTotal === "number" && Number.isFinite(o.lineTotal)
+              ? Math.round(o.lineTotal)
+              : undefined,
+        };
+      })
+      .filter((x) => x.catalogId.length > 0);
+    if (cleaned.length > 0) networkSelectionsJson = cleaned;
+  }
   const tplRaw = String(pdfTemplate ?? "").trim();
   const pdfTpl = tplRaw === "premium" ? "premium" : "default";
   const startDate = new Date();
@@ -166,6 +189,7 @@ export async function POST(request: NextRequest) {
           pdfTemplate: pdfTpl,
           locale: localeStr,
           quoteRequestId: created.id,
+          networkSelections: networkSelectionsJson ?? undefined,
         },
       });
 
@@ -181,12 +205,14 @@ export async function POST(request: NextRequest) {
           clientCompany: ooh.clientCompany,
           clientName: ooh.clientName,
           period: ooh.period,
+          periodKey: ooh.periodKey,
           budgetMin: ooh.budgetMin,
           budgetMax: ooh.budgetMax,
           pdfTemplate: ooh.pdfTemplate,
           locale: ooh.locale,
           mediaIds: ooh.mediaIds,
           totalAmount: ooh.totalAmount,
+          networkSelections: ooh.networkSelections ?? undefined,
         });
         const isKo = localeStr === "ko";
         await sendEmailWithPdfAttachment({

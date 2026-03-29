@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { BarChart3, FileText, MessageCircle, Send, X } from "lucide-react";
+import {
+  BarChart3,
+  Bot,
+  FileText,
+  MessageCircle,
+  Send,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { AiChatbotMessage } from "@/components/ai-chatbot-message";
@@ -21,14 +29,10 @@ export type ChatTurn = {
   role: "user" | "assistant";
   content: string;
   media?: AiChatbotMediaCard[];
+  ts?: number;
 };
 
-const SUGGESTION_KEYS = [
-  "suggestion1",
-  "suggestion2",
-  "suggestion3",
-  "suggestion4",
-] as const;
+const SUGGESTION_KEYS = ["suggestion1", "suggestion2", "suggestion3"] as const;
 
 type PanelTab = "chat" | "compare" | "inquiry";
 
@@ -45,6 +49,14 @@ export default function AiChatbot() {
   const [compareEntries, setCompareEntries] = useState<CompareCartEntry[]>([]);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const lastReadCountRef = useRef(0);
+
+  useEffect(() => {
+    if (open) lastReadCountRef.current = messages.length;
+  }, [open, messages.length]);
+
+  const showFabPulse =
+    !open && messages.length > lastReadCountRef.current;
 
   const refreshCompare = useCallback(() => {
     setCompareEntries(getCompareCartEntries());
@@ -82,7 +94,11 @@ export default function AiChatbot() {
       if (!text || loading) return;
       setInput("");
       setError(null);
-      const userMsg: ChatTurn = { role: "user", content: text };
+      const userMsg: ChatTurn = {
+        role: "user",
+        content: text,
+        ts: Date.now(),
+      };
       setMessages((m) => [...m, userMsg]);
       setLoading(true);
       try {
@@ -106,7 +122,15 @@ export default function AiChatbot() {
         }
         const reply = data.reply?.trim() || "…";
         const media = Array.isArray(data.media) ? data.media : undefined;
-        setMessages((m) => [...m, { role: "assistant", content: reply, media }]);
+        setMessages((m) => [
+          ...m,
+          {
+            role: "assistant",
+            content: reply,
+            media,
+            ts: Date.now(),
+          },
+        ]);
       } catch (e) {
         setError(e instanceof Error ? e.message : t("errorGeneric"));
         setMessages((m) => m.slice(0, -1));
@@ -143,14 +167,19 @@ export default function AiChatbot() {
   return (
     <>
       <div className="group/button fixed bottom-6 right-4 z-[55] sm:right-6">
+        {showFabPulse ? (
+          <span
+            className="pointer-events-none absolute inset-0 z-0 animate-ping rounded-full bg-gold/55"
+            aria-hidden
+          />
+        ) : null}
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           className={cn(
-            "relative flex h-14 w-14 items-center justify-center rounded-full shadow-xl transition-transform hover:scale-105 focus-visible:outline focus-visible:ring-2 focus-visible:ring-navy/30",
-            open
-              ? "bg-gold-dark text-navy"
-              : "bg-gold text-navy hover:bg-gold-dark",
+            "relative z-10 flex h-14 w-14 items-center justify-center rounded-full text-navy shadow-xl transition-transform duration-200 hover:scale-110 focus-visible:outline focus-visible:ring-2 focus-visible:ring-gold/50",
+            "bg-gradient-to-br from-[#f0e4c4] via-gold to-gold-dark",
+            open && "from-gold-dark via-[#c9a85c] to-gold",
           )}
           style={{ boxShadow: "0 10px 28px rgba(200, 168, 99, 0.45)" }}
           aria-expanded={open}
@@ -184,22 +213,36 @@ export default function AiChatbot() {
             role="dialog"
             aria-label={t("dialogLabel")}
           >
-            <div className="flex shrink-0 flex-col border-b border-navy/8 bg-navy text-white">
-              <div className="flex items-center justify-between px-3 py-2 sm:px-4">
-                <p className="text-xs font-bold tracking-tight sm:text-sm">
-                  {t("title")}
-                </p>
+            <div className="flex shrink-0 flex-col border-b-2 border-gold/50 bg-gradient-to-r from-navy-dark via-navy to-navy-dark text-white">
+              <div className="flex items-center gap-3 px-3 py-2.5 sm:px-4">
+                <div
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/20 ring-2 ring-gold/40"
+                  aria-hidden
+                >
+                  <span className="relative">
+                    <Bot className="h-5 w-5 text-gold" strokeWidth={2} />
+                    <Sparkles className="absolute -right-1 -top-1 h-3 w-3 text-gold" />
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold tracking-tight text-white sm:text-sm">
+                    {t("title")}
+                  </p>
+                  <p className="mt-0.5 truncate text-[10px] font-medium text-gold/90 sm:text-[11px]">
+                    {t("subtitle")}
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="rounded-full p-1.5 text-white/90 hover:bg-white/10"
+                  className="shrink-0 rounded-full p-1.5 text-white/90 hover:bg-white/10"
                   aria-label={t("closeAria")}
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
               <div
-                className="flex border-t border-white/10 px-1"
+                className="flex border-t border-gold/25 px-1"
                 role="tablist"
                 aria-label={t("dialogLabel")}
               >
@@ -226,34 +269,32 @@ export default function AiChatbot() {
 
             {panelTab === "chat" ? (
               <>
+                <div className="shrink-0 border-b border-navy/8 bg-slate-50/95 px-2 py-2">
+                  <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-navy/45">
+                    {t("suggestionsLabel")}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {SUGGESTION_KEYS.map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        disabled={loading}
+                        onClick={() => applySuggestion(t(key))}
+                        className="rounded-full border border-navy/12 bg-white px-2.5 py-1.5 text-left text-[11px] font-medium leading-snug text-navy shadow-sm transition hover:border-gold/45 hover:bg-gold/5 disabled:opacity-50"
+                      >
+                        {t(key)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div
                   ref={listRef}
                   className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-3"
                 >
                   {messages.length === 0 && !loading ? (
-                    <>
-                      <p className="px-1 text-center text-xs leading-relaxed text-muted-foreground">
-                        {t("emptyState")}
-                      </p>
-                      <div className="flex flex-col gap-2 px-1">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-navy/50">
-                          {t("suggestionsLabel")}
-                        </p>
-                        <div className="flex flex-col gap-1.5">
-                          {SUGGESTION_KEYS.map((key) => (
-                            <button
-                              key={key}
-                              type="button"
-                              disabled={loading}
-                              onClick={() => applySuggestion(t(key))}
-                              className="rounded-xl border border-navy/10 bg-slate-50 px-3 py-2 text-left text-xs leading-snug text-navy transition hover:border-gold/40 hover:bg-white disabled:opacity-50"
-                            >
-                              {t(key)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </>
+                    <p className="px-1 text-center text-xs leading-relaxed text-muted-foreground">
+                      {t("emptyState")}
+                    </p>
                   ) : null}
                   {messages.map((msg, i) => (
                     <AiChatbotMessage
@@ -262,6 +303,7 @@ export default function AiChatbot() {
                       content={msg.content}
                       media={msg.media}
                       isKo={isKo}
+                      ts={msg.ts}
                     />
                   ))}
                   {loading ? (
@@ -301,20 +343,21 @@ export default function AiChatbot() {
                       }}
                       placeholder={t("placeholder")}
                       rows={2}
-                      className="min-h-[2.75rem] flex-1 resize-none rounded-xl border border-navy/15 bg-slate-50 px-3 py-2 text-sm outline-none ring-gold/30 placeholder:text-muted-foreground focus:border-gold/40 focus:ring-2"
+                      className="min-h-[2.75rem] flex-1 resize-none rounded-2xl border border-navy/15 bg-slate-50 px-3.5 py-2.5 text-sm outline-none ring-gold/25 placeholder:text-muted-foreground focus:border-gold/45 focus:ring-2"
                       disabled={loading}
                     />
-                    <Button
+                    <button
                       type="button"
-                      variant="cta"
-                      size="icon"
-                      className="btn-gold h-11 w-11 shrink-0 rounded-xl"
                       disabled={loading || !input.trim()}
                       onClick={() => void send()}
                       aria-label={t("send")}
+                      className={cn(
+                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-navy shadow-md transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-40",
+                        "bg-gradient-to-br from-[#f0e4c4] via-gold to-gold-dark",
+                      )}
                     >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                      <Send className="h-4 w-4" strokeWidth={2.25} />
+                    </button>
                   </div>
                   <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
                     {t("disclaimer")}
