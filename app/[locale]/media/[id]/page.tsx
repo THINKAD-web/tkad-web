@@ -86,26 +86,28 @@ export default async function MediaDetailPage({ params }: Props) {
   return (
     <>
       <TrackMediaView mediaId={media.id} />
-      <section className="relative w-full bg-navy">
-        {/* 대표 이미지 1장 */}
-        {heroImage && (
-          <div className="relative aspect-video w-full overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={heroImage}
-              alt={isKo ? media.name : media.nameEn}
-              className="h-full w-full object-cover"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/20 to-transparent" />
-          </div>
-        )}
-        <div className="relative px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10" style={heroImage ? { marginTop: '-6rem' } : {}}>
-          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+      
+      {/* 메인 이미지만 (오버레이 없음) */}
+      {heroImage && (
+        <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={heroImage}
+            alt={isKo ? media.name : media.nameEn}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      )}
+
+      {/* 매체 정보 (흰색 배경) */}
+      <section className="bg-white px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10 border-b border-gray-100">
+        <div className="mx-auto max-w-4xl">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 mb-4">
             <Link href="/media">
               <Button
                 variant="ghost"
                 size="sm"
-                className="-ml-2 text-white/85 hover:bg-white/10 hover:text-white"
+                className="-ml-2 text-navy/70 hover:bg-navy/5 hover:text-navy"
               >
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {t("back")}
@@ -113,38 +115,28 @@ export default async function MediaDetailPage({ params }: Props) {
             </Link>
             <MediaDetailAdminActions />
           </div>
-          <div className="max-w-4xl min-w-0 pb-1 mt-4">
-            <h1 className="break-words text-2xl font-bold tracking-tight text-white drop-shadow-sm sm:text-3xl md:text-4xl">
-              {isKo ? media.name : media.nameEn}
-            </h1>
-            <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-white/88 sm:text-lg">
-              <span className="inline-flex items-center gap-2">
-                <MapPin
-                  className="h-4 w-4 shrink-0 opacity-90"
-                  aria-hidden
-                />
-                {isKo ? media.location : media.locationEn}
-              </span>
-              {typeLabel ? (
-                <>
-                  <span
-                    className="hidden text-white/35 sm:inline"
-                    aria-hidden
-                  >
-                    ·
-                  </span>
-                  <span className="font-medium text-white/95">{typeLabel}</span>
-                </>
-              ) : null}
-            </p>
-            <div className="mt-5 flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
-              <span className="break-words text-xl font-bold tabular-nums text-gold sm:text-2xl">
-                ₩{media.price.toLocaleString()}
-              </span>
-              <span className="text-sm font-normal text-white/70 sm:shrink-0">
-                {t("perMonth")}
-              </span>
-            </div>
+          <h1 className="break-words text-2xl font-bold tracking-tight text-navy sm:text-3xl md:text-4xl">
+            {isKo ? media.name : media.nameEn}
+          </h1>
+          <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-muted-foreground sm:text-lg">
+            <span className="inline-flex items-center gap-2">
+              <MapPin className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+              {isKo ? media.location : media.locationEn}
+            </span>
+            {typeLabel ? (
+              <>
+                <span className="hidden text-gray-300 sm:inline" aria-hidden>·</span>
+                <span className="font-medium text-navy/80">{typeLabel}</span>
+              </>
+            ) : null}
+          </p>
+          <div className="mt-5 flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
+            <span className="break-words text-xl font-bold tabular-nums text-gold-dark sm:text-2xl">
+              ₩{media.price.toLocaleString()}
+            </span>
+            <span className="text-sm font-normal text-muted-foreground sm:shrink-0">
+              {t("perMonth")}
+            </span>
           </div>
         </div>
       </section>
@@ -322,16 +314,14 @@ export default async function MediaDetailPage({ params }: Props) {
             </div>
           </section>
 
-          {(casePhotos.length > 0 || extraGalleryImages.length > 0) && (
+          {/* 집행사례는 casePhotos만 표시 (sampleImages 제외) */}
+          {casePhotos.length > 0 && (
             <>
               <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
                 {t("caseStudiesTitle")}
               </h2>
               <MediaCaseStudyGallery
-                photos={[
-                  ...extraGalleryImages.map((url) => ({ url })),
-                  ...casePhotos,
-                ]}
+                photos={casePhotos}
                 isKo={isKo}
                 labels={{
                   close: t("galleryLightboxClose"),
