@@ -15,15 +15,21 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  buildCaseStudyGalleryItems,
   getAllMediaIds,
   getMediaDetailGalleryUrls,
   getSimilarMediaFromCatalog,
   typeLabels,
 } from "@/lib/media-data";
+import { formatMediaLocationShort } from "@/lib/media-location-format";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
+import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
-import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
@@ -46,10 +52,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!media) return { title: "Media" };
   const title =
     locale === "ko" ? `${media.name} | THINKAD` : `${media.nameEn} | THINKAD`;
+  const won = media.price * 10_000;
   const description =
     locale === "ko"
-      ? `${media.location} · 월 ₩${media.price.toLocaleString()}만원`
-      : `${media.locationEn} · ₩${media.price.toLocaleString()}M/mo`;
+      ? `${media.location} · ${won.toLocaleString()}원`
+      : `${media.locationEn} · ₩${won.toLocaleString()}`;
   return { title, description };
 }
 
@@ -69,9 +76,9 @@ export default async function MediaDetailPage({ params }: Props) {
     Math.round(media.dailyFootTraffic * 30);
 
   const similar = getSimilarMediaFromCatalog(catalog, media, 4);
-  const casePhotos = media.caseStudyPhotos ?? [];
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
+  const caseStudyItems = buildCaseStudyGalleryItems(media);
   const typeLabel =
     (isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en) ?? "";
   const featuresText = isKo ? media.features : media.featuresEn;
@@ -80,6 +87,8 @@ export default async function MediaDetailPage({ params }: Props) {
     similar.length > 0
       ? `/compare?ids=${media.id},${similar[0].id}`
       : "/media";
+
+  const periodLabel = t(mediaPricePeriodTranslationKey(media.pricePeriod));
 
   return (
     <>
@@ -119,21 +128,23 @@ export default async function MediaDetailPage({ params }: Props) {
           <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-muted-foreground sm:text-lg">
             <span className="inline-flex items-center gap-2">
               <MapPin className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-              {isKo ? media.location : media.locationEn}
+              {formatMediaLocationShort(media, isKo)}
             </span>
             {typeLabel ? (
               <>
-                <span className="hidden text-gray-300 sm:inline" aria-hidden>·</span>
+                <span className="hidden text-gray-300 sm:inline" aria-hidden>
+                  ·
+                </span>
                 <span className="font-medium text-navy/80">{typeLabel}</span>
               </>
             ) : null}
           </p>
           <div className="mt-5 flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
             <span className="break-words text-xl font-bold tabular-nums text-gold-dark sm:text-2xl">
-              ₩{media.price.toLocaleString()}
+              {formatMediaPriceWonWithSymbol(media.price)}
             </span>
             <span className="text-sm font-normal text-muted-foreground sm:shrink-0">
-              {t("perMonth")}
+              · {periodLabel}
             </span>
           </div>
         </div>
@@ -190,10 +201,10 @@ export default async function MediaDetailPage({ params }: Props) {
                 value={
                   <>
                     <span className="break-all text-base font-semibold tabular-nums text-gold-dark sm:text-lg">
-                      ₩{media.price.toLocaleString()}
+                      {formatMediaPriceWonWithSymbol(media.price)}
                     </span>
                     <span className="mt-1 block text-xs font-normal text-muted-foreground">
-                      {t("priceUnit")}
+                      {t("priceUnitWon")} · {periodLabel}
                     </span>
                   </>
                 }
@@ -312,14 +323,13 @@ export default async function MediaDetailPage({ params }: Props) {
             </div>
           </section>
 
-          {/* 집행사례는 casePhotos만 표시 (sampleImages 제외) */}
-          {casePhotos.length > 0 && (
+          {caseStudyItems.length > 0 ? (
             <>
-              <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
+              <h2 className="mb-3 mt-12 text-lg font-bold text-navy">
                 {t("caseStudiesTitle")}
               </h2>
               <MediaCaseStudyGallery
-                photos={casePhotos}
+                photos={caseStudyItems}
                 isKo={isKo}
                 labels={{
                   close: t("galleryLightboxClose"),
@@ -330,14 +340,9 @@ export default async function MediaDetailPage({ params }: Props) {
                 }}
               />
             </>
-          )}
+          ) : null}
 
-          <MediaSimilarCarousel
-            items={similar}
-            isKo={isKo}
-            title={t("similarTitle")}
-            priceSuffix={isKo ? "만원/월" : " (10K ₩)/mo"}
-          />
+          <MediaSimilarCarousel items={similar} isKo={isKo} title={t("similarTitle")} />
         </div>
       </section>
 

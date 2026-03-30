@@ -145,6 +145,7 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
     tags: ["network", n.type],
     type: "network",
     price: displayPrice,
+    pricePeriod: "month",
     lat: centerLat,
     lng: centerLng,
     dailyFootTraffic: 0,

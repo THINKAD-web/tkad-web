@@ -113,6 +113,32 @@ export function selectPlannerPortfolio(
   return out;
 }
 
+/** 사용자가 고른 순서를 유지하며 월 예산 상한 내에서 슬롯 구성 */
+export function portfolioFromManualSelection(
+  orderedItems: MediaItem[],
+  budgetMan: number,
+  months: number,
+  maxItems = 12,
+): MediaItem[] {
+  if (orderedItems.length === 0 || months < 1 || budgetMan < 1) return [];
+  const spendPerMonth = budgetMan / months;
+  const cap = spendPerMonth * 0.92;
+  const out: MediaItem[] = [];
+  let allocated = 0;
+  for (const m of orderedItems) {
+    if (out.length >= maxItems) break;
+    if (allocated + m.price <= cap) {
+      out.push(m);
+      allocated += m.price;
+    }
+  }
+  if (out.length === 0) {
+    const cheapest = [...orderedItems].sort((a, b) => a.price - b.price)[0];
+    if (cheapest) out.push(cheapest);
+  }
+  return out;
+}
+
 export type BudgetBlurbParts = {
   sampleName: string;
   samplePrice: number;

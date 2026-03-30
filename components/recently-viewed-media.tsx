@@ -11,6 +11,10 @@ import {
   subscribeRecentlyViewedChanged,
 } from "@/lib/recently-viewed";
 import { type MediaItem } from "@/lib/media-data";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
 const DISPLAY_MAX = RECENTLY_VIEWED_MAX;
@@ -105,14 +109,14 @@ export default function RecentlyViewedMedia({ locale }: Props) {
                   bottomGradientClassName={null}
                   placeholderSize="xs"
                 />
-                <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-2 pr-3 pl-2.5">
+                <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-1.5 pr-2.5 pl-2">
                   <span className="truncate text-[11px] font-semibold leading-tight text-foreground group-hover:text-navy">
                     {isKo ? media.name : media.nameEn}
                   </span>
-                  <span className="text-[11px] font-bold tabular-nums text-navy group-hover:text-navy">
-                    ₩{media.price.toLocaleString()}
+                  <span className="text-[10px] font-bold tabular-nums leading-tight text-navy group-hover:text-navy">
+                    {formatMediaPriceWonWithSymbol(media.price)}
                     <span className="ml-0.5 text-[9px] font-medium text-muted-foreground">
-                      {isKo ? "만원" : "10K"}
+                      · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
                     </span>
                   </span>
                 </div>

@@ -34,6 +34,8 @@ export type AiRecommendInput = {
   minVisibility?: number;
   /** Minimum daily foot traffic. 0 disables filtering. */
   minDailyFootTraffic?: number;
+  /** 서울 등 선택 시 `mediaHaystack`에 포함되는 키워드로 한 번 더 좁힘 (하나라도 매칭) */
+  locationKeywords?: readonly string[] | null;
 };
 
 export type MatchReason = { ko: string; en: string };
@@ -108,6 +110,13 @@ export function regionMatchesMedia(m: MediaItem, code: string): boolean {
   }
   if (code === "jeju") {
     return m.region === "jeju" || /제주/i.test(h);
+  }
+  if (code === "capital") {
+    if (m.region === "busan" || m.region === "jeju") return false;
+    if (m.region === "seoul" || m.region === "national") return true;
+    return /수도권|경기|인천|판교|분당|일산|송도|김포|하남|수원|성남|고양|부천|안양|용인|과천|의왕|광명|안산|시흥|파주|동탄|화성|광교|수지|분당|테헤란|여의도|강남|홍대|명동|코엑스|서울/i.test(
+      h,
+    );
   }
   return m.region === code;
 }
@@ -287,6 +296,14 @@ function subscoreRegion(m: MediaItem, code: string): number {
   }
   if (code === "busan" && m.region !== "busan") return 74;
   if (code === "jeju" && m.region !== "jeju") return 74;
+  if (code === "capital") {
+    if (m.region === "seoul") return 96;
+    if (m.region === "national") return 88;
+    const h = mediaHaystack(m);
+    if (/수도권|경기|인천|판교|분당|일산|송도|김포|하남|수원|성남|고양|부천|안양|용인|서울|강남|테헤란|여의도|홍대|명동|코엑스/i.test(h))
+      return 86;
+    return 72;
+  }
   return 78;
 }
 
@@ -456,6 +473,13 @@ export function recommendMedia(
   const minFt = Math.max(0, Math.round(input.minDailyFootTraffic ?? 0));
   if (minFt > 0) {
     pool = pool.filter((m) => (m.dailyFootTraffic ?? 0) >= minFt);
+  }
+  const kws = input.locationKeywords?.filter((k) => k.trim().length > 0) ?? [];
+  if (kws.length > 0) {
+    pool = pool.filter((m) => {
+      const h = mediaHaystack(m);
+      return kws.some((kw) => h.includes(kw.trim().toLowerCase()));
+    });
   }
   if (pool.length === 0) return [];
 

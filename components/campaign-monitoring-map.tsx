@@ -72,6 +72,18 @@ type Props = {
   fixedMapHeightPx?: number;
   /** Show helper line under the map (provider hint). Default true. */
   showFooterCaption?: boolean;
+  /** Optional: override initial center (e.g. user geolocation). */
+  centerOverride?: { lat: number; lng: number } | null;
+  /** Optional: override initial zoom when centerOverride is set. */
+  zoomOverride?: number | null;
+  /**
+   * Optional per-pin UI metadata (used by fallback/demo map styling).
+   * Keys: pin id
+   */
+  pinMetaById?: Record<
+    string,
+    { tone?: "blue" | "green"; nowBadge?: boolean; popular?: boolean }
+  >;
 };
 
 type KakaoMapCtx = {
@@ -95,6 +107,9 @@ export function CampaignMonitoringMap({
   className,
   fixedMapHeightPx,
   showFooterCaption = true,
+  centerOverride = null,
+  zoomOverride = null,
+  pinMetaById,
 }: Props) {
   const provider = useMemo(() => getCampaignMonitoringMapProvider(), []);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -105,13 +120,14 @@ export function CampaignMonitoringMap({
   const [mapEpoch, bumpMapEpoch] = useReducer((n: number) => n + 1, 0);
 
   const center = useMemo(() => {
+    if (centerOverride) return centerOverride;
     if (pins.length === 0) return { lat: 37.5665, lng: 126.978 };
     const s = pins.reduce(
       (a, p) => ({ lat: a.lat + p.lat, lng: a.lng + p.lng }),
       { lat: 0, lng: 0 },
     );
     return { lat: s.lat / pins.length, lng: s.lng / pins.length };
-  }, [pins]);
+  }, [pins, centerOverride]);
 
   const pinLayoutKey = useMemo(
     () => pins.map((p) => `${p.id}:${p.lat}:${p.lng}`).join("|"),
@@ -175,21 +191,23 @@ export function CampaignMonitoringMap({
 
       const map = new googleMaps.Map(el, {
         center,
-        zoom: 12,
+        zoom: zoomOverride != null ? zoomOverride : 12,
       });
 
-      const bounds = new googleMaps.LatLngBounds();
-      for (const p of pinList) {
-        bounds.extend({ lat: p.lat, lng: p.lng });
-      }
-      map.fitBounds(bounds);
-      window.setTimeout(() => {
-        const m = map as { getZoom?: () => number; setZoom?: (z: number) => void };
-        const z = m.getZoom?.();
-        if (typeof z === "number" && z > 14) {
-          m.setZoom?.(14);
+      if (!centerOverride) {
+        const bounds = new googleMaps.LatLngBounds();
+        for (const p of pinList) {
+          bounds.extend({ lat: p.lat, lng: p.lng });
         }
-      }, 400);
+        map.fitBounds(bounds);
+        window.setTimeout(() => {
+          const m = map as { getZoom?: () => number; setZoom?: (z: number) => void };
+          const z = m.getZoom?.();
+          if (typeof z === "number" && z > 14) {
+            m.setZoom?.(14);
+          }
+        }, 400);
+      }
 
       googleMapCtxRef.current = { map };
       bumpMapEpoch();
@@ -216,7 +234,15 @@ export function CampaignMonitoringMap({
       cleanupRef.current?.();
       cleanupRef.current = null;
     };
-  }, [center, isKo, onSelectPin, pinLayoutKey, bumpMapEpoch]);
+  }, [
+    center,
+    centerOverride,
+    zoomOverride,
+    isKo,
+    onSelectPin,
+    pinLayoutKey,
+    bumpMapEpoch,
+  ]);
 
   const mountKakao = useCallback(() => {
     const el = containerRef.current;
@@ -273,23 +299,28 @@ export function CampaignMonitoringMap({
         if (cancelled || !containerRef.current) return;
         const map = new K.Map(el, {
           center: new K.LatLng(center.lat, center.lng),
-          level: 8,
+          level:
+            zoomOverride != null
+              ? Math.max(1, Math.min(14, 15 - zoomOverride))
+              : 8,
         });
 
-        const bounds = new K.LatLngBounds();
-        for (const p of pinList) {
-          bounds.extend(new K.LatLng(p.lat, p.lng));
-        }
-        map.setBounds(bounds);
-        // 동일·근접 좌표만 있으면 과확대 → 레벨 숫자가 작을수록 확대이므로 최소 레벨 6 이상으로 완화
-        const minLevelWide = 6;
-        const mapAny = map as {
-          getLevel?: () => number;
-          setLevel: (n: number) => void;
-        };
-        const lv = mapAny.getLevel?.();
-        if (typeof lv === "number" && lv < minLevelWide) {
-          mapAny.setLevel(minLevelWide);
+        if (!centerOverride) {
+          const bounds = new K.LatLngBounds();
+          for (const p of pinList) {
+            bounds.extend(new K.LatLng(p.lat, p.lng));
+          }
+          map.setBounds(bounds);
+          // 동일·근접 좌표만 있으면 과확대 → 레벨 숫자가 작을수록 확대이므로 최소 레벨 6 이상으로 완화
+          const minLevelWide = 6;
+          const mapAny = map as {
+            getLevel?: () => number;
+            setLevel: (n: number) => void;
+          };
+          const lv = mapAny.getLevel?.();
+          if (typeof lv === "number" && lv < minLevelWide) {
+            mapAny.setLevel(minLevelWide);
+          }
         }
 
         kakaoMapCtxRef.current = { map, LatLng: K.LatLng };
@@ -318,7 +349,15 @@ export function CampaignMonitoringMap({
       cleanupRef.current?.();
       cleanupRef.current = null;
     };
-  }, [center, isKo, onSelectPin, pinLayoutKey, bumpMapEpoch]);
+  }, [
+    center,
+    centerOverride,
+    zoomOverride,
+    isKo,
+    onSelectPin,
+    pinLayoutKey,
+    bumpMapEpoch,
+  ]);
 
   useEffect(() => {
     cleanupRef.current?.();
@@ -386,22 +425,36 @@ export function CampaignMonitoringMap({
           </div>
           {pins.map((p) => {
             const active = selectedId === p.id;
+            const meta = pinMetaById?.[p.id];
+            const tone = meta?.tone ?? "blue";
+            const isNow = meta?.nowBadge === true;
+            const popular = meta?.popular === true;
             return (
               <button
                 key={p.id}
                 type="button"
                 className={cn(
-                  "absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 shadow-lg transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold",
+                  "absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 shadow-lg transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2",
                   active
-                    ? "border-gold bg-navy text-gold"
-                    : "border-white bg-gold text-navy",
+                    ? "border-gold bg-navy text-white focus-visible:ring-gold"
+                    : tone === "green"
+                      ? "border-white bg-emerald-500 text-white focus-visible:ring-emerald-400"
+                      : "border-white bg-blue-500 text-white focus-visible:ring-blue-400",
+                  popular && !active && "ring-2 ring-gold/80",
                 )}
                 style={{ left: `${p.fallbackX}%`, top: `${p.fallbackY}%` }}
                 onClick={() => onSelectPin(active ? null : p.id)}
                 aria-pressed={active}
                 aria-label={isKo ? p.spotNameKo : p.spotNameEn}
               >
-                <MapPin className="h-5 w-5" />
+                <span className="relative">
+                  <MapPin className="h-5 w-5" />
+                  {isNow ? (
+                    <span className="absolute -right-6 -top-2 rounded-full bg-white px-1.5 py-0.5 text-[9px] font-extrabold tracking-tight text-emerald-700 shadow">
+                      NOW
+                    </span>
+                  ) : null}
+                </span>
               </button>
             );
           })}

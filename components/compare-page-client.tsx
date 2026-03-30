@@ -27,6 +27,11 @@ import {
 } from "lucide-react";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { type MediaItem } from "@/lib/media-data";
+import { formatMediaLocationShort } from "@/lib/media-location-format";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 
 function RatioBar({
   label,
@@ -98,11 +103,12 @@ function CompareMediaCard({
   maxDaily: number;
   imagePreparingLabel: string;
 }) {
+  const tMedia = useTranslations("media");
   const score = Math.min(
     100,
     Math.max(0, Math.round(media.visibilityScore ?? 0)),
   );
-  const loc = isKo ? media.location : media.locationEn;
+  const loc = formatMediaLocationShort(media, isKo);
 
   return (
     <article
@@ -157,7 +163,7 @@ function CompareMediaCard({
           </Link>
         </div>
 
-        {/* 3. 가격 (월) */}
+        {/* 3. 집행 단가 */}
         <div
           className={cn(
             "rounded-2xl border p-5 md:p-6",
@@ -168,12 +174,12 @@ function CompareMediaCard({
         >
           <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-navy/50">
             <Tag className="h-3.5 w-3.5 text-navy" />
-            {isKo ? "월 가격" : "Monthly price"}
+            {isKo ? "집행 단가" : "Price"}
           </div>
           <p className="text-2xl font-extrabold tracking-tight text-navy">
-            ₩{media.price.toLocaleString()}
+            {formatMediaPriceWonWithSymbol(media.price)}
             <span className="ml-1 text-sm font-semibold text-muted-foreground">
-              {isKo ? "만원" : " (10K)"}
+              · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
             </span>
           </p>
         </div>

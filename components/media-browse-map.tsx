@@ -13,6 +13,9 @@ export default function MediaBrowseMap({
   className,
   fixedMapHeightPx,
   showFooterCaption,
+  centerOverride,
+  zoomOverride,
+  pinMetaById,
 }: {
   items: readonly MediaItem[];
   locale: string;
@@ -21,6 +24,12 @@ export default function MediaBrowseMap({
   className?: string;
   fixedMapHeightPx?: number;
   showFooterCaption?: boolean;
+  centerOverride?: { lat: number; lng: number } | null;
+  zoomOverride?: number | null;
+  pinMetaById?: Record<
+    string,
+    { tone?: "blue" | "green"; nowBadge?: boolean; popular?: boolean }
+  >;
 }) {
   const isKo = locale === "ko";
   const pins = useMemo(() => mediaItemsToCampaignPins(items), [items]);
@@ -33,6 +42,9 @@ export default function MediaBrowseMap({
       className={className}
       fixedMapHeightPx={fixedMapHeightPx}
       showFooterCaption={showFooterCaption}
+      centerOverride={centerOverride ?? null}
+      zoomOverride={zoomOverride ?? null}
+      pinMetaById={pinMetaById}
     />
   );
 }

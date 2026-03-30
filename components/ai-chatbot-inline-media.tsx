@@ -6,6 +6,10 @@ import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { typeLabels } from "@/lib/media-data";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 
 export function AiChatbotMediaCards({
   items,
@@ -49,9 +53,10 @@ export function AiChatbotMediaCards({
                 {label}
               </p>
               <p className="mt-0.5 text-[11px] font-bold tabular-nums text-gold-dark">
-                ₩{m.price.toLocaleString()}
+                {formatMediaPriceWonWithSymbol(m.price)}
                 <span className="font-semibold text-navy/55">
-                  {isKo ? "만/월" : " (10K/mo)"}
+                  {" "}
+                  · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
                 </span>
               </p>
               <p className="mt-0.5 text-[10px] text-navy/45">

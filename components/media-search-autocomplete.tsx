@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 import {
   matchesMediaTextQuery,
   typeLabels,
   type MediaItem,
 } from "@/lib/media-data";
+import { formatMediaLocationShort } from "@/lib/media-location-format";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 
 interface Props {
   /** 서버 `fetchPublicMediaCatalog()` 등에서 내려준 공개 매체 목록(필수). */
@@ -18,6 +24,7 @@ interface Props {
   /** Fired on every input change so the parent can clear text filters when the field is emptied. */
   onQueryChange?: (query: string) => void;
   searchButtonLabel?: string;
+  placeholder?: string;
 }
 
 export default function MediaSearchAutocomplete({
@@ -27,8 +34,10 @@ export default function MediaSearchAutocomplete({
   onSearchSubmit,
   onQueryChange,
   searchButtonLabel,
+  placeholder,
 }: Props) {
   const isKo = locale === "ko";
+  const tMedia = useTranslations("media");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<MediaItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -136,7 +145,10 @@ export default function MediaSearchAutocomplete({
             onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={() => query.trim() && results.length > 0 && setIsOpen(true)}
-            placeholder={isKo ? "매체명, 지역, 유형 검색..." : "Search name, location, type..."}
+            placeholder={
+              placeholder ??
+              (isKo ? "매체명, 지역, 유형 검색..." : "Search name, location, type...")
+            }
             className="w-full rounded-lg border bg-white py-2.5 pl-10 pr-9 text-sm outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
           />
           {query && (
@@ -186,12 +198,15 @@ export default function MediaSearchAutocomplete({
                   {isKo ? media.name : media.nameEn}
                 </div>
                 <div className="text-xs text-muted-foreground truncate">
-                  {isKo ? media.location : media.locationEn} ·{" "}
+                  {formatMediaLocationShort(media, isKo)} ·{" "}
                   {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
                 </div>
               </div>
-              <span className="shrink-0 text-xs font-semibold text-gold-dark">
-                ₩{media.price.toLocaleString()}만
+              <span className="shrink-0 text-right text-[11px] font-semibold leading-tight text-gold-dark">
+                {formatMediaPriceWonWithSymbol(media.price)}
+                <span className="ml-0.5 text-[10px] font-medium text-muted-foreground">
+                  · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
+                </span>
               </span>
             </button>
           ))}

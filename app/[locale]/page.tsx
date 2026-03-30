@@ -14,6 +14,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import HeroParallaxBackground from "@/components/hero-parallax-background";
 import { type MediaItem } from "@/lib/media-data";
+import { formatMediaLocationShort } from "@/lib/media-location-format";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 import { fetchHomeFeaturedMedia } from "@/lib/public-media-catalog";
 import {
   ArrowRight,
@@ -78,6 +83,7 @@ export default async function HomePage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const t = await getTranslations();
+  const tMedia = await getTranslations({ locale, namespace: "media" });
   /**
    * 추천 매체: Prisma `isFeatured`·`featuredOrder`(홈 하드코딩 ID 없음).
    * DB 연결 시 실제 행만; 미연결 시에만 샘플 카탈로그.
@@ -85,17 +91,24 @@ export default async function HomePage({ params }: Props) {
   const featuredCatalog = await fetchHomeFeaturedMedia(6);
 
   return (
-    <HomeContent locale={locale} t={t} featuredCatalog={featuredCatalog} />
+    <HomeContent
+      locale={locale}
+      t={t}
+      tMedia={tMedia}
+      featuredCatalog={featuredCatalog}
+    />
   );
 }
 
 function HomeContent({
   locale,
   t,
+  tMedia,
   featuredCatalog,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
+  tMedia: Awaited<ReturnType<typeof getTranslations>>;
   featuredCatalog: MediaItem[];
 }) {
   const isKo = locale === "ko";
@@ -647,7 +660,7 @@ function HomeContent({
                   </div>
                   <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-white/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </MediaCatalogThumbnail>
-                <CardHeader className="pb-2">
+                <CardHeader className="space-y-1 px-4 pb-2 pt-4">
                   <div className="flex items-center justify-between">
                     <Badge
                       variant="secondary"
@@ -658,19 +671,19 @@ function HomeContent({
                         : (typeLabels[media.type]?.en ?? media.type)}
                     </Badge>
                   </div>
-                  <CardTitle className="text-base font-bold">
+                  <CardTitle className="text-base font-bold leading-snug">
                     {isKo ? media.name : media.nameEn}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-3 w-3" />
-                    {isKo ? media.location : media.locationEn}
+                <CardContent className="px-4 pb-4 pt-0">
+                  <div className="flex items-start gap-1 text-sm leading-snug text-muted-foreground">
+                    <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+                    {formatMediaLocationShort(media, isKo)}
                   </div>
-                  <div className="mt-3 text-lg font-bold text-navy">
-                    ₩{media.price.toLocaleString()}
-                    <span className="text-xs font-normal text-muted-foreground">
-                      {t("media.perMonth")}
+                  <div className="mt-2 text-lg font-bold text-navy">
+                    {formatMediaPriceWonWithSymbol(media.price)}
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">
+                      · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
                     </span>
                   </div>
                   <div className="mt-4">

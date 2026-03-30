@@ -13,6 +13,11 @@ import {
   subscribeRecentlyViewedChanged,
 } from "@/lib/recently-viewed";
 import { typeLabels, type MediaItem } from "@/lib/media-data";
+import { formatMediaLocationShort } from "@/lib/media-location-format";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 import ScrollAnimate from "@/components/scroll-animate";
 
 interface Props {
@@ -96,22 +101,24 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                     bottomGradientClassName={null}
                     placeholderSize="xs"
                   />
-                  <CardHeader className="p-4 pb-1">
+                  <CardHeader className="p-3 pb-1.5">
                     <Badge variant="secondary" className="w-fit bg-navy/5 text-navy text-[10px]">
                       {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
                     </Badge>
-                    <CardTitle className="text-sm font-bold">
+                    <CardTitle className="text-sm font-bold leading-snug">
                       {isKo ? media.name : media.nameEn}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      {isKo ? media.location : media.locationEn}
+                  <CardContent className="px-3 pb-3">
+                    <div className="flex items-start gap-1 text-xs leading-snug text-muted-foreground">
+                      <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+                      {formatMediaLocationShort(media, isKo)}
                     </div>
-                    <div className="mt-1.5 text-base font-bold text-navy">
-                      ₩{media.price.toLocaleString()}
-                      <span className="text-[10px] font-normal text-muted-foreground">만원</span>
+                    <div className="mt-1 text-sm font-bold text-navy">
+                      {formatMediaPriceWonWithSymbol(media.price)}
+                      <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                        · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>

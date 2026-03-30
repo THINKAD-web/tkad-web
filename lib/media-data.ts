@@ -6,6 +6,13 @@ export type MediaCaseStudyPhoto = {
   captionEn?: string;
 };
 
+/** 집행 단가 기준 (DB `price_period`) */
+export type MediaPricePeriodKey =
+  | "month"
+  | "biweekly"
+  | "week"
+  | "day";
+
 export interface MediaItem {
   id: string;
   name: string;
@@ -13,6 +20,8 @@ export interface MediaItem {
   location: string;
   locationEn: string;
   region: string;
+  /** 공개 카탈로그에서의 운영 상태 (DB `availability`) */
+  availability?: "available" | "reserved" | "maintenance";
   /** 세부 카테고리 (DB `sub_category`) */
   subCategory?: string;
   /** 검색·표시용 태그 */
@@ -25,6 +34,8 @@ export interface MediaItem {
   nearbyLandmarks?: string;
   type: string;
   price: number;
+  /** 집행 단가 기준: 월·2주·주·일 */
+  pricePeriod?: MediaPricePeriodKey;
   lat: number;
   lng: number;
   dailyFootTraffic: number;
@@ -127,6 +138,24 @@ export function resolveMediaGallery(m: MediaItem): string[] {
   return dedupeImageUrls(raw);
 }
 
+/** 진행·집행 사례: 구조화된 사진 + 갤러리 추가 이미지(히어로 제외) 병합 */
+export function buildCaseStudyGalleryItems(
+  media: MediaItem,
+): MediaCaseStudyPhoto[] {
+  const structured = media.caseStudyPhotos ?? [];
+  const seen = new Set(structured.map((p) => p.url));
+  const gallery = dedupeImageUrls(resolveMediaGallery(media));
+  const extras: MediaCaseStudyPhoto[] = [];
+  for (let i = 1; i < gallery.length; i++) {
+    const url = gallery[i];
+    if (url?.trim() && !seen.has(url)) {
+      seen.add(url);
+      extras.push({ url });
+    }
+  }
+  return [...structured, ...extras];
+}
+
 /**
  * DB `image` / `extractedImages` 등으로 채워진 `sampleImages` 중 첫 URL만 반환.
  * 없으면 null — 목업(Picsum) 대신 플레이스홀더 UI를 쓰려 할 때 사용.
@@ -186,6 +215,36 @@ function adjustOverlappingMapCoords(
   return out;
 }
 
+function periodAbbrevKo(p?: MediaPricePeriodKey): string {
+  switch (p ?? "month") {
+    case "month":
+      return "월";
+    case "biweekly":
+      return "2주";
+    case "week":
+      return "주";
+    case "day":
+      return "일";
+    default:
+      return "월";
+  }
+}
+
+function periodAbbrevEn(p?: MediaPricePeriodKey): string {
+  switch (p ?? "month") {
+    case "month":
+      return "mo";
+    case "biweekly":
+      return "2wk";
+    case "week":
+      return "wk";
+    case "day":
+      return "day";
+    default:
+      return "mo";
+  }
+}
+
 function mediaTypeToMapType(type: string): CampaignMapMediaType {
   if (type === "static") return "billboard";
   if (type === "mobile") return "transport";
@@ -212,8 +271,9 @@ export function mediaItemsToCampaignPins(
     const lat = adjusted[i].lat;
     const lng = adjusted[i].lng;
     const { x, y } = latLngToFallbackPercent(lat, lng);
-    const capKo = `${m.location} · 월 ₩${m.price.toLocaleString()}만`;
-    const capEn = `${m.locationEn} · ₩${m.price.toLocaleString()}M/mo`;
+    const won = m.price * 10_000;
+    const capKo = `${m.location} · ${won.toLocaleString()}원/${periodAbbrevKo(m.pricePeriod)}`;
+    const capEn = `${m.locationEn} · ₩${won.toLocaleString()}/${periodAbbrevEn(m.pricePeriod)}`;
     return {
       id: String(m.id),
       projectId: "media-browse",
@@ -290,6 +350,7 @@ export const mediaData: MediaItem[] = [
     region: "seoul",
     type: "digital",
     price: 4000,
+    pricePeriod: "week",
     lat: 37.4979,
     lng: 127.0276,
     dailyFootTraffic: 300000,

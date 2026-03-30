@@ -1,4 +1,4 @@
-import type { MediaItem } from "@/lib/media-data";
+import type { MediaItem, MediaPricePeriodKey } from "@/lib/media-data";
 import {
   getPrimaryMediaImageUrl,
   matchesMediaTextQuery,
@@ -29,6 +29,7 @@ export type AiChatbotMediaCard = {
   nameEn: string;
   location: string;
   price: number;
+  pricePeriod?: MediaPricePeriodKey;
   type: string;
   region: string;
   /** 썸네일 URL (없으면 카드에서 플레이스홀더) */
@@ -42,6 +43,7 @@ function compact(m: MediaItem): AiChatbotMediaCard {
     nameEn: m.nameEn,
     location: m.location,
     price: m.price,
+    pricePeriod: m.pricePeriod,
     type: m.type,
     region: m.region,
     imageUrl: getPrimaryMediaImageUrl(m),

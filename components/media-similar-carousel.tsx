@@ -9,17 +9,19 @@ import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 
 export default function MediaSimilarCarousel({
   items,
   isKo,
   title,
-  priceSuffix,
 }: {
   items: readonly MediaItem[];
   isKo: boolean;
   title: string;
-  priceSuffix: string;
 }) {
   const t = useTranslations("media.detail");
   const tMedia = useTranslations("media");
@@ -129,19 +131,19 @@ export default function MediaSimilarCarousel({
                 bottomGradientClassName={null}
                 placeholderSize="xs"
               />
-              <div className="flex flex-1 flex-col p-4">
+              <div className="flex flex-1 flex-col px-3 pb-3 pt-2.5">
                 {typeLabel ? (
-                  <span className="mb-2 inline-flex w-fit max-w-full truncate rounded-md border border-navy/10 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-navy/80">
+                  <span className="mb-1.5 inline-flex w-fit max-w-full truncate rounded-md border border-navy/10 bg-slate-50 px-1.5 py-0.5 text-[11px] font-semibold text-navy/80">
                     {typeLabel}
                   </span>
                 ) : null}
-                <p className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-snug text-navy group-hover:text-gold-dark">
+                <p className="line-clamp-2 min-h-[2.35rem] text-sm font-bold leading-snug text-navy group-hover:text-gold-dark">
                   {isKo ? m.name : m.nameEn}
                 </p>
-                <p className="mt-3 text-base font-bold tabular-nums text-gold-dark">
-                  ₩{m.price.toLocaleString()}
-                  <span className="ml-1 text-xs font-medium text-muted-foreground">
-                    {priceSuffix}
+                <p className="mt-2 text-sm font-bold tabular-nums text-gold-dark sm:text-base">
+                  {formatMediaPriceWonWithSymbol(m.price)}
+                  <span className="ml-1 text-[11px] font-medium text-muted-foreground sm:text-xs">
+                    · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
                   </span>
                 </p>
               </div>

@@ -21,6 +21,13 @@ enum MediaAvailability {
   maintenance
 }
 
+enum MediaPricePeriod {
+  month
+  biweekly
+  week
+  day
+}
+
 enum CrmTier {
   vip
   standard
@@ -74,6 +81,7 @@ model Media {
   /// Catalog code: `digital` | `static` | `mobile` (OOH 유형)
   type      String
   price     Int
+  pricePeriod MediaPricePeriod @default(month) @map("price_period")
   image     String?
   width     String?
   height    String?

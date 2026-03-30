@@ -72,6 +72,11 @@ import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { formatMediaLocationShort } from "@/lib/media-location-format";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 
 export default function MediaBrowseClient({
   catalog,
@@ -79,6 +84,7 @@ export default function MediaBrowseClient({
   catalog: MediaItem[];
 }) {
   const t = useTranslations();
+  const tMedia = useTranslations("media");
   const locale = useLocale();
   const isKo = locale === "ko";
 
@@ -558,11 +564,15 @@ export default function MediaBrowseClient({
                                     : mapSelectedMedia.nameEn}
                                 </h3>
                                 <p className="mt-1.5 text-sm font-bold tabular-nums text-navy">
-                                  ₩{mapSelectedMedia.price.toLocaleString()}
+                                  {formatMediaPriceWonWithSymbol(mapSelectedMedia.price)}
                                   <span className="text-xs font-normal text-muted-foreground">
-                                    {isKo
-                                      ? `만원 ${t("media.perMonth")}`
-                                      : ` ${t("media.perMonth")}`}
+                                    {" "}
+                                    ·{" "}
+                                    {tMedia(
+                                      mediaPricePeriodTranslationKey(
+                                        mapSelectedMedia.pricePeriod,
+                                      ),
+                                    )}
                                   </span>
                                 </p>
                                 <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -700,21 +710,20 @@ export default function MediaBrowseClient({
                             <div className="flex items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-xs">
                               <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
                               <span className="line-clamp-2">
-                                {isKo ? media.location : media.locationEn}
+                                {formatMediaLocationShort(media, isKo)}
                               </span>
                             </div>
-                            <div className="space-y-0.5">
-                              <div className="text-[15px] font-bold tabular-nums text-navy sm:text-base">
-                                ₩{media.price.toLocaleString()}
-                                <span className="text-[11px] font-normal text-muted-foreground sm:text-xs">
-                                  만원 {t("media.perMonth")}
-                                </span>
-                              </div>
-                              <div className="text-[10px] text-muted-foreground sm:text-[11px]">
-                                {isKo
-                                  ? `월 ${media.price.toLocaleString()}만원~`
-                                  : `From ₩${media.price.toLocaleString()}M/mo`}
-                              </div>
+                            <div className="text-[15px] font-bold tabular-nums text-navy sm:text-base">
+                              {formatMediaPriceWonWithSymbol(media.price)}
+                              <span className="text-[11px] font-normal text-muted-foreground sm:text-xs">
+                                {" "}
+                                ·{" "}
+                                {tMedia(
+                                  mediaPricePeriodTranslationKey(
+                                    media.pricePeriod,
+                                  ),
+                                )}
+                              </span>
                             </div>
                           </CardContent>
                           </Card>
@@ -784,13 +793,18 @@ export default function MediaBrowseClient({
                           </p>
                           <p className="line-clamp-2 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
                             <MapPin className="mr-0.5 inline h-2.5 w-2.5 align-text-bottom sm:h-3 sm:w-3" />
-                            {isKo ? media.location : media.locationEn}
+                            {formatMediaLocationShort(media, isKo)}
                           </p>
                           <p className="text-[13px] font-bold tabular-nums leading-none text-navy sm:text-sm">
-                            ₩{media.price.toLocaleString()}
+                            {formatMediaPriceWonWithSymbol(media.price)}
                             <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
                               {" "}
-                              만원 {t("media.perMonth")}
+                              ·{" "}
+                              {tMedia(
+                                mediaPricePeriodTranslationKey(
+                                  media.pricePeriod,
+                                ),
+                              )}
                             </span>
                           </p>
                         </div>

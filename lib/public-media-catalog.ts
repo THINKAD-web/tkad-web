@@ -5,6 +5,7 @@ import {
   getMediaById,
   mediaData,
   type MediaItem,
+  type MediaPricePeriodKey,
 } from "@/lib/media-data";
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 
@@ -65,6 +66,11 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     location: m.location,
     locationEn,
     region: m.region,
+    availability: (m as unknown as { availability?: string }).availability as
+      | "available"
+      | "reserved"
+      | "maintenance"
+      | undefined,
     subCategory: m.subCategory?.trim() || undefined,
     tags: m.tags?.length ? [...m.tags] : undefined,
     city: m.city?.trim() || undefined,
@@ -102,7 +108,17 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     nearbyFacilities: buildNearbyFacilitiesDisplay(m),
     nearbyFacilitiesEn: buildNearbyFacilitiesDisplay(m),
     caseStudyPhotos: undefined,
+    pricePeriod: normalizePricePeriod(m.pricePeriod),
   };
+}
+
+function normalizePricePeriod(
+  v: string | null | undefined,
+): MediaPricePeriodKey {
+  if (v === "biweekly" || v === "week" || v === "day" || v === "month") {
+    return v;
+  }
+  return "month";
 }
 
 /**

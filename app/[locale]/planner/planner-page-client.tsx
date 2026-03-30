@@ -20,7 +20,6 @@ import {
   Download,
   Layers,
   Send,
-  Sparkles,
   TrendingUp,
   Wallet,
   CalendarRange,
@@ -44,6 +43,7 @@ import {
   budgetSplitByCategory,
   reachSplitForGoal,
   comparePlansByDuration,
+  portfolioFromManualSelection,
 } from "@/lib/planner-logic";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
@@ -57,6 +57,11 @@ import {
   PlannerMonthCompareChart,
 } from "@/components/planner-charts";
 import { PlannerRegionMap } from "@/components/planner-region-map";
+import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
+import PlannerMediaSelector from "@/components/planner-media-selector";
+import PlannerTips from "@/components/planner-tips";
+import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
+import PlannerReportStep from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
 const BUDGET_MIN = 100;
@@ -149,6 +154,8 @@ export default function PlannerPageClient({
   const [ageKey, setAgeKey] = useState<(typeof AGE_KEYS)[number]>("ageAll");
   const [industryKey, setIndustryKey] =
     useState<(typeof INDUSTRY_KEYS)[number]>("indOther");
+  const [campaignMediaIds, setCampaignMediaIds] = useState<string[]>([]);
+  const [creativeObjectUrl, setCreativeObjectUrl] = useState<string | null>(null);
 
   const toggleCategory = (key: PlannerCategory) => {
     setCategories((prev) => {
@@ -186,6 +193,29 @@ export default function PlannerPageClient({
     [catalog, selectedRegions, categories],
   );
 
+  const selectedMediaForSimulation = useMemo(() => {
+    if (campaignMediaIds.length === 0) return [];
+    const byId = new Map(catalog.map((m) => [m.id, m]));
+    const out: MediaItem[] = [];
+    for (const id of campaignMediaIds) {
+      const m = byId.get(id);
+      if (m) out.push(m);
+    }
+    return out;
+  }, [campaignMediaIds, catalog]);
+
+  const manualIntersectedPortfolio = useMemo(() => {
+    if (campaignMediaIds.length === 0) return [];
+    const byId = new Map(catalog.map((m) => [m.id, m]));
+    const allowed = new Set(filtered.map((m) => m.id));
+    const ordered: MediaItem[] = [];
+    for (const id of campaignMediaIds) {
+      const m = byId.get(id);
+      if (m && allowed.has(id)) ordered.push(m);
+    }
+    return ordered;
+  }, [campaignMediaIds, catalog, filtered]);
+
   const budgetNum = useMemo(() => {
     const n = Number.parseInt(budget.replace(/,/g, ""), 10);
     if (!Number.isFinite(n)) return BUDGET_MIN;
@@ -201,8 +231,15 @@ export default function PlannerPageClient({
 
   const portfolio = useMemo(() => {
     if (filtered.length === 0 || budgetNum < BUDGET_MIN) return [];
+    if (manualIntersectedPortfolio.length > 0) {
+      return portfolioFromManualSelection(
+        manualIntersectedPortfolio,
+        budgetNum,
+        months,
+      );
+    }
     return selectPlannerPortfolio(filtered, budgetNum, months, 6);
-  }, [filtered, budgetNum, months]);
+  }, [filtered, budgetNum, months, manualIntersectedPortfolio]);
 
   const blurbParts = useMemo(
     () => computeBudgetBlurbParts(filtered, budgetNum, months),
@@ -242,6 +279,11 @@ export default function PlannerPageClient({
   }, [portfolio, isKo]);
 
   const reachSplit = reachSplitForGoal(campaignGoal);
+
+  const goalTitle = useMemo(() => {
+    const g = GOALS.find((x) => x.key === campaignGoal);
+    return g ? t(g.titleKey) : "—";
+  }, [campaignGoal, t]);
 
   const roiMax = metrics
     ? Math.max(
@@ -289,6 +331,7 @@ export default function PlannerPageClient({
         ageKey,
         industryKey,
         mediaIds: portfolio.map((m) => m.id),
+        campaignMediaIds,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
       toast("success", t("savedToast"));
@@ -305,6 +348,7 @@ export default function PlannerPageClient({
     ageKey,
     industryKey,
     portfolio,
+    campaignMediaIds,
     toast,
     t,
     isKo,
@@ -338,7 +382,14 @@ export default function PlannerPageClient({
         ) {
           setIndustryKey(p.industryKey as (typeof INDUSTRY_KEYS)[number]);
         }
-        if (typeof p.wizardStep === "number") setWizardStep(p.wizardStep);
+        if (typeof p.wizardStep === "number") {
+          let w = p.wizardStep as number;
+          if (p.version === 2 && w === 6) w = 7;
+          if (w > 7) w = 7;
+          setWizardStep(w);
+        }
+        if (Array.isArray(p.campaignMediaIds))
+          setCampaignMediaIds(p.campaignMediaIds as string[]);
         toast("success", t("loadedToast"));
         return;
       }
@@ -350,7 +401,7 @@ export default function PlannerPageClient({
         setCategories(normalizePlannerCategoriesFromStorage(p.categories));
         if (typeof p.budget === "number") setBudget(String(p.budget));
         if (typeof p.months === "number") setMonths(p.months);
-        setWizardStep(4);
+        setWizardStep(7);
         toast("success", t("loadedToast"));
         return;
       }
@@ -366,20 +417,48 @@ export default function PlannerPageClient({
     [t, tm],
   );
 
+  const mediaRegionLabel = useCallback(
+    (region: string) =>
+      region === "national"
+        ? t("regionNationalShort")
+        : tm(`regions.${region}`),
+    [t, tm],
+  );
+
+  const regionsSummary = useMemo(
+    () =>
+      [...selectedRegions]
+        .map((r) => mapLabel(r as PlannerMapRegion))
+        .join(", "),
+    [selectedRegions, mapLabel],
+  );
+
+  const categoriesSummary = useMemo(
+    () =>
+      CATEGORIES.filter((c) => categories.has(c.key))
+        .map((c) => t(c.labelKey))
+        .join(", "),
+    [categories, t],
+  );
+
   const goNext = () => {
     if (wizardStep === 1 && !campaignGoal) {
       toast("error", t("selectGoal"));
       return;
     }
-    if (wizardStep === 2 && budgetNum < BUDGET_MIN) {
+    if (wizardStep === 2 && campaignMediaIds.length === 0) {
+      toast("error", t("needMediaPick"));
+      return;
+    }
+    if (wizardStep === 4 && budgetNum < BUDGET_MIN) {
       toast("error", t("needBudget"));
       return;
     }
-    if (wizardStep === 3 && selectedRegions.size === 0) {
+    if (wizardStep === 5 && selectedRegions.size === 0) {
       toast("error", t("selectRegion"));
       return;
     }
-    setWizardStep((s) => Math.min(4, s + 1));
+    setWizardStep((s) => Math.min(7, s + 1));
   };
 
   const goBack = () => setWizardStep((s) => Math.max(1, s - 1));
@@ -444,13 +523,13 @@ export default function PlannerPageClient({
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        {wizardStep < 4 ? (
+        {wizardStep < 7 ? (
           <div className="mb-8 flex flex-col items-center gap-3">
             <p className="text-sm font-semibold text-navy">
-              {t("stepOf", { current: wizardStep, total: 3 })}
+              {t("stepOf", { current: wizardStep, total: 6 })}
             </p>
-            <div className="flex items-center gap-2 sm:gap-4">
-              {[1, 2, 3].map((s) => (
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+              {[1, 2, 3, 4, 5, 6].map((s) => (
                 <div key={s} className="flex items-center gap-2 sm:gap-4">
                   <div
                     className={cn(
@@ -464,10 +543,10 @@ export default function PlannerPageClient({
                   >
                     {wizardStep > s ? <Check className="h-4 w-4" /> : s}
                   </div>
-                  {s < 3 ? (
+                  {s < 6 ? (
                     <div
                       className={cn(
-                        "hidden h-0.5 w-8 sm:block sm:w-16",
+                        "hidden h-0.5 w-8 sm:block sm:w-10",
                         wizardStep > s ? "bg-gold/70" : "bg-slate-200",
                       )}
                     />
@@ -478,48 +557,68 @@ export default function PlannerPageClient({
           </div>
         ) : null}
 
-        {wizardStep < 4 ? (
-          <div className="mx-auto max-w-3xl space-y-8">
+        {wizardStep < 7 ? (
+          <div
+            className={cn(
+              "mx-auto space-y-8",
+              wizardStep === 2 ||
+                wizardStep === 3 ||
+                wizardStep === 6
+                ? "max-w-6xl"
+                : "max-w-3xl",
+            )}
+          >
+            <PlannerTips
+              wizardStep={wizardStep}
+              campaignGoal={campaignGoal}
+              campaignMediaCount={campaignMediaIds.length}
+              hasCreative={Boolean(creativeObjectUrl)}
+              budgetNum={budgetNum}
+            />
             {wizardStep === 1 ? (
-              <Card className="border-navy/10 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-navy">
-                    <Sparkles className="h-5 w-5 text-gold" />
-                    {t("step1Title")}
-                  </CardTitle>
-                  <CardDescription>{t("step1Desc")}</CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-3 sm:grid-cols-2">
-                  {GOALS.map(({ key, titleKey, descKey }) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setCampaignGoal(key)}
-                      className={cn(
-                        "rounded-2xl border-2 p-4 text-left transition-all",
-                        campaignGoal === key
-                          ? "border-gold bg-gold/10 shadow-md ring-1 ring-gold/30"
-                          : "border-navy/10 bg-white hover:border-navy/25",
-                      )}
-                    >
-                      <p className="font-bold text-navy">{t(titleKey)}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {t(descKey)}
-                      </p>
-                    </button>
-                  ))}
-                </CardContent>
-              </Card>
+              <PlannerCampaignStep1
+                campaignGoal={campaignGoal}
+                goals={GOALS}
+                onSelectGoal={setCampaignGoal}
+              />
             ) : null}
 
             {wizardStep === 2 ? (
+              <>
+                <div className="space-y-2 text-center sm:text-left">
+                  <h2 className="text-lg font-bold text-navy sm:text-xl">
+                    {t("stepMediaTitle")}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {t("stepMediaDesc")}
+                  </p>
+                </div>
+                <PlannerMediaSelector
+                  catalog={catalog}
+                  campaignMediaIds={campaignMediaIds}
+                  setCampaignMediaIds={setCampaignMediaIds}
+                  isKo={isKo}
+                  regionLabel={mediaRegionLabel}
+                />
+              </>
+            ) : null}
+
+            {wizardStep === 3 ? (
+              <PlannerSimulationStep3
+                selectedMedia={selectedMediaForSimulation}
+                creativeObjectUrl={creativeObjectUrl}
+                setCreativeObjectUrl={setCreativeObjectUrl}
+              />
+            ) : null}
+
+            {wizardStep === 4 ? (
               <Card className="border-navy/10 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-navy">
                     <Wallet className="h-5 w-5 text-gold" />
-                    {t("step2Title")}
+                    {t("stepBudgetTitle")}
                   </CardTitle>
-                  <CardDescription>{t("step2Desc")}</CardDescription>
+                  <CardDescription>{t("stepBudgetDesc")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
@@ -594,7 +693,7 @@ export default function PlannerPageClient({
               </Card>
             ) : null}
 
-            {wizardStep === 3 ? (
+            {wizardStep === 5 ? (
               <div className="space-y-6">
                 <Card className="border-navy/10 shadow-lg">
                   <CardHeader>
@@ -711,6 +810,25 @@ export default function PlannerPageClient({
               </div>
             ) : null}
 
+            {wizardStep === 6 ? (
+              <PlannerReportStep
+                isKo={isKo}
+                campaignGoal={campaignGoal}
+                goalTitle={goalTitle}
+                budgetNum={budgetNum}
+                months={months}
+                regionsText={regionsSummary}
+                categoriesText={categoriesSummary}
+                ageText={t(ageKey)}
+                industryText={t(industryKey)}
+                portfolio={portfolio}
+                metrics={metrics}
+                reachCorePct={reachSplit.corePct}
+                reachExtendedPct={reachSplit.extendedPct}
+                creativeObjectUrl={creativeObjectUrl}
+              />
+            ) : null}
+
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
               <Button
                 type="button"
@@ -727,9 +845,14 @@ export default function PlannerPageClient({
                 className="btn-gold rounded-full px-8 font-semibold"
                 onClick={goNext}
               >
-                {wizardStep === 3 ? (
+                {wizardStep === 5 ? (
                   <>
-                    {t("runSimulation")}
+                    {t("stepRegionNext")}
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </>
+                ) : wizardStep === 6 ? (
+                  <>
+                    {t("viewEffectDashboard")}
                     <ChevronRight className="ml-1 h-4 w-4" />
                   </>
                 ) : (
@@ -743,12 +866,19 @@ export default function PlannerPageClient({
           </div>
         ) : (
           <div className="space-y-8">
+            <PlannerTips
+              wizardStep={7}
+              campaignGoal={campaignGoal}
+              campaignMediaCount={campaignMediaIds.length}
+              hasCreative={Boolean(creativeObjectUrl)}
+              budgetNum={budgetNum}
+            />
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Button
                 type="button"
                 variant="outline"
                 className="w-full rounded-full border-navy/20 sm:w-auto"
-                onClick={() => setWizardStep(3)}
+                onClick={() => setWizardStep(5)}
               >
                 <ChevronLeft className="mr-1 h-4 w-4" />
                 {t("editInputs")}
@@ -780,7 +910,7 @@ export default function PlannerPageClient({
                     type="button"
                     className="mt-4 rounded-full"
                     variant="outline"
-                    onClick={() => setWizardStep(3)}
+                    onClick={() => setWizardStep(5)}
                   >
                     {t("editInputs")}
                   </Button>
@@ -811,7 +941,11 @@ export default function PlannerPageClient({
                 <Card className="border-navy/10 shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-navy">{t("comboTitle")}</CardTitle>
-                    <CardDescription>{t("comboHint")}</CardDescription>
+                    <CardDescription>
+                      {manualIntersectedPortfolio.length > 0
+                        ? t("comboHintManual")
+                        : t("comboHint")}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {portfolio.map((m) => (
