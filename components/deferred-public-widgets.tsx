@@ -13,6 +13,10 @@ const AiChatbot = dynamic(() => import("@/components/ai-chatbot"), {
 const FloatingCta = dynamic(() => import("@/components/floating-cta"), {
   ssr: false,
 });
+const FloatingScrollNav = dynamic(
+  () => import("@/components/floating-scroll-nav"),
+  { ssr: false },
+);
 const ExitIntentPopup = dynamic(
   () => import("@/components/exit-intent-popup"),
   { ssr: false },
@@ -22,6 +26,7 @@ export default function DeferredPublicWidgets() {
   return (
     <>
       <FloatingCta />
+      <FloatingScrollNav />
       <ExitIntentPopup />
       <AiChatbot />
     </>

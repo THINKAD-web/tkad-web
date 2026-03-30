@@ -642,9 +642,9 @@ export default function MediaBrowseClient({
                           key={media.id}
                           href={detailHref}
                           aria-label={isKo ? media.name : media.nameEn}
-                          className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+                          className="block min-w-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
                         >
-                          <Card className="relative overflow-hidden gap-0 py-0 transition-shadow hover:shadow-lg sm:gap-6 sm:py-6 motion-safe:hover:translate-y-0 sm:motion-safe:hover:-translate-y-[4px]">
+                          <Card className="relative min-w-0 overflow-hidden gap-0 py-0 transition-shadow hover:shadow-lg sm:gap-6 sm:py-6 motion-safe:hover:translate-y-0 sm:motion-safe:hover:-translate-y-[4px]">
                           <MediaCatalogThumbnail
                             media={media}
                             placeholderLabel={t("media.imagePreparing")}
@@ -691,7 +691,7 @@ export default function MediaBrowseClient({
                               </div>
                             )}
                           </MediaCatalogThumbnail>
-                          <CardHeader className="relative z-0 space-y-1.5 px-4 pb-2.5 pt-2 sm:space-y-2 sm:px-6 sm:pb-3 sm:pt-3">
+                          <CardHeader className="relative z-0 min-w-0 space-y-1.5 px-4 pb-2.5 pt-2 sm:space-y-2 sm:px-6 sm:pb-3 sm:pt-3">
                             <div className="flex items-center justify-between gap-2">
                               <Badge
                                 variant="secondary"
@@ -702,14 +702,14 @@ export default function MediaBrowseClient({
                                   : (typeLabels[media.type]?.en ?? media.type)}
                               </Badge>
                             </div>
-                            <CardTitle className="line-clamp-2 text-[13px] leading-snug sm:text-sm">
+                            <CardTitle className="truncate text-[13px] leading-snug sm:text-sm">
                               {isKo ? media.name : media.nameEn}
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="relative z-0 space-y-2.5 px-4 pb-4 pt-0 sm:space-y-3 sm:px-6 sm:pb-6">
-                            <div className="flex items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-xs">
+                          <CardContent className="relative z-0 min-w-0 space-y-2.5 px-4 pb-4 pt-0 sm:space-y-3 sm:px-6 sm:pb-6">
+                            <div className="flex min-w-0 items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-xs">
                               <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-                              <span className="line-clamp-2">
+                              <span className="min-w-0 truncate">
                                 {formatMediaLocationShort(media, isKo)}
                               </span>
                             </div>
@@ -732,7 +732,7 @@ export default function MediaBrowseClient({
                     })}
                   </div>
                     ) : (
-                  <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
                     {pagedCatalog.map((media) => {
                       const detailHref = mediaItemDetailPath(media.id);
                       return (
@@ -740,7 +740,7 @@ export default function MediaBrowseClient({
                         key={media.id}
                         href={detailHref}
                         aria-label={isKo ? media.name : media.nameEn}
-                        className="relative flex rounded-lg border border-navy/10 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 sm:gap-4 sm:rounded-xl sm:p-3.5"
+                        className="relative flex min-w-0 rounded-lg border border-navy/10 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 sm:gap-4 sm:rounded-xl sm:p-3.5"
                       >
                         <MediaCatalogThumbnail
                           media={media}
@@ -788,12 +788,14 @@ export default function MediaBrowseClient({
                               </span>
                             )}
                           </div>
-                          <p className="line-clamp-2 text-[13px] font-bold leading-snug text-navy sm:text-sm sm:leading-relaxed">
+                          <p className="truncate text-[13px] font-bold leading-snug text-navy sm:text-sm sm:leading-relaxed">
                             {isKo ? media.name : media.nameEn}
                           </p>
-                          <p className="line-clamp-2 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
-                            <MapPin className="mr-0.5 inline h-2.5 w-2.5 align-text-bottom sm:h-3 sm:w-3" />
-                            {formatMediaLocationShort(media, isKo)}
+                          <p className="flex min-w-0 items-center gap-0.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
+                            <MapPin className="h-2.5 w-2.5 shrink-0 align-text-bottom sm:h-3 sm:w-3" />
+                            <span className="min-w-0 truncate">
+                              {formatMediaLocationShort(media, isKo)}
+                            </span>
                           </p>
                           <p className="text-[13px] font-bold tabular-nums leading-none text-navy sm:text-sm">
                             {formatMediaPriceWonWithSymbol(media.price)}

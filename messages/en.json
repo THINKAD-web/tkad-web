@@ -9,7 +9,10 @@
     "filter": "Filter",
     "reset": "Reset",
     "submit": "Submit",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "scrollToTop": "Scroll to top",
+    "scrollToBottom": "Scroll to bottom",
+    "scrollNavLabel": "Page scroll navigation"
   },
   "aiChatbot": {
     "title": "THINKAD AI Media Planner",

@@ -92,7 +92,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
           {items.slice(0, 3).map((media, i) => (
             <ScrollAnimate key={media.id} delay={i * 100}>
               <Link href={`/media/${media.id}`} className="block touch-manipulation">
-                <Card className="group cursor-pointer overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-1">
+                <Card className="group min-w-0 cursor-pointer overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-1">
                   <MediaCatalogThumbnail
                     media={media}
                     placeholderLabel={tMedia("imagePreparing")}
@@ -101,18 +101,20 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                     bottomGradientClassName={null}
                     placeholderSize="xs"
                   />
-                  <CardHeader className="p-3 pb-1.5">
+                  <CardHeader className="min-w-0 p-3 pb-1.5">
                     <Badge variant="secondary" className="w-fit bg-navy/5 text-navy text-[10px]">
                       {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
                     </Badge>
-                    <CardTitle className="text-sm font-bold leading-snug">
+                    <CardTitle className="truncate text-sm font-bold leading-snug">
                       {isKo ? media.name : media.nameEn}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="px-3 pb-3">
-                    <div className="flex items-start gap-1 text-xs leading-snug text-muted-foreground">
+                  <CardContent className="min-w-0 px-3 pb-3">
+                    <div className="flex min-w-0 items-start gap-1 text-xs leading-snug text-muted-foreground">
                       <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-                      {formatMediaLocationShort(media, isKo)}
+                      <span className="min-w-0 truncate">
+                        {formatMediaLocationShort(media, isKo)}
+                      </span>
                     </div>
                     <div className="mt-1 text-sm font-bold text-navy">
                       {formatMediaPriceWonWithSymbol(media.price)}

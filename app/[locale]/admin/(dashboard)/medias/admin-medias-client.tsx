@@ -38,6 +38,7 @@ import {
   normalizeAdminMediaRow,
   parseAdminMediaListFromApiJson,
 } from "@/lib/admin-media-dto";
+import { adminFetchJson } from "@/lib/admin-client-fetch";
 
 const AdminMediaDraggableMap = dynamic(
   () => import("@/components/admin-media-draggable-map"),
@@ -450,25 +451,21 @@ export default function AdminMediasClient({
     if (showSpinner) setListLoading(true);
     setListError(null);
     try {
-      const res = await fetch(`/api/admin/medias?take=500&_=${Date.now()}`, {
-        credentials: "include",
-        cache: "no-store",
-      });
-      const raw: unknown = await res.json();
-      if (!res.ok) {
-        const err =
-          typeof raw === "object" &&
-          raw !== null &&
-          "error" in raw &&
-          typeof (raw as { error?: unknown }).error === "string"
-            ? (raw as { error: string }).error
-            : "목록을 불러오지 못했습니다.";
+      const result = await adminFetchJson(
+        `/api/admin/medias?take=500&_=${Date.now()}`,
+        {
+          credentials: "include",
+          cache: "no-store",
+        },
+      );
+      if (!result.ok) {
         if (showSpinner && gen === listFetchGenRef.current) {
-          setListError(err);
+          setListError(result.message);
           setMedias([]);
         }
         return;
       }
+      const raw: unknown = result.data;
       const { medias: next, error: parseErr } =
         parseAdminMediaListFromApiJson(raw);
       if (parseErr) {
@@ -480,9 +477,10 @@ export default function AdminMediasClient({
       }
       if (gen !== listFetchGenRef.current) return;
       setMedias(next);
-    } catch {
+    } catch (e) {
       if (showSpinner && gen === listFetchGenRef.current) {
-        setListError("네트워크 오류");
+        const msg = e instanceof Error ? e.message : "목록을 불러오지 못했습니다.";
+        setListError(msg);
         setMedias([]);
       }
     } finally {
@@ -567,17 +565,20 @@ export default function AdminMediasClient({
     }
     try {
       if (editing) {
-        const res = await fetch(`/api/admin/medias/${editing.id}`, {
-          method: "PATCH",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const data = (await res.json()) as { media?: unknown; error?: string };
-        if (!res.ok) {
-          setSaveError(data.error ?? "저장 실패");
+        const result = await adminFetchJson(
+          `/api/admin/medias/${editing.id}`,
+          {
+            method: "PATCH",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          },
+        );
+        if (!result.ok) {
+          setSaveError(result.message);
           return;
         }
+        const data = result.data as { media?: unknown; error?: string };
         const patched = data.media
           ? normalizeAdminMediaRow(data.media)
           : null;
@@ -589,17 +590,17 @@ export default function AdminMediasClient({
           await loadMedias({ showSpinner: false });
         }
       } else {
-        const res = await fetch("/api/admin/medias", {
+        const result = await adminFetchJson("/api/admin/medias", {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
-        const data = (await res.json()) as { media?: unknown; error?: string };
-        if (!res.ok) {
-          setSaveError(data.error ?? "등록 실패");
+        if (!result.ok) {
+          setSaveError(result.message);
           return;
         }
+        const data = result.data as { media?: unknown; error?: string };
         const created = data.media
           ? normalizeAdminMediaRow(data.media)
           : null;
@@ -610,8 +611,10 @@ export default function AdminMediasClient({
         }
       }
       setModalOpen(false);
-    } catch {
-      setSaveError("네트워크 오류");
+    } catch (e) {
+      setSaveError(
+        e instanceof Error ? e.message : "저장 요청을 처리하지 못했습니다.",
+      );
     } finally {
       setSaveLoading(false);
     }
@@ -663,14 +666,14 @@ export default function AdminMediasClient({
     ) => {
       listFetchGenRef.current += 1;
       try {
-        const res = await fetch(`/api/admin/medias/${m.id}`, {
+        const result = await adminFetchJson(`/api/admin/medias/${m.id}`, {
           method: "PATCH",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(patch),
         });
-        if (!res.ok) return;
-        const data = (await res.json()) as { media?: unknown };
+        if (!result.ok) return;
+        const data = result.data as { media?: unknown };
         const row = data.media ? normalizeAdminMediaRow(data.media) : null;
         if (row) {
           setMedias((prev) => prev.map((x) => (x.id === m.id ? row : x)));

@@ -24,6 +24,7 @@ import {
   type MediaQuickAddCreate,
   type QuickAddMediaJson,
 } from "@/lib/media-quick-add";
+import { adminFetchJson } from "@/lib/admin-client-fetch";
 
 const SAMPLE_JSON = `{
   "media_name": "강남역 인근 디지털 보드",
@@ -129,25 +130,25 @@ export default function AdminMediaQuickAddPage() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const res = await fetch("/api/admin/medias/quick-add", {
+      const result = await adminFetchJson("/api/admin/medias/quick-add", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: mergedItems }),
       });
-      const data = (await res.json()) as {
-        error?: string;
-        count?: number;
-      };
-      if (!res.ok) {
-        setSubmitError(data.error ?? "등록 실패");
+      if (!result.ok) {
+        setSubmitError(result.message);
         return;
       }
       // 목록 페이지가 bfcache·클라이언트 상태로 옛 데이터를 보이지 않도록 쿼리로 재조회 유도
       router.push(`/admin/medias?updated=${Date.now()}`);
       router.refresh();
-    } catch {
-      setSubmitError("네트워크 오류");
+    } catch (e) {
+      setSubmitError(
+        e instanceof Error
+          ? e.message
+          : "요청을 처리하지 못했습니다. 페이지를 새로고침 후 다시 시도해 주세요.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -157,30 +158,32 @@ export default function AdminMediaQuickAddPage() {
     setReclassifyLoading(true);
     setReclassifyMsg(null);
     try {
-      const res = await fetch("/api/admin/medias/reclassify", {
+      const result = await adminFetchJson("/api/admin/medias/reclassify", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dryRun }),
       });
-      const data = (await res.json()) as {
+      if (!result.ok) {
+        setReclassifyMsg(result.message);
+        return;
+      }
+      const data = result.data as {
         error?: string;
         scanned?: number;
         updated?: number;
         wouldChange?: number;
         dryRun?: boolean;
       };
-      if (!res.ok) {
-        setReclassifyMsg(data.error ?? "재분류 실패");
-        return;
-      }
       setReclassifyMsg(
         data.dryRun
           ? `시뮬: ${data.scanned ?? 0}건 검토, ${data.wouldChange ?? 0}건 유형 변경 예정`
           : `완료: ${data.updated ?? 0}건 유형 업데이트 (${data.scanned ?? 0}건 검토)`,
       );
-    } catch {
-      setReclassifyMsg("네트워크 오류");
+    } catch (e) {
+      setReclassifyMsg(
+        e instanceof Error ? e.message : "재분류 요청을 처리하지 못했습니다.",
+      );
     } finally {
       setReclassifyLoading(false);
     }

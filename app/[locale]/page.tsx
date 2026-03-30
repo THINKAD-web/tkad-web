@@ -638,7 +638,7 @@ function HomeContent({
               return (
               <ScrollAnimate key={media.id} delay={i * 100}>
               <Card
-                className="group overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
+                className="group min-w-0 overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
                 <MediaCatalogThumbnail
                   media={media}
@@ -660,7 +660,7 @@ function HomeContent({
                   </div>
                   <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-white/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </MediaCatalogThumbnail>
-                <CardHeader className="space-y-1 px-4 pb-2 pt-4">
+                <CardHeader className="min-w-0 space-y-1 px-4 pb-2 pt-4">
                   <div className="flex items-center justify-between">
                     <Badge
                       variant="secondary"
@@ -671,14 +671,16 @@ function HomeContent({
                         : (typeLabels[media.type]?.en ?? media.type)}
                     </Badge>
                   </div>
-                  <CardTitle className="text-base font-bold leading-snug">
+                  <CardTitle className="truncate text-base font-bold leading-snug">
                     {isKo ? media.name : media.nameEn}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-4 pb-4 pt-0">
-                  <div className="flex items-start gap-1 text-sm leading-snug text-muted-foreground">
+                <CardContent className="min-w-0 px-4 pb-4 pt-0">
+                  <div className="flex min-w-0 items-start gap-1 text-sm leading-snug text-muted-foreground">
                     <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-                    {formatMediaLocationShort(media, isKo)}
+                    <span className="min-w-0 truncate">
+                      {formatMediaLocationShort(media, isKo)}
+                    </span>
                   </div>
                   <div className="mt-2 text-lg font-bold text-navy">
                     {formatMediaPriceWonWithSymbol(media.price)}

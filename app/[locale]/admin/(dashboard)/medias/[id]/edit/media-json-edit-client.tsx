@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
+import { adminFetchJson } from "@/lib/admin-client-fetch";
 
 type Props = { mediaId: string };
 
@@ -22,23 +23,19 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
     setLoading(true);
     setLoadError(null);
     try {
-      const res = await fetch(`/api/admin/medias/${mediaId}/json`, {
-        credentials: "include",
-        cache: "no-store",
-      });
-      const raw: unknown = await res.json();
-      if (!res.ok) {
-        setLoadError(
-          typeof raw === "object" &&
-            raw !== null &&
-            "error" in raw &&
-            typeof (raw as { error?: unknown }).error === "string"
-            ? (raw as { error: string }).error
-            : "불러오기 실패",
-        );
+      const result = await adminFetchJson(
+        `/api/admin/medias/${mediaId}/json`,
+        {
+          credentials: "include",
+          cache: "no-store",
+        },
+      );
+      if (!result.ok) {
+        setLoadError(result.message);
         setText("");
         return;
       }
+      const raw: unknown = result.data;
       const j =
         typeof raw === "object" &&
         raw !== null &&
@@ -47,8 +44,10 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
           ? (raw as { json: Record<string, unknown> }).json
           : null;
       setText(j ? JSON.stringify(j, null, 2) : "{}");
-    } catch {
-      setLoadError("네트워크 오류");
+    } catch (e) {
+      setLoadError(
+        e instanceof Error ? e.message : "불러오기 요청을 처리하지 못했습니다.",
+      );
       setText("");
     } finally {
       setLoading(false);
@@ -106,24 +105,20 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
 
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/medias/${mediaId}/json`, {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed),
-      });
-      const raw: unknown = await res.json();
-      if (!res.ok) {
-        const msg =
-          typeof raw === "object" &&
-          raw !== null &&
-          "error" in raw &&
-          typeof (raw as { error?: unknown }).error === "string"
-            ? (raw as { error: string }).error
-            : "저장 실패";
-        setError(msg);
+      const result = await adminFetchJson(
+        `/api/admin/medias/${mediaId}/json`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(parsed),
+        },
+      );
+      if (!result.ok) {
+        setError(result.message);
         return;
       }
+      const raw: unknown = result.data;
       const nextJson =
         typeof raw === "object" &&
         raw !== null &&
@@ -135,8 +130,10 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
         setText(JSON.stringify(nextJson, null, 2));
       }
       router.push("/admin/medias");
-    } catch {
-      setError("네트워크 오류");
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "저장 요청을 처리하지 못했습니다.",
+      );
     } finally {
       setSaving(false);
     }
