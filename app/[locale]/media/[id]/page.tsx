@@ -87,8 +87,8 @@ export default async function MediaDetailPage({ params }: Props) {
     <>
       <TrackMediaView mediaId={media.id} />
       <MediaDetailHeroGallery
-        images={heroImage ? [heroImage] : []}
-        heroSrc={heroImage}
+        images={[]}
+        heroSrc=""
         altBase={isKo ? media.name : media.nameEn}
         showThumbnails={false}
         labels={{
@@ -320,13 +320,16 @@ export default async function MediaDetailPage({ params }: Props) {
             </div>
           </section>
 
-          {casePhotos.length > 0 && (
+          {(casePhotos.length > 0 || extraGalleryImages.length > 0) && (
             <>
               <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
                 {t("caseStudiesTitle")}
               </h2>
               <MediaCaseStudyGallery
-                photos={casePhotos}
+                photos={[
+                  ...extraGalleryImages.map((url) => ({ url })),
+                  ...casePhotos,
+                ]}
                 isKo={isKo}
                 labels={{
                   close: t("galleryLightboxClose"),
