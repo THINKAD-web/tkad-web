@@ -86,51 +86,65 @@ export default async function MediaDetailPage({ params }: Props) {
   return (
     <>
       <TrackMediaView mediaId={media.id} />
-      <section className="relative w-full bg-navy px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10">
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-          <Link href="/media">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="-ml-2 text-white/85 hover:bg-white/10 hover:text-white"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              {t("back")}
-            </Button>
-          </Link>
-          <MediaDetailAdminActions />
-        </div>
-        <div className="max-w-4xl min-w-0 pb-1 mt-4">
-          <h1 className="break-words text-2xl font-bold tracking-tight text-white drop-shadow-sm sm:text-3xl md:text-4xl">
-            {isKo ? media.name : media.nameEn}
-          </h1>
-          <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-white/88 sm:text-lg">
-            <span className="inline-flex items-center gap-2">
-              <MapPin
-                className="h-4 w-4 shrink-0 opacity-90"
-                aria-hidden
-              />
-              {isKo ? media.location : media.locationEn}
-            </span>
-            {typeLabel ? (
-              <>
-                <span
-                  className="hidden text-white/35 sm:inline"
+      <section className="relative w-full bg-navy">
+        {/* 대표 이미지 1장 */}
+        {heroImage && (
+          <div className="relative aspect-video w-full overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={heroImage}
+              alt={isKo ? media.name : media.nameEn}
+              className="h-full w-full object-cover"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/80 via-navy/20 to-transparent" />
+          </div>
+        )}
+        <div className="relative px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10" style={heroImage ? { marginTop: '-6rem' } : {}}>
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+            <Link href="/media">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="-ml-2 text-white/85 hover:bg-white/10 hover:text-white"
+              >
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                {t("back")}
+              </Button>
+            </Link>
+            <MediaDetailAdminActions />
+          </div>
+          <div className="max-w-4xl min-w-0 pb-1 mt-4">
+            <h1 className="break-words text-2xl font-bold tracking-tight text-white drop-shadow-sm sm:text-3xl md:text-4xl">
+              {isKo ? media.name : media.nameEn}
+            </h1>
+            <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-white/88 sm:text-lg">
+              <span className="inline-flex items-center gap-2">
+                <MapPin
+                  className="h-4 w-4 shrink-0 opacity-90"
                   aria-hidden
-                >
-                  ·
-                </span>
-                <span className="font-medium text-white/95">{typeLabel}</span>
-              </>
-            ) : null}
-          </p>
-          <div className="mt-5 flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
-            <span className="break-words text-xl font-bold tabular-nums text-gold sm:text-2xl">
-              ₩{media.price.toLocaleString()}
-            </span>
-            <span className="text-sm font-normal text-white/70 sm:shrink-0">
-              {t("perMonth")}
-            </span>
+                />
+                {isKo ? media.location : media.locationEn}
+              </span>
+              {typeLabel ? (
+                <>
+                  <span
+                    className="hidden text-white/35 sm:inline"
+                    aria-hidden
+                  >
+                    ·
+                  </span>
+                  <span className="font-medium text-white/95">{typeLabel}</span>
+                </>
+              ) : null}
+            </p>
+            <div className="mt-5 flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
+              <span className="break-words text-xl font-bold tabular-nums text-gold sm:text-2xl">
+                ₩{media.price.toLocaleString()}
+              </span>
+              <span className="text-sm font-normal text-white/70 sm:shrink-0">
+                {t("perMonth")}
+              </span>
+            </div>
           </div>
         </div>
       </section>
