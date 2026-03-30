@@ -5,7 +5,10 @@ import { useTranslations } from "next-intl";
 import {
   Building2,
   CalendarDays,
+  Layers,
   MapPin,
+  Monitor,
+  Search,
   Sparkles,
   Target,
   Wallet,
@@ -18,11 +21,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type {
-  AiRecommendInput,
-  Industry,
-  TargetAudience,
+import {
+  PLACEMENT_HINT_KEYS,
+  type AiRecommendInput,
+  type Industry,
+  type TargetAudience,
 } from "@/lib/ai-media-recommend";
+import { Input } from "@/components/ui/input";
 
 export type RegionCheckboxCode =
   | "seoul"
@@ -55,6 +60,8 @@ export type MediaAiRecommendFormSubmit = {
   input: AiRecommendInput;
   /** 선택 지역(빈 배열이면 전국·필터 없음) */
   regionCodes: RegionCheckboxCode[];
+  /** 매체명·지역 등 텍스트 검색(비어 있으면 무시) */
+  searchQuery: string;
 };
 
 type Props = {
@@ -62,8 +69,11 @@ type Props = {
   onSubmit: (payload: MediaAiRecommendFormSubmit) => void;
 };
 
+type MediaTypeFilter = "all" | "digital" | "static" | "mobile" | "network";
+
 export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const tr = useTranslations("recommend");
+  const tPlacement = useTranslations("recommend.form.placementHints");
   const isKo = locale === "ko";
 
   const [regions, setRegions] = useState<Set<RegionCheckboxCode>>(
@@ -72,12 +82,17 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const [ageBands, setAgeBands] = useState<Set<AgeBand>>(
     () => new Set(["twenties", "thirties"]),
   );
-  const [budgetMan, setBudgetMan] = useState(2500);
+  const [budgetMan, setBudgetMan] = useState(3000);
   const [industry, setIndustry] = useState<Industry>("beauty");
   const [periodWeeks, setPeriodWeeks] = useState<PeriodWeeks>(2);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mediaType, setMediaType] = useState<MediaTypeFilter>("all");
+  const [placementHints, setPlacementHints] = useState<Set<string>>(
+    () => new Set(),
+  );
 
-  const budgetMin = 500;
-  const budgetMax = 5000;
+  const budgetMin = 100;
+  const budgetMax = 10000;
 
   const toggleRegion = useCallback((code: RegionCheckboxCode) => {
     setRegions((prev) => {
@@ -93,6 +108,15 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       const next = new Set(prev);
       if (next.has(b)) next.delete(b);
       else next.add(b);
+      return next;
+    });
+  }, []);
+
+  const togglePlacementHint = useCallback((code: string) => {
+    setPlacementHints((prev) => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
       return next;
     });
   }, []);
@@ -144,6 +168,17 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     [tr],
   );
 
+  const mediaTypeOptions: { value: MediaTypeFilter; label: string }[] = useMemo(
+    () => [
+      { value: "all", label: tr("form.mediaTypeAll") },
+      { value: "digital", label: tr("form.mediaTypeDigital") },
+      { value: "static", label: tr("form.mediaTypeStatic") },
+      { value: "mobile", label: tr("form.mediaTypeMobile") },
+      { value: "network", label: tr("form.mediaTypeNetwork") },
+    ],
+    [tr],
+  );
+
   const handleSubmit = () => {
     if (ageBands.size === 0) return;
     const target = mapAgeBands(ageBands);
@@ -153,6 +188,9 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       regionCode = regionCodes[0];
     }
 
+    const hints =
+      placementHints.size > 0 ? [...placementHints] : undefined;
+
     const input: AiRecommendInput = {
       goal: "awareness",
       target,
@@ -160,9 +198,11 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       region: regionCode,
       industry,
       preferredPeriodWeeks: periodWeeks,
+      type: mediaType === "all" ? "all" : mediaType,
+      placementHints: hints,
     };
 
-    onSubmit({ input, regionCodes });
+    onSubmit({ input, regionCodes, searchQuery });
   };
 
   const canSubmit = ageBands.size > 0;
@@ -206,6 +246,66 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
 
           <section className="space-y-2.5">
             <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+              <Search className="h-4 w-4 shrink-0" aria-hidden />
+              {tr("form.searchLabel")}
+            </div>
+            <Input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={tr("form.searchPlaceholder")}
+              className="border-white/15 bg-navy/60 text-white placeholder:text-slate-500"
+            />
+          </section>
+
+          <section className="space-y-2.5">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+              <Monitor className="h-4 w-4 shrink-0" aria-hidden />
+              {tr("form.mediaTypeLabel")}
+            </div>
+            <select
+              value={mediaType}
+              onChange={(e) => setMediaType(e.target.value as MediaTypeFilter)}
+              className="w-full rounded-xl border border-white/15 bg-navy/60 px-3 py-2.5 text-sm font-medium text-white shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+            >
+              {mediaTypeOptions.map((o) => (
+                <option key={o.value} value={o.value} className="bg-navy">
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </section>
+
+          <section className="space-y-2.5">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+              <Layers className="h-4 w-4 shrink-0" aria-hidden />
+              {tr("form.placementHintsLabel")}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {PLACEMENT_HINT_KEYS.map((code) => (
+                <label
+                  key={code}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:text-sm",
+                    placementHints.has(code)
+                      ? "border-gold bg-gold/15 text-gold"
+                      : "border-white/15 bg-white/5 text-slate-200 hover:border-white/25",
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={placementHints.has(code)}
+                    onChange={() => togglePlacementHint(code)}
+                  />
+                  {tPlacement(code)}
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-2.5">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
               <Target className="h-4 w-4 shrink-0" aria-hidden />
               {tr("form.ageLabel")}
             </div>
@@ -242,7 +342,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 type="range"
                 min={budgetMin}
                 max={budgetMax}
-                step={50}
+                step={100}
                 value={budgetMan}
                 onChange={(e) => setBudgetMan(Number(e.target.value))}
                 className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-gold"

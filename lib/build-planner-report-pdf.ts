@@ -8,7 +8,6 @@ export type PlannerReportPdfLabels = {
   title: string;
   sectionOverview: string;
   sectionMedia: string;
-  sectionSimulation: string;
   sectionEffect: string;
   sectionCost: string;
   sectionContact: string;
@@ -32,12 +31,13 @@ export type PlannerReportPdfLabels = {
   labelReachExtended: string;
   labelCostBreakdown: string;
   labelShare: string;
-  simCreativeNote: string;
-  simNoCreative: string;
-  /** 시뮬레이션: 매체 / 크리에이티브 나란히 표시용 */
-  simMediaCaption: string;
-  simCreativeCaption: string;
-  simMvpDisclaimer: string;
+  labelCpm: string;
+  sectionBudgetAllocation: string;
+  budgetAllocationIntro: string;
+  sectionEffectSummary: string;
+  effectSummaryIntro: string;
+  reportSectionCompositeNote: string;
+  reportCompositeBody: string;
   footerDisclaimer: string;
 };
 
@@ -52,12 +52,19 @@ export type PlannerReportPdfMediaRow = {
   imageUrl: string | null;
 };
 
+export type PlannerReportPdfBudgetSlice = {
+  label: string;
+  pct: number;
+  valueMan: number;
+};
+
 export type PlannerReportPdfParams = {
   labels: PlannerReportPdfLabels;
   generatedAt: string;
   goalText: string;
   budgetMan: number;
-  months: number;
+  /** 표시용 기간 문구 (예: 2주, 3개월) */
+  periodDisplay: string;
   regionsText: string;
   categoriesText: string;
   ageText: string;
@@ -71,7 +78,12 @@ export type PlannerReportPdfParams = {
     reachCorePct: number;
     reachExtendedPct: number;
   } | null;
-  creativeDataUrl: string | null;
+  /** 예산 유형별 비중(차트·표) */
+  budgetAllocation: PlannerReportPdfBudgetSlice[];
+  /** 포트폴리오 기준 블렌드 CPM(원/천회), 없으면 null */
+  blendedCpmKrw: number | null;
+  /** 예측 효과 요약 불릿 */
+  effectSummaryLines: string[];
   contact: {
     company: string;
     phone: string;
@@ -180,7 +192,7 @@ async function buildPlannerReportPdfInner(
     throw e instanceof Error ? e : new Error(String(e));
   }
   const hasKrFont = await registerNotoSansKrFromFetch(doc);
-  const { labels, portfolio, metrics, creativeDataUrl, contact } = p;
+  const { labels, portfolio, metrics, contact } = p;
 
   const margin = 14;
   const pageW = doc.internal.pageSize.getWidth();
@@ -214,7 +226,7 @@ async function buildPlannerReportPdfInner(
   const overviewLines = [
     `${labels.labelGoal}: ${p.goalText}`,
     `${labels.labelBudget}: ${p.isKo ? `${p.budgetMan.toLocaleString()}만원 (총)` : `${p.budgetMan.toLocaleString()} ₩10K (total)`}`,
-    `${labels.labelPeriod}: ${p.months}${p.isKo ? "개월" : " mo"}`,
+    `${labels.labelPeriod}: ${p.periodDisplay}`,
     `${labels.labelRegions}: ${p.regionsText}`,
     `${labels.labelCategories}: ${p.categoriesText}`,
     `${labels.labelAge}: ${p.ageText}`,
@@ -270,60 +282,18 @@ async function buildPlannerReportPdfInner(
     y += 4;
   }
 
-  y = ensureSpace(doc, y, 40, pageH, margin);
+  y = ensureSpace(doc, y, 28, pageH, margin);
   setFont(doc, hasKrFont, "bold");
   doc.setTextColor(...NAVY);
-  doc.text(labels.sectionSimulation, margin, y);
+  doc.text(labels.reportSectionCompositeNote, margin, y);
   y += 6;
   setFont(doc, hasKrFont, "normal");
+  doc.setFontSize(9);
   doc.setTextColor(30, 30, 35);
-  if (creativeDataUrl) {
-    y = ensureSpace(doc, y, 72, pageH, margin);
-    doc.setFontSize(9);
-    doc.text(labels.simCreativeNote, margin, y);
-    y += 5;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 108, 120);
-    const disc = doc.splitTextToSize(labels.simMvpDisclaimer, maxW);
-    doc.text(disc, margin, y);
-    y += disc.length * 3.6 + 3;
-    doc.setTextColor(30, 30, 35);
+  const compositeBody = doc.splitTextToSize(labels.reportCompositeBody, maxW);
+  doc.text(compositeBody, margin, y);
+  y += compositeBody.length * lhTight + 6;
 
-    const colGap = 4;
-    const colW = (maxW - colGap) / 2;
-    const imgH = 46;
-    const firstMediaUrl = portfolio[0]?.imageUrl ?? null;
-    const mediaDataUrl = firstMediaUrl ? await fetchDataUrl(firstMediaUrl) : null;
-
-    y = ensureSpace(doc, y, imgH + 14, pageH, margin);
-    doc.setFontSize(8);
-    setFont(doc, hasKrFont, "bold");
-    doc.text(labels.simMediaCaption, margin, y);
-    doc.text(labels.simCreativeCaption, margin + colW + colGap, y);
-    y += 4;
-    setFont(doc, hasKrFont, "normal");
-
-    let rowH = 0;
-    if (mediaDataUrl) {
-      const fmt = imgFormatFromDataUrl(mediaDataUrl);
-      if (addImageSafe(doc, mediaDataUrl, fmt, margin, y, colW, imgH)) rowH = imgH;
-    } else {
-      doc.setFontSize(8);
-      doc.text("—", margin, y + 6);
-      rowH = imgH;
-    }
-    const crFmt = imgFormatFromDataUrl(creativeDataUrl);
-    if (addImageSafe(doc, creativeDataUrl, crFmt, margin + colW + colGap, y, colW, imgH)) {
-      rowH = Math.max(rowH, imgH);
-    }
-    y += Math.max(rowH, imgH) + 6;
-  } else {
-    doc.setFontSize(10);
-    doc.text(labels.simNoCreative, margin, y);
-    y += lh * 2;
-  }
-
-  y += 4;
   y = ensureSpace(doc, y, 36, pageH, margin);
   setFont(doc, hasKrFont, "bold");
   doc.setTextColor(...NAVY);
@@ -333,17 +303,23 @@ async function buildPlannerReportPdfInner(
   doc.setFontSize(10);
   doc.setTextColor(30, 30, 35);
   if (metrics) {
-    const eff = [
+    const eff: string[] = [
       `${labels.labelMonthlyImp}: ${metrics.monthlyImp.toLocaleString()}`,
       `${labels.labelTotalImp}: ${metrics.totalImp.toLocaleString()}`,
-      `${labels.labelRoiExpected}: ${metrics.roiExpected}`,
       `${labels.labelReachCore}: ${metrics.reachCorePct}%`,
       `${labels.labelReachExtended}: ${metrics.reachExtendedPct}%`,
     ];
+    if (p.blendedCpmKrw != null) {
+      eff.push(
+        `${labels.labelCpm}: ₩${p.blendedCpmKrw.toLocaleString()}${p.isKo ? " / 천회 노출" : " / 1K impr."}`,
+      );
+    }
+    eff.push(`${labels.labelRoiExpected}: ${metrics.roiExpected}`);
     for (const line of eff) {
       y = ensureSpace(doc, y, lh * 2, pageH, margin);
-      doc.text(line, margin, y);
-      y += lh + 1;
+      const wrapped = doc.splitTextToSize(line, maxW);
+      doc.text(wrapped, margin, y);
+      y += wrapped.length * lhTight + 1;
     }
   } else {
     doc.text("—", margin, y);
@@ -351,7 +327,69 @@ async function buildPlannerReportPdfInner(
   }
 
   y += 4;
+  y = ensureSpace(doc, y, 28, pageH, margin);
+  setFont(doc, hasKrFont, "bold");
+  doc.setTextColor(...NAVY);
+  doc.text(labels.sectionEffectSummary, margin, y);
+  y += 6;
+  setFont(doc, hasKrFont, "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(60, 66, 78);
+  const sumIntro = doc.splitTextToSize(labels.effectSummaryIntro, maxW);
+  doc.text(sumIntro, margin, y);
+  y += sumIntro.length * lhTight + 2;
+  doc.setTextColor(30, 30, 35);
+  for (const line of p.effectSummaryLines) {
+    y = ensureSpace(doc, y, lh * 2, pageH, margin);
+    const wrapped = doc.splitTextToSize(`• ${line}`, maxW);
+    doc.text(wrapped, margin, y);
+    y += wrapped.length * lhTight + 1;
+  }
+
+  y += 4;
   y = ensureSpace(doc, y, 30, pageH, margin);
+  setFont(doc, hasKrFont, "bold");
+  doc.setTextColor(...NAVY);
+  doc.text(labels.sectionBudgetAllocation, margin, y);
+  y += 6;
+  setFont(doc, hasKrFont, "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(60, 66, 78);
+  const allocIntro = doc.splitTextToSize(labels.budgetAllocationIntro, maxW);
+  doc.text(allocIntro, margin, y);
+  y += allocIntro.length * lhTight + 3;
+  doc.setTextColor(30, 30, 35);
+
+  const barH = 3.4;
+  const barMaxW = maxW;
+  if (p.budgetAllocation.length === 0) {
+    y = ensureSpace(doc, y, lh * 2, pageH, margin);
+    doc.text("—", margin, y);
+    y += lh + 2;
+  }
+  for (const row of p.budgetAllocation) {
+    y = ensureSpace(doc, y, 16, pageH, margin);
+    const cap = `${row.label} — ${row.pct}% · ${row.valueMan.toLocaleString()}${p.isKo ? "만/월" : " ₩10K/mo"}`;
+    const capLines = doc.splitTextToSize(cap, maxW);
+    doc.text(capLines, margin, y);
+    y += capLines.length * lhTight + 1.2;
+    doc.setFillColor(241, 243, 248);
+    doc.rect(margin, y, barMaxW, barH, "F");
+    doc.setFillColor(...GOLD);
+    doc.rect(
+      margin,
+      y,
+      (barMaxW * Math.min(100, Math.max(0, row.pct))) / 100,
+      barH,
+      "F",
+    );
+    doc.setDrawColor(210, 214, 223);
+    doc.rect(margin, y, barMaxW, barH, "S");
+    y += barH + 5;
+  }
+
+  y += 2;
+  y = ensureSpace(doc, y, 24, pageH, margin);
   setFont(doc, hasKrFont, "bold");
   doc.setTextColor(...NAVY);
   doc.text(labels.sectionCost, margin, y);

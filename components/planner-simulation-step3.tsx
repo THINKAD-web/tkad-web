@@ -211,6 +211,12 @@ export default function PlannerSimulationStep3({
           <CardDescription>{t("simViewDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 rounded-xl border border-amber-200/80 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 shadow-sm">
+            <p className="font-semibold text-navy">{t("simCompositeDisabledTitle")}</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-950/90">
+              {t("simCompositeDisabledBody")}
+            </p>
+          </div>
           {mediaCards.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-navy/15 bg-slate-50/60 py-12 text-center text-sm text-muted-foreground">
               {t("simEmpty")}
@@ -300,23 +306,6 @@ export default function PlannerSimulationStep3({
                               {t("mediaPhotoMissing")}
                             </div>
                           )}
-
-                          {creativeObjectUrl ? (
-                            <img
-                              src={creativeObjectUrl}
-                              alt=""
-                              className="absolute inset-0 h-full w-full object-contain"
-                              draggable={false}
-                              style={{
-                                opacity: 0.92,
-                                mixBlendMode: "screen",
-                                transform:
-                                  "perspective(900px) rotateX(6deg) rotateY(-4deg) translateY(2px)",
-                                filter:
-                                  "drop-shadow(0 10px 18px rgba(0,0,0,0.22))",
-                              }}
-                            />
-                          ) : null}
 
                           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0" />
                           <div className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/25 bg-black/35 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white/90 backdrop-blur-sm">

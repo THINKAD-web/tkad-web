@@ -6,7 +6,7 @@ import type { MediaItem } from "@/lib/media-data";
  * 1. 후보 풀: `budgetMaxMan` > 0 이면 `m.price <= cap` 선필터, 지역은 `regionMatchesMedia`.
  * 2. 점수: `budgetFit*0.4 + targetMatch*0.3 + region*0.2 + visibility*0.1` (각 0–100 근사).
  * 3. 타겟 매칭: `targetAge` 문자열 파싱 후 연령 밴드 겹침 + 상권·업종·캠페인 목표 가중.
- * 4. `score >= 22`만 노출, 상위 15건.
+ * 4. `score >= 18`만 노출(완화), 상위 30건.
  */
 export type CampaignGoal = "awareness" | "consideration" | "launch";
 
@@ -38,6 +38,11 @@ export type AiRecommendInput = {
   locationKeywords?: readonly string[] | null;
   /** 희망 집행 기간(주). UI·사유 문구용 — 스코어 가중은 선택적 */
   preferredPeriodWeeks?: number;
+  /**
+   * 세부 노출 환경(OR). 비어 있으면 무시. haystack(매체명·위치·특성)에 키워드 매칭.
+   * 값: subway | bus | roadside | building | airport | retail
+   */
+  placementHints?: readonly string[] | null;
 };
 
 export type MatchReason = { ko: string; en: string };
@@ -53,6 +58,31 @@ const W_BUDGET = 0.4;
 const W_TARGET = 0.3;
 const W_REGION = 0.2;
 const W_VISIBILITY = 0.1;
+
+const MIN_SCORE = 18;
+const MAX_RECOMMEND_RESULTS = 30;
+
+/** 세부 노출 환경(선택 시 OR) */
+export const PLACEMENT_HINT_KEYS = [
+  "subway",
+  "bus",
+  "roadside",
+  "building",
+  "airport",
+  "retail",
+] as const;
+
+const PLACEMENT_HINT_PATTERNS: Record<
+  (typeof PLACEMENT_HINT_KEYS)[number],
+  RegExp
+> = {
+  subway: /지하철|subway|역세권|metro|underground/i,
+  bus: /버스|bus\s|노선|brt/i,
+  roadside: /도로|간선|고속|휴게|간판|로드|roadside|highway/i,
+  building: /빌딩|건물|아트월|로비|elevator|facade|wall/i,
+  airport: /공항|airport|터미널|terminal/i,
+  retail: /백화|쇼핑|몰|마트|retail|storefront/i,
+};
 
 function mediaHaystack(m: MediaItem): string {
   return [
@@ -494,13 +524,24 @@ export function recommendMedia(
       return kws.some((kw) => h.includes(kw.trim().toLowerCase()));
     });
   }
+  const rawHints =
+    input.placementHints?.filter((h) => h.trim() && h !== "all") ?? [];
+  const placementKeys = rawHints.filter((h): h is (typeof PLACEMENT_HINT_KEYS)[number] =>
+    (PLACEMENT_HINT_KEYS as readonly string[]).includes(h),
+  );
+  if (placementKeys.length > 0) {
+    pool = pool.filter((m) => {
+      const hay = mediaHaystack(m);
+      return placementKeys.some((tag) => PLACEMENT_HINT_PATTERNS[tag].test(hay));
+    });
+  }
   if (pool.length === 0) return [];
 
   return [...pool]
     .map((m) => scoreOne(m, input, budgetCap))
-    .filter((s) => s.score >= 22)
+    .filter((s) => s.score >= MIN_SCORE)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 15);
+    .slice(0, MAX_RECOMMEND_RESULTS);
 }
 
 /** 한반도 근사 바운딩 박스 내 정규화 좌표 (%) */

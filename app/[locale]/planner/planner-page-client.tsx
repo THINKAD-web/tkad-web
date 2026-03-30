@@ -45,6 +45,7 @@ import {
   comparePlansByDuration,
   portfolioFromManualSelection,
 } from "@/lib/planner-logic";
+import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
 import {
@@ -64,8 +65,8 @@ import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
 import PlannerReportStep from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
-const BUDGET_MIN = 100;
-const BUDGET_MAX = 10_000;
+const BUDGET_MIN = 500;
+const BUDGET_MAX = 100_000;
 const STORAGE_KEY = "tkad-planner-plan-v2";
 
 const GOALS: {
@@ -366,7 +367,8 @@ export default function PlannerPageClient({
         if (Array.isArray(p.regions))
           setSelectedRegions(new Set(p.regions as string[]));
         setCategories(normalizePlannerCategoriesFromStorage(p.categories));
-        if (typeof p.budget === "number") setBudget(String(p.budget));
+        if (typeof p.budget === "number")
+          setBudget(String(Math.max(BUDGET_MIN, Math.min(BUDGET_MAX, p.budget))));
         if (typeof p.months === "number") setMonths(p.months);
         if (typeof p.campaignGoal === "string")
           setCampaignGoal(p.campaignGoal as PlannerCampaignGoal);
@@ -399,7 +401,8 @@ export default function PlannerPageClient({
           setSelectedRegions(new Set(PLANNER_MAP_REGIONS));
         else setSelectedRegions(new Set([r]));
         setCategories(normalizePlannerCategoriesFromStorage(p.categories));
-        if (typeof p.budget === "number") setBudget(String(p.budget));
+        if (typeof p.budget === "number")
+          setBudget(String(Math.max(BUDGET_MIN, Math.min(BUDGET_MAX, p.budget))));
         if (typeof p.months === "number") setMonths(p.months);
         setWizardStep(7);
         toast("success", t("loadedToast"));
@@ -630,7 +633,7 @@ export default function PlannerPageClient({
                       type="range"
                       min={BUDGET_MIN}
                       max={BUDGET_MAX}
-                      step={50}
+                      step={500}
                       value={budgetNum}
                       onChange={(e) => setBudget(e.target.value)}
                       className="h-2 w-full cursor-pointer accent-gold"
@@ -672,21 +675,24 @@ export default function PlannerPageClient({
                       {t("period")}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {[1, 3, 6, 12].map((m) => (
-                        <Button
-                          key={m}
-                          type="button"
-                          variant={months === m ? "default" : "outline"}
-                          size="sm"
-                          className={cn(
-                            "rounded-full",
-                            months === m && "btn-gold border-0",
-                          )}
-                          onClick={() => setMonths(m)}
-                        >
-                          {t("periodMonthsShort", { n: m })}
-                        </Button>
-                      ))}
+                      {PLANNER_PERIOD_OPTIONS.map((opt) => {
+                        const selected = Math.abs(months - opt.months) < 0.04;
+                        return (
+                          <Button
+                            key={opt.id}
+                            type="button"
+                            variant={selected ? "default" : "outline"}
+                            size="sm"
+                            className={cn(
+                              "rounded-full",
+                              selected && "btn-gold border-0",
+                            )}
+                            onClick={() => setMonths(opt.months)}
+                          >
+                            {t(opt.labelKey)}
+                          </Button>
+                        );
+                      })}
                     </div>
                   </div>
                 </CardContent>
@@ -825,7 +831,6 @@ export default function PlannerPageClient({
                 metrics={metrics}
                 reachCorePct={reachSplit.corePct}
                 reachExtendedPct={reachSplit.extendedPct}
-                creativeObjectUrl={creativeObjectUrl}
               />
             ) : null}
 

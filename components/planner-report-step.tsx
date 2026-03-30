@@ -13,7 +13,13 @@ import {
 } from "@/components/ui/card";
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
-import type { PlannerCampaignGoal, PlannerMetrics } from "@/lib/planner-logic";
+import {
+  budgetSplitByCategory,
+  plannerBlendCpmKrw,
+  type PlannerCampaignGoal,
+  type PlannerMetrics,
+} from "@/lib/planner-logic";
+import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import {
   buildPlannerReportPdf,
   type PlannerReportPdfLabels,
@@ -34,22 +40,7 @@ type Props = {
   metrics: PlannerMetrics | null;
   reachCorePct: number;
   reachExtendedPct: number;
-  creativeObjectUrl: string | null;
 };
-
-async function blobUrlToDataUrl(url: string): Promise<string | null> {
-  try {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return await new Promise((resolve) => {
-      const r = new FileReader();
-      r.onloadend = () => resolve(String(r.result));
-      r.readAsDataURL(blob);
-    });
-  } catch {
-    return null;
-  }
-}
 
 function mediaPhotoUrl(m: MediaItem): string | null {
   return getPrimaryMediaImageUrl(m) ?? resolveMediaGallery(m)[0] ?? null;
@@ -69,7 +60,6 @@ export default function PlannerReportStep({
   metrics,
   reachCorePct,
   reachExtendedPct,
-  creativeObjectUrl,
 }: Props) {
   const t = useTranslations("planner");
   const tCommon = useTranslations("common");
@@ -84,7 +74,6 @@ export default function PlannerReportStep({
       title: t("reportPdfTitle"),
       sectionOverview: t("reportSectionOverview"),
       sectionMedia: t("reportSectionMedia"),
-      sectionSimulation: t("reportSectionSimulation"),
       sectionEffect: t("reportSectionEffect"),
       sectionCost: t("reportSectionCost"),
       sectionContact: t("reportSectionContact"),
@@ -108,15 +97,69 @@ export default function PlannerReportStep({
       labelReachExtended: t("reportLabelReachExtended"),
       labelCostBreakdown: t("reportLabelCostBreakdown"),
       labelShare: t("reportLabelShare"),
-      simCreativeNote: t("reportSimCreativeNote"),
-      simNoCreative: t("reportSimNoCreative"),
-      simMediaCaption: t("reportSimMediaCaption"),
-      simCreativeCaption: t("reportSimCreativeCaption"),
-      simMvpDisclaimer: t("reportSimMvpDisclaimer"),
+      labelCpm: t("reportLabelCpm"),
+      sectionBudgetAllocation: t("reportSectionBudgetAllocation"),
+      budgetAllocationIntro: t("reportBudgetAllocationIntro"),
+      sectionEffectSummary: t("reportSectionEffectSummary"),
+      effectSummaryIntro: t("reportEffectSummaryIntro"),
+      reportSectionCompositeNote: t("reportSectionCompositeNote"),
+      reportCompositeBody: t("reportCompositeBody"),
       footerDisclaimer: t("reportFooterDisclaimer"),
     }),
     [t],
   );
+
+  const periodDisplay = useMemo(
+    () =>
+      formatPlannerPeriodDisplay(
+        months,
+        (key, values) =>
+          values != null
+            ? (t as (k: string, v?: Record<string, number>) => string)(key, values)
+            : t(key),
+      ),
+    [months, t],
+  );
+
+  const budgetAllocation = useMemo(() => {
+    const slices = budgetSplitByCategory(portfolio);
+    return slices.map((s) => ({
+      label: isKo ? s.labelKo : s.labelEn,
+      pct: s.pct,
+      valueMan: s.value,
+    }));
+  }, [portfolio, isKo]);
+
+  const blendedCpmKrw = useMemo(() => {
+    if (!metrics) return null;
+    return plannerBlendCpmKrw(portfolio, metrics.estimatedMonthlyImpressions);
+  }, [metrics, portfolio]);
+
+  const effectSummaryLines = useMemo(() => {
+    if (!metrics) return [];
+    const lines: string[] = [
+      t("reportSummaryImpMonthly", {
+        n: metrics.estimatedMonthlyImpressions.toLocaleString(),
+      }),
+      t("reportSummaryImpTotal", {
+        n: metrics.estimatedTotalImpressions.toLocaleString(),
+      }),
+      t("reportSummaryReach", {
+        core: reachCorePct,
+        ext: reachExtendedPct,
+      }),
+    ];
+    if (blendedCpmKrw != null) {
+      lines.push(
+        t("reportSummaryCpm", { n: blendedCpmKrw.toLocaleString() }),
+      );
+    }
+    lines.push(
+      t("reportSummaryRoi", { n: metrics.roiExpected }),
+      t("reportSummaryDisclaimerShort"),
+    );
+    return lines;
+  }, [metrics, reachCorePct, reachExtendedPct, blendedCpmKrw, t]);
 
   const contact = useMemo(
     () => ({
@@ -133,9 +176,6 @@ export default function PlannerReportStep({
     (async () => {
       setLoading(true);
       setError(null);
-      const creativeDataUrl = creativeObjectUrl
-        ? await blobUrlToDataUrl(creativeObjectUrl)
-        : null;
       const generatedAt = new Date().toLocaleString(isKo ? "ko-KR" : "en-US");
       const pdfPortfolio = portfolio.map((m) => ({
         name: isKo ? m.name : m.nameEn || m.name,
@@ -153,7 +193,7 @@ export default function PlannerReportStep({
           generatedAt,
           goalText: goalTitle,
           budgetMan: budgetNum,
-          months,
+          periodDisplay,
           regionsText,
           categoriesText,
           ageText,
@@ -169,7 +209,9 @@ export default function PlannerReportStep({
                 reachExtendedPct,
               }
             : null,
-          creativeDataUrl,
+          budgetAllocation,
+          blendedCpmKrw,
+          effectSummaryLines,
           contact,
         });
         if (cancelled) return;
@@ -200,7 +242,7 @@ export default function PlannerReportStep({
     isKo,
     goalTitle,
     budgetNum,
-    months,
+    periodDisplay,
     regionsText,
     categoriesText,
     ageText,
@@ -209,7 +251,9 @@ export default function PlannerReportStep({
     metrics,
     reachCorePct,
     reachExtendedPct,
-    creativeObjectUrl,
+    budgetAllocation,
+    blendedCpmKrw,
+    effectSummaryLines,
     contact,
     t,
     tCommon,
@@ -218,9 +262,6 @@ export default function PlannerReportStep({
 
   const downloadPdf = useCallback(async () => {
     try {
-      const creativeDataUrl = creativeObjectUrl
-        ? await blobUrlToDataUrl(creativeObjectUrl)
-        : null;
       const generatedAt = new Date().toLocaleString(isKo ? "ko-KR" : "en-US");
       const pdfPortfolio = portfolio.map((m) => ({
         name: isKo ? m.name : m.nameEn || m.name,
@@ -237,7 +278,7 @@ export default function PlannerReportStep({
         generatedAt,
         goalText: goalTitle,
         budgetMan: budgetNum,
-        months,
+        periodDisplay,
         regionsText,
         categoriesText,
         ageText,
@@ -253,7 +294,9 @@ export default function PlannerReportStep({
               reachExtendedPct,
             }
           : null,
-        creativeDataUrl,
+        budgetAllocation,
+        blendedCpmKrw,
+        effectSummaryLines,
         contact,
       });
       const filename = isKo
@@ -279,7 +322,7 @@ export default function PlannerReportStep({
     isKo,
     goalTitle,
     budgetNum,
-    months,
+    periodDisplay,
     regionsText,
     categoriesText,
     ageText,
@@ -288,7 +331,9 @@ export default function PlannerReportStep({
     metrics,
     reachCorePct,
     reachExtendedPct,
-    creativeObjectUrl,
+    budgetAllocation,
+    blendedCpmKrw,
+    effectSummaryLines,
     contact,
     t,
     tCommon,
@@ -305,14 +350,14 @@ export default function PlannerReportStep({
         "",
         `${isKo ? "목표" : "Goal"}: ${goalTitle}`,
         `${isKo ? "예산(만원)" : "Budget (₩10K)"}: ${budgetNum}`,
-        `${isKo ? "기간" : "Duration"}: ${months}${isKo ? "개월" : " mo"}`,
+        `${isKo ? "기간" : "Duration"}: ${periodDisplay}`,
         campaignGoal ? `goalKey: ${campaignGoal}` : "",
         "",
         `${isKo ? "연락 가능한 이메일" : "Reply email"}: `,
       ].join("\n"),
     );
     window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`;
-  }, [isKo, goalTitle, budgetNum, months, campaignGoal, contact.email]);
+  }, [isKo, goalTitle, budgetNum, periodDisplay, campaignGoal, contact.email]);
 
   return (
     <div className="space-y-6">

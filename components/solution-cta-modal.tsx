@@ -96,7 +96,14 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
       open={open}
       onClose={onClose}
       locked={submitted}
-      ariaLabelledBy="solution-cta-title"
+      ariaLabelledBy={submitted ? undefined : "solution-cta-title"}
+      ariaLabel={
+        submitted
+          ? isKo
+            ? "상담 신청 완료"
+            : "Request received"
+          : undefined
+      }
       className="max-w-lg"
     >
       <div className="p-6">
@@ -126,7 +133,7 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="relative space-y-4">
               <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
                 <input type="text" name="website" tabIndex={-1} autoComplete="off" />
               </div>
@@ -168,7 +175,11 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
                 <select
                   id="solution-budget"
                   value={budget}
-                  onChange={(e) => setBudget(e.target.value as typeof budget)}
+                  onChange={(e) =>
+                    setBudget(
+                      e.target.value as "under5" | "5to10" | "over10",
+                    )
+                  }
                   className={selectClass}
                 >
                   {budgetOptions.map((opt) => (
@@ -189,7 +200,15 @@ export default function SolutionCtaModal({ open, onClose }: SolutionCtaModalProp
                 <select
                   id="solution-region"
                   value={region}
-                  onChange={(e) => setRegion(e.target.value as typeof region)}
+                  onChange={(e) =>
+                    setRegion(
+                      e.target.value as
+                        | "seoul"
+                        | "capital"
+                        | "nationwide"
+                        | "other",
+                    )
+                  }
                   className={selectClass}
                 >
                   {regionOptions.map((opt) => (

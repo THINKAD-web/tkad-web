@@ -35,8 +35,8 @@ export default function PlannerTips({
               ? "tipStep3"
               : wizardStep === 3
                 ? "tipStep3Done"
-                : wizardStep === 4 && budgetNum <= 100
-                  ? "tipStep4Budget"
+        : wizardStep === 4 && budgetNum < 500
+          ? "tipStep4Budget"
                   : wizardStep === 5
                     ? "tipStep5"
                     : wizardStep === 6

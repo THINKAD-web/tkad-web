@@ -83,13 +83,24 @@ export function countPlannerMediaByRegion(
 }
 
 /** 예산 대비 효율로 조합 추천 (월 합산 단가가 spend 상한에 맞게) */
+/** 포트폴리오 월 단가(만원) 대비 예상 월간 노출로 블렌드 CPM(원/천회) 추정 */
+export function plannerBlendCpmKrw(
+  portfolio: readonly MediaItem[],
+  estimatedMonthlyImpressions: number,
+): number | null {
+  if (portfolio.length === 0 || estimatedMonthlyImpressions <= 0) return null;
+  const sumMan = portfolio.reduce((s, m) => s + m.price, 0);
+  const wonPerMonth = sumMan * 10_000;
+  return Math.round(wonPerMonth / (estimatedMonthlyImpressions / 1000));
+}
+
 export function selectPlannerPortfolio(
   filtered: MediaItem[],
   budgetMan: number,
   months: number,
   maxItems = 6,
 ): MediaItem[] {
-  if (filtered.length === 0 || months < 1 || budgetMan < 1) return [];
+  if (filtered.length === 0 || months <= 0 || budgetMan < 1) return [];
   const spendPerMonth = budgetMan / months;
   const cap = spendPerMonth * 0.92;
   const scored = filtered.map((m) => ({
@@ -120,7 +131,7 @@ export function portfolioFromManualSelection(
   months: number,
   maxItems = 12,
 ): MediaItem[] {
-  if (orderedItems.length === 0 || months < 1 || budgetMan < 1) return [];
+  if (orderedItems.length === 0 || months <= 0 || budgetMan < 1) return [];
   const spendPerMonth = budgetMan / months;
   const cap = spendPerMonth * 0.92;
   const out: MediaItem[] = [];
@@ -151,7 +162,7 @@ export function computeBudgetBlurbParts(
   budgetMan: number,
   months: number,
 ): BudgetBlurbParts | null {
-  if (filtered.length === 0 || months < 1 || budgetMan < 1) return null;
+  if (filtered.length === 0 || months <= 0 || budgetMan < 1) return null;
   const perMonth = budgetMan / months;
   const pool = [...filtered].sort(
     (a, b) => a.price - b.price || b.dailyFootTraffic - a.dailyFootTraffic,
@@ -330,7 +341,7 @@ export function computePlannerMetrics(
   months: number,
   options?: { campaignGoal?: PlannerCampaignGoal | null },
 ): PlannerMetrics | null {
-  if (filtered.length === 0 || months < 1 || budgetMan <= 0) return null;
+  if (filtered.length === 0 || months <= 0 || budgetMan <= 0) return null;
 
   const avgMonthlyPrice =
     filtered.reduce((s, m) => s + m.price, 0) / filtered.length;
@@ -344,7 +355,9 @@ export function computePlannerMetrics(
   const estimatedMonthlyImpressions = Math.round(
     blendDailyReach * 30 * visibility * Math.min(1, intensity + 0.25),
   );
-  const estimatedTotalImpressions = estimatedMonthlyImpressions * months;
+  const estimatedTotalImpressions = Math.round(
+    estimatedMonthlyImpressions * months,
+  );
 
   const mixBonus =
     (filtered.some((m) => m.type === "digital" || m.type === "network")
@@ -355,9 +368,10 @@ export function computePlannerMetrics(
 
   const goalBoost = goalRoiBoost(options?.campaignGoal ?? null);
 
+  const roiMonthsForScale = Math.max(months, 7 / 30);
   const baseRoi =
     2.1 +
-    Math.min(2.2, (budgetMan / (450 * months)) * 0.45) +
+    Math.min(2.2, (budgetMan / (450 * roiMonthsForScale)) * 0.45) +
     mixBonus * 0.4 +
     goalBoost;
 
@@ -367,14 +381,27 @@ export function computePlannerMetrics(
 
   const cumulativeByMonth: { month: number; impressions: number }[] = [];
   let acc = 0;
-  for (let mo = 1; mo <= months; mo++) {
+  const fullMonths = Math.floor(months + 1e-9);
+  const fracRemain = months - fullMonths;
+  for (let mo = 1; mo <= fullMonths; mo++) {
     acc += estimatedMonthlyImpressions;
     cumulativeByMonth.push({ month: mo, impressions: acc });
   }
+  if (fracRemain > 1e-6) {
+    acc += Math.round(estimatedMonthlyImpressions * fracRemain);
+    cumulativeByMonth.push({ month: fullMonths + 1, impressions: acc });
+  }
+  if (cumulativeByMonth.length === 0) {
+    cumulativeByMonth.push({
+      month: 1,
+      impressions: estimatedTotalImpressions,
+    });
+  }
 
+  const roiSteps = Math.max(1, cumulativeByMonth.length);
   const roiByMonth: PlannerMetrics["roiByMonth"] = [];
-  for (let mo = 1; mo <= months; mo++) {
-    const t = months <= 1 ? 1 : (mo - 1) / (months - 1);
+  for (let mo = 1; mo <= roiSteps; mo++) {
+    const t = roiSteps <= 1 ? 1 : (mo - 1) / (roiSteps - 1);
     const ramp = 0.88 + 0.12 * t;
     roiByMonth.push({
       month: mo,

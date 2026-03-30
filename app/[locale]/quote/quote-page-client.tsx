@@ -37,6 +37,7 @@ import {
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import Spinner from "@/components/spinner";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
+import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
@@ -706,13 +707,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           {isKo ? "조건에 맞는 매체가 없습니다." : "No media matches your filters."}
                         </div>
                       ) : mediaLayout === "grid" ? (
-                      <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {filteredCatalog.map((media) => {
                           const checked = selectedIds.has(media.id);
-                          const typeLabel = typeLabels[media.type];
-                          const quoteThumb =
-                            dedupeImageUrls(media.sampleImages ?? [])[0]
-                              ?.trim() || null;
                           const nwOpt = networkQuoteOptions[media.id];
                           const isNw = media.catalogSource === "network";
                           const displayPrice = isNw
@@ -725,70 +722,20 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             : media.price;
                           return (
                             <div key={media.id} className="space-y-2">
-                              <label className="block cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  className="peer sr-only"
-                                  checked={checked}
-                                  onChange={() => toggleMedia(media.id)}
-                                />
-                                <Card
-                                  className={cn(
-                                    "h-full overflow-hidden border-2 transition-all hover:shadow-md",
-                                    "peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
-                                  )}
-                                >
-                                  <MediaCatalogThumbnail
-                                    media={media}
-                                    primaryImageUrl={quoteThumb}
-                                    placeholderLabel={tMedia("imagePreparing")}
-                                    className="relative flex h-24 items-center justify-center sm:h-32"
-                                    bottomGradientClassName={null}
-                                    placeholderSize="xs"
-                                  >
-                                    <span
-                                      className={cn(
-                                        "absolute right-2.5 top-2.5 z-10 flex h-5 w-5 items-center justify-center rounded border-2 bg-white text-xs",
-                                        checked
-                                          ? "border-gold bg-gold text-navy"
-                                          : "border-navy/20",
-                                      )}
-                                      aria-hidden
-                                    >
-                                      {checked ? "✓" : ""}
-                                    </span>
-                                  </MediaCatalogThumbnail>
-                                  <CardHeader className="px-4 pb-2 pt-3 sm:px-6">
-                                    <Badge
-                                      variant="secondary"
-                                      className="w-fit bg-navy/5 text-[11px] text-navy sm:text-xs"
-                                    >
-                                      {isKo
-                                        ? (typeLabel?.ko ?? media.type)
-                                        : (typeLabel?.en ?? media.type)}
-                                    </Badge>
-                                    <CardTitle className="line-clamp-2 pt-1 text-[13px] leading-snug sm:text-base">
-                                      {isKo ? media.name : media.nameEn}
-                                    </CardTitle>
-                                  </CardHeader>
-                                  <CardContent className="space-y-2 px-4 pb-4 sm:px-6 sm:pb-6">
-                                    <div className="flex items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-sm">
-                                      <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                                      <span className="line-clamp-2">
-                                        {isKo
-                                          ? media.location
-                                          : media.locationEn}
-                                      </span>
-                                    </div>
-                                    <div className="text-[15px] font-bold tabular-nums text-navy sm:text-lg">
-                                      ₩{displayPrice.toLocaleString()}
-                                      <span className="text-xs font-normal text-muted-foreground">
-                                        만원 {t("quote.perMonth")}
-                                      </span>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              </label>
+                              <MediaCatalogGridCard
+                                variant="selectable"
+                                media={media}
+                                isKo={isKo}
+                                imagePreparingLabel={tMedia("imagePreparing")}
+                                selected={checked}
+                                onToggleSelected={() => toggleMedia(media.id)}
+                                selectionAriaLabel={
+                                  isKo
+                                    ? `${media.name} 선택`
+                                    : `Select ${media.nameEn}`
+                                }
+                                priceMan={displayPrice}
+                              />
                               {checked && isNw ? (
                                 <div className="space-y-2 rounded-lg border border-navy/10 bg-slate-50 p-3 text-sm">
                                   <div>

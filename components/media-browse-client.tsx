@@ -5,16 +5,9 @@ import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   MapPin,
-  BadgeCheck,
   ShieldCheck,
   Flame,
   Calculator,
@@ -25,8 +18,10 @@ import {
   ExternalLink,
   X,
   Users,
+  SlidersHorizontal,
 } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
+import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import SolutionCtaButton from "@/components/solution-cta-button";
 import ShareButtons from "@/components/share-buttons";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
@@ -68,6 +63,7 @@ import {
 } from "@/lib/media-filter-advanced";
 import MediaAdvancedFiltersPanel from "@/components/media-advanced-filters-panel";
 import MediaRegionReference from "@/components/media-region-reference";
+import Modal from "@/components/ui/modal";
 import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
@@ -89,9 +85,6 @@ export default function MediaBrowseClient({
   const isKo = locale === "ko";
 
   const [mainTab, setMainTab] = useState<"search" | "ai">("search");
-  const [region, setRegion] = useState("all");
-  const [type, setType] = useState("all");
-  const [budget, setBudget] = useState("all");
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
   const [textFilter, setTextFilter] = useState("");
   const [browseMode, setBrowseMode] = useState<"list" | "map">("list");
@@ -104,6 +97,10 @@ export default function MediaBrowseClient({
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
+  const [sortBy, setSortBy] = useState<
+    "default" | "priceAsc" | "priceDesc" | "trafficDesc"
+  >("default");
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const bounds = useMemo(() => computeCatalogBounds(catalog), [catalog]);
   const defaultAdvanced = useMemo(
@@ -142,7 +139,7 @@ export default function MediaBrowseClient({
     );
   }, [compareItems]);
 
-  /** DB(또는 폴백) `catalog`의 region·type·price와 동일 필드로 필터링 */
+  /** 검색어·선택 매체 + 고급 필터(슬라이더·태그 등) 적용 */
   const filtered = useMemo(() => {
     let data = catalog;
 
@@ -153,53 +150,46 @@ export default function MediaBrowseClient({
       data = data.filter((m) => matchesMediaTextQuery(m, lower));
     }
 
-    return data.filter((m) => {
-      if (region !== "all" && m.region !== region) return false;
-      if (type !== "all" && m.type !== type) return false;
-      if (budget === "under1000" && m.price > 1000) return false;
-      if (budget === "1000to3000" && (m.price < 1000 || m.price > 3000))
-        return false;
-      if (budget === "3000to5000" && (m.price < 3000 || m.price > 5000))
-        return false;
-      if (budget === "over5000" && m.price < 5000) return false;
-      if (!passesMediaAdvancedFilters(m, effectiveAdvanced, bounds)) return false;
-      return true;
-    });
-  }, [
-    catalog,
-    region,
-    type,
-    budget,
-    searchTarget,
-    textFilter,
-    effectiveAdvanced,
-    bounds,
-  ]);
+    return data.filter((m) =>
+      passesMediaAdvancedFilters(m, effectiveAdvanced, bounds),
+    );
+  }, [catalog, searchTarget, textFilter, effectiveAdvanced, bounds]);
+
+  const sortedFiltered = useMemo(() => {
+    const arr = [...filtered];
+    switch (sortBy) {
+      case "priceAsc":
+        return arr.sort((a, b) => a.price - b.price);
+      case "priceDesc":
+        return arr.sort((a, b) => b.price - a.price);
+      case "trafficDesc":
+        return arr.sort(
+          (a, b) =>
+            (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0),
+        );
+      default:
+        return arr;
+    }
+  }, [filtered, sortBy]);
 
   useEffect(() => {
     if (mapSelectedId == null) return;
-    if (!filtered.some((m) => m.id === mapSelectedId)) setMapSelectedId(null);
-  }, [filtered, mapSelectedId]);
+    if (!sortedFiltered.some((m) => m.id === mapSelectedId))
+      setMapSelectedId(null);
+  }, [sortedFiltered, mapSelectedId]);
 
   useEffect(() => {
     setCatalogPage(1);
-  }, [
-    region,
-    type,
-    budget,
-    searchTarget,
-    textFilter,
-    effectiveAdvanced,
-  ]);
+  }, [searchTarget, textFilter, effectiveAdvanced, sortBy]);
 
   const pagedCatalog = useMemo(() => {
     const start = (catalogPage - 1) * catalogPageSize;
-    return filtered.slice(start, start + catalogPageSize);
-  }, [filtered, catalogPage, catalogPageSize]);
+    return sortedFiltered.slice(start, start + catalogPageSize);
+  }, [sortedFiltered, catalogPage, catalogPageSize]);
 
   const catalogPageCount = Math.max(
     1,
-    Math.ceil(filtered.length / catalogPageSize),
+    Math.ceil(sortedFiltered.length / catalogPageSize),
   );
 
   useEffect(() => {
@@ -219,30 +209,12 @@ export default function MediaBrowseClient({
     { value: "national", label: t("media.regions.national") },
   ];
 
-  const types = [
-    { value: "all", label: t("media.allTypes") },
-    { value: "digital", label: t("media.types.digital") },
-    { value: "static", label: t("media.types.static") },
-    { value: "mobile", label: t("media.types.mobile") },
-    { value: "network", label: t("media.types.network") },
-  ];
-
-  const budgets = [
-    { value: "all", label: t("media.allBudgets") },
-    { value: "under1000", label: t("media.budgets.under1000") },
-    { value: "1000to3000", label: t("media.budgets.1000to3000") },
-    { value: "3000to5000", label: t("media.budgets.3000to5000") },
-    { value: "over5000", label: t("media.budgets.over5000") },
-  ];
-
   const resetFilters = () => {
-    setRegion("all");
-    setType("all");
-    setBudget("all");
     setSearchTarget(null);
     setTextFilter("");
     setMapSelectedId(null);
     setAdvanced(null);
+    setSortBy("default");
   };
 
   const handleMediaView = useCallback((media: MediaItem) => {
@@ -276,7 +248,7 @@ export default function MediaBrowseClient({
 
   const mapSelectedMedia =
     mapSelectedId != null
-      ? filtered.find((m) => m.id === mapSelectedId) ?? null
+      ? sortedFiltered.find((m) => m.id === mapSelectedId) ?? null
       : null;
 
   const handleMapSelectId = useCallback((id: string | null) => {
@@ -297,6 +269,7 @@ export default function MediaBrowseClient({
           <p className="mt-2 text-slate-300">{t("media.subtitle")}</p>
           <div className="mt-6">
             <SolutionCtaButton
+              href="/contact"
               label={
                 isKo
                   ? "맞춤형 OOH 캠페인 제안 받기"
@@ -351,7 +324,7 @@ export default function MediaBrowseClient({
           ) : (
             <div className="flex flex-col gap-8 lg:flex-row">
               <aside className="w-full shrink-0 lg:w-64">
-                <div className="sticky top-24 space-y-6 rounded-xl border bg-white p-6 shadow-sm">
+                <div className="sticky top-24 space-y-4 rounded-xl border bg-white p-6 shadow-sm">
                   <div>
                     <label className="mb-2 block text-sm font-semibold text-navy">
                       {t("common.search")}
@@ -371,65 +344,18 @@ export default function MediaBrowseClient({
                       searchButtonLabel={t("media.searchButton")}
                     />
                   </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-navy">
-                      {t("media.region")}
-                    </label>
-                    <select
-                      value={region}
-                      onChange={(e) => setRegion(e.target.value)}
-                      className="w-full rounded-md border px-3 py-2 text-sm"
-                    >
-                      {regions.map((r) => (
-                        <option key={r.value} value={r.value}>
-                          {r.label}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="mt-3">
-                      <MediaRegionReference />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-navy">
-                      {t("media.type")}
-                    </label>
-                    <select
-                      value={type}
-                      onChange={(e) => setType(e.target.value)}
-                      className="w-full rounded-md border px-3 py-2 text-sm"
-                    >
-                      {types.map((tp) => (
-                        <option key={tp.value} value={tp.value}>
-                          {tp.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-navy">
-                      {t("media.budget")}
-                    </label>
-                    <select
-                      value={budget}
-                      onChange={(e) => setBudget(e.target.value)}
-                      className="w-full rounded-md border px-3 py-2 text-sm"
-                    >
-                      {budgets.map((b) => (
-                        <option key={b.value} value={b.value}>
-                          {b.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <MediaAdvancedFiltersPanel
-                    bounds={bounds}
-                    value={effectiveAdvanced}
-                    onChange={setAdvanced}
-                  />
                   <Button
+                    type="button"
                     variant="outline"
-                    className="w-full"
+                    className="w-full border-navy/20 font-semibold text-navy"
+                    onClick={() => setAdvancedOpen(true)}
+                  >
+                    <SlidersHorizontal className="mr-2 h-4 w-4" />
+                    {t("media.advanced.openButton")}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full text-muted-foreground"
                     onClick={resetFilters}
                   >
                     {t("common.reset")}
@@ -437,12 +363,74 @@ export default function MediaBrowseClient({
                 </div>
               </aside>
 
+              <Modal
+                open={advancedOpen}
+                onClose={() => setAdvancedOpen(false)}
+                ariaLabelledBy="media-advanced-filters-heading"
+                className="max-w-lg sm:max-w-xl"
+              >
+                <div className="max-h-[min(85vh,720px)] overflow-y-auto p-6">
+                  <h2
+                    id="media-advanced-filters-heading"
+                    className="mb-4 pr-8 text-lg font-bold text-navy"
+                  >
+                    {t("media.advanced.title")}
+                  </h2>
+                  <p className="mb-4 text-xs text-muted-foreground">
+                    {t("media.advanced.modalHint")}
+                  </p>
+                  <MediaAdvancedFiltersPanel
+                    catalog={catalog}
+                    bounds={bounds}
+                    value={effectiveAdvanced}
+                    onChange={setAdvanced}
+                  />
+                  <div className="mt-6 border-t border-navy/10 pt-4">
+                    <MediaRegionReference />
+                  </div>
+                  <Button
+                    type="button"
+                    className="btn-gold mt-6 h-11 w-full font-bold"
+                    onClick={() => setAdvancedOpen(false)}
+                  >
+                    {t("media.advanced.modalClose")}
+                  </Button>
+                </div>
+              </Modal>
+
               <div className="flex-1">
                 <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="text-sm text-muted-foreground">
-                    {t("media.results")}: {filtered.length}
+                    {t("media.results")}: {sortedFiltered.length}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
+                    <label className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-white px-3 py-1.5 text-xs font-medium text-navy">
+                      <span className="text-muted-foreground">
+                        {t("media.sortLabel")}
+                      </span>
+                      <select
+                        className="max-w-[10rem] rounded-md border border-navy/15 bg-slate-50 px-2 py-0.5 text-xs font-semibold"
+                        value={sortBy}
+                        onChange={(e) =>
+                          setSortBy(
+                            e.target.value as typeof sortBy,
+                          )
+                        }
+                      >
+                        <option value="default">
+                          {t("media.sortDefault")}
+                        </option>
+                        <option value="priceAsc">
+                          {t("media.sortPriceAsc")}
+                        </option>
+                        <option value="priceDesc">
+                          {t("media.sortPriceDesc")}
+                        </option>
+                        <option value="trafficDesc">
+                          {t("media.sortTrafficDesc")}
+                        </option>
+                      </select>
+                    </label>
                     <div className="inline-flex rounded-full border border-navy/15 bg-slate-50 p-0.5">
                       <button
                         type="button"
@@ -523,14 +511,14 @@ export default function MediaBrowseClient({
                   </div>
                 </div>
 
-                {filtered.length === 0 ? (
+                {sortedFiltered.length === 0 ? (
                   <div className="flex h-64 items-center justify-center rounded-xl border text-muted-foreground">
                     {t("media.noResults")}
                   </div>
                 ) : browseMode === "map" ? (
                   <div className="relative">
                     <MediaBrowseMap
-                      items={filtered}
+                      items={sortedFiltered}
                       locale={locale}
                       selectedId={mapSelectedId}
                       onSelectId={handleMapSelectId}
@@ -635,92 +623,40 @@ export default function MediaBrowseClient({
                   <>
                     {catalogCardLayout === "grid" ? (
                   <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {pagedCatalog.map((media) => {
-                      const detailHref = mediaItemDetailPath(media.id);
-                      return (
-                        <Link
-                          key={media.id}
-                          href={detailHref}
-                          aria-label={isKo ? media.name : media.nameEn}
-                          className="block min-w-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
-                        >
-                          <Card className="relative min-w-0 overflow-hidden gap-0 py-0 transition-shadow hover:shadow-lg motion-safe:hover:translate-y-0 sm:motion-safe:hover:-translate-y-[2px]">
-                          <MediaCatalogThumbnail
-                            media={media}
-                            placeholderLabel={t("media.imagePreparing")}
-                            className="flex h-[7.25rem] items-center justify-center sm:h-36"
-                            bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/10 to-transparent"
+                    {pagedCatalog.map((media) => (
+                      <MediaCatalogGridCard
+                        key={media.id}
+                        variant="link"
+                        media={media}
+                        isKo={isKo}
+                        imagePreparingLabel={t("media.imagePreparing")}
+                        popularIds={popularIds}
+                        topLeftSlot={
+                          <label
+                            className="absolute left-2.5 top-2.5 z-20 flex size-8 cursor-pointer select-none items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                            title={t("media.compareToggleAria")}
                           >
-                            {media.catalogSource !== "network" ? (
-                              <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
-                                <BadgeCheck className="h-3 w-3" />
-                                Verified
-                              </div>
-                            ) : (
-                              <div className="absolute top-2.5 right-2.5 z-10 rounded-full bg-navy/90 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
-                                {t("media.networkSitesBadge", {
-                                  count: media.networkTotalLocations ?? 0,
-                                })}
-                              </div>
-                            )}
-                            <label
-                              className="absolute top-2.5 left-2.5 z-20 flex cursor-pointer select-none items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-navy shadow-sm backdrop-blur-sm"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
-                              onKeyDown={(e) => e.stopPropagation()}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isInCompare(media.id)}
-                                onChange={() => toggleCompare(media)}
-                                disabled={
-                                  media.catalogSource === "network" ||
-                                  (!isInCompare(media.id) &&
-                                    compareItems.length >= COMPARE_MAX_ITEMS)
-                                }
-                                className="h-3.5 w-3.5 rounded border-navy/30 text-gold accent-gold"
-                              />
-                              {isKo ? "비교" : "Compare"}
-                            </label>
-                            {popularIds.has(media.id) && (
-                              <div className="absolute bottom-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[10px] font-bold text-navy shadow-sm">
-                                <Flame className="h-3 w-3" />
-                                {isKo ? "인기" : "Popular"}
-                              </div>
-                            )}
-                          </MediaCatalogThumbnail>
-                          <CardHeader className="relative z-0 min-w-0 space-y-1 px-3 pb-1.5 pt-2 sm:px-4 sm:pb-2 sm:pt-2">
-                            <div className="flex items-center justify-between gap-2">
-                              <Badge
-                                variant="secondary"
-                                className="bg-navy/5 text-[11px] text-navy sm:text-xs"
-                              >
-                                {isKo
-                                  ? (typeLabels[media.type]?.ko ?? media.type)
-                                  : (typeLabels[media.type]?.en ?? media.type)}
-                              </Badge>
-                            </div>
-                            <CardTitle className="truncate text-[13px] leading-snug sm:text-sm">
-                              {isKo ? media.name : media.nameEn}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="relative z-0 min-w-0 space-y-1.5 px-3 pb-2.5 pt-0 sm:px-4 sm:pb-3">
-                            <div className="flex min-w-0 items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-xs">
-                              <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-                              <span className="min-w-0 truncate">
-                                {formatMediaLocationShort(media, isKo)}
-                              </span>
-                            </div>
-                            <div className="text-[15px] font-bold tabular-nums text-navy sm:text-base">
-                              {formatMediaPriceWonWithSymbol(media.price)}
-                            </div>
-                          </CardContent>
-                          </Card>
-                        </Link>
-                      );
-                    })}
+                            <input
+                              type="checkbox"
+                              checked={isInCompare(media.id)}
+                              onChange={() => toggleCompare(media)}
+                              disabled={
+                                media.catalogSource === "network" ||
+                                (!isInCompare(media.id) &&
+                                  compareItems.length >= COMPARE_MAX_ITEMS)
+                              }
+                              aria-label={t("media.compareToggleAria")}
+                              className="h-3.5 w-3.5 rounded border-navy/30 text-gold accent-gold"
+                            />
+                          </label>
+                        }
+                      />
+                    ))}
                   </div>
                     ) : (
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
@@ -741,12 +677,13 @@ export default function MediaBrowseClient({
                           placeholderSize="xs"
                         >
                           <label
-                            className="absolute left-1 top-1 z-20 flex cursor-pointer select-none items-center gap-0.5 rounded-full bg-white/95 px-1.5 py-0.5 text-[9px] font-medium text-navy shadow-sm"
+                            className="absolute left-1 top-1 z-20 flex size-7 cursor-pointer select-none items-center justify-center rounded-full bg-white/95 shadow-sm"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
                             }}
                             onKeyDown={(e) => e.stopPropagation()}
+                            title={t("media.compareToggleAria")}
                           >
                             <input
                               type="checkbox"
@@ -757,9 +694,9 @@ export default function MediaBrowseClient({
                                 (!isInCompare(media.id) &&
                                   compareItems.length >= COMPARE_MAX_ITEMS)
                               }
+                              aria-label={t("media.compareToggleAria")}
                               className="h-3 w-3 rounded border-navy/30 text-gold accent-gold"
                             />
-                            {isKo ? "비교" : "Cmp"}
                           </label>
                         </MediaCatalogThumbnail>
                         <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 sm:gap-1.5">
@@ -822,14 +759,14 @@ export default function MediaBrowseClient({
                         <span className="text-sm text-muted-foreground">
                           {t("media.pageSummary", {
                             from:
-                              filtered.length === 0
+                              sortedFiltered.length === 0
                                 ? 0
                                 : (catalogPage - 1) * catalogPageSize + 1,
                             to: Math.min(
                               catalogPage * catalogPageSize,
-                              filtered.length,
+                              sortedFiltered.length,
                             ),
-                            total: filtered.length,
+                            total: sortedFiltered.length,
                           })}
                         </span>
                         <Button

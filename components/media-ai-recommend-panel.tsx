@@ -25,6 +25,7 @@ import {
   type MediaItem,
   typeLabels,
   getPrimaryMediaImageUrl,
+  matchesMediaTextQuery,
 } from "@/lib/media-data";
 import {
   recommendMedia,
@@ -99,8 +100,15 @@ export default function MediaAiRecommendPanel({
       setResults(null);
       window.setTimeout(() => {
         const pool = filterCatalogByRegionCodes(catalog, payload.regionCodes);
+        const q = payload.searchQuery.trim().toLowerCase();
+        const poolFiltered =
+          q.length > 0
+            ? pool.filter((m) => matchesMediaTextQuery(m, q))
+            : pool;
         const scored =
-          catalog.length === 0 ? [] : recommendMedia(payload.input, pool);
+          catalog.length === 0
+            ? []
+            : recommendMedia(payload.input, poolFiltered);
         setResults(scored);
         setPhase(scored.length > 0 ? "dashboard" : "noResults");
       }, 900);

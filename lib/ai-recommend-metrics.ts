@@ -1,10 +1,10 @@
 import type { MediaItem } from "@/lib/media-data";
 
-/** 월간 추정 노출 (데이터 없으면 일 유동 × 30) */
+/** 월간 추정 노출: `impressions` → `monthlyFootTraffic` → 일 유동×30 */
 export function estimatedMonthlyImpressions(m: MediaItem): number {
-  const mo = m.monthlyFootTraffic;
-  if (typeof mo === "number" && Number.isFinite(mo) && mo > 0) {
-    return Math.round(mo);
+  const imp = m.impressions ?? m.monthlyFootTraffic;
+  if (typeof imp === "number" && Number.isFinite(imp) && imp > 0) {
+    return Math.round(imp);
   }
   const d = m.dailyFootTraffic ?? 0;
   return Math.round(Math.max(0, d) * 30);

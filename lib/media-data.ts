@@ -39,7 +39,20 @@ export interface MediaItem {
   lat: number;
   lng: number;
   dailyFootTraffic: number;
+  /** 월간·기간 예상 노출(건). DB `impressions`와 동일 의미로 사용 */
   monthlyFootTraffic?: number;
+  impressions?: number;
+  /** 도달 인구(명) — DB `reach` */
+  reach?: number;
+  /** 평균 노출 빈도 — DB `frequency` */
+  frequency?: number;
+  /** CPM(원/1,000회) — DB `cpm` */
+  cpm?: number;
+  /** 참여율 0–1 — DB `engagement_rate` */
+  engagementRate?: number;
+  /** 가로·세로(m) — DB `width_m` / `height_m` */
+  widthM?: number;
+  heightM?: number;
   size?: string;
   resolution?: string;
   brightness?: string;
@@ -288,13 +301,14 @@ export function mediaItemsToCampaignPins(
       creativeCaptionEn: capEn,
       imageUrl: gallery(m),
       impressionsToday: m.dailyFootTraffic,
-      impressionsTotal: m.monthlyFootTraffic ?? m.dailyFootTraffic * 30,
+      impressionsTotal:
+        m.impressions ?? m.monthlyFootTraffic ?? m.dailyFootTraffic * 30,
       lastUpdatedIso: new Date().toISOString(),
     };
   });
 }
 
-export const mediaData: MediaItem[] = [
+const rawMediaCatalog: MediaItem[] = [
   {
     id: "1",
     name: "코엑스 K-POP 스퀘어",
@@ -719,6 +733,65 @@ export const mediaData: MediaItem[] = [
     ],
   },
 ];
+
+function enrichMediaCatalogItem(m: MediaItem): MediaItem {
+  const idHash = m.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const imp = m.impressions ?? m.monthlyFootTraffic;
+  const daily = m.dailyFootTraffic ?? 0;
+  const impressions =
+    imp ?? (daily > 0 ? Math.round(daily * 30) : undefined);
+  const reach =
+    m.reach ??
+    (typeof impressions === "number" && impressions > 0
+      ? Math.round(impressions * (0.32 + (idHash % 45) / 100))
+      : undefined);
+  const frequency = m.frequency ?? 2.2 + (idHash % 18) / 5;
+  const engagementRate =
+    m.engagementRate ?? 0.008 + (idHash % 25) / 1000;
+  const tags =
+    m.tags ??
+    [
+      m.type === "digital"
+        ? "디지털"
+        : m.type === "static"
+          ? "고정"
+          : "이동",
+      m.region === "seoul"
+        ? "서울"
+        : m.region === "busan"
+          ? "부산"
+          : m.region === "jeju"
+            ? "제주"
+            : "전국",
+    ];
+  const subCategory =
+    m.subCategory ??
+    (m.type === "digital"
+      ? "디지털 전광"
+      : m.type === "static"
+        ? "빌보드·외벽"
+        : "교통·역사 매체");
+  const nearbyStations =
+    m.nearbyStations ??
+    (() => {
+      const f = m.nearbyFacilities ?? "";
+      const station = f.match(/([가-힣A-Za-z0-9]+역)(?=\(|,|$|\s)/);
+      return station ? station[1] : undefined;
+    })();
+  return {
+    ...m,
+    impressions,
+    monthlyFootTraffic: m.monthlyFootTraffic ?? impressions,
+    reach,
+    frequency,
+    engagementRate,
+    tags,
+    subCategory,
+    nearbyStations,
+  };
+}
+
+export const mediaData: MediaItem[] = rawMediaCatalog.map(enrichMediaCatalogItem);
 
 export const typeLabels: Record<string, { ko: string; en: string }> = {
   digital: { ko: "디지털", en: "Digital" },

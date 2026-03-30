@@ -12,6 +12,7 @@ import MediaAiRecommendForm, {
 } from "@/components/media-ai-recommend-form";
 import MediaAiRecommendDashboard from "@/components/media-ai-recommend-dashboard";
 import type { MediaItem } from "@/lib/media-data";
+import { matchesMediaTextQuery } from "@/lib/media-data";
 import type { ScoredMedia } from "@/lib/ai-media-recommend";
 import {
   recommendMedia,
@@ -60,7 +61,12 @@ export default function RecommendPageClient({
       setPhase("loading");
       window.setTimeout(() => {
         const pool = filterCatalogByRegionCodes(catalog, payload.regionCodes);
-        const scored = recommendMedia(payload.input, pool);
+        const q = payload.searchQuery.trim().toLowerCase();
+        const poolFiltered =
+          q.length > 0
+            ? pool.filter((m) => matchesMediaTextQuery(m, q))
+            : pool;
+        const scored = recommendMedia(payload.input, poolFiltered);
         setFullList(scored);
         setPhase(scored.length > 0 ? "dashboard" : "noResults");
       }, 900);

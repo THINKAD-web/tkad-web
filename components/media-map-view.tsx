@@ -245,8 +245,6 @@ export function MediaMapView({
                 {filtered.map((media) => {
                   const u = getPrimaryMediaImageUrl(media);
                   const inCompare = isInCompare(media.id);
-                  const disableCompare =
-                    !inCompare && compareItemCount >= COMPARE_MAX_ITEMS;
                   return (
                     <Card
                       key={media.id}
@@ -265,6 +263,25 @@ export function MediaMapView({
                             <Monitor className="h-10 w-10" />
                           </div>
                         )}
+                        <label
+                          className="absolute left-2.5 top-2.5 z-20 flex size-8 cursor-pointer select-none items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          title={t("media.compareToggleAria")}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={inCompare}
+                            onChange={() => toggleCompare(media)}
+                            disabled={
+                              media.catalogSource === "network" ||
+                              (!inCompare &&
+                                compareItemCount >= COMPARE_MAX_ITEMS)
+                            }
+                            aria-label={t("media.compareToggleAria")}
+                            className="h-3.5 w-3.5 rounded border-navy/30 text-gold accent-gold"
+                          />
+                        </label>
                         {popularIds.has(media.id) && (
                           <div className="absolute bottom-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[10px] font-bold text-navy shadow-sm">
                             <Flame className="h-3 w-3" />
@@ -273,7 +290,7 @@ export function MediaMapView({
                         )}
                       </div>
                       <CardHeader className="space-y-1.5 px-3 pb-1.5 pt-3">
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
                           <Badge
                             variant="secondary"
                             className="bg-navy/5 text-[11px] text-navy"
@@ -282,14 +299,6 @@ export function MediaMapView({
                               ? (typeLabels[media.type]?.ko ?? media.type)
                               : (typeLabels[media.type]?.en ?? media.type)}
                           </Badge>
-                          <button
-                            type="button"
-                            disabled={disableCompare}
-                            onClick={() => toggleCompare(media)}
-                            className="text-xs font-semibold text-gold hover:text-gold-dark disabled:opacity-40"
-                          >
-                            {inCompare ? `✓ ${t("media.compare")}` : `+ ${t("media.compare")}`}
-                          </button>
                         </div>
                         <CardTitle className="text-sm font-bold leading-snug text-navy">
                           {isKo ? media.name : media.nameEn}
