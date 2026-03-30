@@ -17,7 +17,7 @@ export function AiChatbotMediaCards({
   const tMedia = useTranslations("media");
   if (!items.length) return null;
   return (
-    <div className="mt-3 flex w-full max-w-[min(100%,22rem)] flex-col gap-2.5">
+    <div className="mt-3 flex w-full min-w-0 max-w-full flex-col gap-2.5 sm:max-w-[min(100%,22rem)]">
       {items.map((m) => {
         const href = mediaItemDetailPath(m.id);
         const label = isKo ? m.name : m.nameEn || m.name;
@@ -26,9 +26,9 @@ export function AiChatbotMediaCards({
           <Link
             key={m.id}
             href={href}
-            className="group flex overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-sm ring-1 ring-black/[0.03] transition hover:border-gold/50 hover:shadow-md hover:ring-gold/20"
+            className="group flex min-w-0 max-w-full overflow-hidden rounded-2xl border border-navy/[0.1] bg-white shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08)] ring-1 ring-black/[0.04] transition hover:border-gold/40 hover:shadow-md hover:ring-gold/15"
           >
-            <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden bg-gradient-to-br from-navy/8 to-gold/15">
+            <div className="relative h-[4.25rem] w-[4.25rem] shrink-0 overflow-hidden bg-gradient-to-br from-navy/[0.07] to-gold/12 sm:h-[4.5rem] sm:w-[4.5rem]">
               {thumb ? (
                 <img
                   src={thumb}
@@ -44,8 +44,8 @@ export function AiChatbotMediaCards({
                 />
               )}
             </div>
-            <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-2">
-              <p className="line-clamp-2 text-xs font-bold leading-snug text-navy group-hover:text-navy-dark">
+            <div className="flex min-w-0 flex-1 flex-col justify-center px-2.5 py-2 sm:px-3">
+              <p className="line-clamp-2 break-words text-xs font-bold leading-snug text-navy group-hover:text-navy-dark">
                 {label}
               </p>
               <p className="mt-0.5 text-[11px] font-bold tabular-nums text-gold-dark">

@@ -73,6 +73,7 @@ export default async function MediaDetailPage({ params }: Props) {
   const casePhotos = media.caseStudyPhotos ?? [];
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
+  const extraGalleryImages = galleryImages.slice(1);
   const typeLabel =
     (isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en) ?? "";
   const featuresText = isKo ? media.features : media.featuresEn;
@@ -86,9 +87,10 @@ export default async function MediaDetailPage({ params }: Props) {
     <>
       <TrackMediaView mediaId={media.id} />
       <MediaDetailHeroGallery
-        images={galleryImages}
+        images={heroImage ? [heroImage] : []}
         heroSrc={heroImage}
         altBase={isKo ? media.name : media.nameEn}
+        showThumbnails={false}
         labels={{
           close: t("galleryLightboxClose"),
           prev: t("galleryLightboxPrev"),
@@ -318,13 +320,16 @@ export default async function MediaDetailPage({ params }: Props) {
             </div>
           </section>
 
-          {casePhotos.length > 0 && (
+          {(casePhotos.length > 0 || extraGalleryImages.length > 0) && (
             <>
               <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
                 {t("caseStudiesTitle")}
               </h2>
               <MediaCaseStudyGallery
-                photos={casePhotos}
+                photos={[
+                  ...casePhotos,
+                  ...extraGalleryImages.map((url) => ({ url })),
+                ]}
                 isKo={isKo}
                 labels={{
                   close: t("galleryLightboxClose"),

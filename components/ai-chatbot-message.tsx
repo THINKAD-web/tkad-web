@@ -75,30 +75,30 @@ export function AiChatbotMessage({
   return (
     <div
       className={cn(
-        "flex w-full flex-col gap-1",
+        "flex w-full min-w-0 max-w-full flex-col gap-1",
         isUser ? "items-end" : "items-start",
         className,
       )}
     >
       <div
         className={cn(
-          "max-w-[min(100%,20rem)] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
+          "max-w-[min(100%,min(20rem,calc(100%-0.25rem)))] rounded-2xl px-3 py-2.5 text-sm shadow-[0_1px_2px_rgba(15,23,42,0.06)] sm:px-3.5 sm:py-2.5",
           isUser
-            ? "rounded-br-md bg-navy text-white"
-            : "rounded-bl-md border border-navy/8 bg-slate-100/95 text-navy",
+            ? "rounded-br-md bg-gradient-to-br from-navy to-[#0f1c33] text-white ring-1 ring-white/10"
+            : "rounded-bl-md border border-navy/[0.09] bg-gradient-to-b from-slate-50 to-slate-100/90 text-navy",
         )}
       >
         {isUser ? (
-          <p className="whitespace-pre-wrap break-words leading-relaxed">
+          <p className="break-words [overflow-wrap:anywhere] whitespace-pre-wrap leading-relaxed">
             {content}
           </p>
         ) : (
           <div
             className={cn(
-              "prose prose-sm max-w-none prose-p:my-1 prose-p:leading-relaxed",
+              "prose prose-sm max-w-none break-words prose-p:my-1 prose-p:leading-relaxed [overflow-wrap:anywhere]",
               "prose-ul:my-1 prose-li:my-0.5 prose-headings:my-2 prose-headings:text-base",
               "prose-headings:font-semibold prose-headings:text-navy prose-strong:text-navy",
-              "prose-a:text-navy-dark",
+              "prose-a:text-navy-dark prose-pre:my-2 prose-pre:max-w-full prose-pre:overflow-x-auto prose-pre:rounded-lg prose-pre:border prose-pre:border-navy/10 prose-pre:bg-white/80 prose-pre:text-[0.8125rem]",
             )}
           >
             <ReactMarkdown

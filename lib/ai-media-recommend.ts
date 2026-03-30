@@ -28,6 +28,12 @@ export type AiRecommendInput = {
   budgetMaxMan: number;
   region: string;
   industry: Industry;
+  /** Media type filter. "all" (default) disables filtering. */
+  type?: string;
+  /** Minimum visibility score (0–100). 0 disables filtering. */
+  minVisibility?: number;
+  /** Minimum daily foot traffic. 0 disables filtering. */
+  minDailyFootTraffic?: number;
 };
 
 export type MatchReason = { ko: string; en: string };
@@ -38,11 +44,15 @@ export type ScoredMedia = {
   reasons: MatchReason[];
 };
 
-/** score = budget*0.4 + target*0.3 + region*0.2 + visibility*0.1 (각 0–100) */
-const W_BUDGET = 0.4;
-const W_TARGET = 0.3;
+/**
+ * score = budget*0.30 + target*0.35 + region*0.20 + visibility*0.10 + value*0.05
+ * (각 0–100 근사)
+ */
+const W_BUDGET = 0.3;
+const W_TARGET = 0.35;
 const W_REGION = 0.2;
 const W_VISIBILITY = 0.1;
+const W_VALUE = 0.05;
 
 function mediaHaystack(m: MediaItem): string {
   return [
@@ -143,7 +153,9 @@ function parseMediaAgeRanges(raw: string | undefined): { min: number; max: numbe
 /** 타겟 매칭 — 연령 구간 겹침 0–100 */
 function subscoreAgeOverlap(mediaText: string | undefined, target: TargetAudience): number {
   const spans = parseMediaAgeRanges(mediaText);
-  if (spans.length === 0) return 52;
+  // If we have no profile for the media, don't give it a neutral "pass".
+  // Slightly conservative so explicit target signals win.
+  if (spans.length === 0) return 45;
   const band = targetAudienceBand(target);
   let best = 0;
   for (const s of spans) {
@@ -274,6 +286,18 @@ function subscoreVisibility(m: MediaItem): number {
   return Math.min(100, Math.round(36 + 64 * (1 - Math.exp(-f / 220000))));
 }
 
+/** 가성비/효율(유동 대비 단가) 0–100 */
+function subscoreValue(m: MediaItem): number {
+  const p = Math.max(1, Number.isFinite(m.price) ? m.price : 1);
+  const f = Math.max(0, Number.isFinite(m.dailyFootTraffic) ? m.dailyFootTraffic : 0);
+  // r = foot-traffic per 1만원. ~ (200k / 3000) = 66.7
+  const r = f / p;
+  if (r <= 0) return 35;
+  // Smooth saturation; tuned so 40~80 range separates meaningfully.
+  const s = 100 * (1 - Math.exp(-r / 90));
+  return Math.max(0, Math.min(100, Math.round(s)));
+}
+
 /** 예산 적합도 0–100 (상한 없음: 중립, 상한 있음: 여유가 클수록 높음) */
 function subscoreBudget(
   m: MediaItem,
@@ -285,6 +309,22 @@ function subscoreBudget(
   if (p <= 0) return 92;
   const ratio = Math.min(1, p / cap);
   return Math.round(45 + 55 * (1 - ratio));
+}
+
+function typeMatchesMedia(m: MediaItem, filter: string | undefined): boolean {
+  const f = (filter ?? "all").trim().toLowerCase();
+  if (!f || f === "all") return true;
+  const t = (m.type ?? "").trim().toLowerCase();
+
+  // Normalize common aliases.
+  const norm = (x: string): string => {
+    if (x === "billboard") return "static";
+    if (x === "subway" || x === "bus" || x === "transport") return "mobile";
+    if (x === "network") return "digital";
+    return x;
+  };
+
+  return norm(t) === norm(f);
 }
 
 function dedupeReasons(reasons: MatchReason[]): MatchReason[] {
@@ -372,11 +412,20 @@ function scoreOne(
     });
   }
 
+  const value = subscoreValue(m);
+  if (value >= 70) {
+    reasons.push({
+      ko: "유동 대비 단가(가성비) 관점에서 유리",
+      en: "Strong value (footfall per price)",
+    });
+  }
+
   const score = Math.round(
     budgetFit * W_BUDGET +
       targetMatching * W_TARGET +
       regionFit * W_REGION +
-      visibility * W_VISIBILITY,
+      visibility * W_VISIBILITY +
+      value * W_VALUE,
   );
 
   return {
@@ -403,11 +452,22 @@ export function recommendMedia(
   if (input.region !== "all") {
     pool = pool.filter((m) => regionMatchesMedia(m, input.region));
   }
+  if (input.type && input.type !== "all") {
+    pool = pool.filter((m) => typeMatchesMedia(m, input.type));
+  }
+  const minVis = Math.max(0, Math.round(input.minVisibility ?? 0));
+  if (minVis > 0) {
+    pool = pool.filter((m) => subscoreVisibility(m) >= minVis);
+  }
+  const minFt = Math.max(0, Math.round(input.minDailyFootTraffic ?? 0));
+  if (minFt > 0) {
+    pool = pool.filter((m) => (m.dailyFootTraffic ?? 0) >= minFt);
+  }
   if (pool.length === 0) return [];
 
   return [...pool]
     .map((m) => scoreOne(m, input, budgetCap))
-    .filter((s) => s.score >= 22)
+    .filter((s) => s.score >= 30)
     .sort((a, b) => b.score - a.score)
     .slice(0, 15);
 }

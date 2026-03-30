@@ -183,6 +183,13 @@ export function CampaignMonitoringMap({
         bounds.extend({ lat: p.lat, lng: p.lng });
       }
       map.fitBounds(bounds);
+      window.setTimeout(() => {
+        const m = map as { getZoom?: () => number; setZoom?: (z: number) => void };
+        const z = m.getZoom?.();
+        if (typeof z === "number" && z > 14) {
+          m.setZoom?.(14);
+        }
+      }, 400);
 
       googleMapCtxRef.current = { map };
       bumpMapEpoch();
@@ -274,6 +281,16 @@ export function CampaignMonitoringMap({
           bounds.extend(new K.LatLng(p.lat, p.lng));
         }
         map.setBounds(bounds);
+        // 동일·근접 좌표만 있으면 과확대 → 레벨 숫자가 작을수록 확대이므로 최소 레벨 6 이상으로 완화
+        const minLevelWide = 6;
+        const mapAny = map as {
+          getLevel?: () => number;
+          setLevel: (n: number) => void;
+        };
+        const lv = mapAny.getLevel?.();
+        if (typeof lv === "number" && lv < minLevelWide) {
+          mapAny.setLevel(minLevelWide);
+        }
 
         kakaoMapCtxRef.current = { map, LatLng: K.LatLng };
         bumpMapEpoch();

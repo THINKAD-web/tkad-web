@@ -67,6 +67,7 @@ import {
   type MediaAdvancedFilterState,
 } from "@/lib/media-filter-advanced";
 import MediaAdvancedFiltersPanel from "@/components/media-advanced-filters-panel";
+import MediaRegionReference from "@/components/media-region-reference";
 import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
@@ -379,6 +380,9 @@ export default function MediaBrowseClient({
                         </option>
                       ))}
                     </select>
+                    <div className="mt-3">
+                      <MediaRegionReference />
+                    </div>
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-semibold text-navy">
@@ -620,17 +624,21 @@ export default function MediaBrowseClient({
                 ) : (
                   <>
                     {catalogCardLayout === "grid" ? (
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {pagedCatalog.map((media) => {
+                      const detailHref = mediaItemDetailPath(media.id);
                       return (
-                        <Card
+                        <Link
                           key={media.id}
-                          className="overflow-hidden transition-shadow hover:shadow-lg"
+                          href={detailHref}
+                          aria-label={isKo ? media.name : media.nameEn}
+                          className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
                         >
+                          <Card className="relative overflow-hidden gap-0 py-0 transition-shadow hover:shadow-lg sm:gap-6 sm:py-6 motion-safe:hover:translate-y-0 sm:motion-safe:hover:-translate-y-[4px]">
                           <MediaCatalogThumbnail
                             media={media}
                             placeholderLabel={t("media.imagePreparing")}
-                            className="flex h-28 items-center justify-center sm:h-32"
+                            className="flex h-[7.25rem] items-center justify-center sm:h-36"
                             bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/10 to-transparent"
                           >
                             {media.catalogSource !== "network" ? (
@@ -645,7 +653,14 @@ export default function MediaBrowseClient({
                                 })}
                               </div>
                             )}
-                            <label className="absolute top-2.5 left-2.5 z-10 flex cursor-pointer select-none items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-navy shadow-sm backdrop-blur-sm">
+                            <label
+                              className="absolute top-2.5 left-2.5 z-20 flex cursor-pointer select-none items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-navy shadow-sm backdrop-blur-sm"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            >
                               <input
                                 type="checkbox"
                                 checked={isInCompare(media.id)}
@@ -666,89 +681,73 @@ export default function MediaBrowseClient({
                               </div>
                             )}
                           </MediaCatalogThumbnail>
-                          <CardHeader className="pb-2">
-                            <div className="flex items-center justify-between">
+                          <CardHeader className="relative z-0 space-y-1.5 px-4 pb-2.5 pt-2 sm:space-y-2 sm:px-6 sm:pb-3 sm:pt-3">
+                            <div className="flex items-center justify-between gap-2">
                               <Badge
                                 variant="secondary"
-                                className="bg-navy/5 text-xs text-navy"
+                                className="bg-navy/5 text-[11px] text-navy sm:text-xs"
                               >
                                 {isKo
                                   ? (typeLabels[media.type]?.ko ?? media.type)
                                   : (typeLabels[media.type]?.en ?? media.type)}
                               </Badge>
-                              <Link
-                                href={mediaItemDetailPath(media.id)}
-                                className="text-xs font-semibold text-gold hover:text-gold-dark"
-                              >
-                                {t("media.cardDetail")}
-                              </Link>
                             </div>
-                            <CardTitle className="text-sm leading-snug">
+                            <CardTitle className="line-clamp-2 text-[13px] leading-snug sm:text-sm">
                               {isKo ? media.name : media.nameEn}
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="pt-0">
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <MapPin className="h-3 w-3" />
-                              {isKo ? media.location : media.locationEn}
+                          <CardContent className="relative z-0 space-y-2.5 px-4 pb-4 pt-0 sm:space-y-3 sm:px-6 sm:pb-6">
+                            <div className="flex items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-xs">
+                              <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+                              <span className="line-clamp-2">
+                                {isKo ? media.location : media.locationEn}
+                              </span>
                             </div>
-                            <div className="mt-1.5">
-                              <div className="text-base font-bold text-navy">
+                            <div className="space-y-0.5">
+                              <div className="text-[15px] font-bold tabular-nums text-navy sm:text-base">
                                 ₩{media.price.toLocaleString()}
-                                <span className="text-xs font-normal text-muted-foreground">
+                                <span className="text-[11px] font-normal text-muted-foreground sm:text-xs">
                                   만원 {t("media.perMonth")}
                                 </span>
                               </div>
-                              <div className="text-[11px] text-muted-foreground">
+                              <div className="text-[10px] text-muted-foreground sm:text-[11px]">
                                 {isKo
                                   ? `월 ${media.price.toLocaleString()}만원~`
                                   : `From ₩${media.price.toLocaleString()}M/mo`}
                               </div>
                             </div>
-                            <div className="mt-3 border-t pt-3">
-                              <ShareButtons
-                                compact
-                                url={`/${locale}${mediaItemDetailPath(media.id)}`}
-                                title={isKo ? media.name : media.nameEn}
-                                description={`${isKo ? media.location : media.locationEn} - ₩${media.price.toLocaleString()}만원/${t("media.perMonth")}`}
-                                locale={locale}
-                              />
-                            </div>
-                            <div className="mt-3 flex flex-col gap-2">
-                              <Link
-                                href={mediaItemDetailPath(media.id)}
-                                className="flex w-full items-center justify-center gap-1.5 rounded-md border border-navy/15 bg-white px-3 py-2 text-sm font-semibold text-navy transition-colors hover:bg-slate-50"
-                              >
-                                {t("media.cardDetail")}
-                              </Link>
-                              <Link
-                                href={`/quote?media=${media.id}`}
-                                className="flex w-full items-center justify-center gap-1.5 rounded-md bg-gold px-3 py-2 text-sm font-semibold text-navy transition-colors hover:bg-gold-dark"
-                              >
-                                <Calculator className="h-3.5 w-3.5" />
-                                {isKo ? "견적 받기" : "Get Quote"}
-                              </Link>
-                            </div>
                           </CardContent>
-                        </Card>
+                          </Card>
+                        </Link>
                       );
                     })}
                   </div>
                     ) : (
-                  <div className="flex flex-col gap-2">
-                    {pagedCatalog.map((media) => (
-                      <div
+                  <div className="flex flex-col gap-2 sm:gap-3">
+                    {pagedCatalog.map((media) => {
+                      const detailHref = mediaItemDetailPath(media.id);
+                      return (
+                      <Link
                         key={media.id}
-                        className="flex gap-3 rounded-xl border border-navy/10 bg-white p-2 shadow-sm transition-shadow hover:shadow-md sm:gap-3 sm:p-2.5"
+                        href={detailHref}
+                        aria-label={isKo ? media.name : media.nameEn}
+                        className="relative flex rounded-lg border border-navy/10 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 sm:gap-4 sm:rounded-xl sm:p-3.5"
                       >
                         <MediaCatalogThumbnail
                           media={media}
                           placeholderLabel={t("media.imagePreparing")}
-                          className="relative h-[4.5rem] w-[5.25rem] shrink-0 overflow-hidden rounded-lg sm:h-[5rem] sm:w-24"
+                          className="relative z-10 h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-md sm:h-24 sm:w-28 sm:rounded-lg"
                           bottomGradientClassName={null}
                           placeholderSize="xs"
                         >
-                          <label className="absolute left-1 top-1 z-10 flex cursor-pointer select-none items-center gap-0.5 rounded-full bg-white/95 px-1.5 py-0.5 text-[9px] font-medium text-navy shadow-sm">
+                          <label
+                            className="absolute left-1 top-1 z-20 flex cursor-pointer select-none items-center gap-0.5 rounded-full bg-white/95 px-1.5 py-0.5 text-[9px] font-medium text-navy shadow-sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          >
                             <input
                               type="checkbox"
                               checked={isInCompare(media.id)}
@@ -763,57 +762,41 @@ export default function MediaBrowseClient({
                             {isKo ? "비교" : "Cmp"}
                           </label>
                         </MediaCatalogThumbnail>
-                        <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
-                          <div className="flex flex-wrap items-center gap-1.5">
+                        <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 sm:gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                             <Badge
                               variant="secondary"
-                              className="bg-navy/5 px-1.5 py-0 text-[10px] text-navy"
+                              className="bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
                             >
                               {isKo
                                 ? (typeLabels[media.type]?.ko ?? media.type)
                                 : (typeLabels[media.type]?.en ?? media.type)}
                             </Badge>
                             {popularIds.has(media.id) && (
-                              <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[9px] font-bold text-navy">
-                                <Flame className="h-2.5 w-2.5" />
+                              <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[8px] font-bold text-navy sm:text-[9px]">
+                                <Flame className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
                                 {isKo ? "인기" : "Hot"}
                               </span>
                             )}
                           </div>
-                          <Link
-                            href={mediaItemDetailPath(media.id)}
-                            className="line-clamp-2 text-sm font-bold leading-snug text-navy hover:text-gold-dark"
-                          >
+                          <p className="line-clamp-2 text-[13px] font-bold leading-snug text-navy sm:text-sm sm:leading-relaxed">
                             {isKo ? media.name : media.nameEn}
-                          </Link>
-                          <p className="line-clamp-1 text-[11px] text-muted-foreground">
-                            <MapPin className="mr-0.5 inline h-3 w-3 align-text-bottom" />
+                          </p>
+                          <p className="line-clamp-2 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
+                            <MapPin className="mr-0.5 inline h-2.5 w-2.5 align-text-bottom sm:h-3 sm:w-3" />
                             {isKo ? media.location : media.locationEn}
                           </p>
-                          <p className="text-sm font-bold tabular-nums text-navy">
+                          <p className="text-[13px] font-bold tabular-nums leading-none text-navy sm:text-sm">
                             ₩{media.price.toLocaleString()}
-                            <span className="text-[10px] font-normal text-muted-foreground">
+                            <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
                               {" "}
                               만원 {t("media.perMonth")}
                             </span>
                           </p>
-                          <div className="mt-1 flex flex-wrap gap-1.5">
-                            <Link
-                              href={mediaItemDetailPath(media.id)}
-                              className="rounded-md border border-navy/15 px-2 py-1 text-[11px] font-semibold text-navy hover:bg-slate-50"
-                            >
-                              {t("media.cardDetail")}
-                            </Link>
-                            <Link
-                              href={`/quote?media=${media.id}`}
-                              className="rounded-md bg-gold px-2 py-1 text-[11px] font-semibold text-navy hover:bg-gold-dark"
-                            >
-                              {isKo ? "견적" : "Quote"}
-                            </Link>
-                          </div>
                         </div>
-                      </div>
-                    ))}
+                      </Link>
+                      );
+                    })}
                   </div>
                     )}
                     {catalogPageCount > 1 ? (

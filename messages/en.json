@@ -134,6 +134,54 @@
       "jeju": "Jeju",
       "national": "Nationwide"
     },
+    "regionReference": {
+      "toggle": "City & region reference",
+      "expandHint": "Expand",
+      "collapseHint": "Collapse",
+      "intro": "Reference list of major cities for search and briefings. Use the region filter above (Seoul, Busan, Jeju, Nationwide) and keywords to find media.",
+      "sections": {
+        "metro": {
+          "title": "Metropolitan cities (special/metro cities)",
+          "body": "Seoul · Busan · Daegu · Incheon · Gwangju (metro) · Daejeon · Ulsan · Sejong"
+        },
+        "gyeonggi": {
+          "title": "Gyeonggi Province — major cities",
+          "body": "Suwon · Goyang · Yongin · Seongnam · Bucheon · Hwaseong · Namyangju · Ansan · Pyeongtaek · Siheung · Gimpo · Uijeongbu · Gwangju (Gyeonggi) · Hanam · Icheon · Anyang · Osan · Gunpo · Uiwang · Yangju · Guri · Pocheon · Dongducheon · Anseong · Yeoju · Paju · Gwacheon · Gwangmyeong · Yangpyeong (per some sources)"
+        },
+        "gangwon": {
+          "title": "Gangwon State",
+          "body": "Chuncheon · Wonju · Gangneung · Donghae · Sokcho · Samcheok · Taebaek"
+        },
+        "chungbuk": {
+          "title": "North Chungcheong",
+          "body": "Cheongju · Chungju · Jecheon"
+        },
+        "chungnam": {
+          "title": "South Chungcheong",
+          "body": "Cheonan · Gongju · Boryeong · Asan · Seosan · Nonsan · Gyeryong · Dangjin"
+        },
+        "jeonbuk": {
+          "title": "Jeonbuk State",
+          "body": "Jeonju · Iksan · Gunsan · Jeongeup · Namwon · Gimje"
+        },
+        "jeonnam": {
+          "title": "South Jeolla",
+          "body": "Mokpo · Yeosu · Suncheon · Naju · Gwangyang"
+        },
+        "gyeongbuk": {
+          "title": "North Gyeongsang",
+          "body": "Pohang · Gyeongju · Gimcheon · Andong · Gumi · Yeongju · Yeongcheon · Sangju · Mungyeong · Gyeongsan"
+        },
+        "gyeongnam": {
+          "title": "South Gyeongsang",
+          "body": "Changwon · Jinju · Tongyeong · Sacheon · Gimhae · Miryang · Geoje · Yangsan"
+        },
+        "jeju": {
+          "title": "Jeju State",
+          "body": "Jeju City · Seogwipo, etc."
+        }
+      }
+    },
     "types": {
       "digital": "Digital",
       "static": "Static",

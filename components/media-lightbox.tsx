@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export type MediaLightboxLabels = {
@@ -29,24 +36,35 @@ export default function MediaLightbox({
   altBase,
   labels,
 }: Props) {
-  const safe =
-    images.length > 0
-      ? images
-      : ["https://picsum.photos/seed/tkad-media-empty/1200/800"];
+  const safe = images.filter((u) => typeof u === "string" && u.trim().length > 0);
   const n = safe.length;
-  const idx = Math.min(Math.max(0, index), n - 1);
-  const src = safe[idx] ?? safe[0];
+  const idx = n > 0 ? Math.min(Math.max(0, index), n - 1) : 0;
+  const src = safe[idx] ?? "";
+  const indexRef = useRef(idx);
+
+  useLayoutEffect(() => {
+    indexRef.current = idx;
+  }, [idx, open]);
+
   const slideKey = `${idx}-${src}`;
   const [failedSlideKey, setFailedSlideKey] = useState<string | null>(null);
   const imgFailed = failedSlideKey === slideKey;
 
   const goPrev = useCallback(() => {
-    onIndexChange((idx - 1 + n) % n);
-  }, [idx, n, onIndexChange]);
+    if (n < 2) return;
+    const cur = indexRef.current;
+    const next = (cur - 1 + n) % n;
+    indexRef.current = next;
+    onIndexChange(next);
+  }, [n, onIndexChange]);
 
   const goNext = useCallback(() => {
-    onIndexChange((idx + 1) % n);
-  }, [idx, n, onIndexChange]);
+    if (n < 2) return;
+    const cur = indexRef.current;
+    const next = (cur + 1) % n;
+    indexRef.current = next;
+    onIndexChange(next);
+  }, [n, onIndexChange]);
 
   const close = useCallback(() => {
     onClose();
@@ -71,34 +89,35 @@ export default function MediaLightbox({
   }, [open, close, goPrev, goNext]);
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    }
+    if (!open) return;
+    const prevHtml = document.documentElement.style.overflow;
+    const prevBody = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
     };
   }, [open]);
 
-  if (!open) return null;
+  if (!open || n === 0 || typeof document === "undefined") {
+    return null;
+  }
 
-  return (
+  const overlay = (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-white/90 p-3 pt-14 pb-8 backdrop-blur-md sm:p-4"
+      className="fixed inset-0 z-[200] flex flex-col bg-black/92"
       role="dialog"
       aria-modal="true"
       aria-label={labels.expand}
-      onClick={close}
     >
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          close();
-        }}
-        className="absolute top-4 right-4 z-[92] flex h-11 w-11 items-center justify-center rounded-full border border-navy/10 bg-white text-navy shadow-md transition hover:bg-slate-50"
+        onClick={close}
+        className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
         aria-label={labels.close}
       >
-        <X className="h-5 w-5" />
+        <X className="h-6 w-6" strokeWidth={2} />
       </button>
 
       {n > 1 ? (
@@ -109,10 +128,10 @@ export default function MediaLightbox({
               e.stopPropagation();
               goPrev();
             }}
-            className="absolute top-1/2 left-2 z-[92] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-navy/10 bg-white text-navy shadow-md transition hover:bg-slate-50 sm:left-4"
+            className="absolute left-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:left-4"
             aria-label={labels.prev}
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-7 w-7" strokeWidth={2} />
           </button>
           <button
             type="button"
@@ -120,48 +139,62 @@ export default function MediaLightbox({
               e.stopPropagation();
               goNext();
             }}
-            className="absolute top-1/2 right-2 z-[92] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-navy/10 bg-white text-navy shadow-md transition hover:bg-slate-50 sm:right-4"
+            className="absolute right-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:right-4"
             aria-label={labels.next}
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-7 w-7" strokeWidth={2} />
           </button>
         </>
       ) : null}
 
       <div
-        className="relative z-[91] mx-auto flex min-h-0 w-full max-w-[min(96vw,100%)] items-center justify-center rounded-2xl bg-slate-100/80 px-2 py-4 ring-1 ring-navy/5"
-        onClick={(e) => e.stopPropagation()}
+        className="flex min-h-0 flex-1 flex-col items-center justify-center px-3 pb-10 pt-14 sm:px-6"
+        onClick={close}
       >
-        {imgFailed ? (
-          <div className="max-w-md rounded-xl border border-navy/10 bg-white px-5 py-8 text-center text-navy shadow-sm">
-            <p className="text-sm font-semibold">
-              이미지를 불러올 수 없습니다.
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Could not load image. Open in a new tab or check the URL.
-            </p>
-            <a
-              href={src}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-block text-sm font-semibold text-gold-dark underline underline-offset-4 hover:text-navy"
-            >
-              새 탭에서 열기 / Open in new tab
-            </a>
-          </div>
-        ) : (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            key={src}
-            src={src}
-            alt={`${altBase} — ${idx + 1} / ${n}`}
-            className="mx-auto max-h-[min(82dvh,85vh)] w-auto max-w-full rounded-lg object-contain shadow-lg ring-1 ring-black/5"
-            loading="eager"
-            decoding="async"
-                onError={() => setFailedSlideKey(slideKey)}
-          />
-        )}
+        <div
+          className="flex max-h-[min(78dvh,82vh)] w-full max-w-5xl flex-1 items-center justify-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {imgFailed ? (
+            <div className="rounded-lg border border-white/20 bg-white/5 px-6 py-8 text-center text-white">
+              <p className="text-sm font-medium">이미지를 불러올 수 없습니다.</p>
+              <p className="mt-2 text-xs text-white/70">
+                Could not load image.
+              </p>
+              {src ? (
+                <a
+                  href={src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block text-sm font-semibold text-gold underline-offset-4 hover:underline"
+                >
+                  새 탭에서 열기
+                </a>
+              ) : null}
+            </div>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={slideKey}
+              src={src}
+              alt={`${altBase} — ${idx + 1} / ${n}`}
+              className="max-h-full max-w-full object-contain"
+              loading="eager"
+              decoding="async"
+              draggable={false}
+              onError={() => setFailedSlideKey(slideKey)}
+            />
+          )}
+        </div>
+
+        {n > 1 ? (
+          <p className="mt-2 text-center text-xs font-medium text-white/80">
+            {idx + 1} / {n}
+          </p>
+        ) : null}
       </div>
     </div>
   );
+
+  return createPortal(overlay, document.body);
 }

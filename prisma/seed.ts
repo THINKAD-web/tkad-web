@@ -3,10 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { randomBytes, scryptSync } from "crypto";
-import {
-  SAMPLE_SUCCESS_CASE_ID,
-  sampleSuccessCaseSeedData,
-} from "@/lib/sample-success-case";
+import { allSampleSuccessCaseSeedData } from "@/lib/sample-success-case";
 
 function hashPassword(plain: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -165,32 +162,34 @@ async function main() {
   }
   console.log(`Inquiries: ${inquiryData.length} created`);
 
-  // --- Published sample success case (matches /cases fallback copy) ---
-  const sampleCase = sampleSuccessCaseSeedData();
-  await prisma.successCase.upsert({
-    where: { id: SAMPLE_SUCCESS_CASE_ID },
-    create: sampleCase,
-    update: {
-      status: "published",
-      clientName: sampleCase.clientName,
-      industry: sampleCase.industry,
-      titleKo: sampleCase.titleKo,
-      titleEn: sampleCase.titleEn,
-      summaryKo: sampleCase.summaryKo,
-      challengeKo: sampleCase.challengeKo,
-      solutionKo: sampleCase.solutionKo,
-      resultsKo: sampleCase.resultsKo,
-      metricsJson: sampleCase.metricsJson,
-      mediaUsed: sampleCase.mediaUsed,
-      periodStart: sampleCase.periodStart,
-      periodEnd: sampleCase.periodEnd,
-      thumbnailUrl: sampleCase.thumbnailUrl,
-      galleryUrls: sampleCase.galleryUrls,
-      testimonialKo: sampleCase.testimonialKo,
-      publishedAt: sampleCase.publishedAt,
-    },
-  });
-  console.log(`Success case sample: ${SAMPLE_SUCCESS_CASE_ID} (published)`);
+  // --- Published sample success cases (matches /cases fallback copy) ---
+  const sampleCases = allSampleSuccessCaseSeedData();
+  for (const sampleCase of sampleCases) {
+    await prisma.successCase.upsert({
+      where: { id: sampleCase.id! },
+      create: sampleCase,
+      update: {
+        status: "published",
+        clientName: sampleCase.clientName,
+        industry: sampleCase.industry,
+        titleKo: sampleCase.titleKo,
+        titleEn: sampleCase.titleEn,
+        summaryKo: sampleCase.summaryKo,
+        challengeKo: sampleCase.challengeKo,
+        solutionKo: sampleCase.solutionKo,
+        resultsKo: sampleCase.resultsKo,
+        metricsJson: sampleCase.metricsJson,
+        mediaUsed: sampleCase.mediaUsed,
+        periodStart: sampleCase.periodStart,
+        periodEnd: sampleCase.periodEnd,
+        thumbnailUrl: sampleCase.thumbnailUrl,
+        galleryUrls: sampleCase.galleryUrls,
+        testimonialKo: sampleCase.testimonialKo,
+        publishedAt: sampleCase.publishedAt,
+      },
+    });
+    console.log(`Success case sample: ${sampleCase.id} (published)`);
+  }
 
   console.log("\nSeed completed!");
   await prisma.$disconnect();

@@ -13,8 +13,8 @@ import type {
 import prisma, { isDatabaseConfigured } from "@/lib/prisma";
 import {
   getSampleSuccessCaseDetail,
-  getSampleSuccessCaseListItem,
-  SAMPLE_SUCCESS_CASE_ID,
+  getSampleSuccessCaseListItems,
+  isSampleSuccessCaseId,
 } from "@/lib/sample-success-case";
 
 export async function getPublishedInsightReports(): Promise<InsightReport[]> {
@@ -39,7 +39,7 @@ export async function getPublishedSuccessCases(): Promise<
   PublicSuccessCaseListItem[]
 > {
   if (!isDatabaseConfigured()) {
-    return [getSampleSuccessCaseListItem()];
+    return getSampleSuccessCaseListItems();
   }
   const rows = await prisma.successCase.findMany({
     where: { status: "published" },
@@ -47,7 +47,7 @@ export async function getPublishedSuccessCases(): Promise<
   });
   const mapped = rows.map(successCaseToPublicListItem);
   if (mapped.length === 0) {
-    return [getSampleSuccessCaseListItem()];
+    return getSampleSuccessCaseListItems();
   }
   return mapped;
 }
@@ -60,7 +60,7 @@ export async function getPublishedSuccessCaseById(
   if (!CUID_RE.test(id)) return null;
 
   if (!isDatabaseConfigured()) {
-    return id === SAMPLE_SUCCESS_CASE_ID ? getSampleSuccessCaseDetail() : null;
+    return getSampleSuccessCaseDetail(id);
   }
 
   const row = await prisma.successCase.findFirst({
@@ -68,10 +68,10 @@ export async function getPublishedSuccessCaseById(
   });
   if (row) return successCaseToPublicDetail(row);
 
-  if (id !== SAMPLE_SUCCESS_CASE_ID) return null;
+  if (!isSampleSuccessCaseId(id)) return null;
 
   const publishedCount = await prisma.successCase.count({
     where: { status: "published" },
   });
-  return publishedCount === 0 ? getSampleSuccessCaseDetail() : null;
+  return publishedCount === 0 ? getSampleSuccessCaseDetail(id) : null;
 }

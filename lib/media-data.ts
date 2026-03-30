@@ -155,6 +155,37 @@ export function latLngToFallbackPercent(lat: number, lng: number): { x: number; 
   };
 }
 
+/**
+ * 동일·근접 좌표에 여러 핀이 있으면 카카오/구글에서 한 점으로만 보이거나 과확대되는 문제가 생김.
+ * 표시용으로만 아주 작은 오프셋을 준다 (목록·상세의 주소 좌표는 그대로).
+ */
+function adjustOverlappingMapCoords(
+  coords: { lat: number; lng: number }[],
+): { lat: number; lng: number }[] {
+  const out = coords.map((c) => ({ ...c }));
+  const groups = new Map<string, number[]>();
+  coords.forEach((c, i) => {
+    const key = `${c.lat.toFixed(5)}_${c.lng.toFixed(5)}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(i);
+  });
+  const step = 0.00045;
+  for (const idxs of groups.values()) {
+    if (idxs.length < 2) continue;
+    idxs.forEach((idx, i) => {
+      if (i === 0) return;
+      const ring = Math.floor((i - 1) / 8) + 1;
+      const slot = (i - 1) % 8;
+      const angle = (slot * Math.PI) / 4;
+      out[idx] = {
+        lat: coords[idx].lat + Math.sin(angle) * step * ring,
+        lng: coords[idx].lng + Math.cos(angle) * step * ring,
+      };
+    });
+  }
+  return out;
+}
+
 function mediaTypeToMapType(type: string): CampaignMapMediaType {
   if (type === "static") return "billboard";
   if (type === "mobile") return "transport";
@@ -175,15 +206,19 @@ export function mediaItemsToCampaignPins(
   items: readonly MediaItem[],
 ): CampaignMapPin[] {
   const gallery = (m: MediaItem) => resolveMediaGallery(m)[0] ?? "";
-  return items.map((m) => {
-    const { x, y } = latLngToFallbackPercent(m.lat, m.lng);
+  const raw = items.map((m) => ({ lat: m.lat, lng: m.lng }));
+  const adjusted = adjustOverlappingMapCoords(raw);
+  return items.map((m, i) => {
+    const lat = adjusted[i].lat;
+    const lng = adjusted[i].lng;
+    const { x, y } = latLngToFallbackPercent(lat, lng);
     const capKo = `${m.location} · 월 ₩${m.price.toLocaleString()}만`;
     const capEn = `${m.locationEn} · ₩${m.price.toLocaleString()}M/mo`;
     return {
       id: String(m.id),
       projectId: "media-browse",
-      lat: m.lat,
-      lng: m.lng,
+      lat,
+      lng,
       fallbackX: x,
       fallbackY: y,
       mediaType: mediaTypeToMapType(m.type),

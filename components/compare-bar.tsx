@@ -1,6 +1,6 @@
 "use client";
 
-import { X, BarChart3 } from "lucide-react";
+import { X, BarChart3, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
@@ -17,6 +17,7 @@ export default function CompareBar({ items, locale, onRemove, onClear }: Props) 
   const isKo = locale === "ko";
 
   if (items.length === 0) return null;
+  const ids = items.map((m) => m.id).join(",");
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl border-t border-navy/10 bg-white/95 shadow-[0_-10px_40px_-8px_rgba(26,42,108,0.18)] backdrop-blur-md">
@@ -55,6 +56,15 @@ export default function CompareBar({ items, locale, onRemove, onClear }: Props) 
           >
             {isKo ? "초기화" : "Clear"}
           </Button>
+          <Link href={`/quote?media=${ids}`}>
+            <Button
+              size="sm"
+              className="btn-gold rounded-full px-5 text-xs font-bold"
+            >
+              <Calculator className="mr-1.5 h-3.5 w-3.5" />
+              {isKo ? "견적받기" : "Quote"}
+            </Button>
+          </Link>
           <Link
             href={`/compare?ids=${items.map((m) => m.id).join(",")}`}
           >

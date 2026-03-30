@@ -12,6 +12,8 @@ type Props = {
   altBase: string;
   labels: MediaLightboxLabels & { clickHint: string };
   children: ReactNode;
+  /** When false, hide the thumbnail strip even if multiple images exist. */
+  showThumbnails?: boolean;
 };
 
 export default function MediaDetailHeroGallery({
@@ -20,6 +22,7 @@ export default function MediaDetailHeroGallery({
   altBase,
   labels,
   children,
+  showThumbnails = true,
 }: Props) {
   const tMedia = useTranslations("media");
   const [open, setOpen] = useState(false);
@@ -94,7 +97,7 @@ export default function MediaDetailHeroGallery({
         {labels.clickHint}
       </span>
 
-      {safe.length > 1 ? (
+      {showThumbnails && safe.length > 1 ? (
         <div className="pointer-events-auto absolute bottom-3 left-3 right-3 z-[12] flex gap-1.5 overflow-x-auto pb-1 sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-[min(100%,28rem)]">
           {safe.map((src, i) => (
             <button

@@ -6,6 +6,7 @@ import {
   BarChart3,
   Bot,
   FileText,
+  Mail,
   MessageCircle,
   Send,
   Sparkles,
@@ -166,7 +167,7 @@ export default function AiChatbot() {
 
   return (
     <>
-      <div className="group/button fixed bottom-6 right-4 z-[55] sm:right-6">
+      <div className="group/button fixed bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))] right-[max(1rem,env(safe-area-inset-right,0px))] z-[55] sm:bottom-6 sm:right-6">
         {showFabPulse ? (
           <span
             className="pointer-events-none absolute inset-0 z-0 animate-ping rounded-full bg-gold/55"
@@ -201,7 +202,7 @@ export default function AiChatbot() {
 
       {open ? (
         <div
-          className="fixed inset-0 z-[54] bg-black/30 sm:pointer-events-none sm:bg-transparent"
+          className="fixed inset-0 z-[54] bg-navy/45 backdrop-blur-[3px] sm:pointer-events-none sm:bg-transparent sm:backdrop-blur-none"
           aria-hidden={false}
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
@@ -209,68 +210,79 @@ export default function AiChatbot() {
           role="presentation"
         >
           <div
-            className="pointer-events-auto fixed bottom-6 left-0 right-0 z-[56] flex h-[min(520px,80vh)] max-h-[80vh] w-full flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl sm:left-auto sm:right-6 sm:h-[min(520px,88vh)] sm:max-h-none sm:w-[min(400px,calc(100vw-2rem))]"
+            className="pointer-events-auto fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] left-3 right-3 z-[56] flex h-[min(520px,min(85dvh,88vh))] max-h-[min(85dvh,88vh)] min-h-0 min-w-0 max-w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/95 shadow-[0_12px_48px_-8px_rgba(15,23,42,0.45)] ring-1 ring-black/[0.04] backdrop-blur-xl sm:bottom-6 sm:left-auto sm:right-6 sm:h-[min(520px,88vh)] sm:max-h-[88vh] sm:w-[min(400px,calc(100vw-3rem))] sm:max-w-[min(400px,calc(100vw-3rem))]"
             role="dialog"
             aria-label={t("dialogLabel")}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex shrink-0 flex-col border-b-2 border-gold/50 bg-gradient-to-r from-navy-dark via-navy to-navy-dark text-white">
-              <div className="flex items-center gap-3 px-3 py-2.5 sm:px-4">
+            <div className="flex shrink-0 flex-col bg-gradient-to-b from-[#0c1424] via-[#0a1220] to-[#080f1a] text-white">
+              <div className="flex items-center gap-2.5 px-3 py-3 sm:gap-3 sm:px-4">
                 <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/20 ring-2 ring-gold/40"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/25 to-gold/5 shadow-inner ring-1 ring-gold/30"
                   aria-hidden
                 >
                   <span className="relative">
-                    <Bot className="h-5 w-5 text-gold" strokeWidth={2} />
-                    <Sparkles className="absolute -right-1 -top-1 h-3 w-3 text-gold" />
+                    <Bot className="h-[1.125rem] w-[1.125rem] text-gold" strokeWidth={2} />
+                    <Sparkles className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 text-gold/90" />
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold tracking-tight text-white sm:text-sm">
+                  <p className="text-[13px] font-semibold tracking-tight text-white/95 sm:text-sm">
                     {t("title")}
                   </p>
-                  <p className="mt-0.5 truncate text-[10px] font-medium text-gold/90 sm:text-[11px]">
+                  <p className="mt-0.5 truncate text-[10px] font-medium leading-snug text-gold/75 sm:text-[11px]">
                     {t("subtitle")}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="shrink-0 rounded-full p-1.5 text-white/90 hover:bg-white/10"
+                  className="shrink-0 rounded-xl p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
                   aria-label={t("closeAria")}
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" strokeWidth={2.25} />
                 </button>
               </div>
               <div
-                className="flex border-t border-gold/25 px-1"
+                className="px-2 pb-2 sm:px-3"
                 role="tablist"
                 aria-label={t("dialogLabel")}
               >
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={panelTab === tab.id}
-                    onClick={() => setPanelTab(tab.id)}
-                    className={cn(
-                      "min-w-0 flex-1 touch-manipulation border-b-2 py-2.5 text-center text-[11px] font-semibold transition-colors sm:text-xs",
-                      panelTab === tab.id
-                        ? "border-gold text-gold"
-                        : "border-transparent text-white/70 hover:text-white",
-                    )}
-                  >
-                    {tab.id === "chat" ? "💬 " : tab.id === "compare" ? "📊 " : "💛 "}
-                    {tab.label}
-                  </button>
-                ))}
+                <div className="flex gap-1 rounded-xl bg-black/25 p-1 ring-1 ring-white/[0.06]">
+                  {tabs.map((tab) => {
+                    const Icon =
+                      tab.id === "chat"
+                        ? MessageCircle
+                        : tab.id === "compare"
+                          ? BarChart3
+                          : Mail;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={panelTab === tab.id}
+                        onClick={() => setPanelTab(tab.id)}
+                        className={cn(
+                          "flex min-w-0 flex-1 touch-manipulation items-center justify-center gap-1 rounded-lg py-2 text-[10px] font-semibold leading-none transition-all sm:gap-1.5 sm:text-[11px]",
+                          panelTab === tab.id
+                            ? "bg-white/[0.12] text-gold shadow-sm ring-1 ring-gold/25"
+                            : "text-white/55 hover:bg-white/[0.06] hover:text-white/90",
+                        )}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
+                        <span className="truncate">{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
             {panelTab === "chat" ? (
               <>
-                <div className="shrink-0 border-b border-navy/8 bg-slate-50/95 px-2 py-2">
-                  <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-navy/45">
+                <div className="shrink-0 border-b border-navy/[0.07] bg-gradient-to-b from-slate-50/98 to-slate-50/90 px-2 py-2.5 sm:px-3">
+                  <p className="mb-1.5 px-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-navy/40">
                     {t("suggestionsLabel")}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -280,16 +292,16 @@ export default function AiChatbot() {
                         type="button"
                         disabled={loading}
                         onClick={() => applySuggestion(t(key))}
-                        className="rounded-full border border-navy/12 bg-white px-2.5 py-1.5 text-left text-[11px] font-medium leading-snug text-navy shadow-sm transition hover:border-gold/45 hover:bg-gold/5 disabled:opacity-50"
+                        className="max-w-full rounded-full border border-navy/[0.1] bg-white/90 px-2.5 py-1.5 text-left text-[11px] font-medium leading-snug text-navy shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02] transition hover:border-gold/35 hover:bg-amber-50/40 disabled:opacity-50"
                       >
-                        {t(key)}
+                        <span className="break-words">{t(key)}</span>
                       </button>
                     ))}
                   </div>
                 </div>
                 <div
                   ref={listRef}
-                  className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-3"
+                  className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto overflow-x-hidden px-2 py-3 sm:px-3"
                 >
                   {messages.length === 0 && !loading ? (
                     <p className="px-1 text-center text-xs leading-relaxed text-muted-foreground">
@@ -318,19 +330,19 @@ export default function AiChatbot() {
                   ) : null}
                 </div>
 
-                <div className="shrink-0 border-t border-navy/8 bg-white p-3">
+                <div className="shrink-0 border-t border-navy/[0.08] bg-gradient-to-b from-white to-slate-50/80 p-2.5 sm:p-3">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="mb-3 w-full rounded-full border-gold/40 text-xs font-semibold text-navy hover:bg-gold/10"
+                    className="mb-2.5 w-full min-w-0 rounded-full border-gold/35 bg-white/80 text-xs font-semibold text-navy shadow-sm hover:bg-amber-50/50"
                     asChild
                   >
-                    <Link href="/quote">
-                      <FileText className="mr-2 h-3.5 w-3.5" />
-                      {t("quoteCta")}
+                    <Link href="/quote" className="truncate">
+                      <FileText className="mr-2 h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{t("quoteCta")}</span>
                     </Link>
                   </Button>
-                  <div className="flex gap-2">
+                  <div className="flex min-w-0 gap-2">
                     <textarea
                       ref={inputRef}
                       value={input}
@@ -343,7 +355,7 @@ export default function AiChatbot() {
                       }}
                       placeholder={t("placeholder")}
                       rows={2}
-                      className="min-h-[2.75rem] flex-1 resize-none rounded-2xl border border-navy/15 bg-slate-50 px-3.5 py-2.5 text-sm outline-none ring-gold/25 placeholder:text-muted-foreground focus:border-gold/45 focus:ring-2"
+                      className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-2xl border border-navy/12 bg-white px-3 py-2.5 text-sm shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none placeholder:text-muted-foreground/80 focus:border-gold/40 focus:ring-2 focus:ring-gold/20"
                       disabled={loading}
                     />
                     <button
@@ -352,21 +364,21 @@ export default function AiChatbot() {
                       onClick={() => void send()}
                       aria-label={t("send")}
                       className={cn(
-                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-navy shadow-md transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-40",
-                        "bg-gradient-to-br from-[#f0e4c4] via-gold to-gold-dark",
+                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-navy shadow-[0_4px_14px_-2px_rgba(200,168,99,0.55)] transition hover:brightness-[1.03] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40",
+                        "bg-gradient-to-br from-[#f3ead0] via-gold to-[#b8954a]",
                       )}
                     >
                       <Send className="h-4 w-4" strokeWidth={2.25} />
                     </button>
                   </div>
-                  <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
+                  <p className="mt-2 text-[10px] leading-snug text-muted-foreground/90">
                     {t("disclaimer")}
                   </p>
                 </div>
               </>
             ) : panelTab === "compare" ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-navy/8 px-4 py-3 text-sm font-bold text-navy">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+                <div className="flex min-w-0 items-center gap-2 border-b border-navy/[0.08] px-3 py-2.5 text-sm font-bold text-navy sm:px-4 sm:py-3">
                   <BarChart3 className="h-4 w-4" />
                   {t("tabCompare")}{" "}
                   <span className="text-muted-foreground">
@@ -378,7 +390,7 @@ export default function AiChatbot() {
                     )
                   </span>
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+                <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 sm:px-3">
                   {compareEntries.length === 0 ? (
                     <div className="flex flex-col items-center gap-4 py-8 text-center">
                       <p className="text-sm text-muted-foreground">
@@ -451,7 +463,7 @@ export default function AiChatbot() {
                 ) : null}
               </div>
             ) : (
-              <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-6">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden px-3 py-5 sm:px-4 sm:py-6">
                 <p className="text-sm text-muted-foreground">
                   {t("kakaoTabLead")}
                 </p>

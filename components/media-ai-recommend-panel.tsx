@@ -100,6 +100,9 @@ export default function MediaAiRecommendPanel({
   const [budgetMax, setBudgetMax] = useState("3000");
   const [region, setRegion] = useState("all");
   const [industry, setIndustry] = useState<Industry>("fmcg");
+  const [type, setType] = useState("all");
+  const [minVisibility, setMinVisibility] = useState("0");
+  const [minFootTraffic, setMinFootTraffic] = useState("0");
   const [view, setView] = useState<"list" | "map">("list");
   const [results, setResults] = useState<ScoredMedia[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -116,6 +119,8 @@ export default function MediaAiRecommendPanel({
 
   const runRecommend = useCallback(() => {
     const cap = Math.max(0, parseInt(budgetMax.replace(/\D/g, ""), 10) || 0);
+    const minVis = Math.max(0, parseInt(minVisibility.replace(/\D/g, ""), 10) || 0);
+    const minFt = Math.max(0, parseInt(minFootTraffic.replace(/\D/g, ""), 10) || 0);
     setLoading(true);
     setResults(null);
     window.setTimeout(() => {
@@ -129,13 +134,16 @@ export default function MediaAiRecommendPanel({
                 budgetMaxMan: cap,
                 region,
                 industry,
+                type,
+                minVisibility: minVis,
+                minDailyFootTraffic: minFt,
               },
               catalog,
             );
       setResults(scored);
       setLoading(false);
     }, 850);
-  }, [goal, target, budgetMax, region, industry, catalog]);
+  }, [goal, target, budgetMax, region, industry, type, minVisibility, minFootTraffic, catalog]);
 
   const top3Ids = useMemo(() => {
     if (!results?.length) return [];
@@ -207,6 +215,21 @@ export default function MediaAiRecommendPanel({
               </div>
               <div>
                 <label className="mb-2 block text-xs font-semibold text-navy">
+                  {isKo ? "매체 유형" : "Media type"}
+                </label>
+                <select
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="w-full rounded-md border border-navy/15 px-3 py-2 text-sm"
+                >
+                  <option value="all">{isKo ? "전체" : "All"}</option>
+                  <option value="digital">{isKo ? "디지털" : "Digital"}</option>
+                  <option value="static">{isKo ? "옥외(고정)" : "Static"}</option>
+                  <option value="mobile">{isKo ? "교통(이동)" : "Mobile"}</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-2 block text-xs font-semibold text-navy">
                   {t("media.ai.budgetMax")}
                 </label>
                 <Input
@@ -221,6 +244,42 @@ export default function MediaAiRecommendPanel({
                 <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
                   {t("media.ai.budgetHint")}
                 </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-xs font-semibold text-navy">
+                    {isKo ? "가시성 최소 점수" : "Min visibility score"}
+                  </label>
+                  <Input
+                    inputMode="numeric"
+                    value={minVisibility}
+                    onChange={(e) =>
+                      setMinVisibility(e.target.value.replace(/[^\d]/g, ""))
+                    }
+                    className="border-navy/15"
+                    placeholder={isKo ? "0 = 제한 없음" : "0 = no limit"}
+                  />
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                    {isKo ? "0–100 범위 (예: 65)" : "0–100 (e.g. 65)"}
+                  </p>
+                </div>
+                <div>
+                  <label className="mb-2 block text-xs font-semibold text-navy">
+                    {isKo ? "일 유동인구 최소" : "Min daily foot traffic"}
+                  </label>
+                  <Input
+                    inputMode="numeric"
+                    value={minFootTraffic}
+                    onChange={(e) =>
+                      setMinFootTraffic(e.target.value.replace(/[^\d]/g, ""))
+                    }
+                    className="border-navy/15"
+                    placeholder={isKo ? "0 = 제한 없음" : "0 = no limit"}
+                  />
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                    {isKo ? "예: 150000" : "e.g. 150000"}
+                  </p>
+                </div>
               </div>
               <div>
                 <label className="mb-2 block text-xs font-semibold text-navy">
