@@ -86,19 +86,7 @@ export default async function MediaDetailPage({ params }: Props) {
   return (
     <>
       <TrackMediaView mediaId={media.id} />
-      <MediaDetailHeroGallery
-        images={[]}
-        heroSrc=""
-        altBase={isKo ? media.name : media.nameEn}
-        showThumbnails={false}
-        labels={{
-          close: t("galleryLightboxClose"),
-          prev: t("galleryLightboxPrev"),
-          next: t("galleryLightboxNext"),
-          expand: t("galleryExpand"),
-          clickHint: t("galleryClickHint"),
-        }}
-      >
+      <section className="relative w-full bg-navy px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10">
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
           <Link href="/media">
             <Button
@@ -112,7 +100,7 @@ export default async function MediaDetailPage({ params }: Props) {
           </Link>
           <MediaDetailAdminActions />
         </div>
-        <div className="max-w-4xl min-w-0 pb-1">
+        <div className="max-w-4xl min-w-0 pb-1 mt-4">
           <h1 className="break-words text-2xl font-bold tracking-tight text-white drop-shadow-sm sm:text-3xl md:text-4xl">
             {isKo ? media.name : media.nameEn}
           </h1>
@@ -145,7 +133,7 @@ export default async function MediaDetailPage({ params }: Props) {
             </span>
           </div>
         </div>
-      </MediaDetailHeroGallery>
+      </section>
 
       <section className="py-12 pb-28 sm:pb-32">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
