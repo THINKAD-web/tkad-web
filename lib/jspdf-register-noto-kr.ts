@@ -8,11 +8,15 @@
  */
 import type { jsPDF } from "jspdf";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { NOTO_KR_FONT_FAMILY } from "@/lib/jspdf-kr-font-constants";
 
-export const NOTO_KR_FONT_FILE = "NotoSansKR-Regular.otf";
+/** VFS 등록 시 파일명과 바이트가 일치해야 함 — 후보 파일마다 별도 이름 사용 */
+export const NOTO_KR_FONT_CANDIDATES = [
+  "NotoSansKR-Regular.otf",
+  "NotoSansKR-Regular.ttf",
+] as const;
 
 function isVerboseFontLog(): boolean {
   return process.env.QUOTE_PDF_FONT_DEBUG === "1";
@@ -20,7 +24,6 @@ function isVerboseFontLog(): boolean {
 
 /** Vercel·로컬 등에서 `process.cwd()`와 무관하게 `public/fonts`를 찾기 위한 후보 경로 */
 export function notoKrFontPathCandidates(): string[] {
-  const name = NOTO_KR_FONT_FILE;
   const cwd = process.cwd();
   const custom = process.env.QUOTE_PDF_KR_FONT_PATH?.trim();
   const paths: string[] = [];
@@ -30,14 +33,18 @@ export function notoKrFontPathCandidates(): string[] {
     if (custom.startsWith("/")) paths.push(custom);
   }
 
-  paths.push(join(cwd, "public", "fonts", name));
+  for (const name of NOTO_KR_FONT_CANDIDATES) {
+    paths.push(join(cwd, "public", "fonts", name));
+  }
 
   // 빌드 산출물 기준 (일부 배포에서 chunk 위치 기준)
   try {
     const here = dirname(fileURLToPath(import.meta.url));
-    paths.push(join(here, "..", "..", "..", "public", "fonts", name));
-    paths.push(join(here, "..", "..", "public", "fonts", name));
-    paths.push(join(here, "..", "public", "fonts", name));
+    for (const name of NOTO_KR_FONT_CANDIDATES) {
+      paths.push(join(here, "..", "..", "..", "public", "fonts", name));
+      paths.push(join(here, "..", "..", "public", "fonts", name));
+      paths.push(join(here, "..", "public", "fonts", name));
+    }
   } catch {
     /* import.meta.url 없는 환경 무시 */
   }
@@ -55,7 +62,7 @@ export function notoKrFontResolvedPath(): string {
   const found = findReadableNotoKrFontPath();
   if (found) return found;
   const c = notoKrFontPathCandidates();
-  return c[0] ?? join(process.cwd(), "public", "fonts", NOTO_KR_FONT_FILE);
+  return c[0] ?? join(process.cwd(), "public", "fonts", NOTO_KR_FONT_CANDIDATES[0]);
 }
 
 function findReadableNotoKrFontPath(): string | null {
@@ -104,13 +111,17 @@ function logFontLoadFailure(candidates: string[]) {
   });
 }
 
-/** Attach pre-read font bytes (Node Buffer). */
-export function attachNotoSansKrBuffer(doc: jsPDF, buf: Buffer): boolean {
+/** Attach pre-read font bytes (Node Buffer). `vfsFileName` must match basename on disk. */
+export function attachNotoSansKrBuffer(
+  doc: jsPDF,
+  buf: Buffer,
+  vfsFileName: string,
+): boolean {
   try {
     const binary = buf.toString("latin1");
-    doc.addFileToVFS(NOTO_KR_FONT_FILE, binary);
+    doc.addFileToVFS(vfsFileName, binary);
     doc.addFont(
-      NOTO_KR_FONT_FILE,
+      vfsFileName,
       NOTO_KR_FONT_FAMILY,
       "normal",
       undefined,
@@ -144,7 +155,8 @@ export function registerNotoSansKrIfAvailable(doc: jsPDF): boolean {
           continue;
         }
         const buf = readFileSync(p);
-        if (attachNotoSansKrBuffer(doc, buf)) {
+        const vfsName = basename(p);
+        if (attachNotoSansKrBuffer(doc, buf, vfsName)) {
           if (isVerboseFontLog()) console.log("[jspdf-kr] loaded:", p, "bytes", buf.length);
           return true;
         }

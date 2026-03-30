@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Sparkles,
   MapPin,
   Monitor,
   List,
@@ -28,9 +28,9 @@ import {
 } from "@/lib/media-data";
 import {
   recommendMedia,
+  filterCatalogByRegionCodes,
   mediaToMapPosition,
   type ScoredMedia,
-  type AiRecommendInput,
 } from "@/lib/ai-media-recommend";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
@@ -39,10 +39,10 @@ import {
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
-import MediaAiQuiz from "@/components/media-ai-quiz";
-import MediaAiSwipeDeck, { SWIPE_DECK_SIZE } from "@/components/media-ai-swipe-deck";
-import MediaAiTop3Results from "@/components/media-ai-top3-results";
-import { top3FromSwipeVotes, type SwipeVote } from "@/lib/ai-media-swipe-top3";
+import MediaAiRecommendForm, {
+  type MediaAiRecommendFormSubmit,
+} from "@/components/media-ai-recommend-form";
+import MediaAiRecommendDashboard from "@/components/media-ai-recommend-dashboard";
 
 type Props = {
   locale: string;
@@ -62,11 +62,11 @@ type Props = {
   };
 };
 
-type Phase = "quiz" | "loading" | "swipe" | "results" | "list";
+type Phase = "form" | "loading" | "dashboard" | "noResults" | "list";
 
 export default function MediaAiRecommendPanel({
   locale,
-  regionOptions: _regionOptions,
+  regionOptions,
   catalog,
   compareItems,
   toggleCompare,
@@ -75,7 +75,9 @@ export default function MediaAiRecommendPanel({
   maxSelectionItems = COMPARE_MAX_ITEMS,
   labelOverrides,
 }: Props) {
+  void regionOptions;
   const t = useTranslations();
+  const tr = useTranslations("recommend");
   const isKo = locale === "ko";
 
   const addCompareLabel =
@@ -87,25 +89,20 @@ export default function MediaAiRecommendPanel({
   const quoteSingleLabel =
     labelOverrides?.quoteSingle ?? (isKo ? "견적" : "Quote");
 
-  const [phase, setPhase] = useState<Phase>("quiz");
+  const [phase, setPhase] = useState<Phase>("form");
   const [view, setView] = useState<"list" | "map">("list");
   const [results, setResults] = useState<ScoredMedia[] | null>(null);
-  const [top3Results, setTop3Results] = useState<ScoredMedia[] | null>(null);
-  const [runKey, setRunKey] = useState(0);
 
   const runRecommend = useCallback(
-    (input: AiRecommendInput) => {
+    (payload: MediaAiRecommendFormSubmit) => {
       setPhase("loading");
       setResults(null);
-      setTop3Results(null);
       window.setTimeout(() => {
+        const pool = filterCatalogByRegionCodes(catalog, payload.regionCodes);
         const scored =
-          catalog.length === 0
-            ? []
-            : recommendMedia(input, catalog);
+          catalog.length === 0 ? [] : recommendMedia(payload.input, pool);
         setResults(scored);
-        setRunKey((k) => k + 1);
-        setPhase("swipe");
+        setPhase(scored.length > 0 ? "dashboard" : "noResults");
       }, 900);
     },
     [catalog],
@@ -126,6 +123,13 @@ export default function MediaAiRecommendPanel({
     addManyToCompare(results.slice(0, maxSelectionItems).map((s) => s.item));
   }, [results, addManyToCompare, maxSelectionItems]);
 
+  const top3Dash = useMemo(
+    () => results?.slice(0, 3) ?? [],
+    [results],
+  );
+
+  const quoteHref = `/quote?media=${encodeURIComponent(quoteQueryPicked)}`;
+
   if (catalog.length === 0) {
     return (
       <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-amber-200 bg-amber-50/80 p-8 text-center text-sm text-amber-950">
@@ -134,112 +138,82 @@ export default function MediaAiRecommendPanel({
     );
   }
 
-  if (phase === "quiz") {
+  if (phase === "form") {
     return (
-      <MediaAiQuiz
+      <MediaAiRecommendForm
         locale={locale}
-        onComplete={(input) => runRecommend(input)}
+        onSubmit={(payload) => runRecommend(payload)}
       />
     );
   }
 
   if (phase === "loading") {
     return (
-      <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-[#0f172a]/92 backdrop-blur-md">
-        <div className="h-14 w-14 animate-spin rounded-full border-4 border-white/20 border-t-gold" />
-        <p className="mt-5 text-sm font-semibold text-white">{t("media.ai.running")}</p>
-        <p className="mt-2 max-w-xs text-center text-xs text-white/60">
-          {t("media.ai.swipe.loadingTagline")}
-        </p>
+      <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-[#0a1628]/95 backdrop-blur-md">
+        <div className="w-full max-w-sm space-y-6 px-6">
+          <p className="text-center text-sm font-semibold text-gold">
+            {tr("loadingTitle")}
+          </p>
+          <div className="space-y-3 rounded-2xl border border-gold/20 bg-navy/80 p-6 shadow-xl">
+            <div className="h-3 overflow-hidden rounded-full bg-white/10">
+              <motion.div
+                className="h-full w-2/5 rounded-full bg-gradient-to-r from-gold/70 to-gold"
+                animate={{ x: ["-30%", "220%"] }}
+                transition={{
+                  duration: 1.35,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 rounded bg-white/10" />
+              <div className="h-3 w-4/5 rounded bg-white/10" />
+              <div className="h-3 w-3/5 rounded bg-white/10" />
+            </div>
+          </div>
+          <p className="text-center text-xs text-slate-400">
+            {tr("loadingSubtitle")}
+          </p>
+        </div>
       </div>
     );
   }
 
-  const handleSwipeSessionComplete = useCallback(
-    (votes: SwipeVote[]) => {
-      if (!results?.length) return;
-      const pool = results.slice(0, SWIPE_DECK_SIZE);
-      const top3 = top3FromSwipeVotes(votes, pool);
-      setTop3Results(top3);
-      setPhase("results");
-    },
-    [results],
-  );
-
-  if (phase === "results" && top3Results !== null) {
+  if (phase === "dashboard" && results !== null && results.length > 0) {
     return (
-      <MediaAiTop3Results
+      <MediaAiRecommendDashboard
         locale={locale}
-        items={top3Results}
-        onRestartQuiz={() => {
-          setTop3Results(null);
-          setPhase("quiz");
+        scored={results}
+        top3={top3Dash}
+        quoteHref={quoteHref}
+        onBackToForm={() => {
+          setResults(null);
+          setPhase("form");
         }}
         onViewFullList={() => setPhase("list")}
-        quoteLabel={quoteSingleLabel}
       />
     );
   }
 
-  if (phase === "swipe" && results !== null) {
-    if (results.length === 0) {
-      return (
-        <div className="space-y-6">
-          <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-2xl border border-amber-200/80 bg-amber-50/90 p-8 text-center">
-            <Sparkles className="h-10 w-10 text-amber-700" />
-            <p className="text-sm font-medium text-amber-950">
-              {t("media.ai.emptyResult")}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2">
-              <Button
-                type="button"
-                className="btn-gold rounded-full"
-                onClick={() => setPhase("quiz")}
-              >
-                {t("media.ai.swipe.restartQuiz")}
-              </Button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
+  if (phase === "noResults") {
     return (
-      <div className="space-y-6">
-        <div className="rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/[0.04] to-gold/[0.06] p-4 sm:p-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h3 className="flex items-center gap-2 text-lg font-bold text-navy">
-                <Sparkles className="h-5 w-5 text-gold" />
-                {t("media.ai.swipe.heroTitle")}
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("media.ai.swipe.heroSubtitle")}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <MediaAiSwipeDeck
-          key={runKey}
-          locale={locale}
-          items={results}
-          compareItems={compareItems}
-          toggleCompare={toggleCompare}
-          isInCompare={isInCompare}
-          maxSelectionItems={maxSelectionItems}
-          addCompareLabel={addCompareLabel}
-          quoteLabel={quoteSingleLabel}
-          quoteQueryPicked={quoteQueryPicked}
-          onRestartQuiz={() => setPhase("quiz")}
-          onShowList={() => setPhase("list")}
-          onSessionComplete={handleSwipeSessionComplete}
-        />
+      <div className="rounded-2xl border border-amber-200/80 bg-amber-50/90 p-8 text-center">
+        <p className="text-sm font-medium text-amber-950">
+          {t("media.ai.emptyResult")}
+        </p>
+        <Button
+          type="button"
+          className="btn-gold mt-4 rounded-full"
+          onClick={() => setPhase("form")}
+        >
+          {tr("backToForm")}
+        </Button>
       </div>
     );
   }
 
-  /* list + optional map (after swipe or direct) */
+  /* list + optional map */
   if (phase === "list" && results !== null) {
     return (
       <div className="space-y-8">
@@ -259,18 +233,18 @@ export default function MediaAiRecommendPanel({
               variant="outline"
               size="sm"
               className="rounded-full text-xs"
-              onClick={() => setPhase("quiz")}
+              onClick={() => setPhase("form")}
             >
-              {t("media.ai.swipe.restartQuiz")}
+              {tr("backToForm")}
             </Button>
             <Button
               type="button"
               variant="secondary"
               size="sm"
               className="rounded-full text-xs"
-              onClick={() => setPhase("swipe")}
+              onClick={() => setPhase("dashboard")}
             >
-              {t("media.ai.swipe.backToSwipe")}
+              {tr("backToDashboard")}
             </Button>
             <div className="inline-flex rounded-full border border-navy/10 bg-white p-1">
               <button

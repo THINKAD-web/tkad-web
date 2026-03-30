@@ -34,6 +34,10 @@ export type PlannerReportPdfLabels = {
   labelShare: string;
   simCreativeNote: string;
   simNoCreative: string;
+  /** 시뮬레이션: 매체 / 크리에이티브 나란히 표시용 */
+  simMediaCaption: string;
+  simCreativeCaption: string;
+  simMvpDisclaimer: string;
   footerDisclaimer: string;
 };
 
@@ -78,7 +82,7 @@ export type PlannerReportPdfParams = {
 
 async function fetchDataUrl(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { mode: "cors", cache: "force-cache" });
     if (!res.ok) return null;
     const blob = await res.blob();
     return await new Promise((resolve) => {
@@ -91,8 +95,28 @@ async function fetchDataUrl(url: string): Promise<string | null> {
   }
 }
 
-function imgFormatFromDataUrl(dataUrl: string): "JPEG" | "PNG" {
-  return dataUrl.includes("image/png") ? "PNG" : "JPEG";
+function imgFormatFromDataUrl(dataUrl: string): "JPEG" | "PNG" | "WEBP" {
+  if (dataUrl.includes("image/png")) return "PNG";
+  if (dataUrl.includes("image/webp")) return "WEBP";
+  return "JPEG";
+}
+
+function addImageSafe(
+  doc: jsPDF,
+  dataUrl: string,
+  fmt: "JPEG" | "PNG" | "WEBP",
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): boolean {
+  try {
+    doc.addImage(dataUrl, fmt, x, y, w, h);
+    return true;
+  } catch (e) {
+    console.warn("[planner-pdf] addImage failed:", e);
+    return false;
+  }
 }
 
 function setFont(
@@ -133,11 +157,28 @@ function ensureSpace(
 export async function buildPlannerReportPdf(
   p: PlannerReportPdfParams,
 ): Promise<jsPDF> {
+  try {
+    return await buildPlannerReportPdfInner(p);
+  } catch (e) {
+    console.error("[planner-pdf] buildPlannerReportPdf failed:", e);
+    throw e instanceof Error ? e : new Error(String(e));
+  }
+}
+
+async function buildPlannerReportPdfInner(
+  p: PlannerReportPdfParams,
+): Promise<jsPDF> {
   const { default: JsPDF } = await import("jspdf");
   const { registerNotoSansKrFromFetch } = await import(
     "@/lib/jspdf-register-noto-kr-browser"
   );
-  const doc = new JsPDF({ unit: "mm", format: "a4" });
+  let doc: jsPDF;
+  try {
+    doc = new JsPDF({ unit: "mm", format: "a4" });
+  } catch (e) {
+    console.error("[planner-pdf] new jsPDF failed:", e);
+    throw e instanceof Error ? e : new Error(String(e));
+  }
   const hasKrFont = await registerNotoSansKrFromFetch(doc);
   const { labels, portfolio, metrics, creativeDataUrl, contact } = p;
 
@@ -221,13 +262,9 @@ export async function buildPlannerReportPdf(
       const dataUrl = await fetchDataUrl(m.imageUrl);
       if (dataUrl) {
         y = ensureSpace(doc, y, 58, pageH, margin);
-        try {
-          const fmt = imgFormatFromDataUrl(dataUrl);
-          doc.addImage(dataUrl, fmt, margin, y, maxW, 50);
-          y += 54;
-        } catch {
-          y += 2;
-        }
+        const fmt = imgFormatFromDataUrl(dataUrl);
+        if (addImageSafe(doc, dataUrl, fmt, margin, y, maxW, 50)) y += 54;
+        else y += 2;
       }
     }
     y += 4;
@@ -241,18 +278,45 @@ export async function buildPlannerReportPdf(
   setFont(doc, hasKrFont, "normal");
   doc.setTextColor(30, 30, 35);
   if (creativeDataUrl) {
-    y = ensureSpace(doc, y, 62, pageH, margin);
+    y = ensureSpace(doc, y, 72, pageH, margin);
     doc.setFontSize(9);
     doc.text(labels.simCreativeNote, margin, y);
     y += 5;
-    try {
-      const fmt = imgFormatFromDataUrl(creativeDataUrl);
-      doc.addImage(creativeDataUrl, fmt, margin, y, maxW, 52);
-      y += 56;
-    } catch {
-      doc.text("—", margin, y);
-      y += lh;
+    doc.setFontSize(8);
+    doc.setTextColor(100, 108, 120);
+    const disc = doc.splitTextToSize(labels.simMvpDisclaimer, maxW);
+    doc.text(disc, margin, y);
+    y += disc.length * 3.6 + 3;
+    doc.setTextColor(30, 30, 35);
+
+    const colGap = 4;
+    const colW = (maxW - colGap) / 2;
+    const imgH = 46;
+    const firstMediaUrl = portfolio[0]?.imageUrl ?? null;
+    const mediaDataUrl = firstMediaUrl ? await fetchDataUrl(firstMediaUrl) : null;
+
+    y = ensureSpace(doc, y, imgH + 14, pageH, margin);
+    doc.setFontSize(8);
+    setFont(doc, hasKrFont, "bold");
+    doc.text(labels.simMediaCaption, margin, y);
+    doc.text(labels.simCreativeCaption, margin + colW + colGap, y);
+    y += 4;
+    setFont(doc, hasKrFont, "normal");
+
+    let rowH = 0;
+    if (mediaDataUrl) {
+      const fmt = imgFormatFromDataUrl(mediaDataUrl);
+      if (addImageSafe(doc, mediaDataUrl, fmt, margin, y, colW, imgH)) rowH = imgH;
+    } else {
+      doc.setFontSize(8);
+      doc.text("—", margin, y + 6);
+      rowH = imgH;
     }
+    const crFmt = imgFormatFromDataUrl(creativeDataUrl);
+    if (addImageSafe(doc, creativeDataUrl, crFmt, margin + colW + colGap, y, colW, imgH)) {
+      rowH = Math.max(rowH, imgH);
+    }
+    y += Math.max(rowH, imgH) + 6;
   } else {
     doc.setFontSize(10);
     doc.text(labels.simNoCreative, margin, y);

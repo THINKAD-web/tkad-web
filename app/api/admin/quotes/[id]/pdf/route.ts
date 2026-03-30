@@ -3,6 +3,7 @@ import { assertAdminDb } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { adminFormalQuotePdfBuffer } from "@/lib/build-admin-formal-quote-pdf";
 import { quoteToPdfParams } from "@/lib/admin-sales-quote";
+import { attachmentContentDisposition } from "@/lib/content-disposition";
 import { loadThinkadLogoDataUrl } from "@/lib/quote-pdf-assets";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest, ctx: Ctx) {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": attachmentContentDisposition(filename),
         "Cache-Control": "no-store, private",
       },
     });

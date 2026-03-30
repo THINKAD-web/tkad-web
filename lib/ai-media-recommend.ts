@@ -36,6 +36,8 @@ export type AiRecommendInput = {
   minDailyFootTraffic?: number;
   /** 서울 등 선택 시 `mediaHaystack`에 포함되는 키워드로 한 번 더 좁힘 (하나라도 매칭) */
   locationKeywords?: readonly string[] | null;
+  /** 희망 집행 기간(주). UI·사유 문구용 — 스코어 가중은 선택적 */
+  preferredPeriodWeeks?: number;
 };
 
 export type MatchReason = { ko: string; en: string };
@@ -444,6 +446,17 @@ function scoreOne(
     score: Math.max(0, Math.min(100, score)),
     reasons: dedupeReasons(reasons),
   };
+}
+
+/** 지역 코드 다중 선택 시 OR 필터 (빈 배열이면 전체 카탈로그) */
+export function filterCatalogByRegionCodes(
+  catalog: readonly MediaItem[],
+  codes: readonly string[],
+): MediaItem[] {
+  if (codes.length === 0) return [...catalog];
+  return catalog.filter((m) =>
+    codes.some((c) => regionMatchesMedia(m, c)),
+  );
 }
 
 export function recommendMedia(

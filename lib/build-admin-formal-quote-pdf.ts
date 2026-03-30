@@ -431,7 +431,15 @@ export async function createAdminFormalQuotePdfDoc(
 export async function adminFormalQuotePdfBuffer(
   p: AdminFormalQuotePdfParams,
 ): Promise<Buffer> {
-  const doc = await createAdminFormalQuotePdfDoc(p);
-  const out = doc.output("arraybuffer") as ArrayBuffer;
-  return Buffer.from(out);
+  try {
+    const doc = await createAdminFormalQuotePdfDoc(p);
+    const out = doc.output("arraybuffer");
+    if (!(out instanceof ArrayBuffer)) {
+      throw new Error("jsPDF output(arraybuffer) did not return ArrayBuffer");
+    }
+    return Buffer.from(out);
+  } catch (e) {
+    console.error("[adminFormalQuotePdfBuffer]", e);
+    throw e instanceof Error ? e : new Error(String(e));
+  }
 }

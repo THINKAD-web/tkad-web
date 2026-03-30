@@ -18,6 +18,7 @@ import {
   buildPlannerReportPdf,
   type PlannerReportPdfLabels,
 } from "@/lib/build-planner-report-pdf";
+import { useToast } from "@/components/toast-provider";
 
 type Props = {
   isKo: boolean;
@@ -71,6 +72,8 @@ export default function PlannerReportStep({
   creativeObjectUrl,
 }: Props) {
   const t = useTranslations("planner");
+  const tCommon = useTranslations("common");
+  const { toast } = useToast();
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +110,9 @@ export default function PlannerReportStep({
       labelShare: t("reportLabelShare"),
       simCreativeNote: t("reportSimCreativeNote"),
       simNoCreative: t("reportSimNoCreative"),
+      simMediaCaption: t("reportSimMediaCaption"),
+      simCreativeCaption: t("reportSimCreativeCaption"),
+      simMvpDisclaimer: t("reportSimMvpDisclaimer"),
       footerDisclaimer: t("reportFooterDisclaimer"),
     }),
     [t],
@@ -174,7 +180,10 @@ export default function PlannerReportStep({
         setPdfUrl(nextUrl);
       } catch (e) {
         console.error(e);
-        if (!cancelled) setError(t("reportPdfError"));
+        if (!cancelled) {
+          setError(t("reportPdfError"));
+          toast("error", tCommon("pdfGenerationFailed"));
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -203,6 +212,8 @@ export default function PlannerReportStep({
     creativeObjectUrl,
     contact,
     t,
+    tCommon,
+    toast,
   ]);
 
   const downloadPdf = useCallback(async () => {
@@ -245,14 +256,23 @@ export default function PlannerReportStep({
         creativeDataUrl,
         contact,
       });
-      doc.save(
-        isKo
-          ? `THINKAD-플래너-보고서-${Date.now()}.pdf`
-          : `THINKAD-planner-report-${Date.now()}.pdf`,
-      );
+      const filename = isKo
+        ? `THINKAD-플래너-보고서-${Date.now()}.pdf`
+        : `THINKAD-planner-report-${Date.now()}.pdf`;
+      const blob = doc.output("blob");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
       setError(t("reportPdfError"));
+      toast("error", tCommon("pdfGenerationFailed"));
     }
   }, [
     labels,
@@ -271,6 +291,8 @@ export default function PlannerReportStep({
     creativeObjectUrl,
     contact,
     t,
+    tCommon,
+    toast,
   ]);
 
   const emailReport = useCallback(() => {

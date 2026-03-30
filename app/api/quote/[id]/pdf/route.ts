@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { attachmentContentDisposition } from "@/lib/content-disposition";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ooHQuotePdfToBase64 } from "@/lib/server-ooh-quote-pdf";
@@ -48,11 +49,14 @@ export async function GET(
       networkSelections: row.networkSelections ?? undefined,
     });
     const buf = Buffer.from(b64, "base64");
+    const locale = row.locale?.toLowerCase().startsWith("ko") ? "ko" : "en";
+    const displayName =
+      locale === "ko" ? "싱커드-견적서.pdf" : "THINKAD-quote.pdf";
     return new NextResponse(buf, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": 'attachment; filename="thinkad-quote.pdf"',
+        "Content-Disposition": attachmentContentDisposition(displayName),
         "Cache-Control": "no-store, private",
       },
     });

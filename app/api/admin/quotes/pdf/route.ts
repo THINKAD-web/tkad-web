@@ -5,6 +5,7 @@ import {
   type AdminFormalQuotePdfParams,
   type AdminFormalQuotePdfRow,
 } from "@/lib/build-admin-formal-quote-pdf";
+import { attachmentContentDisposition } from "@/lib/content-disposition";
 import { loadThinkadLogoDataUrl } from "@/lib/quote-pdf-assets";
 
 export const dynamic = "force-dynamic";
@@ -125,12 +126,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const buf = await adminFormalQuotePdfBuffer(params);
-    const filename = `thinkad-quote-${quoteNumber.replace(/[^\w.-]+/g, "_")}.pdf`;
+    const safeNum = quoteNumber.replace(/[^\w.-]+/g, "_");
+    const filename = `thinkad-quote-${safeNum}.pdf`;
     return new Response(new Uint8Array(buf), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": attachmentContentDisposition(filename),
         "Cache-Control": "no-store, private",
       },
     });

@@ -68,6 +68,7 @@ function mediaSpecLine(m: AdminMediaDto): string {
 
 export default function AdminQuoteNewClient() {
   const t = useTranslations("adminQuoteNew");
+  const tCommon = useTranslations("common");
   const { toast } = useToast();
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -418,7 +419,14 @@ export default function AdminQuoteNewClient() {
         }
         throw new Error(msg);
       }
+      const ct = res.headers.get("content-type") ?? "";
+      if (!ct.includes("application/pdf")) {
+        throw new Error(t("pdfFailed"));
+      }
       const blob = await res.blob();
+      if (blob.size < 64) {
+        throw new Error(t("pdfFailed"));
+      }
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -426,7 +434,9 @@ export default function AdminQuoteNewClient() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
-      setPdfError(e instanceof Error ? e.message : t("pdfFailed"));
+      const msg = e instanceof Error ? e.message : t("pdfFailed");
+      setPdfError(msg);
+      toast("error", tCommon("pdfGenerationFailed"));
     } finally {
       setPdfLoading(false);
     }
@@ -447,6 +457,8 @@ export default function AdminQuoteNewClient() {
     pdfPostRows,
     isKo,
     t,
+    tCommon,
+    toast,
   ]);
 
   return (

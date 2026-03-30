@@ -1,5 +1,7 @@
 /**
  * Downloads subset Noto Sans KR OTF for Korean PDF if missing (postinstall / CI).
+ * You may also place `NotoSansKR-Regular.ttf` manually under `public/fonts/`
+ * (server/browser loaders try .otf then .ttf).
  */
 import fs from "node:fs";
 import path from "node:path";
