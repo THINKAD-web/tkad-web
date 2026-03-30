@@ -175,7 +175,7 @@ export default async function MediaDetailPage({ params }: Props) {
             {t("coreInfoTitle")}
           </h2>
           <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-lg shadow-navy/5 sm:p-8">
-            <div className="grid grid-cols-2 gap-8 sm:gap-10 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
               <CoreFact
                 icon={Ruler}
                 label={t("size")}
