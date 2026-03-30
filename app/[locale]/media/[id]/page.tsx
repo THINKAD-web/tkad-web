@@ -322,7 +322,27 @@ export default async function MediaDetailPage({ params }: Props) {
             </div>
           </section>
 
-          {/* 갤러리 섹션 제거됨 */}
+          {(casePhotos.length > 0 || extraGalleryImages.length > 0) && (
+            <>
+              <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
+                {t("caseStudiesTitle")}
+              </h2>
+              <MediaCaseStudyGallery
+                photos={[
+                  ...extraGalleryImages.map((url) => ({ url })),
+                  ...casePhotos,
+                ]}
+                isKo={isKo}
+                labels={{
+                  close: t("galleryLightboxClose"),
+                  prev: t("galleryLightboxPrev"),
+                  next: t("galleryLightboxNext"),
+                  expand: t("galleryExpand"),
+                  clickHint: t("galleryClickHint"),
+                }}
+              />
+            </>
+          )}
 
           <MediaSimilarCarousel
             items={similar}
