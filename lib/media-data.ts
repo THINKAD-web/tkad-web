@@ -271,7 +271,7 @@ export function mediaItemsToCampaignPins(
     const lat = adjusted[i].lat;
     const lng = adjusted[i].lng;
     const { x, y } = latLngToFallbackPercent(lat, lng);
-    const won = m.price * 10_000;
+    const won = m.price;
     const capKo = `${m.location} · ${won.toLocaleString()}원/${periodAbbrevKo(m.pricePeriod)}`;
     const capEn = `${m.locationEn} · ₩${won.toLocaleString()}/${periodAbbrevEn(m.pricePeriod)}`;
     return {

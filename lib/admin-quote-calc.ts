@@ -33,7 +33,8 @@ export function lineSupplyWon(
   const p = Math.max(0, priceManPerMonth);
   const m = Math.max(0, monthFactor);
   const q = Math.max(0, quantity);
-  return Math.round(p * 10_000 * m * q);
+  // DB price는 이미 원 단위
+  return Math.round(p * m * q);
 }
 
 export type AdminQuoteTotals = {

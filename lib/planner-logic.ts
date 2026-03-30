@@ -213,7 +213,7 @@ export function estimateCpmByCategory(filtered: MediaItem[]): CpmBarPoint[] {
       list.reduce((s, m) => s + m.dailyFootTraffic, 0) /
       Math.max(list.length, 1);
     const estImp = Math.max(1, avgD * 30 * visibility);
-    const krwMonth = avgP * 10_000;
+    const krwMonth = avgP; // DB price는 이미 원 단위
     const cpm = krwMonth / (estImp / 1000);
     out.push({
       key,
