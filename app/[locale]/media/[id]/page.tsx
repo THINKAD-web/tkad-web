@@ -172,8 +172,8 @@ export default async function MediaDetailPage({ params }: Props) {
           <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
             {t("coreInfoTitle")}
           </h2>
-          <div className="rounded-2xl border border-navy/10 bg-white p-5 shadow-lg shadow-navy/5 sm:p-6">
-            <div className="grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4">
+          <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-lg shadow-navy/5 sm:p-8">
+            <div className="grid grid-cols-2 gap-8 sm:gap-10 lg:grid-cols-4">
               <CoreFact
                 icon={Ruler}
                 label={t("size")}
@@ -412,18 +412,18 @@ function CoreFact({
   value: ReactNode;
 }) {
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-4">
       <div
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold/12 text-gold-dark"
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/12 text-gold-dark"
         aria-hidden
       >
         <Icon className="h-5 w-5" strokeWidth={1.75} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
-        <div className="mt-1.5 min-w-0 text-sm leading-snug text-navy">
+        <div className="mt-2 min-w-0 text-sm leading-relaxed text-navy">
           {value}
         </div>
       </div>
