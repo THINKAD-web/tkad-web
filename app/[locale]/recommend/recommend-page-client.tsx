@@ -31,11 +31,17 @@ export default function RecommendPageClient({
     () => [
       { value: "all", label: t("media.allRegions") },
       { value: "seoul", label: t("media.regions.seoul") },
+      { value: "seoul_gangnam", label: isKo ? "강남/서초" : "Gangnam/Seocho" },
+      { value: "seoul_hongdae", label: isKo ? "홍대/마포" : "Hongdae/Mapo" },
+      { value: "seoul_myeongdong", label: isKo ? "명동/중구" : "Myeongdong/Junggu" },
+      { value: "seoul_yeouido", label: isKo ? "여의도/영등포" : "Yeouido/Yeongdeungpo" },
+      { value: "seoul_gangbuk", label: isKo ? "강북/종로" : "Jongno/Gangbuk" },
+      { value: "seoul_etc", label: isKo ? "기타 서울" : "Other Seoul" },
       { value: "busan", label: t("media.regions.busan") },
       { value: "jeju", label: t("media.regions.jeju") },
       { value: "national", label: t("media.regions.national") },
     ],
-    [t],
+    [t, isKo],
   );
 
   const toggleCart = useCallback((media: MediaItem) => {

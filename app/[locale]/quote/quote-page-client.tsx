@@ -30,6 +30,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import {
   dedupeImageUrls,
   getPrimaryMediaImageUrl,
+  matchesMediaTextQuery,
   typeLabels,
   type MediaItem,
 } from "@/lib/media-data";
@@ -83,6 +84,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [step, setStep] = useState<WizardStep>(1);
   const [period, setPeriod] = useState<PeriodKey>("1month");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [mediaLayout, setMediaLayout] = useState<"grid" | "compact">("grid");
+  const [mediaTextFilter, setMediaTextFilter] = useState("");
+  const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
+  const [mediaRegionFilter, setMediaRegionFilter] = useState("all");
+  const [mediaBudgetCap, setMediaBudgetCap] = useState("all"); // 만원
   const [networkQuoteOptions, setNetworkQuoteOptions] = useState<
     Record<string, { units: number; regionScope: string }>
   >({});
@@ -149,6 +155,61 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     () => catalog.filter((m) => selectedIds.has(m.id)),
     [catalog, selectedIds],
   );
+
+  const quoteRegionOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const m of catalog) {
+      const r = (m.region ?? "national").trim() || "national";
+      counts.set(r, (counts.get(r) ?? 0) + 1);
+    }
+    const order = ["all", "seoul", "busan", "jeju", "national"];
+    const sorted = [...counts.keys()].sort((a, b) => {
+      const ai = order.indexOf(a);
+      const bi = order.indexOf(b);
+      if (ai !== -1 || bi !== -1) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      return a.localeCompare(b);
+    });
+    return [
+      { value: "all", label: isKo ? "전체" : "All" },
+      ...sorted
+        .filter((x) => x !== "all")
+        .map((value) => ({
+          value,
+          label:
+            value === "seoul"
+              ? isKo
+                ? "서울/수도권"
+                : "Seoul"
+              : value === "busan"
+                ? isKo
+                  ? "부산"
+                  : "Busan"
+                : value === "jeju"
+                  ? isKo
+                    ? "제주"
+                    : "Jeju"
+                  : value === "national"
+                    ? isKo
+                      ? "전국"
+                      : "National"
+                    : value,
+        })),
+    ];
+  }, [catalog, isKo]);
+
+  const filteredCatalog = useMemo(() => {
+    const cap =
+      mediaBudgetCap === "all" ? null : Math.max(0, parseInt(mediaBudgetCap, 10) || 0);
+    return catalog.filter((m) => {
+      if (mediaRegionFilter !== "all" && (m.region ?? "") !== mediaRegionFilter) return false;
+      if (mediaTypeFilter !== "all" && (m.type ?? "") !== mediaTypeFilter) return false;
+      if (cap != null && cap > 0 && (m.price ?? 0) > cap) return false;
+      if (mediaTextFilter.trim().length > 0 && !matchesMediaTextQuery(m, mediaTextFilter)) {
+        return false;
+      }
+      return true;
+    });
+  }, [catalog, mediaRegionFilter, mediaTypeFilter, mediaBudgetCap, mediaTextFilter]);
 
   const monthlyCost = useMemo(
     () =>
@@ -556,8 +617,97 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       <p className="mb-4 text-sm text-muted-foreground">
                         {t("quote.selectMediaDesc")}
                       </p>
-                      <div className="grid gap-6 sm:grid-cols-2">
-                        {catalog.map((media) => {
+                      <div className="mb-4 flex flex-col gap-3 rounded-xl border border-navy/10 bg-slate-50/70 p-3 sm:flex-row sm:items-end">
+                        <div className="flex-1">
+                          <label className="mb-1 block text-xs font-semibold text-navy">
+                            {isKo ? "검색" : "Search"}
+                          </label>
+                          <Input
+                            value={mediaTextFilter}
+                            onChange={(e) => setMediaTextFilter(e.target.value)}
+                            className="border-navy/15 bg-white"
+                            placeholder={isKo ? "지역/역/키워드로 검색" : "Search by area/station/keyword"}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-none sm:gap-2">
+                          <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-navy/80">
+                              {isKo ? "유형" : "Type"}
+                            </label>
+                            <select
+                              value={mediaTypeFilter}
+                              onChange={(e) => setMediaTypeFilter(e.target.value)}
+                              className="h-10 w-full rounded-md border border-navy/15 bg-white px-2 text-sm"
+                            >
+                              <option value="all">{isKo ? "전체" : "All"}</option>
+                              <option value="digital">{isKo ? "디지털" : "Digital"}</option>
+                              <option value="static">{isKo ? "옥외(고정)" : "Static"}</option>
+                              <option value="mobile">{isKo ? "교통(이동)" : "Mobile"}</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-navy/80">
+                              {isKo ? "지역" : "Region"}
+                            </label>
+                            <select
+                              value={mediaRegionFilter}
+                              onChange={(e) => setMediaRegionFilter(e.target.value)}
+                              className="h-10 w-full rounded-md border border-navy/15 bg-white px-2 text-sm"
+                            >
+                              {quoteRegionOptions.map((o) => (
+                                <option key={o.value} value={o.value}>
+                                  {o.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-none">
+                          <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-navy/80">
+                              {isKo ? "예산 상한(월)" : "Budget cap/mo"}
+                            </label>
+                            <select
+                              value={mediaBudgetCap}
+                              onChange={(e) => setMediaBudgetCap(e.target.value)}
+                              className="h-10 w-full rounded-md border border-navy/15 bg-white px-2 text-sm"
+                            >
+                              <option value="all">{isKo ? "제한 없음" : "No cap"}</option>
+                              <option value="500">500</option>
+                              <option value="1000">1000</option>
+                              <option value="2000">2000</option>
+                              <option value="3000">3000</option>
+                              <option value="5000">5000</option>
+                            </select>
+                          </div>
+                          <div className="flex items-end gap-2">
+                            <Button
+                              type="button"
+                              variant={mediaLayout === "grid" ? "secondary" : "outline"}
+                              className="h-10 flex-1 text-xs font-semibold"
+                              onClick={() => setMediaLayout("grid")}
+                            >
+                              {isKo ? "카드" : "Cards"}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant={mediaLayout === "compact" ? "secondary" : "outline"}
+                              className="h-10 flex-1 text-xs font-semibold"
+                              onClick={() => setMediaLayout("compact")}
+                            >
+                              {isKo ? "컴팩트" : "Compact"}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {filteredCatalog.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-navy/15 bg-white p-8 text-center text-sm text-muted-foreground">
+                          {isKo ? "조건에 맞는 매체가 없습니다." : "No media matches your filters."}
+                        </div>
+                      ) : mediaLayout === "grid" ? (
+                      <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2">
+                        {filteredCatalog.map((media) => {
                           const checked = selectedIds.has(media.id);
                           const typeLabel = typeLabels[media.type];
                           const quoteThumb =
@@ -592,7 +742,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     media={media}
                                     primaryImageUrl={quoteThumb}
                                     placeholderLabel={tMedia("imagePreparing")}
-                                    className="relative flex h-32 items-center justify-center"
+                                    className="relative flex h-24 items-center justify-center sm:h-32"
                                     bottomGradientClassName={null}
                                     placeholderSize="xs"
                                   >
@@ -608,29 +758,29 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                       {checked ? "✓" : ""}
                                     </span>
                                   </MediaCatalogThumbnail>
-                                  <CardHeader className="pb-2">
+                                  <CardHeader className="px-4 pb-2 pt-3 sm:px-6">
                                     <Badge
                                       variant="secondary"
-                                      className="bg-navy/5 text-xs text-navy"
+                                      className="w-fit bg-navy/5 text-[11px] text-navy sm:text-xs"
                                     >
                                       {isKo
                                         ? (typeLabel?.ko ?? media.type)
                                         : (typeLabel?.en ?? media.type)}
                                     </Badge>
-                                    <CardTitle className="pt-1 text-base leading-snug">
+                                    <CardTitle className="line-clamp-2 pt-1 text-[13px] leading-snug sm:text-base">
                                       {isKo ? media.name : media.nameEn}
                                     </CardTitle>
                                   </CardHeader>
-                                  <CardContent className="space-y-2">
-                                    <div className="flex items-start gap-1 text-sm text-muted-foreground">
+                                  <CardContent className="space-y-2 px-4 pb-4 sm:px-6 sm:pb-6">
+                                    <div className="flex items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-sm">
                                       <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                                      <span>
+                                      <span className="line-clamp-2">
                                         {isKo
                                           ? media.location
                                           : media.locationEn}
                                       </span>
                                     </div>
-                                    <div className="text-lg font-bold text-navy">
+                                    <div className="text-[15px] font-bold tabular-nums text-navy sm:text-lg">
                                       ₩{displayPrice.toLocaleString()}
                                       <span className="text-xs font-normal text-muted-foreground">
                                         만원 {t("quote.perMonth")}
@@ -708,6 +858,153 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           );
                         })}
                       </div>
+                      ) : (
+                        <div className="flex flex-col gap-2 sm:gap-3">
+                          {filteredCatalog.map((media) => {
+                            const checked = selectedIds.has(media.id);
+                            const typeLabel = typeLabels[media.type];
+                            const quoteThumb =
+                              dedupeImageUrls(media.sampleImages ?? [])[0]?.trim() ||
+                              null;
+                            const nwOpt = networkQuoteOptions[media.id];
+                            const isNw = media.catalogSource === "network";
+                            const displayPrice = isNw
+                              ? computeNetworkMonthlyFromMediaItem(
+                                  media,
+                                  nwOpt?.units ?? media.networkMinUnits ?? 1,
+                                )
+                              : media.price;
+                            return (
+                              <div key={media.id} className="space-y-2">
+                                <label className="block cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    className="peer sr-only"
+                                    checked={checked}
+                                    onChange={() => toggleMedia(media.id)}
+                                  />
+                                  <div
+                                    className={cn(
+                                      "flex gap-2.5 rounded-xl border border-navy/10 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md",
+                                      "peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
+                                    )}
+                                  >
+                                    <MediaCatalogThumbnail
+                                      media={media}
+                                      primaryImageUrl={quoteThumb}
+                                      placeholderLabel={tMedia("imagePreparing")}
+                                      className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-lg sm:h-24 sm:w-28"
+                                      bottomGradientClassName={null}
+                                      placeholderSize="xs"
+                                    >
+                                      <span
+                                        className={cn(
+                                          "absolute right-1.5 top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded border-2 bg-white text-xs",
+                                          checked
+                                            ? "border-gold bg-gold text-navy"
+                                            : "border-navy/20",
+                                        )}
+                                        aria-hidden
+                                      >
+                                        {checked ? "✓" : ""}
+                                      </span>
+                                    </MediaCatalogThumbnail>
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <Badge
+                                          variant="secondary"
+                                          className="bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
+                                        >
+                                          {isKo
+                                            ? (typeLabel?.ko ?? media.type)
+                                            : (typeLabel?.en ?? media.type)}
+                                        </Badge>
+                                      </div>
+                                      <p className="mt-1 line-clamp-2 text-[13px] font-bold leading-snug text-navy sm:text-sm">
+                                        {isKo ? media.name : media.nameEn}
+                                      </p>
+                                      <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-muted-foreground sm:text-[11px]">
+                                        <MapPin className="mr-0.5 inline h-2.5 w-2.5 align-text-bottom sm:h-3 sm:w-3" />
+                                        {isKo ? media.location : media.locationEn}
+                                      </p>
+                                      <p className="mt-1 text-[13px] font-bold tabular-nums text-navy sm:text-sm">
+                                        ₩{displayPrice.toLocaleString()}
+                                        <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
+                                          {" "}
+                                          만원 {t("quote.perMonth")}
+                                        </span>
+                                      </p>
+                                    </div>
+                                  </div>
+                                </label>
+                                {checked && isNw ? (
+                                  <div className="space-y-2 rounded-lg border border-navy/10 bg-slate-50 p-3 text-sm">
+                                    <div>
+                                      <label className="mb-1 block text-xs font-semibold text-navy">
+                                        {t("quote.networkUnits")}
+                                      </label>
+                                      <Input
+                                        type="number"
+                                        min={media.networkMinUnits ?? 1}
+                                        max={media.networkTotalLocations ?? 99999}
+                                        value={nwOpt?.units ?? media.networkMinUnits ?? 1}
+                                        onChange={(e) => {
+                                          const v = parseInt(e.target.value, 10);
+                                          const lo = media.networkMinUnits ?? 1;
+                                          const hi =
+                                            media.networkTotalLocations ?? 99999;
+                                          const u = Number.isFinite(v)
+                                            ? Math.min(hi, Math.max(lo, v))
+                                            : lo;
+                                          setNetworkQuoteOptions((p) => ({
+                                            ...p,
+                                            [media.id]: {
+                                              units: u,
+                                              regionScope:
+                                                p[media.id]?.regionScope ?? "all",
+                                            },
+                                          }));
+                                        }}
+                                        className="h-9"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="mb-1 block text-xs font-semibold text-navy">
+                                        {t("quote.networkRegion")}
+                                      </label>
+                                      <select
+                                        className="w-full rounded-md border border-navy/15 bg-white px-2 py-1.5 text-sm"
+                                        value={nwOpt?.regionScope ?? "all"}
+                                        onChange={(e) =>
+                                          setNetworkQuoteOptions((p) => ({
+                                            ...p,
+                                            [media.id]: {
+                                              units:
+                                                p[media.id]?.units ??
+                                                media.networkMinUnits ??
+                                                1,
+                                              regionScope: e.target.value,
+                                            },
+                                          }))
+                                        }
+                                      >
+                                        <option value="all">
+                                          {isKo ? "전체" : "All"}
+                                        </option>
+                                        {(media.networkRegionLabels ?? []).map((label) => (
+                                          <option key={label} value={label}>
+                                            {label}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                ) : null}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </>
                   )}
 

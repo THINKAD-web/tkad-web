@@ -40,15 +40,27 @@ export async function quoteElementToPdf(element: HTMLElement): Promise<jsPDF> {
     await document.fonts.ready;
   }
 
-  const canvas = await html2canvas(element, {
-    scale: 1.75,
-    useCORS: true,
-    allowTaint: false,
-    logging: false,
-    backgroundColor: "#ffffff",
-    imageTimeout: 20000,
-    onclone: replaceUntrustedImagesInClone,
-  });
+  let canvas: HTMLCanvasElement;
+  try {
+    canvas = await html2canvas(element, {
+      scale: 1.75,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+      backgroundColor: "#ffffff",
+      imageTimeout: 20000,
+      onclone: replaceUntrustedImagesInClone,
+    });
+  } catch (e) {
+    // Keep a high-signal client-side log; common culprit is CORS-tainted images.
+    // eslint-disable-next-line no-console
+    console.error("[quoteElementToPdf] html2canvas failed", {
+      error: e instanceof Error ? e.message : String(e),
+      size: { w: element.offsetWidth, h: element.offsetHeight },
+      imgCount: element.querySelectorAll("img").length,
+    });
+    throw e;
+  }
 
   const imgData = canvas.toDataURL("image/jpeg", 0.92);
   const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
@@ -90,13 +102,24 @@ export async function downloadQuotePdfFromElement(
   element: HTMLElement,
   filename: string,
 ): Promise<void> {
-  const pdf = await quoteElementToPdf(element);
-  const blob = pdf.output("blob");
   try {
-    triggerBlobDownload(blob, filename);
-  } catch {
-    const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-    triggerBlobDownload(blob, `THINKAD_quote_${ymd}.pdf`);
+    const pdf = await quoteElementToPdf(element);
+    const blob = pdf.output("blob");
+    try {
+      triggerBlobDownload(blob, filename);
+    } catch {
+      // Fallback #1: jsPDF save (some browsers block programmatic blob anchor clicks)
+      try {
+        pdf.save(filename);
+      } catch {
+        const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+        triggerBlobDownload(blob, `THINKAD_quote_${ymd}.pdf`);
+      }
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("[downloadQuotePdfFromElement] failed", e);
+    throw e;
   }
 }
 

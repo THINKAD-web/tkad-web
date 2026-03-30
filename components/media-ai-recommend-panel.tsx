@@ -97,7 +97,8 @@ export default function MediaAiRecommendPanel({
 
   const [goal, setGoal] = useState<CampaignGoal>("awareness");
   const [target, setTarget] = useState<TargetAudience>("millennial");
-  const [budgetMax, setBudgetMax] = useState("3000");
+  // Default 0 = no cap (otherwise demo data often returns too few results)
+  const [budgetMax, setBudgetMax] = useState("0");
   const [region, setRegion] = useState("all");
   const [industry, setIndustry] = useState<Industry>("fmcg");
   const [type, setType] = useState("all");
@@ -549,9 +550,21 @@ function AiResultCard({
         </div>
       </div>
       <CardHeader className="pb-2">
-        <Badge variant="secondary" className="w-fit bg-navy/5 text-xs text-navy">
-          {isKo ? tl.ko : tl.en}
-        </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary" className="w-fit bg-navy/5 text-xs text-navy">
+            {isKo ? (tl?.ko ?? m.type) : (tl?.en ?? m.type)}
+          </Badge>
+          {scored.reasons.some((r) => /예산|cap|price/i.test(r.ko + r.en)) ? (
+            <Badge className="border-0 bg-amber-100 text-[10px] font-bold text-amber-950">
+              {isKo ? "예산 적합" : "Budget fit"}
+            </Badge>
+          ) : null}
+          {scored.reasons.some((r) => /타겟|Target age/i.test(r.ko + r.en)) ? (
+            <Badge className="border-0 bg-emerald-100 text-[10px] font-bold text-emerald-950">
+              {isKo ? "타겟 일치" : "Target match"}
+            </Badge>
+          ) : null}
+        </div>
         <CardTitle className="text-base leading-snug">
           {isKo ? m.name : m.nameEn}
         </CardTitle>

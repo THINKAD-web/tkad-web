@@ -44,15 +44,11 @@ export type ScoredMedia = {
   reasons: MatchReason[];
 };
 
-/**
- * score = budget*0.30 + target*0.35 + region*0.20 + visibility*0.10 + value*0.05
- * (각 0–100 근사)
- */
-const W_BUDGET = 0.3;
-const W_TARGET = 0.35;
+/** score = budget*0.4 + target*0.3 + region*0.2 + visibility*0.1 (각 0–100 근사). */
+const W_BUDGET = 0.4;
+const W_TARGET = 0.3;
 const W_REGION = 0.2;
 const W_VISIBILITY = 0.1;
-const W_VALUE = 0.05;
 
 function mediaHaystack(m: MediaItem): string {
   return [
@@ -79,6 +75,21 @@ export function regionMatchesMedia(m: MediaItem, code: string): boolean {
   if (code === "all") return true;
   if (m.region === code) return true;
   const h = mediaHaystack(m);
+  // Seoul sub-regions (kept as a strict subset of "seoul")
+  if (code.startsWith("seoul_")) {
+    if (m.region === "busan" || m.region === "jeju") return false;
+    if (m.region !== "seoul" && m.region !== "national") return false;
+    const patterns: Record<string, RegExp> = {
+      seoul_gangnam: /강남|서초|신사|논현|역삼|삼성|대치|청담|테헤란|코엑스|서초/i,
+      seoul_hongdae: /홍대|마포|합정|상수|망원|연남|신촌|서강|상암|공덕/i,
+      seoul_myeongdong: /명동|중구|을지로|동대문|충무로|시청|남대문/i,
+      seoul_yeouido: /여의도|영등포|당산|문래|국회의사당|IFC/i,
+      seoul_gangbuk: /종로|광화문|경복궁|서대문|용산|삼청|북촌|혜화/i,
+      seoul_etc: /서울|수도권|강북|노원|송파|강동|성동|성수|강서|양천|구로|금천|관악|동작/i,
+    };
+    const re = patterns[code] ?? /서울|수도권/i;
+    return re.test(h);
+  }
   if (code === "seoul") {
     if (m.region === "busan" || m.region === "jeju") return false;
     if (m.region === "seoul") return true;
@@ -266,6 +277,10 @@ function subscoreRegion(m: MediaItem, code: string): number {
   if (code === "all") return 76;
   if (m.region === code) return 100;
   const h = mediaHaystack(m);
+  if (code.startsWith("seoul_")) {
+    // already filtered by regionMatchesMedia; reward exact corridor hits more.
+    return regionMatchesMedia(m, code) ? 100 : 60;
+  }
   if (code === "seoul" && m.region === "national") {
     if (/서울|수도권|강남|홍대|명동|테헤란|판교|분당/i.test(h)) return 84;
     return 68;
@@ -284,18 +299,6 @@ function subscoreVisibility(m: MediaItem): number {
   const f = m.dailyFootTraffic;
   if (f <= 0) return 38;
   return Math.min(100, Math.round(36 + 64 * (1 - Math.exp(-f / 220000))));
-}
-
-/** 가성비/효율(유동 대비 단가) 0–100 */
-function subscoreValue(m: MediaItem): number {
-  const p = Math.max(1, Number.isFinite(m.price) ? m.price : 1);
-  const f = Math.max(0, Number.isFinite(m.dailyFootTraffic) ? m.dailyFootTraffic : 0);
-  // r = foot-traffic per 1만원. ~ (200k / 3000) = 66.7
-  const r = f / p;
-  if (r <= 0) return 35;
-  // Smooth saturation; tuned so 40~80 range separates meaningfully.
-  const s = 100 * (1 - Math.exp(-r / 90));
-  return Math.max(0, Math.min(100, Math.round(s)));
 }
 
 /** 예산 적합도 0–100 (상한 없음: 중립, 상한 있음: 여유가 클수록 높음) */
@@ -412,20 +415,11 @@ function scoreOne(
     });
   }
 
-  const value = subscoreValue(m);
-  if (value >= 70) {
-    reasons.push({
-      ko: "유동 대비 단가(가성비) 관점에서 유리",
-      en: "Strong value (footfall per price)",
-    });
-  }
-
   const score = Math.round(
     budgetFit * W_BUDGET +
       targetMatching * W_TARGET +
       regionFit * W_REGION +
-      visibility * W_VISIBILITY +
-      value * W_VALUE,
+      visibility * W_VISIBILITY,
   );
 
   return {
@@ -467,7 +461,7 @@ export function recommendMedia(
 
   return [...pool]
     .map((m) => scoreOne(m, input, budgetCap))
-    .filter((s) => s.score >= 30)
+    .filter((s) => s.score >= 22)
     .sort((a, b) => b.score - a.score)
     .slice(0, 15);
 }

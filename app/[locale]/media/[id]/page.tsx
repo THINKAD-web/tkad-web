@@ -23,7 +23,6 @@ import {
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
-import MediaDetailHeroGallery from "@/components/media-detail-hero-gallery";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
@@ -73,7 +72,6 @@ export default async function MediaDetailPage({ params }: Props) {
   const casePhotos = media.caseStudyPhotos ?? [];
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
-  const extraGalleryImages = galleryImages.slice(1);
   const typeLabel =
     (isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en) ?? "";
   const featuresText = isKo ? media.features : media.featuresEn;

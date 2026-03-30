@@ -624,7 +624,7 @@ export default function MediaBrowseClient({
                 ) : (
                   <>
                     {catalogCardLayout === "grid" ? (
-                  <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {pagedCatalog.map((media) => {
                       const detailHref = mediaItemDetailPath(media.id);
                       return (
