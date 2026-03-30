@@ -644,7 +644,7 @@ export default function MediaBrowseClient({
                           aria-label={isKo ? media.name : media.nameEn}
                           className="block min-w-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
                         >
-                          <Card className="relative min-w-0 overflow-hidden gap-0 py-0 transition-shadow hover:shadow-lg sm:gap-6 sm:py-6 motion-safe:hover:translate-y-0 sm:motion-safe:hover:-translate-y-[4px]">
+                          <Card className="relative min-w-0 overflow-hidden gap-0 py-0 transition-shadow hover:shadow-lg motion-safe:hover:translate-y-0 sm:motion-safe:hover:-translate-y-[2px]">
                           <MediaCatalogThumbnail
                             media={media}
                             placeholderLabel={t("media.imagePreparing")}
@@ -691,7 +691,7 @@ export default function MediaBrowseClient({
                               </div>
                             )}
                           </MediaCatalogThumbnail>
-                          <CardHeader className="relative z-0 min-w-0 space-y-1.5 px-4 pb-2.5 pt-2 sm:space-y-2 sm:px-6 sm:pb-3 sm:pt-3">
+                          <CardHeader className="relative z-0 min-w-0 space-y-1 px-3 pb-1.5 pt-2 sm:px-4 sm:pb-2 sm:pt-2">
                             <div className="flex items-center justify-between gap-2">
                               <Badge
                                 variant="secondary"
@@ -706,7 +706,7 @@ export default function MediaBrowseClient({
                               {isKo ? media.name : media.nameEn}
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="relative z-0 min-w-0 space-y-2.5 px-4 pb-4 pt-0 sm:space-y-3 sm:px-6 sm:pb-6">
+                          <CardContent className="relative z-0 min-w-0 space-y-1.5 px-3 pb-2.5 pt-0 sm:px-4 sm:pb-3">
                             <div className="flex min-w-0 items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-xs">
                               <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
                               <span className="min-w-0 truncate">
