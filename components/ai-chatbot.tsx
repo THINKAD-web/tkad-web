@@ -210,7 +210,7 @@ export default function AiChatbot() {
           role="presentation"
         >
           <div
-            className="pointer-events-auto fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] left-3 right-3 z-[56] flex h-[min(520px,min(85dvh,88vh))] max-h-[min(85dvh,88vh)] min-h-0 min-w-0 max-w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/95 shadow-[0_12px_48px_-8px_rgba(15,23,42,0.45)] ring-1 ring-black/[0.04] backdrop-blur-xl sm:bottom-6 sm:left-auto sm:right-6 sm:h-[min(520px,88vh)] sm:max-h-[88vh] sm:w-[min(400px,calc(100vw-3rem))] sm:max-w-[min(400px,calc(100vw-3rem))]"
+            className="pointer-events-auto fixed bottom-0 left-0 right-0 z-[56] mx-auto flex h-[85dvh] max-h-[85dvh] w-full max-w-[100vw] flex-col overflow-hidden rounded-t-2xl border-t border-white/10 bg-white shadow-[0_-8px_32px_-4px_rgba(15,23,42,0.35)] sm:bottom-6 sm:left-auto sm:right-6 sm:mx-0 sm:h-[min(520px,88vh)] sm:max-h-[88vh] sm:w-[400px] sm:max-w-[400px] sm:rounded-2xl sm:border sm:shadow-[0_12px_48px_-8px_rgba(15,23,42,0.45)]"
             role="dialog"
             aria-label={t("dialogLabel")}
             onClick={(e) => e.stopPropagation()}
