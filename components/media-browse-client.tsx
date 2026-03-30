@@ -715,15 +715,6 @@ export default function MediaBrowseClient({
                             </div>
                             <div className="text-[15px] font-bold tabular-nums text-navy sm:text-base">
                               {formatMediaPriceWonWithSymbol(media.price)}
-                              <span className="text-[11px] font-normal text-muted-foreground sm:text-xs">
-                                {" "}
-                                ·{" "}
-                                {tMedia(
-                                  mediaPricePeriodTranslationKey(
-                                    media.pricePeriod,
-                                  ),
-                                )}
-                              </span>
                             </div>
                           </CardContent>
                           </Card>
