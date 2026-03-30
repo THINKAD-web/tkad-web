@@ -149,7 +149,6 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
     lng: centerLng,
     dailyFootTraffic: 0,
     monthlyFootTraffic: undefined,
-    visibilityScore: 0,
     features: n.description ?? n.features ?? undefined,
     featuresEn: n.description ?? n.features ?? undefined,
     sampleImages: imgs.length > 0 ? imgs : [],

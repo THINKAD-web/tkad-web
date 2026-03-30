@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import {
   fetchRecentlyViewedItems,
   readRecentlyViewedIds,
   RECENTLY_VIEWED_MAX,
   subscribeRecentlyViewedChanged,
 } from "@/lib/recently-viewed";
-import { type MediaItem, resolveMediaGallery } from "@/lib/media-data";
+import { type MediaItem } from "@/lib/media-data";
 import { cn } from "@/lib/utils";
 
 const DISPLAY_MAX = RECENTLY_VIEWED_MAX;
@@ -19,6 +21,7 @@ interface Props {
 
 export default function RecentlyViewedMedia({ locale }: Props) {
   const isKo = locale === "ko";
+  const tMedia = useTranslations("media");
   const [items, setItems] = useState<MediaItem[]>([]);
   const [ready, setReady] = useState(false);
 
@@ -80,7 +83,6 @@ export default function RecentlyViewedMedia({ locale }: Props) {
           )}
         >
           {items.slice(0, DISPLAY_MAX).map((media) => {
-            const thumb = resolveMediaGallery(media)[0];
             return (
               <Link
                 key={media.id}
@@ -95,14 +97,14 @@ export default function RecentlyViewedMedia({ locale }: Props) {
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/30",
                 )}
               >
-                <div className="relative h-[60px] w-[80px] shrink-0 overflow-hidden bg-muted">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={thumb}
-                    alt=""
-                    className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
-                  />
-                </div>
+                <MediaCatalogThumbnail
+                  media={media}
+                  placeholderLabel={tMedia("imagePreparing")}
+                  className="relative h-[60px] w-[80px] shrink-0"
+                  imgClassName="transition-transform duration-200 group-hover:scale-[1.03]"
+                  bottomGradientClassName={null}
+                  placeholderSize="xs"
+                />
                 <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-2 pr-3 pl-2.5">
                   <span className="truncate text-[11px] font-semibold leading-tight text-foreground group-hover:text-navy">
                     {isKo ? media.name : media.nameEn}

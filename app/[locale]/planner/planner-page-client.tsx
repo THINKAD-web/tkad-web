@@ -77,20 +77,37 @@ const GOALS: {
 
 const CATEGORIES: {
   key: PlannerCategory;
-  labelKey: "catDigital" | "catBillboard" | "catBus" | "catSubway";
+  labelKey: "catDigital" | "catStatic" | "catMobile";
 }[] = [
   { key: "digital", labelKey: "catDigital" },
-  { key: "billboard", labelKey: "catBillboard" },
-  { key: "bus", labelKey: "catBus" },
-  { key: "subway", labelKey: "catSubway" },
+  { key: "static", labelKey: "catStatic" },
+  { key: "mobile", labelKey: "catMobile" },
 ];
 
 const DEFAULT_CATEGORIES: PlannerCategory[] = [
   "digital",
-  "billboard",
-  "bus",
-  "subway",
+  "static",
+  "mobile",
 ];
+
+function normalizePlannerCategoriesFromStorage(raw: unknown): Set<PlannerCategory> {
+  const allowed = new Set<string>(["digital", "static", "mobile"]);
+  const legacy: Record<string, PlannerCategory> = {
+    billboard: "static",
+    bus: "mobile",
+    subway: "mobile",
+  };
+  if (!Array.isArray(raw)) return new Set(DEFAULT_CATEGORIES);
+  const next = new Set<PlannerCategory>();
+  for (const c of raw) {
+    if (typeof c !== "string") continue;
+    const mapped = legacy[c] ?? (allowed.has(c) ? (c as PlannerCategory) : null);
+    if (mapped === "digital" || mapped === "static" || mapped === "mobile") {
+      next.add(mapped);
+    }
+  }
+  return next.size > 0 ? next : new Set(DEFAULT_CATEGORIES);
+}
 
 const AGE_KEYS = ["ageAll", "age20s", "age30s", "age40s", "age50plus"] as const;
 const INDUSTRY_KEYS = [
@@ -243,7 +260,7 @@ export default function PlannerPageClient({
   const applyPreset = (id: "premium" | "national" | "value") => {
     if (id === "premium") {
       setSelectedRegions(new Set<PlannerMapRegion>(["seoul"]));
-      setCategories(new Set<PlannerCategory>(["digital", "billboard"]));
+      setCategories(new Set<PlannerCategory>(["digital", "static"]));
     } else if (id === "national") {
       setSelectedRegions(
         new Set<PlannerMapRegion>(["seoul", "busan", "jeju"]),
@@ -261,7 +278,7 @@ export default function PlannerPageClient({
   const savePlan = useCallback(() => {
     try {
       const payload = {
-        version: 2 as const,
+        version: 3 as const,
         savedAt: new Date().toISOString(),
         wizardStep,
         campaignGoal,
@@ -301,11 +318,10 @@ export default function PlannerPageClient({
         return;
       }
       const p = JSON.parse(raw) as Record<string, unknown>;
-      if (p.version === 2) {
+      if (p.version === 3 || p.version === 2) {
         if (Array.isArray(p.regions))
           setSelectedRegions(new Set(p.regions as string[]));
-        if (Array.isArray(p.categories))
-          setCategories(new Set(p.categories as PlannerCategory[]));
+        setCategories(normalizePlannerCategoriesFromStorage(p.categories));
         if (typeof p.budget === "number") setBudget(String(p.budget));
         if (typeof p.months === "number") setMonths(p.months);
         if (typeof p.campaignGoal === "string")
@@ -331,8 +347,7 @@ export default function PlannerPageClient({
         if (r === "all")
           setSelectedRegions(new Set(PLANNER_MAP_REGIONS));
         else setSelectedRegions(new Set([r]));
-        if (Array.isArray(p.categories))
-          setCategories(new Set(p.categories as PlannerCategory[]));
+        setCategories(normalizePlannerCategoriesFromStorage(p.categories));
         if (typeof p.budget === "number") setBudget(String(p.budget));
         if (typeof p.months === "number") setMonths(p.months);
         setWizardStep(4);

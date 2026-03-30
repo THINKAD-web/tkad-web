@@ -1,15 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
   MapPin,
-  Monitor,
+  GitCompare,
   BadgeCheck,
   ExternalLink,
   Tag,
@@ -25,7 +26,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
-import { type MediaItem, resolveMediaGallery } from "@/lib/media-data";
+import { type MediaItem } from "@/lib/media-data";
 
 function RatioBar({
   label,
@@ -89,13 +90,14 @@ function CompareMediaCard({
   isKo,
   isLowestPrice,
   maxDaily,
+  imagePreparingLabel,
 }: {
   media: MediaItem;
   isKo: boolean;
   isLowestPrice: boolean;
   maxDaily: number;
+  imagePreparingLabel: string;
 }) {
-  const img = resolveMediaGallery(media)[0];
   const score = Math.min(
     100,
     Math.max(0, Math.round(media.visibilityScore ?? 0)),
@@ -112,14 +114,13 @@ function CompareMediaCard({
       )}
     >
       {/* 1. 대표 이미지 */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-navy/[0.12] to-navy/[0.04]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={img}
-          alt=""
-          className="h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-navy/55 via-navy/10 to-transparent" />
+      <MediaCatalogThumbnail
+        media={media}
+        placeholderLabel={imagePreparingLabel}
+        className="relative aspect-[16/10] w-full"
+        bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/55 via-navy/10 to-transparent"
+        placeholderSize="md"
+      >
         {isLowestPrice && (
           <div className="absolute left-3 top-3 z-10">
             <Badge className="border-0 bg-gold px-2.5 py-0.5 text-[11px] font-bold text-navy shadow-sm">
@@ -132,7 +133,7 @@ function CompareMediaCard({
           <BadgeCheck className="h-3 w-3" />
           Verified
         </div>
-      </div>
+      </MediaCatalogThumbnail>
 
       <div className="flex flex-1 flex-col gap-6 p-6 md:gap-7 md:p-8">
         {/* 2. 매체명 / 위치 */}
@@ -273,6 +274,7 @@ function CompareMediaCard({
 export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const tMedia = useTranslations("media");
 
   const { minPrice, maxDaily } = useMemo(() => {
     const prices = items.map((i) => i.price);
@@ -284,7 +286,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   if (items.length < 2) {
     return (
       <section className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-        <Monitor className="mb-4 h-16 w-16 text-navy/15" />
+        <GitCompare className="mb-4 h-16 w-16 text-navy/15" aria-hidden />
         <h1 className="text-2xl font-bold text-navy">
           {isKo ? "비교할 매체를 선택해주세요" : "Select media to compare"}
         </h1>
@@ -359,6 +361,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                   isKo={isKo}
                   isLowestPrice={media.price === minPrice}
                   maxDaily={maxDaily}
+                  imagePreparingLabel={tMedia("imagePreparing")}
                 />
               </div>
             ))}

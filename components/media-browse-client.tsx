@@ -14,15 +14,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   MapPin,
-  Monitor,
   BadgeCheck,
   ShieldCheck,
   Flame,
   Calculator,
   LayoutList,
+  LayoutGrid,
+  Rows3,
   Map as MapIcon,
   ExternalLink,
+  X,
+  Users,
 } from "lucide-react";
+import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import SolutionCtaButton from "@/components/solution-cta-button";
 import ShareButtons from "@/components/share-buttons";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
@@ -55,8 +59,14 @@ import {
   matchesMediaTextQuery,
   typeLabels,
   type MediaItem,
-  resolveMediaGallery,
 } from "@/lib/media-data";
+import {
+  computeCatalogBounds,
+  defaultAdvancedFilterState,
+  passesMediaAdvancedFilters,
+  type MediaAdvancedFilterState,
+} from "@/lib/media-filter-advanced";
+import MediaAdvancedFiltersPanel from "@/components/media-advanced-filters-panel";
 import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
@@ -78,10 +88,26 @@ export default function MediaBrowseClient({
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
   const [textFilter, setTextFilter] = useState("");
   const [browseMode, setBrowseMode] = useState<"list" | "map">("list");
+  const [catalogCardLayout, setCatalogCardLayout] = useState<
+    "grid" | "compact"
+  >("grid");
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [catalogPageSize, setCatalogPageSize] = useState(24);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
+
+  const bounds = useMemo(() => computeCatalogBounds(catalog), [catalog]);
+  const defaultAdvanced = useMemo(
+    () => defaultAdvancedFilterState(bounds),
+    [bounds],
+  );
+  /** `null` = use `defaultAdvanced` until the user edits advanced filters */
+  const [advanced, setAdvanced] = useState<MediaAdvancedFilterState | null>(
+    null,
+  );
+  const effectiveAdvanced = advanced ?? defaultAdvanced;
 
   useLayoutEffect(() => {
     setCompareItems(entriesToCompareMediaItems(getCompareCartEntries(), catalog));
@@ -129,14 +155,54 @@ export default function MediaBrowseClient({
       if (budget === "3000to5000" && (m.price < 3000 || m.price > 5000))
         return false;
       if (budget === "over5000" && m.price < 5000) return false;
+      if (!passesMediaAdvancedFilters(m, effectiveAdvanced, bounds)) return false;
       return true;
     });
-  }, [catalog, region, type, budget, searchTarget, textFilter]);
+  }, [
+    catalog,
+    region,
+    type,
+    budget,
+    searchTarget,
+    textFilter,
+    effectiveAdvanced,
+    bounds,
+  ]);
 
   useEffect(() => {
     if (mapSelectedId == null) return;
     if (!filtered.some((m) => m.id === mapSelectedId)) setMapSelectedId(null);
   }, [filtered, mapSelectedId]);
+
+  useEffect(() => {
+    setCatalogPage(1);
+  }, [
+    region,
+    type,
+    budget,
+    searchTarget,
+    textFilter,
+    effectiveAdvanced,
+  ]);
+
+  const pagedCatalog = useMemo(() => {
+    const start = (catalogPage - 1) * catalogPageSize;
+    return filtered.slice(start, start + catalogPageSize);
+  }, [filtered, catalogPage, catalogPageSize]);
+
+  const catalogPageCount = Math.max(
+    1,
+    Math.ceil(filtered.length / catalogPageSize),
+  );
+
+  useEffect(() => {
+    if (browseMode !== "map" || mapSelectedId == null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMapSelectedId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [browseMode, mapSelectedId]);
 
   const regions = [
     { value: "all", label: t("media.allRegions") },
@@ -148,15 +214,10 @@ export default function MediaBrowseClient({
 
   const types = [
     { value: "all", label: t("media.allTypes") },
-    { value: "billboard", label: t("media.types.billboard") },
     { value: "digital", label: t("media.types.digital") },
-    { value: "subway", label: t("media.types.subway") },
-    { value: "bus", label: t("media.types.bus") },
+    { value: "static", label: t("media.types.static") },
+    { value: "mobile", label: t("media.types.mobile") },
     { value: "network", label: t("media.types.network") },
-    { value: "apartment", label: t("media.types.apartment") },
-    { value: "premium", label: t("media.types.premium") },
-    { value: "highway", label: t("media.types.highway") },
-    { value: "indoor", label: t("media.types.indoor") },
   ];
 
   const budgets = [
@@ -174,6 +235,7 @@ export default function MediaBrowseClient({
     setSearchTarget(null);
     setTextFilter("");
     setMapSelectedId(null);
+    setAdvanced(null);
   };
 
   const handleMediaView = useCallback((media: MediaItem) => {
@@ -209,6 +271,14 @@ export default function MediaBrowseClient({
     mapSelectedId != null
       ? filtered.find((m) => m.id === mapSelectedId) ?? null
       : null;
+
+  const handleMapSelectId = useCallback((id: string | null) => {
+    if (id == null) {
+      setMapSelectedId(null);
+      return;
+    }
+    setMapSelectedId((prev) => (prev === id ? null : id));
+  }, []);
 
   return (
     <>
@@ -342,6 +412,11 @@ export default function MediaBrowseClient({
                       ))}
                     </select>
                   </div>
+                  <MediaAdvancedFiltersPanel
+                    bounds={bounds}
+                    value={effectiveAdvanced}
+                    onChange={setAdvanced}
+                  />
                   <Button
                     variant="outline"
                     className="w-full"
@@ -384,6 +459,53 @@ export default function MediaBrowseClient({
                         {t("media.browseViewMap")}
                       </button>
                     </div>
+                    {browseMode === "list" ? (
+                      <div className="inline-flex rounded-full border border-navy/15 bg-slate-50 p-0.5">
+                        <button
+                          type="button"
+                          onClick={() => setCatalogCardLayout("grid")}
+                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                            catalogCardLayout === "grid"
+                              ? "bg-white text-navy shadow-sm"
+                              : "text-muted-foreground hover:text-navy"
+                          }`}
+                        >
+                          <LayoutGrid className="h-3.5 w-3.5" />
+                          {t("media.browseCardLayoutGrid")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCatalogCardLayout("compact")}
+                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                            catalogCardLayout === "compact"
+                              ? "bg-white text-navy shadow-sm"
+                              : "text-muted-foreground hover:text-navy"
+                          }`}
+                        >
+                          <Rows3 className="h-3.5 w-3.5" />
+                          {t("media.browseCardLayoutCompact")}
+                        </button>
+                      </div>
+                    ) : null}
+                    {browseMode === "list" ? (
+                      <label className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-white px-3 py-1.5 text-xs font-medium text-navy">
+                        <span className="text-muted-foreground">
+                          {t("media.perPage")}
+                        </span>
+                        <select
+                          className="rounded-md border border-navy/15 bg-slate-50 px-2 py-0.5 text-xs font-semibold"
+                          value={catalogPageSize}
+                          onChange={(e) => {
+                            setCatalogPageSize(Number(e.target.value));
+                            setCatalogPage(1);
+                          }}
+                        >
+                          <option value={12}>12</option>
+                          <option value={24}>24</option>
+                          <option value={48}>48</option>
+                        </select>
+                      </label>
+                    ) : null}
                     <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
                       <ShieldCheck className="h-4 w-4" />
                       Verified Media
@@ -396,81 +518,121 @@ export default function MediaBrowseClient({
                     {t("media.noResults")}
                   </div>
                 ) : browseMode === "map" ? (
-                  <div className="space-y-4">
+                  <div className="relative">
                     <MediaBrowseMap
                       items={filtered}
                       locale={locale}
                       selectedId={mapSelectedId}
-                      onSelectId={setMapSelectedId}
+                      onSelectId={handleMapSelectId}
                     />
-                    {mapSelectedMedia && (
-                      <div className="rounded-xl border bg-white p-4 shadow-sm">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                              {isKo ? "선택한 매체" : "Selected placement"}
-                            </p>
-                            <h3 className="mt-1 text-lg font-bold text-navy">
-                              {isKo
-                                ? mapSelectedMedia.name
-                                : mapSelectedMedia.nameEn}
-                            </h3>
-                            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                              <MapPin className="h-3.5 w-3.5 shrink-0" />
-                              {isKo
-                                ? mapSelectedMedia.location
-                                : mapSelectedMedia.locationEn}
-                            </p>
-                            <p className="mt-2 text-base font-bold text-navy">
-                              ₩{mapSelectedMedia.price.toLocaleString()}
-                              <span className="text-xs font-normal text-muted-foreground">
-                                만원 {t("media.perMonth")}
-                              </span>
-                            </p>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            <Link href={mediaItemDetailPath(mapSelectedMedia.id)}>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="font-semibold"
+                    {mapSelectedMedia ? (
+                      <div className="pointer-events-none absolute inset-0 z-20 flex items-end justify-center p-3 sm:p-4 md:items-start md:justify-end">
+                        <div
+                          className="pointer-events-auto w-full max-w-md animate-in fade-in slide-in-from-bottom-3 duration-200 md:slide-in-from-bottom-0 md:slide-in-from-right-3"
+                          role="dialog"
+                          aria-label={
+                            isKo
+                              ? mapSelectedMedia.name
+                              : mapSelectedMedia.nameEn
+                          }
+                        >
+                          <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl shadow-navy/20 ring-1 ring-black/5">
+                            <div className="flex items-start gap-3 border-b border-navy/8 p-3 sm:p-4">
+                              <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg sm:h-24 sm:w-32">
+                                <MediaCatalogThumbnail
+                                  media={mapSelectedMedia}
+                                  placeholderLabel={t("media.imagePreparing")}
+                                  className="h-full w-full rounded-lg"
+                                  bottomGradientClassName={null}
+                                  placeholderSize="xs"
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1 pt-0.5">
+                                <h3 className="line-clamp-2 text-base font-bold leading-snug text-navy sm:text-lg">
+                                  {isKo
+                                    ? mapSelectedMedia.name
+                                    : mapSelectedMedia.nameEn}
+                                </h3>
+                                <p className="mt-1.5 text-sm font-bold tabular-nums text-navy">
+                                  ₩{mapSelectedMedia.price.toLocaleString()}
+                                  <span className="text-xs font-normal text-muted-foreground">
+                                    {isKo
+                                      ? `만원 ${t("media.perMonth")}`
+                                      : ` ${t("media.perMonth")}`}
+                                  </span>
+                                </p>
+                                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                  <Users
+                                    className="h-3.5 w-3.5 shrink-0 text-gold-dark"
+                                    aria-hidden
+                                  />
+                                  <span>
+                                    {t("media.mapPopupFootTraffic")}:{" "}
+                                    <span className="font-semibold text-navy/85">
+                                      {mapSelectedMedia.dailyFootTraffic.toLocaleString()}
+                                    </span>
+                                  </span>
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setMapSelectedId(null)}
+                                className="-m-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-slate-100 hover:text-navy"
+                                aria-label={t("media.mapPopupClose")}
                               >
-                                <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-                                {t("media.mapCardDetail")}
-                              </Button>
-                            </Link>
-                            <Link href={`/quote?media=${mapSelectedMedia.id}`}>
-                              <Button
-                                size="sm"
-                                className="bg-gold font-semibold text-navy hover:bg-gold-dark"
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 p-3 sm:p-4 sm:pt-3">
+                              <Link
+                                href={mediaItemDetailPath(
+                                  mapSelectedMedia.id,
+                                )}
+                                className="flex-1 min-w-[8rem]"
                               >
-                                <Calculator className="mr-1.5 h-3.5 w-3.5" />
-                                {t("media.mapCardQuote")}
-                              </Button>
-                            </Link>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-10 w-full font-semibold"
+                                >
+                                  <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                                  {t("media.mapCardDetail")}
+                                </Button>
+                              </Link>
+                              <Link
+                                href={`/quote?media=${mapSelectedMedia.id}`}
+                                className="flex-1 min-w-[8rem]"
+                              >
+                                <Button
+                                  size="sm"
+                                  className="h-10 w-full bg-gold font-semibold text-navy hover:bg-gold-dark"
+                                >
+                                  <Calculator className="mr-1.5 h-3.5 w-3.5" />
+                                  {t("media.mapCardQuote")}
+                                </Button>
+                              </Link>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 ) : (
-                  <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                    {filtered.map((media) => {
-                      const thumb = resolveMediaGallery(media)[0];
+                  <>
+                    {catalogCardLayout === "grid" ? (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {pagedCatalog.map((media) => {
                       return (
                         <Card
                           key={media.id}
                           className="overflow-hidden transition-shadow hover:shadow-lg"
                         >
-                          <div className="relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br from-navy/5 to-navy/10">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={thumb}
-                              alt=""
-                              className="absolute inset-0 h-full w-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/10 to-transparent" />
-                            <Monitor className="relative z-0 h-10 w-10 text-white/30" />
+                          <MediaCatalogThumbnail
+                            media={media}
+                            placeholderLabel={t("media.imagePreparing")}
+                            className="flex h-28 items-center justify-center sm:h-32"
+                            bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/10 to-transparent"
+                          >
                             {media.catalogSource !== "network" ? (
                               <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
                                 <BadgeCheck className="h-3 w-3" />
@@ -503,7 +665,7 @@ export default function MediaBrowseClient({
                                 {isKo ? "인기" : "Popular"}
                               </div>
                             )}
-                          </div>
+                          </MediaCatalogThumbnail>
                           <CardHeader className="pb-2">
                             <div className="flex items-center justify-between">
                               <Badge
@@ -521,17 +683,17 @@ export default function MediaBrowseClient({
                                 {t("media.cardDetail")}
                               </Link>
                             </div>
-                            <CardTitle className="text-base">
+                            <CardTitle className="text-sm leading-snug">
                               {isKo ? media.name : media.nameEn}
                             </CardTitle>
                           </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <CardContent className="pt-0">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <MapPin className="h-3 w-3" />
                               {isKo ? media.location : media.locationEn}
                             </div>
-                            <div className="mt-2">
-                              <div className="text-lg font-bold text-navy">
+                            <div className="mt-1.5">
+                              <div className="text-base font-bold text-navy">
                                 ₩{media.price.toLocaleString()}
                                 <span className="text-xs font-normal text-muted-foreground">
                                   만원 {t("media.perMonth")}
@@ -572,6 +734,130 @@ export default function MediaBrowseClient({
                       );
                     })}
                   </div>
+                    ) : (
+                  <div className="flex flex-col gap-2">
+                    {pagedCatalog.map((media) => (
+                      <div
+                        key={media.id}
+                        className="flex gap-3 rounded-xl border border-navy/10 bg-white p-2 shadow-sm transition-shadow hover:shadow-md sm:gap-3 sm:p-2.5"
+                      >
+                        <MediaCatalogThumbnail
+                          media={media}
+                          placeholderLabel={t("media.imagePreparing")}
+                          className="relative h-[4.5rem] w-[5.25rem] shrink-0 overflow-hidden rounded-lg sm:h-[5rem] sm:w-24"
+                          bottomGradientClassName={null}
+                          placeholderSize="xs"
+                        >
+                          <label className="absolute left-1 top-1 z-10 flex cursor-pointer select-none items-center gap-0.5 rounded-full bg-white/95 px-1.5 py-0.5 text-[9px] font-medium text-navy shadow-sm">
+                            <input
+                              type="checkbox"
+                              checked={isInCompare(media.id)}
+                              onChange={() => toggleCompare(media)}
+                              disabled={
+                                media.catalogSource === "network" ||
+                                (!isInCompare(media.id) &&
+                                  compareItems.length >= COMPARE_MAX_ITEMS)
+                              }
+                              className="h-3 w-3 rounded border-navy/30 text-gold accent-gold"
+                            />
+                            {isKo ? "비교" : "Cmp"}
+                          </label>
+                        </MediaCatalogThumbnail>
+                        <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <Badge
+                              variant="secondary"
+                              className="bg-navy/5 px-1.5 py-0 text-[10px] text-navy"
+                            >
+                              {isKo
+                                ? (typeLabels[media.type]?.ko ?? media.type)
+                                : (typeLabels[media.type]?.en ?? media.type)}
+                            </Badge>
+                            {popularIds.has(media.id) && (
+                              <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[9px] font-bold text-navy">
+                                <Flame className="h-2.5 w-2.5" />
+                                {isKo ? "인기" : "Hot"}
+                              </span>
+                            )}
+                          </div>
+                          <Link
+                            href={mediaItemDetailPath(media.id)}
+                            className="line-clamp-2 text-sm font-bold leading-snug text-navy hover:text-gold-dark"
+                          >
+                            {isKo ? media.name : media.nameEn}
+                          </Link>
+                          <p className="line-clamp-1 text-[11px] text-muted-foreground">
+                            <MapPin className="mr-0.5 inline h-3 w-3 align-text-bottom" />
+                            {isKo ? media.location : media.locationEn}
+                          </p>
+                          <p className="text-sm font-bold tabular-nums text-navy">
+                            ₩{media.price.toLocaleString()}
+                            <span className="text-[10px] font-normal text-muted-foreground">
+                              {" "}
+                              만원 {t("media.perMonth")}
+                            </span>
+                          </p>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            <Link
+                              href={mediaItemDetailPath(media.id)}
+                              className="rounded-md border border-navy/15 px-2 py-1 text-[11px] font-semibold text-navy hover:bg-slate-50"
+                            >
+                              {t("media.cardDetail")}
+                            </Link>
+                            <Link
+                              href={`/quote?media=${media.id}`}
+                              className="rounded-md bg-gold px-2 py-1 text-[11px] font-semibold text-navy hover:bg-gold-dark"
+                            >
+                              {isKo ? "견적" : "Quote"}
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                    )}
+                    {catalogPageCount > 1 ? (
+                      <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-slate-200 pt-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={catalogPage <= 1}
+                          onClick={() =>
+                            setCatalogPage((p) => Math.max(1, p - 1))
+                          }
+                        >
+                          {t("media.pagePrev")}
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                          {t("media.pageSummary", {
+                            from:
+                              filtered.length === 0
+                                ? 0
+                                : (catalogPage - 1) * catalogPageSize + 1,
+                            to: Math.min(
+                              catalogPage * catalogPageSize,
+                              filtered.length,
+                            ),
+                            total: filtered.length,
+                          })}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={catalogPage >= catalogPageCount}
+                          onClick={() =>
+                            setCatalogPage((p) =>
+                              Math.min(catalogPageCount, p + 1),
+                            )
+                          }
+                        >
+                          {t("media.pageNext")}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </>
                 )}
               </div>
             </div>

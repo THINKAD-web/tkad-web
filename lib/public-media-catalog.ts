@@ -89,7 +89,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     sampleImages: imgs.length > 0 ? imgs : [],
     operatingHours: m.operatingHours ?? undefined,
     operatingHoursEn: m.operatingHours ?? undefined,
-    installYear: undefined,
+    installYear: m.installYear ?? undefined,
     ...(() => {
       const manual = m.pastAdvertisers?.trim() || undefined;
       const fromExec = buildPastAdvertisersFromExecutions(m.advertiserExecutions);

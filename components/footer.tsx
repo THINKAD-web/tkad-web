@@ -8,6 +8,7 @@ export default function Footer() {
 
   const navItems = [
     { href: "/", label: t("nav.home") },
+    { href: "/about", label: t("nav.about") },
     { href: "/media", label: t("nav.media") },
     { href: "/cases", label: t("nav.cases") },
     { href: "/contact", label: t("nav.contact") },
@@ -15,7 +16,7 @@ export default function Footer() {
 
   const serviceItems = [
     { href: "/media", label: t("footer.domesticOOH"), icon: Megaphone },
-    { href: "/about", label: t("footer.crossBorderOOH"), icon: Globe },
+    { href: "/planner", label: t("footer.crossBorderOOH"), icon: Globe },
     { href: "/contact", label: t("footer.dataConsulting"), icon: BarChart3 },
     { href: "/tools", label: t("footer.planningTool"), icon: Wrench },
   ];

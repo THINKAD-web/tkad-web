@@ -1,4 +1,4 @@
-import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getPublishedSuccessCaseById } from "@/lib/public-content-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -8,14 +8,15 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, { params }: Params) {
   const { id } = await params;
-  if (!isDatabaseConfigured() || !CUID_RE.test(id)) {
+  if (!CUID_RE.test(id)) {
     return Response.json({ error: "Not found" }, { status: 404 });
   }
-  const db = getPrisma();
-  const row = await db.successCase.findFirst({
-    where: { id, status: "published" },
-    select: { id: true, titleKo: true, titleEn: true, clientName: true },
+  const detail = await getPublishedSuccessCaseById(id);
+  if (!detail) return Response.json({ error: "Not found" }, { status: 404 });
+  return Response.json({
+    id: detail.id,
+    titleKo: detail.titleKo,
+    titleEn: detail.titleEn,
+    clientName: detail.clientName,
   });
-  if (!row) return Response.json({ error: "Not found" }, { status: 404 });
-  return Response.json(row);
 }

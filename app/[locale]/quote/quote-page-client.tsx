@@ -13,9 +13,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle,
-  Monitor,
-  MapPin,
+  Images,
   Calculator,
+  MapPin,
   Send,
   Download,
   ChevronRight,
@@ -27,18 +27,24 @@ import {
   Mail,
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { typeLabels, type MediaItem } from "@/lib/media-data";
+import {
+  dedupeImageUrls,
+  getPrimaryMediaImageUrl,
+  typeLabels,
+  type MediaItem,
+} from "@/lib/media-data";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import Spinner from "@/components/spinner";
+import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
+import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
+import { QuotePdfPreview } from "@/components/quote-pdf-preview";
 import {
-  saveQuotePdf,
-  quotePdfToBase64,
-  type QuoteTemplateId,
-  type BuildQuotePdfParams,
-} from "@/lib/build-quote-pdf";
+  downloadQuotePdfFromElement,
+  quoteElementToPdfBase64,
+} from "@/lib/quote-html-pdf";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -51,14 +57,6 @@ const PERIOD_MONTHS: Record<PeriodKey, number> = {
   "3months": 3,
   "6months": 6,
   "12months": 12,
-};
-
-/** PDF uses Helvetica only — English period line */
-const PERIOD_LABEL_PDF_EN: Record<PeriodKey, string> = {
-  "1month": "1 month",
-  "3months": "3 months",
-  "6months": "6 months",
-  "12months": "12 months",
 };
 
 type FormState = {
@@ -78,6 +76,7 @@ type WizardStep = 1 | 2 | 3 | 4;
 
 export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const t = useTranslations();
+  const tMedia = useTranslations("media");
   const locale = useLocale();
   const isKo = locale === "ko";
 
@@ -144,6 +143,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [emailPdfLoading, setEmailPdfLoading] = useState(false);
+  const [quoteIssuedAt] = useState(() => new Date());
 
   const selectedMedia = useMemo(
     () => catalog.filter((m) => selectedIds.has(m.id)),
@@ -175,70 +175,44 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     return Number.isFinite(n) && n >= 0 ? n : null;
   }, [form.budgetMax]);
 
-  const pdfParams: BuildQuotePdfParams = useMemo(
-    () => ({
-      template,
-      logoDataUrl,
-      isKo,
-      company: form.company,
-      name: form.name,
-      periodLabelPdf: PERIOD_LABEL_PDF_EN[period],
-      budgetMin: budgetMinN,
-      budgetMax: budgetMaxN,
-      monthlyCost,
-      totalCost,
-      rows: selectedMedia.map((m) => {
-        const isNw = m.catalogSource === "network";
-        const opt = networkQuoteOptions[m.id];
-        const units = isNw ? opt?.units ?? m.networkMinUnits ?? 1 : 0;
-        const line = isNw
-          ? computeNetworkMonthlyFromMediaItem(m, units)
-          : m.price;
-        const baseName = (isKo ? m.name : m.nameEn) || m.name;
-        const name =
-          isNw && units
-            ? `${baseName} (${units}${isKo ? "개소" : " sites"})`
-            : baseName;
-        const location =
-          isNw && opt
-            ? opt.regionScope === "all"
-              ? isKo
-                ? "지역: 전체"
-                : "Regions: all"
-              : opt.regionScope
-            : (isKo ? m.location : m.locationEn) || m.location;
-        const nameAsciiBase = (m.nameEn || m.name).trim();
-        const nameAscii =
-          isNw && units ? `${nameAsciiBase} (${units} sites)` : nameAsciiBase;
-        const locationAscii =
-          m.catalogSource === "network" && opt
-            ? opt.regionScope === "all"
-              ? "Regions: all"
-              : String(opt.regionScope)
-            : (m.locationEn || m.location || "").trim();
-        return {
-          name,
-          location,
-          price: line,
-          nameAscii,
-          locationAscii,
-        };
-      }),
-    }),
-    [
-      template,
-      logoDataUrl,
-      isKo,
-      form.company,
-      form.name,
-      period,
-      budgetMinN,
-      budgetMaxN,
-      monthlyCost,
-      totalCost,
-      selectedMedia,
-      networkQuoteOptions,
-    ],
+  const pdfPreviewRef = useRef<HTMLDivElement>(null);
+
+  const pdfPreviewRows = useMemo(() => {
+    return selectedMedia.map((m) => {
+      const isNw = m.catalogSource === "network";
+      const opt = networkQuoteOptions[m.id];
+      const units = isNw ? opt?.units ?? m.networkMinUnits ?? 1 : 0;
+      const lineMonthly = isNw
+        ? computeNetworkMonthlyFromMediaItem(m, units)
+        : m.price;
+      const baseName = (isKo ? m.name : m.nameEn) || m.name;
+      const name =
+        isNw && units
+          ? `${baseName} (${units}${isKo ? "개소" : " sites"})`
+          : baseName;
+      const location =
+        isNw && opt
+          ? opt.regionScope === "all"
+            ? isKo
+              ? "지역: 전체"
+              : "Regions: all"
+            : opt.regionScope
+          : (isKo ? m.location : m.locationEn) || m.location;
+      return {
+        id: m.id,
+        thumbUrl: getPrimaryMediaImageUrl(m),
+        name,
+        location,
+        unitPriceMan: lineMonthly,
+        lineTotalMan: lineMonthly * periodMonths,
+      };
+    });
+  }, [selectedMedia, networkQuoteOptions, isKo, periodMonths]);
+
+  const pdfVatMan = useMemo(() => Math.round(totalCost * 0.1), [totalCost]);
+  const pdfGrandTotalMan = useMemo(
+    () => totalCost + pdfVatMan,
+    [totalCost, pdfVatMan],
   );
 
   const toggleMedia = useCallback((id: string) => {
@@ -286,6 +260,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     ],
     [t],
   );
+
+  const StepHeaderIcon = (
+    [Images, Calculator, LayoutTemplate, CheckCircle] as const
+  )[step - 1];
 
   const canGoNext = useCallback(() => {
     if (step === 1) return selectedMedia.length > 0;
@@ -429,7 +407,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     }
     setDownloading(true);
     try {
-      await saveQuotePdf(pdfParams, "thinkad-quote.pdf");
+      await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+      const el = pdfPreviewRef.current;
+      if (!el) {
+        toast("error", t("quote.pdfError"));
+        return;
+      }
+      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      const filename = isKo
+        ? `싱커드_견적서_${ymd}.pdf`
+        : `THINKAD_quote_${ymd}.pdf`;
+      await downloadQuotePdfFromElement(el, filename);
       toast("success", t("quote.pdfDownloaded"));
     } catch {
       toast("error", t("quote.pdfError"));
@@ -449,7 +437,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     }
     setEmailPdfLoading(true);
     try {
-      const pdfBase64 = await quotePdfToBase64(pdfParams);
+      await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+      const el = pdfPreviewRef.current;
+      if (!el) {
+        toast("error", t("quote.pdfError"));
+        return;
+      }
+      const pdfBase64 = await quoteElementToPdfBase64(el);
       const res = await fetch("/api/quote/email-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -547,7 +541,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               <Card className="min-h-[320px] shadow-md">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-xl text-navy">
-                    <Monitor className="h-5 w-5 text-gold" />
+                    <StepHeaderIcon className="h-5 w-5 text-gold" aria-hidden />
                     {stepLabels[step - 1]}
                   </CardTitle>
                 </CardHeader>
@@ -566,6 +560,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         {catalog.map((media) => {
                           const checked = selectedIds.has(media.id);
                           const typeLabel = typeLabels[media.type];
+                          const quoteThumb =
+                            dedupeImageUrls(media.sampleImages ?? [])[0]
+                              ?.trim() || null;
                           const nwOpt = networkQuoteOptions[media.id];
                           const isNw = media.catalogSource === "network";
                           const displayPrice = isNw
@@ -591,11 +588,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     "peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
                                   )}
                                 >
-                                  <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
-                                    <Monitor className="h-9 w-9 text-navy/20" />
+                                  <MediaCatalogThumbnail
+                                    media={media}
+                                    primaryImageUrl={quoteThumb}
+                                    placeholderLabel={tMedia("imagePreparing")}
+                                    className="relative flex h-32 items-center justify-center"
+                                    bottomGradientClassName={null}
+                                    placeholderSize="xs"
+                                  >
                                     <span
                                       className={cn(
-                                        "absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded border-2 bg-white text-xs",
+                                        "absolute right-2.5 top-2.5 z-10 flex h-5 w-5 items-center justify-center rounded border-2 bg-white text-xs",
                                         checked
                                           ? "border-gold bg-gold text-navy"
                                           : "border-navy/20",
@@ -604,7 +607,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     >
                                       {checked ? "✓" : ""}
                                     </span>
-                                  </div>
+                                  </MediaCatalogThumbnail>
                                   <CardHeader className="pb-2">
                                     <Badge
                                       variant="secondary"
@@ -857,6 +860,37 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
                   {step === 4 && !submitted && (
                     <div className="space-y-6">
+                      {selectedMedia.length > 0 ? (
+                        <div className="space-y-2">
+                          <h3 className="text-sm font-semibold text-navy">
+                            {t("quote.pdfPreviewTitle")}
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            {t("quote.pdfPreviewHint")}
+                          </p>
+                          <div className="overflow-x-auto rounded-xl border border-navy/10 bg-slate-100/90 p-4 md:p-6">
+                            <div className="mx-auto w-fit max-w-full">
+                              <QuotePdfPreview
+                                ref={pdfPreviewRef}
+                                template={template}
+                                customerLogoSrc={logoDataUrl}
+                                company={form.company}
+                                contactName={form.name}
+                                contactPhone={form.phone}
+                                contactEmail={form.email}
+                                periodLabel={periodLabel}
+                                periodMonths={periodMonths}
+                                rows={pdfPreviewRows}
+                                subtotalMan={totalCost}
+                                vatMan={pdfVatMan}
+                                grandTotalMan={pdfGrandTotalMan}
+                                issuedAt={quoteIssuedAt}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
                       <div className="rounded-xl border border-navy/10 bg-slate-50/80 p-4 text-sm">
                         <p className="font-semibold text-navy">
                           {t("quote.reviewTitle")}

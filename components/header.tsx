@@ -50,6 +50,7 @@ export default function Header() {
     { href: "/", label: t("nav.home") },
     { href: "/media", label: t("nav.media") },
     { href: "/services", label: t("nav.services") },
+    { href: "/about", label: t("nav.about") },
     { href: "/recommend", label: t("nav.recommend") },
     { href: "/planner", label: t("nav.planner") },
     { href: "/cases", label: t("nav.cases") },

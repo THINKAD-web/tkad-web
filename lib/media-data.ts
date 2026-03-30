@@ -137,6 +137,11 @@ export function getPrimaryMediaImageUrl(m: MediaItem): string | null {
   return first || null;
 }
 
+/** 상세·갤러리: 업로드된 이미지만 (Picsum 폴백 없음) */
+export function getMediaDetailGalleryUrls(m: MediaItem): string[] {
+  return dedupeImageUrls(m.sampleImages ?? []);
+}
+
 export function latLngToFallbackPercent(lat: number, lng: number): { x: number; y: number } {
   const latMin = 33.2;
   const latMax = 38.6;
@@ -151,17 +156,19 @@ export function latLngToFallbackPercent(lat: number, lng: number): { x: number; 
 }
 
 function mediaTypeToMapType(type: string): CampaignMapMediaType {
+  if (type === "static") return "billboard";
+  if (type === "mobile") return "transport";
+  if (type === "digital" || type === "network") return "digital";
   if (type === "billboard" || type === "highway") return "billboard";
   if (
-    type === "digital" ||
-    type === "network" ||
     type === "premium" ||
     type === "indoor" ||
     type === "apartment"
   ) {
     return "digital";
   }
-  return "transport";
+  if (type === "bus" || type === "subway") return "transport";
+  return "digital";
 }
 
 export function mediaItemsToCampaignPins(
@@ -206,6 +213,7 @@ export const mediaData: MediaItem[] = [
     lng: 127.0595,
     dailyFootTraffic: 450000,
     monthlyFootTraffic: 5000000,
+    visibilityScore: 92,
     size: "80.9m × 20.1m (1,620㎡)",
     resolution: "7,840 × 1,952px",
     brightness: "9,000nit",
@@ -251,6 +259,7 @@ export const mediaData: MediaItem[] = [
     lng: 127.0276,
     dailyFootTraffic: 300000,
     monthlyFootTraffic: 9000000,
+    visibilityScore: 78,
     size: "1.5m × 5.34m × 18기",
     resolution: "1,080 × 1,920px (기준)",
     brightness: "5,500nit",
@@ -290,6 +299,7 @@ export const mediaData: MediaItem[] = [
     lng: 127.0254,
     dailyFootTraffic: 250000,
     monthlyFootTraffic: 7500000,
+    visibilityScore: 85,
     size: "약 200㎡ 면적",
     resolution: "4K 기반 송출",
     brightness: "7,000nit",
@@ -321,6 +331,7 @@ export const mediaData: MediaItem[] = [
     lng: 127.0397,
     dailyFootTraffic: 200000,
     monthlyFootTraffic: 6000000,
+    visibilityScore: 88,
     size: "대형 루프 전광",
     resolution: "6K급 패널",
     brightness: "8,000nit",
@@ -347,12 +358,13 @@ export const mediaData: MediaItem[] = [
     location: "서울 성동구 성수동2가",
     locationEn: "Seongsu-dong 2-ga, Seongdong-gu, Seoul",
     region: "seoul",
-    type: "billboard",
+    type: "static",
     price: 2000,
     lat: 37.5445,
     lng: 127.056,
     dailyFootTraffic: 180000,
     monthlyFootTraffic: 5400000,
+    visibilityScore: 72,
     size: "대형 외벽 패널",
     resolution: "인쇄 + 야간 조명",
     brightness: "역광 조명",
@@ -385,12 +397,13 @@ export const mediaData: MediaItem[] = [
     location: "서울 성동구 성수역",
     locationEn: "Seongsu Station, Seoul",
     region: "seoul",
-    type: "subway",
+    type: "mobile",
     price: 1500,
     lat: 37.5445,
     lng: 127.0559,
     dailyFootTraffic: 100000,
     monthlyFootTraffic: 3000000,
+    visibilityScore: 64,
     size: "역사 내 DID 멀티 스크린",
     resolution: "FHD~4K 혼합",
     brightness: "실내 기준 500–800nit",
@@ -422,6 +435,7 @@ export const mediaData: MediaItem[] = [
     lng: 127.0635,
     dailyFootTraffic: 300000,
     monthlyFootTraffic: 9000000,
+    visibilityScore: 86,
     size: "타워형 세로 LED",
     resolution: "세로형 고해상도",
     brightness: "6,500nit",
@@ -465,6 +479,7 @@ export const mediaData: MediaItem[] = [
     lng: 129.0593,
     dailyFootTraffic: 140000,
     monthlyFootTraffic: 4200000,
+    visibilityScore: 70,
     dailyExposure: "140,000",
     operatingHours: "06:00–24:00",
     operatingHoursEn: "6:00 a.m.–midnight",
@@ -484,12 +499,13 @@ export const mediaData: MediaItem[] = [
     location: "부산 동구",
     locationEn: "Dong-gu, Busan",
     region: "busan",
-    type: "subway",
+    type: "mobile",
     price: 900,
     lat: 35.115,
     lng: 129.041,
     dailyFootTraffic: 85000,
     monthlyFootTraffic: 2550000,
+    visibilityScore: 62,
     dailyExposure: "85,000",
     operatingHours: "첫차–막차",
     operatingHoursEn: "First–last train",
@@ -515,6 +531,7 @@ export const mediaData: MediaItem[] = [
     lng: 126.493,
     dailyFootTraffic: 110000,
     monthlyFootTraffic: 3300000,
+    visibilityScore: 74,
     dailyExposure: "110,000",
     operatingHours: "항공편 운항 시간 연동",
     operatingHoursEn: "Aligned with flight operations",
@@ -534,12 +551,13 @@ export const mediaData: MediaItem[] = [
     location: "서귀포시",
     locationEn: "Seogwipo",
     region: "jeju",
-    type: "billboard",
+    type: "static",
     price: 1000,
     lat: 33.252,
     lng: 126.412,
     dailyFootTraffic: 65000,
     monthlyFootTraffic: 1950000,
+    visibilityScore: 68,
     dailyExposure: "65,000",
     operatingHours: "상시 (야간 조명)",
     operatingHoursEn: "Always on (night lighting)",
@@ -559,12 +577,13 @@ export const mediaData: MediaItem[] = [
     location: "전국 주요 도시",
     locationEn: "Major cities nationwide",
     region: "national",
-    type: "bus",
+    type: "mobile",
     price: 600,
     lat: 36.5,
     lng: 127.9,
     dailyFootTraffic: 350000,
     monthlyFootTraffic: 10500000,
+    visibilityScore: 66,
     dailyExposure: "350,000+",
     operatingHours: "노선 운행 시간",
     operatingHoursEn: "Per route schedule",
@@ -584,12 +603,13 @@ export const mediaData: MediaItem[] = [
     location: "전국 고속도로",
     locationEn: "Nationwide expressways",
     region: "national",
-    type: "billboard",
+    type: "static",
     price: 3500,
     lat: 37.5,
     lng: 127.0,
     dailyFootTraffic: 220000,
     monthlyFootTraffic: 6600000,
+    visibilityScore: 80,
     dailyExposure: "220,000",
     operatingHours: "상시 노출",
     operatingHoursEn: "Always visible",
@@ -605,15 +625,10 @@ export const mediaData: MediaItem[] = [
 ];
 
 export const typeLabels: Record<string, { ko: string; en: string }> = {
-  billboard: { ko: "빌보드", en: "Billboard" },
   digital: { ko: "디지털", en: "Digital" },
-  subway: { ko: "지하철", en: "Subway" },
-  bus: { ko: "버스/트럭", en: "Bus/Truck" },
+  static: { ko: "고정형", en: "Static" },
+  mobile: { ko: "이동형", en: "Mobile" },
   network: { ko: "네트워크/패키지", en: "Network / package" },
-  apartment: { ko: "아파트", en: "Apartment" },
-  premium: { ko: "프리미엄(호텔·골프 등)", en: "Premium (hotel, golf, etc.)" },
-  highway: { ko: "고속도로", en: "Highway" },
-  indoor: { ko: "실내", en: "Indoor" },
 };
 
 /** 텍스트 검색: 매체명·주소·구/시·역·시설·랜드마크·태그·세부 카테고리·유형 라벨 */

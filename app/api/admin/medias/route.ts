@@ -6,6 +6,10 @@ import { enrichNewMediaLocationFromKakao } from "@/lib/media-location-enrich";
 import { maybeEstimateDailyFootfall } from "@/lib/media-daily-footfall-estimate";
 import { maybeAutoFillNearbyMediaFields } from "@/lib/media-nearby-facilities";
 import { getPrisma } from "@/lib/prisma";
+import {
+  CATALOG_MEDIA_TYPES,
+  isValidCatalogMediaType,
+} from "@/lib/media-auto-categorize";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +72,14 @@ export async function POST(request: NextRequest) {
   const price = Number(body.price ?? 0);
   if (!name || !location || !region || !type) {
     return json({ error: "name, location, region, type required" }, 400);
+  }
+  if (!isValidCatalogMediaType(type)) {
+    return json(
+      {
+        error: `type must be one of: ${CATALOG_MEDIA_TYPES.join(", ")}`,
+      },
+      400,
+    );
   }
 
   const data: Prisma.MediaCreateInput = {

@@ -56,16 +56,14 @@ type Props = {
 
 function typeBadgeLabel(type: string): string {
   const s = type.toLowerCase();
-  if (/billboard|빌보드|외벽/.test(s)) return "빌보드";
-  if (/subway|지하철|랩핑/.test(s)) return "지하철";
-  if (/bus|버스|쉘터|shelter/.test(s)) return "버스";
+  if (s === "digital") return "디지털";
+  if (s === "static") return "고정형";
+  if (s === "mobile") return "이동형";
+  if (s === "network" || /네트워크/.test(s)) return "네트워크";
+  if (/billboard|빌보드|외벽|highway|고속|현수막/.test(s)) return "고정형";
+  if (/subway|지하철|랩핑|bus|버스|쉘터|shelter/.test(s)) return "이동형";
   if (/digital|디지털|전광|led|사이니지|signage|미디어폴|screen/.test(s))
     return "디지털";
-  if (s === "apartment" || /아파트/.test(s)) return "아파트";
-  if (s === "premium" || /프리미엄|골프|호텔/.test(s)) return "프리미엄";
-  if (s === "highway" || /고속|휴게소/.test(s)) return "고속도로";
-  if (s === "network" || /네트워크/.test(s)) return "네트워크";
-  if (s === "indoor" || /실내/.test(s)) return "실내";
   return type;
 }
 
@@ -73,26 +71,25 @@ function matchesCategoryFilter(type: string, filter: string): boolean {
   if (filter === "all") return true;
   const s = type.toLowerCase();
   switch (filter) {
-    case "billboard":
-      return /billboard|빌보드|외벽|highway/.test(s);
-    case "digital":
-      return /digital|디지털|전광|led|사이니지|signage|미디어폴|screen|premium|indoor|apartment/.test(
-        s,
+    case "static":
+      return (
+        s === "static" ||
+        /billboard|빌보드|외벽|highway|고속|현수막/.test(s)
       );
-    case "subway":
-      return /subway|지하철|랩핑/.test(s);
-    case "bus":
-      return /bus|버스|쉘터|shelter|network/.test(s);
-    case "apartment":
-      return s === "apartment";
-    case "premium":
-      return s === "premium";
-    case "highway":
-      return s === "highway";
+    case "digital":
+      return (
+        s === "digital" ||
+        /디지털|전광|led|사이니지|signage|미디어폴|screen|premium|indoor|apartment/.test(
+          s,
+        )
+      );
+    case "mobile":
+      return (
+        s === "mobile" ||
+        /subway|지하철|랩핑|bus|버스|쉘터|shelter/.test(s)
+      );
     case "network":
       return s === "network";
-    case "indoor":
-      return s === "indoor";
     default:
       return true;
   }
@@ -932,15 +929,10 @@ export default function AdminMediasClient({
           <div className="flex flex-wrap gap-1.5">
             {[
               { value: "all", label: "전체" },
-              { value: "billboard", label: "빌보드" },
               { value: "digital", label: "디지털" },
-              { value: "subway", label: "지하철" },
-              { value: "bus", label: "버스" },
+              { value: "static", label: "고정형" },
+              { value: "mobile", label: "이동형" },
               { value: "network", label: "네트워크" },
-              { value: "apartment", label: "아파트" },
-              { value: "premium", label: "프리미엄" },
-              { value: "highway", label: "고속도로" },
-              { value: "indoor", label: "실내" },
             ].map((opt) => (
               <button
                 key={opt.value}
@@ -1516,7 +1508,7 @@ export default function AdminMediasClient({
                     onChange={(e) =>
                       setForm((f) => ({ ...f, type: e.target.value }))
                     }
-                    placeholder="digital, 디지털 전광판…"
+                    placeholder="digital, static, mobile"
                   />
                 </div>
               </div>

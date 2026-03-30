@@ -5,9 +5,10 @@ import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
-import { resolveMediaGallery, typeLabels } from "@/lib/media-data";
+import { typeLabels } from "@/lib/media-data";
 
 export default function MediaSimilarCarousel({
   items,
@@ -21,6 +22,7 @@ export default function MediaSimilarCarousel({
   priceSuffix: string;
 }) {
   const t = useTranslations("media.detail");
+  const tMedia = useTranslations("media");
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
@@ -105,7 +107,6 @@ export default function MediaSimilarCarousel({
         )}
       >
         {items.map((m) => {
-          const thumb = resolveMediaGallery(m)[0];
           const typeLabel =
             (isKo ? typeLabels[m.type]?.ko : typeLabels[m.type]?.en) ?? "";
           return (
@@ -120,14 +121,14 @@ export default function MediaSimilarCarousel({
                 "motion-reduce:transform-none",
               )}
             >
-              <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={thumb}
-                  alt=""
-                  className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
-                />
-              </div>
+              <MediaCatalogThumbnail
+                media={m}
+                placeholderLabel={tMedia("imagePreparing")}
+                className="relative aspect-[4/3] w-full"
+                imgClassName="transition duration-500 ease-out group-hover:scale-105"
+                bottomGradientClassName={null}
+                placeholderSize="xs"
+              />
               <div className="flex flex-1 flex-col p-4">
                 {typeLabel ? (
                   <span className="mb-2 inline-flex w-fit max-w-full truncate rounded-md border border-navy/10 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-navy/80">

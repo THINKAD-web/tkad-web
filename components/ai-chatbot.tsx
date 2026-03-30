@@ -209,7 +209,7 @@ export default function AiChatbot() {
           role="presentation"
         >
           <div
-            className="pointer-events-auto fixed bottom-6 right-4 z-[56] flex h-[min(520px,88vh)] w-[min(400px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl sm:right-6"
+            className="pointer-events-auto fixed bottom-6 left-0 right-0 z-[56] flex h-[min(520px,80vh)] max-h-[80vh] w-full flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl sm:left-auto sm:right-6 sm:h-[min(520px,88vh)] sm:max-h-none sm:w-[min(400px,calc(100vw-2rem))]"
             role="dialog"
             aria-label={t("dialogLabel")}
           >

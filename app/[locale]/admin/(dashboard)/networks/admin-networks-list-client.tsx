@@ -86,6 +86,11 @@ export default function AdminNetworksListClient({
           <Button variant="outline" type="button" onClick={() => refresh()}>
             {locale === "en" ? "Refresh" : "새로고침"}
           </Button>
+          <Button variant="outline" asChild>
+            <Link href="/admin/networks/quick-add">
+              {locale === "en" ? "Quick add (JSON)" : "빠른 등록 (JSON)"}
+            </Link>
+          </Button>
           <Button asChild>
             <Link href="/admin/networks/new">
               <Plus className="mr-2 h-4 w-4" />

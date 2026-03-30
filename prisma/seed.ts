@@ -3,6 +3,10 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { randomBytes, scryptSync } from "crypto";
+import {
+  SAMPLE_SUCCESS_CASE_ID,
+  sampleSuccessCaseSeedData,
+} from "@/lib/sample-success-case";
 
 function hashPassword(plain: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -35,7 +39,7 @@ async function main() {
       nameEn: "COEX K-POP Square LED",
       location: "서울 강남구 영동대로 513 코엑스",
       region: "서울",
-      type: "디지털 전광판",
+      type: "digital",
       price: 50000000,
       width: "80900",
       height: "20100",
@@ -45,7 +49,7 @@ async function main() {
       nameEn: "Gangnam-daero Media Pole G-LIGHT",
       location: "강남역-신논현역 760m 구간",
       region: "서울",
-      type: "미디어폴",
+      type: "digital",
       price: 40000000,
       width: "1500",
       height: "5340",
@@ -55,7 +59,7 @@ async function main() {
       nameEn: "Sinnonhyeon DSG Building LED",
       location: "강남대로 신논현역 사거리",
       region: "서울",
-      type: "디지털 전광판",
+      type: "digital",
       price: 28000000,
       width: "12000",
       height: "8000",
@@ -65,7 +69,7 @@ async function main() {
       nameEn: "Cheongdam SS Tower LED",
       location: "서울 강남구 학동사거리",
       region: "서울",
-      type: "디지털 전광판",
+      type: "digital",
       price: 32000000,
       width: "10000",
       height: "7000",
@@ -75,7 +79,7 @@ async function main() {
       nameEn: "Seongsu Bando Exterior Ad",
       location: "서울 성동구 성수동2가",
       region: "서울",
-      type: "빌보드",
+      type: "static",
       price: 20000000,
       width: "15000",
       height: "10000",
@@ -85,7 +89,7 @@ async function main() {
       nameEn: "Seongsu Station Line 2 Digital Ad",
       location: "서울 성동구 성수역",
       region: "서울",
-      type: "스크린도어",
+      type: "mobile",
       price: 15000000,
       width: "2000",
       height: "800",
@@ -95,7 +99,7 @@ async function main() {
       nameEn: "COEX Parnas Media Tower",
       location: "삼성역 코엑스",
       region: "서울",
-      type: "미디어타워",
+      type: "digital",
       price: 35000000,
       width: "5000",
       height: "12000",
@@ -160,6 +164,33 @@ async function main() {
     await prisma.contactInquiry.create({ data: inq });
   }
   console.log(`Inquiries: ${inquiryData.length} created`);
+
+  // --- Published sample success case (matches /cases fallback copy) ---
+  const sampleCase = sampleSuccessCaseSeedData();
+  await prisma.successCase.upsert({
+    where: { id: SAMPLE_SUCCESS_CASE_ID },
+    create: sampleCase,
+    update: {
+      status: "published",
+      clientName: sampleCase.clientName,
+      industry: sampleCase.industry,
+      titleKo: sampleCase.titleKo,
+      titleEn: sampleCase.titleEn,
+      summaryKo: sampleCase.summaryKo,
+      challengeKo: sampleCase.challengeKo,
+      solutionKo: sampleCase.solutionKo,
+      resultsKo: sampleCase.resultsKo,
+      metricsJson: sampleCase.metricsJson,
+      mediaUsed: sampleCase.mediaUsed,
+      periodStart: sampleCase.periodStart,
+      periodEnd: sampleCase.periodEnd,
+      thumbnailUrl: sampleCase.thumbnailUrl,
+      galleryUrls: sampleCase.galleryUrls,
+      testimonialKo: sampleCase.testimonialKo,
+      publishedAt: sampleCase.publishedAt,
+    },
+  });
+  console.log(`Success case sample: ${SAMPLE_SUCCESS_CASE_ID} (published)`);
 
   console.log("\nSeed completed!");
   await prisma.$disconnect();

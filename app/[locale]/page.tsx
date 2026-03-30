@@ -13,10 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import HeroParallaxBackground from "@/components/hero-parallax-background";
-import {
-  resolveMediaGallery,
-  type MediaItem,
-} from "@/lib/media-data";
+import { type MediaItem } from "@/lib/media-data";
 import { fetchHomeFeaturedMedia } from "@/lib/public-media-catalog";
 import {
   ArrowRight,
@@ -25,7 +22,6 @@ import {
   CheckCircle,
   Globe,
   MapPin,
-  Monitor,
   TrendingUp,
   ChevronDown,
   ShieldCheck,
@@ -46,6 +42,8 @@ import {
   MessageCircle,
 } from "lucide-react";
 
+import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
+
 const HomeRecentlyViewed = dynamic(
   () => import("@/components/home-recently-viewed"),
   { loading: () => null },
@@ -63,10 +61,10 @@ type Props = {
 };
 
 const typeLabels: Record<string, { ko: string; en: string }> = {
-  billboard: { ko: "빌보드", en: "Billboard" },
   digital: { ko: "디지털", en: "Digital" },
-  subway: { ko: "지하철", en: "Subway" },
-  bus: { ko: "버스", en: "Bus" },
+  static: { ko: "고정형", en: "Static" },
+  mobile: { ko: "이동형", en: "Mobile" },
+  network: { ko: "네트워크/패키지", en: "Network / package" },
 };
 
 const partnerLogos = [
@@ -344,7 +342,6 @@ function HomeContent({
           <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {topThreeFeatured.map((media, i) => {
               const rank = i + 1;
-              const thumb = resolveMediaGallery(media)[0];
               const typeLabel = isKo
                 ? (typeLabels[media.type]?.ko ?? media.type)
                 : (typeLabels[media.type]?.en ?? media.type);
@@ -364,15 +361,14 @@ function HomeContent({
                 <ScrollAnimate key={media.id} delay={i * 100}>
                   <Card className="group relative overflow-hidden border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl">
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
-                    <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-navy/5 to-navy/10">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={thumb}
-                        alt=""
-                        className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-navy/45 via-transparent to-transparent" />
-                      <Monitor className="relative z-0 h-16 w-16 text-white/20 transition-transform duration-300 group-hover:scale-110" />
+                    <MediaCatalogThumbnail
+                      media={media}
+                      placeholderLabel={t("media.imagePreparing")}
+                      className="group relative flex h-52 items-center justify-center"
+                      imgClassName="opacity-90 transition duration-300 group-hover:scale-105"
+                      bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/45 via-transparent to-transparent"
+                      placeholderSize="sm"
+                    >
                       <div className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-light text-lg font-bold text-navy shadow-md">
                         {rank}
                       </div>
@@ -380,7 +376,7 @@ function HomeContent({
                         <BadgeCheck className="h-3.5 w-3.5" />
                         Verified
                       </div>
-                    </div>
+                    </MediaCatalogThumbnail>
                     <CardHeader className="pb-3">
                       <Badge
                         variant="secondary"
@@ -626,21 +622,19 @@ function HomeContent({
           ) : (
           <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-7">
             {featuredGridItems.map((media, i) => {
-              const thumb = resolveMediaGallery(media)[0];
               return (
               <ScrollAnimate key={media.id} delay={i * 100}>
               <Card
                 className="group overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
-                <div className="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-navy/5 to-navy/10">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={thumb}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy/50 via-transparent to-transparent" />
-                  <Monitor className="relative z-0 h-12 w-12 text-white/25 transition-transform duration-300 group-hover:scale-110" />
+                <MediaCatalogThumbnail
+                  media={media}
+                  placeholderLabel={t("media.imagePreparing")}
+                  className="group relative flex h-48 items-center justify-center"
+                  imgClassName="opacity-90 transition duration-300 group-hover:scale-105"
+                  bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/50 via-transparent to-transparent"
+                  placeholderSize="sm"
+                >
                   {i < 3 && (
                     <div className="absolute top-3 left-3 z-10 flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
                       <Flame className="h-3 w-3" />
@@ -651,8 +645,8 @@ function HomeContent({
                     <BadgeCheck className="h-3 w-3" />
                     Verified
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                </div>
+                  <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-white/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                </MediaCatalogThumbnail>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <Badge

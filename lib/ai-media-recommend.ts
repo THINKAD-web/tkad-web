@@ -1,5 +1,13 @@
 import type { MediaItem } from "@/lib/media-data";
 
+/**
+ * AI 매체 추천 (규칙 기반)
+ *
+ * 1. 후보 풀: `budgetMaxMan` > 0 이면 `m.price <= cap` 선필터, 지역은 `regionMatchesMedia`.
+ * 2. 점수: `budgetFit*0.4 + targetMatch*0.3 + region*0.2 + visibility*0.1` (각 0–100 근사).
+ * 3. 타겟 매칭: `targetAge` 문자열 파싱 후 연령 밴드 겹침 + 상권·업종·캠페인 목표 가중.
+ * 4. `score >= 22`만 노출, 상위 15건.
+ */
 export type CampaignGoal = "awareness" | "consideration" | "launch";
 
 export type TargetAudience = "genz" | "millennial" | "family" | "biz" | "mass";
@@ -109,6 +117,15 @@ function parseMediaAgeRanges(raw: string | undefined): { min: number; max: numbe
     const b = Math.max(Number(mm[1]), Number(mm[2]));
     if (Number.isFinite(a) && Number.isFinite(b)) out.push({ min: a, max: b });
   }
+  /** `20대~40대`, `30대-50대` 등 */
+  const decadeSpanRe = /(\d{1,2})대[~\-–](\d{1,2})대/g;
+  while ((mm = decadeSpanRe.exec(t)) !== null) {
+    const lo = Number(mm[1]);
+    const hi = Number(mm[2]);
+    if (Number.isFinite(lo) && Number.isFinite(hi) && lo <= hi) {
+      out.push({ min: lo, max: hi + 9 });
+    }
+  }
   const genRe = /(\d{1,2})대/g;
   while ((mm = genRe.exec(t)) !== null) {
     const d = Number(mm[1]);
@@ -186,13 +203,24 @@ function industryFmcgRetailFootfall(industry: Industry, m: MediaItem): boolean {
 function goalRawPoints(goal: CampaignGoal, m: MediaItem): number {
   if (goal === "awareness") {
     let pts = Math.min(55, Math.round(m.dailyFootTraffic / 35000));
-    if (m.type === "digital" || m.type === "billboard" || m.type === "network") {
+    if (
+      m.type === "digital" ||
+      m.type === "static" ||
+      m.type === "network" ||
+      m.type === "billboard"
+    ) {
       pts += 18;
     }
     return Math.min(100, pts);
   }
   if (goal === "consideration") {
-    if (m.type === "subway" || m.type === "digital") return 82;
+    if (
+      m.type === "mobile" ||
+      m.type === "subway" ||
+      m.type === "digital"
+    ) {
+      return 82;
+    }
     return 48;
   }
   if (goal === "launch") {
@@ -281,13 +309,13 @@ function scoreOne(
   const budgetFit = subscoreBudget(m, budgetCap);
   if (budgetCap != null && budgetCap > 0) {
     reasons.push({
-      ko: "예산 상한 대비 단가 적합도",
-      en: "Budget fit vs. monthly cap",
+      ko: `월 ${budgetCap.toLocaleString()}만원 이하 조건 충족 (단가 ${m.price.toLocaleString()}만원/월)`,
+      en: `Price ${m.price.toLocaleString()} ≤ cap ${budgetCap.toLocaleString()} (₩10K units / mo)`,
     });
   } else {
     reasons.push({
-      ko: "예산 제한 없음 (중립 적합도)",
-      en: "No budget cap (neutral budget fit)",
+      ko: "예산 상한 미설정 — 단가·적합도 신호 위주로 산정",
+      en: "No budget cap — ranked mainly on fit and value signals",
     });
   }
 
@@ -297,6 +325,11 @@ function scoreOne(
     reasons.push({
       ko: "타겟 연령대와 매체 타깃이 잘 맞음",
       en: "Target age aligns with media profile",
+    });
+  } else if (age >= 58) {
+    reasons.push({
+      ko: "타겟 연령과 어느 정도 맞음",
+      en: "Reasonable overlap with target age",
     });
   }
   if (youthDistrictHit(input.target, m)) {

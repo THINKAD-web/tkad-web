@@ -71,6 +71,7 @@ model Media {
   nameEn    String?  @map("name_en")
   location  String
   region    String
+  /// Catalog code: `digital` | `static` | `mobile` (OOH 유형)
   type      String
   price     Int
   image     String?
@@ -98,6 +99,8 @@ model Media {
   cpm              Float?
   engagementRate   Float?   @map("engagement_rate")
   visibilityScore  Int      @default(0) @map("visibility_score")
+  /// 설치 연도 (옵션, 공개 검색 고급 필터)
+  installYear      Int?     @map("install_year")
   effectMemo       String?  @map("effect_memo")
   extractedImages  String[] @default([]) @map("extracted_images")
   /** 광고주 이력 (쉼표 구분). 비어 있으면 집행 이력(MediaAdvertiserExecution)에서 요약 */

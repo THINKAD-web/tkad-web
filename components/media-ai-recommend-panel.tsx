@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import dynamic from "next/dynamic";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,10 +13,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 import {
   Sparkles,
   MapPin,
-  Monitor,
   List,
   Map as MapIcon,
   ShoppingBag,
@@ -29,7 +30,6 @@ import {
 } from "@/lib/media-data";
 import {
   recommendMedia,
-  mediaToMapPosition,
   type CampaignGoal,
   type TargetAudience,
   type Industry,
@@ -37,6 +37,19 @@ import {
 } from "@/lib/ai-media-recommend";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { cn } from "@/lib/utils";
+import { getCampaignMonitoringMapProvider } from "@/components/campaign-monitoring-map";
+
+const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[400px] items-center justify-center border-t border-navy/10 bg-slate-50">
+      <div
+        className="h-9 w-9 animate-spin rounded-full border-2 border-navy/15 border-t-gold"
+        aria-hidden
+      />
+    </div>
+  ),
+});
 
 type Props = {
   locale: string;
@@ -90,6 +103,16 @@ export default function MediaAiRecommendPanel({
   const [view, setView] = useState<"list" | "map">("list");
   const [results, setResults] = useState<ScoredMedia[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [aiMapSelectedId, setAiMapSelectedId] = useState<string | null>(null);
+
+  const aiMapItems = useMemo(
+    () => (results ?? []).map((s) => s.item),
+    [results],
+  );
+
+  useEffect(() => {
+    setAiMapSelectedId(null);
+  }, [results]);
 
   const runRecommend = useCallback(() => {
     const cap = Math.max(0, parseInt(budgetMax.replace(/\D/g, ""), 10) || 0);
@@ -193,7 +216,11 @@ export default function MediaAiRecommendPanel({
                     setBudgetMax(e.target.value.replace(/[^\d]/g, ""))
                   }
                   className="border-navy/15"
+                  placeholder={isKo ? "0 = 제한 없음" : "0 = no cap"}
                 />
+                <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                  {t("media.ai.budgetHint")}
+                </p>
               </div>
               <div>
                 <label className="mb-2 block text-xs font-semibold text-navy">
@@ -366,35 +393,25 @@ export default function MediaAiRecommendPanel({
                   ))}
                 </div>
               ) : (
-                <div className="overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-b from-slate-100 to-slate-200 shadow-inner">
-                  <p className="border-b border-navy/10 bg-white/80 px-4 py-2 text-center text-[11px] text-muted-foreground">
+                <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-inner">
+                  <p className="border-b border-navy/10 bg-slate-50/90 px-4 py-2 text-center text-[11px] text-muted-foreground">
                     {t("media.ai.mapHint")}
                   </p>
-                  <div className="relative mx-auto aspect-[16/11] max-h-[420px] w-full">
-                    <div className="absolute inset-3 rounded-xl border border-navy/10 bg-[#e8eef5] shadow-sm">
-                      <span className="absolute left-2 top-2 text-[10px] font-bold text-navy/40">
-                        KOR
-                      </span>
-                      {results.map((s) => {
-                        const { x, y } = mediaToMapPosition(s.item);
-                        return (
-                          <div
-                            key={s.item.id}
-                            className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
-                            style={{ left: `${x}%`, top: `${y}%` }}
-                            title={
-                              isKo ? s.item.name : s.item.nameEn
-                            }
-                          >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gold text-[10px] font-extrabold text-navy shadow-md">
-                              {s.score}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <ul className="max-h-40 space-y-1 overflow-y-auto border-t border-navy/10 bg-white/90 px-4 py-3 text-xs">
+                  {getCampaignMonitoringMapProvider() === "fallback" ? (
+                    <p className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-[11px] text-amber-950">
+                      {t("media.ai.mapFallbackTiles")}
+                    </p>
+                  ) : null}
+                  <MediaBrowseMap
+                    items={aiMapItems}
+                    locale={locale}
+                    selectedId={aiMapSelectedId}
+                    onSelectId={setAiMapSelectedId}
+                    fixedMapHeightPx={400}
+                    showFooterCaption
+                    className="rounded-none border-0"
+                  />
+                  <ul className="max-h-36 space-y-1 overflow-y-auto border-t border-navy/10 bg-white px-4 py-2.5 text-xs">
                     {results.map((s) => (
                       <li
                         key={s.item.id}
@@ -436,6 +453,7 @@ function AiResultCard({
   addCompareLabel: string;
   quoteLabel: string;
 }) {
+  const tMedia = useTranslations("media");
   const m = scored.item;
   const tl = typeLabels[m.type];
   const primaryUrl = getPrimaryMediaImageUrl(m);
@@ -446,9 +464,11 @@ function AiResultCard({
     <Card className="overflow-hidden border-navy/10 shadow-md transition-shadow hover:shadow-lg">
       <div className="relative h-32 overflow-hidden bg-gradient-to-br from-navy/8 to-gold/10">
         {showPlaceholder ? (
-          <div className="flex h-full w-full items-center justify-center">
-            <Monitor className="h-9 w-9 text-navy/25" aria-hidden />
-          </div>
+          <MediaImagePlaceholder
+            label={tMedia("imagePreparing")}
+            size="sm"
+            className="h-full w-full"
+          />
         ) : (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -7,6 +7,10 @@ import { kakaoFillForMediaPatch } from "@/lib/media-location-enrich";
 import { maybeEstimateDailyFootfall } from "@/lib/media-daily-footfall-estimate";
 import { maybeAutoFillNearbyMediaFields } from "@/lib/media-nearby-facilities";
 import { getPrisma } from "@/lib/prisma";
+import {
+  CATALOG_MEDIA_TYPES,
+  isValidCatalogMediaType,
+} from "@/lib/media-auto-categorize";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +55,18 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     data.nameEn = String(body.nameEn ?? "").trim() || null;
   if (body.location != null) data.location = String(body.location).trim();
   if (body.region != null) data.region = String(body.region).trim();
-  if (body.type != null) data.type = String(body.type).trim();
+  if (body.type != null) {
+    const nextType = String(body.type).trim();
+    if (!isValidCatalogMediaType(nextType)) {
+      return json(
+        {
+          error: `type must be one of: ${CATALOG_MEDIA_TYPES.join(", ")}`,
+        },
+        400,
+      );
+    }
+    data.type = nextType;
+  }
   if (body.price != null) data.price = Math.round(Number(body.price)) || 0;
   if (body.image !== undefined)
     data.image = String(body.image ?? "").trim() || null;

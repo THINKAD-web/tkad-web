@@ -16,13 +16,15 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   getAllMediaIds,
+  getMediaDetailGalleryUrls,
   getSimilarMediaFromCatalog,
-  resolveMediaGallery,
   typeLabels,
 } from "@/lib/media-data";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
+import MediaDetailHeroGallery from "@/components/media-detail-hero-gallery";
+import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
@@ -69,7 +71,8 @@ export default async function MediaDetailPage({ params }: Props) {
 
   const similar = getSimilarMediaFromCatalog(catalog, media, 4);
   const casePhotos = media.caseStudyPhotos ?? [];
-  const heroImage = resolveMediaGallery(media)[0];
+  const galleryImages = getMediaDetailGalleryUrls(media);
+  const heroImage = galleryImages[0] ?? "";
   const typeLabel =
     (isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en) ?? "";
   const featuresText = isKo ? media.features : media.featuresEn;
@@ -82,67 +85,65 @@ export default async function MediaDetailPage({ params }: Props) {
   return (
     <>
       <TrackMediaView mediaId={media.id} />
-      <section className="relative w-full overflow-hidden bg-navy aspect-video">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={heroImage}
-          alt={isKo ? media.name : media.nameEn}
-          className="absolute inset-0 h-full w-full object-cover"
-          fetchPriority="high"
-        />
-        <div
-          className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25"
-          aria-hidden
-        />
-        <div className="relative z-10 flex h-full min-h-0 flex-col justify-between px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10">
-          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-            <Link href="/media">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="-ml-2 text-white/85 hover:bg-white/10 hover:text-white"
-              >
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                {t("back")}
-              </Button>
-            </Link>
-            <MediaDetailAdminActions />
-          </div>
-          <div className="max-w-4xl min-w-0 pb-1">
-            <h1 className="break-words text-2xl font-bold tracking-tight text-white drop-shadow-sm sm:text-3xl md:text-4xl">
-              {isKo ? media.name : media.nameEn}
-            </h1>
-            <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-white/88 sm:text-lg">
-              <span className="inline-flex items-center gap-2">
-                <MapPin
-                  className="h-4 w-4 shrink-0 opacity-90"
+      <MediaDetailHeroGallery
+        images={galleryImages}
+        heroSrc={heroImage}
+        altBase={isKo ? media.name : media.nameEn}
+        labels={{
+          close: t("galleryLightboxClose"),
+          prev: t("galleryLightboxPrev"),
+          next: t("galleryLightboxNext"),
+          expand: t("galleryExpand"),
+          clickHint: t("galleryClickHint"),
+        }}
+      >
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+          <Link href="/media">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="-ml-2 text-white/85 hover:bg-white/10 hover:text-white"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              {t("back")}
+            </Button>
+          </Link>
+          <MediaDetailAdminActions />
+        </div>
+        <div className="max-w-4xl min-w-0 pb-1">
+          <h1 className="break-words text-2xl font-bold tracking-tight text-white drop-shadow-sm sm:text-3xl md:text-4xl">
+            {isKo ? media.name : media.nameEn}
+          </h1>
+          <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-white/88 sm:text-lg">
+            <span className="inline-flex items-center gap-2">
+              <MapPin
+                className="h-4 w-4 shrink-0 opacity-90"
+                aria-hidden
+              />
+              {isKo ? media.location : media.locationEn}
+            </span>
+            {typeLabel ? (
+              <>
+                <span
+                  className="hidden text-white/35 sm:inline"
                   aria-hidden
-                />
-                {isKo ? media.location : media.locationEn}
-              </span>
-              {typeLabel ? (
-                <>
-                  <span
-                    className="hidden text-white/35 sm:inline"
-                    aria-hidden
-                  >
-                    ·
-                  </span>
-                  <span className="font-medium text-white/95">{typeLabel}</span>
-                </>
-              ) : null}
-            </p>
-            <div className="mt-5 flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
-              <span className="break-words text-xl font-bold tabular-nums text-gold sm:text-2xl">
-                ₩{media.price.toLocaleString()}
-              </span>
-              <span className="text-sm font-normal text-white/70 sm:shrink-0">
-                {t("perMonth")}
-              </span>
-            </div>
+                >
+                  ·
+                </span>
+                <span className="font-medium text-white/95">{typeLabel}</span>
+              </>
+            ) : null}
+          </p>
+          <div className="mt-5 flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
+            <span className="break-words text-xl font-bold tabular-nums text-gold sm:text-2xl">
+              ₩{media.price.toLocaleString()}
+            </span>
+            <span className="text-sm font-normal text-white/70 sm:shrink-0">
+              {t("perMonth")}
+            </span>
           </div>
         </div>
-      </section>
+      </MediaDetailHeroGallery>
 
       <section className="py-12 pb-28 sm:pb-32">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -159,6 +160,7 @@ export default async function MediaDetailPage({ params }: Props) {
               galleryLightboxPrev: t("galleryLightboxPrev"),
               galleryLightboxNext: t("galleryLightboxNext"),
               galleryExpand: t("galleryExpand"),
+              galleryClickHint: t("galleryClickHint"),
               locationAddressLabel: t("locationAddressLabel"),
               locationRegionLabel: t("locationRegionLabel"),
               kakaoMapEmbedBadge: t("kakaoMapEmbedBadge"),
@@ -321,33 +323,17 @@ export default async function MediaDetailPage({ params }: Props) {
               <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
                 {t("caseStudiesTitle")}
               </h2>
-              <div className="grid gap-6 sm:grid-cols-2">
-                {casePhotos.map((p, i) => {
-                  const cap = isKo
-                    ? p.captionKo || p.captionEn
-                    : p.captionEn || p.captionKo;
-                  return (
-                    <figure
-                      key={`${p.url}-${i}`}
-                      className="overflow-hidden rounded-xl border bg-white shadow-sm"
-                    >
-                      <div className="relative aspect-[16/10] bg-slate-100">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={p.url}
-                          alt={cap || ""}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      {cap ? (
-                        <figcaption className="border-t px-4 py-3 text-sm leading-relaxed text-muted-foreground">
-                          {cap}
-                        </figcaption>
-                      ) : null}
-                    </figure>
-                  );
-                })}
-              </div>
+              <MediaCaseStudyGallery
+                photos={casePhotos}
+                isKo={isKo}
+                labels={{
+                  close: t("galleryLightboxClose"),
+                  prev: t("galleryLightboxPrev"),
+                  next: t("galleryLightboxNext"),
+                  expand: t("galleryExpand"),
+                  clickHint: t("galleryClickHint"),
+                }}
+              />
             </>
           )}
 

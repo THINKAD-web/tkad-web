@@ -1,10 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { typeLabels } from "@/lib/media-data";
-import { Monitor } from "lucide-react";
+import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 
 export function AiChatbotMediaCards({
   items,
@@ -13,6 +14,7 @@ export function AiChatbotMediaCards({
   items: AiChatbotMediaCard[];
   isKo: boolean;
 }) {
+  const tMedia = useTranslations("media");
   if (!items.length) return null;
   return (
     <div className="mt-3 flex w-full max-w-[min(100%,22rem)] flex-col gap-2.5">
@@ -35,9 +37,11 @@ export function AiChatbotMediaCards({
                   loading="lazy"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-navy/35">
-                  <Monitor className="h-8 w-8" strokeWidth={1.25} />
-                </div>
+                <MediaImagePlaceholder
+                  label={tMedia("imagePreparing")}
+                  size="xs"
+                  className="h-full w-full"
+                />
               )}
             </div>
             <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-2">

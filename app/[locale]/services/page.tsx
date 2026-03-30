@@ -153,35 +153,30 @@ export default async function ServicesPage({ params }: Props) {
             className="mb-12 max-w-2xl"
           />
 
-          <div className="md:hidden">
-            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
-              {steps.map((step, i) => (
-                <AnimatedCard
-                  key={step.label}
-                  delay={i * 60}
-                  className="min-w-[min(100%,22rem)] shrink-0 snap-center"
-                >
-                  <Card className="h-full rounded-2xl border border-navy/8 bg-white shadow-sm">
-                    <CardHeader className="pb-2">
-                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy text-sm font-bold text-gold-light shadow-sm">
-                        {step.label}
-                      </span>
-                      <CardTitle className="pt-2 text-base text-navy">
-                        {step.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <p className="text-sm leading-relaxed text-muted-foreground">
-                        {step.body}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </AnimatedCard>
-              ))}
-            </div>
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              {t("processSwipeHint")}
-            </p>
+          <div className="md:hidden flex w-full min-w-0 max-w-full flex-col gap-4 overflow-x-hidden">
+            {steps.map((step, i) => (
+              <AnimatedCard
+                key={step.label}
+                delay={i * 60}
+                className="w-full min-w-0"
+              >
+                <Card className="h-full rounded-2xl border border-navy/8 bg-white shadow-sm">
+                  <CardHeader className="pb-2">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy text-sm font-bold text-gold-light shadow-sm">
+                      {step.label}
+                    </span>
+                    <CardTitle className="pt-2 text-base text-navy">
+                      {step.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-sm leading-relaxed text-muted-foreground break-words">
+                      {step.body}
+                    </p>
+                  </CardContent>
+                </Card>
+              </AnimatedCard>
+            ))}
           </div>
 
           <div className="hidden md:block">

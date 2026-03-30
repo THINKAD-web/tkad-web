@@ -1,6 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 
-export type PlannerCategory = "digital" | "billboard" | "bus" | "subway";
+export type PlannerCategory = "digital" | "static" | "mobile";
 
 /** 지도·다중 선택용 (전국 패널은 `national`) */
 export const PLANNER_MAP_REGIONS = [
@@ -23,18 +23,10 @@ export function matchesPlannerCategory(
   item: MediaItem,
   cat: PlannerCategory,
 ): boolean {
-  if (cat === "bus")
-    return item.type === "bus" || item.type === "network";
-  if (cat === "subway") return item.type === "subway";
   if (cat === "digital")
-    return (
-      item.type === "digital" ||
-      item.type === "premium" ||
-      item.type === "indoor" ||
-      item.type === "apartment"
-    );
-  if (cat === "billboard")
-    return item.type === "billboard" || item.type === "highway";
+    return item.type === "digital" || item.type === "network";
+  if (cat === "static") return item.type === "static";
+  if (cat === "mobile") return item.type === "mobile";
   return false;
 }
 
@@ -155,14 +147,9 @@ const TYPE_META: Record<
   { labelKo: string; labelEn: string }
 > = {
   digital: { labelKo: "디지털", labelEn: "Digital" },
-  billboard: { labelKo: "빌보드", labelEn: "Billboard" },
-  bus: { labelKo: "버스", labelEn: "Bus" },
-  subway: { labelKo: "지하철", labelEn: "Subway" },
+  static: { labelKo: "고정형", labelEn: "Static" },
+  mobile: { labelKo: "이동형", labelEn: "Mobile" },
   network: { labelKo: "네트워크", labelEn: "Network" },
-  apartment: { labelKo: "아파트", labelEn: "Apartment" },
-  premium: { labelKo: "프리미엄", labelEn: "Premium" },
-  highway: { labelKo: "고속도로", labelEn: "Highway" },
-  indoor: { labelKo: "실내", labelEn: "Indoor" },
 };
 
 export function portfolioDailyByCategory(portfolio: MediaItem[]): CategoryBarPoint[] {
@@ -334,21 +321,11 @@ export function computePlannerMetrics(
   const estimatedTotalImpressions = estimatedMonthlyImpressions * months;
 
   const mixBonus =
-    (filtered.some(
-      (m) =>
-        m.type === "digital" ||
-        m.type === "billboard" ||
-        m.type === "highway" ||
-        m.type === "premium" ||
-        m.type === "indoor" ||
-        m.type === "apartment",
-    )
+    (filtered.some((m) => m.type === "digital" || m.type === "network")
       ? 0.25
       : 0) +
-    (filtered.some((m) => m.type === "subway") ? 0.15 : 0) +
-    (filtered.some((m) => m.type === "bus" || m.type === "network")
-      ? 0.1
-      : 0);
+    (filtered.some((m) => m.type === "static") ? 0.15 : 0) +
+    (filtered.some((m) => m.type === "mobile") ? 0.1 : 0);
 
   const goalBoost = goalRoiBoost(options?.campaignGoal ?? null);
 

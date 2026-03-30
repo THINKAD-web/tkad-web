@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ZoomIn } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import MediaLightbox, { type MediaLightboxLabels } from "@/components/media-lightbox";
+import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 
-type GalleryLabels = {
-  close: string;
-  prev: string;
-  next: string;
-  expand: string;
+type GalleryLabels = MediaLightboxLabels & {
+  clickHint?: string;
 };
 
 const defaultLabels: GalleryLabels = {
@@ -16,6 +16,7 @@ const defaultLabels: GalleryLabels = {
   prev: "Previous image",
   next: "Next image",
   expand: "View full size",
+  clickHint: "Click to enlarge",
 };
 
 export default function MediaGallery({
@@ -29,35 +30,24 @@ export default function MediaGallery({
   className?: string;
   labels?: Partial<GalleryLabels>;
 }) {
+  const tMedia = useTranslations("media");
   const L = { ...defaultLabels, ...labels };
   const [active, setActive] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [lightboxImgFailed, setLightboxImgFailed] = useState(false);
-  const lightboxIndexRef = useRef(0);
+  const lightboxIndexRef = useRef(lightboxIndex);
 
   useEffect(() => {
     lightboxIndexRef.current = lightboxIndex;
   }, [lightboxIndex]);
 
-  const safe =
-    images.length > 0
-      ? images
-      : ["https://picsum.photos/seed/tkad-media-empty/1200/800"];
+  const safe = images.filter(
+    (u) => typeof u === "string" && u.trim().length > 0,
+  );
 
   const n = safe.length;
-  const mainIdx = Math.min(active, n - 1);
-  const mainSrc = safe[mainIdx];
-  const lightboxSrc = safe[Math.min(lightboxIndex, n - 1)] ?? safe[0];
-
-  useEffect(() => {
-    setLightboxImgFailed(false);
-  }, [lightboxOpen, lightboxIndex, lightboxSrc]);
-
-  const thumbIndices = safe
-    .map((_, i) => i)
-    .filter((i) => i !== mainIdx)
-    .slice(0, 4);
+  const mainIdx = n > 0 ? Math.min(active, n - 1) : 0;
+  const mainSrc = n > 0 ? safe[mainIdx] : "";
 
   const closeLightbox = useCallback(() => {
     setActive(lightboxIndexRef.current);
@@ -69,66 +59,69 @@ export default function MediaGallery({
     setLightboxOpen(true);
   }, []);
 
-  const goPrev = useCallback(() => {
-    setLightboxIndex((i) => (i - 1 + n) % n);
-  }, [n]);
+  const thumbIndices =
+    n > 0
+      ? safe
+          .map((_, i) => i)
+          .filter((i) => i !== mainIdx)
+          .slice(0, 5)
+      : [];
 
-  const goNext = useCallback(() => {
-    setLightboxIndex((i) => (i + 1) % n);
-  }, [n]);
+  const lightboxLabels: MediaLightboxLabels = {
+    close: L.close,
+    prev: L.prev,
+    next: L.next,
+    expand: L.expand,
+  };
 
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        closeLightbox();
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        goPrev();
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        goNext();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [lightboxOpen, closeLightbox, goPrev, goNext]);
-
-  useEffect(() => {
-    if (lightboxOpen) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [lightboxOpen]);
+  if (n === 0) {
+    return (
+      <div className={cn("overflow-hidden rounded-2xl border border-navy/10", className)}>
+        <MediaImagePlaceholder
+          label={tMedia("imagePreparing")}
+          size="md"
+          className="min-h-[220px] w-full py-12"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={cn(className)}>
       <div
         className={cn(
           "flex flex-col gap-2 sm:gap-3",
-          "lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-2 lg:items-stretch",
+          "lg:grid lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-2 lg:items-stretch lg:gap-3",
         )}
       >
         <button
           type="button"
           onClick={() => openLightbox(mainIdx)}
           className={cn(
-            "group relative aspect-video w-full overflow-hidden rounded-xl border border-navy/10 bg-slate-100 text-left shadow-sm outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-gold/60",
-            "lg:col-span-1 lg:row-span-2 lg:aspect-auto lg:min-h-[min(22rem,50vw)]",
+            "group relative aspect-video w-full cursor-zoom-in overflow-hidden rounded-xl border border-navy/10 bg-slate-100 text-left shadow-md shadow-navy/5 outline-none ring-offset-2 transition-shadow duration-300 hover:border-gold/40 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-gold/60",
+            "lg:col-span-1 lg:row-span-2 lg:aspect-auto lg:min-h-[min(20rem,48vw)]",
           )}
           aria-label={L.expand}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element -- remote demo URLs */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={mainSrc}
             alt={`${altBase} — ${mainIdx + 1} / ${n}`}
-            className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+            className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.03] group-active:scale-[0.99]"
             loading="lazy"
             decoding="async"
           />
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/50 via-transparent to-navy/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full border border-white/30 bg-navy/75 px-2.5 py-1 text-[11px] font-semibold text-white shadow-md backdrop-blur-sm transition duration-300 group-hover:bg-navy/90"
+            aria-hidden
+          >
+            <ZoomIn className="h-3.5 w-3.5" strokeWidth={2.5} />
+            <span>{L.clickHint}</span>
+          </div>
         </button>
 
         {thumbIndices.map((idx) => (
@@ -140,105 +133,39 @@ export default function MediaGallery({
               openLightbox(idx);
             }}
             className={cn(
-              "group relative aspect-video w-full overflow-hidden rounded-lg border border-navy/10 bg-slate-100 text-left outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-gold/60",
+              "group relative aspect-video w-full cursor-zoom-in overflow-hidden rounded-lg border border-navy/10 bg-slate-100 text-left shadow-sm outline-none ring-offset-2 transition-all duration-300 hover:border-gold/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-gold/60",
               "lg:aspect-auto lg:min-h-0",
             )}
-            aria-label={`${altBase} — ${idx + 1} / ${n}`}
+            aria-label={`${L.expand} — ${idx + 1} / ${n}`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={safe[idx]}
               alt=""
-              className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+              className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.05]"
               loading="lazy"
               decoding="async"
             />
+            <div
+              className="pointer-events-none absolute inset-0 flex items-center justify-center bg-navy/0 transition-colors duration-300 group-hover:bg-navy/20"
+              aria-hidden
+            >
+              <ZoomIn className="h-8 w-8 text-white opacity-0 drop-shadow-md transition-opacity duration-300 group-hover:opacity-100" />
+            </div>
           </button>
         ))}
       </div>
 
-      {lightboxOpen ? (
-        <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-white/90 p-3 pt-14 pb-8 backdrop-blur-md sm:p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label={L.expand}
-          onClick={closeLightbox}
-        >
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              closeLightbox();
-            }}
-            className="absolute top-4 right-4 z-[82] flex h-11 w-11 items-center justify-center rounded-full border border-navy/10 bg-white text-navy shadow-md transition hover:bg-slate-50"
-            aria-label={L.close}
-          >
-            <X className="h-5 w-5" />
-          </button>
-
-          {n > 1 ? (
-            <>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goPrev();
-                }}
-                className="absolute top-1/2 left-2 z-[82] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-navy/10 bg-white text-navy shadow-md transition hover:bg-slate-50 sm:left-4"
-                aria-label={L.prev}
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goNext();
-                }}
-                className="absolute top-1/2 right-2 z-[82] flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-navy/10 bg-white text-navy shadow-md transition hover:bg-slate-50 sm:right-4"
-                aria-label={L.next}
-              >
-                <ChevronRight className="h-6 w-6" />
-              </button>
-            </>
-          ) : null}
-
-          <div
-            className="relative z-[81] mx-auto flex min-h-0 w-full max-w-[min(96vw,100%)] items-center justify-center rounded-2xl bg-slate-100/80 px-2 py-4 ring-1 ring-navy/5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {lightboxImgFailed ? (
-              <div className="max-w-md rounded-xl border border-navy/10 bg-white px-5 py-8 text-center text-navy shadow-sm">
-                <p className="text-sm font-semibold">
-                  이미지를 불러올 수 없습니다.
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Could not load image. Open in a new tab or check the URL.
-                </p>
-                <a
-                  href={lightboxSrc}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 inline-block text-sm font-semibold text-gold-dark underline underline-offset-4 hover:text-navy"
-                >
-                  새 탭에서 열기 / Open in new tab
-                </a>
-              </div>
-            ) : (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                key={lightboxSrc}
-                src={lightboxSrc}
-                alt={`${altBase} — ${lightboxIndex + 1} / ${n}`}
-                className="mx-auto max-h-[min(82dvh,85vh)] w-auto max-w-full rounded-lg object-contain shadow-lg ring-1 ring-black/5"
-                loading="eager"
-                decoding="async"
-                onError={() => setLightboxImgFailed(true)}
-              />
-            )}
-          </div>
-        </div>
+      {n > 0 ? (
+        <MediaLightbox
+          open={lightboxOpen}
+          onClose={closeLightbox}
+          images={safe}
+          index={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+          altBase={altBase}
+          labels={lightboxLabels}
+        />
       ) : null}
     </div>
   );

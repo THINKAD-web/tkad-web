@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { getCampaignMonitoringMapProvider } from "@/components/campaign-monitoring-map";
 import MediaGallery from "@/components/media-gallery";
 import type { MediaItem } from "@/lib/media-data";
-import { resolveMediaGallery } from "@/lib/media-data";
+import { getMediaDetailGalleryUrls } from "@/lib/media-data";
+import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 import { Calculator, MapPin, MessageCircle } from "lucide-react";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
@@ -32,6 +33,7 @@ export default function MediaDetailExtras({
     galleryLightboxPrev: string;
     galleryLightboxNext: string;
     galleryExpand: string;
+    galleryClickHint: string;
     locationAddressLabel: string;
     locationRegionLabel: string;
     kakaoMapEmbedBadge: string;
@@ -40,7 +42,7 @@ export default function MediaDetailExtras({
   const isKo = locale === "ko";
   const tMedia = useTranslations("media");
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(media.id);
-  const gallery = resolveMediaGallery(media);
+  const gallery = getMediaDetailGalleryUrls(media);
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(isKo ? media.name : media.nameEn)},${media.lat},${media.lng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${media.lat},${media.lng}`;
   const mapProvider = useMemo(() => getCampaignMonitoringMapProvider(), []);
@@ -61,17 +63,28 @@ export default function MediaDetailExtras({
 
   return (
     <>
-      <MediaGallery
-        images={gallery}
-        altBase={isKo ? media.name : media.nameEn}
-        className="mb-10"
-        labels={{
-          close: labels.galleryLightboxClose,
-          prev: labels.galleryLightboxPrev,
-          next: labels.galleryLightboxNext,
-          expand: labels.galleryExpand,
-        }}
-      />
+      {gallery.length > 0 ? (
+        <MediaGallery
+          images={gallery}
+          altBase={isKo ? media.name : media.nameEn}
+          className="mb-8"
+          labels={{
+            close: labels.galleryLightboxClose,
+            prev: labels.galleryLightboxPrev,
+            next: labels.galleryLightboxNext,
+            expand: labels.galleryExpand,
+            clickHint: labels.galleryClickHint,
+          }}
+        />
+      ) : (
+        <div className="mb-8 overflow-hidden rounded-2xl border border-navy/10 bg-slate-50/80">
+          <MediaImagePlaceholder
+            label={tMedia("imagePreparing")}
+            size="md"
+            className="min-h-[200px] w-full py-10"
+          />
+        </div>
+      )}
 
       <div className="mb-4 flex flex-wrap gap-2">
         <Link href={`/quote?media=${media.id}`}>

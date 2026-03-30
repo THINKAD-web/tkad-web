@@ -1,23 +1,15 @@
 /**
  * 매체 유형 자동 분류 (DB `Media.type` 문자열)
  * — 퀵 등록·일괄 재분류·sub_category-only 힌트에 공통 사용
+ *
+ * 공개 카탈로그 유형은 `digital` | `static` | `mobile` 세 가지.
  */
 
 function norm(s: string): string {
   return s.replace(/\s+/g, " ").trim();
 }
 
-export const CATALOG_MEDIA_TYPES = [
-  "digital",
-  "billboard",
-  "bus",
-  "subway",
-  "apartment",
-  "premium",
-  "highway",
-  "network",
-  "indoor",
-] as const;
+export const CATALOG_MEDIA_TYPES = ["digital", "static", "mobile"] as const;
 
 export type CatalogMediaType = (typeof CATALOG_MEDIA_TYPES)[number];
 
@@ -55,6 +47,7 @@ function blobFrom(input: MediaTypeInferenceInput): string {
 
 /**
  * 텍스트 시그널로 유형 추론. 앞쪽 규칙이 우선(더 구체적).
+ * 결과는 항상 `digital` | `static` | `mobile`.
  */
 export function inferCatalogTypeFromMediaContent(
   input: MediaTypeInferenceInput,
@@ -67,14 +60,7 @@ export function inferCatalogTypeFromMediaContent(
     ) ||
     (/버스|정류장|쉘터/.test(b) && /네트워크|패키지|전국|광역/.test(b))
   ) {
-    return "network";
-  }
-
-  if (
-    /아파트|아파트단지|단지내|단지\s*내/.test(b) &&
-    !/아파트형/.test(b)
-  ) {
-    return "apartment";
+    return /버스|정류|쉘터|bus|shelter/.test(b) ? "mobile" : "digital";
   }
 
   if (
@@ -82,34 +68,17 @@ export function inferCatalogTypeFromMediaContent(
       b,
     )
   ) {
-    return "highway";
-  }
-
-  if (
-    /골프|golf|호텔|hotel|리조트|resort|cc\b|클럽하우스|5\s*성|럭셔리/.test(b)
-  ) {
-    return "premium";
-  }
-
-  if (
-    /실내|인도어|\bindoor\b|로비|lobby|매장\s*내|백화점\s*내|몰\s*내|지하\s*상가/.test(
-      b,
-    )
-  ) {
-    return "indoor";
+    return "static";
   }
 
   if (
     b.includes("빌보드") ||
     b.includes("billboard") ||
     b.includes("외벽") ||
-    b.includes("건물") ||
     b.includes("현수막") ||
-    b.includes("옥외") ||
-    b.includes("roof") ||
-    b.includes("랩핑")
+    /인쇄\s*광고|게첨|대형\s*패널/.test(b)
   ) {
-    return "billboard";
+    return "static";
   }
 
   if (
@@ -118,14 +87,13 @@ export function inferCatalogTypeFromMediaContent(
     b.includes("역\s*(") ||
     b.includes("subway") ||
     b.includes("metro") ||
-    b.includes("멀티비전") ||
     b.includes("스크린도어") ||
     b.includes("platform") ||
     b.includes("지하통로") ||
     b.includes("환승") ||
     b.includes("전철")
   ) {
-    return "subway";
+    return "mobile";
   }
 
   if (
@@ -133,9 +101,13 @@ export function inferCatalogTypeFromMediaContent(
     b.includes("bus") ||
     b.includes("쉘터") ||
     b.includes("shelter") ||
-    b.includes("정류장")
+    b.includes("정류장") ||
+    b.includes("택시") ||
+    b.includes("taxi") ||
+    b.includes("랩핑") ||
+    b.includes("wrapping")
   ) {
-    return "bus";
+    return "mobile";
   }
 
   if (
@@ -145,9 +117,23 @@ export function inferCatalogTypeFromMediaContent(
     b.includes("digital") ||
     b.includes("사이니지") ||
     b.includes("signage") ||
-    b.includes("lcd")
+    b.includes("lcd") ||
+    b.includes("미디어폴") ||
+    /실내|인도어|\bindoor\b|로비|lobby|매장\s*내|백화점\s*내|몰\s*내|지하\s*상가/.test(
+      b,
+    ) ||
+    /골프|golf|호텔|hotel|리조트|resort|아파트|단지내|단지\s*내/.test(b)
   ) {
     return "digital";
+  }
+
+  if (
+    b.includes("옥외") ||
+    b.includes("roof") ||
+    b.includes("건물") ||
+    b.includes("외벽")
+  ) {
+    return "static";
   }
 
   return "digital";

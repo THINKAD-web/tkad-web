@@ -130,7 +130,7 @@ export function getAiChatbotTools(): AiChatbotToolSpec[] {
     {
       name: "recommendMedia",
       description:
-        "Recommend media using optional region (seoul|busan|jeju|national), type (billboard|digital|subway|bus for broad groups, or apartment|premium|highway|network|indoor for specific), max monthly price in 만원, and optional keywords/goals for text matching. Combines filters and sorts by relevance.",
+        "Recommend media using optional region (seoul|busan|jeju|national), type (digital|static|mobile; aliases billboard→static, bus|subway→mobile), max monthly price in 만원, and optional keywords/goals for text matching. Combines filters and sorts by relevance.",
       input_schema: {
         type: "object",
         properties: {
@@ -145,7 +145,7 @@ export function getAiChatbotTools(): AiChatbotToolSpec[] {
           type: {
             type: "string",
             description:
-              "Broad: billboard|digital|subway|bus. Specific: apartment|premium|highway|network|indoor. Empty = any.",
+              "digital|static|mobile (legacy: billboard, bus, subway). Empty = any.",
           },
           maxPrice: {
             type: "number",
@@ -238,16 +238,20 @@ export function executeChatbotTool(
     if (region && ["seoul", "busan", "jeju", "national"].includes(region)) {
       pool = pool.filter((m) => m.region === region);
     }
-    const plannerCats: PlannerCategory[] = [
-      "billboard",
-      "digital",
-      "subway",
-      "bus",
-    ];
-    if (typeFilter && plannerCats.includes(typeFilter as PlannerCategory)) {
-      pool = pool.filter((m) =>
-        matchesPlannerCategory(m, typeFilter as PlannerCategory),
-      );
+    const legacyPlannerType: Record<string, PlannerCategory> = {
+      billboard: "static",
+      bus: "mobile",
+      subway: "mobile",
+    };
+    const plannerCats: PlannerCategory[] = ["digital", "static", "mobile"];
+    const plannerResolved =
+      typeFilter && legacyPlannerType[typeFilter]
+        ? legacyPlannerType[typeFilter]
+        : typeFilter && plannerCats.includes(typeFilter as PlannerCategory)
+          ? (typeFilter as PlannerCategory)
+          : null;
+    if (plannerResolved) {
+      pool = pool.filter((m) => matchesPlannerCategory(m, plannerResolved));
     } else if (
       typeFilter &&
       (CATALOG_MEDIA_TYPES as readonly string[]).includes(typeFilter)

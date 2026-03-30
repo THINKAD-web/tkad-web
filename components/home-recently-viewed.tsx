@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, MapPin, Monitor, ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Clock, MapPin, ArrowRight } from "lucide-react";
+import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
@@ -19,6 +21,7 @@ interface Props {
 
 export default function HomeRecentlyViewed({ locale }: Props) {
   const isKo = locale === "ko";
+  const tMedia = useTranslations("media");
   const [items, setItems] = useState<MediaItem[]>([]);
   const [ready, setReady] = useState(false);
 
@@ -85,9 +88,14 @@ export default function HomeRecentlyViewed({ locale }: Props) {
             <ScrollAnimate key={media.id} delay={i * 100}>
               <Link href={`/media/${media.id}`} className="block touch-manipulation">
                 <Card className="group cursor-pointer overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-1">
-                  <div className="flex h-28 items-center justify-center bg-gradient-to-br from-navy/5 to-navy/10">
-                    <Monitor className="h-8 w-8 text-navy/15 transition-transform group-hover:scale-110" />
-                  </div>
+                  <MediaCatalogThumbnail
+                    media={media}
+                    placeholderLabel={tMedia("imagePreparing")}
+                    className="flex h-28 items-center justify-center"
+                    imgClassName="transition duration-300 group-hover:scale-105"
+                    bottomGradientClassName={null}
+                    placeholderSize="xs"
+                  />
                   <CardHeader className="p-4 pb-1">
                     <Badge variant="secondary" className="w-fit bg-navy/5 text-navy text-[10px]">
                       {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
