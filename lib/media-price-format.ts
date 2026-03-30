@@ -1,19 +1,15 @@
 import type { MediaPricePeriodKey } from "@/lib/media-data";
 
-/** DB·카탈로그 `price`는 만원(₩10,000) 단위 */
-export function mediaPriceManUnitToWon(manUnits: number): number {
-  return Math.round(manUnits * 10_000);
-}
-
-export function formatMediaPriceWon(manUnits: number, locale = "ko-KR"): string {
-  return `${mediaPriceManUnitToWon(manUnits).toLocaleString(locale)}원`;
+/** DB·카탈로그 `price`는 원(₩) 단위 */
+export function formatMediaPriceWon(wonUnits: number, locale = "ko-KR"): string {
+  return `${wonUnits.toLocaleString(locale)}원`;
 }
 
 export function formatMediaPriceWonWithSymbol(
-  manUnits: number,
+  wonUnits: number,
   locale = "ko-KR",
 ): string {
-  return `₩${formatMediaPriceWon(manUnits, locale)}`;
+  return `₩${wonUnits.toLocaleString(locale)}`;
 }
 
 export function normalizeMediaPricePeriod(
