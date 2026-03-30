@@ -320,16 +320,13 @@ export default async function MediaDetailPage({ params }: Props) {
             </div>
           </section>
 
-          {(casePhotos.length > 0 || extraGalleryImages.length > 0) && (
+          {casePhotos.length > 0 && (
             <>
               <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
                 {t("caseStudiesTitle")}
               </h2>
               <MediaCaseStudyGallery
-                photos={[
-                  ...casePhotos,
-                  ...extraGalleryImages.map((url) => ({ url })),
-                ]}
+                photos={casePhotos}
                 isKo={isKo}
                 labels={{
                   close: t("galleryLightboxClose"),
