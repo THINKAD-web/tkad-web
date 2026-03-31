@@ -80,8 +80,12 @@ export async function POST(request: NextRequest) {
     locCreate.push({
       name: locName,
       address: str(l.address) || null,
+      fullAddress: str(l.fullAddress) || null,
       latitude: lat != null && Number.isFinite(lat) ? lat : null,
       longitude: lng != null && Number.isFinite(lng) ? lng : null,
+      priceNote: str(l.priceNote) || null,
+      dailyFootfall: optInt(l.dailyFootfall) ?? null,
+      note: str(l.note) || null,
     });
   }
 
@@ -109,13 +113,22 @@ export async function POST(request: NextRequest) {
       type,
       pricePerUnit: optInt(o.pricePerUnit) ?? null,
       pricePackage: optInt(o.pricePackage) ?? null,
+      priceNote: str(o.priceNote) || null,
       minUnits: Math.max(1, minUnits),
       totalLocations: Math.max(0, totalLocations),
       regions: strArr(o.regions),
+      city: str(o.city) || null,
+      district: str(o.district) || null,
       image: str(o.image) || null,
       galleryImages: strArr(o.galleryImages),
       features: str(o.features) || null,
       packageOptions,
+      visibilityScore: optInt(o.visibilityScore) ?? null,
+      dailyFootfall: optInt(o.dailyFootfall) ?? null,
+      targetAge: str(o.targetAge) || null,
+      effectMemo: str(o.effectMemo) || null,
+      operatingHours: str(o.operatingHours) || null,
+      tags: strArr(o.tags),
       isActive: o.isActive === false ? false : true,
       locations:
         locCreate.length > 0

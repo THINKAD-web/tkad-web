@@ -44,7 +44,7 @@ export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
           <div
             className={cn(
               "pointer-events-auto mx-auto max-w-7xl",
-              "rounded-2xl border border-navy/10 bg-white shadow-[0_-8px_32px_-4px_rgba(15,23,42,0.12)]",
+              "rounded-2xl border border-navy/10 bg-white/95 backdrop-blur-sm shadow-[0_-8px_32px_-4px_rgba(15,23,42,0.12)]",
               "px-3 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom,0px))]",
               "sm:px-5 sm:py-3 sm:pb-[max(0.85rem,env(safe-area-inset-bottom,0px))]",
             )}

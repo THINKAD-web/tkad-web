@@ -95,6 +95,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       o.pricePerUnit !== undefined ? optInt(o.pricePerUnit) ?? null : undefined,
     pricePackage:
       o.pricePackage !== undefined ? optInt(o.pricePackage) ?? null : undefined,
+    priceNote: o.priceNote !== undefined ? str(o.priceNote) || null : undefined,
     minUnits:
       o.minUnits !== undefined
         ? Math.max(1, optInt(o.minUnits) ?? 1)
@@ -104,12 +105,30 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ? Math.max(0, optInt(o.totalLocations) ?? 0)
         : undefined,
     regions: o.regions !== undefined ? strArr(o.regions) : undefined,
+    city: o.city !== undefined ? str(o.city) || null : undefined,
+    district: o.district !== undefined ? str(o.district) || null : undefined,
     image: o.image !== undefined ? str(o.image) || null : undefined,
     galleryImages:
       o.galleryImages !== undefined ? strArr(o.galleryImages) : undefined,
     features: o.features !== undefined ? str(o.features) || null : undefined,
     packageOptions: packageOptionsUpdate,
     isActive: typeof o.isActive === "boolean" ? o.isActive : undefined,
+    visibilityScore:
+      o.visibilityScore !== undefined
+        ? optInt(o.visibilityScore) ?? null
+        : undefined,
+    dailyFootfall:
+      o.dailyFootfall !== undefined
+        ? optInt(o.dailyFootfall) ?? null
+        : undefined,
+    targetAge: o.targetAge !== undefined ? str(o.targetAge) || null : undefined,
+    effectMemo:
+      o.effectMemo !== undefined ? str(o.effectMemo) || null : undefined,
+    operatingHours:
+      o.operatingHours !== undefined
+        ? str(o.operatingHours) || null
+        : undefined,
+    tags: o.tags !== undefined ? strArr(o.tags) : undefined,
   };
 
   const locationsRaw = o.locations;
@@ -126,8 +145,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         networkId: id,
         name: locName,
         address: str(l.address) || null,
+        fullAddress: str(l.fullAddress) || null,
         latitude: lat != null && Number.isFinite(lat) ? lat : null,
         longitude: lng != null && Number.isFinite(lng) ? lng : null,
+        priceNote: str(l.priceNote) || null,
+        dailyFootfall: optInt(l.dailyFootfall) ?? null,
+        note: str(l.note) || null,
       });
     }
     await db.$transaction(async (tx) => {

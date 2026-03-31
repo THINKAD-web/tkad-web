@@ -623,7 +623,7 @@ export default function MediaBrowseClient({
                         popularIds={popularIds}
                         topLeftSlot={
                           <label
-                            className="absolute left-2.5 top-2.5 z-20 flex size-8 cursor-pointer select-none items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm"
+                            className="absolute left-2.5 top-2.5 z-20 flex h-9 w-9 cursor-pointer select-none items-center justify-center rounded-full border-2 border-navy bg-white shadow-md"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -641,7 +641,7 @@ export default function MediaBrowseClient({
                                   compareItems.length >= COMPARE_MAX_ITEMS)
                               }
                               aria-label={t("media.compareToggleAria")}
-                              className="h-3.5 w-3.5 rounded border-navy/30 text-gold accent-gold"
+                              className="h-4 w-4 rounded border-2 border-navy bg-white text-gold accent-gold"
                             />
                           </label>
                         }
@@ -661,9 +661,9 @@ export default function MediaBrowseClient({
                           mediaPricePeriodTranslationKey(media.pricePeriod),
                         )}
                         popularIds={popularIds}
-                        thumbnailOverlay={
+                        leadingSlot={
                           <label
-                            className="absolute left-1 top-1 z-20 flex size-7 cursor-pointer select-none items-center justify-center rounded-full bg-white/95 shadow-sm"
+                            className="flex h-9 w-9 cursor-pointer select-none items-center justify-center rounded-lg border border-navy/20 bg-white shadow-sm"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -681,7 +681,7 @@ export default function MediaBrowseClient({
                                   compareItems.length >= COMPARE_MAX_ITEMS)
                               }
                               aria-label={t("media.compareToggleAria")}
-                              className="h-3 w-3 rounded border-navy/30 text-gold accent-gold"
+                              className="h-4 w-4 rounded border-2 border-navy bg-white text-gold accent-gold shadow-none"
                             />
                           </label>
                         }

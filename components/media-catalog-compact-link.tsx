@@ -21,6 +21,8 @@ type Props = {
   imagePreparingLabel: string;
   pricePeriodLabel: string;
   popularIds?: Set<string>;
+  /** e.g. compare checkbox area left of thumbnail */
+  leadingSlot?: ReactNode;
   /** e.g. compare checkbox overlay on thumbnail */
   thumbnailOverlay?: ReactNode;
   className?: string;
@@ -36,6 +38,7 @@ export function MediaCatalogCompactLinkRow({
   imagePreparingLabel,
   pricePeriodLabel,
   popularIds,
+  leadingSlot,
   thumbnailOverlay,
   className,
 }: Props) {
@@ -52,6 +55,11 @@ export function MediaCatalogCompactLinkRow({
         className,
       )}
     >
+      {leadingSlot ? (
+        <div className="relative z-20 mr-1 flex h-full shrink-0 items-center justify-center">
+          {leadingSlot}
+        </div>
+      ) : null}
       <MediaCatalogThumbnail
         media={media}
         primaryImageUrl={primaryThumb}

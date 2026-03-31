@@ -150,6 +150,9 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
+  const [userEmail, setUserEmail] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -288,35 +291,71 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     tCommon,
     toast,
   ]);
-
-  const emailReport = useCallback(() => {
-    const subject = encodeURIComponent(
-      props.isKo
-        ? "[THINKAD] 플래너 보고서 요청"
-        : "[THINKAD] Planner report request",
-    );
-    const body = encodeURIComponent(
-      [
+  const sendEmailReport = useCallback(async () => {
+    const email = userEmail.trim();
+    if (
+      !email ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+      toast("error", props.isKo ? "올바른 이메일을 입력하세요" : "Please enter a valid email");
+      return;
+    }
+    setEmailSending(true);
+    setEmailSent(false);
+    try {
+      const res = await fetch("/api/planner/email-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail: email,
+          goalTitle: props.goalTitle,
+          budgetNum: props.budgetNum,
+          periodDisplay: derived.periodDisplay,
+          regionsText: props.regionsText,
+          categoriesText: props.categoriesText,
+          ageText: props.ageText,
+          industryText: props.industryText,
+          mediaList: props.portfolio.map((m) => ({
+            name: props.isKo ? m.name : m.nameEn,
+            price: m.price,
+            location: m.location,
+          })),
+          metrics: props.metrics,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("email failed");
+      }
+      setEmailSent(true);
+      toast(
+        "success",
         props.isKo
-          ? "플래너 보고서를 이메일로 받고 싶습니다."
-          : "Please send the planner report by email.",
-        "",
-        `${props.isKo ? "목표" : "Goal"}: ${props.goalTitle}`,
-        `${props.isKo ? "예산(만원)" : "Budget (₩10K)"}: ${props.budgetNum}`,
-        `${props.isKo ? "기간" : "Duration"}: ${derived.periodDisplay}`,
-        props.campaignGoal ? `goalKey: ${props.campaignGoal}` : "",
-        "",
-        `${props.isKo ? "연락 가능한 이메일" : "Reply email"}: `,
-      ].join("\n"),
-    );
-    window.location.href = `mailto:${derived.contact.email}?subject=${subject}&body=${body}`;
+          ? "이메일로 보고서가 발송되었습니다"
+          : "Report has been sent by email",
+      );
+    } catch {
+      toast(
+        "error",
+        props.isKo
+          ? "이메일 발송에 실패했습니다"
+          : "Failed to send email report",
+      );
+    } finally {
+      setEmailSending(false);
+    }
   }, [
+    userEmail,
     props.isKo,
     props.goalTitle,
     props.budgetNum,
-    props.campaignGoal,
+    props.regionsText,
+    props.categoriesText,
+    props.ageText,
+    props.industryText,
+    props.portfolio,
+    props.metrics,
     derived.periodDisplay,
-    derived.contact.email,
+    toast,
   ]);
 
   return (
@@ -354,7 +393,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             <CardTitle className="text-navy">{t("reportPdfDocumentTitle")}</CardTitle>
             <CardDescription>{t("reportPreviewDesc")}</CardDescription>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
               variant="outline"
@@ -382,14 +421,31 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 </a>
               </Button>
             ) : null}
-            <Button
-              type="button"
-              className="btn-gold rounded-full font-semibold"
-              onClick={emailReport}
-            >
-              <Mail className="mr-2 h-4 w-4" />
-              {t("reportEmailMe")}
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Input
+                type="email"
+                placeholder={props.isKo ? "이메일 주소" : "Email address"}
+                value={userEmail}
+                onChange={(e) => {
+                  setUserEmail(e.target.value);
+                  setEmailSent(false);
+                }}
+                className="h-10 w-full min-w-[14rem] sm:w-56"
+              />
+              <Button
+                type="button"
+                className="btn-gold rounded-full font-semibold"
+                onClick={() => void sendEmailReport()}
+                disabled={emailSending}
+              >
+                {emailSending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Mail className="mr-2 h-4 w-4" />
+                )}
+                {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
+              </Button>
+            </div>
             {error ? (
               <Button
                 type="button"
@@ -443,6 +499,9 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
+  const [userEmail, setUserEmail] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const downloadPdf = useCallback(async () => {
     setDownloading(true);
@@ -485,35 +544,71 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     tCommon,
     toast,
   ]);
-
-  const emailReport = useCallback(() => {
-    const subject = encodeURIComponent(
-      props.isKo
-        ? "[THINKAD] 플래너 보고서 요청"
-        : "[THINKAD] Planner report request",
-    );
-    const body = encodeURIComponent(
-      [
+  const sendEmailReport = useCallback(async () => {
+    const email = userEmail.trim();
+    if (
+      !email ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+      toast("error", props.isKo ? "올바른 이메일을 입력하세요" : "Please enter a valid email");
+      return;
+    }
+    setEmailSending(true);
+    setEmailSent(false);
+    try {
+      const res = await fetch("/api/planner/email-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail: email,
+          goalTitle: props.goalTitle,
+          budgetNum: props.budgetNum,
+          periodDisplay: derived.periodDisplay,
+          regionsText: props.regionsText,
+          categoriesText: props.categoriesText,
+          ageText: props.ageText,
+          industryText: props.industryText,
+          mediaList: props.portfolio.map((m) => ({
+            name: props.isKo ? m.name : m.nameEn,
+            price: m.price,
+            location: m.location,
+          })),
+          metrics: props.metrics,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("email failed");
+      }
+      setEmailSent(true);
+      toast(
+        "success",
         props.isKo
-          ? "플래너 보고서를 이메일로 받고 싶습니다."
-          : "Please send the planner report by email.",
-        "",
-        `${props.isKo ? "목표" : "Goal"}: ${props.goalTitle}`,
-        `${props.isKo ? "예산(만원)" : "Budget (₩10K)"}: ${props.budgetNum}`,
-        `${props.isKo ? "기간" : "Duration"}: ${derived.periodDisplay}`,
-        props.campaignGoal ? `goalKey: ${props.campaignGoal}` : "",
-        "",
-        `${props.isKo ? "연락 가능한 이메일" : "Reply email"}: `,
-      ].join("\n"),
-    );
-    window.location.href = `mailto:${derived.contact.email}?subject=${subject}&body=${body}`;
+          ? "이메일로 보고서가 발송되었습니다"
+          : "Report has been sent by email",
+      );
+    } catch {
+      toast(
+        "error",
+        props.isKo
+          ? "이메일 발송에 실패했습니다"
+          : "Failed to send email report",
+      );
+    } finally {
+      setEmailSending(false);
+    }
   }, [
+    userEmail,
     props.isKo,
     props.goalTitle,
     props.budgetNum,
-    props.campaignGoal,
+    props.regionsText,
+    props.categoriesText,
+    props.ageText,
+    props.industryText,
+    props.portfolio,
+    props.metrics,
     derived.periodDisplay,
-    derived.contact.email,
+    toast,
   ]);
 
   return (
@@ -556,15 +651,32 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             )}
             {t("reportDownloadPdf")}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-full border-navy/20"
-            onClick={emailReport}
-          >
-            <Mail className="mr-2 h-4 w-4" />
-            {t("reportEmailMe")}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              type="email"
+              placeholder={props.isKo ? "이메일 주소" : "Email address"}
+              value={userEmail}
+              onChange={(e) => {
+                setUserEmail(e.target.value);
+                setEmailSent(false);
+              }}
+              className="h-10 w-full min-w-[12rem] sm:w-52"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full border-navy/20"
+              onClick={() => void sendEmailReport()}
+              disabled={emailSending}
+            >
+              {emailSending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Mail className="mr-2 h-4 w-4" />
+              )}
+              {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
