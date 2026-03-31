@@ -138,10 +138,13 @@ export default function AcademyPageClient({
     <>
       <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mx-auto mb-4 flex justify-center">
+          <div className="mx-auto mb-4 flex items-center justify-center gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold">
               <GraduationCap className="h-4 w-4" />
               {t("heroBadge")}
+            </span>
+            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
+              BETA
             </span>
           </div>
           <h1 className="text-3xl font-bold text-white sm:text-4xl">{t("heroTitle")}</h1>

@@ -174,6 +174,9 @@ export default function InsightsPageClient({
             <Badge className="border-0 bg-emerald-500/25 text-xs font-semibold text-emerald-100">
               OOH
             </Badge>
+            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
+              BETA
+            </span>
           </div>
           <h1 className="text-3xl font-bold text-white sm:text-4xl">{t("heroTitle")}</h1>
           <p className="mx-auto mt-3 max-w-2xl text-slate-300">{t("heroSubtitle")}</p>
