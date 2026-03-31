@@ -68,8 +68,6 @@ export type MediaAdvancedFilterState = {
   sizeTier: "all" | MediaSizeTier;
   resolutionFilter: ResolutionFilter;
   hoursBucket: "all" | OperatingHoursBucket;
-  installYearMin: number;
-  installYearMax: number;
   advertiserQuery: string;
   targetAgePick: Partial<Record<TargetAgeBucket, boolean>>;
   selectedTags: string[];
@@ -299,7 +297,16 @@ function passesNumericRange(
   return v >= min && v <= max;
 }
 
-function selectedTargetAgeBands(
+/** 고급·간편 필터 공통 — 타겟 연령 멀티선택 */
+export const TARGET_AGE_BUCKETS: readonly TargetAgeBucket[] = [
+  "teen",
+  "twenties",
+  "thirties",
+  "forties",
+  "fiftyPlus",
+];
+
+export function selectedTargetAgeBands(
   pick: Partial<Record<TargetAgeBucket, boolean>>,
 ): TargetAgeBucket[] {
   return (Object.keys(pick) as TargetAgeBucket[]).filter((k) => pick[k]);
@@ -355,33 +362,19 @@ function matchesSubCategoryFilter(m: MediaItem, filter: string): boolean {
 export type CatalogBounds = {
   minPrice: number;
   maxPrice: number;
-  minYear: number;
-  maxYear: number;
 };
 
 export function computeCatalogBounds(catalog: MediaItem[]): CatalogBounds {
   let minP = Infinity;
   let maxP = 0;
-  let minY = Infinity;
-  let maxY = 0;
   for (const m of catalog) {
     minP = Math.min(minP, m.price);
     maxP = Math.max(maxP, m.price);
-    if (m.installYear != null) {
-      minY = Math.min(minY, m.installYear);
-      maxY = Math.max(maxY, m.installYear);
-    }
   }
   if (!Number.isFinite(minP)) minP = 0;
-  if (!Number.isFinite(minY)) {
-    minY = new Date().getFullYear() - 10;
-    maxY = new Date().getFullYear();
-  }
   return {
     minPrice: minP,
     maxPrice: Math.max(maxP, minP),
-    minYear: minY,
-    maxYear: Math.max(maxY, minY),
   };
 }
 
@@ -415,8 +408,6 @@ export function defaultAdvancedFilterState(
     sizeTier: "all",
     resolutionFilter: "all",
     hoursBucket: "all",
-    installYearMin: bounds.minYear,
-    installYearMax: bounds.maxYear,
     advertiserQuery: "",
     targetAgePick: {},
     selectedTags: [],
@@ -456,8 +447,6 @@ export function isAdvancedFilterAtDefault(
     f.sizeTier === "all" &&
     f.resolutionFilter === "all" &&
     f.hoursBucket === "all" &&
-    f.installYearMin <= bounds.minYear &&
-    f.installYearMax >= bounds.maxYear &&
     f.advertiserQuery.trim() === "" &&
     !ageActive &&
     f.selectedTags.length === 0 &&
@@ -602,15 +591,6 @@ export function passesMediaAdvancedFilters(
     if (f.hoursBucket !== "all") {
       const h = inferOperatingHoursBucket(m);
       if (h != null && h !== f.hoursBucket) return false;
-    }
-
-    const yearNarrowed =
-      f.installYearMin > bounds.minYear || f.installYearMax < bounds.maxYear;
-    if (yearNarrowed) {
-      if (m.installYear == null) return false;
-      if (m.installYear < f.installYearMin || m.installYear > f.installYearMax) {
-        return false;
-      }
     }
   }
 

@@ -117,18 +117,18 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
             {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
           </Badge>
         </div>
-        <CardTitle className="truncate text-[13px] leading-snug sm:text-sm">
+        <CardTitle className="line-clamp-2 min-w-0 break-words text-[13px] leading-snug sm:text-sm">
           {isKo ? media.name : media.nameEn}
         </CardTitle>
       </CardHeader>
       <CardContent className="relative z-0 min-w-0 space-y-1.5 px-3 pb-2.5 pt-0 sm:px-4 sm:pb-3">
         <div className="flex min-w-0 items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-xs">
           <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-          <span className="min-w-0 truncate">
+          <span className="min-w-0 line-clamp-2 sm:line-clamp-2">
             {formatMediaLocationShort(media, isKo)}
           </span>
         </div>
-        <div className="text-[15px] font-bold tabular-nums text-navy sm:text-base">
+        <div className="min-w-0 break-words text-[15px] font-bold tabular-nums leading-tight text-navy sm:text-base sm:leading-normal">
           {formatMediaPriceWonWithSymbol(priceNum)}
           {showPricePeriod ? (
             <span className="text-xs font-normal text-muted-foreground">

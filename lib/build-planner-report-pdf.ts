@@ -192,6 +192,11 @@ async function buildPlannerReportPdfInner(
     throw e instanceof Error ? e : new Error(String(e));
   }
   const hasKrFont = await registerNotoSansKrFromFetch(doc);
+  if (!hasKrFont) {
+    console.warn(
+      "[planner-pdf] Noto Sans KR could not be loaded; Korean glyphs may use Helvetica fallback",
+    );
+  }
   const { labels, portfolio, metrics, contact } = p;
 
   const margin = 14;
@@ -452,4 +457,52 @@ async function buildPlannerReportPdfInner(
   });
 
   return doc;
+}
+
+/** 다운로드용 ASCII 파일명 (일부 브라우저에서 한글 파일명 실패 방지) */
+export function defaultPlannerPdfFilename(): string {
+  return `THINKAD-planner-report-${Date.now()}.pdf`;
+}
+
+/** jsPDF → Blob (blob 출력 실패 시 arraybuffer 폴백) */
+export function plannerPdfToBlob(doc: jsPDF): Blob {
+  try {
+    return doc.output("blob");
+  } catch (e) {
+    console.error("[planner-pdf] output('blob') failed, trying arraybuffer", e);
+    try {
+      const ab = doc.output("arraybuffer") as ArrayBuffer;
+      return new Blob([ab], { type: "application/pdf" });
+    } catch (e2) {
+      console.error("[planner-pdf] output('arraybuffer') failed", e2);
+      throw e2 instanceof Error ? e2 : new Error(String(e2));
+    }
+  }
+}
+
+/**
+ * 브라우저에서 PDF 저장. FileSaver(`doc.save`) 우선, 실패 시 Blob+앵커 폴백.
+ */
+export function downloadPlannerPdf(doc: jsPDF, filename?: string): void {
+  const name = filename ?? defaultPlannerPdfFilename();
+  try {
+    doc.save(name);
+  } catch (e) {
+    console.error("[planner-pdf] doc.save() failed", e);
+    try {
+      const blob = plannerPdfToBlob(doc);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e2) {
+      console.error("[planner-pdf] fallback anchor download failed", e2);
+      throw e2 instanceof Error ? e2 : new Error(String(e2));
+    }
+  }
 }

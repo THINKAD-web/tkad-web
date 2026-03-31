@@ -6,7 +6,8 @@ import type { MediaItem } from "@/lib/media-data";
  * 1. 후보 풀: `budgetMaxMan` > 0 이면 `m.price <= cap` 선필터, 지역은 `regionMatchesMedia`.
  * 2. 점수: `budgetFit*0.4 + targetMatch*0.3 + region*0.2 + visibility*0.1` (각 0–100 근사).
  * 3. 타겟 매칭: `targetAge` 문자열 파싱 후 연령 밴드 겹침 + 상권·업종·캠페인 목표 가중.
- * 4. `score >= 12` 우선, 부족 시 상위 랭킹으로 최소 3건 보장, 상위 30건.
+ * 4. `score >= MIN_SCORE` 우선, 부족 시 상위 랭킹으로 최소 MIN_RESULTS(5)건 보장, 상위 30건.
+ * 5. 후보 풀이 비었거나 5개 미만이면 `paddingCatalog`(또는 동일 카탈로그)에서 보강.
  */
 export type CampaignGoal = "awareness" | "consideration" | "launch";
 
@@ -60,8 +61,8 @@ const W_REGION = 0.2;
 const W_VISIBILITY = 0.1;
 
 /** 완화: 너무 많이 걸러지는 경우 상위 랭킹으로 보강 */
-const MIN_SCORE = 12;
-const MIN_RESULTS = 3;
+const MIN_SCORE = 8;
+const MIN_RESULTS = 5;
 const MAX_RECOMMEND_RESULTS = 30;
 
 /** 세부 노출 환경(선택 시 OR) */
@@ -500,6 +501,9 @@ type RecommendPoolOpts = {
   skipBudget?: boolean;
   skipPlacement?: boolean;
   skipLocationKeywords?: boolean;
+  skipType?: boolean;
+  skipMinVisibility?: boolean;
+  skipMinFootTraffic?: boolean;
 };
 
 function buildRecommendPool(
@@ -515,15 +519,15 @@ function buildRecommendPool(
   if (input.region !== "all") {
     pool = pool.filter((m) => regionMatchesMedia(m, input.region));
   }
-  if (input.type && input.type !== "all") {
+  if (input.type && input.type !== "all" && !opts.skipType) {
     pool = pool.filter((m) => typeMatchesMedia(m, input.type));
   }
   const minVis = Math.max(0, Math.round(input.minVisibility ?? 0));
-  if (minVis > 0) {
+  if (minVis > 0 && !opts.skipMinVisibility) {
     pool = pool.filter((m) => subscoreVisibility(m) >= minVis);
   }
   const minFt = Math.max(0, Math.round(input.minDailyFootTraffic ?? 0));
-  if (minFt > 0) {
+  if (minFt > 0 && !opts.skipMinFootTraffic) {
     pool = pool.filter((m) => (m.dailyFootTraffic ?? 0) >= minFt);
   }
   const kws = input.locationKeywords?.filter((k) => k.trim().length > 0) ?? [];
@@ -556,6 +560,7 @@ function pickRecommendPool(
   if (budgetCap != null) steps.push({ skipBudget: true });
   steps.push({ skipPlacement: true });
   steps.push({ skipPlacement: true, skipLocationKeywords: true });
+  steps.push({ skipPlacement: true, skipLocationKeywords: true, skipType: true });
   if (budgetCap != null) {
     steps.push({ skipBudget: true, skipPlacement: true });
     steps.push({
@@ -563,12 +568,57 @@ function pickRecommendPool(
       skipPlacement: true,
       skipLocationKeywords: true,
     });
+    steps.push({
+      skipBudget: true,
+      skipPlacement: true,
+      skipLocationKeywords: true,
+      skipType: true,
+    });
   }
+  steps.push({
+    skipBudget: true,
+    skipPlacement: true,
+    skipLocationKeywords: true,
+    skipType: true,
+    skipMinVisibility: true,
+    skipMinFootTraffic: true,
+  });
   for (const opts of steps) {
     const pool = buildRecommendPool(valid, input, opts);
     if (pool.length > 0) return pool;
   }
-  return [];
+  return valid.length > 0 ? [...valid] : [];
+}
+
+/** Fisher–Yates shuffle 후 앞에서 n개 */
+function randomSample<T>(items: readonly T[], n: number): T[] {
+  if (n <= 0 || items.length === 0) return [];
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const a = copy[i];
+    const b = copy[j];
+    if (a !== undefined && b !== undefined) {
+      copy[i] = b;
+      copy[j] = a;
+    }
+  }
+  return copy.slice(0, Math.min(n, copy.length));
+}
+
+/** 후보가 MIN_RESULTS 미만이면 같은 카탈로그에서 중복 없이 보강 */
+function ensureMinPoolSize(
+  pool: MediaItem[],
+  catalog: readonly MediaItem[],
+  min: number,
+): MediaItem[] {
+  if (catalog.length === 0) return pool;
+  const seen = new Set(pool.map((m) => m.id));
+  if (pool.length >= min) return pool;
+  const rest = catalog.filter((m) => !seen.has(m.id));
+  const need = Math.min(min - pool.length, rest.length);
+  if (need <= 0) return pool;
+  return [...pool, ...randomSample(rest, need)];
 }
 
 function finalizeScoredList(
@@ -583,28 +633,47 @@ function finalizeScoredList(
   if (passed.length >= MIN_RESULTS) {
     return passed.slice(0, MAX_RECOMMEND_RESULTS);
   }
-  if (scored.length <= passed.length) {
-    return passed.slice(0, MAX_RECOMMEND_RESULTS);
+  if (scored.length === 0) {
+    return [];
   }
   const take = Math.min(
+    scored.length,
     MAX_RECOMMEND_RESULTS,
     Math.max(MIN_RESULTS, passed.length),
   );
-  return scored.slice(0, Math.min(scored.length, take));
+  return scored.slice(0, take);
 }
 
+/**
+ * @param catalog 추천·점수 산정에 쓰는 후보(지역·검색 등으로 좁힌 목록)
+ * @param paddingCatalog 후보가 MIN_RESULTS 미만일 때 같은 조건의 더 넓은 풀에서 ID 중복 없이 보강(미지정 시 catalog)
+ */
 export function recommendMedia(
   input: AiRecommendInput,
   catalog: readonly MediaItem[],
+  paddingCatalog?: readonly MediaItem[],
 ): ScoredMedia[] {
   const valid = catalog.filter(
     (m) => m != null && typeof m.id === "string" && m.id.trim().length > 0,
   );
   if (valid.length === 0) return [];
 
+  const padValid = (paddingCatalog ?? catalog).filter(
+    (m) => m != null && typeof m.id === "string" && m.id.trim().length > 0,
+  );
+
+  const sourceForPad =
+    padValid.length > 0 ? padValid : valid;
   const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
-  const pool = pickRecommendPool(valid, input);
-  if (pool.length === 0) return [];
+  let pool = pickRecommendPool(valid, input);
+  if (pool.length === 0) {
+    pool = randomSample(
+      sourceForPad,
+      Math.min(MIN_RESULTS, sourceForPad.length),
+    );
+  } else {
+    pool = ensureMinPoolSize(pool, sourceForPad, MIN_RESULTS);
+  }
 
   return finalizeScoredList(pool, input, budgetCap);
 }

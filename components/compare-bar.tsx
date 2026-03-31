@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { FloatingSelectionBar } from "@/components/floating-selection-bar";
@@ -16,7 +15,8 @@ interface Props {
 }
 
 /**
- * 매체검색 — 비교 카트가 있을 때 하단 플로팅 바 (슬라이드 애니메이션).
+ * 매체검색 — 비교 카트가 있을 때 하단 고정 팝업.
+ * ✓ N개 선택됨 · [선택해제] [비교하기] [견적받기]
  */
 export default function CompareBar({ items, locale, onClear }: Props) {
   const t = useTranslations("media");
@@ -31,46 +31,61 @@ export default function CompareBar({ items, locale, onClear }: Props) {
   const compareHref = `/compare?ids=${displayItems.map((m) => m.id).join(",")}`;
   const quoteHref = `/quote?media=${ids}`;
 
+  const count = displayItems.length;
+  const canCompare = count >= 2;
+
   return (
     <FloatingSelectionBar
       open={open}
       ariaLabel={isKo ? "선택한 매체 작업" : "Selected media actions"}
     >
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div
-          className="flex min-w-0 items-center gap-2 text-base font-semibold text-navy md:text-sm"
+          className="flex min-w-0 items-center gap-2 sm:gap-2.5"
           aria-live="polite"
           aria-atomic="true"
         >
-          <CheckCircle2
-            className="h-5 w-5 shrink-0 text-emerald-600 md:h-4 md:w-4"
+          <span
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-base font-bold leading-none text-emerald-700"
             aria-hidden
-          />
-          <span className="truncate">
-            {t("compareFloatingSelected", { count: displayItems.length })}
-            <span className="ml-1.5 font-mono text-xs font-normal text-muted-foreground md:text-[11px]">
-              ({displayItems.length}/{COMPARE_MAX_ITEMS})
+          >
+            ✓
+          </span>
+          <span className="min-w-0 truncate text-sm font-semibold tabular-nums text-navy sm:text-base">
+            {t("compareFloatingSelected", { count })}
+            <span className="sr-only">
+              {" "}
+              ({count}/{COMPARE_MAX_ITEMS})
             </span>
           </span>
         </div>
 
-        <div className="flex flex-wrap items-stretch gap-2 md:shrink-0 md:justify-end">
+        <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:justify-end sm:gap-2">
           <Button
             type="button"
             variant="floatingSecondary"
             size="floating"
             onClick={onClear}
-            className="flex-1 md:flex-none"
+            className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
           >
             {t("compareFloatingClear")}
           </Button>
-          {displayItems.length < 2 ? (
+          {canCompare ? (
+            <Button
+              asChild
+              variant="floatingSecondary"
+              size="floating"
+              className="min-w-0 px-2 text-xs font-semibold sm:min-h-12 sm:px-5 sm:text-sm"
+            >
+              <Link href={compareHref}>{t("compareFloatingCompare")}</Link>
+            </Button>
+          ) : (
             <Button
               type="button"
               variant="floatingSecondary"
               size="floating"
               disabled
-              className="flex-1 md:flex-none"
+              className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
               title={
                 isKo
                   ? "비교하려면 매체를 2개 이상 선택하세요"
@@ -79,21 +94,12 @@ export default function CompareBar({ items, locale, onClear }: Props) {
             >
               {t("compareFloatingCompare")}
             </Button>
-          ) : (
-            <Button
-              asChild
-              variant="floatingSecondary"
-              size="floating"
-              className="flex-1 font-bold md:flex-none"
-            >
-              <Link href={compareHref}>{t("compareFloatingCompare")}</Link>
-            </Button>
           )}
           <Button
             asChild
             variant="floatingPrimary"
             size="floating"
-            className="flex-1 md:flex-none"
+            className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
           >
             <Link href={quoteHref}>{t("compareQuoteCta")}</Link>
           </Button>

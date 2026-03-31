@@ -11,6 +11,10 @@ type Props = {
   children: ReactNode;
 };
 
+/** 바가 열렸을 때 본문 하단에 넣는 여백(콘텐츠가 가려지지 않도록). */
+export const FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS =
+  "h-[7.25rem] sm:h-[6.75rem]";
+
 /**
  * 매체 비교/견적 등 선택 시 하단 고정 바.
  * 나타날 때 슬라이드업, 사라질 때 슬라이드다운 (AnimatePresence).
@@ -33,18 +37,16 @@ export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
             mass: 0.85,
           }}
           className={cn(
-            "fixed bottom-0 left-0 right-0 z-[60]",
-            "border-t border-navy/10 bg-white shadow-lg",
+            "fixed inset-x-0 bottom-0 z-[60] px-2 pb-2 sm:px-4 sm:pb-3",
+            "pointer-events-none",
           )}
         >
           <div
             className={cn(
-              "mx-auto max-w-7xl",
-              /* 모바일: 넉넉한 패딩·두께 */
-              "px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))]",
-              /* PC: 얇고 정돈 */
-              "md:px-6 md:py-2.5 md:pt-2.5 md:pb-[max(0.65rem,env(safe-area-inset-bottom,0px))]",
-              "lg:px-8",
+              "pointer-events-auto mx-auto max-w-7xl",
+              "rounded-2xl border border-navy/10 bg-white shadow-[0_-8px_32px_-4px_rgba(15,23,42,0.12)]",
+              "px-3 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom,0px))]",
+              "sm:px-5 sm:py-3 sm:pb-[max(0.85rem,env(safe-area-inset-bottom,0px))]",
             )}
           >
             {children}

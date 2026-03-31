@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Flame, MapPin } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
-import { typeLabels, type MediaItem } from "@/lib/media-data";
+import { dedupeImageUrls, typeLabels, type MediaItem } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   formatMediaPriceWonWithSymbol,
@@ -39,6 +39,9 @@ export function MediaCatalogCompactLinkRow({
   thumbnailOverlay,
   className,
 }: Props) {
+  const primaryThumb =
+    dedupeImageUrls(media.sampleImages ?? [])[0]?.trim() || null;
+
   return (
     <Link
       href={href}
@@ -51,6 +54,7 @@ export function MediaCatalogCompactLinkRow({
     >
       <MediaCatalogThumbnail
         media={media}
+        primaryImageUrl={primaryThumb}
         placeholderLabel={imagePreparingLabel}
         className="relative z-10 h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-md sm:h-24 sm:w-28 sm:rounded-lg"
         bottomGradientClassName={null}
@@ -58,33 +62,33 @@ export function MediaCatalogCompactLinkRow({
       >
         {thumbnailOverlay}
       </MediaCatalogThumbnail>
-      <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 sm:gap-1.5">
-        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+      <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 overflow-hidden sm:gap-1.5">
+        <div className="flex min-w-0 flex-wrap items-center gap-1 sm:gap-1.5">
           <Badge
             variant="secondary"
-            className="bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
+            className="max-w-full shrink bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
           >
             {isKo
               ? (typeLabels[media.type]?.ko ?? media.type)
               : (typeLabels[media.type]?.en ?? media.type)}
           </Badge>
           {popularIds?.has(media.id) ? (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[8px] font-bold text-navy sm:text-[9px]">
+            <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[8px] font-bold text-navy sm:text-[9px]">
               <Flame className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
               {isKo ? "인기" : "Hot"}
             </span>
           ) : null}
         </div>
-        <p className="truncate text-[13px] font-bold leading-snug text-navy sm:text-sm sm:leading-relaxed">
+        <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug text-navy sm:line-clamp-1 sm:text-sm sm:leading-relaxed">
           {isKo ? media.name : media.nameEn}
         </p>
-        <p className="flex min-w-0 items-center gap-0.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
-          <MapPin className="h-2.5 w-2.5 shrink-0 align-text-bottom sm:h-3 sm:w-3" />
-          <span className="min-w-0 truncate">
+        <p className="flex min-w-0 items-start gap-0.5 text-[10px] leading-snug text-muted-foreground sm:items-center sm:text-[11px] sm:leading-relaxed">
+          <MapPin className="mt-0.5 h-2.5 w-2.5 shrink-0 sm:mt-0 sm:h-3 sm:w-3" />
+          <span className="min-w-0 line-clamp-2 sm:line-clamp-1">
             {formatMediaLocationShort(media, isKo)}
           </span>
         </p>
-        <p className="text-[13px] font-bold tabular-nums leading-none text-navy sm:text-sm">
+        <p className="min-w-0 break-words text-[13px] font-bold tabular-nums leading-tight text-navy sm:text-sm sm:leading-none">
           {formatMediaPriceWonWithSymbol(media.price)}
           <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
             {" "}

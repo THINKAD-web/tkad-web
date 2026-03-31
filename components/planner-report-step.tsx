@@ -22,6 +22,9 @@ import {
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import {
   buildPlannerReportPdf,
+  defaultPlannerPdfFilename,
+  downloadPlannerPdf,
+  plannerPdfToBlob,
   type PlannerReportPdfLabels,
 } from "@/lib/build-planner-report-pdf";
 import { useToast } from "@/components/toast-provider";
@@ -246,7 +249,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           buildPlannerPdfParams(props, derived, generatedAt),
         );
         if (cancelled) return;
-        const blob = doc.output("blob");
+        const blob = plannerPdfToBlob(doc);
         const nextUrl = URL.createObjectURL(blob);
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         urlRef.current = nextUrl;
@@ -287,37 +290,54 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     toast,
   ]);
 
-  const downloadPdf = useCallback(async () => {
-    setDownloading(true);
-    try {
-      const generatedAt = new Date().toLocaleString(
-        props.isKo ? "ko-KR" : "en-US",
-      );
-      const doc = await buildPlannerReportPdf(
-        buildPlannerPdfParams(props, derived, generatedAt),
-      );
-      const filename = props.isKo
-        ? `THINKAD-플래너-보고서-${Date.now()}.pdf`
-        : `THINKAD-planner-report-${Date.now()}.pdf`;
-      const blob = doc.output("blob");
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.rel = "noopener";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      toast("success", t("reportPdfDownloaded"));
-    } catch (e) {
-      console.error("[planner-pdf download]", e);
-      setError(t("reportPdfError"));
-      toast("error", tCommon("pdfGenerationFailed"));
-    } finally {
-      setDownloading(false);
+  const downloadPdf = useCallback(() => {
+    const asciiName = defaultPlannerPdfFilename();
+
+    /** 미리보기와 동일 Blob — 사용자 제스처 안에서 동기 다운로드(비동기 재생성 후 클릭 시 차단 방지) */
+    if (pdfUrl && !loading && !error) {
+      setDownloading(true);
+      try {
+        const a = document.createElement("a");
+        a.href = pdfUrl;
+        a.download = asciiName;
+        a.rel = "noopener";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        toast("success", t("reportPdfDownloaded"));
+      } catch (e) {
+        console.error("[planner-pdf download from preview blob]", e);
+        setError(t("reportPdfError"));
+        toast("error", tCommon("pdfGenerationFailed"));
+      } finally {
+        setDownloading(false);
+      }
+      return;
     }
+
+    void (async () => {
+      setDownloading(true);
+      try {
+        const generatedAt = new Date().toLocaleString(
+          props.isKo ? "ko-KR" : "en-US",
+        );
+        const doc = await buildPlannerReportPdf(
+          buildPlannerPdfParams(props, derived, generatedAt),
+        );
+        downloadPlannerPdf(doc, asciiName);
+        toast("success", t("reportPdfDownloaded"));
+      } catch (e) {
+        console.error("[planner-pdf download regenerate]", e);
+        setError(t("reportPdfError"));
+        toast("error", tCommon("pdfGenerationFailed"));
+      } finally {
+        setDownloading(false);
+      }
+    })();
   }, [
+    pdfUrl,
+    loading,
+    error,
     props.isKo,
     props.goalTitle,
     props.budgetNum,
@@ -497,19 +517,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
       const doc = await buildPlannerReportPdf(
         buildPlannerPdfParams(props, derived, generatedAt),
       );
-      const filename = props.isKo
-        ? `THINKAD-플래너-보고서-${Date.now()}.pdf`
-        : `THINKAD-planner-report-${Date.now()}.pdf`;
-      const blob = doc.output("blob");
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.rel = "noopener";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      downloadPlannerPdf(doc, defaultPlannerPdfFilename());
       toast("success", t("reportPdfDownloaded"));
     } catch (e) {
       console.error("[planner-pdf compact]", e);

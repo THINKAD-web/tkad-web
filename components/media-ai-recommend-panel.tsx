@@ -99,16 +99,27 @@ export default function MediaAiRecommendPanel({
       setPhase("loading");
       setResults(null);
       window.setTimeout(() => {
-        const pool = filterCatalogByRegionCodes(catalog, payload.regionCodes);
+        const poolRegion = filterCatalogByRegionCodes(
+          catalog,
+          payload.regionCodes,
+        );
         const q = payload.searchQuery.trim().toLowerCase();
         const poolFiltered =
           q.length > 0
-            ? pool.filter((m) => matchesMediaTextQuery(m, q))
-            : pool;
+            ? poolRegion.filter((m) => matchesMediaTextQuery(m, q))
+            : poolRegion;
+        const baseCatalog =
+          poolFiltered.length > 0 ? poolFiltered : catalog;
+        const paddingSource =
+          poolRegion.length > 0 ? poolRegion : catalog;
         const scored =
           catalog.length === 0
             ? []
-            : recommendMedia(payload.input, poolFiltered);
+            : recommendMedia(
+                payload.input,
+                baseCatalog,
+                paddingSource,
+              );
         setResults(scored);
         setPhase(scored.length > 0 ? "dashboard" : "noResults");
       }, 900);

@@ -13,10 +13,10 @@ import {
   ExternalLink,
   X,
   Users,
-  SlidersHorizontal,
 } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
+import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
 import SolutionCtaButton from "@/components/solution-cta-button";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
 import {
@@ -49,17 +49,16 @@ import {
   computeCatalogBounds,
   defaultAdvancedFilterState,
   passesMediaAdvancedFilters,
-  type MediaAdvancedFilterState,
+  type TargetAgeBucket,
 } from "@/lib/media-filter-advanced";
-import MediaAdvancedFiltersOverlay from "@/components/media-advanced-filters-overlay";
 import {
   MEDIA_CATALOG_GRID_CLASS,
   MEDIA_CATALOG_COMPACT_GRID_CLASS,
-  MediaCatalogStickyAside,
   MediaCatalogGridCompactToggle,
 } from "@/components/media-catalog-shared";
+import MediaCatalogFiltersBar from "@/components/media-catalog-filters-bar";
+import { buildMediaRegionFilterOptions } from "@/lib/media-region-filter-options";
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
-import { useMediaMinWidth } from "@/lib/use-media-min-width";
 import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
@@ -95,19 +94,48 @@ export default function MediaBrowseClient({
   const [sortBy, setSortBy] = useState<
     "default" | "priceAsc" | "priceDesc" | "trafficDesc"
   >("default");
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const mdUp = useMediaMinWidth(768);
 
   const bounds = useMemo(() => computeCatalogBounds(catalog), [catalog]);
   const defaultAdvanced = useMemo(
     () => defaultAdvancedFilterState(bounds),
     [bounds],
   );
-  /** `null` = use `defaultAdvanced` until the user edits advanced filters */
-  const [advanced, setAdvanced] = useState<MediaAdvancedFilterState | null>(
-    null,
+
+  const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
+  const [mediaRegionFilter, setMediaRegionFilter] = useState("all");
+  const [budgetMin, setBudgetMin] = useState(() => bounds.minPrice);
+  const [budgetMax, setBudgetMax] = useState(() => bounds.maxPrice);
+  const [targetAgePick, setTargetAgePick] = useState<
+    Partial<Record<TargetAgeBucket, boolean>>
+  >({});
+
+  useEffect(() => {
+    setBudgetMin(bounds.minPrice);
+    setBudgetMax(bounds.maxPrice);
+  }, [bounds.minPrice, bounds.maxPrice]);
+
+  const filterState = useMemo(
+    () => ({
+      ...defaultAdvanced,
+      priceMin: budgetMin,
+      priceMax: budgetMax,
+      targetAgePick,
+    }),
+    [defaultAdvanced, budgetMin, budgetMax, targetAgePick],
   );
-  const effectiveAdvanced = advanced ?? defaultAdvanced;
+
+  const toggleTargetAge = useCallback((k: TargetAgeBucket) => {
+    setTargetAgePick((prev) => {
+      const next = { ...prev, [k]: !prev[k] };
+      if (!next[k]) delete next[k];
+      return next;
+    });
+  }, []);
+
+  const regionFilterOptions = useMemo(
+    () => buildMediaRegionFilterOptions(catalog, (key) => tMedia(key)),
+    [catalog, tMedia],
+  );
 
   useLayoutEffect(() => {
     setCompareItems(entriesToCompareMediaItems(getCompareCartEntries(), catalog));
@@ -135,7 +163,7 @@ export default function MediaBrowseClient({
     );
   }, [compareItems]);
 
-  /** 검색어·선택 매체 + 고급 필터(슬라이더·태그 등) 적용 */
+  /** 검색어·선택 매체 + 유형·지역·예산 범위·타겟 연령 + 기본 고급 스키마 */
   const filtered = useMemo(() => {
     let data = catalog;
 
@@ -146,10 +174,23 @@ export default function MediaBrowseClient({
       data = data.filter((m) => matchesMediaTextQuery(m, lower));
     }
 
-    return data.filter((m) =>
-      passesMediaAdvancedFilters(m, effectiveAdvanced, bounds),
-    );
-  }, [catalog, searchTarget, textFilter, effectiveAdvanced, bounds]);
+    return data.filter((m) => {
+      if (!passesMediaAdvancedFilters(m, filterState, bounds)) return false;
+      if (mediaRegionFilter !== "all" && (m.region ?? "") !== mediaRegionFilter)
+        return false;
+      if (mediaTypeFilter !== "all" && (m.type ?? "") !== mediaTypeFilter)
+        return false;
+      return true;
+    });
+  }, [
+    catalog,
+    searchTarget,
+    textFilter,
+    filterState,
+    bounds,
+    mediaRegionFilter,
+    mediaTypeFilter,
+  ]);
 
   const sortedFiltered = useMemo(() => {
     const arr = [...filtered];
@@ -176,7 +217,14 @@ export default function MediaBrowseClient({
 
   useEffect(() => {
     setCatalogPage(1);
-  }, [searchTarget, textFilter, effectiveAdvanced, sortBy]);
+  }, [
+    searchTarget,
+    textFilter,
+    filterState,
+    sortBy,
+    mediaRegionFilter,
+    mediaTypeFilter,
+  ]);
 
   const pagedCatalog = useMemo(() => {
     const start = (catalogPage - 1) * catalogPageSize;
@@ -209,8 +257,12 @@ export default function MediaBrowseClient({
     setSearchTarget(null);
     setTextFilter("");
     setMapSelectedId(null);
-    setAdvanced(null);
     setSortBy("default");
+    setMediaTypeFilter("all");
+    setMediaRegionFilter("all");
+    setBudgetMin(bounds.minPrice);
+    setBudgetMax(bounds.maxPrice);
+    setTargetAgePick({});
   };
 
   const handleMediaView = useCallback((media: MediaItem) => {
@@ -318,57 +370,45 @@ export default function MediaBrowseClient({
               addManyToCompare={addManyToCompare}
             />
           ) : (
-            <div className="flex flex-col gap-8 lg:flex-row">
-              <MediaCatalogStickyAside>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-navy">
-                    {t("common.search")}
-                  </label>
-                  <MediaSearchAutocomplete
-                    locale={locale}
-                    catalog={catalog}
-                    onSelect={handleMediaView}
-                    onSearchSubmit={(q) => {
-                      setSearchTarget(null);
-                      setTextFilter(q);
-                      setBrowseMode("list");
-                    }}
-                    onQueryChange={(q) => {
-                      if (!q.trim()) setTextFilter("");
-                    }}
-                    searchButtonLabel={t("media.searchButton")}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-11 w-full rounded-xl border-navy/20 font-semibold text-navy"
-                  onClick={() => setAdvancedOpen(true)}
-                >
-                  <SlidersHorizontal className="mr-2 h-4 w-4" />
-                  {t("media.advanced.openButton")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-11 w-full rounded-xl border-navy/15 font-semibold text-muted-foreground"
-                  onClick={resetFilters}
-                >
-                  {t("common.reset")}
-                </Button>
-              </MediaCatalogStickyAside>
-
-              <MediaAdvancedFiltersOverlay
-                open={advancedOpen}
-                onOpenChange={setAdvancedOpen}
-                mdUp={mdUp}
-                catalog={catalog}
+            <div className="flex flex-col gap-6">
+              <MediaCatalogFiltersBar
+                search={
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-navy">
+                      {t("common.search")}
+                    </label>
+                    <MediaSearchAutocomplete
+                      locale={locale}
+                      catalog={catalog}
+                      onSelect={handleMediaView}
+                      onSearchSubmit={(q) => {
+                        setSearchTarget(null);
+                        setTextFilter(q);
+                        setBrowseMode("list");
+                      }}
+                      onQueryChange={(q) => {
+                        if (!q.trim()) setTextFilter("");
+                      }}
+                      searchButtonLabel={t("media.searchButton")}
+                    />
+                  </div>
+                }
+                mediaTypeFilter={mediaTypeFilter}
+                onMediaTypeFilterChange={setMediaTypeFilter}
+                mediaRegionFilter={mediaRegionFilter}
+                onMediaRegionFilterChange={setMediaRegionFilter}
+                regionOptions={regionFilterOptions}
                 bounds={bounds}
-                effectiveAdvanced={effectiveAdvanced}
-                setAdvanced={setAdvanced}
+                budgetMin={budgetMin}
+                budgetMax={budgetMax}
+                onBudgetMinChange={setBudgetMin}
+                onBudgetMaxChange={setBudgetMax}
+                targetAgePick={targetAgePick}
+                onToggleTargetAge={toggleTargetAge}
+                onReset={resetFilters}
               />
 
-              <div className="flex-1">
+              <div className="min-w-0">
                 <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="text-sm text-muted-foreground">
                     {t("media.results")}: {sortedFiltered.length}
@@ -707,7 +747,7 @@ export default function MediaBrowseClient({
       />
 
       {compareItems.length > 0 ? (
-        <div className="h-[6.25rem] md:h-[5.25rem]" aria-hidden />
+        <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
       ) : null}
     </>
   );

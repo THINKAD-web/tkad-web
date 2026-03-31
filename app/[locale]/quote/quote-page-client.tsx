@@ -13,7 +13,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle,
-  CheckCircle2,
   Images,
   Calculator,
   MapPin,
@@ -26,7 +25,6 @@ import {
   ImagePlus,
   Trash2,
   Mail,
-  SlidersHorizontal,
   ShieldCheck,
   Flame,
 } from "lucide-react";
@@ -43,23 +41,25 @@ import Spinner from "@/components/spinner";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
-import MediaAdvancedFiltersOverlay from "@/components/media-advanced-filters-overlay";
-import { FloatingSelectionBar } from "@/components/floating-selection-bar";
+import {
+  FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS,
+  FloatingSelectionBar,
+} from "@/components/floating-selection-bar";
 import {
   MEDIA_CATALOG_GRID_CLASS,
   MEDIA_CATALOG_COMPACT_GRID_CLASS,
   MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
-  MediaCatalogStickyAside,
   MediaCatalogGridCompactToggle,
 } from "@/components/media-catalog-shared";
+import MediaCatalogFiltersBar from "@/components/media-catalog-filters-bar";
+import { buildMediaRegionFilterOptions } from "@/lib/media-region-filter-options";
 import { cn } from "@/lib/utils";
 import {
   computeCatalogBounds,
   defaultAdvancedFilterState,
   passesMediaAdvancedFilters,
-  type MediaAdvancedFilterState,
+  type TargetAgeBucket,
 } from "@/lib/media-filter-advanced";
-import { useMediaMinWidth } from "@/lib/use-media-min-width";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   formatMediaPriceWonWithSymbol,
@@ -115,12 +115,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [mediaTextFilter, setMediaTextFilter] = useState("");
   const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
   const [mediaRegionFilter, setMediaRegionFilter] = useState("all");
-  const [mediaBudgetCap, setMediaBudgetCap] = useState("all"); // 만원
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const mdUp = useMediaMinWidth(768);
-  const [advanced, setAdvanced] = useState<MediaAdvancedFilterState | null>(
-    null,
-  );
   const [quoteSearchFieldKey, setQuoteSearchFieldKey] = useState(0);
   const [networkQuoteOptions, setNetworkQuoteOptions] = useState<
     Record<string, { units: number; regionScope: string }>
@@ -189,65 +183,54 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     [catalog, selectedIds],
   );
 
-  const quoteRegionOptions = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const m of catalog) {
-      const r = (m.region ?? "national").trim() || "national";
-      counts.set(r, (counts.get(r) ?? 0) + 1);
-    }
-    const order = ["all", "seoul", "busan", "jeju", "national"];
-    const sorted = [...counts.keys()].sort((a, b) => {
-      const ai = order.indexOf(a);
-      const bi = order.indexOf(b);
-      if (ai !== -1 || bi !== -1) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-      return a.localeCompare(b);
-    });
-    return [
-      { value: "all", label: isKo ? "전체" : "All" },
-      ...sorted
-        .filter((x) => x !== "all")
-        .map((value) => ({
-          value,
-          label:
-            value === "seoul"
-              ? isKo
-                ? "서울/수도권"
-                : "Seoul"
-              : value === "busan"
-                ? isKo
-                  ? "부산"
-                  : "Busan"
-                : value === "jeju"
-                  ? isKo
-                    ? "제주"
-                    : "Jeju"
-                  : value === "national"
-                    ? isKo
-                      ? "전국"
-                      : "National"
-                    : value,
-        })),
-    ];
-  }, [catalog, isKo]);
+  const regionFilterOptions = useMemo(
+    () => buildMediaRegionFilterOptions(catalog, (key) => tMedia(key)),
+    [catalog, tMedia],
+  );
 
   const bounds = useMemo(() => computeCatalogBounds(catalog), [catalog]);
   const defaultAdvanced = useMemo(
     () => defaultAdvancedFilterState(bounds),
     [bounds],
   );
-  const effectiveAdvanced = advanced ?? defaultAdvanced;
+
+  const [budgetMin, setBudgetMin] = useState(() => bounds.minPrice);
+  const [budgetMax, setBudgetMax] = useState(() => bounds.maxPrice);
+  const [targetAgePick, setTargetAgePick] = useState<
+    Partial<Record<TargetAgeBucket, boolean>>
+  >({});
+
+  useEffect(() => {
+    setBudgetMin(bounds.minPrice);
+    setBudgetMax(bounds.maxPrice);
+  }, [bounds.minPrice, bounds.maxPrice]);
+
+  const filterState = useMemo(
+    () => ({
+      ...defaultAdvanced,
+      priceMin: budgetMin,
+      priceMax: budgetMax,
+      targetAgePick,
+    }),
+    [defaultAdvanced, budgetMin, budgetMax, targetAgePick],
+  );
+
+  const toggleTargetAge = useCallback((k: TargetAgeBucket) => {
+    setTargetAgePick((prev) => {
+      const next = { ...prev, [k]: !prev[k] };
+      if (!next[k]) delete next[k];
+      return next;
+    });
+  }, []);
 
   const filteredCatalog = useMemo(() => {
-    const cap =
-      mediaBudgetCap === "all" ? null : Math.max(0, parseInt(mediaBudgetCap, 10) || 0);
     const q = mediaTextFilter.trim().toLowerCase();
     return catalog.filter((m) => {
-      if (!passesMediaAdvancedFilters(m, effectiveAdvanced, bounds)) return false;
+      if (!passesMediaAdvancedFilters(m, filterState, bounds)) return false;
       if (mediaRegionFilter !== "all" && (m.region ?? "") !== mediaRegionFilter)
         return false;
       if (mediaTypeFilter !== "all" && (m.type ?? "") !== mediaTypeFilter)
         return false;
-      if (cap != null && cap > 0 && (m.price ?? 0) > cap) return false;
       if (q.length > 0 && !matchesMediaTextQuery(m, q)) return false;
       return true;
     });
@@ -255,9 +238,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     catalog,
     mediaRegionFilter,
     mediaTypeFilter,
-    mediaBudgetCap,
     mediaTextFilter,
-    effectiveAdvanced,
+    filterState,
     bounds,
   ]);
 
@@ -265,10 +247,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     setMediaTextFilter("");
     setMediaTypeFilter("all");
     setMediaRegionFilter("all");
-    setMediaBudgetCap("all");
-    setAdvanced(null);
+    setBudgetMin(bounds.minPrice);
+    setBudgetMax(bounds.maxPrice);
+    setTargetAgePick({});
     setQuoteSearchFieldKey((k) => k + 1);
-  }, []);
+  }, [bounds.minPrice, bounds.maxPrice]);
 
   const monthlyCost = useMemo(
     () =>
@@ -691,111 +674,44 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       <p className="mb-4 text-sm text-muted-foreground">
                         {t("quote.selectMediaDesc")}
                       </p>
-                      <div className="flex flex-col gap-8 lg:flex-row">
-                        <MediaCatalogStickyAside>
-                          <div>
-                            <label className="mb-2 block text-sm font-semibold text-navy">
-                              {t("common.search")}
-                            </label>
-                            <MediaSearchAutocomplete
-                              key={quoteSearchFieldKey}
-                              locale={locale}
-                              catalog={catalog}
-                              onSelect={(m) => toggleMedia(m.id)}
-                              onSearchSubmit={(q) => setMediaTextFilter(q.trim())}
-                              onQueryChange={(q) => {
-                                if (!q.trim()) setMediaTextFilter("");
-                              }}
-                              searchButtonLabel={t("media.searchButton")}
-                            />
-                          </div>
-                          <div>
-                            <label className="mb-2 block text-sm font-semibold text-navy">
-                              {isKo ? "유형" : "Type"}
-                            </label>
-                            <select
-                              value={mediaTypeFilter}
-                              onChange={(e) =>
-                                setMediaTypeFilter(e.target.value)
-                              }
-                              className="h-11 w-full rounded-xl border border-navy/15 bg-white px-3 text-sm font-medium text-navy"
-                              aria-label={isKo ? "유형" : "Type"}
-                            >
-                              <option value="all">{isKo ? "전체" : "All"}</option>
-                              <option value="digital">{isKo ? "디지털" : "Digital"}</option>
-                              <option value="static">{isKo ? "옥외(고정)" : "Static"}</option>
-                              <option value="mobile">{isKo ? "교통(이동)" : "Mobile"}</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="mb-2 block text-sm font-semibold text-navy">
-                              {isKo ? "지역" : "Region"}
-                            </label>
-                            <select
-                              value={mediaRegionFilter}
-                              onChange={(e) =>
-                                setMediaRegionFilter(e.target.value)
-                              }
-                              className="h-11 w-full rounded-xl border border-navy/15 bg-white px-3 text-sm font-medium text-navy"
-                              aria-label={isKo ? "지역" : "Region"}
-                            >
-                              {quoteRegionOptions.map((o) => (
-                                <option key={o.value} value={o.value}>
-                                  {o.label}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <label className="mb-2 block text-sm font-semibold text-navy">
-                              {isKo ? "예산 상한(월)" : "Budget cap/mo"}
-                            </label>
-                            <select
-                              value={mediaBudgetCap}
-                              onChange={(e) =>
-                                setMediaBudgetCap(e.target.value)
-                              }
-                              className="h-11 w-full rounded-xl border border-navy/15 bg-white px-3 text-sm font-medium text-navy"
-                              aria-label={isKo ? "예산 상한" : "Budget cap"}
-                            >
-                              <option value="all">{isKo ? "제한 없음" : "No cap"}</option>
-                              <option value="500">500</option>
-                              <option value="1000">1000</option>
-                              <option value="2000">2000</option>
-                              <option value="3000">3000</option>
-                              <option value="5000">5000</option>
-                            </select>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-11 w-full rounded-xl border-navy/20 font-semibold text-navy"
-                            onClick={() => setAdvancedOpen(true)}
-                          >
-                            <SlidersHorizontal className="mr-2 h-4 w-4" />
-                            {t("media.advanced.openButton")}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-11 w-full rounded-xl border-navy/15 font-semibold text-muted-foreground"
-                            onClick={resetQuoteMediaFilters}
-                          >
-                            {t("common.reset")}
-                          </Button>
-                        </MediaCatalogStickyAside>
-
-                        <MediaAdvancedFiltersOverlay
-                          open={advancedOpen}
-                          onOpenChange={setAdvancedOpen}
-                          mdUp={mdUp}
-                          catalog={catalog}
+                      <div className="flex flex-col gap-6">
+                        <MediaCatalogFiltersBar
+                          search={
+                            <div>
+                              <label className="mb-2 block text-sm font-semibold text-navy">
+                                {t("common.search")}
+                              </label>
+                              <MediaSearchAutocomplete
+                                key={quoteSearchFieldKey}
+                                locale={locale}
+                                catalog={catalog}
+                                onSelect={(m) => toggleMedia(m.id)}
+                                onSearchSubmit={(q) =>
+                                  setMediaTextFilter(q.trim())
+                                }
+                                onQueryChange={(q) => {
+                                  if (!q.trim()) setMediaTextFilter("");
+                                }}
+                                searchButtonLabel={t("media.searchButton")}
+                              />
+                            </div>
+                          }
+                          mediaTypeFilter={mediaTypeFilter}
+                          onMediaTypeFilterChange={setMediaTypeFilter}
+                          mediaRegionFilter={mediaRegionFilter}
+                          onMediaRegionFilterChange={setMediaRegionFilter}
+                          regionOptions={regionFilterOptions}
                           bounds={bounds}
-                          effectiveAdvanced={effectiveAdvanced}
-                          setAdvanced={setAdvanced}
+                          budgetMin={budgetMin}
+                          budgetMax={budgetMax}
+                          onBudgetMinChange={setBudgetMin}
+                          onBudgetMaxChange={setBudgetMax}
+                          targetAgePick={targetAgePick}
+                          onToggleTargetAge={toggleTargetAge}
+                          onReset={resetQuoteMediaFilters}
                         />
 
-                        <div className="min-w-0 flex-1">
+                        <div className="min-w-0">
                           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div className="text-sm text-muted-foreground">
                               {t("media.results")}: {filteredCatalog.length}
@@ -970,33 +886,33 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                         {checked ? "✓" : ""}
                                       </span>
                                     </MediaCatalogThumbnail>
-                                    <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 sm:gap-1.5">
-                                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+                                    <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 overflow-hidden sm:gap-1.5">
+                                      <div className="flex min-w-0 flex-wrap items-center gap-1 sm:gap-1.5">
                                         <Badge
                                           variant="secondary"
-                                          className="bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
+                                          className="max-w-full shrink bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
                                         >
                                           {isKo
                                             ? (typeLabel?.ko ?? media.type)
                                             : (typeLabel?.en ?? media.type)}
                                         </Badge>
                                         {popularIds.has(media.id) ? (
-                                          <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[8px] font-bold text-navy sm:text-[9px]">
+                                          <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[8px] font-bold text-navy sm:text-[9px]">
                                             <Flame className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
                                             {isKo ? "인기" : "Hot"}
                                           </span>
                                         ) : null}
                                       </div>
-                                      <p className="truncate text-[13px] font-bold leading-snug text-navy sm:text-sm sm:leading-relaxed">
+                                      <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug text-navy sm:line-clamp-1 sm:text-sm sm:leading-relaxed">
                                         {isKo ? media.name : media.nameEn}
                                       </p>
-                                      <p className="flex min-w-0 items-center gap-0.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
-                                        <MapPin className="h-2.5 w-2.5 shrink-0 align-text-bottom sm:h-3 sm:w-3" />
-                                        <span className="min-w-0 truncate">
+                                      <p className="flex min-w-0 items-start gap-0.5 text-[10px] leading-snug text-muted-foreground sm:items-center sm:text-[11px] sm:leading-relaxed">
+                                        <MapPin className="mt-0.5 h-2.5 w-2.5 shrink-0 sm:mt-0 sm:h-3 sm:w-3" />
+                                        <span className="min-w-0 line-clamp-2 sm:line-clamp-1">
                                           {formatMediaLocationShort(media, isKo)}
                                         </span>
                                       </p>
-                                      <p className="text-[13px] font-bold tabular-nums leading-none text-navy sm:text-sm">
+                                      <p className="min-w-0 break-words text-[13px] font-bold tabular-nums leading-tight text-navy sm:text-sm sm:leading-none">
                                         {formatMediaPriceWonWithSymbol(displayPrice)}
                                         <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
                                           {" "}
@@ -1618,29 +1534,31 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         open={quoteBarOpen}
         ariaLabel={isKo ? "선택한 매체 작업" : "Selected media actions"}
       >
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div
-            className="flex min-w-0 shrink-0 items-center gap-2 text-base font-semibold text-navy md:text-sm"
+            className="flex min-w-0 items-center gap-2 sm:gap-2.5"
             aria-live="polite"
             aria-atomic="true"
           >
-            <CheckCircle2
-              className="h-5 w-5 shrink-0 text-emerald-600 md:h-4 md:w-4"
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-base font-bold leading-none text-emerald-700"
               aria-hidden
-            />
-            <span className="truncate">
+            >
+              ✓
+            </span>
+            <span className="min-w-0 truncate text-sm font-semibold tabular-nums text-navy sm:text-base">
               {t("quote.floatingSelectedCount", {
                 count: displaySelectedForBar.length,
               })}
             </span>
           </div>
-          <div className="flex min-w-0 flex-1 items-center justify-between gap-3 md:gap-4">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:justify-end sm:gap-3">
             <Button
               type="button"
               variant="floatingSecondary"
               size="floating"
               onClick={clearAllMediaSelection}
-              className="shrink-0"
+              className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
             >
               {t("quote.floatingClearSelection")}
             </Button>
@@ -1649,20 +1567,16 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               variant="floatingPrimary"
               size="floating"
               onClick={goNext}
-              className="shrink-0 px-6 md:px-8"
+              className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
             >
               {t("quote.nextStep")}
-              <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
         </div>
       </FloatingSelectionBar>
 
       {quoteBarOpen ? (
-        <div
-          className="h-[6.25rem] md:h-[5.25rem]"
-          aria-hidden
-        />
+        <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
       ) : null}
     </>
   );
