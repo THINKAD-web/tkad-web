@@ -40,12 +40,12 @@ function ChartTooltip({
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (
-    <div className="rounded-lg border border-gold/30 bg-navy px-3 py-2 text-xs shadow-lg">
-      <p className="max-w-[220px] font-semibold text-gold">{p.name}</p>
-      <p className="mt-1 tabular-nums text-slate-200">
+    <div className="rounded-lg border border-navy/15 bg-white px-3 py-2 text-xs shadow-lg">
+      <p className="max-w-[220px] font-semibold text-navy">{p.name}</p>
+      <p className="mt-1 tabular-nums text-navy/70">
         {isKo ? "적합도" : "Fit"}: {p.x}
       </p>
-      <p className="tabular-nums text-slate-200">
+      <p className="tabular-nums text-navy/70">
         {isKo ? "월 추정 노출" : "Est. monthly reach"}:{" "}
         {p.y.toLocaleString()}
       </p>
@@ -72,7 +72,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
   if (!data.length || !hasReach) {
     return (
       <div
-        className="flex min-h-[280px] items-center justify-center rounded-2xl border border-gold/15 bg-navy/40 px-4 text-center text-sm text-slate-400"
+        className="flex min-h-[280px] items-center justify-center rounded-2xl border border-navy/10 bg-slate-50 px-4 text-center text-sm text-slate-500"
         role="img"
         aria-label={tr("resultChartAria")}
       >
@@ -83,25 +83,25 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
 
   return (
     <div
-      className="h-[min(360px,55vw)] w-full rounded-2xl border border-gold/15 bg-navy/40 p-2 sm:p-4"
+      className="h-[min(360px,55vw)] w-full rounded-2xl border border-navy/10 bg-slate-50 p-2 sm:p-4"
       role="img"
       aria-label={tr("resultChartAria")}
     >
       <p className="mb-2 px-1 text-[11px] text-slate-500">{tr("resultChartHint")}</p>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(212,175,55,0.12)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(26,42,108,0.1)" />
           <XAxis
             type="number"
             dataKey="x"
             name="fit"
             domain={[0, 100]}
-            tick={{ fill: "#94a3b8", fontSize: 11 }}
-            stroke="rgba(148,163,184,0.35)"
+            tick={{ fill: "#1a2a6c", fontSize: 11 }}
+            stroke="rgba(26,42,108,0.3)"
             label={{
               value: isKo ? "AI 적합도" : "AI fit (0–100)",
               position: "bottom",
-              fill: "#94a3b8",
+              fill: "#1a2a6c",
               fontSize: 11,
             }}
           />
@@ -109,8 +109,8 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
             type="number"
             dataKey="y"
             name="reach"
-            tick={{ fill: "#94a3b8", fontSize: 11 }}
-            stroke="rgba(148,163,184,0.35)"
+            tick={{ fill: "#1a2a6c", fontSize: 11 }}
+            stroke="rgba(26,42,108,0.3)"
             tickFormatter={(v) =>
               v >= 1_000_000
                 ? `${(v / 1_000_000).toFixed(1)}M`
@@ -121,7 +121,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
               value: isKo ? "월 추정 노출" : "Est. monthly reach",
               angle: -90,
               position: "insideLeft",
-              fill: "#94a3b8",
+              fill: "#1a2a6c",
               fontSize: 11,
             }}
           />
