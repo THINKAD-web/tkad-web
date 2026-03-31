@@ -1363,7 +1363,7 @@
     "operatingHoursLabel": "Operating hours",
     "targetAgeLabel": "Target age",
     "valueEmpty": "-",
-    "locationDailyFootfall": "{count}/day",
+    "locationDailyFootfall": "Daily footfall: {count}",
     "noLocationsFallback": "No locations registered.",
     "effectMemoLabel": "Ad effectiveness",
     "contactUs": "Contact us"

@@ -125,6 +125,7 @@ type AdminMediaForm = {
   subCategory: string;
   tags: string;
   priceNote: string;
+  priceOptionsJson: string;
   image: string;
   extractedImagesText: string;
   targetAge: string;
@@ -167,6 +168,7 @@ const emptyForm: AdminMediaForm = {
   subCategory: "",
   tags: "",
   priceNote: "",
+  priceOptionsJson: "",
   image: "",
   extractedImagesText: "",
   targetAge: "",
@@ -211,6 +213,8 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     subCategory: m.subCategory ?? "",
     tags: (m.tags ?? []).join(", "),
     priceNote: m.priceNote ?? "",
+    priceOptionsJson:
+      m.priceOptions != null ? JSON.stringify(m.priceOptions, null, 2) : "",
     image: m.image ?? "",
     extractedImagesText: (m.extractedImages ?? []).join("\n"),
     targetAge: m.targetAge ?? "",
@@ -250,6 +254,16 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     .map((s) => s.trim())
     .filter(Boolean);
   const vis = Math.round(Number(form.visibilityScore) || 0);
+  let priceOptions: unknown = null;
+  const rawOpts = form.priceOptionsJson.trim();
+  if (rawOpts) {
+    try {
+      const parsed = JSON.parse(rawOpts);
+      priceOptions = parsed;
+    } catch {
+      // ignore parse error; keep null
+    }
+  }
   return {
     name: form.name.trim(),
     nameEn: form.nameEn.trim() || null,
@@ -272,6 +286,7 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     latitude: parseOptFloat(form.latitude),
     longitude: parseOptFloat(form.longitude),
     priceNote: form.priceNote.trim() || null,
+    priceOptions,
     widthM: parseOptFloat(form.widthM),
     heightM: parseOptFloat(form.heightM),
     resolution: form.resolution.trim() || null,
@@ -1688,6 +1703,24 @@ export default function AdminMediasClient({
                     setForm((f) => ({ ...f, priceNote: e.target.value }))
                   }
                 />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  가격 옵션 (JSON)
+                </label>
+                <textarea
+                  value={form.priceOptionsJson}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, priceOptionsJson: e.target.value }))
+                  }
+                  rows={4}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono text-navy shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  placeholder='[{"label":"20초 기준","price":30000000,"period":"month"},{"label":"15초 기준","price":25000000,"period":"month"}]'
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  예: [{"label":"20초 기준","price":30000000,"period":"month"}] —
+                  period는 month/biweekly/week/day 중 하나를 권장합니다.
+                </p>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">

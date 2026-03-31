@@ -1362,7 +1362,7 @@
     "operatingHoursLabel": "운영시간",
     "targetAgeLabel": "타겟 연령",
     "valueEmpty": "-",
-    "locationDailyFootfall": "유동인구 {count}명/일",
+    "locationDailyFootfall": "일일 유동인구: {count}명",
     "noLocationsFallback": "등록된 지점이 없습니다.",
     "effectMemoLabel": "광고 효과",
     "contactUs": "문의하기"

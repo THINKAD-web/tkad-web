@@ -161,7 +161,7 @@ export default async function MediaDetailPage({ params }: Props) {
                     {formatMediaPriceWonWithSymbol(primaryPriceOption.price)}
                   </span>
                   <span className="text-sm font-normal text-muted-foreground sm:shrink-0">
-                    · {primaryPricePeriodLabel}
+                    · {primaryPricePeriodLabel} {primaryPriceOption.label}
                   </span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
