@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import html2canvas from "html2canvas";
 import { useTranslations } from "next-intl";
 import { ExternalLink, FileDown, Loader2, Mail, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -304,6 +305,22 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     setEmailSending(true);
     setEmailSent(false);
     try {
+      let screenshotBase64 = "";
+      try {
+        const reportEl =
+          document.getElementById("planner-report-content") ?? previewRef.current;
+        if (reportEl) {
+          const canvas = await html2canvas(reportEl, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+          });
+          screenshotBase64 = canvas.toDataURL("image/png");
+        }
+      } catch (e) {
+        console.error("[planner-email] screenshot failed", e);
+      }
+
       const res = await fetch("/api/planner/email-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -322,6 +339,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             location: m.location,
           })),
           metrics: props.metrics,
+          screenshot: screenshotBase64,
         }),
       });
       if (!res.ok) {
@@ -557,6 +575,23 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     setEmailSending(true);
     setEmailSent(false);
     try {
+      let screenshotBase64 = "";
+      try {
+        const reportEl =
+          document.getElementById("planner-report-content") ??
+          compactPreviewRef.current;
+        if (reportEl) {
+          const canvas = await html2canvas(reportEl, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+          });
+          screenshotBase64 = canvas.toDataURL("image/png");
+        }
+      } catch (e) {
+        console.error("[planner-email] compact screenshot failed", e);
+      }
+
       const res = await fetch("/api/planner/email-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -575,6 +610,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             location: m.location,
           })),
           metrics: props.metrics,
+          screenshot: screenshotBase64,
         }),
       });
       if (!res.ok) {

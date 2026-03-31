@@ -154,7 +154,23 @@ export default function MediaNetworkDetailClient({
         </div>
       </section>
 
-      <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      {thumbPool.length > 1 && (
+        <section className="mx-auto max-w-4xl px-4 pt-4 pb-2 sm:px-6 lg:px-8">
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {thumbPool.slice(1, 8).map((src, idx) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={`${src}-${idx}`}
+                src={src}
+                alt=""
+                className="h-20 w-32 shrink-0 rounded-xl border border-navy/10 object-cover"
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
         <h2 className="text-lg font-bold text-navy">{t("regionsTitle")}</h2>
         <div className="mt-3 flex flex-wrap gap-2">
           {data.regions.length > 0 ? (
@@ -235,6 +251,39 @@ export default function MediaNetworkDetailClient({
             {data.locations.find((l) => l.id === mapSelectedId)?.name ?? ""}
           </p>
         ) : null}
+
+        {data.locations.length > 0 && (
+          <section className="mt-10">
+            <h2 className="text-lg font-bold text-navy">
+              {isKo ? "위치 목록" : "Location list"}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {isKo
+                ? "지도의 마커와 함께 네트워크를 구성하는 주요 위치들을 확인해 보세요."
+                : "Review key locations that make up this network alongside the map markers."}
+            </p>
+            <div className="mt-4 space-y-3">
+              {data.locations.map((loc) => (
+                <div
+                  key={loc.id}
+                  className="flex items-start gap-3 rounded-lg border border-navy/10 bg-white px-3 py-2.5 text-sm"
+                >
+                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold-dark">
+                    <MapPin className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-navy">{loc.name}</p>
+                    {loc.address ? (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {loc.address}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {data.features ? (
           <div className="mt-10 rounded-xl border border-navy/10 bg-slate-50/80 p-5">

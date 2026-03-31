@@ -61,19 +61,24 @@ export function MediaPinPopup({
             {onToggleSelect && (
               <Button
                 size="sm"
-                variant={isSelected ? "default" : "outline"}
-                className={`rounded-full text-xs font-bold ${
-                  isSelected
-                    ? "bg-navy text-white hover:bg-navy/90"
-                    : "border-navy/20 text-navy hover:bg-navy/5"
-                }`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   onToggleSelect(media.id);
                 }}
+                className={`w-full rounded-full text-xs font-bold ${
+                  isSelected
+                    ? "border border-gold bg-white text-gold hover:bg-white/90"
+                    : "bg-gold text-navy hover:bg-gold-dark"
+                }`}
               >
-                {isSelected ? (isKo ? "✓ 선택됨" : "✓ Selected") : (isKo ? "선택" : "Select")}
+                {isSelected
+                  ? isKo
+                    ? "✓ 선택됨"
+                    : "✓ Selected"
+                  : isKo
+                    ? "+ 비교 추가"
+                    : "+ Add to compare"}
               </Button>
             )}
             <Link href={mediaItemDetailPath(media.id)}>

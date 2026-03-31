@@ -24,6 +24,7 @@ type PlannerReportPayload = {
   industryText?: string;
   mediaList?: MediaItem[];
   metrics?: Metrics;
+  screenshot?: string | null;
 };
 
 export async function POST(request: NextRequest) {
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
     industryText,
     mediaList = [],
     metrics = {},
+    screenshot,
   } = body;
 
   if (!userEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail)) {
@@ -74,17 +76,30 @@ export async function POST(request: NextRequest) {
     metrics,
   });
 
+  const attachments =
+    typeof screenshot === "string" && screenshot.startsWith("data:image/")
+      ? [
+          {
+            filename: "planner-report.png",
+            content: screenshot.replace(/^data:image\/png;base64,/, ""),
+            encoding: "base64" as const,
+          },
+        ]
+      : [];
+
   try {
     await sendEmail({
       to: userEmail,
       subject: `[싱커드] 미디어 플래너 보고서 - ${goalTitle}`,
       html,
+      attachments,
     });
 
     await sendEmail({
       to: "mannote@tkad.co.kr",
       subject: `[플래너 보고서 요청] ${userEmail} - ${goalTitle}`,
       html,
+      attachments,
     });
 
     return NextResponse.json({ success: true });
@@ -122,6 +137,7 @@ function buildPlannerReportHtml(data: {
   industryText?: string;
   mediaList: MediaItem[];
   metrics: Metrics;
+  screenshot?: string | null;
 }): string {
   const hasMedia = data.mediaList && data.mediaList.length > 0;
   const { impressions, reach, frequency } = data.metrics || {};
@@ -151,6 +167,16 @@ function buildPlannerReportHtml(data: {
           </td>
         </tr>
       `;
+
+  const screenshotSection =
+    typeof data.screenshot === "string" && data.screenshot.startsWith("data:image/")
+      ? `
+        <h3 style="color: #0f172a; margin: 28px 0 12px; font-size: 16px;">화면 캡처</h3>
+        <div style="border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; background: #020617;">
+          <img src="${data.screenshot}" alt="Planner screenshot" style="display: block; width: 100%; max-height: 720px; object-fit: contain; background: #020617;" />
+        </div>
+      `
+      : "";
 
   return `
     <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 640px; margin: 0 auto; background: #f1f5f9;">
@@ -246,6 +272,8 @@ function buildPlannerReportHtml(data: {
             </tr>
           </tbody>
         </table>
+
+        ${screenshotSection}
 
         <div style="margin-top: 28px; padding: 16px 14px; background: #fffbeb; border-radius: 10px; border: 1px solid #f97316; text-align: center;">
           <p style="margin: 0; color: #92400e; font-size: 13px;">
