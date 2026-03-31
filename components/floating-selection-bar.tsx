@@ -41,7 +41,6 @@ export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
             "bg-white/95 backdrop-blur-sm border-t border-navy/10",
             "shadow-[0_-8px_32px_-4px_rgba(15,23,42,0.12)]",
             "px-2 pb-2 sm:px-4 sm:pb-3",
-            "pointer-events-none",
           )}
         >
           <div

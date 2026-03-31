@@ -591,6 +591,19 @@ export default function MediaBrowseClient({
                                   {t("media.mapCardDetail")}
                                 </Button>
                               </Link>
+                              <Button
+                                size="sm"
+                                onClick={() => toggleCompare(mapSelectedMedia)}
+                                className={`h-10 flex-1 min-w-[8rem] font-semibold ${
+                                  isInCompare(mapSelectedMedia.id)
+                                    ? "border-2 border-gold bg-white text-gold hover:bg-gold/10"
+                                    : "bg-navy text-white hover:bg-navy/90"
+                                }`}
+                              >
+                                {isInCompare(mapSelectedMedia.id)
+                                  ? (isKo ? "✓ 선택됨" : "✓ Selected")
+                                  : (isKo ? "+ 비교 추가" : "+ Compare")}
+                              </Button>
                               <Link
                                 href={`/quote?media=${mapSelectedMedia.id}`}
                                 className="flex-1 min-w-[8rem]"
