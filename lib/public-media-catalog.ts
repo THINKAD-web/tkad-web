@@ -5,6 +5,7 @@ import {
   getMediaById,
   mediaData,
   type MediaItem,
+  type MediaPriceOption,
   type MediaPricePeriodKey,
 } from "@/lib/media-data";
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
@@ -58,6 +59,32 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
 
   const locationEn =
     [m.district, m.city].filter(Boolean).join(", ") || m.location;
+
+  const priceOptions: MediaPriceOption[] | undefined = (() => {
+    const raw = (m as unknown as { priceOptions?: unknown }).priceOptions;
+    if (!raw) return undefined;
+    try {
+      const arr =
+        typeof raw === "string" ? (JSON.parse(raw) as unknown) : raw;
+      if (!Array.isArray(arr)) return undefined;
+      const normalized: MediaPriceOption[] = [];
+      for (const item of arr) {
+        if (!item || typeof item !== "object") continue;
+        const label = (item as any).label;
+        const price = (item as any).price;
+        const period = (item as any).period as
+          | MediaPricePeriodKey
+          | string
+          | undefined;
+        if (typeof label !== "string") continue;
+        if (typeof price !== "number") continue;
+        normalized.push({ label, price, period });
+      }
+      return normalized.length ? normalized : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
 
   return {
     id: m.id,
@@ -116,6 +143,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     nearbyFacilitiesEn: buildNearbyFacilitiesDisplay(m),
     caseStudyPhotos: undefined,
     pricePeriod: normalizePricePeriod(m.pricePeriod),
+    priceOptions,
   };
 }
 

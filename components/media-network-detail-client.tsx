@@ -57,6 +57,10 @@ export type NetworkDetailPayload = {
     note: string | null;
     lat: number | null;
     lng: number | null;
+    /** 단일 매체와 연결된 지점인 경우 */
+    mediaId?: string | null;
+    /** 지점 전용 이미지 (없으면 네트워크 대표 이미지 사용) */
+    image?: string | null;
   }[];
   visibilityScore: number | null;
   dailyFootfall: number | null;
@@ -93,6 +97,11 @@ export default function MediaNetworkDetailClient({
   const mapItems: MediaItem[] = useMemo(() => {
     const fallbackImg =
       thumbPool[0] ?? "https://picsum.photos/seed/tkad-net-loc/800/500";
+    const basePricePerLocation =
+      data.pricePerUnit ??
+      (data.pricePackage != null && data.totalLocations > 0
+        ? Math.round(data.pricePackage / data.totalLocations)
+        : 0);
     return data.locations
       .filter((l) => l.lat != null && l.lng != null)
       .map((l) => ({
@@ -103,13 +112,15 @@ export default function MediaNetworkDetailClient({
         locationEn: l.address ?? "",
         region: "seoul",
         type: "digital",
-        price: 0,
+        price: basePricePerLocation > 0 ? basePricePerLocation : 0,
         lat: l.lat!,
         lng: l.lng!,
-        dailyFootTraffic: 0,
-        sampleImages: [fallbackImg],
+        dailyFootTraffic: l.dailyFootfall ?? 0,
+        sampleImages: [l.image || fallbackImg].filter(
+          (x): x is string => typeof x === "string" && Boolean(x.trim()),
+        ),
       }));
-  }, [data.locations, thumbPool]);
+  }, [data.locations, data.pricePerUnit, data.pricePackage, data.totalLocations, thumbPool]);
 
   const heroImg =
     thumbPool[0] ?? "https://picsum.photos/seed/tkad-network-hero/1600/900";
@@ -146,8 +157,26 @@ export default function MediaNetworkDetailClient({
         )
       : null);
 
+  const selectedLocation =
+    (mapSelectedId &&
+      data.locations.find((loc) => loc.id === mapSelectedId)) ??
+    data.locations[0] ??
+    null;
+
   return (
     <>
+      {/* 상단 Hero 영역: 네트워크 대표 갤러리 */}
+      {heroImg && (
+        <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={heroImg}
+            alt={isKo ? data.name : data.nameEn ?? data.name}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      )}
+
       <section className="bg-white px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10 border-b border-gray-100">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -172,17 +201,35 @@ export default function MediaNetworkDetailClient({
           </div>
 
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1.2fr)] lg:items-start">
-            <div className="space-y-3">
-              <div className="relative overflow-hidden rounded-2xl border border-navy/10 bg-slate-100">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={heroImg}
-                  alt={isKo ? data.name : data.nameEn ?? data.name}
-                  className="h-full w-full max-h-[420px] object-cover"
-                />
+            <div className="space-y-4">
+              <h1 className="text-2xl font-bold tracking-tight text-navy sm:text-3xl">
+                {isKo ? data.name : data.nameEn ?? data.name}
+              </h1>
+              {data.description ? (
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {data.description}
+                </p>
+              ) : null}
+
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                  {[data.city, data.district].filter(Boolean).join(" ")}
+                </span>
+                {typeLb ? (
+                  <>
+                    <span className="hidden text-gray-300 sm:inline" aria-hidden>
+                      ·
+                    </span>
+                    <span className="font-medium text-navy/80">
+                      {isKo ? typeLb.ko : typeLb.en}
+                    </span>
+                  </>
+                ) : null}
               </div>
+
               {thumbPool.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-1">
+                <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
                   {thumbPool.slice(1, 7).map((src, idx) => (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -197,15 +244,6 @@ export default function MediaNetworkDetailClient({
             </div>
 
             <aside className="space-y-4 rounded-2xl border border-navy/10 bg-slate-50/60 p-4 shadow-sm sm:p-5">
-              <h1 className="text-2xl font-bold tracking-tight text-navy sm:text-3xl">
-                {isKo ? data.name : data.nameEn ?? data.name}
-              </h1>
-              {data.description ? (
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {data.description}
-                </p>
-              ) : null}
-
               <div className="space-y-2 text-sm">
                 <div className="flex items-start gap-2 text-navy">
                   <MapPin className="mt-0.5 h-4 w-4 text-gold-dark" />
@@ -368,7 +406,7 @@ export default function MediaNetworkDetailClient({
           </div>
         </div>
 
-        <h2 className="mt-8 text-lg font-bold text-navy">
+        <h2 className="mt-10 text-lg font-bold text-navy">
           {t("coverageMap")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("mapHint")}</p>
@@ -443,6 +481,90 @@ export default function MediaNetworkDetailClient({
             )}
           </div>
         </div>
+
+        {/* 지도 하단 팝업 카드: 선택된 지점 요약 */}
+        {selectedLocation && (
+          <div className="mt-6 rounded-2xl border border-navy/10 bg-white p-4 shadow-md shadow-navy/5 sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1.6fr)] sm:items-center">
+              <div className="relative overflow-hidden rounded-xl bg-slate-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={
+                    selectedLocation.image ||
+                    heroImg ||
+                    "https://picsum.photos/seed/tkad-net-popup/960/640"
+                  }
+                  alt={selectedLocation.name}
+                  className="h-full max-h-60 w-full object-cover"
+                />
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-base font-semibold text-navy">
+                    {selectedLocation.name}
+                  </p>
+                  {selectedLocation.dailyFootfall != null && (
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {t("locationDailyFootfall", {
+                        n: selectedLocation.dailyFootfall.toLocaleString(),
+                      })}
+                    </span>
+                  )}
+                </div>
+                {(selectedLocation.fullAddress || selectedLocation.address) && (
+                  <p className="text-xs text-muted-foreground">
+                    {selectedLocation.fullAddress || selectedLocation.address}
+                  </p>
+                )}
+                {selectedLocation.priceNote && (
+                  <p className="mt-1 text-xs text-navy/80 whitespace-pre-wrap">
+                    {selectedLocation.priceNote}
+                  </p>
+                )}
+                {selectedLocation.note && (
+                  <p className="mt-1 text-xs text-navy/80 whitespace-pre-wrap">
+                    {selectedLocation.note}
+                  </p>
+                )}
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {selectedLocation.mediaId ? (
+                    <>
+                      <Button
+                        size="sm"
+                        className="bg-gold font-semibold text-navy hover:bg-gold-dark"
+                        asChild
+                      >
+                        <Link href={`/media/${selectedLocation.mediaId}`}>
+                          {t("viewLinkedMedia")}
+                        </Link>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-navy/20 font-semibold text-navy hover:bg-navy/5"
+                        asChild
+                      >
+                        <Link href={quoteHref}>{t("getQuote")}</Link>
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="bg-gold font-semibold text-navy hover:bg-gold-dark"
+                      asChild
+                    >
+                      <Link href={quoteHref}>
+                        <Calculator className="mr-1.5 h-4 w-4" />
+                        {t("getQuote")}
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {data.effectMemo && (
           <div className="mt-10 rounded-2xl border border-gold-dark/45 bg-gradient-to-br from-gold-light/40 via-white to-gold/15 px-5 py-5 shadow-md shadow-navy/[0.07] sm:px-7 sm:py-6">

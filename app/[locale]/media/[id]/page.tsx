@@ -74,6 +74,19 @@ export default async function MediaDetailPage({ params }: Props) {
     mediaDetailPricePeriodTranslationKey(media.pricePeriod),
   );
 
+  const priceOptions = Array.isArray(media.priceOptions)
+    ? media.priceOptions
+    : undefined;
+  const primaryPriceOption = priceOptions?.[0];
+
+  const primaryPricePeriodLabel = primaryPriceOption?.period
+    ? t(
+        mediaDetailPricePeriodTranslationKey(
+          primaryPriceOption.period as any,
+        ),
+      )
+    : periodLabel;
+
   const monthly =
     media.monthlyFootTraffic ??
     Math.round(media.dailyFootTraffic * 30);
@@ -140,13 +153,48 @@ export default async function MediaDetailPage({ params }: Props) {
               </>
             ) : null}
           </p>
-          <div className="mt-5 flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
-            <span className="break-words text-xl font-bold tabular-nums text-gold-dark sm:text-2xl">
-              {formatMediaPriceWonWithSymbol(media.price)}
-            </span>
-            <span className="text-sm font-normal text-muted-foreground sm:shrink-0">
-              · {periodLabel}
-            </span>
+          <div className="mt-5 min-w-0 max-w-full">
+            {primaryPriceOption ? (
+              <>
+                <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
+                  <span className="break-words text-xl font-bold tabular-nums text-gold-dark sm:text-2xl">
+                    {formatMediaPriceWonWithSymbol(primaryPriceOption.price)}
+                  </span>
+                  <span className="text-sm font-normal text-muted-foreground sm:shrink-0">
+                    · {primaryPricePeriodLabel}
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                  {priceOptions!.map((opt, idx) => (
+                    <span
+                      key={`${opt.label}-${idx}`}
+                      className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/5 px-3 py-1"
+                    >
+                      <span className="font-medium text-navy/80">
+                        {opt.label}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground">
+                        {formatMediaPriceWonWithSymbol(opt.price)} ·{" "}
+                        {t(
+                          mediaDetailPricePeriodTranslationKey(
+                            (opt.period as any) ?? media.pricePeriod,
+                          ),
+                        )}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
+                <span className="break-words text-xl font-bold tabular-nums text-gold-dark sm:text-2xl">
+                  {formatMediaPriceWonWithSymbol(media.price)}
+                </span>
+                <span className="text-sm font-normal text-muted-foreground sm:shrink-0">
+                  · {periodLabel}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -200,14 +248,37 @@ export default async function MediaDetailPage({ params }: Props) {
                 icon={CircleDollarSign}
                 label={t("priceTitle")}
                 value={
-                  <>
-                    <span className="break-all text-base font-semibold tabular-nums text-gold-dark sm:text-lg">
-                      {formatMediaPriceWonWithSymbol(media.price)}
-                    </span>
-                    <span className="mt-1 block text-xs font-normal text-muted-foreground">
-                      {t("priceUnitWon")} · {periodLabel}
-                    </span>
-                  </>
+                  priceOptions && priceOptions.length > 0 ? (
+                    <div className="space-y-1">
+                      {priceOptions.map((opt, idx) => (
+                        <div key={`${opt.label}-${idx}`}>
+                          <span className="block text-[13px] font-semibold text-navy">
+                            {opt.label}
+                          </span>
+                          <span className="break-all text-sm font-semibold tabular-nums text-gold-dark">
+                            {formatMediaPriceWonWithSymbol(opt.price)}
+                          </span>
+                          <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                            {t("priceUnitWon")} ·{" "}
+                            {t(
+                              mediaDetailPricePeriodTranslationKey(
+                                (opt.period as any) ?? media.pricePeriod,
+                              ),
+                            )}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      <span className="break-all text-base font-semibold tabular-nums text-gold-dark sm:text-lg">
+                        {formatMediaPriceWonWithSymbol(media.price)}
+                      </span>
+                      <span className="mt-1 block text-xs font-normal text-muted-foreground">
+                        {t("priceUnitWon")} · {periodLabel}
+                      </span>
+                    </>
+                  )
                 }
               />
               <CoreFact

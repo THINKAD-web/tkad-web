@@ -13,6 +13,13 @@ export type MediaPricePeriodKey =
   | "week"
   | "day";
 
+export type MediaPriceOption = {
+  label: string;
+  price: number;
+  /** 개별 옵션 기간 (없으면 기본 `pricePeriod` 사용) */
+  period?: MediaPricePeriodKey | string;
+};
+
 export interface MediaItem {
   id: string;
   name: string;
@@ -75,6 +82,8 @@ export interface MediaItem {
   nearbyFacilitiesEn?: string;
   /** 진행·집행 사례 사진 (관리·콘텐츠용) */
   caseStudyPhotos?: MediaCaseStudyPhoto[];
+  /** 복수 가격 옵션 (예: 15초 1일 1회 / 1일 2회 등) */
+  priceOptions?: MediaPriceOption[];
   /** DB 단일 매체 | 합성 네트워크 패키지 */
   catalogSource?: "media" | "network";
   networkSubtype?: string;
@@ -801,6 +810,73 @@ export const typeLabels: Record<string, { ko: string; en: string }> = {
 };
 
 /** 텍스트 검색: 매체명·주소·구/시·역·시설·랜드마크·태그·세부 카테고리·유형 라벨 */
+function normalizeRegionCode(raw: string | null | undefined): string {
+  const s = (raw ?? "").trim().toLowerCase();
+  if (!s) return "전국";
+  if (s === "seoul") return "서울";
+  if (s === "busan") return "부산";
+  if (s === "jeju") return "제주";
+  if (s === "national") return "전국";
+  if (s === "gwangju") return "광주";
+  if (s === "gyeonggi" || s === "gyeonggi-do") return "경기";
+  if (s === "incheon") return "인천";
+  return s;
+}
+
+function toChosung(input: string): string {
+  const CHO = [
+    "ㄱ",
+    "ㄲ",
+    "ㄴ",
+    "ㄷ",
+    "ㄸ",
+    "ㄹ",
+    "ㅁ",
+    "ㅂ",
+    "ㅃ",
+    "ㅅ",
+    "ㅆ",
+    "ㅇ",
+    "ㅈ",
+    "ㅉ",
+    "ㅊ",
+    "ㅋ",
+    "ㅌ",
+    "ㅍ",
+    "ㅎ",
+  ];
+  let out = "";
+  for (const ch of input) {
+    const code = ch.charCodeAt(0);
+    if (code >= 0xac00 && code <= 0xd7a3) {
+      const idx = Math.floor((code - 0xac00) / (21 * 28));
+      out += CHO[idx] ?? ch;
+    } else if (CHO.includes(ch)) {
+      out += ch;
+    }
+  }
+  return out;
+}
+
+const SYNONYM_MAP: Record<string, string[]> = {
+  디지털전광판: ["디지털 전광판", "디지털", "전광판", "led", "lcd", "digital", "signage", "사이니지", "디지털사이니지"],
+  옥외빌보드: ["옥외 빌보드", "빌보드", "outdoor", "옥외광고"],
+  지하철매체: ["지하철 매체", "지하철", "subway", "metro", "스크린도어"],
+  버스쉘터: ["버스·쉘터", "버스쉘터", "버스", "shelter", "bus shelter"],
+};
+
+function expandSearchTokens(raw: string): string[] {
+  const base = raw.toLowerCase();
+  const tokens = new Set<string>([base]);
+  for (const [key, vals] of Object.entries(SYNONYM_MAP)) {
+    if (vals.some((v) => base.includes(v.toLowerCase()))) {
+      tokens.add(key.toLowerCase());
+      for (const v of vals) tokens.add(v.toLowerCase());
+    }
+  }
+  return [...tokens];
+}
+
 export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
   const fields: (string | null | undefined)[] = [
     m.name,
@@ -809,19 +885,43 @@ export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
     m.locationEn,
     m.district,
     m.city,
+    m.subCategory,
     m.nearbyStations,
     m.nearbyFacilities,
     m.nearbyFacilitiesEn,
     m.nearbyLandmarks,
-    m.subCategory,
+    m.features,
+    m.featuresEn,
     m.networkSubtype,
     typeLabels[m.type]?.ko,
     typeLabels[m.type]?.en,
+    normalizeRegionCode(m.region),
   ];
-  if (fields.some((f) => f != null && f.toLowerCase().includes(lower))) {
-    return true;
-  }
-  return (m.tags ?? []).some(
-    (tag) => tag != null && tag.toLowerCase().includes(lower),
+
+  const haystackPlain = fields
+    .filter((f): f is string => typeof f === "string" && f.trim().length > 0)
+    .join(" ")
+    .toLowerCase();
+
+  const haystackChosung = toChosung(
+    fields
+      .filter((f): f is string => typeof f === "string" && f.trim().length > 0)
+      .join(" "),
   );
+
+  const tagsText = (m.tags ?? []).join(" ").toLowerCase();
+
+  const tokens = expandSearchTokens(lower);
+
+  for (const token of tokens) {
+    if (haystackPlain.includes(token)) return true;
+    if (tagsText.includes(token)) return true;
+    // 초성 검색: 입력이 전부 한글 초성인 경우에만 검사
+    if (/^[ㄱ-ㅎ]+$/.test(token)) {
+      if (toChosung(haystackPlain).includes(token)) return true;
+      if (haystackChosung.includes(token)) return true;
+    }
+  }
+
+  return false;
 }
