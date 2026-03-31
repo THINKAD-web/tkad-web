@@ -6,7 +6,16 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calculator, MapPin } from "lucide-react";
+import {
+  ArrowLeft,
+  Calculator,
+  MapPin,
+  CircleDollarSign,
+  Users,
+  Clock,
+  Eye,
+  Tag,
+} from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import {
   NETWORK_TYPE_LABELS,
@@ -28,9 +37,12 @@ export type NetworkDetailPayload = {
   type: string;
   totalLocations: number;
   regions: string[];
+  city: string | null;
+  district: string | null;
   minUnits: number;
   pricePerUnit: number | null;
   pricePackage: number | null;
+  priceNote: string | null;
   tiers: { units: number; price: number }[];
   image: string | null;
   galleryImages: string[];
@@ -39,9 +51,19 @@ export type NetworkDetailPayload = {
     id: string;
     name: string;
     address: string | null;
+    fullAddress: string | null;
+    priceNote: string | null;
+    dailyFootfall: number | null;
+    note: string | null;
     lat: number | null;
     lng: number | null;
   }[];
+  visibilityScore: number | null;
+  dailyFootfall: number | null;
+  targetAge: string | null;
+  effectMemo: string | null;
+  operatingHours: string | null;
+  tags: string[];
 };
 
 export default function MediaNetworkDetailClient({
@@ -111,178 +133,326 @@ export default function MediaNetworkDetailClient({
         ];
 
   const quoteHref = `/quote?media=${encodeURIComponent(data.catalogId)}`;
+  const contactHref = "/contact";
+
+  const avgLocFootfall =
+    data.dailyFootfall ??
+    (data.locations.length > 0
+      ? Math.round(
+          data.locations.reduce(
+            (sum, l) => sum + (l.dailyFootfall ?? 0),
+            0,
+          ) / data.locations.length,
+        )
+      : null);
 
   return (
     <>
-      <section className="relative aspect-video w-full overflow-hidden bg-navy">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={heroImg}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-        <div className="relative z-10 flex h-full flex-col justify-between p-6 sm:p-10">
-          <Link href="/media">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="-ml-2 text-white/90 hover:bg-white/10"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              {t("backToList")}
-            </Button>
-          </Link>
-          <div>
-            <div className="mb-2 flex flex-wrap gap-2">
+      <section className="bg-white px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10 border-b border-gray-100">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <Link href="/media">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="-ml-2 text-navy/70 hover:bg-navy/5 hover:text-navy"
+              >
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                {t("backToList")}
+              </Button>
+            </Link>
+            <div className="flex flex-wrap gap-2">
               <Badge className="bg-gold text-navy">
                 {t("sitesCount", { count: data.totalLocations })}
               </Badge>
-              <Badge variant="secondary" className="bg-white/20 text-white">
+              <Badge variant="outline" className="border-navy/20 text-xs text-navy">
                 {isKo ? typeLb.ko : typeLb.en}
               </Badge>
             </div>
-            <h1 className="text-2xl font-bold text-white sm:text-4xl">
-              {isKo ? data.name : data.nameEn ?? data.name}
-            </h1>
-            {data.description ? (
-              <p className="mt-3 max-w-3xl text-sm text-white/85 sm:text-base">
-                {data.description}
-              </p>
-            ) : null}
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1.2fr)] lg:items-start">
+            <div className="space-y-3">
+              <div className="relative overflow-hidden rounded-2xl border border-navy/10 bg-slate-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={heroImg}
+                  alt={isKo ? data.name : data.nameEn ?? data.name}
+                  className="h-full w-full max-h-[420px] object-cover"
+                />
+              </div>
+              {thumbPool.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {thumbPool.slice(1, 7).map((src, idx) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={`${src}-${idx}`}
+                      src={src}
+                      alt=""
+                      className="h-20 w-28 shrink-0 rounded-xl border border-navy/10 object-cover"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <aside className="space-y-4 rounded-2xl border border-navy/10 bg-slate-50/60 p-4 shadow-sm sm:p-5">
+              <h1 className="text-2xl font-bold tracking-tight text-navy sm:text-3xl">
+                {isKo ? data.name : data.nameEn ?? data.name}
+              </h1>
+              {data.description ? (
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {data.description}
+                </p>
+              ) : null}
+
+              <div className="space-y-2 text-sm">
+                <div className="flex items-start gap-2 text-navy">
+                  <MapPin className="mt-0.5 h-4 w-4 text-gold-dark" />
+                  <div className="space-y-1">
+                    <p className="font-medium">
+                      {[data.city, data.district].filter(Boolean).join(" ")}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {data.regions.map((r) => (
+                        <Badge
+                          key={r}
+                          variant="secondary"
+                          className="border border-navy/10 bg-white text-[11px] text-navy"
+                        >
+                          {r}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <div className="flex items-start gap-2">
+                    <CircleDollarSign className="mt-0.5 h-4 w-4 text-gold-dark" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t("pricePerUnitLabel")}
+                      </p>
+                      <p className="mt-0.5 text-sm font-bold text-navy">
+                        {data.pricePerUnit != null
+                          ? `₩${data.pricePerUnit.toLocaleString()} / ${t("unitLabel")}`
+                          : t("priceEmpty")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CircleDollarSign className="mt-0.5 h-4 w-4 text-gold-dark" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t("pricePackageLabel")}
+                      </p>
+                      <p className="mt-0.5 text-sm font-bold text-navy">
+                        {data.pricePackage != null
+                          ? `₩${data.pricePackage.toLocaleString()} / ${t("perMonth")}`
+                          : t("priceEmpty")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {data.priceNote ? (
+                  <p className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">
+                    {data.priceNote}
+                  </p>
+                ) : null}
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="flex items-start gap-2">
+                    <Users className="mt-0.5 h-4 w-4 text-gold-dark" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t("dailyFootfallLabel")}
+                      </p>
+                      <p className="mt-0.5 text-sm font-bold text-navy">
+                        {avgLocFootfall != null
+                          ? `${avgLocFootfall.toLocaleString()}명/일`
+                          : t("valueEmpty")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Eye className="mt-0.5 h-4 w-4 text-gold-dark" />
+                    <div className="w-full">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t("visibilityScoreLabel")}
+                      </p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-gold-dark to-gold"
+                            style={{
+                              width: `${
+                                data.visibilityScore != null
+                                  ? Math.min(100, Math.max(0, data.visibilityScore))
+                                  : 0
+                              }%`,
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs font-semibold text-navy">
+                          {data.visibilityScore != null ? data.visibilityScore : "–"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                  <div className="flex items-start gap-2">
+                    <Clock className="mt-0.5 h-4 w-4 text-gold-dark" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t("operatingHoursLabel")}
+                      </p>
+                      <p className="mt-0.5 text-sm text-navy">
+                        {data.operatingHours || t("valueEmpty")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Users className="mt-0.5 h-4 w-4 text-gold-dark" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t("targetAgeLabel")}
+                      </p>
+                      <p className="mt-0.5 text-sm text-navy">
+                        {data.targetAge || t("valueEmpty")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {data.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    <Tag className="h-3.5 w-3.5 text-gold-dark" />
+                    {data.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="outline"
+                        className="border-navy/15 bg-white text-[11px] text-navy"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Button
+                  className="bg-gold font-semibold text-navy hover:bg-gold-dark"
+                  asChild
+                >
+                  <Link href={quoteHref}>
+                    <Calculator className="mr-2 h-4 w-4" />
+                    {t("getQuote")}
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-navy/20 font-semibold text-navy hover:bg-navy/5"
+                  asChild
+                >
+                  <Link href={contactHref}>
+                    {isKo ? "문의하기" : "Contact us"}
+                  </Link>
+                </Button>
+              </div>
+            </aside>
           </div>
         </div>
-      </section>
 
-      {thumbPool.length > 1 && (
-        <section className="mx-auto max-w-4xl px-4 pt-4 pb-2 sm:px-6 lg:px-8">
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {thumbPool.slice(1, 8).map((src, idx) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={`${src}-${idx}`}
-                src={src}
-                alt=""
-                className="h-20 w-32 shrink-0 rounded-xl border border-navy/10 object-cover"
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-        <h2 className="text-lg font-bold text-navy">{t("regionsTitle")}</h2>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {data.regions.length > 0 ? (
-            data.regions.map((r) => (
-              <Badge key={r} variant="secondary" className="text-navy">
-                {r}
-              </Badge>
-            ))
-          ) : (
-            <span className="text-sm text-muted-foreground">
-              {t("regionsEmpty")}
-            </span>
-          )}
-        </div>
-
-        <h2 className="mt-10 text-lg font-bold text-navy">
-          {t("packagesTitle")}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t("packagesHint")}</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {tierList.map((tier, i) => (
-            <button
-              key={`${tier.units}-${tier.price}`}
-              type="button"
-              onClick={() => setSelectedTierIdx(i)}
-              className={`rounded-xl border-2 p-4 text-left transition-colors ${
-                selectedTierIdx === i
-                  ? "border-gold bg-gold/10"
-                  : "border-navy/10 bg-white hover:border-navy/20"
-              }`}
-            >
-              <p className="text-xs font-semibold uppercase tracking-wide text-navy/50">
-                {t("tierUnits", { count: tier.units })}
-              </p>
-              <p className="mt-1 text-xl font-bold text-navy">
-                ₩{tier.price.toLocaleString()}
-                <span className="text-xs font-normal text-muted-foreground">
-                  {t("perMonth")}
-                </span>
-              </p>
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Button className="bg-gold font-bold text-navy hover:bg-gold-dark" asChild>
-            <Link href={quoteHref}>
-              <Calculator className="mr-2 h-4 w-4" />
-              {t("getQuote")}
-            </Link>
-          </Button>
-        </div>
-
-        <h2 className="mt-14 text-lg font-bold text-navy">
+        <h2 className="mt-8 text-lg font-bold text-navy">
           {t("coverageMap")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("mapHint")}</p>
-        <div className="mt-4 overflow-hidden rounded-xl border border-navy/10">
-          {mapItems.length > 0 ? (
-            <MediaBrowseMap
-              items={mapItems}
-              locale={locale}
-              selectedId={mapSelectedId}
-              onSelectId={setMapSelectedId}
-              fixedMapHeightPx={420}
-              showFooterCaption={false}
-            />
-          ) : (
-            <div className="flex h-48 items-center justify-center bg-slate-50 text-sm text-muted-foreground">
-              {t("noMapPins")}
-            </div>
-          )}
+        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.3fr)]">
+          <div className="overflow-hidden rounded-xl border border-navy/10">
+            {mapItems.length > 0 ? (
+              <MediaBrowseMap
+                items={mapItems}
+                locale={locale}
+                selectedId={mapSelectedId}
+                onSelectId={setMapSelectedId}
+                fixedMapHeightPx={420}
+                showFooterCaption={false}
+              />
+            ) : (
+              <div className="flex h-48 items-center justify-center bg-slate-50 text-sm text-muted-foreground">
+                {t("noMapPins")}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {data.locations.length > 0 ? (
+              data.locations.map((loc) => {
+                const selected = mapSelectedId === loc.id;
+                return (
+                  <button
+                    key={loc.id}
+                    type="button"
+                    onClick={() => setMapSelectedId(loc.id)}
+                    className={`flex w-full items-start gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
+                      selected
+                        ? "border-gold bg-gold/10"
+                        : "border-navy/10 bg-white hover:border-navy/20"
+                    }`}
+                  >
+                    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold-dark">
+                      <MapPin className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-navy">{loc.name}</p>
+                      {(loc.fullAddress || loc.address) && (
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {loc.fullAddress || loc.address}
+                        </p>
+                      )}
+                      {loc.priceNote && (
+                        <p className="mt-0.5 text-xs text-navy/75">
+                          {loc.priceNote}
+                        </p>
+                      )}
+                      {loc.dailyFootfall != null && (
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">
+                          {t("locationDailyFootfall", {
+                            n: loc.dailyFootfall.toLocaleString(),
+                          })}
+                        </p>
+                      )}
+                      {loc.note && (
+                        <p className="mt-1 text-[11px] text-navy/70 whitespace-pre-wrap">
+                          {loc.note}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {t("noLocationsFallback")}
+              </p>
+            )}
+          </div>
         </div>
 
-        {mapSelectedId ? (
-          <p className="mt-3 flex items-center gap-2 text-sm text-navy">
-            <MapPin className="h-4 w-4 shrink-0 text-gold-dark" />
-            {data.locations.find((l) => l.id === mapSelectedId)?.name ?? ""}
-          </p>
-        ) : null}
-
-        {data.locations.length > 0 && (
-          <section className="mt-10">
-            <h2 className="text-lg font-bold text-navy">
-              {isKo ? "위치 목록" : "Location list"}
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {isKo
-                ? "지도의 마커와 함께 네트워크를 구성하는 주요 위치들을 확인해 보세요."
-                : "Review key locations that make up this network alongside the map markers."}
+        {data.effectMemo && (
+          <div className="mt-10 rounded-2xl border border-gold-dark/45 bg-gradient-to-br from-gold-light/40 via-white to-gold/15 px-5 py-5 shadow-md shadow-navy/[0.07] sm:px-7 sm:py-6">
+            <p className="text-xs font-semibold uppercase tracking-wider text-navy/75">
+              {t("effectMemoLabel")}
             </p>
-            <div className="mt-4 space-y-3">
-              {data.locations.map((loc) => (
-                <div
-                  key={loc.id}
-                  className="flex items-start gap-3 rounded-lg border border-navy/10 bg-white px-3 py-2.5 text-sm"
-                >
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold-dark">
-                    <MapPin className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-navy">{loc.name}</p>
-                    {loc.address ? (
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {loc.address}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-navy/90">
+              {data.effectMemo}
+            </p>
+          </div>
         )}
 
         {data.features ? (
