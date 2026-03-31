@@ -449,8 +449,12 @@ export default function AdminNetworkEditor(props: Props) {
           const add: LocRow[] = parsed.map((p) => ({
             name: p.name,
             address: p.address ?? "",
+            fullAddress: p.address ?? "",
             lat: p.latitude != null ? String(p.latitude) : "",
             lng: p.longitude != null ? String(p.longitude) : "",
+            priceNote: "",
+            dailyFootfall: "",
+            note: "",
           }));
           return [...base, ...add];
         });
