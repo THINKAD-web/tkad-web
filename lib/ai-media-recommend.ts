@@ -648,7 +648,7 @@ function finalizeScoredList(
  * @param catalog 추천·점수 산정에 쓰는 후보(지역·검색 등으로 좁힌 목록)
  * @param paddingCatalog 후보가 MIN_RESULTS 미만일 때 같은 조건의 더 넓은 풀에서 ID 중복 없이 보강(미지정 시 catalog)
  */
-export function recommendMedia(
+function recommendMediaCore(
   input: AiRecommendInput,
   catalog: readonly MediaItem[],
   paddingCatalog?: readonly MediaItem[],
@@ -676,6 +676,20 @@ export function recommendMedia(
   }
 
   return finalizeScoredList(pool, input, budgetCap);
+}
+
+export function recommendMedia(
+  input: AiRecommendInput,
+  catalog: readonly MediaItem[],
+  paddingCatalog?: readonly MediaItem[],
+): ScoredMedia[] {
+  try {
+    return recommendMediaCore(input, catalog, paddingCatalog);
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e));
+    console.error("[recommendMedia] failed", err);
+    throw err;
+  }
 }
 
 /** 한반도 근사 바운딩 박스 내 정규화 좌표 (%) */

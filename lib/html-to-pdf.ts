@@ -1,6 +1,33 @@
 import html2canvas from "html2canvas";
 import type { jsPDF } from "jspdf";
 
+/** Overall cap for html2canvas + jsPDF (image load + rasterize). */
+export const HTML_TO_PDF_DEFAULT_TIMEOUT_MS = 30_000;
+
+export type HtmlElementToPdfOptions = {
+  /** 0 = no overall timeout. Default {@link HTML_TO_PDF_DEFAULT_TIMEOUT_MS}. */
+  timeoutMs?: number;
+};
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  if (ms <= 0) return promise;
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${ms}ms`));
+    }, ms);
+    promise.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
+    );
+  });
+}
+
 /**
  * 외부 http(s) 이미지는 canvas 오염(CORS)을 유발할 수 있어 클론에서 플레이스홀더로 교체합니다.
  */
@@ -48,7 +75,7 @@ async function waitForFontsAndPaint(): Promise<void> {
 /**
  * DOM 노드를 A4 세로 PDF로 래스터화 (한글은 스타일된 HTML 이미지로 보존).
  */
-export async function htmlElementToPdf(element: HTMLElement): Promise<jsPDF> {
+async function htmlElementToPdfInner(element: HTMLElement): Promise<jsPDF> {
   if (typeof window === "undefined") {
     throw new Error("htmlElementToPdf is browser-only");
   }
@@ -73,7 +100,7 @@ export async function htmlElementToPdf(element: HTMLElement): Promise<jsPDF> {
       windowHeight: h,
       scrollX: 0,
       scrollY: -window.scrollY,
-      imageTimeout: 25000,
+      imageTimeout: 20_000,
       onclone: replaceUntrustedImagesInClone,
     });
   } catch (e) {
@@ -110,6 +137,21 @@ export async function htmlElementToPdf(element: HTMLElement): Promise<jsPDF> {
   return pdf;
 }
 
+export async function htmlElementToPdf(
+  element: HTMLElement,
+  options?: HtmlElementToPdfOptions,
+): Promise<jsPDF> {
+  const timeoutMs =
+    options?.timeoutMs !== undefined
+      ? options.timeoutMs
+      : HTML_TO_PDF_DEFAULT_TIMEOUT_MS;
+  const work = htmlElementToPdfInner(element);
+  if (timeoutMs > 0) {
+    return withTimeout(work, timeoutMs, "htmlElementToPdf");
+  }
+  return work;
+}
+
 /** ASCII 안전 파일명 (플래너·견적 공통) */
 export function defaultPlannerPdfFilename(): string {
   return `THINKAD-planner-report-${Date.now()}.pdf`;
@@ -144,8 +186,9 @@ function pdfToBlob(pdf: jsPDF): Blob {
 export async function downloadPdfFromHtmlElement(
   element: HTMLElement,
   filename: string,
+  options?: HtmlElementToPdfOptions,
 ): Promise<void> {
-  const pdf = await htmlElementToPdf(element);
+  const pdf = await htmlElementToPdf(element, options);
   const safeName =
     filename.replace(/[/\\?%*:|"<>]/g, "-").trim() ||
     `THINKAD-${Date.now()}.pdf`;
@@ -165,8 +208,11 @@ export async function downloadPdfFromHtmlElement(
   }
 }
 
-export async function htmlElementToPdfBase64(element: HTMLElement): Promise<string> {
-  const pdf = await htmlElementToPdf(element);
+export async function htmlElementToPdfBase64(
+  element: HTMLElement,
+  options?: HtmlElementToPdfOptions,
+): Promise<string> {
+  const pdf = await htmlElementToPdf(element, options);
   const uri = pdf.output("datauristring") as string;
   const i = uri.indexOf(",");
   return i >= 0 ? uri.slice(i + 1) : uri;

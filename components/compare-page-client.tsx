@@ -4,7 +4,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { GitCompare, ArrowLeft, FileDown, ShieldCheck } from "lucide-react";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/toast-provider";
+import {
+  downloadPdfFromHtmlElement,
+  HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
+} from "@/lib/html-to-pdf";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { matchesMediaTextQuery, type MediaItem } from "@/lib/media-data";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
@@ -25,6 +31,10 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   const isKo = locale === "ko";
   const tMedia = useTranslations("media");
   const t = useTranslations();
+  const tCommon = useTranslations("common");
+  const { toast } = useToast();
+  const comparePdfRef = useRef<HTMLDivElement>(null);
+  const [comparePdfLoading, setComparePdfLoading] = useState(false);
 
   const [textFilter, setTextFilter] = useState("");
   const [compareSearchKey, setCompareSearchKey] = useState(0);
@@ -45,6 +55,27 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
     setTextFilter("");
     setCompareSearchKey((k) => k + 1);
   }, []);
+
+  const handleComparePdfDownload = useCallback(async () => {
+    const el = comparePdfRef.current;
+    if (!el) {
+      toast("error", tCommon("pdfGenerationFailed"));
+      return;
+    }
+    setComparePdfLoading(true);
+    try {
+      const stamp = new Date().toISOString().slice(0, 10);
+      const filename = `thinkad-media-compare-${stamp}.pdf`;
+      await downloadPdfFromHtmlElement(el, filename, {
+        timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
+      });
+    } catch (e) {
+      console.error("[compare-pdf]", e);
+      toast("error", tCommon("pdfGenerationFailed"));
+    } finally {
+      setComparePdfLoading(false);
+    }
+  }, [toast, tCommon]);
 
   if (items.length < 2) {
     return (
@@ -179,7 +210,12 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                 </div>
               )}
 
-              <CompareSpecTable items={items} isKo={isKo} />
+              <div
+                ref={comparePdfRef}
+                className="rounded-2xl bg-white p-2 sm:p-0"
+              >
+                <CompareSpecTable items={items} isKo={isKo} />
+              </div>
 
               <div className="mt-14 flex flex-col items-stretch gap-4 sm:mt-16 sm:items-center md:gap-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
@@ -194,19 +230,18 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     </Link>
                   </Button>
                   <Button
-                    asChild
+                    type="button"
                     variant="outline"
-                    className="h-11 rounded-xl border-2 border-gold/50 px-8 font-bold text-navy hover:bg-gold/10"
+                    disabled={comparePdfLoading}
+                    onClick={() => void handleComparePdfDownload()}
+                    className="h-11 rounded-xl border-2 border-gold/50 px-8 font-bold text-navy hover:bg-gold/10 disabled:opacity-60"
                   >
-                    <a
-                      href={`/api/compare/pdf?ids=${items.map((m) => encodeURIComponent(m.id)).join(",")}${isKo ? "" : "&lang=en"}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
-                    >
+                    {comparePdfLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
                       <FileDown className="mr-2 h-4 w-4" />
-                      {isKo ? "PDF 다운로드" : "Download PDF"}
-                    </a>
+                    )}
+                    {isKo ? "PDF 다운로드" : "Download PDF"}
                   </Button>
                 </div>
                 <p className="text-center text-[11px] text-muted-foreground">

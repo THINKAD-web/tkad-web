@@ -23,7 +23,12 @@ import {
   defaultPlannerPdfFilename,
   downloadPdfFromHtmlElement,
   htmlElementToPdf,
+  HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
 } from "@/lib/html-to-pdf";
+
+function isPdfTimeoutError(e: unknown): boolean {
+  return e instanceof Error && /timed out/i.test(e.message);
+}
 import { useToast } from "@/components/toast-provider";
 import PlannerReportPreview from "@/components/planner-report-preview";
 
@@ -160,7 +165,9 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         return;
       }
       try {
-        const doc = await htmlElementToPdf(el);
+        const doc = await htmlElementToPdf(el, {
+          timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
+        });
         if (cancelled) return;
         const blob = doc.output("blob");
         const nextUrl = URL.createObjectURL(blob);
@@ -170,8 +177,12 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       } catch (e) {
         console.error("[planner-pdf html2canvas]", e);
         if (!cancelled) {
-          setError(t("reportPdfError"));
-          toast("error", tCommon("pdfGenerationFailed"));
+          const timedOut = isPdfTimeoutError(e);
+          setError(timedOut ? t("reportPdfTimeout") : t("reportPdfError"));
+          toast(
+            "error",
+            timedOut ? t("reportPdfTimeout") : tCommon("pdfGenerationFailed"),
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -241,12 +252,18 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           toast("error", tCommon("pdfGenerationFailed"));
           return;
         }
-        await downloadPdfFromHtmlElement(el, asciiName);
+        await downloadPdfFromHtmlElement(el, asciiName, {
+          timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
+        });
         toast("success", t("reportPdfDownloaded"));
       } catch (e) {
         console.error("[planner-pdf download regenerate]", e);
-        setError(t("reportPdfError"));
-        toast("error", tCommon("pdfGenerationFailed"));
+        const timedOut = isPdfTimeoutError(e);
+        setError(timedOut ? t("reportPdfTimeout") : t("reportPdfError"));
+        toast(
+          "error",
+          timedOut ? t("reportPdfTimeout") : tCommon("pdfGenerationFailed"),
+        );
       } finally {
         setDownloading(false);
       }
@@ -438,11 +455,16 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
         toast("error", tCommon("pdfGenerationFailed"));
         return;
       }
-      await downloadPdfFromHtmlElement(el, defaultPlannerPdfFilename());
+      await downloadPdfFromHtmlElement(el, defaultPlannerPdfFilename(), {
+        timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
+      });
       toast("success", t("reportPdfDownloaded"));
     } catch (e) {
       console.error("[planner-pdf compact]", e);
-      toast("error", tCommon("pdfGenerationFailed"));
+      toast(
+        "error",
+        isPdfTimeoutError(e) ? t("reportPdfTimeout") : tCommon("pdfGenerationFailed"),
+      );
     } finally {
       setDownloading(false);
     }

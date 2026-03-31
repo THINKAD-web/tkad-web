@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useTranslations, useLocale } from "next-intl";
 import { Sparkles } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
+import { useToast } from "@/components/toast-provider";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export default function RecommendPageClient({
 }) {
   const t = useTranslations();
   const tr = useTranslations("recommend");
+  const { toast } = useToast();
   const locale = useLocale();
   const isKo = locale === "ko";
 
@@ -60,37 +62,44 @@ export default function RecommendPageClient({
     (payload: MediaAiRecommendFormSubmit) => {
       setPhase("loading");
       window.setTimeout(() => {
-        const poolRegion = filterCatalogByRegionCodes(
-          catalog,
-          payload.regionCodes,
-        );
-        const q = payload.searchQuery.trim().toLowerCase();
-        const poolFiltered =
-          q.length > 0
-            ? poolRegion.filter((m) => matchesMediaTextQuery(m, q))
-            : poolRegion;
-        /** 검색으로만 비면 지역 풀, 지역까지 비면 전체 카탈로그. 보강은 지역 풀 → 전체 순 */
-        const baseCatalog =
-          poolFiltered.length > 0 ? poolFiltered : catalog;
-        const paddingSource =
-          poolRegion.length > 0 ? poolRegion : catalog;
-        let scored = recommendMedia(
-          payload.input,
-          baseCatalog,
-          paddingSource,
-        );
-        if (scored.length === 0 && q.length > 0 && poolRegion.length > 0) {
-          scored = recommendMedia(
+        try {
+          const poolRegion = filterCatalogByRegionCodes(
+            catalog,
+            payload.regionCodes,
+          );
+          const q = payload.searchQuery.trim().toLowerCase();
+          const poolFiltered =
+            q.length > 0
+              ? poolRegion.filter((m) => matchesMediaTextQuery(m, q))
+              : poolRegion;
+          /** 검색으로만 비면 지역 풀, 지역까지 비면 전체 카탈로그. 보강은 지역 풀 → 전체 순 */
+          const baseCatalog =
+            poolFiltered.length > 0 ? poolFiltered : catalog;
+          const paddingSource =
+            poolRegion.length > 0 ? poolRegion : catalog;
+          let scored = recommendMedia(
             payload.input,
-            poolRegion,
+            baseCatalog,
             paddingSource,
           );
+          if (scored.length === 0 && q.length > 0 && poolRegion.length > 0) {
+            scored = recommendMedia(
+              payload.input,
+              poolRegion,
+              paddingSource,
+            );
+          }
+          setFullList(scored);
+          setPhase(scored.length > 0 ? "dashboard" : "noResults");
+        } catch (e) {
+          console.error("[recommend] runAnalysis", e);
+          setFullList(null);
+          setPhase("form");
+          toast("error", tr("analysisFailed"));
         }
-        setFullList(scored);
-        setPhase(scored.length > 0 ? "dashboard" : "noResults");
       }, 900);
     },
-    [catalog],
+    [catalog, toast, tr],
   );
 
   const handleFormSubmit = useCallback(
