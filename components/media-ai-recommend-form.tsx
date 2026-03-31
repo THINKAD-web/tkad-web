@@ -416,10 +416,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
             type="button"
             size="lg"
             disabled={!canSubmit}
-            className="h-12 w-full rounded-xl border border-gold/60/40 bg-gradient-to-r from-navy to-navy/90 text-base font-bold text-navy shadow-md hover:from-navy/95 hover:to-navy/85 disabled:opacity-50"
+            className="h-12 w-full rounded-xl bg-gold text-base font-bold text-navy shadow-md hover:bg-gold-dark disabled:opacity-50"
             onClick={handleSubmit}
           >
-            <Sparkles className="mr-2 h-5 w-5 text-navy" aria-hidden />
+            <Sparkles className="mr-2 h-5 w-5" aria-hidden />
             {tr("form.submit")}
           </Button>
         </CardContent>
