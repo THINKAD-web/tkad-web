@@ -24,7 +24,8 @@ export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMet
     .split("")
     .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   const seed = idHash * 1103 + (media.dailyFootTraffic % 997);
-  const visibilityScore = 58 + (seed % 35);
+  // DB에 visibilityScore가 있으면 사용, 없으면 해시로 생성
+  const visibilityScore = media.visibilityScore ?? (58 + (seed % 35));
 
   let peak = 32 + (seed % 26);
   let standard = 24 + ((seed >> 3) % 28);
