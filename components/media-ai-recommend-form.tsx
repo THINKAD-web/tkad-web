@@ -209,15 +209,15 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      <Card className="border border-gold/25 bg-navy/40 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-sm">
-        <CardHeader className="border-b border-gold/20 pb-4">
-          <CardTitle className="text-lg font-bold text-white sm:text-xl">
+      <Card className="border border-navy/15 bg-white shadow-xl">
+        <CardHeader className="border-b border-navy/10 pb-4">
+          <CardTitle className="text-lg font-bold text-navy sm:text-xl">
             {tr("form.panelTitle")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-7 pt-6">
           <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+            <div className="flex items-center gap-2 text-sm font-semibold text-navy">
               <MapPin className="h-4 w-4 shrink-0" aria-hidden />
               {tr("form.regionLabel")}
             </div>
@@ -228,8 +228,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   className={cn(
                     "flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:text-sm",
                     regions.has(code)
-                      ? "border-gold bg-gold/15 text-gold"
-                      : "border-white/15 bg-white/5 text-slate-200 hover:border-white/25",
+                      ? "border-gold/60 bg-gold/20 text-navy"
+                      : "border-navy/15 bg-navy/5 text-navy/70 hover:border-navy/30",
                   )}
                 >
                   <input
@@ -245,7 +245,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+            <div className="flex items-center gap-2 text-sm font-semibold text-navy">
               <Search className="h-4 w-4 shrink-0" aria-hidden />
               {tr("form.searchLabel")}
             </div>
@@ -254,19 +254,19 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={tr("form.searchPlaceholder")}
-              className="border-white/15 bg-navy/60 text-white placeholder:text-slate-500"
+              className="border-navy/15 bg-white text-navy placeholder:text-navy/40"
             />
           </section>
 
           <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+            <div className="flex items-center gap-2 text-sm font-semibold text-navy">
               <Monitor className="h-4 w-4 shrink-0" aria-hidden />
               {tr("form.mediaTypeLabel")}
             </div>
             <select
               value={mediaType}
               onChange={(e) => setMediaType(e.target.value as MediaTypeFilter)}
-              className="w-full rounded-xl border border-white/15 bg-navy/60 px-3 py-2.5 text-sm font-medium text-white shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+              className="w-full rounded-xl border border-navy/15 bg-white px-3 py-2.5 text-sm font-medium text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             >
               {mediaTypeOptions.map((o) => (
                 <option key={o.value} value={o.value} className="bg-navy">
@@ -277,7 +277,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+            <div className="flex items-center gap-2 text-sm font-semibold text-navy">
               <Layers className="h-4 w-4 shrink-0" aria-hidden />
               {tr("form.placementHintsLabel")}
             </div>
@@ -288,8 +288,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   className={cn(
                     "flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:text-sm",
                     placementHints.has(code)
-                      ? "border-gold bg-gold/15 text-gold"
-                      : "border-white/15 bg-white/5 text-slate-200 hover:border-white/25",
+                      ? "border-gold/60 bg-gold/20 text-navy"
+                      : "border-navy/15 bg-navy/5 text-navy/70 hover:border-navy/30",
                   )}
                 >
                   <input
@@ -305,7 +305,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+            <div className="flex items-center gap-2 text-sm font-semibold text-navy">
               <Target className="h-4 w-4 shrink-0" aria-hidden />
               {tr("form.ageLabel")}
             </div>
@@ -316,8 +316,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   className={cn(
                     "flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:text-sm",
                     ageBands.has(code)
-                      ? "border-gold bg-gold/15 text-gold"
-                      : "border-white/15 bg-white/5 text-slate-200 hover:border-white/25",
+                      ? "border-gold/60 bg-gold/20 text-navy"
+                      : "border-navy/15 bg-navy/5 text-navy/70 hover:border-navy/30",
                   )}
                 >
                   <input
@@ -333,7 +333,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+            <div className="flex items-center gap-2 text-sm font-semibold text-navy">
               <Wallet className="h-4 w-4 shrink-0" aria-hidden />
               {tr("form.budgetLabel")}
             </div>
@@ -356,7 +356,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     ? `${budgetMin.toLocaleString()}만원`
                     : `${budgetMin.toLocaleString()} (10K)`}
                 </span>
-                <span className="font-bold text-gold tabular-nums">
+                <span className="font-bold text-navy tabular-nums">
                   {isKo
                     ? `${budgetMan.toLocaleString()}만원`
                     : `${budgetMan.toLocaleString()} (10K)`}
@@ -371,14 +371,14 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+            <div className="flex items-center gap-2 text-sm font-semibold text-navy">
               <Building2 className="h-4 w-4 shrink-0" aria-hidden />
               {tr("form.industryLabel")}
             </div>
             <select
               value={industry}
               onChange={(e) => setIndustry(e.target.value as Industry)}
-              className="w-full rounded-xl border border-white/15 bg-navy/60 px-3 py-2.5 text-sm font-medium text-white shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+              className="w-full rounded-xl border border-navy/15 bg-white px-3 py-2.5 text-sm font-medium text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             >
               {industryOptions.map((o) => (
                 <option key={o.value} value={o.value} className="bg-navy">
@@ -389,7 +389,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
+            <div className="flex items-center gap-2 text-sm font-semibold text-navy">
               <CalendarDays className="h-4 w-4 shrink-0" aria-hidden />
               {tr("form.periodLabel")}
             </div>
@@ -402,8 +402,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   className={cn(
                     "rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:text-sm",
                     periodWeeks === w
-                      ? "border-gold bg-gold/15 text-gold"
-                      : "border-white/15 bg-white/5 text-slate-200 hover:border-white/25",
+                      ? "border-gold/60 bg-gold/20 text-navy"
+                      : "border-navy/15 bg-navy/5 text-navy/70 hover:border-navy/30",
                   )}
                 >
                   {label}
@@ -416,10 +416,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
             type="button"
             size="lg"
             disabled={!canSubmit}
-            className="h-12 w-full rounded-xl border border-gold/40 bg-gradient-to-r from-navy to-navy/90 text-base font-bold text-white shadow-md hover:from-navy/95 hover:to-navy/85 disabled:opacity-50"
+            className="h-12 w-full rounded-xl border border-gold/60/40 bg-gradient-to-r from-navy to-navy/90 text-base font-bold text-navy shadow-md hover:from-navy/95 hover:to-navy/85 disabled:opacity-50"
             onClick={handleSubmit}
           >
-            <Sparkles className="mr-2 h-5 w-5 text-gold" aria-hidden />
+            <Sparkles className="mr-2 h-5 w-5 text-navy" aria-hidden />
             {tr("form.submit")}
           </Button>
         </CardContent>
