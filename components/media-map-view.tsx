@@ -173,7 +173,15 @@ export function MediaMapView({
             pinMetaById={pinMetaById}
             className="touch-pan-y"
           />
-          <MediaPinPopup media={mapSelectedMedia} isKo={isKo} />
+          <MediaPinPopup
+            media={mapSelectedMedia}
+            isKo={isKo}
+            isSelected={mapSelectedMedia ? isInCompare(mapSelectedMedia.id) : false}
+            onToggleSelect={(id) => {
+              const m = filtered.find((x) => x.id === id);
+              if (m) toggleCompare(m);
+            }}
+          />
           <div className="pointer-events-none absolute inset-x-0 bottom-[max(5.5rem,env(safe-area-inset-bottom))] z-30 flex justify-center md:bottom-4 md:pb-0">
             <div className="pointer-events-auto px-4">
               <Button

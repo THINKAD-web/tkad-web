@@ -16,9 +16,13 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 export function MediaPinPopup({
   media,
   isKo,
+  isSelected,
+  onToggleSelect,
 }: {
   media: MediaItem | null;
   isKo: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (mediaId: string) => void;
 }) {
   const tMedia = useTranslations("media");
   if (!media) return null;
@@ -53,12 +57,30 @@ export function MediaPinPopup({
               </span>
             </p>
           </div>
-          <div className="flex shrink-0 flex-col gap-2">
+          <div className="flex shrink-0 flex-col gap-1.5">
+            {onToggleSelect && (
+              <Button
+                size="sm"
+                variant={isSelected ? "default" : "outline"}
+                className={`rounded-full text-xs font-bold ${
+                  isSelected
+                    ? "bg-navy text-white hover:bg-navy/90"
+                    : "border-navy/20 text-navy hover:bg-navy/5"
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onToggleSelect(media.id);
+                }}
+              >
+                {isSelected ? (isKo ? "✓ 선택됨" : "✓ Selected") : (isKo ? "선택" : "Select")}
+              </Button>
+            )}
             <Link href={mediaItemDetailPath(media.id)}>
               <Button
                 size="sm"
                 variant="outline"
-                className="rounded-full text-xs font-bold"
+                className="w-full rounded-full text-xs font-bold"
               >
                 {isKo ? "상세" : "Details"}
               </Button>
@@ -66,7 +88,7 @@ export function MediaPinPopup({
             <Link href={`/quote?media=${media.id}`}>
               <Button
                 size="sm"
-                className="rounded-full bg-gold text-xs font-bold text-navy hover:bg-gold-dark"
+                className="w-full rounded-full bg-gold text-xs font-bold text-navy hover:bg-gold-dark"
               >
                 {isKo ? "견적" : "Quote"}
               </Button>
