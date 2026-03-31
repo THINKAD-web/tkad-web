@@ -24,9 +24,30 @@ export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMet
     .split("")
     .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   const seed = idHash * 1103 + (media.dailyFootTraffic % 997);
-  // DB에 visibilityScore가 있으면 사용, 없으면 해시로 생성
+  
+  // DB 값 우선 사용, 없으면 해시로 생성
   const visibilityScore = media.visibilityScore ?? (58 + (seed % 35));
+  
+  // reach: DB 값을 0-100 스케일로 변환 (백분율로 표시)
+  // DB reach가 있으면 impressions 대비 비율로 계산, 없으면 해시
+  const impressions = media.impressions ?? monthly;
+  const reachValue = media.reach != null && impressions > 0
+    ? Math.min(98, Math.round((media.reach / impressions) * 100))
+    : (52 + (seed % 42));
+  
+  // frequency를 dwell로 사용 (체류/반복 노출 지표)
+  // DB frequency가 있으면 10 기준 백분율, 없으면 해시
+  const dwellValue = media.frequency != null
+    ? Math.min(98, Math.round(media.frequency * 10))
+    : (48 + ((seed * 5) % 44));
+  
+  // engagementRate를 recall로 사용 (기억/인지 지표)
+  // DB engagementRate가 있으면 100배 백분율, 없으면 해시
+  const recallValue = media.engagementRate != null
+    ? Math.min(98, Math.round(media.engagementRate * 100))
+    : (50 + ((seed * 7) % 41));
 
+  // 도넛 차트 (시간대별 노출) - 해시 기반 유지 (DB에 해당 필드 없음)
   let peak = 32 + (seed % 26);
   let standard = 24 + ((seed >> 3) % 28);
   let extended = 100 - peak - standard;
@@ -36,10 +57,6 @@ export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMet
     standard = Math.max(18, standard - Math.floor(need / 2));
     extended = 100 - peak - standard;
   }
-
-  const reach = 52 + (seed % 42);
-  const dwell = 48 + ((seed * 5) % 44);
-  const recall = 50 + ((seed * 7) % 41);
 
   return {
     visibilityScore,
@@ -51,9 +68,9 @@ export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMet
       { key: "extended", percent: extended, color: "#94a3b8" },
     ],
     bars: [
-      { key: "reach", value: Math.min(98, reach) },
-      { key: "dwell", value: Math.min(98, dwell) },
-      { key: "recall", value: Math.min(98, recall) },
+      { key: "reach", value: Math.min(98, reachValue) },
+      { key: "dwell", value: Math.min(98, dwellValue) },
+      { key: "recall", value: Math.min(98, recallValue) },
     ],
   };
 }
