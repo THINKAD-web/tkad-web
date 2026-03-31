@@ -1353,7 +1353,20 @@
     "coverageMap": "Site map",
     "mapHint": "Only locations with coordinates are shown.",
     "noMapPins": "No coordinates yet. Add locations in admin.",
-    "featuresTitle": "Highlights"
+    "featuresTitle": "Highlights",
+    "pricePerUnitLabel": "Unit price",
+    "pricePackageLabel": "Package price",
+    "unitLabel": "unit",
+    "priceEmpty": "Contact for pricing",
+    "dailyFootfallLabel": "Daily foot traffic",
+    "visibilityScoreLabel": "Visibility score",
+    "operatingHoursLabel": "Operating hours",
+    "targetAgeLabel": "Target age",
+    "valueEmpty": "-",
+    "locationDailyFootfall": "{count}/day",
+    "noLocationsFallback": "No locations registered.",
+    "effectMemoLabel": "Ad effectiveness",
+    "contactUs": "Contact us"
   },
   "adminNav": {
     "dashboard": "Dashboard",

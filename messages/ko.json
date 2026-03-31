@@ -1352,7 +1352,20 @@
     "coverageMap": "설치 지점 지도",
     "mapHint": "등록된 좌표가 있는 지점만 표시됩니다.",
     "noMapPins": "표시할 좌표가 없습니다. 관리자에서 지점을 등록해 주세요.",
-    "featuresTitle": "특징"
+    "featuresTitle": "특징",
+    "pricePerUnitLabel": "개당 단가",
+    "pricePackageLabel": "패키지 가격",
+    "unitLabel": "개소",
+    "priceEmpty": "별도 문의",
+    "dailyFootfallLabel": "일일 유동인구",
+    "visibilityScoreLabel": "가시성 점수",
+    "operatingHoursLabel": "운영시간",
+    "targetAgeLabel": "타겟 연령",
+    "valueEmpty": "-",
+    "locationDailyFootfall": "유동인구 {count}명/일",
+    "noLocationsFallback": "등록된 지점이 없습니다.",
+    "effectMemoLabel": "광고 효과",
+    "contactUs": "문의하기"
   },
   "adminNav": {
     "dashboard": "대시보드",
