@@ -249,37 +249,48 @@ async function buildPlannerReportPdfInner(
 
   for (let i = 0; i < portfolio.length; i++) {
     const m = portfolio[i];
-    y = ensureSpace(doc, y, 42, pageH, margin);
-    doc.setFontSize(10);
-    setFont(doc, hasKrFont, "bold");
-    doc.text(`${i + 1}. ${m.name}`, margin, y);
-    y += lh;
+    try {
+      y = ensureSpace(doc, y, 42, pageH, margin);
+      doc.setFontSize(10);
+      setFont(doc, hasKrFont, "bold");
+      doc.text(`${i + 1}. ${m.name}`, margin, y);
+      y += lh;
 
-    setFont(doc, hasKrFont, "normal");
-    const detail = [
-      `${labels.labelLocation}: ${m.location}`,
-      `${labels.labelPrice}: ₩${m.price.toLocaleString()}${p.isKo ? "만/월" : " ₩10K/mo"}`,
-      `${labels.labelType}: ${m.type}`,
-      `${labels.labelSize}: ${m.size || "—"}`,
-      `${labels.labelResolution}: ${m.resolution || "—"}`,
-      `${labels.labelDailyTraffic}: ${m.dailyFootTraffic.toLocaleString()}`,
-    ];
-    for (const line of detail) {
-      const lines = doc.splitTextToSize(line, maxW);
-      doc.text(lines, margin, y);
-      y += lines.length * lhTight;
-    }
-
-    if (m.imageUrl) {
-      const dataUrl = await fetchDataUrl(m.imageUrl);
-      if (dataUrl) {
-        y = ensureSpace(doc, y, 58, pageH, margin);
-        const fmt = imgFormatFromDataUrl(dataUrl);
-        if (addImageSafe(doc, dataUrl, fmt, margin, y, maxW, 50)) y += 54;
-        else y += 2;
+      setFont(doc, hasKrFont, "normal");
+      const detail = [
+        `${labels.labelLocation}: ${m.location}`,
+        `${labels.labelPrice}: ₩${m.price.toLocaleString()}${p.isKo ? "만/월" : " ₩10K/mo"}`,
+        `${labels.labelType}: ${m.type}`,
+        `${labels.labelSize}: ${m.size || "—"}`,
+        `${labels.labelResolution}: ${m.resolution || "—"}`,
+        `${labels.labelDailyTraffic}: ${(m.dailyFootTraffic ?? 0).toLocaleString()}`,
+      ];
+      for (const line of detail) {
+        const lines = doc.splitTextToSize(line, maxW);
+        doc.text(lines, margin, y);
+        y += lines.length * lhTight;
       }
+
+      if (m.imageUrl) {
+        const dataUrl = await fetchDataUrl(m.imageUrl);
+        if (dataUrl) {
+          y = ensureSpace(doc, y, 58, pageH, margin);
+          const fmt = imgFormatFromDataUrl(dataUrl);
+          if (addImageSafe(doc, dataUrl, fmt, margin, y, maxW, 50)) y += 54;
+          else y += 2;
+        }
+      }
+      y += 4;
+    } catch (rowErr) {
+      console.warn("[planner-pdf] media row skipped:", m.name, rowErr);
+      y = ensureSpace(doc, y, lh * 2, pageH, margin);
+      setFont(doc, hasKrFont, "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(160, 70, 70);
+      doc.text(`(${i + 1}) ${m.name} — row render skipped`, margin, y);
+      doc.setTextColor(30, 30, 35);
+      y += lh * 2;
     }
-    y += 4;
   }
 
   y = ensureSpace(doc, y, 28, pageH, margin);

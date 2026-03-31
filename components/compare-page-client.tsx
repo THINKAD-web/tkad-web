@@ -3,16 +3,48 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { GitCompare, ArrowLeft, FileDown } from "lucide-react";
+import { GitCompare, ArrowLeft, FileDown, ShieldCheck } from "lucide-react";
+import { useMemo, useState, useCallback } from "react";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
-import { type MediaItem } from "@/lib/media-data";
+import { matchesMediaTextQuery, type MediaItem } from "@/lib/media-data";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { CompareSpecTable } from "@/components/compare-spec-table";
+import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
+import {
+  MEDIA_CATALOG_GRID_CLASS,
+  MEDIA_CATALOG_COMPACT_GRID_CLASS,
+  MediaCatalogStickyAside,
+  MediaCatalogGridCompactToggle,
+} from "@/components/media-catalog-shared";
+import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
+import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { mediaPricePeriodTranslationKey } from "@/lib/media-price-format";
 
 export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const tMedia = useTranslations("media");
+  const t = useTranslations();
+
+  const [textFilter, setTextFilter] = useState("");
+  const [compareSearchKey, setCompareSearchKey] = useState(0);
+  const [layout, setLayout] = useState<"grid" | "compact">("grid");
+
+  const popularIds = useMemo(
+    () => new Set(["1", "2", "3", "8", "9"]),
+    [],
+  );
+
+  const visibleItems = useMemo(() => {
+    const q = textFilter.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((m) => matchesMediaTextQuery(m, q));
+  }, [items, textFilter]);
+
+  const resetCompareFilters = useCallback(() => {
+    setTextFilter("");
+    setCompareSearchKey((k) => k + 1);
+  }, []);
 
   if (items.length < 2) {
     return (
@@ -27,7 +59,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
             : `Select 2–${COMPARE_MAX_ITEMS} media from the media search page`}
         </p>
         <Link href="/media" className="mt-6">
-          <Button className="rounded-full bg-gold px-6 font-bold text-navy hover:bg-gold-dark">
+          <Button className="btn-gold h-11 rounded-xl px-8 font-bold text-navy">
             <ArrowLeft className="mr-2 h-4 w-4" />
             {isKo ? "매체 검색으로" : "Go to Media Search"}
           </Button>
@@ -38,9 +70,9 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
 
   return (
     <>
-      <section className="bg-navy py-24 md:py-28">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-white md:text-4xl">
+          <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {isKo ? "매체 비교" : "Media Comparison"}
           </h1>
           <p className="mx-auto mt-2 max-w-xl text-slate-300">
@@ -51,66 +83,139 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
         </div>
       </section>
 
-      <section className="bg-gradient-to-b from-slate-50/90 via-white to-slate-50/50 py-12 md:py-16 lg:py-20">
+      <section className="py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 md:mb-10">
-            <Link href="/media">
-              <Button variant="ghost" size="sm" className="text-muted-foreground">
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                {isKo ? "매체 검색으로 돌아가기" : "Back to Media Search"}
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {items.map((media) => (
-              <MediaCatalogGridCard
-                key={media.id}
-                variant="link"
-                media={media}
-                isKo={isKo}
-                imagePreparingLabel={tMedia("imagePreparing")}
-              />
-            ))}
-          </div>
-
-          <CompareSpecTable items={items} isKo={isKo} />
-
-          <div className="mt-14 flex flex-col items-stretch gap-4 sm:mt-16 sm:items-center md:gap-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center">
+          <div className="flex flex-col gap-8 lg:flex-row">
+            <MediaCatalogStickyAside>
               <Button
                 asChild
-                size="lg"
-                className="h-12 rounded-full bg-navy px-8 font-bold text-white shadow-md hover:bg-navy-light"
+                variant="outline"
+                className="h-11 w-full rounded-xl border-navy/20 font-semibold text-navy"
               >
-                <Link
-                  href={`/quote?media=${items.map((m) => m.id).join(",")}`}
-                >
-                  {isKo ? "견적 요청" : "Request a quote"}
+                <Link href="/media">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  {isKo ? "매체 검색으로" : "Back to Media Search"}
                 </Link>
               </Button>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-navy">
+                  {t("common.search")}
+                </label>
+                <MediaSearchAutocomplete
+                  key={compareSearchKey}
+                  locale={locale}
+                  catalog={items}
+                  onSelect={(m) =>
+                    setTextFilter((isKo ? m.name : m.nameEn).trim())
+                  }
+                  onSearchSubmit={(q) => setTextFilter(q.trim())}
+                  onQueryChange={(q) => {
+                    if (!q.trim()) setTextFilter("");
+                  }}
+                  searchButtonLabel={t("media.searchButton")}
+                />
+              </div>
               <Button
-                asChild
-                size="lg"
+                type="button"
                 variant="outline"
-                className="h-12 rounded-full border-2 border-gold/50 px-8 font-bold text-navy hover:bg-gold/10"
+                className="h-11 w-full rounded-xl border-navy/15 font-semibold text-muted-foreground"
+                onClick={resetCompareFilters}
               >
-                <a
-                  href={`/api/compare/pdf?ids=${items.map((m) => encodeURIComponent(m.id)).join(",")}${isKo ? "" : "&lang=en"}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download
-                >
-                  <FileDown className="mr-2 h-4 w-4" />
-                  {isKo ? "PDF 다운로드" : "Download PDF"}
-                </a>
+                {t("common.reset")}
               </Button>
+            </MediaCatalogStickyAside>
+
+            <div className="min-w-0 flex-1">
+              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {t("media.results")}: {visibleItems.length}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <MediaCatalogGridCompactToggle
+                    layout={layout}
+                    onLayoutChange={setLayout}
+                    gridLabel={t("media.browseCardLayoutGrid")}
+                    compactLabel={t("media.browseCardLayoutCompact")}
+                  />
+                  <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
+                    <ShieldCheck className="h-4 w-4" aria-hidden />
+                    <span>{tMedia("browseCatalogVerifiedBadge")}</span>
+                  </div>
+                </div>
+              </div>
+
+              {visibleItems.length === 0 ? (
+                <div className="flex h-64 items-center justify-center rounded-xl border text-sm text-muted-foreground">
+                  {isKo ? "검색 결과가 없습니다." : "No matches for your search."}
+                </div>
+              ) : layout === "grid" ? (
+                <div className={MEDIA_CATALOG_GRID_CLASS}>
+                  {visibleItems.map((media) => (
+                    <MediaCatalogGridCard
+                      key={media.id}
+                      variant="link"
+                      media={media}
+                      isKo={isKo}
+                      imagePreparingLabel={tMedia("imagePreparing")}
+                      popularIds={popularIds}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className={MEDIA_CATALOG_COMPACT_GRID_CLASS}>
+                  {visibleItems.map((media) => (
+                    <MediaCatalogCompactLinkRow
+                      key={media.id}
+                      media={media}
+                      isKo={isKo}
+                      href={mediaItemDetailPath(media.id)}
+                      imagePreparingLabel={tMedia("imagePreparing")}
+                      pricePeriodLabel={tMedia(
+                        mediaPricePeriodTranslationKey(media.pricePeriod),
+                      )}
+                      popularIds={popularIds}
+                    />
+                  ))}
+                </div>
+              )}
+
+              <CompareSpecTable items={items} isKo={isKo} />
+
+              <div className="mt-14 flex flex-col items-stretch gap-4 sm:mt-16 sm:items-center md:gap-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+                  <Button
+                    asChild
+                    className="h-11 rounded-xl bg-navy px-8 font-bold text-white shadow-md hover:bg-navy/90"
+                  >
+                    <Link
+                      href={`/quote?media=${items.map((m) => m.id).join(",")}`}
+                    >
+                      {isKo ? "견적 요청" : "Request a quote"}
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-11 rounded-xl border-2 border-gold/50 px-8 font-bold text-navy hover:bg-gold/10"
+                  >
+                    <a
+                      href={`/api/compare/pdf?ids=${items.map((m) => encodeURIComponent(m.id)).join(",")}${isKo ? "" : "&lang=en"}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                    >
+                      <FileDown className="mr-2 h-4 w-4" />
+                      {isKo ? "PDF 다운로드" : "Download PDF"}
+                    </a>
+                  </Button>
+                </div>
+                <p className="text-center text-[11px] text-muted-foreground">
+                  {isKo
+                    ? "견적 요청 시 위에서 비교 중인 매체가 모두 선택된 상태로 이동합니다."
+                    : "Quote opens with all media you are comparing pre-selected."}
+                </p>
+              </div>
             </div>
-            <p className="text-center text-[11px] text-muted-foreground">
-              {isKo
-                ? "견적 요청 시 위에서 비교 중인 매체가 모두 선택된 상태로 이동합니다."
-                : "Quote opens with all media you are comparing pre-selected."}
-            </p>
           </div>
         </div>
       </section>

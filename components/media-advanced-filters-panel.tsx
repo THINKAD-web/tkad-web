@@ -43,6 +43,11 @@ const RESOLUTION_SELECT: { v: ResolutionBucket; labelKey: "resHd" | "resFhd" | "
  * 고급 필터 UI 순서: `lib/media-advanced-filters-schema.ts` 의
  * high_priority_filters → secondary_filters → (앱 확장) 추가 옵션.
  */
+const rangeMinClass =
+  "min-h-11 w-full cursor-pointer touch-manipulation py-2 [-webkit-appearance:none] appearance-none accent-gold";
+const rangeMaxClass =
+  "min-h-11 w-full cursor-pointer touch-manipulation py-2 [-webkit-appearance:none] appearance-none accent-navy";
+
 export default function MediaAdvancedFiltersPanel({
   catalog,
   bounds,
@@ -124,43 +129,61 @@ export default function MediaAdvancedFiltersPanel({
             <p className="mb-2 text-[11px] text-muted-foreground">
               {value.visibilityMin} – {value.visibilityMax}
             </p>
-            <div className="flex flex-col gap-2">
-              <input
-                type="range"
-                min={R.visibility.min}
-                max={R.visibility.max}
-                step={1}
-                value={clamp(
-                  value.visibilityMin,
-                  R.visibility.min,
-                  value.visibilityMax,
-                )}
-                onChange={(e) => {
-                  const v = Number(e.target.value);
-                  patch({
-                    visibilityMin: clamp(v, R.visibility.min, value.visibilityMax),
-                  });
-                }}
-                className="w-full accent-gold"
-              />
-              <input
-                type="range"
-                min={R.visibility.min}
-                max={R.visibility.max}
-                step={1}
-                value={clamp(
-                  value.visibilityMax,
-                  value.visibilityMin,
-                  R.visibility.max,
-                )}
-                onChange={(e) => {
-                  const v = Number(e.target.value);
-                  patch({
-                    visibilityMax: clamp(v, value.visibilityMin, R.visibility.max),
-                  });
-                }}
-                className="w-full accent-navy"
-              />
+            <div className="flex flex-col gap-3">
+              <div>
+                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("sliderMin")}
+                </span>
+                <input
+                  type="range"
+                  min={R.visibility.min}
+                  max={R.visibility.max}
+                  step={1}
+                  value={clamp(
+                    value.visibilityMin,
+                    R.visibility.min,
+                    value.visibilityMax,
+                  )}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    patch({
+                      visibilityMin: clamp(
+                        v,
+                        R.visibility.min,
+                        value.visibilityMax,
+                      ),
+                    });
+                  }}
+                  className={rangeMinClass}
+                />
+              </div>
+              <div>
+                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("sliderMax")}
+                </span>
+                <input
+                  type="range"
+                  min={R.visibility.min}
+                  max={R.visibility.max}
+                  step={1}
+                  value={clamp(
+                    value.visibilityMax,
+                    value.visibilityMin,
+                    R.visibility.max,
+                  )}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    patch({
+                      visibilityMax: clamp(
+                        v,
+                        value.visibilityMin,
+                        R.visibility.max,
+                      ),
+                    });
+                  }}
+                  className={rangeMaxClass}
+                />
+              </div>
             </div>
           </div>
 
@@ -193,7 +216,7 @@ export default function MediaAdvancedFiltersPanel({
                     ),
                   });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -215,7 +238,7 @@ export default function MediaAdvancedFiltersPanel({
                     ),
                   });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -239,7 +262,7 @@ export default function MediaAdvancedFiltersPanel({
                   const v = Number(e.target.value);
                   patch({ cpmMin: clamp(v, R.cpm.min, value.cpmMax) });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -251,7 +274,7 @@ export default function MediaAdvancedFiltersPanel({
                   const v = Number(e.target.value);
                   patch({ cpmMax: clamp(v, value.cpmMin, R.cpm.max) });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -275,7 +298,7 @@ export default function MediaAdvancedFiltersPanel({
                   const v = Number(e.target.value);
                   patch({ reachMin: clamp(v, R.reach.min, value.reachMax) });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -287,7 +310,7 @@ export default function MediaAdvancedFiltersPanel({
                   const v = Number(e.target.value);
                   patch({ reachMax: clamp(v, value.reachMin, R.reach.max) });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -316,7 +339,7 @@ export default function MediaAdvancedFiltersPanel({
                     frequencyMin: clamp(v, R.frequency.min, value.frequencyMax),
                   });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -334,7 +357,7 @@ export default function MediaAdvancedFiltersPanel({
                     frequencyMax: clamp(v, value.frequencyMin, R.frequency.max),
                   });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -358,7 +381,7 @@ export default function MediaAdvancedFiltersPanel({
                   const v = Number(e.target.value);
                   patch({ footMin: clamp(v, R.dailyFoot.min, value.footMax) });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -370,7 +393,7 @@ export default function MediaAdvancedFiltersPanel({
                   const v = Number(e.target.value);
                   patch({ footMax: clamp(v, value.footMin, R.dailyFoot.max) });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -383,13 +406,13 @@ export default function MediaAdvancedFiltersPanel({
               {AGE_KEYS.map((k) => (
                 <label
                   key={k}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-md border border-navy/15 bg-white px-2.5 py-1.5 text-xs font-medium text-navy"
+                  className="flex min-h-11 cursor-pointer touch-manipulation items-center gap-2 rounded-lg border border-navy/15 bg-white px-3 py-2 text-xs font-medium text-navy has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gold/40"
                 >
                   <input
                     type="checkbox"
                     checked={Boolean(value.targetAgePick[k])}
                     onChange={() => toggleAge(k)}
-                    className="rounded border-navy/30 text-gold accent-gold"
+                    className="size-4 shrink-0 rounded border-navy/30 text-gold accent-gold"
                   />
                   {t(`age.${k}`)}
                 </label>
@@ -405,12 +428,12 @@ export default function MediaAdvancedFiltersPanel({
             {tagOptions.length === 0 ? (
               <p className="text-xs text-muted-foreground">{t("tagsEmpty")}</p>
             ) : (
-              <div className="max-h-32 overflow-y-auto rounded-md border border-navy/10 p-2">
+              <div className="max-h-32 overflow-y-auto overscroll-contain rounded-md border border-navy/10 p-2 touch-pan-y">
                 <div className="flex flex-wrap gap-2">
                   {tagOptions.map((tag) => (
                     <label
                       key={tag}
-                      className="flex cursor-pointer items-center gap-1.5 rounded-md border border-navy/15 bg-slate-50/80 px-2 py-1 text-xs font-medium text-navy"
+                      className="flex min-h-10 cursor-pointer touch-manipulation items-center gap-2 rounded-lg border border-navy/15 bg-slate-50/80 px-2.5 py-1.5 text-xs font-medium text-navy has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gold/40"
                     >
                       <input
                         type="checkbox"
@@ -418,7 +441,7 @@ export default function MediaAdvancedFiltersPanel({
                           (x) => x.toLowerCase() === tag.toLowerCase(),
                         )}
                         onChange={() => toggleTag(tag)}
-                        className="rounded border-navy/30 text-gold accent-gold"
+                        className="size-4 shrink-0 rounded border-navy/30 text-gold accent-gold"
                       />
                       {tag}
                     </label>
@@ -457,7 +480,7 @@ export default function MediaAdvancedFiltersPanel({
                     ),
                   });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -479,7 +502,7 @@ export default function MediaAdvancedFiltersPanel({
                     ),
                   });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -502,7 +525,7 @@ export default function MediaAdvancedFiltersPanel({
               <select
                 value={value.subCategoryFilter}
                 onChange={(e) => patch({ subCategoryFilter: e.target.value })}
-                className="w-full rounded-md border px-3 py-2 text-sm"
+                className="min-h-11 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
               >
                 <option value="all">{t("subCategoryAll")}</option>
                 {subCategoryOptions.map((sc) => (
@@ -523,7 +546,7 @@ export default function MediaAdvancedFiltersPanel({
               value={value.landmarkQuery}
               onChange={(e) => patch({ landmarkQuery: e.target.value })}
               placeholder={t("landmarkPlaceholder")}
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="min-h-11 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             />
           </div>
 
@@ -536,7 +559,7 @@ export default function MediaAdvancedFiltersPanel({
               value={value.stationQuery}
               onChange={(e) => patch({ stationQuery: e.target.value })}
               placeholder={t("stationPlaceholder")}
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="min-h-11 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             />
           </div>
 
@@ -560,7 +583,7 @@ export default function MediaAdvancedFiltersPanel({
                     widthMinM: clamp(v, R.widthM.min, value.widthMaxM),
                   });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -574,7 +597,7 @@ export default function MediaAdvancedFiltersPanel({
                     widthMaxM: clamp(v, value.widthMinM, R.widthM.max),
                   });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -599,7 +622,7 @@ export default function MediaAdvancedFiltersPanel({
                     heightMinM: clamp(v, R.heightM.min, value.heightMaxM),
                   });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -617,7 +640,7 @@ export default function MediaAdvancedFiltersPanel({
                     heightMaxM: clamp(v, value.heightMinM, R.heightM.max),
                   });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -637,7 +660,7 @@ export default function MediaAdvancedFiltersPanel({
                     .value as MediaAdvancedFilterState["resolutionFilter"],
                 })
               }
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="min-h-11 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             >
               <option value="all">{t("resolutionAll")}</option>
               {RESOLUTION_SELECT.map(({ v, labelKey }) => (
@@ -660,7 +683,7 @@ export default function MediaAdvancedFiltersPanel({
                     .value as MediaAdvancedFilterState["hoursBucket"],
                 })
               }
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="min-h-11 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             >
               {hourOptions.map((o) => (
                 <option key={o.v} value={o.v}>
@@ -690,7 +713,7 @@ export default function MediaAdvancedFiltersPanel({
                     .value as MediaAdvancedFilterState["catalogKind"],
                 })
               }
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="min-h-11 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             >
               <option value="all">{t("catalogKindAll")}</option>
               <option value="single">{t("catalogKindSingle")}</option>
@@ -719,7 +742,7 @@ export default function MediaAdvancedFiltersPanel({
                     priceMin: clamp(v, bounds.minPrice, value.priceMax),
                   });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -733,7 +756,7 @@ export default function MediaAdvancedFiltersPanel({
                     priceMax: clamp(v, value.priceMin, bounds.maxPrice),
                   });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -749,7 +772,7 @@ export default function MediaAdvancedFiltersPanel({
                   sizeTier: e.target.value as MediaAdvancedFilterState["sizeTier"],
                 })
               }
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="min-h-11 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             >
               {sizeOptions.map((o) => (
                 <option key={o.v} value={o.v}>
@@ -781,7 +804,7 @@ export default function MediaAdvancedFiltersPanel({
                     installYearMin: clamp(v, bounds.minYear, value.installYearMax),
                   });
                 }}
-                className="w-full accent-gold"
+                className={rangeMinClass}
               />
               <input
                 type="range"
@@ -799,7 +822,7 @@ export default function MediaAdvancedFiltersPanel({
                     installYearMax: clamp(v, value.installYearMin, bounds.maxYear),
                   });
                 }}
-                className="w-full accent-navy"
+                className={rangeMaxClass}
               />
             </div>
           </div>
@@ -813,7 +836,7 @@ export default function MediaAdvancedFiltersPanel({
               value={value.advertiserQuery}
               onChange={(e) => patch({ advertiserQuery: e.target.value })}
               placeholder={t("advertiserPlaceholder")}
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="min-h-11 w-full rounded-lg border border-navy/15 bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             />
           </div>
         </div>

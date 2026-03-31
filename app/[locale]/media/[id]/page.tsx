@@ -24,7 +24,7 @@ import {
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   formatMediaPriceWonWithSymbol,
-  mediaPricePeriodTranslationKey,
+  formatPricePeriodShortLabel,
 } from "@/lib/media-price-format";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
@@ -88,7 +88,7 @@ export default async function MediaDetailPage({ params }: Props) {
       ? `/compare?ids=${media.id},${similar[0].id}`
       : "/media";
 
-  const periodLabel = t(mediaPricePeriodTranslationKey(media.pricePeriod));
+  const periodLabel = formatPricePeriodShortLabel(media.pricePeriod, locale);
 
   return (
     <>

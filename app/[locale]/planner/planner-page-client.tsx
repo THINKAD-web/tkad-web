@@ -62,7 +62,9 @@ import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
 import PlannerMediaSelector from "@/components/planner-media-selector";
 import PlannerTips from "@/components/planner-tips";
 import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
-import PlannerReportStep from "@/components/planner-report-step";
+import PlannerReportStep, {
+  PlannerReportPdfCompact,
+} from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
 const BUDGET_MIN = 500;
@@ -1210,6 +1212,22 @@ export default function PlannerPageClient({
                     </div>
                   </CardContent>
                 </Card>
+
+                <PlannerReportPdfCompact
+                  isKo={isKo}
+                  campaignGoal={campaignGoal}
+                  goalTitle={goalTitle}
+                  budgetNum={budgetNum}
+                  months={months}
+                  regionsText={regionsSummary}
+                  categoriesText={categoriesSummary}
+                  ageText={t(ageKey)}
+                  industryText={t(industryKey)}
+                  portfolio={portfolio}
+                  metrics={metrics}
+                  reachCorePct={reachSplit.corePct}
+                  reachExtendedPct={reachSplit.extendedPct}
+                />
               </>
             ) : null}
 

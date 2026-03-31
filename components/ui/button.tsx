@@ -22,11 +22,20 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-secondary/60 hover:text-foreground dark:hover:bg-accent/50",
         link: "relative text-primary shadow-none after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-primary after:transition-all after:duration-300 after:ease-out hover:after:w-full",
+        /** 하단 플로팅 바 등 — gold primary */
+        floatingPrimary:
+          "border-0 bg-gold font-bold text-navy shadow-sm hover:translate-y-0 hover:bg-gold-dark hover:scale-[1.05] hover:shadow-lg active:translate-y-0 active:scale-[0.98] motion-reduce:hover:scale-100",
+        /** 하단 플로팅 바 등 — muted secondary */
+        floatingSecondary:
+          "border-0 bg-navy/10 font-semibold text-navy shadow-sm hover:translate-y-0 hover:bg-navy/[0.14] hover:scale-[1.05] hover:shadow-md active:translate-y-0 active:scale-[0.98] motion-reduce:hover:scale-100",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
+        /** 플로팅 바: 모바일 크게, md 이상 컴팩트 */
+        floating:
+          "h-12 min-h-12 rounded-xl px-5 text-sm has-[>svg]:px-4 md:h-10 md:min-h-10 md:px-4 md:text-sm",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
         "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",

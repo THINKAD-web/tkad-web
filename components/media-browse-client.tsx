@@ -5,15 +5,10 @@ import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
-  MapPin,
   ShieldCheck,
-  Flame,
   Calculator,
   LayoutList,
-  LayoutGrid,
-  Rows3,
   Map as MapIcon,
   ExternalLink,
   X,
@@ -23,7 +18,6 @@ import {
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import SolutionCtaButton from "@/components/solution-cta-button";
-import ShareButtons from "@/components/share-buttons";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
 import {
   useState,
@@ -50,25 +44,26 @@ const CompareBar = dynamic(() => import("@/components/compare-bar"), {
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
 });
-import {
-  matchesMediaTextQuery,
-  typeLabels,
-  type MediaItem,
-} from "@/lib/media-data";
+import { matchesMediaTextQuery, type MediaItem } from "@/lib/media-data";
 import {
   computeCatalogBounds,
   defaultAdvancedFilterState,
   passesMediaAdvancedFilters,
   type MediaAdvancedFilterState,
 } from "@/lib/media-filter-advanced";
-import MediaAdvancedFiltersPanel from "@/components/media-advanced-filters-panel";
-import MediaRegionReference from "@/components/media-region-reference";
-import Modal from "@/components/ui/modal";
+import MediaAdvancedFiltersOverlay from "@/components/media-advanced-filters-overlay";
+import {
+  MEDIA_CATALOG_GRID_CLASS,
+  MEDIA_CATALOG_COMPACT_GRID_CLASS,
+  MediaCatalogStickyAside,
+  MediaCatalogGridCompactToggle,
+} from "@/components/media-catalog-shared";
+import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
+import { useMediaMinWidth } from "@/lib/use-media-min-width";
 import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   formatMediaPriceWonWithSymbol,
   mediaPricePeriodTranslationKey,
@@ -101,6 +96,7 @@ export default function MediaBrowseClient({
     "default" | "priceAsc" | "priceDesc" | "trafficDesc"
   >("default");
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const mdUp = useMediaMinWidth(768);
 
   const bounds = useMemo(() => computeCatalogBounds(catalog), [catalog]);
   const defaultAdvanced = useMemo(
@@ -323,80 +319,54 @@ export default function MediaBrowseClient({
             />
           ) : (
             <div className="flex flex-col gap-8 lg:flex-row">
-              <aside className="w-full shrink-0 lg:w-64">
-                <div className="sticky top-24 space-y-4 rounded-xl border bg-white p-6 shadow-sm">
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-navy">
-                      {t("common.search")}
-                    </label>
-                    <MediaSearchAutocomplete
-                      locale={locale}
-                      catalog={catalog}
-                      onSelect={handleMediaView}
-                      onSearchSubmit={(q) => {
-                        setSearchTarget(null);
-                        setTextFilter(q);
-                        setBrowseMode("list");
-                      }}
-                      onQueryChange={(q) => {
-                        if (!q.trim()) setTextFilter("");
-                      }}
-                      searchButtonLabel={t("media.searchButton")}
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full border-navy/20 font-semibold text-navy"
-                    onClick={() => setAdvancedOpen(true)}
-                  >
-                    <SlidersHorizontal className="mr-2 h-4 w-4" />
-                    {t("media.advanced.openButton")}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full text-muted-foreground"
-                    onClick={resetFilters}
-                  >
-                    {t("common.reset")}
-                  </Button>
-                </div>
-              </aside>
-
-              <Modal
-                open={advancedOpen}
-                onClose={() => setAdvancedOpen(false)}
-                ariaLabelledBy="media-advanced-filters-heading"
-                className="max-w-lg sm:max-w-xl"
-              >
-                <div className="max-h-[min(85vh,720px)] overflow-y-auto p-6">
-                  <h2
-                    id="media-advanced-filters-heading"
-                    className="mb-4 pr-8 text-lg font-bold text-navy"
-                  >
-                    {t("media.advanced.title")}
-                  </h2>
-                  <p className="mb-4 text-xs text-muted-foreground">
-                    {t("media.advanced.modalHint")}
-                  </p>
-                  <MediaAdvancedFiltersPanel
+              <MediaCatalogStickyAside>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-navy">
+                    {t("common.search")}
+                  </label>
+                  <MediaSearchAutocomplete
+                    locale={locale}
                     catalog={catalog}
-                    bounds={bounds}
-                    value={effectiveAdvanced}
-                    onChange={setAdvanced}
+                    onSelect={handleMediaView}
+                    onSearchSubmit={(q) => {
+                      setSearchTarget(null);
+                      setTextFilter(q);
+                      setBrowseMode("list");
+                    }}
+                    onQueryChange={(q) => {
+                      if (!q.trim()) setTextFilter("");
+                    }}
+                    searchButtonLabel={t("media.searchButton")}
                   />
-                  <div className="mt-6 border-t border-navy/10 pt-4">
-                    <MediaRegionReference />
-                  </div>
-                  <Button
-                    type="button"
-                    className="btn-gold mt-6 h-11 w-full font-bold"
-                    onClick={() => setAdvancedOpen(false)}
-                  >
-                    {t("media.advanced.modalClose")}
-                  </Button>
                 </div>
-              </Modal>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 w-full rounded-xl border-navy/20 font-semibold text-navy"
+                  onClick={() => setAdvancedOpen(true)}
+                >
+                  <SlidersHorizontal className="mr-2 h-4 w-4" />
+                  {t("media.advanced.openButton")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 w-full rounded-xl border-navy/15 font-semibold text-muted-foreground"
+                  onClick={resetFilters}
+                >
+                  {t("common.reset")}
+                </Button>
+              </MediaCatalogStickyAside>
+
+              <MediaAdvancedFiltersOverlay
+                open={advancedOpen}
+                onOpenChange={setAdvancedOpen}
+                mdUp={mdUp}
+                catalog={catalog}
+                bounds={bounds}
+                effectiveAdvanced={effectiveAdvanced}
+                setAdvanced={setAdvanced}
+              />
 
               <div className="flex-1">
                 <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -458,32 +428,12 @@ export default function MediaBrowseClient({
                       </button>
                     </div>
                     {browseMode === "list" ? (
-                      <div className="inline-flex rounded-full border border-navy/15 bg-slate-50 p-0.5">
-                        <button
-                          type="button"
-                          onClick={() => setCatalogCardLayout("grid")}
-                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                            catalogCardLayout === "grid"
-                              ? "bg-white text-navy shadow-sm"
-                              : "text-muted-foreground hover:text-navy"
-                          }`}
-                        >
-                          <LayoutGrid className="h-3.5 w-3.5" />
-                          {t("media.browseCardLayoutGrid")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setCatalogCardLayout("compact")}
-                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                            catalogCardLayout === "compact"
-                              ? "bg-white text-navy shadow-sm"
-                              : "text-muted-foreground hover:text-navy"
-                          }`}
-                        >
-                          <Rows3 className="h-3.5 w-3.5" />
-                          {t("media.browseCardLayoutCompact")}
-                        </button>
-                      </div>
+                      <MediaCatalogGridCompactToggle
+                        layout={catalogCardLayout}
+                        onLayoutChange={setCatalogCardLayout}
+                        gridLabel={t("media.browseCardLayoutGrid")}
+                        compactLabel={t("media.browseCardLayoutCompact")}
+                      />
                     ) : null}
                     {browseMode === "list" ? (
                       <label className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-white px-3 py-1.5 text-xs font-medium text-navy">
@@ -505,8 +455,8 @@ export default function MediaBrowseClient({
                       </label>
                     ) : null}
                     <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
-                      <ShieldCheck className="h-4 w-4" />
-                      Verified Media
+                      <ShieldCheck className="h-4 w-4" aria-hidden />
+                      <span>{tMedia("browseCatalogVerifiedBadge")}</span>
                     </div>
                   </div>
                 </div>
@@ -622,7 +572,7 @@ export default function MediaBrowseClient({
                 ) : (
                   <>
                     {catalogCardLayout === "grid" ? (
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className={MEDIA_CATALOG_GRID_CLASS}>
                     {pagedCatalog.map((media) => (
                       <MediaCatalogGridCard
                         key={media.id}
@@ -659,23 +609,19 @@ export default function MediaBrowseClient({
                     ))}
                   </div>
                     ) : (
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
-                    {pagedCatalog.map((media) => {
-                      const detailHref = mediaItemDetailPath(media.id);
-                      return (
-                      <Link
+                  <div className={MEDIA_CATALOG_COMPACT_GRID_CLASS}>
+                    {pagedCatalog.map((media) => (
+                      <MediaCatalogCompactLinkRow
                         key={media.id}
-                        href={detailHref}
-                        aria-label={isKo ? media.name : media.nameEn}
-                        className="relative flex min-w-0 rounded-lg border border-navy/10 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 sm:gap-4 sm:rounded-xl sm:p-3.5"
-                      >
-                        <MediaCatalogThumbnail
-                          media={media}
-                          placeholderLabel={t("media.imagePreparing")}
-                          className="relative z-10 h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-md sm:h-24 sm:w-28 sm:rounded-lg"
-                          bottomGradientClassName={null}
-                          placeholderSize="xs"
-                        >
+                        media={media}
+                        isKo={isKo}
+                        href={mediaItemDetailPath(media.id)}
+                        imagePreparingLabel={t("media.imagePreparing")}
+                        pricePeriodLabel={tMedia(
+                          mediaPricePeriodTranslationKey(media.pricePeriod),
+                        )}
+                        popularIds={popularIds}
+                        thumbnailOverlay={
                           <label
                             className="absolute left-1 top-1 z-20 flex size-7 cursor-pointer select-none items-center justify-center rounded-full bg-white/95 shadow-sm"
                             onClick={(e) => {
@@ -698,49 +644,9 @@ export default function MediaBrowseClient({
                               className="h-3 w-3 rounded border-navy/30 text-gold accent-gold"
                             />
                           </label>
-                        </MediaCatalogThumbnail>
-                        <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 sm:gap-1.5">
-                          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
-                            <Badge
-                              variant="secondary"
-                              className="bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
-                            >
-                              {isKo
-                                ? (typeLabels[media.type]?.ko ?? media.type)
-                                : (typeLabels[media.type]?.en ?? media.type)}
-                            </Badge>
-                            {popularIds.has(media.id) && (
-                              <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[8px] font-bold text-navy sm:text-[9px]">
-                                <Flame className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
-                                {isKo ? "인기" : "Hot"}
-                              </span>
-                            )}
-                          </div>
-                          <p className="truncate text-[13px] font-bold leading-snug text-navy sm:text-sm sm:leading-relaxed">
-                            {isKo ? media.name : media.nameEn}
-                          </p>
-                          <p className="flex min-w-0 items-center gap-0.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
-                            <MapPin className="h-2.5 w-2.5 shrink-0 align-text-bottom sm:h-3 sm:w-3" />
-                            <span className="min-w-0 truncate">
-                              {formatMediaLocationShort(media, isKo)}
-                            </span>
-                          </p>
-                          <p className="text-[13px] font-bold tabular-nums leading-none text-navy sm:text-sm">
-                            {formatMediaPriceWonWithSymbol(media.price)}
-                            <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
-                              {" "}
-                              ·{" "}
-                              {tMedia(
-                                mediaPricePeriodTranslationKey(
-                                  media.pricePeriod,
-                                ),
-                              )}
-                            </span>
-                          </p>
-                        </div>
-                      </Link>
-                      );
-                    })}
+                        }
+                      />
+                    ))}
                   </div>
                     )}
                     {catalogPageCount > 1 ? (
@@ -797,13 +703,12 @@ export default function MediaBrowseClient({
       <CompareBar
         items={compareItems}
         locale={locale}
-        onRemove={(id) =>
-          setCompareItems((prev) => prev.filter((m) => m.id !== id))
-        }
         onClear={() => setCompareItems([])}
       />
 
-      {compareItems.length > 0 && <div className="h-24 md:h-28" />}
+      {compareItems.length > 0 ? (
+        <div className="h-[6.25rem] md:h-[5.25rem]" aria-hidden />
+      ) : null}
     </>
   );
 }

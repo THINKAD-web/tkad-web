@@ -233,7 +233,12 @@ export async function resolveMediaForDetail(
   id: string,
 ): Promise<MediaItem | null> {
   const fromStatic = getMediaById(id);
-  if (fromStatic) return fromStatic;
+  if (fromStatic) {
+    return {
+      ...fromStatic,
+      pricePeriod: normalizePricePeriod(fromStatic.pricePeriod),
+    };
+  }
   if (!isDatabaseConfigured()) return null;
   try {
     const db = getPrisma();

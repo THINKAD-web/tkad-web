@@ -6,7 +6,7 @@ import type { MediaItem } from "@/lib/media-data";
  * 1. 후보 풀: `budgetMaxMan` > 0 이면 `m.price <= cap` 선필터, 지역은 `regionMatchesMedia`.
  * 2. 점수: `budgetFit*0.4 + targetMatch*0.3 + region*0.2 + visibility*0.1` (각 0–100 근사).
  * 3. 타겟 매칭: `targetAge` 문자열 파싱 후 연령 밴드 겹침 + 상권·업종·캠페인 목표 가중.
- * 4. `score >= 18`만 노출(완화), 상위 30건.
+ * 4. `score >= 12` 우선, 부족 시 상위 랭킹으로 최소 3건 보장, 상위 30건.
  */
 export type CampaignGoal = "awareness" | "consideration" | "launch";
 
@@ -59,7 +59,9 @@ const W_TARGET = 0.3;
 const W_REGION = 0.2;
 const W_VISIBILITY = 0.1;
 
-const MIN_SCORE = 18;
+/** 완화: 너무 많이 걸러지는 경우 상위 랭킹으로 보강 */
+const MIN_SCORE = 12;
+const MIN_RESULTS = 3;
 const MAX_RECOMMEND_RESULTS = 30;
 
 /** 세부 노출 환경(선택 시 OR) */
@@ -142,6 +144,10 @@ export function regionMatchesMedia(m: MediaItem, code: string): boolean {
   }
   if (code === "jeju") {
     return m.region === "jeju" || /제주/i.test(h);
+  }
+  /** 폼의「전국」— 단일 코드로는 `seoul` 등만 있던 DB 매체가 빠지지 않도록 전체 허용 */
+  if (code === "national") {
+    return true;
   }
   if (code === "capital") {
     if (m.region === "busan" || m.region === "jeju") return false;
@@ -316,6 +322,7 @@ function subscoreTargetMatch(m: MediaItem, input: AiRecommendInput): number {
 /** 지역 적합도 0–100 (필터 통과 매체 기준으로 강도만 차등) */
 function subscoreRegion(m: MediaItem, code: string): number {
   if (code === "all") return 76;
+  if (code === "national") return 88;
   if (m.region === code) return 100;
   const h = mediaHaystack(m);
   if (code.startsWith("seoul_")) {
@@ -444,7 +451,7 @@ function scoreOne(
   }
 
   const regionFit = subscoreRegion(m, input.region);
-  if (input.region === "all") {
+  if (input.region === "all" || input.region === "national") {
     reasons.push({
       ko: "전국·복수 지역 노출 옵션",
       en: "Nationwide / multi-region options",
@@ -489,18 +496,20 @@ export function filterCatalogByRegionCodes(
   );
 }
 
-export function recommendMedia(
-  input: AiRecommendInput,
-  catalog: readonly MediaItem[],
-): ScoredMedia[] {
-  const valid = catalog.filter(
-    (m) => m != null && typeof m.id === "string" && m.id.trim().length > 0,
-  );
-  if (valid.length === 0) return [];
+type RecommendPoolOpts = {
+  skipBudget?: boolean;
+  skipPlacement?: boolean;
+  skipLocationKeywords?: boolean;
+};
 
+function buildRecommendPool(
+  valid: readonly MediaItem[],
+  input: AiRecommendInput,
+  opts: RecommendPoolOpts,
+): MediaItem[] {
   const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
-  let pool = valid;
-  if (budgetCap != null) {
+  let pool = [...valid];
+  if (budgetCap != null && !opts.skipBudget) {
     pool = pool.filter((m) => m.price <= budgetCap);
   }
   if (input.region !== "all") {
@@ -518,7 +527,7 @@ export function recommendMedia(
     pool = pool.filter((m) => (m.dailyFootTraffic ?? 0) >= minFt);
   }
   const kws = input.locationKeywords?.filter((k) => k.trim().length > 0) ?? [];
-  if (kws.length > 0) {
+  if (kws.length > 0 && !opts.skipLocationKeywords) {
     pool = pool.filter((m) => {
       const h = mediaHaystack(m);
       return kws.some((kw) => h.includes(kw.trim().toLowerCase()));
@@ -529,19 +538,75 @@ export function recommendMedia(
   const placementKeys = rawHints.filter((h): h is (typeof PLACEMENT_HINT_KEYS)[number] =>
     (PLACEMENT_HINT_KEYS as readonly string[]).includes(h),
   );
-  if (placementKeys.length > 0) {
+  if (placementKeys.length > 0 && !opts.skipPlacement) {
     pool = pool.filter((m) => {
       const hay = mediaHaystack(m);
       return placementKeys.some((tag) => PLACEMENT_HINT_PATTERNS[tag].test(hay));
     });
   }
+  return pool;
+}
+
+function pickRecommendPool(
+  valid: readonly MediaItem[],
+  input: AiRecommendInput,
+): MediaItem[] {
+  const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
+  const steps: RecommendPoolOpts[] = [{}];
+  if (budgetCap != null) steps.push({ skipBudget: true });
+  steps.push({ skipPlacement: true });
+  steps.push({ skipPlacement: true, skipLocationKeywords: true });
+  if (budgetCap != null) {
+    steps.push({ skipBudget: true, skipPlacement: true });
+    steps.push({
+      skipBudget: true,
+      skipPlacement: true,
+      skipLocationKeywords: true,
+    });
+  }
+  for (const opts of steps) {
+    const pool = buildRecommendPool(valid, input, opts);
+    if (pool.length > 0) return pool;
+  }
+  return [];
+}
+
+function finalizeScoredList(
+  pool: MediaItem[],
+  input: AiRecommendInput,
+  budgetCap: number | null,
+): ScoredMedia[] {
+  const scored = pool
+    .map((m) => scoreOne(m, input, budgetCap))
+    .sort((a, b) => b.score - a.score);
+  const passed = scored.filter((s) => s.score >= MIN_SCORE);
+  if (passed.length >= MIN_RESULTS) {
+    return passed.slice(0, MAX_RECOMMEND_RESULTS);
+  }
+  if (scored.length <= passed.length) {
+    return passed.slice(0, MAX_RECOMMEND_RESULTS);
+  }
+  const take = Math.min(
+    MAX_RECOMMEND_RESULTS,
+    Math.max(MIN_RESULTS, passed.length),
+  );
+  return scored.slice(0, Math.min(scored.length, take));
+}
+
+export function recommendMedia(
+  input: AiRecommendInput,
+  catalog: readonly MediaItem[],
+): ScoredMedia[] {
+  const valid = catalog.filter(
+    (m) => m != null && typeof m.id === "string" && m.id.trim().length > 0,
+  );
+  if (valid.length === 0) return [];
+
+  const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
+  const pool = pickRecommendPool(valid, input);
   if (pool.length === 0) return [];
 
-  return [...pool]
-    .map((m) => scoreOne(m, input, budgetCap))
-    .filter((s) => s.score >= MIN_SCORE)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, MAX_RECOMMEND_RESULTS);
+  return finalizeScoredList(pool, input, budgetCap);
 }
 
 /** 한반도 근사 바운딩 박스 내 정규화 좌표 (%) */

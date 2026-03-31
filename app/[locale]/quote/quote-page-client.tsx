@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle,
+  CheckCircle2,
   Images,
   Calculator,
   MapPin,
@@ -25,6 +26,9 @@ import {
   ImagePlus,
   Trash2,
   Mail,
+  SlidersHorizontal,
+  ShieldCheck,
+  Flame,
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import {
@@ -38,7 +42,29 @@ import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import Spinner from "@/components/spinner";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
+import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
+import MediaAdvancedFiltersOverlay from "@/components/media-advanced-filters-overlay";
+import { FloatingSelectionBar } from "@/components/floating-selection-bar";
+import {
+  MEDIA_CATALOG_GRID_CLASS,
+  MEDIA_CATALOG_COMPACT_GRID_CLASS,
+  MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
+  MediaCatalogStickyAside,
+  MediaCatalogGridCompactToggle,
+} from "@/components/media-catalog-shared";
 import { cn } from "@/lib/utils";
+import {
+  computeCatalogBounds,
+  defaultAdvancedFilterState,
+  passesMediaAdvancedFilters,
+  type MediaAdvancedFilterState,
+} from "@/lib/media-filter-advanced";
+import { useMediaMinWidth } from "@/lib/use-media-min-width";
+import { formatMediaLocationShort } from "@/lib/media-location-format";
+import {
+  formatMediaPriceWonWithSymbol,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
@@ -90,6 +116,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
   const [mediaRegionFilter, setMediaRegionFilter] = useState("all");
   const [mediaBudgetCap, setMediaBudgetCap] = useState("all"); // 만원
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const mdUp = useMediaMinWidth(768);
+  const [advanced, setAdvanced] = useState<MediaAdvancedFilterState | null>(
+    null,
+  );
+  const [quoteSearchFieldKey, setQuoteSearchFieldKey] = useState(0);
   const [networkQuoteOptions, setNetworkQuoteOptions] = useState<
     Record<string, { units: number; regionScope: string }>
   >({});
@@ -198,19 +230,45 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     ];
   }, [catalog, isKo]);
 
+  const bounds = useMemo(() => computeCatalogBounds(catalog), [catalog]);
+  const defaultAdvanced = useMemo(
+    () => defaultAdvancedFilterState(bounds),
+    [bounds],
+  );
+  const effectiveAdvanced = advanced ?? defaultAdvanced;
+
   const filteredCatalog = useMemo(() => {
     const cap =
       mediaBudgetCap === "all" ? null : Math.max(0, parseInt(mediaBudgetCap, 10) || 0);
+    const q = mediaTextFilter.trim().toLowerCase();
     return catalog.filter((m) => {
-      if (mediaRegionFilter !== "all" && (m.region ?? "") !== mediaRegionFilter) return false;
-      if (mediaTypeFilter !== "all" && (m.type ?? "") !== mediaTypeFilter) return false;
-      if (cap != null && cap > 0 && (m.price ?? 0) > cap) return false;
-      if (mediaTextFilter.trim().length > 0 && !matchesMediaTextQuery(m, mediaTextFilter)) {
+      if (!passesMediaAdvancedFilters(m, effectiveAdvanced, bounds)) return false;
+      if (mediaRegionFilter !== "all" && (m.region ?? "") !== mediaRegionFilter)
         return false;
-      }
+      if (mediaTypeFilter !== "all" && (m.type ?? "") !== mediaTypeFilter)
+        return false;
+      if (cap != null && cap > 0 && (m.price ?? 0) > cap) return false;
+      if (q.length > 0 && !matchesMediaTextQuery(m, q)) return false;
       return true;
     });
-  }, [catalog, mediaRegionFilter, mediaTypeFilter, mediaBudgetCap, mediaTextFilter]);
+  }, [
+    catalog,
+    mediaRegionFilter,
+    mediaTypeFilter,
+    mediaBudgetCap,
+    mediaTextFilter,
+    effectiveAdvanced,
+    bounds,
+  ]);
+
+  const resetQuoteMediaFilters = useCallback(() => {
+    setMediaTextFilter("");
+    setMediaTypeFilter("all");
+    setMediaRegionFilter("all");
+    setMediaBudgetCap("all");
+    setAdvanced(null);
+    setQuoteSearchFieldKey((k) => k + 1);
+  }, []);
 
   const monthlyCost = useMemo(
     () =>
@@ -238,6 +296,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   }, [form.budgetMax]);
 
   const pdfPreviewRef = useRef<HTMLDivElement>(null);
+  const quoteFloatingStashRef = useRef<MediaItem[]>([]);
 
   const pdfPreviewRows = useMemo(() => {
     return selectedMedia.map((m) => {
@@ -285,6 +344,15 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       return next;
     });
   }, []);
+
+  const clearAllMediaSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const popularIds = useMemo(
+    () => new Set(["1", "2", "3", "8", "9"]),
+    [],
+  );
 
   const updateField = useCallback((field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -532,6 +600,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     }
   };
 
+  if (selectedMedia.length > 0) quoteFloatingStashRef.current = selectedMedia;
+  const quoteBarOpen = step === 1 && selectedMedia.length > 0;
+  const displaySelectedForBar =
+    selectedMedia.length > 0 ? selectedMedia : quoteFloatingStashRef.current;
+
   return (
     <>
       <section className="bg-navy py-28">
@@ -618,27 +691,35 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       <p className="mb-4 text-sm text-muted-foreground">
                         {t("quote.selectMediaDesc")}
                       </p>
-                      <div className="mb-4 flex flex-col gap-3 rounded-xl border border-navy/10 bg-slate-50/70 p-3 sm:flex-row sm:items-end">
-                        <div className="flex-1">
-                          <label className="mb-1 block text-xs font-semibold text-navy">
-                            {isKo ? "검색" : "Search"}
-                          </label>
-                          <Input
-                            value={mediaTextFilter}
-                            onChange={(e) => setMediaTextFilter(e.target.value)}
-                            className="border-navy/15 bg-white"
-                            placeholder={isKo ? "지역/역/키워드로 검색" : "Search by area/station/keyword"}
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-none sm:gap-2">
+                      <div className="flex flex-col gap-8 lg:flex-row">
+                        <MediaCatalogStickyAside>
                           <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-navy/80">
+                            <label className="mb-2 block text-sm font-semibold text-navy">
+                              {t("common.search")}
+                            </label>
+                            <MediaSearchAutocomplete
+                              key={quoteSearchFieldKey}
+                              locale={locale}
+                              catalog={catalog}
+                              onSelect={(m) => toggleMedia(m.id)}
+                              onSearchSubmit={(q) => setMediaTextFilter(q.trim())}
+                              onQueryChange={(q) => {
+                                if (!q.trim()) setMediaTextFilter("");
+                              }}
+                              searchButtonLabel={t("media.searchButton")}
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-semibold text-navy">
                               {isKo ? "유형" : "Type"}
                             </label>
                             <select
                               value={mediaTypeFilter}
-                              onChange={(e) => setMediaTypeFilter(e.target.value)}
-                              className="h-10 w-full rounded-md border border-navy/15 bg-white px-2 text-sm"
+                              onChange={(e) =>
+                                setMediaTypeFilter(e.target.value)
+                              }
+                              className="h-11 w-full rounded-xl border border-navy/15 bg-white px-3 text-sm font-medium text-navy"
+                              aria-label={isKo ? "유형" : "Type"}
                             >
                               <option value="all">{isKo ? "전체" : "All"}</option>
                               <option value="digital">{isKo ? "디지털" : "Digital"}</option>
@@ -647,13 +728,16 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             </select>
                           </div>
                           <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-navy/80">
+                            <label className="mb-2 block text-sm font-semibold text-navy">
                               {isKo ? "지역" : "Region"}
                             </label>
                             <select
                               value={mediaRegionFilter}
-                              onChange={(e) => setMediaRegionFilter(e.target.value)}
-                              className="h-10 w-full rounded-md border border-navy/15 bg-white px-2 text-sm"
+                              onChange={(e) =>
+                                setMediaRegionFilter(e.target.value)
+                              }
+                              className="h-11 w-full rounded-xl border border-navy/15 bg-white px-3 text-sm font-medium text-navy"
+                              aria-label={isKo ? "지역" : "Region"}
                             >
                               {quoteRegionOptions.map((o) => (
                                 <option key={o.value} value={o.value}>
@@ -662,16 +746,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               ))}
                             </select>
                           </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-none">
                           <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-navy/80">
+                            <label className="mb-2 block text-sm font-semibold text-navy">
                               {isKo ? "예산 상한(월)" : "Budget cap/mo"}
                             </label>
                             <select
                               value={mediaBudgetCap}
-                              onChange={(e) => setMediaBudgetCap(e.target.value)}
-                              className="h-10 w-full rounded-md border border-navy/15 bg-white px-2 text-sm"
+                              onChange={(e) =>
+                                setMediaBudgetCap(e.target.value)
+                              }
+                              className="h-11 w-full rounded-xl border border-navy/15 bg-white px-3 text-sm font-medium text-navy"
+                              aria-label={isKo ? "예산 상한" : "Budget cap"}
                             >
                               <option value="all">{isKo ? "제한 없음" : "No cap"}</option>
                               <option value="500">500</option>
@@ -681,33 +766,62 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               <option value="5000">5000</option>
                             </select>
                           </div>
-                          <div className="flex items-end gap-2">
-                            <Button
-                              type="button"
-                              variant={mediaLayout === "grid" ? "secondary" : "outline"}
-                              className="h-10 flex-1 text-xs font-semibold"
-                              onClick={() => setMediaLayout("grid")}
-                            >
-                              {isKo ? "카드" : "Cards"}
-                            </Button>
-                            <Button
-                              type="button"
-                              variant={mediaLayout === "compact" ? "secondary" : "outline"}
-                              className="h-10 flex-1 text-xs font-semibold"
-                              onClick={() => setMediaLayout("compact")}
-                            >
-                              {isKo ? "컴팩트" : "Compact"}
-                            </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="h-11 w-full rounded-xl border-navy/20 font-semibold text-navy"
+                            onClick={() => setAdvancedOpen(true)}
+                          >
+                            <SlidersHorizontal className="mr-2 h-4 w-4" />
+                            {t("media.advanced.openButton")}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="h-11 w-full rounded-xl border-navy/15 font-semibold text-muted-foreground"
+                            onClick={resetQuoteMediaFilters}
+                          >
+                            {t("common.reset")}
+                          </Button>
+                        </MediaCatalogStickyAside>
+
+                        <MediaAdvancedFiltersOverlay
+                          open={advancedOpen}
+                          onOpenChange={setAdvancedOpen}
+                          mdUp={mdUp}
+                          catalog={catalog}
+                          bounds={bounds}
+                          effectiveAdvanced={effectiveAdvanced}
+                          setAdvanced={setAdvanced}
+                        />
+
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="text-sm text-muted-foreground">
+                              {t("media.results")}: {filteredCatalog.length}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <MediaCatalogGridCompactToggle
+                                layout={mediaLayout}
+                                onLayoutChange={setMediaLayout}
+                                gridLabel={t("media.browseCardLayoutGrid")}
+                                compactLabel={t("media.browseCardLayoutCompact")}
+                              />
+                              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
+                                <ShieldCheck className="h-4 w-4" aria-hidden />
+                                <span>
+                                  {tMedia("browseCatalogVerifiedBadge")}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
 
                       {filteredCatalog.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-navy/15 bg-white p-8 text-center text-sm text-muted-foreground">
+                        <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-navy/15 text-sm text-muted-foreground">
                           {isKo ? "조건에 맞는 매체가 없습니다." : "No media matches your filters."}
                         </div>
                       ) : mediaLayout === "grid" ? (
-                      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      <div className={MEDIA_CATALOG_GRID_CLASS}>
                         {filteredCatalog.map((media) => {
                           const checked = selectedIds.has(media.id);
                           const nwOpt = networkQuoteOptions[media.id];
@@ -806,7 +920,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         })}
                       </div>
                       ) : (
-                        <div className="flex flex-col gap-2 sm:gap-3">
+                        <div className={MEDIA_CATALOG_COMPACT_GRID_CLASS}>
                           {filteredCatalog.map((media) => {
                             const checked = selectedIds.has(media.id);
                             const typeLabel = typeLabels[media.type];
@@ -832,21 +946,21 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   />
                                   <div
                                     className={cn(
-                                      "flex gap-2.5 rounded-xl border border-navy/10 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md",
-                                      "peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
+                                      MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
+                                      "hover:shadow-md peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
                                     )}
                                   >
                                     <MediaCatalogThumbnail
                                       media={media}
                                       primaryImageUrl={quoteThumb}
                                       placeholderLabel={tMedia("imagePreparing")}
-                                      className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-lg sm:h-24 sm:w-28"
+                                      className="relative z-10 h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-md sm:h-24 sm:w-28 sm:rounded-lg"
                                       bottomGradientClassName={null}
                                       placeholderSize="xs"
                                     >
                                       <span
                                         className={cn(
-                                          "absolute right-1.5 top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded border-2 bg-white text-xs",
+                                          "absolute right-1 top-1 z-20 flex size-7 items-center justify-center rounded-full border-2 bg-white/95 text-[10px] font-bold shadow-sm",
                                           checked
                                             ? "border-gold bg-gold text-navy"
                                             : "border-navy/20",
@@ -856,8 +970,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                         {checked ? "✓" : ""}
                                       </span>
                                     </MediaCatalogThumbnail>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex items-center gap-2">
+                                    <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 sm:gap-1.5">
+                                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                                         <Badge
                                           variant="secondary"
                                           className="bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
@@ -866,19 +980,32 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                             ? (typeLabel?.ko ?? media.type)
                                             : (typeLabel?.en ?? media.type)}
                                         </Badge>
+                                        {popularIds.has(media.id) ? (
+                                          <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[8px] font-bold text-navy sm:text-[9px]">
+                                            <Flame className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+                                            {isKo ? "인기" : "Hot"}
+                                          </span>
+                                        ) : null}
                                       </div>
-                                      <p className="mt-1 line-clamp-2 text-[13px] font-bold leading-snug text-navy sm:text-sm">
+                                      <p className="truncate text-[13px] font-bold leading-snug text-navy sm:text-sm sm:leading-relaxed">
                                         {isKo ? media.name : media.nameEn}
                                       </p>
-                                      <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-muted-foreground sm:text-[11px]">
-                                        <MapPin className="mr-0.5 inline h-2.5 w-2.5 align-text-bottom sm:h-3 sm:w-3" />
-                                        {isKo ? media.location : media.locationEn}
+                                      <p className="flex min-w-0 items-center gap-0.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
+                                        <MapPin className="h-2.5 w-2.5 shrink-0 align-text-bottom sm:h-3 sm:w-3" />
+                                        <span className="min-w-0 truncate">
+                                          {formatMediaLocationShort(media, isKo)}
+                                        </span>
                                       </p>
-                                      <p className="mt-1 text-[13px] font-bold tabular-nums text-navy sm:text-sm">
-                                        ₩{displayPrice.toLocaleString()}
+                                      <p className="text-[13px] font-bold tabular-nums leading-none text-navy sm:text-sm">
+                                        {formatMediaPriceWonWithSymbol(displayPrice)}
                                         <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
                                           {" "}
-                                          만원 {t("quote.perMonth")}
+                                          ·{" "}
+                                          {tMedia(
+                                            mediaPricePeriodTranslationKey(
+                                              media.pricePeriod,
+                                            ),
+                                          )}
                                         </span>
                                       </p>
                                     </div>
@@ -952,6 +1079,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           })}
                         </div>
                       )}
+                        </div>
+                      </div>
                     </>
                   )}
 
@@ -1401,28 +1530,33 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   ) : null}
 
                   {step < 4 || (step === 4 && !submitted) ? (
-                    <div className="mt-8 flex flex-wrap justify-between gap-3 border-t border-navy/10 pt-6">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={goPrev}
-                        disabled={step === 1}
-                        className="border-navy/20"
-                      >
-                        <ChevronLeft className="mr-1 h-4 w-4" />
-                        {t("quote.prevStep")}
-                      </Button>
-                      {step < 4 ? (
+                    !(step === 1 && selectedMedia.length > 0) ? (
+                      <div className="mt-8 flex flex-wrap justify-between gap-3 border-t border-navy/10 pt-6">
                         <Button
                           type="button"
-                          onClick={goNext}
-                          className="bg-gold font-bold text-navy hover:bg-gold-dark"
+                          variant="floatingSecondary"
+                          size="floating"
+                          onClick={goPrev}
+                          disabled={step === 1}
+                          className="h-11 rounded-xl border-0 md:h-11"
                         >
-                          {t("quote.nextStep")}
-                          <ChevronRight className="ml-1 h-4 w-4" />
+                          <ChevronLeft className="mr-1 h-4 w-4" />
+                          {t("quote.prevStep")}
                         </Button>
-                      ) : null}
-                    </div>
+                        {step < 4 ? (
+                          <Button
+                            type="button"
+                            variant="floatingPrimary"
+                            size="floating"
+                            onClick={goNext}
+                            className="h-11 rounded-xl md:h-11"
+                          >
+                            {t("quote.nextStep")}
+                            <ChevronRight className="ml-1 h-4 w-4" />
+                          </Button>
+                        ) : null}
+                      </div>
+                    ) : null
                   ) : null}
                 </CardContent>
               </Card>
@@ -1479,6 +1613,57 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           </div>
         </div>
       </section>
+
+      <FloatingSelectionBar
+        open={quoteBarOpen}
+        ariaLabel={isKo ? "선택한 매체 작업" : "Selected media actions"}
+      >
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
+          <div
+            className="flex min-w-0 shrink-0 items-center gap-2 text-base font-semibold text-navy md:text-sm"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <CheckCircle2
+              className="h-5 w-5 shrink-0 text-emerald-600 md:h-4 md:w-4"
+              aria-hidden
+            />
+            <span className="truncate">
+              {t("quote.floatingSelectedCount", {
+                count: displaySelectedForBar.length,
+              })}
+            </span>
+          </div>
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-3 md:gap-4">
+            <Button
+              type="button"
+              variant="floatingSecondary"
+              size="floating"
+              onClick={clearAllMediaSelection}
+              className="shrink-0"
+            >
+              {t("quote.floatingClearSelection")}
+            </Button>
+            <Button
+              type="button"
+              variant="floatingPrimary"
+              size="floating"
+              onClick={goNext}
+              className="shrink-0 px-6 md:px-8"
+            >
+              {t("quote.nextStep")}
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </FloatingSelectionBar>
+
+      {quoteBarOpen ? (
+        <div
+          className="h-[6.25rem] md:h-[5.25rem]"
+          aria-hidden
+        />
+      ) : null}
     </>
   );
 }

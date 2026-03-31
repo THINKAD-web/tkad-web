@@ -66,7 +66,14 @@ export default function RecommendPageClient({
           q.length > 0
             ? pool.filter((m) => matchesMediaTextQuery(m, q))
             : pool;
-        const scored = recommendMedia(payload.input, poolFiltered);
+        let scored = recommendMedia(payload.input, poolFiltered);
+        if (
+          scored.length === 0 &&
+          q.length > 0 &&
+          pool.length > 0
+        ) {
+          scored = recommendMedia(payload.input, pool);
+        }
         setFullList(scored);
         setPhase(scored.length > 0 ? "dashboard" : "noResults");
       }, 900);

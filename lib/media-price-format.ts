@@ -39,3 +39,37 @@ export function mediaPricePeriodTranslationKey(
       return "pricePeriodMonth";
   }
 }
+
+/**
+ * 상세·히어로 등 가격 옆 기간 문구 (비정상 `pricePeriod`는 month로 폴백).
+ * ko: 월 / 2주 / 주 / 일 — 영문: per month / per 2 weeks / …
+ */
+export function formatPricePeriodShortLabel(
+  period: MediaPricePeriodKey | string | null | undefined,
+  locale: string,
+): string {
+  const p = normalizeMediaPricePeriod(period);
+  const isKo = locale === "ko";
+  if (isKo) {
+    switch (p) {
+      case "biweekly":
+        return "2주";
+      case "week":
+        return "주";
+      case "day":
+        return "일";
+      default:
+        return "월";
+    }
+  }
+  switch (p) {
+    case "biweekly":
+      return "per 2 weeks";
+    case "week":
+      return "per week";
+    case "day":
+      return "per day";
+    default:
+      return "per month";
+  }
+}

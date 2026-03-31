@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { FileDown, Loader2, Mail } from "lucide-react";
+import { ExternalLink, FileDown, Loader2, Mail, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,8 +25,9 @@ import {
   type PlannerReportPdfLabels,
 } from "@/lib/build-planner-report-pdf";
 import { useToast } from "@/components/toast-provider";
+import PlannerReportPreview from "@/components/planner-report-preview";
 
-type Props = {
+export type PlannerReportSharedProps = {
   isKo: boolean;
   campaignGoal: PlannerCampaignGoal | null;
   goalTitle: string;
@@ -46,29 +47,8 @@ function mediaPhotoUrl(m: MediaItem): string | null {
   return getPrimaryMediaImageUrl(m) ?? resolveMediaGallery(m)[0] ?? null;
 }
 
-export default function PlannerReportStep({
-  isKo,
-  campaignGoal,
-  goalTitle,
-  budgetNum,
-  months,
-  regionsText,
-  categoriesText,
-  ageText,
-  industryText,
-  portfolio,
-  metrics,
-  reachCorePct,
-  reachExtendedPct,
-}: Props) {
+function usePlannerReportDerived(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
-  const tCommon = useTranslations("common");
-  const { toast } = useToast();
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const urlRef = useRef<string | null>(null);
-
   const labels: PlannerReportPdfLabels = useMemo(
     () => ({
       title: t("reportPdfTitle"),
@@ -112,41 +92,44 @@ export default function PlannerReportStep({
   const periodDisplay = useMemo(
     () =>
       formatPlannerPeriodDisplay(
-        months,
+        props.months,
         (key, values) =>
           values != null
             ? (t as (k: string, v?: Record<string, number>) => string)(key, values)
             : t(key),
       ),
-    [months, t],
+    [props.months, t],
   );
 
   const budgetAllocation = useMemo(() => {
-    const slices = budgetSplitByCategory(portfolio);
+    const slices = budgetSplitByCategory(props.portfolio);
     return slices.map((s) => ({
-      label: isKo ? s.labelKo : s.labelEn,
+      label: props.isKo ? s.labelKo : s.labelEn,
       pct: s.pct,
       valueMan: s.value,
     }));
-  }, [portfolio, isKo]);
+  }, [props.portfolio, props.isKo]);
 
   const blendedCpmKrw = useMemo(() => {
-    if (!metrics) return null;
-    return plannerBlendCpmKrw(portfolio, metrics.estimatedMonthlyImpressions);
-  }, [metrics, portfolio]);
+    if (!props.metrics) return null;
+    return plannerBlendCpmKrw(
+      props.portfolio,
+      props.metrics.estimatedMonthlyImpressions,
+    );
+  }, [props.metrics, props.portfolio]);
 
   const effectSummaryLines = useMemo(() => {
-    if (!metrics) return [];
+    if (!props.metrics) return [];
     const lines: string[] = [
       t("reportSummaryImpMonthly", {
-        n: metrics.estimatedMonthlyImpressions.toLocaleString(),
+        n: props.metrics.estimatedMonthlyImpressions.toLocaleString(),
       }),
       t("reportSummaryImpTotal", {
-        n: metrics.estimatedTotalImpressions.toLocaleString(),
+        n: props.metrics.estimatedTotalImpressions.toLocaleString(),
       }),
       t("reportSummaryReach", {
-        core: reachCorePct,
-        ext: reachExtendedPct,
+        core: props.reachCorePct,
+        ext: props.reachExtendedPct,
       }),
     ];
     if (blendedCpmKrw != null) {
@@ -155,11 +138,11 @@ export default function PlannerReportStep({
       );
     }
     lines.push(
-      t("reportSummaryRoi", { n: metrics.roiExpected }),
+      t("reportSummaryRoi", { n: props.metrics.roiExpected }),
       t("reportSummaryDisclaimerShort"),
     );
     return lines;
-  }, [metrics, reachCorePct, reachExtendedPct, blendedCpmKrw, t]);
+  }, [props.metrics, props.reachCorePct, props.reachExtendedPct, blendedCpmKrw, t]);
 
   const contact = useMemo(
     () => ({
@@ -171,49 +154,97 @@ export default function PlannerReportStep({
     [t],
   );
 
+  return useMemo(
+    () => ({
+      labels,
+      periodDisplay,
+      budgetAllocation,
+      blendedCpmKrw,
+      effectSummaryLines,
+      contact,
+    }),
+    [
+      labels,
+      periodDisplay,
+      budgetAllocation,
+      blendedCpmKrw,
+      effectSummaryLines,
+      contact,
+    ],
+  );
+}
+
+function buildPlannerPdfParams(
+  props: PlannerReportSharedProps,
+  derived: ReturnType<typeof usePlannerReportDerived>,
+  generatedAt: string,
+) {
+  const pdfPortfolio = props.portfolio.map((m) => ({
+    name: props.isKo ? m.name : m.nameEn || m.name,
+    location: props.isKo ? m.location : m.locationEn || m.location,
+    price: m.price,
+    size: m.size ?? "—",
+    resolution: m.resolution ?? "—",
+    type: m.type,
+    dailyFootTraffic: m.dailyFootTraffic ?? 0,
+    imageUrl: mediaPhotoUrl(m),
+  }));
+  return {
+    labels: derived.labels,
+    generatedAt,
+    goalText: props.goalTitle,
+    budgetMan: props.budgetNum,
+    periodDisplay: derived.periodDisplay,
+    regionsText: props.regionsText,
+    categoriesText: props.categoriesText,
+    ageText: props.ageText,
+    industryText: props.industryText,
+    isKo: props.isKo,
+    portfolio: pdfPortfolio,
+    metrics: props.metrics
+      ? {
+          monthlyImp: props.metrics.estimatedMonthlyImpressions,
+          totalImp: props.metrics.estimatedTotalImpressions,
+          roiExpected: props.metrics.roiExpected,
+          reachCorePct: props.reachCorePct,
+          reachExtendedPct: props.reachExtendedPct,
+        }
+      : null,
+    budgetAllocation: derived.budgetAllocation,
+    blendedCpmKrw: derived.blendedCpmKrw,
+    effectSummaryLines: derived.effectSummaryLines,
+    contact: derived.contact,
+  };
+}
+
+export default function PlannerReportStep(props: PlannerReportSharedProps) {
+  const t = useTranslations("planner");
+  const tCommon = useTranslations("common");
+  const { toast } = useToast();
+  const derived = usePlannerReportDerived(props);
+
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
+  const [downloading, setDownloading] = useState(false);
+  const urlRef = useRef<string | null>(null);
+  const [snapshotAt] = useState(() =>
+    new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
+  );
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
       setError(null);
-      const generatedAt = new Date().toLocaleString(isKo ? "ko-KR" : "en-US");
-      const pdfPortfolio = portfolio.map((m) => ({
-        name: isKo ? m.name : m.nameEn || m.name,
-        location: isKo ? m.location : m.locationEn || m.location,
-        price: m.price,
-        size: m.size ?? "—",
-        resolution: m.resolution ?? "—",
-        type: m.type,
-        dailyFootTraffic: m.dailyFootTraffic,
-        imageUrl: mediaPhotoUrl(m),
-      }));
+      const generatedAt = new Date().toLocaleString(
+        props.isKo ? "ko-KR" : "en-US",
+      );
       try {
-        const doc = await buildPlannerReportPdf({
-          labels,
-          generatedAt,
-          goalText: goalTitle,
-          budgetMan: budgetNum,
-          periodDisplay,
-          regionsText,
-          categoriesText,
-          ageText,
-          industryText,
-          isKo,
-          portfolio: pdfPortfolio,
-          metrics: metrics
-            ? {
-                monthlyImp: metrics.estimatedMonthlyImpressions,
-                totalImp: metrics.estimatedTotalImpressions,
-                roiExpected: metrics.roiExpected,
-                reachCorePct,
-                reachExtendedPct,
-              }
-            : null,
-          budgetAllocation,
-          blendedCpmKrw,
-          effectSummaryLines,
-          contact,
-        });
+        const doc = await buildPlannerReportPdf(
+          buildPlannerPdfParams(props, derived, generatedAt),
+        );
         if (cancelled) return;
         const blob = doc.output("blob");
         const nextUrl = URL.createObjectURL(blob);
@@ -221,7 +252,7 @@ export default function PlannerReportStep({
         urlRef.current = nextUrl;
         setPdfUrl(nextUrl);
       } catch (e) {
-        console.error(e);
+        console.error("[planner-pdf]", e);
         if (!cancelled) {
           setError(t("reportPdfError"));
           toast("error", tCommon("pdfGenerationFailed"));
@@ -238,68 +269,34 @@ export default function PlannerReportStep({
       }
     };
   }, [
-    labels,
-    isKo,
-    goalTitle,
-    budgetNum,
-    periodDisplay,
-    regionsText,
-    categoriesText,
-    ageText,
-    industryText,
-    portfolio,
-    metrics,
-    reachCorePct,
-    reachExtendedPct,
-    budgetAllocation,
-    blendedCpmKrw,
-    effectSummaryLines,
-    contact,
+    props.isKo,
+    props.goalTitle,
+    props.budgetNum,
+    props.regionsText,
+    props.categoriesText,
+    props.ageText,
+    props.industryText,
+    props.portfolio,
+    props.metrics,
+    props.reachCorePct,
+    props.reachExtendedPct,
+    derived,
+    retryKey,
     t,
     tCommon,
     toast,
   ]);
 
   const downloadPdf = useCallback(async () => {
+    setDownloading(true);
     try {
-      const generatedAt = new Date().toLocaleString(isKo ? "ko-KR" : "en-US");
-      const pdfPortfolio = portfolio.map((m) => ({
-        name: isKo ? m.name : m.nameEn || m.name,
-        location: isKo ? m.location : m.locationEn || m.location,
-        price: m.price,
-        size: m.size ?? "—",
-        resolution: m.resolution ?? "—",
-        type: m.type,
-        dailyFootTraffic: m.dailyFootTraffic,
-        imageUrl: mediaPhotoUrl(m),
-      }));
-      const doc = await buildPlannerReportPdf({
-        labels,
-        generatedAt,
-        goalText: goalTitle,
-        budgetMan: budgetNum,
-        periodDisplay,
-        regionsText,
-        categoriesText,
-        ageText,
-        industryText,
-        isKo,
-        portfolio: pdfPortfolio,
-        metrics: metrics
-          ? {
-              monthlyImp: metrics.estimatedMonthlyImpressions,
-              totalImp: metrics.estimatedTotalImpressions,
-              roiExpected: metrics.roiExpected,
-              reachCorePct,
-              reachExtendedPct,
-            }
-          : null,
-        budgetAllocation,
-        blendedCpmKrw,
-        effectSummaryLines,
-        contact,
-      });
-      const filename = isKo
+      const generatedAt = new Date().toLocaleString(
+        props.isKo ? "ko-KR" : "en-US",
+      );
+      const doc = await buildPlannerReportPdf(
+        buildPlannerPdfParams(props, derived, generatedAt),
+      );
+      const filename = props.isKo
         ? `THINKAD-플래너-보고서-${Date.now()}.pdf`
         : `THINKAD-planner-report-${Date.now()}.pdf`;
       const blob = doc.output("blob");
@@ -312,29 +309,27 @@ export default function PlannerReportStep({
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast("success", t("reportPdfDownloaded"));
     } catch (e) {
-      console.error(e);
+      console.error("[planner-pdf download]", e);
       setError(t("reportPdfError"));
       toast("error", tCommon("pdfGenerationFailed"));
+    } finally {
+      setDownloading(false);
     }
   }, [
-    labels,
-    isKo,
-    goalTitle,
-    budgetNum,
-    periodDisplay,
-    regionsText,
-    categoriesText,
-    ageText,
-    industryText,
-    portfolio,
-    metrics,
-    reachCorePct,
-    reachExtendedPct,
-    budgetAllocation,
-    blendedCpmKrw,
-    effectSummaryLines,
-    contact,
+    props.isKo,
+    props.goalTitle,
+    props.budgetNum,
+    props.regionsText,
+    props.categoriesText,
+    props.ageText,
+    props.industryText,
+    props.portfolio,
+    props.metrics,
+    props.reachCorePct,
+    props.reachExtendedPct,
+    derived,
     t,
     tCommon,
     toast,
@@ -342,22 +337,33 @@ export default function PlannerReportStep({
 
   const emailReport = useCallback(() => {
     const subject = encodeURIComponent(
-      isKo ? "[THINKAD] 플래너 보고서 요청" : "[THINKAD] Planner report request",
+      props.isKo
+        ? "[THINKAD] 플래너 보고서 요청"
+        : "[THINKAD] Planner report request",
     );
     const body = encodeURIComponent(
       [
-        isKo ? "플래너 보고서를 이메일로 받고 싶습니다." : "Please send the planner report by email.",
+        props.isKo
+          ? "플래너 보고서를 이메일로 받고 싶습니다."
+          : "Please send the planner report by email.",
         "",
-        `${isKo ? "목표" : "Goal"}: ${goalTitle}`,
-        `${isKo ? "예산(만원)" : "Budget (₩10K)"}: ${budgetNum}`,
-        `${isKo ? "기간" : "Duration"}: ${periodDisplay}`,
-        campaignGoal ? `goalKey: ${campaignGoal}` : "",
+        `${props.isKo ? "목표" : "Goal"}: ${props.goalTitle}`,
+        `${props.isKo ? "예산(만원)" : "Budget (₩10K)"}: ${props.budgetNum}`,
+        `${props.isKo ? "기간" : "Duration"}: ${derived.periodDisplay}`,
+        props.campaignGoal ? `goalKey: ${props.campaignGoal}` : "",
         "",
-        `${isKo ? "연락 가능한 이메일" : "Reply email"}: `,
+        `${props.isKo ? "연락 가능한 이메일" : "Reply email"}: `,
       ].join("\n"),
     );
-    window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`;
-  }, [isKo, goalTitle, budgetNum, periodDisplay, campaignGoal, contact.email]);
+    window.location.href = `mailto:${derived.contact.email}?subject=${subject}&body=${body}`;
+  }, [
+    props.isKo,
+    props.goalTitle,
+    props.budgetNum,
+    props.campaignGoal,
+    derived.periodDisplay,
+    derived.contact.email,
+  ]);
 
   return (
     <div className="space-y-6">
@@ -368,10 +374,29 @@ export default function PlannerReportStep({
         <p className="text-sm text-muted-foreground">{t("stepReportDesc")}</p>
       </div>
 
+      <PlannerReportPreview
+        isKo={props.isKo}
+        goalTitle={props.goalTitle}
+        budgetNum={props.budgetNum}
+        periodDisplay={derived.periodDisplay}
+        regionsText={props.regionsText}
+        categoriesText={props.categoriesText}
+        ageText={props.ageText}
+        industryText={props.industryText}
+        portfolio={props.portfolio}
+        metrics={props.metrics}
+        reachCorePct={props.reachCorePct}
+        reachExtendedPct={props.reachExtendedPct}
+        budgetAllocation={derived.budgetAllocation}
+        blendedCpmKrw={derived.blendedCpmKrw}
+        effectSummaryLines={derived.effectSummaryLines}
+        generatedAt={snapshotAt}
+      />
+
       <Card className="border-navy/10 shadow-lg">
-        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <CardHeader className="flex flex-col gap-4 border-b border-navy/8 bg-slate-50/50 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle className="text-navy">{t("reportPreviewTitle")}</CardTitle>
+            <CardTitle className="text-navy">{t("reportPdfDocumentTitle")}</CardTitle>
             <CardDescription>{t("reportPreviewDesc")}</CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -380,11 +405,28 @@ export default function PlannerReportStep({
               variant="outline"
               className="rounded-full border-navy/20"
               onClick={downloadPdf}
-              disabled={loading || !!error}
+              disabled={downloading}
             >
-              <FileDown className="mr-2 h-4 w-4" />
+              {downloading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <FileDown className="mr-2 h-4 w-4" />
+              )}
               {t("reportDownloadPdf")}
             </Button>
+            {pdfUrl && !loading ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full border-navy/20"
+                asChild
+              >
+                <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  {t("reportOpenPdfNewTab")}
+                </a>
+              </Button>
+            ) : null}
             <Button
               type="button"
               className="btn-gold rounded-full font-semibold"
@@ -393,27 +435,186 @@ export default function PlannerReportStep({
               <Mail className="mr-2 h-4 w-4" />
               {t("reportEmailMe")}
             </Button>
+            {error ? (
+              <Button
+                type="button"
+                variant="secondary"
+                className="rounded-full"
+                onClick={() => {
+                  setError(null);
+                  setRetryKey((k) => k + 1);
+                }}
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                {t("reportRetryPdf")}
+              </Button>
+            ) : null}
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {loading ? (
-            <div className="flex min-h-[28rem] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-navy/15 bg-slate-50/60 py-16 text-sm text-muted-foreground">
+            <div className="flex min-h-[20rem] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-navy/15 bg-slate-50/60 py-16 text-sm text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin text-gold" />
               {t("reportGenerating")}
             </div>
           ) : error ? (
             <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-10 text-center text-sm text-destructive">
-              {error}
+              <p>{error}</p>
+              <p className="mt-2 text-xs text-destructive/80">
+                {t("reportPdfErrorHint")}
+              </p>
             </div>
           ) : pdfUrl ? (
             <iframe
-              title={t("reportPreviewTitle")}
+              title={t("reportPdfDocumentTitle")}
               src={`${pdfUrl}#toolbar=1`}
-              className="h-[min(72vh,820px)] w-full rounded-2xl border border-navy/10 bg-white shadow-inner"
+              className="h-[min(65vh,720px)] w-full rounded-2xl border border-navy/10 bg-white shadow-inner"
             />
           ) : null}
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+/** 대시보드(7단계) 하단: 요약 미리보기 + PDF 다운로드(클릭 시 생성) */
+export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
+  const t = useTranslations("planner");
+  const tCommon = useTranslations("common");
+  const { toast } = useToast();
+  const derived = usePlannerReportDerived(props);
+  const [downloading, setDownloading] = useState(false);
+  const [snapshotAt] = useState(() =>
+    new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
+  );
+
+  const downloadPdf = useCallback(async () => {
+    setDownloading(true);
+    try {
+      const generatedAt = new Date().toLocaleString(
+        props.isKo ? "ko-KR" : "en-US",
+      );
+      const doc = await buildPlannerReportPdf(
+        buildPlannerPdfParams(props, derived, generatedAt),
+      );
+      const filename = props.isKo
+        ? `THINKAD-플래너-보고서-${Date.now()}.pdf`
+        : `THINKAD-planner-report-${Date.now()}.pdf`;
+      const blob = doc.output("blob");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast("success", t("reportPdfDownloaded"));
+    } catch (e) {
+      console.error("[planner-pdf compact]", e);
+      toast("error", tCommon("pdfGenerationFailed"));
+    } finally {
+      setDownloading(false);
+    }
+  }, [
+    props.isKo,
+    props.goalTitle,
+    props.budgetNum,
+    props.regionsText,
+    props.categoriesText,
+    props.ageText,
+    props.industryText,
+    props.portfolio,
+    props.metrics,
+    props.reachCorePct,
+    props.reachExtendedPct,
+    derived,
+    t,
+    tCommon,
+    toast,
+  ]);
+
+  const emailReport = useCallback(() => {
+    const subject = encodeURIComponent(
+      props.isKo
+        ? "[THINKAD] 플래너 보고서 요청"
+        : "[THINKAD] Planner report request",
+    );
+    const body = encodeURIComponent(
+      [
+        props.isKo
+          ? "플래너 보고서를 이메일로 받고 싶습니다."
+          : "Please send the planner report by email.",
+        "",
+        `${props.isKo ? "목표" : "Goal"}: ${props.goalTitle}`,
+        `${props.isKo ? "예산(만원)" : "Budget (₩10K)"}: ${props.budgetNum}`,
+        `${props.isKo ? "기간" : "Duration"}: ${derived.periodDisplay}`,
+        props.campaignGoal ? `goalKey: ${props.campaignGoal}` : "",
+        "",
+        `${props.isKo ? "연락 가능한 이메일" : "Reply email"}: `,
+      ].join("\n"),
+    );
+    window.location.href = `mailto:${derived.contact.email}?subject=${subject}&body=${body}`;
+  }, [
+    props.isKo,
+    props.goalTitle,
+    props.budgetNum,
+    props.campaignGoal,
+    derived.periodDisplay,
+    derived.contact.email,
+  ]);
+
+  return (
+    <Card className="border-navy/10 shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-navy">{t("reportPreviewTitle")}</CardTitle>
+        <CardDescription>{t("reportCompactDesc")}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        <PlannerReportPreview
+          isKo={props.isKo}
+          goalTitle={props.goalTitle}
+          budgetNum={props.budgetNum}
+          periodDisplay={derived.periodDisplay}
+          regionsText={props.regionsText}
+          categoriesText={props.categoriesText}
+          ageText={props.ageText}
+          industryText={props.industryText}
+          portfolio={props.portfolio}
+          metrics={props.metrics}
+          reachCorePct={props.reachCorePct}
+          reachExtendedPct={props.reachExtendedPct}
+          budgetAllocation={derived.budgetAllocation}
+          blendedCpmKrw={derived.blendedCpmKrw}
+          effectSummaryLines={derived.effectSummaryLines}
+          generatedAt={snapshotAt}
+        />
+        <div className="flex flex-wrap gap-2 border-t border-navy/10 pt-6">
+          <Button
+            type="button"
+            className="btn-gold rounded-full font-semibold"
+            onClick={downloadPdf}
+            disabled={downloading}
+          >
+            {downloading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <FileDown className="mr-2 h-4 w-4" />
+            )}
+            {t("reportDownloadPdf")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-full border-navy/20"
+            onClick={emailReport}
+          >
+            <Mail className="mr-2 h-4 w-4" />
+            {t("reportEmailMe")}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
