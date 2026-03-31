@@ -6,6 +6,11 @@ type SendEmailParams = {
   subject: string;
   text?: string;
   html?: string;
+  attachments?: Array<{
+    filename: string;
+    content: string;
+    encoding?: "base64";
+  }>;
 };
 
 const transporter =
@@ -66,6 +71,7 @@ export async function sendEmail({
   subject,
   text,
   html,
+  attachments,
 }: SendEmailParams): Promise<void> {
   if (isResendConfigured()) {
     const resend = resendClient();
@@ -77,6 +83,10 @@ export async function sendEmail({
         to,
         subject,
         ...body,
+        attachments: attachments?.map((a) => ({
+          filename: a.filename,
+          content: Buffer.from(a.content, a.encoding || "base64"),
+        })),
       });
       if (error) console.error("[email] Resend:", error);
     } catch (err) {
