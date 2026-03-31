@@ -124,6 +124,9 @@ export default function RecommendPageClient({
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-4 py-1.5 text-xs font-semibold text-navy">
             <Sparkles className="h-3.5 w-3.5 text-gold-dark" />
             AI
+            <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+              BETA
+            </span>
           </div>
           <h1 className="text-3xl font-bold text-navy sm:text-4xl">
             {tr("heroTitle")}

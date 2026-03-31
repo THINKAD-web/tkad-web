@@ -474,9 +474,14 @@ export default function PlannerPageClient({
         <section className="relative overflow-hidden bg-navy py-28 text-white">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(232,213,181,0.12),transparent_50%)]" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <Badge className="border-gold/40 bg-gold/15 text-gold">
-              THINKAD Planner
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge className="border-gold/40 bg-gold/15 text-gold">
+                THINKAD Planner
+              </Badge>
+              <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                BETA
+              </span>
+            </div>
             <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
               {t("title")}
             </h1>
@@ -503,9 +508,14 @@ export default function PlannerPageClient({
       <section className="relative overflow-hidden bg-navy py-20 text-white sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(232,213,181,0.12),transparent_50%)]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Badge className="border-gold/40 bg-gold/15 text-gold">
-            THINKAD Planner
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className="border-gold/40 bg-gold/15 text-gold">
+              THINKAD Planner
+            </Badge>
+            <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+              BETA
+            </span>
+          </div>
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
             {t("title")}
           </h1>
