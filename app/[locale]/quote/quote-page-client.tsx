@@ -520,7 +520,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     }
     setDownloading(true);
     try {
-      await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+      await new Promise<void>((r) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => r())),
+      );
       const el = pdfPreviewRef.current;
       if (!el) {
         toast("error", t("quote.pdfError"));
@@ -532,7 +534,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         : `THINKAD_quote_${ymd}.pdf`;
       await downloadQuotePdfFromElement(el, filename);
       toast("success", t("quote.pdfDownloaded"));
-    } catch {
+    } catch (e) {
+      console.error("[quote pdf download]", e);
       toast("error", t("quote.pdfError"));
     } finally {
       setDownloading(false);
@@ -550,7 +553,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     }
     setEmailPdfLoading(true);
     try {
-      await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+      await new Promise<void>((r) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => r())),
+      );
       const el = pdfPreviewRef.current;
       if (!el) {
         toast("error", t("quote.pdfError"));
@@ -576,7 +581,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         throw new Error(data.error ?? "fail");
       }
       toast("success", t("quote.pdfEmailed"));
-    } catch {
+    } catch (e) {
+      console.error("[quote pdf email]", e);
       toast("error", t("quote.pdfEmailFail"));
     } finally {
       setEmailPdfLoading(false);

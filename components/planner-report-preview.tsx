@@ -1,5 +1,6 @@
 "use client";
 
+import { forwardRef } from "react";
 import { useTranslations } from "next-intl";
 import { Target, Wallet, CalendarRange, MapPin, Layers, Users, Briefcase } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
@@ -35,7 +36,9 @@ function thumbUrl(m: MediaItem): string | null {
   return getPrimaryMediaImageUrl(m) ?? resolveMediaGallery(m)[0] ?? null;
 }
 
-export default function PlannerReportPreview({
+const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
+  function PlannerReportPreview(
+    {
   isKo,
   goalTitle,
   budgetNum,
@@ -52,7 +55,9 @@ export default function PlannerReportPreview({
   blendedCpmKrw,
   effectSummaryLines,
   generatedAt,
-}: Props) {
+}: Props,
+  ref,
+) {
   const tm = useTranslations("media");
   const t = useTranslations("planner");
 
@@ -70,7 +75,10 @@ export default function PlannerReportPreview({
   };
 
   return (
-    <div className="space-y-8">
+    <div
+      ref={ref}
+      className="box-border w-full max-w-[210mm] space-y-8 bg-white text-slate-900 antialiased"
+    >
       <div className="overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-br from-navy via-navy to-[#152a5c] p-6 text-white shadow-lg sm:p-8">
         <p className="text-xs font-medium uppercase tracking-wider text-gold/90">
           THINKAD Planner
@@ -295,4 +303,7 @@ export default function PlannerReportPreview({
       </section>
     </div>
   );
-}
+},
+);
+
+export default PlannerReportPreview;

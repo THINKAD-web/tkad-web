@@ -24,7 +24,7 @@ import {
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   formatMediaPriceWonWithSymbol,
-  formatPricePeriodShortLabel,
+  mediaDetailPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
@@ -70,6 +70,9 @@ export default async function MediaDetailPage({ params }: Props) {
   const catalog = await fetchPublicMediaCatalog();
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const isKo = locale === "ko";
+  const periodLabel = t(
+    mediaDetailPricePeriodTranslationKey(media.pricePeriod),
+  );
 
   const monthly =
     media.monthlyFootTraffic ??
@@ -87,8 +90,6 @@ export default async function MediaDetailPage({ params }: Props) {
     similar.length > 0
       ? `/compare?ids=${media.id},${similar[0].id}`
       : "/media";
-
-  const periodLabel = formatPricePeriodShortLabel(media.pricePeriod, locale);
 
   return (
     <>

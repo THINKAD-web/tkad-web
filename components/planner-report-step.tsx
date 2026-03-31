@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { MediaItem } from "@/lib/media-data";
-import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
 import {
   budgetSplitByCategory,
   plannerBlendCpmKrw,
@@ -21,12 +20,10 @@ import {
 } from "@/lib/planner-logic";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import {
-  buildPlannerReportPdf,
   defaultPlannerPdfFilename,
-  downloadPlannerPdf,
-  plannerPdfToBlob,
-  type PlannerReportPdfLabels,
-} from "@/lib/build-planner-report-pdf";
+  downloadPdfFromHtmlElement,
+  htmlElementToPdf,
+} from "@/lib/html-to-pdf";
 import { useToast } from "@/components/toast-provider";
 import PlannerReportPreview from "@/components/planner-report-preview";
 
@@ -46,51 +43,8 @@ export type PlannerReportSharedProps = {
   reachExtendedPct: number;
 };
 
-function mediaPhotoUrl(m: MediaItem): string | null {
-  return getPrimaryMediaImageUrl(m) ?? resolveMediaGallery(m)[0] ?? null;
-}
-
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
-  const labels: PlannerReportPdfLabels = useMemo(
-    () => ({
-      title: t("reportPdfTitle"),
-      sectionOverview: t("reportSectionOverview"),
-      sectionMedia: t("reportSectionMedia"),
-      sectionEffect: t("reportSectionEffect"),
-      sectionCost: t("reportSectionCost"),
-      sectionContact: t("reportSectionContact"),
-      labelGoal: t("reportLabelGoal"),
-      labelBudget: t("reportLabelBudget"),
-      labelPeriod: t("reportLabelPeriod"),
-      labelRegions: t("reportLabelRegions"),
-      labelCategories: t("reportLabelCategories"),
-      labelAge: t("reportLabelAge"),
-      labelIndustry: t("reportLabelIndustry"),
-      labelLocation: t("reportLabelLocation"),
-      labelPrice: t("reportLabelPrice"),
-      labelSize: t("reportLabelSize"),
-      labelResolution: t("reportLabelResolution"),
-      labelType: t("reportLabelType"),
-      labelDailyTraffic: t("reportLabelDailyTraffic"),
-      labelMonthlyImp: t("reportLabelMonthlyImp"),
-      labelTotalImp: t("reportLabelTotalImp"),
-      labelRoiExpected: t("reportLabelRoiExpected"),
-      labelReachCore: t("reportLabelReachCore"),
-      labelReachExtended: t("reportLabelReachExtended"),
-      labelCostBreakdown: t("reportLabelCostBreakdown"),
-      labelShare: t("reportLabelShare"),
-      labelCpm: t("reportLabelCpm"),
-      sectionBudgetAllocation: t("reportSectionBudgetAllocation"),
-      budgetAllocationIntro: t("reportBudgetAllocationIntro"),
-      sectionEffectSummary: t("reportSectionEffectSummary"),
-      effectSummaryIntro: t("reportEffectSummaryIntro"),
-      reportSectionCompositeNote: t("reportSectionCompositeNote"),
-      reportCompositeBody: t("reportCompositeBody"),
-      footerDisclaimer: t("reportFooterDisclaimer"),
-    }),
-    [t],
-  );
 
   const periodDisplay = useMemo(
     () =>
@@ -159,7 +113,6 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
 
   return useMemo(
     () => ({
-      labels,
       periodDisplay,
       budgetAllocation,
       blendedCpmKrw,
@@ -167,7 +120,6 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       contact,
     }),
     [
-      labels,
       periodDisplay,
       budgetAllocation,
       blendedCpmKrw,
@@ -175,49 +127,6 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       contact,
     ],
   );
-}
-
-function buildPlannerPdfParams(
-  props: PlannerReportSharedProps,
-  derived: ReturnType<typeof usePlannerReportDerived>,
-  generatedAt: string,
-) {
-  const pdfPortfolio = props.portfolio.map((m) => ({
-    name: props.isKo ? m.name : m.nameEn || m.name,
-    location: props.isKo ? m.location : m.locationEn || m.location,
-    price: m.price,
-    size: m.size ?? "—",
-    resolution: m.resolution ?? "—",
-    type: m.type,
-    dailyFootTraffic: m.dailyFootTraffic ?? 0,
-    imageUrl: mediaPhotoUrl(m),
-  }));
-  return {
-    labels: derived.labels,
-    generatedAt,
-    goalText: props.goalTitle,
-    budgetMan: props.budgetNum,
-    periodDisplay: derived.periodDisplay,
-    regionsText: props.regionsText,
-    categoriesText: props.categoriesText,
-    ageText: props.ageText,
-    industryText: props.industryText,
-    isKo: props.isKo,
-    portfolio: pdfPortfolio,
-    metrics: props.metrics
-      ? {
-          monthlyImp: props.metrics.estimatedMonthlyImpressions,
-          totalImp: props.metrics.estimatedTotalImpressions,
-          roiExpected: props.metrics.roiExpected,
-          reachCorePct: props.reachCorePct,
-          reachExtendedPct: props.reachExtendedPct,
-        }
-      : null,
-    budgetAllocation: derived.budgetAllocation,
-    blendedCpmKrw: derived.blendedCpmKrw,
-    effectSummaryLines: derived.effectSummaryLines,
-    contact: derived.contact,
-  };
 }
 
 export default function PlannerReportStep(props: PlannerReportSharedProps) {
@@ -232,6 +141,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const [retryKey, setRetryKey] = useState(0);
   const [downloading, setDownloading] = useState(false);
   const urlRef = useRef<string | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
@@ -241,21 +151,24 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     (async () => {
       setLoading(true);
       setError(null);
-      const generatedAt = new Date().toLocaleString(
-        props.isKo ? "ko-KR" : "en-US",
+      await new Promise<void>((r) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => r())),
       );
+      const el = previewRef.current;
+      if (!el) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
       try {
-        const doc = await buildPlannerReportPdf(
-          buildPlannerPdfParams(props, derived, generatedAt),
-        );
+        const doc = await htmlElementToPdf(el);
         if (cancelled) return;
-        const blob = plannerPdfToBlob(doc);
+        const blob = doc.output("blob");
         const nextUrl = URL.createObjectURL(blob);
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         urlRef.current = nextUrl;
         setPdfUrl(nextUrl);
       } catch (e) {
-        console.error("[planner-pdf]", e);
+        console.error("[planner-pdf html2canvas]", e);
         if (!cancelled) {
           setError(t("reportPdfError"));
           toast("error", tCommon("pdfGenerationFailed"));
@@ -275,6 +188,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     props.isKo,
     props.goalTitle,
     props.budgetNum,
+    props.months,
     props.regionsText,
     props.categoriesText,
     props.ageText,
@@ -285,6 +199,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     props.reachExtendedPct,
     derived,
     retryKey,
+    snapshotAt,
     t,
     tCommon,
     toast,
@@ -318,13 +233,15 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     void (async () => {
       setDownloading(true);
       try {
-        const generatedAt = new Date().toLocaleString(
-          props.isKo ? "ko-KR" : "en-US",
+        await new Promise<void>((r) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => r())),
         );
-        const doc = await buildPlannerReportPdf(
-          buildPlannerPdfParams(props, derived, generatedAt),
-        );
-        downloadPlannerPdf(doc, asciiName);
+        const el = previewRef.current;
+        if (!el) {
+          toast("error", tCommon("pdfGenerationFailed"));
+          return;
+        }
+        await downloadPdfFromHtmlElement(el, asciiName);
         toast("success", t("reportPdfDownloaded"));
       } catch (e) {
         console.error("[planner-pdf download regenerate]", e);
@@ -395,6 +312,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       </div>
 
       <PlannerReportPreview
+        ref={previewRef}
         isKo={props.isKo}
         goalTitle={props.goalTitle}
         budgetNum={props.budgetNum}
@@ -425,7 +343,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
               variant="outline"
               className="rounded-full border-navy/20"
               onClick={downloadPdf}
-              disabled={downloading}
+              disabled={loading || downloading}
             >
               {downloading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -504,6 +422,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const { toast } = useToast();
   const derived = usePlannerReportDerived(props);
   const [downloading, setDownloading] = useState(false);
+  const compactPreviewRef = useRef<HTMLDivElement>(null);
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
@@ -511,13 +430,15 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const downloadPdf = useCallback(async () => {
     setDownloading(true);
     try {
-      const generatedAt = new Date().toLocaleString(
-        props.isKo ? "ko-KR" : "en-US",
+      await new Promise<void>((r) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => r())),
       );
-      const doc = await buildPlannerReportPdf(
-        buildPlannerPdfParams(props, derived, generatedAt),
-      );
-      downloadPlannerPdf(doc, defaultPlannerPdfFilename());
+      const el = compactPreviewRef.current;
+      if (!el) {
+        toast("error", tCommon("pdfGenerationFailed"));
+        return;
+      }
+      await downloadPdfFromHtmlElement(el, defaultPlannerPdfFilename());
       toast("success", t("reportPdfDownloaded"));
     } catch (e) {
       console.error("[planner-pdf compact]", e);
@@ -581,6 +502,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
       </CardHeader>
       <CardContent className="space-y-8">
         <PlannerReportPreview
+          ref={compactPreviewRef}
           isKo={props.isKo}
           goalTitle={props.goalTitle}
           budgetNum={props.budgetNum}

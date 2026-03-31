@@ -110,22 +110,22 @@ export default function RecommendPageClient({
 
   return (
     <>
-      <section className="bg-navy py-24 sm:py-28">
+      <section className="border-b border-slate-200/90 bg-white py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-white/5 px-4 py-1.5 text-xs font-semibold text-gold">
-            <Sparkles className="h-3.5 w-3.5" />
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-4 py-1.5 text-xs font-semibold text-navy">
+            <Sparkles className="h-3.5 w-3.5 text-gold-dark" />
             AI
           </div>
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">
+          <h1 className="text-3xl font-bold text-navy sm:text-4xl">
             {tr("heroTitle")}
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-slate-300">
+          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
             {tr("heroSubtitle")}
           </p>
         </div>
       </section>
 
-      <section className="bg-navy py-16 sm:py-24">
+      <section className="bg-slate-50 py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {phase === "form" && (
             <MediaAiRecommendForm
@@ -135,15 +135,15 @@ export default function RecommendPageClient({
           )}
 
           {phase === "loading" && (
-            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-[#0a1628]/95 backdrop-blur-md">
+            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-white/90 backdrop-blur-md">
               <div className="w-full max-w-sm space-y-6 px-6">
-                <p className="text-center text-sm font-semibold text-gold">
+                <p className="text-center text-sm font-semibold text-navy">
                   {tr("loadingTitle")}
                 </p>
-                <div className="space-y-3 rounded-2xl border border-gold/20 bg-navy/80 p-6 shadow-xl">
-                  <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                <div className="space-y-3 rounded-2xl border border-navy/10 bg-white p-6 shadow-lg">
+                  <div className="h-3 overflow-hidden rounded-full bg-slate-200">
                     <motion.div
-                      className="h-full w-2/5 rounded-full bg-gradient-to-r from-gold/70 to-gold"
+                      className="h-full w-2/5 rounded-full bg-gradient-to-r from-gold/80 to-gold"
                       animate={{ x: ["-30%", "220%"] }}
                       transition={{
                         duration: 1.35,
@@ -153,12 +153,12 @@ export default function RecommendPageClient({
                     />
                   </div>
                   <div className="space-y-2">
-                    <div className="h-3 rounded bg-white/10" />
-                    <div className="h-3 w-4/5 rounded bg-white/10" />
-                    <div className="h-3 w-3/5 rounded bg-white/10" />
+                    <div className="h-3 rounded bg-slate-200" />
+                    <div className="h-3 w-4/5 rounded bg-slate-200" />
+                    <div className="h-3 w-3/5 rounded bg-slate-200" />
                   </div>
                 </div>
-                <p className="text-center text-xs text-slate-400">
+                <p className="text-center text-xs text-muted-foreground">
                   {tr("loadingSubtitle")}
                 </p>
               </div>
@@ -180,8 +180,8 @@ export default function RecommendPageClient({
           )}
 
           {phase === "noResults" && (
-            <div className="mx-auto max-w-lg rounded-2xl border border-amber-500/30 bg-navy/60 p-8 text-center shadow-xl">
-              <p className="text-sm font-medium text-amber-100">
+            <div className="mx-auto max-w-lg rounded-2xl border border-amber-200 bg-amber-50/90 p-8 text-center shadow-lg">
+              <p className="text-sm font-medium text-amber-950">
                 {t("media.ai.emptyResult")}
               </p>
               <Button
@@ -200,16 +200,16 @@ export default function RecommendPageClient({
           {phase === "list" && fullList && fullList.length > 0 && (
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-white">
+                <h2 className="text-lg font-bold text-navy">
                   {t("media.ai.results")}{" "}
-                  <span className="text-slate-400">({fullList.length})</span>
+                  <span className="text-muted-foreground">({fullList.length})</span>
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
+                    className="rounded-full border-navy/15 bg-white text-navy hover:bg-slate-100"
                     onClick={() => setPhase("dashboard")}
                   >
                     {tr("backToDashboard")}
@@ -232,15 +232,15 @@ export default function RecommendPageClient({
                 {fullList.map((s) => (
                   <li
                     key={s.item.id}
-                    className="rounded-xl border border-gold/15 bg-navy/50 p-4 shadow-sm"
+                    className="rounded-xl border border-navy/10 bg-white p-4 text-center shadow-sm sm:text-left"
                   >
-                    <p className="font-bold text-white">
+                    <p className="font-bold text-navy">
                       {isKo ? s.item.name : s.item.nameEn}
                     </p>
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-400">
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                       {isKo ? s.item.location : s.item.locationEn}
                     </p>
-                    <ul className="mt-2 space-y-1 text-[11px] text-slate-300">
+                    <ul className="mt-2 space-y-1 text-[11px] text-muted-foreground">
                       {s.reasons.slice(0, 3).map((r, i) => (
                         <li key={i}>· {isKo ? r.ko : r.en}</li>
                       ))}

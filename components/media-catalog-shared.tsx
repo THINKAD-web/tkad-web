@@ -13,7 +13,7 @@ export const MEDIA_CATALOG_COMPACT_GRID_CLASS =
 
 /** 컴팩트 행(링크/선택) 외곽 — 시각 통일 */
 export const MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS =
-  "relative flex min-w-0 rounded-lg border border-navy/10 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md sm:gap-4 sm:rounded-xl sm:p-3.5";
+  "relative flex min-w-0 items-center rounded-lg border border-navy/10 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md sm:gap-4 sm:rounded-xl sm:p-3.5";
 
 export function MediaCatalogStickyAside({
   children,

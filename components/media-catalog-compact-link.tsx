@@ -62,8 +62,8 @@ export function MediaCatalogCompactLinkRow({
       >
         {thumbnailOverlay}
       </MediaCatalogThumbnail>
-      <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 overflow-hidden sm:gap-1.5">
-        <div className="flex min-w-0 flex-wrap items-center gap-1 sm:gap-1.5">
+      <div className="relative z-0 flex min-w-0 flex-1 flex-col items-center justify-center gap-1 overflow-hidden text-center sm:gap-1.5">
+        <div className="flex min-w-0 flex-wrap items-center justify-center gap-1 sm:gap-1.5">
           <Badge
             variant="secondary"
             className="max-w-full shrink bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
@@ -79,16 +79,16 @@ export function MediaCatalogCompactLinkRow({
             </span>
           ) : null}
         </div>
-        <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug text-navy sm:line-clamp-1 sm:text-sm sm:leading-relaxed">
+        <p className="line-clamp-2 min-w-0 break-words text-center text-[13px] font-bold leading-snug text-navy sm:line-clamp-1 sm:text-sm sm:leading-relaxed">
           {isKo ? media.name : media.nameEn}
         </p>
-        <p className="flex min-w-0 items-start gap-0.5 text-[10px] leading-snug text-muted-foreground sm:items-center sm:text-[11px] sm:leading-relaxed">
-          <MapPin className="mt-0.5 h-2.5 w-2.5 shrink-0 sm:mt-0 sm:h-3 sm:w-3" />
+        <p className="flex min-w-0 items-center justify-center gap-0.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
+          <MapPin className="h-2.5 w-2.5 shrink-0 sm:h-3 sm:w-3" />
           <span className="min-w-0 line-clamp-2 sm:line-clamp-1">
             {formatMediaLocationShort(media, isKo)}
           </span>
         </p>
-        <p className="min-w-0 break-words text-[13px] font-bold tabular-nums leading-tight text-navy sm:text-sm sm:leading-none">
+        <p className="min-w-0 break-words text-center text-[13px] font-bold tabular-nums leading-tight text-navy sm:text-sm sm:leading-none">
           {formatMediaPriceWonWithSymbol(media.price)}
           <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
             {" "}

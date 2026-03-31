@@ -92,6 +92,7 @@ export default function MediaAiRecommendPanel({
 
   const [phase, setPhase] = useState<Phase>("form");
   const [view, setView] = useState<"list" | "map">("list");
+  const [rowLayout, setRowLayout] = useState<"card" | "compact">("card");
   const [results, setResults] = useState<ScoredMedia[] | null>(null);
 
   const runRecommend = useCallback(
@@ -322,22 +323,62 @@ export default function MediaAiRecommendPanel({
             {t("media.ai.emptyResult")}
           </div>
         ) : view === "list" ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {results.map((s) => (
-              <AiResultCard
-                key={`${s.item.id}-${getPrimaryMediaImageUrl(s.item) ?? "none"}`}
-                scored={s}
-                isKo={isKo}
-                inCompare={isInCompare(s.item.id)}
-                onToggleCompare={() => toggleCompare(s.item)}
-                disableCompare={
-                  !isInCompare(s.item.id) &&
-                  compareItems.length >= maxSelectionItems
-                }
-                addCompareLabel={addCompareLabel}
-                quoteLabel={quoteSingleLabel}
-              />
-            ))}
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t("media.browseCardLayoutLabel")}
+              </span>
+              <div className="inline-flex rounded-full border border-navy/10 bg-white p-1 shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setRowLayout("card")}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                    rowLayout === "card"
+                      ? "bg-navy text-white"
+                      : "text-muted-foreground hover:bg-slate-50",
+                  )}
+                >
+                  {t("media.browseCardLayoutGrid")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRowLayout("compact")}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                    rowLayout === "compact"
+                      ? "bg-navy text-white"
+                      : "text-muted-foreground hover:bg-slate-50",
+                  )}
+                >
+                  {t("media.browseCardLayoutCompact")}
+                </button>
+              </div>
+            </div>
+            <div
+              className={cn(
+                rowLayout === "compact"
+                  ? "flex flex-col gap-3"
+                  : "grid gap-4 sm:grid-cols-2",
+              )}
+            >
+              {results.map((s) => (
+                <AiResultCard
+                  key={`${s.item.id}-${getPrimaryMediaImageUrl(s.item) ?? "none"}`}
+                  scored={s}
+                  isKo={isKo}
+                  compact={rowLayout === "compact"}
+                  inCompare={isInCompare(s.item.id)}
+                  onToggleCompare={() => toggleCompare(s.item)}
+                  disableCompare={
+                    !isInCompare(s.item.id) &&
+                    compareItems.length >= maxSelectionItems
+                  }
+                  addCompareLabel={addCompareLabel}
+                  quoteLabel={quoteSingleLabel}
+                />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-b from-slate-100 to-slate-200 shadow-inner">
@@ -393,6 +434,7 @@ export default function MediaAiRecommendPanel({
 function AiResultCard({
   scored,
   isKo,
+  compact,
   inCompare,
   onToggleCompare,
   disableCompare,
@@ -401,6 +443,7 @@ function AiResultCard({
 }: {
   scored: ScoredMedia;
   isKo: boolean;
+  compact?: boolean;
   inCompare: boolean;
   onToggleCompare: () => void;
   disableCompare: boolean;
@@ -425,8 +468,18 @@ function AiResultCard({
         : null;
 
   return (
-    <Card className="overflow-hidden border-navy/10 shadow-md transition-shadow hover:shadow-lg">
-      <div className="relative h-32 overflow-hidden bg-gradient-to-br from-navy/8 to-gold/10">
+    <Card
+      className={cn(
+        "overflow-hidden border-navy/10 shadow-md transition-shadow hover:shadow-lg",
+        compact && "text-center",
+      )}
+    >
+      <div
+        className={cn(
+          "relative overflow-hidden bg-gradient-to-br from-navy/8 to-gold/10",
+          compact ? "mx-auto h-28 max-w-sm" : "h-32",
+        )}
+      >
         {showPlaceholder ? (
           <div className="flex h-full w-full items-center justify-center">
             <Monitor className="h-9 w-9 text-navy/25" aria-hidden />
@@ -446,22 +499,45 @@ function AiResultCard({
         <Badge className="absolute top-2 right-2 border-0 bg-navy text-white">
           {scored.score}
         </Badge>
-        <div className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white">
+        <div
+          className={cn(
+            "absolute top-2 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white",
+            compact ? "left-1/2 -translate-x-1/2" : "left-2",
+          )}
+        >
           <BadgeCheck className="h-3 w-3" />
           AI
         </div>
       </div>
-      <CardHeader className="pb-2">
-        <Badge variant="secondary" className="w-fit bg-navy/5 text-xs text-navy">
+      <CardHeader className={cn("pb-2", compact && "flex flex-col items-center")}>
+        <Badge
+          variant="secondary"
+          className={cn(
+            "bg-navy/5 text-xs text-navy",
+            compact ? "mx-auto" : "w-fit",
+          )}
+        >
           {isKo ? tl.ko : tl.en}
         </Badge>
-        <CardTitle className="text-base leading-snug">
+        <CardTitle
+          className={cn(
+            "text-base leading-snug",
+            compact && "text-center",
+          )}
+        >
           {isKo ? m.name : m.nameEn}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm">
+      <CardContent
+        className={cn("space-y-3 text-sm", compact && "flex flex-col items-center")}
+      >
         {(exposure || availability) && (
-          <div className="flex flex-wrap items-center gap-2">
+          <div
+            className={cn(
+              "flex flex-wrap items-center gap-2",
+              compact && "justify-center",
+            )}
+          >
             {exposure ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-navy/5 px-2.5 py-1 text-[11px] font-semibold text-navy">
                 👥 {exposure}
@@ -479,28 +555,59 @@ function AiResultCard({
             ) : null}
           </div>
         )}
-        <div className="flex items-start gap-1 text-muted-foreground">
-          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          <span className="text-xs">
+        <div
+          className={cn(
+            "flex gap-1 text-muted-foreground",
+            compact ? "items-center justify-center text-center" : "items-start",
+          )}
+        >
+          <MapPin
+            className={cn(
+              "h-3.5 w-3.5 shrink-0",
+              compact ? "" : "mt-0.5",
+            )}
+          />
+          <span className="text-xs leading-snug">
             {formatMediaLocationShort(m, isKo)}
           </span>
         </div>
-        <ul className="space-y-1 text-[11px] leading-relaxed text-navy/80">
+        <ul
+          className={cn(
+            "space-y-1 text-[11px] leading-relaxed text-navy/80",
+            compact && "text-center",
+          )}
+        >
           {scored.reasons.map((r, i) => (
-            <li key={i} className="flex gap-1.5">
+            <li
+              key={i}
+              className={cn(
+                "flex gap-1.5",
+                compact && "justify-center",
+              )}
+            >
               <span className="text-gold">·</span>
-              <span>{isKo ? r.ko : r.en}</span>
+              <span className="text-left">{isKo ? r.ko : r.en}</span>
             </li>
           ))}
         </ul>
-        <div className="text-lg font-bold text-navy">
+        <div
+          className={cn(
+            "text-lg font-bold text-navy",
+            compact && "text-center",
+          )}
+        >
           {formatMediaPriceWonWithSymbol(m.price)}
           <span className="text-xs font-normal text-muted-foreground">
             {" "}
             · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
           </span>
         </div>
-        <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+        <div
+          className={cn(
+            "flex flex-wrap gap-2 border-t border-slate-100 pt-3",
+            compact && "justify-center",
+          )}
+        >
           <Button
             type="button"
             variant={inCompare ? "secondary" : "outline"}

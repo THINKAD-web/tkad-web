@@ -931,6 +931,20 @@ export default function PlannerPageClient({
               </Card>
             ) : metrics ? (
               <>
+                <div className="flex flex-col gap-2 rounded-xl border border-amber-200/90 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant="secondary"
+                      className="shrink-0 border-amber-300/80 bg-white font-semibold text-amber-950"
+                    >
+                      {t("estimatedModelBadge")}
+                    </Badge>
+                    <span className="min-w-0 text-left text-xs leading-relaxed text-amber-950/95 sm:text-sm">
+                      {t("estimatedModelHint")}
+                    </span>
+                  </div>
+                </div>
+
                 <p className="rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy shadow-sm">
                   <span className="font-semibold text-muted-foreground">
                     {t("targetSummaryLabel")}

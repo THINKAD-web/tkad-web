@@ -73,3 +73,23 @@ export function formatPricePeriodShortLabel(
       return "per month";
   }
 }
+
+/** `media.detail` 번역 키 — 매체 상세 가격 옆 기간 문구(1개월·2주·4주·1일 등) */
+export function mediaDetailPricePeriodTranslationKey(
+  period: MediaPricePeriodKey | string | null | undefined,
+):
+  | "pricePeriodDisplayMonth"
+  | "pricePeriodDisplayBiweekly"
+  | "pricePeriodDisplayWeek"
+  | "pricePeriodDisplayDay" {
+  switch (normalizeMediaPricePeriod(period)) {
+    case "biweekly":
+      return "pricePeriodDisplayBiweekly";
+    case "week":
+      return "pricePeriodDisplayWeek";
+    case "day":
+      return "pricePeriodDisplayDay";
+    default:
+      return "pricePeriodDisplayMonth";
+  }
+}
