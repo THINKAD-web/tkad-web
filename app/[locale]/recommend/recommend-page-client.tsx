@@ -119,19 +119,19 @@ export default function RecommendPageClient({
 
   return (
     <>
-      <section className="border-b border-slate-200/90 bg-white py-12 sm:py-16">
+      <section className="bg-navy py-24 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-4 py-1.5 text-xs font-semibold text-navy">
-            <Sparkles className="h-3.5 w-3.5 text-gold-dark" />
-            AI
-            <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+          <div className="mb-4 inline-flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-gold" />
+            <span className="text-sm font-semibold text-gold">AI</span>
+            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
               BETA
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-navy sm:text-4xl">
+          <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {tr("heroTitle")}
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+          <p className="mx-auto mt-3 max-w-2xl text-slate-300">
             {tr("heroSubtitle")}
           </p>
         </div>
