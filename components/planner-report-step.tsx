@@ -413,6 +413,12 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             <CardDescription>{t("reportPreviewDesc")}</CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {/* PDF/이메일 기능 준비 중 - 화면 캡처로 저장 안내 */}
+            <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
+              <span>💡</span>
+              <span>{props.isKo ? "화면을 캡처하여 저장하세요 (Cmd+Shift+4 또는 Win+Shift+S)" : "Take a screenshot to save (Cmd+Shift+4 or Win+Shift+S)"}</span>
+            </div>
+            {/* TODO: PDF/이메일 기능 복원 예정
             <Button
               type="button"
               variant="outline"
@@ -465,6 +471,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
               </Button>
             </div>
+            */}
             {error ? (
               <Button
                 type="button"
@@ -675,6 +682,12 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           generatedAt={snapshotAt}
         />
         <div className="flex flex-wrap gap-2 border-t border-navy/10 pt-6">
+          {/* PDF/이메일 기능 준비 중 - 화면 캡처로 저장 안내 */}
+          <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
+            <span>💡</span>
+            <span>{props.isKo ? "화면을 캡처하여 저장하세요 (Cmd+Shift+4 또는 Win+Shift+S)" : "Take a screenshot to save (Cmd+Shift+4 or Win+Shift+S)"}</span>
+          </div>
+          {/* TODO: PDF/이메일 기능 복원 예정
           <Button
             type="button"
             className="btn-gold rounded-full font-semibold"
@@ -714,6 +727,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
               {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
             </Button>
           </div>
+          */}
         </div>
       </CardContent>
     </Card>
