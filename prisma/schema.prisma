@@ -464,21 +464,31 @@ model MediaNetwork {
   name        String
   nameEn      String? @map("name_en")
   description String? @db.Text
-  /// bus_shelter | apartment | subway_pillar | convenience_store | golf_course | highway_rest
+  /// bus_shelter | apartment | subway_pillar | convenience_store | golf_course | highway_rest | subway_digital_square_pillar
   type        String
 
-  pricePerUnit Int? @map("price_per_unit")
-  pricePackage Int? @map("price_package")
-  minUnits     Int  @default(1) @map("min_units")
+  pricePerUnit   Int?    @map("price_per_unit")
+  pricePackage   Int?    @map("price_package")
+  priceNote      String? @map("price_note") @db.Text
+  minUnits       Int     @default(1) @map("min_units")
 
   totalLocations Int      @map("total_locations")
   regions        String[] @default([])
+  city           String?
+  district       String?
 
   image         String?
   galleryImages String[] @default([]) @map("gallery_images")
   features      String?  @db.Text
   /// [{ "units": 100, "price": 5000 }, ...] 만원 단위
   packageOptions Json?   @map("package_options")
+
+  visibilityScore Int?    @map("visibility_score")
+  dailyFootfall   Int?    @map("daily_footfall")
+  targetAge       String? @map("target_age")
+  effectMemo      String? @map("effect_memo") @db.Text
+  operatingHours  String? @map("operating_hours")
+  tags            String[] @default([])
 
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
@@ -495,10 +505,14 @@ model MediaNetworkLocation {
   networkId String       @map("network_id")
   network   MediaNetwork @relation(fields: [networkId], references: [id], onDelete: Cascade)
 
-  name      String
-  address   String?
-  latitude  Float?
-  longitude Float?
+  name          String
+  address       String?
+  fullAddress   String? @map("full_address")
+  latitude      Float?
+  longitude     Float?
+  priceNote     String? @map("price_note") @db.Text
+  dailyFootfall Int?    @map("daily_footfall")
+  note          String? @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
 
