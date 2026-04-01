@@ -235,7 +235,7 @@ export default function MediaNetworkDetailClient({
         ) : null}
 
         <div className="relative z-10 flex h-full min-h-0 flex-col justify-between px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10">
-          <div className="mx-auto flex w-full max-w-6xl items-start justify-between gap-3">
+          <div className="mx-auto flex w-full max-w-4xl items-start justify-between gap-3">
             <Link href="/media">
               <Button
                 variant="ghost"
@@ -259,7 +259,7 @@ export default function MediaNetworkDetailClient({
             </div>
           </div>
 
-          <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.3fr)] lg:items-end">
+          <div className="mx-auto grid w-full max-w-4xl gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.3fr)] lg:items-end">
             <div className="min-w-0 space-y-3 text-white">
               <h1 className="break-words text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
                 {isKo ? data.name : data.nameEn ?? data.name}
@@ -361,7 +361,7 @@ export default function MediaNetworkDetailClient({
 
       {/* 본문: 리포트 카드 스타일 2열 레이아웃 (지도 섹션 제외) */}
       <section className="bg-white py-12 pb-16 sm:pb-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           {/* 섹션 헤더 */}
           <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -374,9 +374,9 @@ export default function MediaNetworkDetailClient({
             </div>
           </div>
 
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(380px,1.2fr)] lg:items-start">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,auto)] lg:items-start">
             {/* 왼쪽: 효과 / 특징 설명 카드 */}
-            <div className="space-y-6 lg:col-span-2">
+            <div className="space-y-6">
               {data.effectMemo && (
                 <EffectMemoCallout title={t("effectMemoLabel")}>
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-navy/90">
@@ -398,7 +398,7 @@ export default function MediaNetworkDetailClient({
             </div>
 
             {/* 오른쪽: 핵심 정보 + 성과 지표 */}
-            <aside className="space-y-8">
+            <aside className="space-y-8 lg:min-w-[380px]">
               <section aria-labelledby="network-core-specs-heading">
                 <h2
                   id="network-core-specs-heading"
@@ -472,7 +472,7 @@ export default function MediaNetworkDetailClient({
 
       {/* 페이지 최하단: 설치 지점 지도 섹션 */}
       <section className="bg-white pb-24">
-        <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl px-4 pt-4 sm:px-6 lg:px-8">
           <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-lg font-bold text-navy">
