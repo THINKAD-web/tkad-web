@@ -52,6 +52,7 @@ import {
   MediaCatalogGridCompactToggle,
 } from "@/components/media-catalog-shared";
 import MediaCatalogFiltersBar from "@/components/media-catalog-filters-bar";
+import { PerPageSelect } from "@/components/per-page-select";
 import { useMediaCatalogFilters } from "@/lib/use-media-catalog-filters";
 import { buildMediaRegionFilterOptions } from "@/lib/media-region-filter-options";
 import { cn } from "@/lib/utils";
@@ -114,7 +115,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [mediaLayout, setMediaLayout] = useState<"grid" | "compact">("grid");
   const [mediaPage, setMediaPage] = useState(1);
-  const mediaPageSize = 12;
+  const [mediaPageSize, setMediaPageSize] = useState(12);
   const [mediaTextFilter, setMediaTextFilter] = useState("");
   const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
   const [mediaRegionFilter, setMediaRegionFilter] = useState("all");
@@ -124,6 +125,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   >({});
   const mediaQueryApplied = useRef(false);
   const [template, setTemplate] = useState<QuoteTemplateId>("default");
+  const [sortBy, setSortBy] = useState<
+    "default" | "priceAsc" | "priceDesc" | "trafficDesc"
+  >("default");
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [emailHoneypot, setEmailHoneypot] = useState("");
 
@@ -229,24 +233,33 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       if (q.length > 0 && !matchesMediaTextQuery(m, q)) return false;
       return true;
     });
-  }, [
-    catalog,
-    mediaRegionFilter,
-    mediaTypeFilter,
-    mediaTextFilter,
-    filterState,
-    bounds,
-  ]);
+  }, [catalog, mediaRegionFilter, mediaTypeFilter, mediaTextFilter, filterState, bounds]);
+
+  const sortedCatalog = useMemo(() => {
+    const arr = [...filteredCatalog];
+    switch (sortBy) {
+      case "priceAsc":
+        return arr.sort((a, b) => a.price - b.price);
+      case "priceDesc":
+        return arr.sort((a, b) => b.price - a.price);
+      case "trafficDesc":
+        return arr.sort(
+          (a, b) => (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0),
+        );
+      default:
+        return arr;
+    }
+  }, [filteredCatalog, sortBy]);
 
   const mediaPageCount = useMemo(
-    () => Math.max(1, Math.ceil(filteredCatalog.length / mediaPageSize)),
-    [filteredCatalog.length],
+    () => Math.max(1, Math.ceil(sortedCatalog.length / mediaPageSize)),
+    [sortedCatalog.length, mediaPageSize],
   );
 
   const pagedCatalog = useMemo(() => {
     const start = (mediaPage - 1) * mediaPageSize;
-    return filteredCatalog.slice(start, start + mediaPageSize);
-  }, [filteredCatalog, mediaPage]);
+    return sortedCatalog.slice(start, start + mediaPageSize);
+  }, [sortedCatalog, mediaPage, mediaPageSize]);
 
   const resetQuoteMediaFilters = useCallback(() => {
     setMediaTextFilter("");
@@ -729,15 +742,78 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         <div className="min-w-0">
                           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div className="text-sm text-muted-foreground">
-                              {t("media.results")}: {filteredCatalog.length}
+                              {t("media.results")}: {sortedCatalog.length}
                             </div>
-                              <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <label className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-white px-3 py-1.5 text-xs font-medium text-navy">
+                                <span className="text-muted-foreground">
+                                  {t("media.sortLabel")}
+                                </span>
+                                <select
+                                  className="max-w-[10rem] rounded-md border border-navy/15 bg-slate-50 px-2 py-0.5 text-xs font-semibold"
+                                  value={sortBy}
+                                  onChange={(e) =>
+                                    setSortBy(
+                                      e.target.value as typeof sortBy,
+                                    )
+                                  }
+                                >
+                                  <option value="default">
+                                    {t("media.sortDefault")}
+                                  </option>
+                                  <option value="priceAsc">
+                                    {t("media.sortPriceAsc")}
+                                  </option>
+                                  <option value="priceDesc">
+                                    {t("media.sortPriceDesc")}
+                                  </option>
+                                  <option value="trafficDesc">
+                                    {t("media.sortTrafficDesc")}
+                                  </option>
+                                </select>
+                              </label>
                               <MediaCatalogGridCompactToggle
                                 layout={mediaLayout}
                                 onLayoutChange={setMediaLayout}
                                 gridLabel={t("media.browseCardLayoutGrid")}
                                 compactLabel={t("media.browseCardLayoutCompact")}
                               />
+                              <PerPageSelect
+                                value={mediaPageSize}
+                                onChange={(next) => {
+                                  setMediaPageSize(next);
+                                  setMediaPage(1);
+                                }}
+                              />
+                              <div className="inline-flex rounded-full border border-navy/15 bg-slate-50 p-0.5">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                                    selectedIds.size > 0
+                                      ? "text-navy"
+                                      : "text-muted-foreground"
+                                  }`}
+                                  onClick={() => {
+                                    const ids = pagedCatalog.map((m) => m.id);
+                                    setSelectedIds(new Set(ids));
+                                  }}
+                                  disabled={pagedCatalog.length === 0}
+                                >
+                                  {isKo ? "전체선택" : "Select all"}
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground"
+                                  onClick={() => setSelectedIds(new Set())}
+                                  disabled={selectedIds.size === 0}
+                                >
+                                  {isKo ? "전체삭제" : "Clear all"}
+                                </Button>
+                              </div>
                               <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
                                 <ShieldCheck className="h-4 w-4" aria-hidden />
                                 <span>
@@ -1011,49 +1087,51 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </div>
                       )}
 
-                      {filteredCatalog.length > mediaPageSize ? (
-                        <div className="mt-4 flex items-center justify-center gap-3 border-t border-slate-200 pt-3">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={mediaPage <= 1}
-                            onClick={() =>
-                              setMediaPage((p) => Math.max(1, p - 1))
-                            }
-                          >
-                            <ChevronLeft className="mr-1 h-3.5 w-3.5" />
-                            {t("media.pagePrev")}
-                          </Button>
-                          <span className="text-xs text-muted-foreground">
-                            {t("media.pageSummary", {
-                              from:
-                                filteredCatalog.length === 0
-                                  ? 0
-                                  : (mediaPage - 1) * mediaPageSize + 1,
-                              to: Math.min(
-                                mediaPage * mediaPageSize,
-                                filteredCatalog.length,
-                              ),
-                              total: filteredCatalog.length,
-                            })}
-                          </span>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={mediaPage >= mediaPageCount}
-                            onClick={() =>
-                              setMediaPage((p) =>
-                                Math.min(mediaPageCount, p + 1),
-                              )
-                            }
-                          >
-                            {t("media.pageNext")}
-                            <ChevronRight className="ml-1 h-3.5 w-3.5" />
-                          </Button>
+                      {filteredCatalog.length > 0 && (
+                        <div className="mt-4 flex flex-col gap-2 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex items-center justify-center gap-3">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              disabled={mediaPage <= 1}
+                              onClick={() =>
+                                setMediaPage((p) => Math.max(1, p - 1))
+                              }
+                            >
+                              <ChevronLeft className="mr-1 h-3.5 w-3.5" />
+                              {t("media.pagePrev")}
+                            </Button>
+                            <span className="text-xs text-muted-foreground">
+                              {t("media.pageSummary", {
+                                from:
+                                  filteredCatalog.length === 0
+                                    ? 0
+                                    : (mediaPage - 1) * mediaPageSize + 1,
+                                to: Math.min(
+                                  mediaPage * mediaPageSize,
+                                  filteredCatalog.length,
+                                ),
+                                total: filteredCatalog.length,
+                              })}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              disabled={mediaPage >= mediaPageCount}
+                              onClick={() =>
+                                setMediaPage((p) =>
+                                  Math.min(mediaPageCount, p + 1),
+                                )
+                              }
+                            >
+                              {t("media.pageNext")}
+                              <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
-                      ) : null}
+                      )}
                         </div>
                       </div>
                     </>

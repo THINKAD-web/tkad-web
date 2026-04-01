@@ -55,6 +55,7 @@ import {
   MEDIA_CATALOG_COMPACT_GRID_CLASS,
   MediaCatalogGridCompactToggle,
 } from "@/components/media-catalog-shared";
+import { PerPageSelect } from "@/components/per-page-select";
 import MediaCatalogFiltersBar from "@/components/media-catalog-filters-bar";
 import {
   useMediaCatalogFilters,
@@ -678,23 +679,13 @@ export default function MediaBrowseClient({
                       />
                     ) : null}
                     {browseMode === "list" ? (
-                      <label className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-white px-3 py-1.5 text-xs font-medium text-navy">
-                        <span className="text-muted-foreground">
-                          {t("media.perPage")}
-                        </span>
-                        <select
-                          className="rounded-md border border-navy/15 bg-slate-50 px-2 py-0.5 text-xs font-semibold"
-                          value={catalogPageSize}
-                          onChange={(e) => {
-                            setCatalogPageSize(Number(e.target.value));
-                            setCatalogPage(1);
-                          }}
-                        >
-                          <option value={12}>12</option>
-                          <option value={24}>24</option>
-                          <option value={48}>48</option>
-                        </select>
-                      </label>
+                      <PerPageSelect
+                        value={catalogPageSize}
+                        onChange={(next) => {
+                          setCatalogPageSize(next);
+                          setCatalogPage(1);
+                        }}
+                      />
                     ) : null}
                     {browseMode === "list" ? (
                       <>
