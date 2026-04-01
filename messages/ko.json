@@ -229,6 +229,7 @@
     "filterBudgetMin": "예산 하한",
     "filterBudgetMax": "예산 상한",
     "filterTargetAge": "타겟 연령대",
+    "filterTargetTraits": "타겟 상황",
     "perPage": "페이지당",
     "pagePrev": "이전",
     "pageNext": "다음",
@@ -267,6 +268,13 @@
     "mapPopupClose": "닫기",
     "cardDetail": "상세",
     "imagePreparing": "이미지 준비중",
+    "targetTrait": {
+      "commute": "출퇴근·통학 동선",
+      "shopping": "쇼핑·상권 중심",
+      "leisureNight": "여가·야간 상권",
+      "tourism": "관광·방문객 유입",
+      "fandom": "팬덤·성지 방문"
+    },
     "advanced": {
       "title": "고급 필터",
       "openButton": "고급 필터",

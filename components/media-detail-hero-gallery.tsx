@@ -53,79 +53,42 @@ export default function MediaDetailHeroGallery({
 
   if (!hasImage) {
     return (
-      <section className="relative aspect-video w-full overflow-hidden bg-navy">
-        <MediaImagePlaceholder
-          label={tMedia("imagePreparing")}
-          size="lg"
-          className="min-h-[14rem] h-full w-full sm:min-h-[16rem]"
-        />
-        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/75 via-black/35 to-black/15" />
-        <div className="relative z-10 flex h-full min-h-0 flex-col justify-between px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10 pointer-events-none [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
-          {children}
+      <section className="relative w-full overflow-hidden bg-navy">
+        <div className="mx-auto flex h-[220px] w-full max-w-6xl items-center justify-center px-4 py-4 sm:h-[260px] sm:px-6 lg:h-[280px] lg:px-12">
+          <MediaImagePlaceholder
+            label={tMedia("imagePreparing")}
+            size="lg"
+            className="h-full w-full max-w-3xl"
+          />
         </div>
+        <div className="border-t border-white/10" />
       </section>
     );
   }
 
   return (
-    <section className="relative w-full overflow-hidden bg-navy aspect-video">
-      <button
-        type="button"
-        onClick={() => openAt(0)}
-        className="absolute inset-0 z-0 block cursor-zoom-in border-0 bg-navy p-0 text-left outline-none ring-inset focus-visible:ring-2 focus-visible:ring-gold/70"
-        aria-label={labels.expand}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={mainSrc}
-          alt={altBase}
-          className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out hover:scale-[1.03] active:scale-[1.01]"
-          fetchPriority="high"
-        />
-      </button>
-
-      <div
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/90 via-black/55 to-black/25"
-        aria-hidden
-      />
-
-      <span
-        className="pointer-events-none absolute bottom-4 right-4 z-[11] flex items-center gap-2 rounded-full border border-white/25 bg-black/45 px-3 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-md sm:bottom-6 sm:right-6"
-        aria-hidden
-      >
-        <ZoomIn className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-        {labels.clickHint}
-      </span>
-
-      {showThumbnails && safe.length > 1 ? (
-        <div className="pointer-events-auto absolute bottom-3 left-3 right-3 z-[12] flex gap-1.5 overflow-x-auto pb-1 sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-[min(100%,28rem)]">
-          {safe.map((src, i) => (
-            <button
-              key={`${src}-${i}`}
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                openAt(i);
-              }}
-              className={`relative h-12 w-16 shrink-0 overflow-hidden rounded-md border-2 bg-black/30 shadow-md transition sm:h-14 sm:w-[4.5rem] ${
-                i === 0 ? "border-gold" : "border-white/30 opacity-90 hover:opacity-100"
-              }`}
-              aria-label={`${labels.expand} ${i + 1}`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt=""
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </button>
-          ))}
+    <section className="relative w-full overflow-hidden bg-navy">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-stretch px-4 py-4 sm:px-6 lg:px-12">
+        <div className="relative flex h-[220px] items-center justify-center rounded-xl bg-black/40 sm:h-[260px] lg:h-[280px]">
+          <button
+            type="button"
+            onClick={() => openAt(0)}
+            className="relative z-0 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 text-left outline-none ring-inset focus-visible:ring-2 focus-visible:ring-gold/70"
+            aria-label={labels.expand}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={mainSrc}
+              alt={altBase}
+              className="mx-auto max-h-full w-auto max-w-full object-contain"
+              fetchPriority="high"
+            />
+          </button>
         </div>
-      ) : null}
 
-      <div className="relative z-10 flex h-full min-h-0 flex-col justify-between px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10 pointer-events-none [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
-        {children}
+        <div className="mt-4 flex flex-col gap-4 pb-2 text-white">
+          {children}
+        </div>
       </div>
 
       <MediaLightbox

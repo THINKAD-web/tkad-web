@@ -49,7 +49,6 @@ import {
   computeCatalogBounds,
   defaultAdvancedFilterState,
   passesMediaAdvancedFilters,
-  type TargetAgeBucket,
 } from "@/lib/media-filter-advanced";
 import {
   MEDIA_CATALOG_GRID_CLASS,
@@ -57,7 +56,9 @@ import {
   MediaCatalogGridCompactToggle,
 } from "@/components/media-catalog-shared";
 import MediaCatalogFiltersBar from "@/components/media-catalog-filters-bar";
-import { buildMediaRegionFilterOptions } from "@/lib/media-region-filter-options";
+import {
+  useMediaCatalogFilters,
+} from "@/lib/use-media-catalog-filters";
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
 import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
@@ -176,6 +177,7 @@ export default function MediaBrowseClient({
 }: {
   catalog: MediaItem[];
 }) {
+  // TODO: dev server restart if needed (after large UI changes)
   const t = useTranslations();
   const tMedia = useTranslations("media");
   const locale = useLocale();
@@ -191,7 +193,7 @@ export default function MediaBrowseClient({
     "grid" | "compact"
   >("grid");
   const [catalogPage, setCatalogPage] = useState(1);
-  const [catalogPageSize, setCatalogPageSize] = useState(24);
+  const [catalogPageSize, setCatalogPageSize] = useState(12);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
@@ -210,12 +212,12 @@ export default function MediaBrowseClient({
   const [mediaRegionFilter, setMediaRegionFilter] = useState("all");
   const [budgetMin, setBudgetMin] = useState(() => bounds.minPrice);
   const [budgetMax, setBudgetMax] = useState(() => bounds.maxPrice);
-  const [targetAgePick, setTargetAgePick] = useState<
-    Partial<Record<TargetAgeBucket, boolean>>
-  >({});
-  const [targetTraitsPick, setTargetTraitsPick] = useState<
-    Partial<Record<string, boolean>>
-  >({});
+  const {
+    filters,
+    toggleFilter,
+    resetFilters: resetAdvancedFilters,
+    getActiveFiltersCount,
+  } = useMediaCatalogFilters();
 
   useEffect(() => {
     setBudgetMin(bounds.minPrice);
@@ -227,23 +229,39 @@ export default function MediaBrowseClient({
       ...defaultAdvanced,
       priceMin: budgetMin,
       priceMax: budgetMax,
-      targetAgePick,
+      targetAgePick: filters.targetAge,
     }),
-    [defaultAdvanced, budgetMin, budgetMax, targetAgePick],
+    [defaultAdvanced, budgetMin, budgetMax, filters.targetAge],
   );
-
-  const toggleTargetAge = useCallback((k: TargetAgeBucket) => {
-    setTargetAgePick((prev) => {
-      const next = { ...prev, [k]: !prev[k] };
-      if (!next[k]) delete next[k];
-      return next;
-    });
-  }, []);
 
   const regionFilterOptions = useMemo(
-    () => buildMediaRegionFilterOptions(catalog, (key) => tMedia(key)),
-    [catalog, tMedia],
+    () => [
+      { value: "all", label: "전체 지역" },
+      { value: "seoul", label: "서울" },
+      { value: "gyeonggi-do", label: "경기" },
+      { value: "incheon", label: "인천" },
+      { value: "busan", label: "부산" },
+      { value: "daegu", label: "대구" },
+      { value: "daejeon", label: "대전" },
+      { value: "gwangju", label: "광주" },
+      { value: "ulsan", label: "울산" },
+      { value: "sejong", label: "세종" },
+      { value: "gangwon", label: "강원" },
+      { value: "chungbuk", label: "충북" },
+      { value: "chungnam", label: "충남" },
+      { value: "jeonbuk", label: "전북" },
+      { value: "jeonnam", label: "전남" },
+      { value: "gyeongbuk", label: "경북" },
+      { value: "gyeongnam", label: "경남" },
+      { value: "jeju", label: "제주" },
+    ],
+    [],
   );
+
+  console.log("MediaCatalogFiltersBar picks", {
+    filters,
+    activeCount: getActiveFiltersCount(),
+  });
 
   useLayoutEffect(() => {
     setCompareItems(entriesToCompareMediaItems(getCompareCartEntries(), catalog));
@@ -282,7 +300,7 @@ export default function MediaBrowseClient({
       data = data.filter((m) => matchesMediaTextQuery(m, lower));
     }
 
-    const activeTraits = Object.entries(targetTraitsPick).filter(
+    const activeTraits = Object.entries(filters.targetTraits).filter(
       ([, v]) => v,
     );
 
@@ -407,8 +425,7 @@ export default function MediaBrowseClient({
     setMediaRegionFilter("all");
     setBudgetMin(bounds.minPrice);
     setBudgetMax(bounds.maxPrice);
-    setTargetAgePick({});
-    setTargetTraitsPick({});
+    resetAdvancedFilters();
   };
 
   const handleMediaView = useCallback((media: MediaItem) => {
@@ -588,15 +605,8 @@ export default function MediaBrowseClient({
                 budgetMax={budgetMax}
                 onBudgetMinChange={setBudgetMin}
                 onBudgetMaxChange={setBudgetMax}
-                targetAgePick={targetAgePick}
-                onToggleTargetAge={toggleTargetAge}
-                targetTraitsPick={targetTraitsPick}
-                onToggleTargetTrait={(key) =>
-                  setTargetTraitsPick((prev) => ({
-                    ...prev,
-                    [key]: !prev[key],
-                  }))
-                }
+                filters={filters}
+                onToggleFilter={toggleFilter}
                 onReset={resetFilters}
               />
 

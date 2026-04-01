@@ -229,6 +229,7 @@
     "filterBudgetMin": "Budget minimum",
     "filterBudgetMax": "Budget maximum",
     "filterTargetAge": "Target age",
+    "filterTargetTraits": "Target context",
     "perPage": "Per page",
     "pagePrev": "Previous",
     "pageNext": "Next",
@@ -267,6 +268,13 @@
     "mapPopupClose": "Close",
     "cardDetail": "Details",
     "imagePreparing": "Image coming soon",
+    "targetTrait": {
+      "commute": "Commuter flow",
+      "shopping": "Shopping & retail",
+      "leisureNight": "Leisure & nightlife",
+      "tourism": "Tourist traffic",
+      "fandom": "Fandom / fan spots"
+    },
     "advanced": {
       "title": "Advanced filters",
       "openButton": "Advanced filters",
