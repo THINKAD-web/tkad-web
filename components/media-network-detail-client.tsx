@@ -359,119 +359,8 @@ export default function MediaNetworkDetailClient({
         </div>
       </section>
 
-      {/* 본문: 리포트 카드 스타일 2열 레이아웃 (지도 섹션 제외) */}
-      <section className="bg-white py-12 pb-16 sm:pb-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          {/* 섹션 헤더 */}
-          <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-xl font-bold tracking-tight text-navy sm:text-2xl">
-                {t("detailDescriptionTitle")}
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("detailDescriptionSubtitle")}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,auto)] lg:items-start">
-            {/* 왼쪽: 효과 / 특징 설명 카드 */}
-            <div className="space-y-6">
-              {data.effectMemo && (
-                <EffectMemoCallout title={t("effectMemoLabel")}>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-navy/90">
-                    {data.effectMemo}
-                  </p>
-                </EffectMemoCallout>
-              )}
-
-              {data.features && (
-                <div className="rounded-2xl border border-navy/10 bg-slate-50/80 p-6">
-                  <h3 className="text-sm font-semibold text-navy">
-                    {t("featuresTitle")}
-                  </h3>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-navy/85">
-                    {data.features}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* 오른쪽: 핵심 정보 + 성과 지표 */}
-            <aside className="space-y-8 lg:min-w-[380px]">
-              <section aria-labelledby="network-core-specs-heading">
-                <h2
-                  id="network-core-specs-heading"
-                  className="mb-3 text-sm font-semibold text-navy"
-                >
-                  {t("coreInfoTitle")}
-                </h2>
-                <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-lg shadow-navy/5 sm:p-7">
-                  <div className="grid grid-cols-1 gap-6">
-                    <CoreFact
-                      icon={Users}
-                      label={t("dailyFootfallLabel")}
-                      value={
-                        <span className="block text-base font-semibold text-navy">
-                          {avgLocFootfall != null
-                            ? `${avgLocFootfall.toLocaleString()}명/일`
-                            : t("valueEmpty")}
-                        </span>
-                      }
-                    />
-                    <CoreFact
-                      icon={Clock}
-                      label={t("operatingHoursLabel")}
-                      value={
-                        <span className="block text-sm text-navy">
-                          {data.operatingHours || t("valueEmpty")}
-                        </span>
-                      }
-                    />
-                    <CoreFact
-                      icon={CircleDollarSign}
-                      label={t("pricePackageLabel")}
-                      value={
-                        <>
-                          <span className="block text-base font-semibold tabular-nums text-gold-dark">
-                            {data.pricePackage != null
-                              ? `₩${data.pricePackage.toLocaleString()}`
-                              : t("priceEmpty")}
-                          </span>
-                          <span className="mt-1 block text-xs text-muted-foreground">
-                            {t("perMonth")}
-                          </span>
-                        </>
-                      }
-                    />
-                    <CoreFact
-                      icon={CircleDollarSign}
-                      label={t("pricePerUnitLabel")}
-                      value={
-                        <>
-                          <span className="block text-base font-semibold tabular-nums text-gold-dark">
-                            {data.pricePerUnit != null
-                              ? `₩${data.pricePerUnit.toLocaleString()}`
-                              : t("priceEmpty")}
-                          </span>
-                          <span className="mt-1 block text-xs text-muted-foreground">
-                            {t("unitLabel")}
-                          </span>
-                        </>
-                      }
-                    />
-                  </div>
-                </div>
-              </section>
-
-              <MediaDetailPerformance metrics={performanceMetrics} />
-            </aside>
-          </div>
-        </div>
-      </section>
-
-      {/* 페이지 최하단: 설치 지점 지도 섹션 */}
-      <section className="bg-white pb-24">
+      {/* 1) 위치 지도 섹션 */}
+      <section className="bg-white pb-16">
         <div className="mx-auto max-w-4xl px-4 pt-4 sm:px-6 lg:px-8">
           <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -705,6 +594,102 @@ export default function MediaNetworkDetailClient({
           )}
         </div>
       </section>
+
+      {/* 2) 핵심 정보 섹션 */}
+      <section className="bg-white py-10">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-6 text-xl font-bold tracking-tight text-navy sm:text-2xl">
+            {t("coreInfoTitle")}
+          </h2>
+          <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-lg shadow-navy/5 sm:p-7">
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+              <CoreFact
+                icon={Users}
+                label={t("dailyFootfallLabel")}
+                value={
+                  <span className="block text-base font-semibold text-navy">
+                    {avgLocFootfall != null
+                      ? `${avgLocFootfall.toLocaleString()}명/일`
+                      : t("valueEmpty")}
+                  </span>
+                }
+              />
+              <CoreFact
+                icon={Clock}
+                label={t("operatingHoursLabel")}
+                value={
+                  <span className="block text-sm text-navy">
+                    {data.operatingHours || t("valueEmpty")}
+                  </span>
+                }
+              />
+              <CoreFact
+                icon={CircleDollarSign}
+                label={t("pricePackageLabel")}
+                value={
+                  <>
+                    <span className="block text-base font-semibold tabular-nums text-gold-dark">
+                      {data.pricePackage != null
+                        ? `₩${data.pricePackage.toLocaleString()}`
+                        : t("priceEmpty")}
+                    </span>
+                    <span className="mt-1 block text-xs text-muted-foreground">{t("perMonth")}</span>
+                  </>
+                }
+              />
+              <CoreFact
+                icon={CircleDollarSign}
+                label={t("pricePerUnitLabel")}
+                value={
+                  <>
+                    <span className="block text-base font-semibold tabular-nums text-gold-dark">
+                      {data.pricePerUnit != null
+                        ? `₩${data.pricePerUnit.toLocaleString()}`
+                        : t("priceEmpty")}
+                    </span>
+                    <span className="mt-1 block text-xs text-muted-foreground">{t("unitLabel")}</span>
+                  </>
+                }
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3) 성과 지표 섹션 */}
+      <section className="bg-white py-4 pb-10">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <MediaDetailPerformance metrics={performanceMetrics} />
+        </div>
+      </section>
+
+      {/* 4) 상세 설명 섹션 */}
+      {(data.effectMemo || data.features) && (
+        <section className="bg-white py-10 pb-20">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <h2 className="mb-6 text-xl font-bold tracking-tight text-navy sm:text-2xl">
+              {t("detailDescriptionTitle")}
+            </h2>
+            <div className="space-y-6">
+              {data.effectMemo && (
+                <EffectMemoCallout title={t("effectMemoLabel")}>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-navy/90">
+                    {data.effectMemo}
+                  </p>
+                </EffectMemoCallout>
+              )}
+              {data.features && (
+                <div className="rounded-2xl border border-navy/10 bg-slate-50/80 p-6">
+                  <h3 className="text-sm font-semibold text-navy">{t("featuresTitle")}</h3>
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-navy/85">
+                    {data.features}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }
