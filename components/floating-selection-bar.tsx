@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -18,11 +18,27 @@ export const FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS =
 /**
  * 매체 비교/견적 등 선택 시 하단 고정 바.
  * 나타날 때 슬라이드업, 사라질 때 슬라이드다운 (AnimatePresence).
+ * 푸터가 보이면 자동으로 숨김.
  */
 export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
+  const [footerVisible, setFooterVisible] = useState(false);
+
+  useEffect(() => {
+    const footer = document.getElementById("site-footer");
+    if (!footer) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setFooterVisible(entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  const visible = open && !footerVisible;
+
   return (
     <AnimatePresence initial={false}>
-      {open ? (
+      {visible ? (
         <motion.div
           key="floating-selection-bar"
           role="region"
