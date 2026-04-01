@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useCallback } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -68,6 +68,7 @@ export default function MediaCatalogFiltersBar({
 
   const [regionQuery, setRegionQuery] = useState("");
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const filteredRegionOptions = useMemo(() => {
     const q = regionQuery.trim();
@@ -78,8 +79,42 @@ export default function MediaCatalogFiltersBar({
   const priceStep =
     bounds.maxPrice - bounds.minPrice <= 500 ? 50 : 100;
 
+  // 활성 필터 총 개수
+  const activeCount = [
+    mediaRegionFilter !== "all" ? 1 : 0,
+    mediaTypeFilter !== "all" ? 1 : 0,
+    budgetMin !== bounds.minPrice || budgetMax !== bounds.maxPrice ? 1 : 0,
+    ...Object.values(filters.targetAge ?? {}).map(v => v ? 1 : 0),
+    ...Object.values(filters.targetTraits ?? {}).map(v => v ? 1 : 0),
+    ...Object.values(filters.specialFeature ?? {}).map(v => v ? 1 : 0),
+    ...Object.values(filters.size ?? {}).map(v => v ? 1 : 0),
+    ...Object.values(filters.duration ?? {}).map(v => v ? 1 : 0),
+    ...Object.values(filters.exposureTime ?? {}).map(v => v ? 1 : 0),
+    ...Object.values(filters.industry ?? {}).map(v => v ? 1 : 0),
+  ].reduce((a, b) => a + (b as number), 0);
+
   return (
-    <div className="rounded-2xl border border-navy/10 bg-white p-4 shadow-sm sm:p-5">
+    <div className="rounded-2xl border border-navy/10 bg-white shadow-sm">
+      {/* 필터 토글 헤더 */}
+      <button
+        type="button"
+        onClick={() => setFiltersOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-4 py-3 sm:px-5"
+      >
+        <span className="flex items-center gap-2 text-sm font-semibold text-navy">
+          <SlidersHorizontal className="h-4 w-4" />
+          필터
+          {(activeCount as number) > 0 && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[11px] font-bold text-navy">
+              {activeCount as number}
+            </span>
+          )}
+        </span>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", filtersOpen && "rotate-180")} />
+      </button>
+
+      {filtersOpen && (
+      <div className="border-t border-navy/5 p-4 sm:p-5">
       <div className="flex flex-col gap-4 sm:gap-5">
         {/* 지역 · 유형 */}
         <div className="flex flex-col gap-3 border-b border-navy/5 pb-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-4">
@@ -459,6 +494,8 @@ export default function MediaCatalogFiltersBar({
           </Button>
         </div>
       </div>
+      </div>
+      )}
     </div>
   );
 }
