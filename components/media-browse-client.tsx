@@ -330,7 +330,7 @@ export default function MediaBrowseClient({
         </div>
       </section>
 
-      <section className="py-28">
+      <section className="bg-white py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 flex justify-center">
             <div className="inline-flex rounded-full border border-navy/10 bg-white p-1 shadow-sm">
