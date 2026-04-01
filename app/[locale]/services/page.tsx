@@ -79,18 +79,22 @@ export default async function ServicesPage({ params }: Props) {
         aria-hidden
       />
 
-      <section className="relative border-b border-navy/8 bg-gradient-to-b from-navy/[0.04] via-white to-white">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
+      <section className="relative border-b border-navy/20 bg-gradient-to-br from-navy via-navy to-[#0c1024]">
+        <div
+          className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.12]"
+          aria-hidden
+        />
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
           <Badge
             variant="secondary"
-            className="mb-5 border-gold/25 bg-gold/10 text-xs font-semibold tracking-wide text-navy"
+            className="mb-5 border-gold/40 bg-gold/15 text-xs font-semibold tracking-wide text-gold-light"
           >
             {t("heroBadge")}
           </Badge>
-          <h1 className="max-w-4xl text-3xl font-extrabold tracking-tight text-navy sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
+          <h1 className="max-w-4xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
             {t("heroTitle")}
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
             {t("heroSubtitle")}
           </p>
           <div className="mt-12 flex flex-wrap gap-3">
@@ -99,7 +103,7 @@ export default async function ServicesPage({ params }: Props) {
             </Button>
             <Button
               variant="outline"
-              className="rounded-full border-navy/15 text-navy hover:bg-navy/[0.04]"
+              className="rounded-full border-white/25 bg-white/5 text-white hover:bg-white/10"
               asChild
             >
               <Link href="/media">{t("ctaSecondary")}</Link>
