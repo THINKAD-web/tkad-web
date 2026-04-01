@@ -212,6 +212,10 @@ export default function MediaAiRecommendPanel({
           setPhase("form");
         }}
         onViewFullList={() => setPhase("list")}
+        onRemix={() => {
+          setResults(null);
+          setPhase("form");
+        }}
       />
     );
   }
