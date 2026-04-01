@@ -49,7 +49,7 @@ export default function MediaDetailPerformance({
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t("performanceStatMonthly")}
           </p>
-          <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-navy sm:text-4xl">
+          <p className="mt-2 text-2xl font-bold tabular-nums tracking-tight text-navy whitespace-nowrap sm:text-3xl">
             {format.number(metrics.monthlyImpressions)}
           </p>
         </div>
@@ -57,7 +57,7 @@ export default function MediaDetailPerformance({
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t("performanceStatDaily")}
           </p>
-          <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-navy sm:text-4xl">
+          <p className="mt-2 text-2xl font-bold tabular-nums tracking-tight text-navy whitespace-nowrap sm:text-3xl">
             {format.number(metrics.dailyFootfall)}
           </p>
         </div>

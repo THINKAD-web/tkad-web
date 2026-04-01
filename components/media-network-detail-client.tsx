@@ -374,7 +374,7 @@ export default function MediaNetworkDetailClient({
             </div>
           </div>
 
-          <div className="grid gap-10 lg:grid-cols-3 lg:items-start">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(380px,1.2fr)] lg:items-start">
             {/* 왼쪽: 효과 / 특징 설명 카드 */}
             <div className="space-y-6 lg:col-span-2">
               {data.effectMemo && (
