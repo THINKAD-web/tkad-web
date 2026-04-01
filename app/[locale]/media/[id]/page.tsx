@@ -6,6 +6,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import {
   ArrowLeft,
+  Calculator,
   CircleDollarSign,
   MapPin,
   Monitor,
@@ -36,6 +37,7 @@ import MediaSimilarCarousel from "@/components/media-similar-carousel";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
 import TrackMediaView from "@/components/track-media-view";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
+import MediaDetailHeroGallery from "@/components/media-detail-hero-gallery";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
@@ -107,28 +109,26 @@ export default async function MediaDetailPage({ params }: Props) {
   return (
     <>
       <TrackMediaView mediaId={media.id} />
-      
-      {/* 메인 이미지만 (오버레이 없음) */}
-      {heroImage && (
-        <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={heroImage}
-            alt={isKo ? media.name : media.nameEn}
-            className="h-full w-full object-cover"
-          />
-        </div>
-      )}
-
-      {/* 매체 정보 (흰색 배경) */}
-      <section className="bg-white px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10 border-b border-gray-100">
-        <div className="mx-auto max-w-4xl">
-          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 mb-4">
+      {/* 메인 이미지 + 히어로 오버레이 (네트워크 매체와 유사 구조) */}
+      <MediaDetailHeroGallery
+        images={galleryImages}
+        heroSrc={heroImage}
+        altBase={isKo ? media.name : media.nameEn}
+        labels={{
+          close: t("galleryLightboxClose"),
+          prev: t("galleryLightboxPrev"),
+          next: t("galleryLightboxNext"),
+          expand: t("galleryExpand"),
+          clickHint: t("galleryClickHint"),
+        }}
+      >
+        <div className="mx-auto flex h-full w-full max-w-6xl flex-col justify-between gap-4">
+          <div className="flex items-start justify-between gap-3">
             <Link href="/media">
               <Button
                 variant="ghost"
                 size="sm"
-                className="-ml-2 text-navy/70 hover:bg-navy/5 hover:text-navy"
+                className="-ml-2 text-slate-200 hover:bg-white/10 hover:text-white"
               >
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {t("back")}
@@ -136,68 +136,69 @@ export default async function MediaDetailPage({ params }: Props) {
             </Link>
             <MediaDetailAdminActions />
           </div>
-          <h1 className="break-words text-2xl font-bold tracking-tight text-navy sm:text-3xl md:text-4xl">
-            {isKo ? media.name : media.nameEn}
-          </h1>
-          <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-muted-foreground sm:text-lg">
-            <span className="inline-flex items-center gap-2">
-              <MapPin className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-              {formatMediaLocationShort(media, isKo)}
-            </span>
-            {typeLabel ? (
-              <>
-                <span className="hidden text-gray-300 sm:inline" aria-hidden>
-                  ·
+
+          <div className="grid gap-6 pb-2 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.3fr)] lg:items-end">
+            <div className="min-w-0 space-y-3 text-white">
+              <h1 className="break-words text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+                {isKo ? media.name : media.nameEn}
+              </h1>
+              <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-200 sm:text-base">
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                  {formatMediaLocationShort(media, isKo)}
                 </span>
-                <span className="font-medium text-navy/80">{typeLabel}</span>
-              </>
-            ) : null}
-          </p>
-          <div className="mt-5 min-w-0 max-w-full">
-            {primaryPriceOption ? (
-              <>
-                <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
-                  <span className="break-words text-xl font-bold tabular-nums text-gold-dark sm:text-2xl">
-                    {formatMediaPriceWonWithSymbol(primaryPriceOption.price)}
-                  </span>
-                  <span className="text-sm font-normal text-muted-foreground sm:shrink-0">
-                    · {primaryPricePeriodLabel} {primaryPriceOption.label}
-                  </span>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  {priceOptions!.map((opt, idx) => (
-                    <span
-                      key={`${opt.label}-${idx}`}
-                      className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/5 px-3 py-1"
-                    >
-                      <span className="font-medium text-navy/80">
-                        {opt.label}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground">
-                        {formatMediaPriceWonWithSymbol(opt.price)} ·{" "}
-                        {t(
-                          mediaDetailPricePeriodTranslationKey(
-                            (opt.period as any) ?? media.pricePeriod,
-                          ),
-                        )}
-                      </span>
+                {typeLabel ? (
+                  <>
+                    <span className="hidden text-slate-400 sm:inline" aria-hidden>
+                      ·
                     </span>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
-                <span className="break-words text-xl font-bold tabular-nums text-gold-dark sm:text-2xl">
-                  {formatMediaPriceWonWithSymbol(media.price)}
-                </span>
-                <span className="text-sm font-normal text-muted-foreground sm:shrink-0">
-                  · {periodLabel}
-                </span>
+                    <span className="font-medium text-gold">
+                      {typeLabel}
+                    </span>
+                  </>
+                ) : null}
+              </p>
+              {featuresText ? (
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-100/90">
+                  {featuresText}
+                </p>
+              ) : null}
+            </div>
+
+            <aside className="min-w-0 rounded-2xl border border-white/15 bg-black/35 p-4 text-sm text-slate-100 shadow-lg shadow-black/40 backdrop-blur-md sm:p-5">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <CoreFact
+                  icon={CircleDollarSign}
+                  label={t("priceTitle")}
+                  value={
+                    <>
+                      <span className="block text-lg font-bold tabular-nums text-gold">
+                        {primaryPriceOption
+                          ? formatMediaPriceWonWithSymbol(primaryPriceOption.price)
+                          : formatMediaPriceWonWithSymbol(media.price)}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-slate-200/90">
+                        {primaryPriceOption
+                          ? `${primaryPricePeriodLabel} ${primaryPriceOption.label}`
+                          : periodLabel}
+                      </span>
+                    </>
+                  }
+                />
+                <CoreFact
+                  icon={Users}
+                  label={t("footTrafficTitle")}
+                  value={
+                    <span className="block text-base font-semibold tabular-nums text-white">
+                      {monthly.toLocaleString()}
+                    </span>
+                  }
+                />
               </div>
-            )}
+            </aside>
           </div>
         </div>
-      </section>
+      </MediaDetailHeroGallery>
 
       <section className="py-12 pb-28 sm:pb-32">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">

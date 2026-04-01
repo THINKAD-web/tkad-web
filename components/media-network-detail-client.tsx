@@ -79,6 +79,7 @@ export default function MediaNetworkDetailClient({
   data: NetworkDetailPayload;
 }) {
   const t = useTranslations("networkMedia");
+  const tDetail = useTranslations("media.detail");
   const isKo = locale === "ko";
   const typeLb = NETWORK_TYPE_LABELS[data.type] ?? {
     ko: data.type,
@@ -676,7 +677,7 @@ export default function MediaNetworkDetailClient({
 
       {/* 4) 상세 설명 섹션 */}
       {(data.effectMemo || data.features) && (
-        <section className="bg-white py-10 pb-20">
+        <section className="bg-white py-10 pb-16">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <h2 className="mb-6 text-xl font-bold tracking-tight text-navy sm:text-2xl">
               {t("detailDescriptionTitle")}
@@ -701,6 +702,29 @@ export default function MediaNetworkDetailClient({
           </div>
         </section>
       )}
+
+      {/* 진행·집행 사례 / 이 매체 어때 — 일반 매체와 동일한 섹션 구조 */}
+      <section className="bg-white pb-8">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-3 text-lg font-bold text-navy">
+            {tDetail("caseStudiesTitle")}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {tDetail("performanceDisclaimer")}
+          </p>
+        </div>
+      </section>
+
+      <section className="bg-white pb-16">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-3 text-lg font-bold text-navy">
+            {tDetail("similarTitle")}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {tDetail("similarCarouselPrev")}
+          </p>
+        </div>
+      </section>
     </>
   );
 }
