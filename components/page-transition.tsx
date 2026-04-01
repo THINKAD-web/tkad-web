@@ -30,10 +30,10 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   return (
     <div
       className={cn(
-        "ease-out transition-[opacity,transform] duration-300 motion-reduce:transition-none",
+        "ease-out transition-opacity duration-300 motion-reduce:transition-none",
         show
-          ? "translate-y-0 opacity-100"
-          : "pointer-events-none translate-y-2 opacity-0",
+          ? "opacity-100"
+          : "pointer-events-none opacity-0",
       )}
     >
       {displayChildren}
