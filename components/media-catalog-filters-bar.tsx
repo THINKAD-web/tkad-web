@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,7 @@ export default function MediaCatalogFiltersBar({
   const tCommon = useTranslations("common");
 
   const [regionQuery, setRegionQuery] = useState("");
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const filteredRegionOptions = useMemo(() => {
     const q = regionQuery.trim();
@@ -192,8 +194,39 @@ export default function MediaCatalogFiltersBar({
           </div>
         </div>
 
-        {/* 타겟 특성 */}
-        {onToggleFilter ? (
+        {/* 고급 필터 토글 */}
+        <div className="border-t border-navy/5 pt-3">
+          <button
+            type="button"
+            onClick={() => setAdvancedOpen((v) => !v)}
+            className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-sm font-semibold text-navy hover:bg-navy/5 transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              고급 필터
+              {Object.values(filters.targetTraits ?? {}).concat(
+                Object.values(filters.specialFeature ?? {}),
+                Object.values(filters.size ?? {}),
+                Object.values(filters.duration ?? {}),
+                Object.values(filters.exposureTime ?? {}),
+                Object.values(filters.industry ?? {}),
+              ).filter(Boolean).length > 0 && (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-navy">
+                  {Object.values(filters.targetTraits ?? {}).concat(
+                    Object.values(filters.specialFeature ?? {}),
+                    Object.values(filters.size ?? {}),
+                    Object.values(filters.duration ?? {}),
+                    Object.values(filters.exposureTime ?? {}),
+                    Object.values(filters.industry ?? {}),
+                  ).filter(Boolean).length}
+                </span>
+              )}
+            </span>
+            <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", advancedOpen && "rotate-180")} />
+          </button>
+        </div>
+
+        {/* 타겟 특성 ~ 업종 (고급 필터 영역) */}
+        {advancedOpen ? (
           <div className="border-t border-navy/5 pt-3">
             <p className="mb-2 text-[13px] font-semibold tracking-tight text-navy sm:text-sm">
               타겟 특성
