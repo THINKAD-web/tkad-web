@@ -74,11 +74,6 @@ export default async function ServicesPage({ params }: Props) {
 
   return (
     <div className="relative overflow-hidden">
-      <div
-        className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.06]"
-        aria-hidden
-      />
-
       <section className="relative border-b border-navy/20 bg-gradient-to-br from-navy via-navy to-[#0c1024]">
         <div
           className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.12]"
