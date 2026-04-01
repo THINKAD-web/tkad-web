@@ -7,6 +7,8 @@ import {
   resolveNetworkMediaDetail,
 } from "@/lib/media-network-public";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
+import { getSimilarMediaFromCatalog } from "@/lib/media-data";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
@@ -17,10 +19,24 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
   const resolved = await resolveLocaleParam(Promise.resolve({ locale }));
   setRequestLocale(resolved);
 
-  const row = await resolveNetworkMediaDetail(id);
+  const [row, catalog] = await Promise.all([
+    resolveNetworkMediaDetail(id),
+    fetchPublicMediaCatalog(),
+  ]);
   if (!row) notFound();
 
   const tiers = parsePackageOptions(row.packageOptions);
+
+  // 유사 매체: 같은 type/region 기준
+  const networkAsMediaLike = {
+    id: networkCatalogId(row.id),
+    name: row.name,
+    nameEn: row.nameEn ?? row.name,
+    type: row.type,
+    region: row.regions?.[0] ?? "seoul",
+    tags: row.tags ?? [],
+  } as Parameters<typeof getSimilarMediaFromCatalog>[1];
+  const similar = getSimilarMediaFromCatalog(catalog, networkAsMediaLike, 6);
 
   const payload = {
     catalogId: networkCatalogId(row.id),
@@ -60,5 +76,5 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
     })),
   };
 
-  return <MediaNetworkDetailClient locale={resolved} data={payload} />;
+  return <MediaNetworkDetailClient locale={resolved} data={payload} similar={similar} />;
 }

@@ -22,6 +22,7 @@ import {
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import { Badge } from "@/components/ui/badge";
+import MediaSimilarCarousel from "@/components/media-similar-carousel";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
@@ -74,9 +75,11 @@ export type NetworkDetailPayload = {
 export default function MediaNetworkDetailClient({
   locale,
   data,
+  similar = [],
 }: {
   locale: string;
   data: NetworkDetailPayload;
+  similar?: MediaItem[];
 }) {
   const t = useTranslations("networkMedia");
   const tDetail = useTranslations("media.detail");
@@ -703,28 +706,19 @@ export default function MediaNetworkDetailClient({
         </section>
       )}
 
-      {/* 진행·집행 사례 / 이 매체 어때 — 일반 매체와 동일한 섹션 구조 */}
-      <section className="bg-white pb-8">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-3 text-lg font-bold text-navy">
-            {tDetail("caseStudiesTitle")}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {tDetail("performanceDisclaimer")}
-          </p>
-        </div>
-      </section>
 
-      <section className="bg-white pb-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-3 text-lg font-bold text-navy">
-            {tDetail("similarTitle")}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {tDetail("similarCarouselPrev")}
-          </p>
-        </div>
-      </section>
+
+      {similar.length > 0 && (
+        <section className="bg-white pb-20">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <MediaSimilarCarousel
+              items={similar}
+              isKo={isKo}
+              title={tDetail("similarTitle")}
+            />
+          </div>
+        </section>
+      )}
     </>
   );
 }
