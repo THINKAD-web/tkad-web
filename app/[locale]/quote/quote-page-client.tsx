@@ -664,7 +664,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
-            <div className="lg:col-span-2">
+            <div className="order-2 lg:order-1 lg:col-span-2">
               <Card className="min-h-[320px] shadow-md">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-xl text-navy">
@@ -1487,7 +1487,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               </Card>
             </div>
 
-            <div className="lg:col-span-1">
+            <div className="order-1 lg:order-2 lg:col-span-1">
               <div className="space-y-6 lg:sticky lg:top-24">
                 <Card className="border-gold/30 shadow-md">
                   <CardHeader className="pb-2">
