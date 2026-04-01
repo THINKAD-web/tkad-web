@@ -507,7 +507,7 @@ export default function PlannerPageClient({
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <section className="relative overflow-hidden bg-navy py-20 text-white sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(232,213,181,0.12),transparent_50%)]" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative mx-auto flex max-w-7xl flex-col items-center px-4 text-center sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <Badge className="border-gold/40 bg-gold/15 text-gold">
               THINKAD Planner
@@ -522,7 +522,7 @@ export default function PlannerPageClient({
           <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
             {t("subtitle")}
           </p>
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
             <Button
               type="button"
               size="sm"

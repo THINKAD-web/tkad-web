@@ -149,7 +149,7 @@ export default function MediaSearchAutocomplete({
               placeholder ??
               (isKo ? "매체명, 지역, 유형 검색..." : "Search name, location, type...")
             }
-            className="w-full rounded-lg border bg-white py-2.5 pl-10 pr-9 text-sm outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
+            className="w-full rounded-lg border bg-white py-2.5 pl-10 pr-9 text-base outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
           />
           {query && (
             <button

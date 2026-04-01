@@ -21,14 +21,15 @@ export const FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS =
  * 푸터가 보이면 자동으로 숨김.
  */
 export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
-  const [footerVisible, setFooterVisible] = useState(false);
+  const [footerOverlap, setFooterOverlap] = useState(0);
 
   useEffect(() => {
     const check = () => {
       const footer = document.getElementById("site-footer");
       if (!footer) return;
       const rect = footer.getBoundingClientRect();
-      setFooterVisible(rect.top < window.innerHeight);
+      const overlap = Math.max(0, window.innerHeight - rect.top);
+      setFooterOverlap(overlap);
     };
     check();
     window.addEventListener("scroll", check, { passive: true });
@@ -39,7 +40,7 @@ export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
     };
   }, []);
 
-  const visible = open && !footerVisible;
+  const visible = open;
 
   return (
     <AnimatePresence initial={false}>
@@ -58,11 +59,12 @@ export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
             mass: 0.85,
           }}
           className={cn(
-            "fixed bottom-0 left-0 right-0 z-[60]",
+            "fixed left-0 right-0 z-[60]",
             "bg-white/95 backdrop-blur-sm border-t border-navy/10",
             "shadow-[0_-8px_32px_-4px_rgba(15,23,42,0.12)]",
             "px-2 pb-2 sm:px-4 sm:pb-3",
           )}
+          style={{ bottom: footerOverlap }}
         >
           <div
             className={cn(

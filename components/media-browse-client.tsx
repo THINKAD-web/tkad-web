@@ -494,6 +494,34 @@ export default function MediaBrowseClient({
                         </select>
                       </label>
                     ) : null}
+                    {browseMode === "list" ? (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            addManyToCompare(
+                              pagedCatalog.filter(
+                                (m) => m.catalogSource !== "network",
+                              ),
+                            )
+                          }
+                          disabled={pagedCatalog.length === 0}
+                        >
+                          전체선택
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCompareItems([])}
+                          disabled={compareItems.length === 0}
+                        >
+                          전체삭제
+                        </Button>
+                      </>
+                    ) : null}
                     <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
                       <ShieldCheck className="h-4 w-4" aria-hidden />
                       <span>{tMedia("browseCatalogVerifiedBadge")}</span>

@@ -129,21 +129,26 @@ export function CompareSpecTable({
       },
     ];
 
+  // 모든 열이 "—" 인 행은 숨겨서 의미 없는 줄과 빈 공간을 줄입니다.
+  const visibleRows = rows.filter((row) =>
+    items.some((m) => row.cell(m) !== "—"),
+  );
+
   return (
-    <div className="mt-12 border-t border-navy/10 pt-10 md:mt-14 md:pt-12">
-      <h2 className="mb-4 text-lg font-bold text-navy md:text-xl">
+    <div className="mt-12 rounded-2xl border border-navy/10 bg-white/80 p-4 shadow-sm md:mt-14 md:p-6">
+      <h2 className="mb-2 text-lg font-bold text-navy md:text-xl">
         {t("compareSpecTitle")}
       </h2>
       <p className="mb-4 text-xs text-muted-foreground md:text-sm">
         {t("compareSpecHint")}
       </p>
-      <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+      <div className="-mx-4 overflow-x-auto px-0 sm:mx-0 sm:px-0">
+        <table className="w-full min-w-[640px] border-separate border-spacing-y-1 text-left text-sm">
           <thead>
-            <tr className="border-b border-navy/15 bg-slate-50/90">
+            <tr className="bg-slate-50/90">
               <th
                 scope="col"
-                className="sticky left-0 z-20 min-w-[8.5rem] border-r border-navy/10 bg-slate-50/95 px-3 py-3 text-xs font-bold uppercase tracking-wide text-navy/70 backdrop-blur-sm sm:min-w-[10rem] sm:px-4"
+                className="sticky left-0 z-20 min-w-[8.5rem] rounded-l-xl border-r border-navy/10 bg-slate-50/95 px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-navy/70 backdrop-blur-sm sm:min-w-[10rem] sm:px-4"
               >
                 {t("compareColMetric")}
               </th>
@@ -164,21 +169,21 @@ export function CompareSpecTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {visibleRows.map((row) => (
               <tr
                 key={row.key}
-                className="border-b border-navy/8 transition-colors hover:bg-slate-50/60"
+                className="transition-colors hover:bg-slate-50/80"
               >
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 whitespace-nowrap border-r border-navy/10 bg-white/95 px-3 py-2.5 text-xs font-semibold text-navy shadow-[4px_0_12px_-4px_rgba(26,42,108,0.12)] backdrop-blur-sm sm:px-4 sm:text-sm"
+                  className="sticky left-0 z-10 whitespace-nowrap rounded-l-xl border-r border-navy/10 bg-white/95 px-3 py-2.5 text-xs font-semibold text-navy shadow-[4px_0_12px_-4px_rgba(26,42,108,0.12)] backdrop-blur-sm sm:px-4 sm:text-sm"
                 >
                   {row.label}
                 </th>
                 {items.map((m) => (
                   <td
                     key={`${row.key}-${m.id}`}
-                    className="max-w-[16rem] bg-white px-3 py-2.5 text-xs tabular-nums text-navy/90 sm:px-4 sm:text-sm"
+                    className="max-w-[16rem] rounded-r-xl bg-white px-3 py-2.5 text-xs tabular-nums text-navy/90 sm:px-4 sm:text-sm"
                   >
                     <span className="line-clamp-4 break-words">{row.cell(m)}</span>
                   </td>
