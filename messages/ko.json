@@ -1365,6 +1365,9 @@
     "locationDailyFootfall": "일일 유동인구: {count}명",
     "noLocationsFallback": "등록된 지점이 없습니다.",
     "effectMemoLabel": "광고 효과",
+    "detailDescriptionTitle": "네트워크 매체 소개",
+    "detailDescriptionSubtitle": "브랜드/지면의 특징과 예상 광고 효과를 한눈에 정리했습니다.",
+    "coreInfoTitle": "핵심 지표 요약",
     "contactUs": "문의하기"
   },
   "adminNav": {
