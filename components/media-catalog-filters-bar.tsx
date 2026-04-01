@@ -35,6 +35,8 @@ export type MediaCatalogFiltersBarProps = {
   onBudgetMaxChange: (v: number) => void;
   targetAgePick: Partial<Record<TargetAgeBucket, boolean>>;
   onToggleTargetAge: (k: TargetAgeBucket) => void;
+  targetTraitsPick?: Partial<Record<string, boolean>>;
+  onToggleTargetTrait?: (key: string) => void;
   onReset: () => void;
 };
 
@@ -55,6 +57,8 @@ export default function MediaCatalogFiltersBar({
   onBudgetMaxChange,
   targetAgePick,
   onToggleTargetAge,
+  targetTraitsPick,
+  onToggleTargetTrait,
   onReset,
 }: MediaCatalogFiltersBarProps) {
   const tMedia = useTranslations("media");
@@ -166,6 +170,41 @@ export default function MediaCatalogFiltersBar({
             })}
           </div>
         </div>
+
+        {onToggleTargetTrait ? (
+          <div>
+            <p className="mb-2 text-xs font-semibold text-navy">
+              {tMedia("filterTargetTraits")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: "commute", label: tMedia("targetTrait.commute") },
+                { key: "shopping", label: tMedia("targetTrait.shopping") },
+                { key: "leisure_night", label: tMedia("targetTrait.leisureNight") },
+                { key: "tourism", label: tMedia("targetTrait.tourism") },
+                { key: "fandom", label: tMedia("targetTrait.fandom") },
+              ].map(({ key, label }) => {
+                const on = Boolean(targetTraitsPick?.[key]);
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => onToggleTargetTrait(key)}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                      on
+                        ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                        : "border-navy/15 bg-white text-muted-foreground hover:border-navy/25 hover:text-navy",
+                    )}
+                    aria-pressed={on}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         <div className="min-w-0">{search}</div>
 

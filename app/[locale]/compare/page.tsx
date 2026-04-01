@@ -21,10 +21,19 @@ export default async function ComparePage({
     .map((s) => s.trim())
     .filter(Boolean)
     .slice(0, COMPARE_MAX_ITEMS);
-  const items: MediaItem[] = [];
-  for (const id of idList) {
-    const m = catalog.find((x) => x.id === id);
-    if (m) items.push(m);
+
+  let items: MediaItem[] = [];
+
+  if (idList.length > 0) {
+    for (const id of idList) {
+      const m = catalog.find((x) => x.id === id);
+      if (m) items.push(m);
+    }
+  } else {
+    // ids가 없을 때는 카탈로그에서 랜덤으로 12개를 선택해 기본 비교 세트를 구성합니다.
+    const shuffled = [...catalog].sort(() => Math.random() - 0.5);
+    items = shuffled.slice(0, 12);
   }
+
   return <ComparePageClient items={items} />;
 }

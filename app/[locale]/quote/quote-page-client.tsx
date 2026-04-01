@@ -602,7 +602,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
             <h1 className="text-3xl font-bold text-white sm:text-4xl">
               {t("quote.title")}
             </h1>
-            <Badge className="bg-gold text-navy text-xs font-bold px-2 py-0.5">BETA</Badge>
+            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">BETA</span>
           </div>
           <p className="mt-2 text-slate-300">{t("quote.subtitle")}</p>
           <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">

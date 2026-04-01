@@ -68,6 +68,109 @@ import {
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 
+const MAIN_CATEGORIES = [
+  { key: "all", nameKo: "전체", nameEn: "All" },
+  { key: "transit", nameKo: "교통 매체", nameEn: "Transit" },
+  {
+    key: "billboard",
+    nameKo: "빌보드 / 전광판",
+    nameEn: "Billboards / Screens",
+  },
+  {
+    key: "street_furniture",
+    nameKo: "거리 가구 매체",
+    nameEn: "Street furniture",
+  },
+  {
+    key: "indoor_place",
+    nameKo: "실내·쇼핑몰",
+    nameEn: "Indoor / malls",
+  },
+  {
+    key: "special_digital",
+    nameKo: "특수·디지털 매체",
+    nameEn: "Special / digital",
+  },
+] as const;
+
+type MainCategoryKey = (typeof MAIN_CATEGORIES)[number]["key"];
+
+const TRANSIT_SUB_CATEGORIES = [
+  { key: "all", nameKo: "전체", nameEn: "All" },
+  { key: "subway", nameKo: "지하철", nameEn: "Subway" },
+  {
+    key: "bus",
+    nameKo: "버스 (외부·내부·쉘터)",
+    nameEn: "Bus & shelters",
+  },
+  { key: "taxi", nameKo: "택시", nameEn: "Taxi" },
+  {
+    key: "rail_airport",
+    nameKo: "철도·공항·터미널",
+    nameEn: "Rail / airport / terminals",
+  },
+] as const;
+
+type TransitSubKey = (typeof TRANSIT_SUB_CATEGORIES)[number]["key"];
+
+function matchesMainCategory(m: MediaItem, key: MainCategoryKey): boolean {
+  if (key === "all") return true;
+
+  const sub = (m.subCategory ?? "").toLowerCase();
+  const tags = (m.tags ?? []).join(" ").toLowerCase();
+  const haystack = `${sub} ${tags}`;
+
+  if (key === "transit") {
+    if (m.type === "mobile") return true;
+    return /교통|버스|택시|지하철|역사|셔틀|차량/.test(haystack);
+  }
+
+  if (key === "billboard") {
+    return /빌보드|전광판|외벽|옥외|파사드|월스크린/.test(haystack);
+  }
+
+  if (key === "street_furniture") {
+    return /미디어폴|버스쉘터|정류장|가로등|키오스크|거리/.test(haystack);
+  }
+
+  if (key === "indoor_place") {
+    return /실내|쇼핑몰|몰|백화점|마트|로비|실내광고|매장/.test(haystack);
+  }
+
+  if (key === "special_digital") {
+    if (m.type === "digital" && !matchesMainCategory(m, "billboard")) {
+      return true;
+    }
+    return /프로젝션|특수|체험|인터랙티브|홀로그램/.test(haystack);
+  }
+
+  return true;
+}
+
+function matchesTransitSub(m: MediaItem, key: TransitSubKey): boolean {
+  if (key === "all") return true;
+
+  const sub = (m.subCategory ?? "").toLowerCase();
+  const tags = (m.tags ?? []).join(" ").toLowerCase();
+  const loc = `${m.nearbyFacilities ?? ""} ${m.location}`.toLowerCase();
+  const haystack = `${sub} ${tags} ${loc}`;
+
+  if (key === "subway") {
+    return /지하철|역사|subway|metro|station/.test(haystack);
+  }
+  if (key === "bus") {
+    return /버스|bus|쉘터|정류장|버스쉘터/.test(haystack);
+  }
+  if (key === "taxi") {
+    return /택시|taxi|카카오T|모범택시/.test(haystack);
+  }
+  if (key === "rail_airport") {
+    return /기차|철도|ktx|srt|공항|airport|터미널|terminal/.test(haystack);
+  }
+
+  return true;
+}
+
 export default function MediaBrowseClient({
   catalog,
 }: {
@@ -80,6 +183,8 @@ export default function MediaBrowseClient({
 
   const [mainTab, setMainTab] = useState<"search" | "ai">("search");
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
+  const [mainCategory, setMainCategory] = useState<MainCategoryKey>("all");
+  const [transitSub, setTransitSub] = useState<TransitSubKey>("all");
   const [textFilter, setTextFilter] = useState("");
   const [browseMode, setBrowseMode] = useState<"list" | "map">("list");
   const [catalogCardLayout, setCatalogCardLayout] = useState<
@@ -107,6 +212,9 @@ export default function MediaBrowseClient({
   const [budgetMax, setBudgetMax] = useState(() => bounds.maxPrice);
   const [targetAgePick, setTargetAgePick] = useState<
     Partial<Record<TargetAgeBucket, boolean>>
+  >({});
+  const [targetTraitsPick, setTargetTraitsPick] = useState<
+    Partial<Record<string, boolean>>
   >({});
 
   useEffect(() => {
@@ -174,18 +282,55 @@ export default function MediaBrowseClient({
       data = data.filter((m) => matchesMediaTextQuery(m, lower));
     }
 
+    const activeTraits = Object.entries(targetTraitsPick).filter(
+      ([, v]) => v,
+    );
+
     return data.filter((m) => {
+      if (!matchesMainCategory(m, mainCategory)) return false;
+      if (mainCategory === "transit" && !matchesTransitSub(m, transitSub))
+        return false;
       if (!passesMediaAdvancedFilters(m, filterState, bounds)) return false;
       if (mediaRegionFilter !== "all" && (m.region ?? "") !== mediaRegionFilter)
         return false;
       if (mediaTypeFilter !== "all" && (m.type ?? "") !== mediaTypeFilter)
         return false;
+      if (activeTraits.length > 0) {
+        const haystack = `${(m.tags ?? []).join(" ")} ${(m.subCategory ?? "")} ${
+          m.location
+        } ${(m.nearbyFacilities ?? "")}`.toLowerCase();
+        const ok = activeTraits.some(([k]) => {
+          switch (k) {
+            case "commute":
+              return /출퇴근|직장인|오피스|역세권|지하철|버스/.test(haystack);
+            case "shopping":
+              return /쇼핑몰|몰|백화점|아울렛|마트|쇼핑/.test(haystack);
+            case "leisure_night":
+              return /야간|나이트|pub|펍|클럽|거리공연|여가|공연장/.test(
+                haystack,
+              );
+            case "tourism":
+              return /관광|tour|여행|랜드마크|명소|핫플|공항|역사/.test(
+                haystack,
+              );
+            case "fandom":
+              return /팬덤|아이돌|응원|생일광고|버스킹|팬미팅|콘서트/.test(
+                haystack,
+              );
+            default:
+              return false;
+          }
+        });
+        if (!ok) return false;
+      }
       return true;
     });
   }, [
     catalog,
     searchTarget,
     textFilter,
+    mainCategory,
+    transitSub,
     filterState,
     bounds,
     mediaRegionFilter,
@@ -263,6 +408,7 @@ export default function MediaBrowseClient({
     setBudgetMin(bounds.minPrice);
     setBudgetMax(bounds.maxPrice);
     setTargetAgePick({});
+    setTargetTraitsPick({});
   };
 
   const handleMediaView = useCallback((media: MediaItem) => {
@@ -371,6 +517,45 @@ export default function MediaBrowseClient({
             />
           ) : (
             <div className="flex flex-col gap-6">
+              <div className="flex flex-wrap gap-2">
+                {MAIN_CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.key}
+                    type="button"
+                    onClick={() => {
+                      setMainCategory(cat.key);
+                      setTransitSub("all");
+                    }}
+                    className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      mainCategory === cat.key
+                        ? "border-navy bg-navy text-white shadow-sm"
+                        : "border-navy/10 bg-white text-muted-foreground hover:border-navy/25 hover:text-navy"
+                    }`}
+                  >
+                    {isKo ? cat.nameKo : cat.nameEn}
+                  </button>
+                ))}
+              </div>
+
+              {mainCategory === "transit" ? (
+                <div className="flex flex-wrap gap-2">
+                  {TRANSIT_SUB_CATEGORIES.map((sub) => (
+                    <button
+                      key={sub.key}
+                      type="button"
+                      onClick={() => setTransitSub(sub.key)}
+                      className={`inline-flex items-center rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${
+                        transitSub === sub.key
+                          ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
+                          : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-400"
+                      }`}
+                    >
+                      {isKo ? sub.nameKo : sub.nameEn}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
               <MediaCatalogFiltersBar
                 search={
                   <div>
@@ -405,6 +590,13 @@ export default function MediaBrowseClient({
                 onBudgetMaxChange={setBudgetMax}
                 targetAgePick={targetAgePick}
                 onToggleTargetAge={toggleTargetAge}
+                targetTraitsPick={targetTraitsPick}
+                onToggleTargetTrait={(key) =>
+                  setTargetTraitsPick((prev) => ({
+                    ...prev,
+                    [key]: !prev[key],
+                  }))
+                }
                 onReset={resetFilters}
               />
 

@@ -77,14 +77,12 @@ export default function CasesPageClient({ initialCases }: Props) {
     <>
       <section className="bg-navy py-24 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mb-4 inline-flex items-center gap-2">
-            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
-              BETA
-            </span>
+          <div className="mb-3 flex items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold text-white sm:text-4xl">
+              {empty ? t("cases.reportHeroTitle") : t("cases.title")}
+            </h1>
+            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">BETA</span>
           </div>
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">
-            {empty ? t("cases.reportHeroTitle") : t("cases.title")}
-          </h1>
           <p className="mt-2 text-slate-300 sm:text-lg">
             {empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
           </p>

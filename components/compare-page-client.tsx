@@ -95,7 +95,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
             <h1 className="text-3xl font-bold text-white sm:text-4xl">
               {isKo ? "매체 비교" : "Media Comparison"}
             </h1>
-            <Badge className="bg-gold text-navy text-xs font-bold px-2 py-0.5">BETA</Badge>
+            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">BETA</span>
           </div>
           <p className="mx-auto mt-2 max-w-xl text-slate-300">
             {isKo
