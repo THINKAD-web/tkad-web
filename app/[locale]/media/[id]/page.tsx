@@ -200,7 +200,7 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </MediaDetailHeroGallery>
 
-      <section className="py-12 pb-28 sm:pb-32">
+      <section className="bg-white py-12 pb-28 sm:pb-32">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <MediaDetailExtras
             media={media}
