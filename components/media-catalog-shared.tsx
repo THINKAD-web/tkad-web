@@ -9,7 +9,7 @@ export const MEDIA_CATALOG_GRID_CLASS =
 
 /** 컴팩트 행 그리드 — 매체검색·견적·비교 공통 */
 export const MEDIA_CATALOG_COMPACT_GRID_CLASS =
-  "grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3";
+  "grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3";
 
 /** 컴팩트 행(링크/선택) 외곽 — 시각 통일 */
 export const MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS =
