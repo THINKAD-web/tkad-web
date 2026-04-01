@@ -343,17 +343,6 @@ export default function MediaNetworkDetailClient({
                 />
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button
-                  className="bg-gold font-semibold text-navy hover:bg-gold-dark"
-                  asChild
-                >
-                  <Link href={quoteHref}>
-                    <Calculator className="mr-2 h-4 w-4" />
-                    {t("getQuote")}
-                  </Link>
-                </Button>
-              </div>
             </aside>
           </div>
         </div>
@@ -362,14 +351,36 @@ export default function MediaNetworkDetailClient({
       {/* 1) 위치 지도 섹션 */}
       <section className="bg-white pb-16">
         <div className="mx-auto max-w-4xl px-4 pt-4 sm:px-6 lg:px-8">
-          <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-lg font-bold text-navy">
-                {isKo ? "설치 지점 지도" : "Location Map"}
+                {isKo ? "위치 지도" : "Location Map"}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("mapHint")}
               </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="bg-gold font-semibold text-navy hover:bg-gold-dark"
+                asChild
+              >
+                <Link href={quoteHref}>
+                  <Calculator className="mr-1.5 h-3.5 w-3.5" />
+                  {isKo ? "견적 받기" : "Get Quote"}
+                </Link>
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-navy/20 font-semibold text-navy hover:bg-navy/5"
+                asChild
+              >
+                <Link href={`/contact?media=${encodeURIComponent(data.catalogId)}`}>
+                  {isKo ? "문의하기" : "Inquire"}
+                </Link>
+              </Button>
             </div>
           </div>
 
