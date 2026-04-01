@@ -325,23 +325,86 @@ export default function MediaBrowseClient({
             case "shopping":
               return /쇼핑몰|몰|백화점|아울렛|마트|쇼핑/.test(haystack);
             case "leisure_night":
-              return /야간|나이트|pub|펍|클럽|거리공연|여가|공연장/.test(
-                haystack,
-              );
+              return /야간|나이트|pub|펍|클럽|거리공연|여가|공연장/.test(haystack);
             case "tourism":
-              return /관광|tour|여행|랜드마크|명소|핫플|공항|역사/.test(
-                haystack,
-              );
+              return /관광|tour|여행|랜드마크|명소|핫플|공항|역사/.test(haystack);
             case "fandom":
-              return /팬덤|아이돌|응원|생일광고|버스킹|팬미팅|콘서트/.test(
-                haystack,
-              );
+              return /팬덤|아이돌|응원|생일광고|버스킹|팬미팅|콘서트/.test(haystack);
             default:
               return false;
           }
         });
         if (!ok) return false;
       }
+
+      // 특수 기능 필터
+      const activeFeatures = Object.entries(filters.specialFeature ?? {}).filter(([, v]) => v);
+      if (activeFeatures.length > 0) {
+        const tagsStr = (m.tags ?? []).join(" ").toLowerCase();
+        const descStr = ((m as any).description ?? "").toLowerCase();
+        const hay = `${tagsStr} ${descStr}`;
+        const ok = activeFeatures.some(([k]) => {
+          switch (k) {
+            case "qr": return /qr|큐알/.test(hay);
+            case "data_measure": return /데이터|측정|분석/.test(hay);
+            case "interactive": return /인터랙티브|interactive|터치/.test(hay);
+            case "3d_motion": return /3d|모션|입체/.test(hay);
+            case "night_bright": return /야간|조명|조도|밝기/.test(hay);
+            case "ar": return /ar|증강현실/.test(hay);
+            case "social_share": return /sns|소셜|공유|인증샷/.test(hay);
+            default: return false;
+          }
+        });
+        if (!ok) return false;
+      }
+
+      // 매체 사이즈 필터
+      const activeSizes = Object.entries(filters.size ?? {}).filter(([, v]) => v);
+      if (activeSizes.length > 0) {
+        const traffic = m.dailyFootTraffic ?? 0;
+        const ok = activeSizes.some(([k]) => {
+          switch (k) {
+            case "large": return traffic >= 100000;
+            case "medium": return traffic >= 30000 && traffic < 100000;
+            case "small": return traffic < 30000;
+            default: return false;
+          }
+        });
+        if (!ok) return false;
+      }
+
+      // 집행 기간 필터 (가격 기준 추정)
+      const activeDurations = Object.entries(filters.duration ?? {}).filter(([, v]) => v);
+      if (activeDurations.length > 0) {
+        const price = m.price ?? 0;
+        const ok = activeDurations.some(([k]) => {
+          switch (k) {
+            case "week": return price <= 500;
+            case "two_weeks": return price <= 1500;
+            case "month_1_3": return price <= 5000;
+            case "month_3_plus": return price > 5000;
+            default: return false;
+          }
+        });
+        if (!ok) return false;
+      }
+
+      // 노출 시간대 필터
+      const activeExposure = Object.entries(filters.exposureTime ?? {}).filter(([, v]) => v);
+      if (activeExposure.length > 0) {
+        const tagsStr = (m.tags ?? []).join(" ").toLowerCase();
+        const ok = activeExposure.some(([k]) => {
+          switch (k) {
+            case "morning": return /아침|오전|출근/.test(tagsStr);
+            case "daytime": return /낮|주간|오후/.test(tagsStr);
+            case "evening": return /저녁|퇴근|야간/.test(tagsStr);
+            case "allday": return /24시|상시|종일/.test(tagsStr);
+            default: return false;
+          }
+        });
+        if (!ok) return false;
+      }
+
       return true;
     });
   }, [
@@ -351,6 +414,7 @@ export default function MediaBrowseClient({
     mainCategory,
     transitSub,
     filterState,
+    filters,
     bounds,
     mediaRegionFilter,
     mediaTypeFilter,
