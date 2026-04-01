@@ -56,6 +56,7 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
       note: l.note,
       lat: l.latitude,
       lng: l.longitude,
+      mediaId: l.mediaId,
     })),
   };
 

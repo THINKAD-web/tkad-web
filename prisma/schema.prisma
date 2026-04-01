@@ -82,7 +82,7 @@ model Media {
   type      String
   price     Int
   pricePeriod MediaPricePeriod @default(month) @map("price_period")
-  /// 가격 옵션 (JSON 배열). 예: [{ "label": "20초 기준", "price": 30000000, "period": "month" }, ...]
+  /// 가격 옵션 (JSON 배열). 예: [{"label":"20초 기준","price":30000000,"period":"month"},{"label":"15초 기준","price":25000000,"period":"month"}]
   priceOptions Json? @map("price_options")
   image     String?
   width     String?
@@ -139,6 +139,9 @@ model Media {
   priceSnapshots        MediaPriceSnapshot[]
   bookings              MediaBooking[]
   advertiserExecutions  MediaAdvertiserExecution[]
+
+  /// 네트워크 패키지 내 개별 지점과의 연결 (선택)
+  networkLocations MediaNetworkLocation[]
 
   @@index([isFeatured, featuredOrder])
   @@map("media")
@@ -507,6 +510,10 @@ model MediaNetworkLocation {
   networkId String       @map("network_id")
   network   MediaNetwork @relation(fields: [networkId], references: [id], onDelete: Cascade)
 
+   /// 연결된 단일 매체 (선택). 없으면 네트워크 전용 지점으로 취급
+  mediaId String? @map("media_id")
+  media   Media?  @relation(fields: [mediaId], references: [id])
+
   name          String
   address       String?
   fullAddress   String? @map("full_address")
@@ -519,6 +526,7 @@ model MediaNetworkLocation {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([networkId])
+  @@index([mediaId])
   @@map("media_network_locations")
 }
 
