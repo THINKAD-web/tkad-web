@@ -78,7 +78,11 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
       const tags = Array.isArray(o.tags)
         ? o.tags.filter((x): x is string => typeof x === "string")
         : [];
-      return { ok: true as const, name, addr, price, tags };
+      const priceOptions = Array.isArray(o.price_options)
+        ? (o.price_options as Array<{ label: string; price: number; period?: string }>)
+            .filter((x) => typeof x.label === "string" && typeof x.price === "number")
+        : null;
+      return { ok: true as const, name, addr, price, tags, priceOptions };
     } catch (e) {
       return {
         ok: false as const,
@@ -222,7 +226,31 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
                   </p>
                   <p className="text-muted-foreground">{preview.addr}</p>
                 </div>
-                {preview.price != null ? (
+                {preview.priceOptions && preview.priceOptions.length > 0 ? (
+                  <div>
+                    <p className="mb-1 text-xs font-medium text-muted-foreground">가격 옵션</p>
+                    <div className="overflow-hidden rounded-lg border border-navy/10 text-xs">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-navy/5">
+                            <th className="px-2 py-1.5 text-left font-semibold text-navy/60">구분</th>
+                            <th className="px-2 py-1.5 text-right font-semibold text-navy/60">금액</th>
+                            <th className="px-2 py-1.5 text-right font-semibold text-navy/60">기간</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {preview.priceOptions.map((opt, i) => (
+                            <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                              <td className="px-2 py-1.5 font-semibold text-navy">{opt.label}</td>
+                              <td className="px-2 py-1.5 text-right tabular-nums text-gold-dark">₩{opt.price.toLocaleString("ko-KR")}</td>
+                              <td className="px-2 py-1.5 text-right text-muted-foreground">{opt.period ?? "month"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : preview.price != null ? (
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">
                       월 가격(원)

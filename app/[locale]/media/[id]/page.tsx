@@ -250,25 +250,34 @@ export default async function MediaDetailPage({ params }: Props) {
                 label={t("priceTitle")}
                 value={
                   priceOptions && priceOptions.length > 0 ? (
-                    <div className="space-y-1">
-                      {priceOptions.map((opt, idx) => (
-                        <div key={`${opt.label}-${idx}`}>
-                          <span className="block text-[13px] font-semibold text-navy">
-                            {opt.label}
-                          </span>
-                          <span className="break-all text-sm font-semibold tabular-nums text-gold-dark">
-                            {formatMediaPriceWonWithSymbol(opt.price)}
-                          </span>
-                          <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                            {t("priceUnitWon")} ·{" "}
-                            {t(
-                              mediaDetailPricePeriodTranslationKey(
-                                (opt.period as any) ?? media.pricePeriod,
-                              ),
-                            )}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="w-full overflow-hidden rounded-xl border border-navy/10">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-navy/10 bg-navy/5">
+                            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-navy/60">구분</th>
+                            <th className="px-3 py-2 text-right text-[11px] font-semibold uppercase tracking-wide text-navy/60">금액</th>
+                            <th className="px-3 py-2 text-right text-[11px] font-semibold uppercase tracking-wide text-navy/60">기간</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {priceOptions.map((opt, idx) => (
+                            <tr
+                              key={`${opt.label}-${idx}`}
+                              className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/60"}
+                            >
+                              <td className="px-3 py-2.5 text-[13px] font-semibold text-navy">
+                                {opt.label}
+                              </td>
+                              <td className="px-3 py-2.5 text-right text-[13px] font-bold tabular-nums text-gold-dark">
+                                {formatMediaPriceWonWithSymbol(opt.price)}
+                              </td>
+                              <td className="px-3 py-2.5 text-right text-[11px] text-muted-foreground">
+                                {t(mediaDetailPricePeriodTranslationKey((opt.period as any) ?? media.pricePeriod))}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   ) : (
                     <>

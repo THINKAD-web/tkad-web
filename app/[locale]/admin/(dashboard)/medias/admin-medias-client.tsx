@@ -1718,7 +1718,7 @@ export default function AdminMediasClient({
                   placeholder='[{"label":"20초 기준","price":30000000,"period":"month"},{"label":"15초 기준","price":25000000,"period":"month"}]'
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  예: [{"label":"20초 기준","price":30000000,"period":"month"}] —
+                  예: [{`{"label":"20초 기준","price":30000000,"period":"month"}`}] —
                   period는 month/biweekly/week/day 중 하나를 권장합니다.
                 </p>
               </div>

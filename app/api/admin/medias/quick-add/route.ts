@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { getPrisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { enrichQuickAddMediaFromKakao } from "@/lib/media-location-enrich";
 import { maybeEstimateDailyFootfall } from "@/lib/media-daily-footfall-estimate";
 import { maybeAutoFillNearbyMediaFields } from "@/lib/media-nearby-facilities";
@@ -95,6 +96,7 @@ export async function POST(request: NextRequest) {
         const media = await tx.media.create({
           data: {
             ...base,
+            priceOptions: base.priceOptions ?? Prisma.JsonNull,
             addressVerified: geoVerified,
             autoPopulatedAt: autoNear?.autoPopulatedAt ?? null,
           },

@@ -2,7 +2,7 @@
  * Admin quick-add: JSON pasted from external tools → Prisma Media create payload.
  */
 
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import {
   CATALOG_MEDIA_TYPES,
   inferCatalogTypeFromMediaContent,
@@ -30,6 +30,8 @@ export type QuickAddMediaJson = {
   longitude: number | null;
   price_per_month: number;
   price_note: string;
+  /** 다양한 가격 옵션: [{label:"15초",price:20000000,period:"month"}, ...] */
+  price_options?: Array<{ label: string; price: number; period?: string }> | null;
   width_m: number | null;
   height_m: number | null;
   resolution: string | null;
@@ -232,6 +234,10 @@ export function validateQuickAddItem(
     nearby_stations: str("nearby_stations", "") || str("nearby_subway", ""),
     nearby_landmarks: str("nearby_landmarks", ""),
     past_advertisers: str("past_advertisers", "") || str("advertiser_history", ""),
+    price_options: Array.isArray(o.price_options)
+      ? (o.price_options as Array<{ label: string; price: number; period?: string }>)
+          .filter((x) => typeof x.label === "string" && typeof x.price === "number")
+      : null,
     ...(typeRaw ? { type: typeRaw.toLowerCase() } : {}),
   };
 
@@ -290,6 +296,7 @@ export type MediaQuickAddCreate = {
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
   pastAdvertisers: string | null;
+  priceOptions: Array<{ label: string; price: number; period?: string }> | null;
 };
 
 export function mediaQuickAddCreateToPrismaUpdate(
@@ -332,6 +339,9 @@ export function mediaQuickAddCreateToPrismaUpdate(
     nearbyStations: p.nearbyStations,
     nearbyLandmarks: p.nearbyLandmarks,
     pastAdvertisers: p.pastAdvertisers,
+    priceOptions: p.priceOptions !== null && p.priceOptions !== undefined
+      ? p.priceOptions
+      : Prisma.JsonNull,
   };
 }
 
@@ -368,6 +378,7 @@ export function mediaDbRowToQuickAddJson(m: {
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
   pastAdvertisers: string | null;
+  priceOptions?: unknown;
 }): QuickAddMediaJson {
   return {
     media_name: m.name,
@@ -401,6 +412,7 @@ export function mediaDbRowToQuickAddJson(m: {
     nearby_stations: m.nearbyStations ?? "",
     nearby_landmarks: m.nearbyLandmarks ?? "",
     past_advertisers: m.pastAdvertisers ?? "",
+    price_options: Array.isArray(m.priceOptions) ? m.priceOptions as Array<{ label: string; price: number; period?: string }> : null,
   };
 }
 
@@ -508,5 +520,9 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     nearbyStations: row.nearby_stations.trim() || null,
     nearbyLandmarks: row.nearby_landmarks.trim() || null,
     pastAdvertisers: row.past_advertisers.trim() || null,
+    priceOptions: Array.isArray(row.price_options)
+      ? (row.price_options as Array<{ label: string; price: number; period?: string }>)
+          .filter((o) => typeof o.label === "string" && typeof o.price === "number")
+      : null,
   };
 }
