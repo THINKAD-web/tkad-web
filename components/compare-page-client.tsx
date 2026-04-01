@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { GitCompare, ArrowLeft, FileDown, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useMemo, useState, useCallback, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
@@ -90,9 +91,12 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
     <>
       <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">
-            {isKo ? "매체 비교" : "Media Comparison"}
-          </h1>
+          <div className="mb-3 flex items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold text-white sm:text-4xl">
+              {isKo ? "매체 비교" : "Media Comparison"}
+            </h1>
+            <Badge className="bg-gold text-navy text-xs font-bold px-2 py-0.5">BETA</Badge>
+          </div>
           <p className="mx-auto mt-2 max-w-xl text-slate-300">
             {isKo
               ? "선택한 매체를 매체 검색과 같은 카드로 확인하고, 견적·PDF로 이어갈 수 있습니다."
