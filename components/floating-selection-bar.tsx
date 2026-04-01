@@ -24,14 +24,19 @@ export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
   const [footerVisible, setFooterVisible] = useState(false);
 
   useEffect(() => {
-    const footer = document.getElementById("site-footer");
-    if (!footer) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setFooterVisible(entry.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(footer);
-    return () => observer.disconnect();
+    const check = () => {
+      const footer = document.getElementById("site-footer");
+      if (!footer) return;
+      const rect = footer.getBoundingClientRect();
+      setFooterVisible(rect.top < window.innerHeight);
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
   }, []);
 
   const visible = open && !footerVisible;
