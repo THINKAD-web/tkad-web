@@ -37,9 +37,9 @@ export function useMediaCatalogFilters() {
 
   const toggleFilter: ToggleMediaCatalogFilter = (category, key) => {
     setFilters((prev) => {
-      const currentCategory = prev[category] ?? {};
+      const currentCategory = (prev[category] ?? {}) as Record<string, boolean | undefined>;
       const nextCategory: Record<string, boolean> = {
-        ...currentCategory,
+        ...(currentCategory as Record<string, boolean>),
         [key]: !currentCategory[key],
       };
       if (!nextCategory[key]) {

@@ -52,6 +52,7 @@ import {
   MediaCatalogGridCompactToggle,
 } from "@/components/media-catalog-shared";
 import MediaCatalogFiltersBar from "@/components/media-catalog-filters-bar";
+import { useMediaCatalogFilters } from "@/lib/use-media-catalog-filters";
 import { buildMediaRegionFilterOptions } from "@/lib/media-region-filter-options";
 import { cn } from "@/lib/utils";
 import {
@@ -198,14 +199,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const [budgetMin, setBudgetMin] = useState(() => bounds.minPrice);
   const [budgetMax, setBudgetMax] = useState(() => bounds.maxPrice);
-  const [targetAgePick, setTargetAgePick] = useState<
-    Partial<Record<TargetAgeBucket, boolean>>
-  >({});
+  const { filters, toggleFilter, resetFilters } = useMediaCatalogFilters();
 
   useEffect(() => {
     setBudgetMin(bounds.minPrice);
     setBudgetMax(bounds.maxPrice);
   }, [bounds.minPrice, bounds.maxPrice]);
+
+  const targetAgePick = filters.targetAge;
 
   const filterState = useMemo(
     () => ({
@@ -216,14 +217,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     }),
     [defaultAdvanced, budgetMin, budgetMax, targetAgePick],
   );
-
-  const toggleTargetAge = useCallback((k: TargetAgeBucket) => {
-    setTargetAgePick((prev) => {
-      const next = { ...prev, [k]: !prev[k] };
-      if (!next[k]) delete next[k];
-      return next;
-    });
-  }, []);
 
   const filteredCatalog = useMemo(() => {
     const q = mediaTextFilter.trim().toLowerCase();
@@ -261,10 +254,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     setMediaRegionFilter("all");
     setBudgetMin(bounds.minPrice);
     setBudgetMax(bounds.maxPrice);
-    setTargetAgePick({});
+    resetFilters();
     setMediaPage(1);
     setQuoteSearchFieldKey((k) => k + 1);
-  }, [bounds.minPrice, bounds.maxPrice]);
+  }, [bounds.minPrice, bounds.maxPrice, resetFilters]);
 
   const monthlyCost = useMemo(
     () =>
@@ -728,8 +721,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           budgetMax={budgetMax}
                           onBudgetMinChange={setBudgetMin}
                           onBudgetMaxChange={setBudgetMax}
-                          targetAgePick={targetAgePick}
-                          onToggleTargetAge={toggleTargetAge}
+                          filters={filters}
+                          onToggleFilter={toggleFilter}
                           onReset={resetQuoteMediaFilters}
                         />
 
