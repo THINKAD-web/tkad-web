@@ -112,6 +112,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [period, setPeriod] = useState<PeriodKey>("1month");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [mediaLayout, setMediaLayout] = useState<"grid" | "compact">("grid");
+  const [mediaPage, setMediaPage] = useState(1);
+  const mediaPageSize = 12;
   const [mediaTextFilter, setMediaTextFilter] = useState("");
   const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
   const [mediaRegionFilter, setMediaRegionFilter] = useState("all");
@@ -243,6 +245,16 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     bounds,
   ]);
 
+  const mediaPageCount = useMemo(
+    () => Math.max(1, Math.ceil(filteredCatalog.length / mediaPageSize)),
+    [filteredCatalog.length],
+  );
+
+  const pagedCatalog = useMemo(() => {
+    const start = (mediaPage - 1) * mediaPageSize;
+    return filteredCatalog.slice(start, start + mediaPageSize);
+  }, [filteredCatalog, mediaPage]);
+
   const resetQuoteMediaFilters = useCallback(() => {
     setMediaTextFilter("");
     setMediaTypeFilter("all");
@@ -250,6 +262,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     setBudgetMin(bounds.minPrice);
     setBudgetMax(bounds.maxPrice);
     setTargetAgePick({});
+    setMediaPage(1);
     setQuoteSearchFieldKey((k) => k + 1);
   }, [bounds.minPrice, bounds.maxPrice]);
 
@@ -663,8 +676,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
-            <div className="order-2 lg:order-1 lg:col-span-2">
+          <div className="flex flex-col gap-6">
+            <div className="order-2">
               <Card className="min-h-[320px] shadow-md">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-xl text-navy">
@@ -725,7 +738,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             <div className="text-sm text-muted-foreground">
                               {t("media.results")}: {filteredCatalog.length}
                             </div>
-                            <div className="flex flex-wrap items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                               <MediaCatalogGridCompactToggle
                                 layout={mediaLayout}
                                 onLayoutChange={setMediaLayout}
@@ -747,7 +760,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </div>
                       ) : mediaLayout === "grid" ? (
                       <div className={MEDIA_CATALOG_GRID_CLASS}>
-                        {filteredCatalog.map((media) => {
+                        {pagedCatalog.map((media) => {
                           const checked = selectedIds.has(media.id);
                           const nwOpt = networkQuoteOptions[media.id];
                           const isNw = media.catalogSource === "network";
@@ -846,7 +859,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       </div>
                       ) : (
                         <div className={MEDIA_CATALOG_COMPACT_GRID_CLASS}>
-                          {filteredCatalog.map((media) => {
+                          {pagedCatalog.map((media) => {
                             const checked = selectedIds.has(media.id);
                             const typeLabel = typeLabels[media.type];
                             const quoteThumb =
@@ -1004,6 +1017,50 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           })}
                         </div>
                       )}
+
+                      {filteredCatalog.length > mediaPageSize ? (
+                        <div className="mt-4 flex items-center justify-center gap-3 border-t border-slate-200 pt-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={mediaPage <= 1}
+                            onClick={() =>
+                              setMediaPage((p) => Math.max(1, p - 1))
+                            }
+                          >
+                            <ChevronLeft className="mr-1 h-3.5 w-3.5" />
+                            {t("media.pagePrev")}
+                          </Button>
+                          <span className="text-xs text-muted-foreground">
+                            {t("media.pageSummary", {
+                              from:
+                                filteredCatalog.length === 0
+                                  ? 0
+                                  : (mediaPage - 1) * mediaPageSize + 1,
+                              to: Math.min(
+                                mediaPage * mediaPageSize,
+                                filteredCatalog.length,
+                              ),
+                              total: filteredCatalog.length,
+                            })}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={mediaPage >= mediaPageCount}
+                            onClick={() =>
+                              setMediaPage((p) =>
+                                Math.min(mediaPageCount, p + 1),
+                              )
+                            }
+                          >
+                            {t("media.pageNext")}
+                            <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      ) : null}
                         </div>
                       </div>
                     </>
@@ -1487,8 +1544,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               </Card>
             </div>
 
-            <div className="order-1 lg:order-2 lg:col-span-1">
-              <div className="space-y-6 lg:sticky lg:top-24">
+            <div className="order-1">
+              <div className="space-y-6">
                 <Card className="border-gold/30 shadow-md">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base text-navy">
