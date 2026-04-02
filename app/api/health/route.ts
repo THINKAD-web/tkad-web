@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 /** Short CDN cache for lightweight status checks (monitoring, LB probes). */
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export async function GET() {
   return NextResponse.json(

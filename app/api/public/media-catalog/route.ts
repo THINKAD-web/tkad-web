@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
-export const revalidate = 60;
+export const revalidate = 1800;
 
 export async function GET() {
   try {

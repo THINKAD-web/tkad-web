@@ -221,25 +221,10 @@ export default function MediaNetworkDetailClient({
 
   return (
     <>
-      {/* Hero: bg-navy, 이미지 + 오버레이 + 헤더 */}
-      <section className="relative w-full overflow-hidden bg-navy aspect-video">
-        {heroImg ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={heroImg}
-              alt={isKo ? data.name : data.nameEn ?? data.name}
-              className="absolute inset-0 h-full w-full object-cover opacity-80"
-            />
-            <div
-              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30"
-              aria-hidden
-            />
-          </>
-        ) : null}
-
-        <div className="relative z-10 flex h-full min-h-0 flex-col justify-between px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10">
-          <div className="mx-auto flex w-full max-w-4xl items-start justify-between gap-3">
+      {/* Hero: 단일 매체 상세와 동일한 구조 – 상단 이미지, 하단 텍스트 카드 */}
+      <section className="bg-navy pb-8 pt-6 sm:pb-10 sm:pt-8">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 sm:px-6 lg:px-12">
+          <div className="flex items-start justify-between gap-3">
             <Link href="/media">
               <Button
                 variant="ghost"
@@ -262,6 +247,21 @@ export default function MediaNetworkDetailClient({
               </Badge>
             </div>
           </div>
+
+          {heroImg ? (
+            <div className="flex justify-center">
+              <div className="overflow-hidden rounded-2xl bg-black/30 px-3 pb-3 pt-3 sm:px-4">
+                <div className="flex items-center justify-center rounded-xl bg-black/40">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={heroImg}
+                    alt={isKo ? data.name : data.nameEn ?? data.name}
+                    className="mx-auto max-h-[260px] w-auto max-w-full object-contain sm:max-h-[300px] lg:max-h-[320px]"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <div className="mx-auto grid w-full max-w-4xl gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.3fr)] lg:items-end">
             <div className="min-w-0 space-y-3 text-white">
@@ -346,7 +346,6 @@ export default function MediaNetworkDetailClient({
                   }
                 />
               </div>
-
             </aside>
           </div>
         </div>

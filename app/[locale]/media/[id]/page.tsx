@@ -41,7 +41,7 @@ import MediaDetailHeroGallery from "@/components/media-detail-hero-gallery";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return getAllMediaIds().map((id) => ({ id: String(id) }));

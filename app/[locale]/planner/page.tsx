@@ -1,7 +1,7 @@
 import PlannerPageClient from "./planner-page-client";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 /**
  * 미디어 플래너: 서버에서 Prisma 활성 매체만 조회해 클라이언트에 전달합니다.

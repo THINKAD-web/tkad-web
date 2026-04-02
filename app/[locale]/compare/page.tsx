@@ -5,7 +5,7 @@ import type { MediaItem } from "@/lib/media-data";
 
 type SearchParams = { ids?: string | string[] };
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export default async function ComparePage({
   searchParams,

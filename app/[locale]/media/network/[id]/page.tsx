@@ -12,7 +12,7 @@ import { getSimilarMediaFromCatalog } from "@/lib/media-data";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export default async function MediaNetworkDetailPage({ params }: Props) {
   const { locale, id } = await params;
