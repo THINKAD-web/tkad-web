@@ -260,7 +260,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
     const db = getPrisma();
     const rows = await db.media.findMany({
       where: { isActive: true },
-      orderBy: [{ viewCount: "desc" }, { updatedAt: "desc" }],
+      orderBy: [{ updatedAt: "desc" }],
       take: max,
       include: catalogInclude,
     });
