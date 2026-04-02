@@ -430,24 +430,58 @@ export default function MediaBrowseClient({
 
   return (
     <>
-      <section className="bg-navy py-28">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#060d24] via-navy to-[#0c1a42] py-20 sm:py-24">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(212,175,55,0.18),transparent_55%)]"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -right-32 -top-20 size-[36rem] rounded-full bg-gold/25 blur-[100px]"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -bottom-40 left-1/2 size-[32rem] -translate-x-1/2 rounded-full bg-primary/30 blur-[90px]"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"
+          aria-hidden
+        />
+        <div className="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35 sm:text-[11px]">
+            {t("media.heroEyebrow")}
+          </p>
+          <h1 className="mt-2 text-balance text-lg font-medium text-white/55 sm:text-xl">
             {t("media.title")}
           </h1>
-          <p className="mt-2 text-slate-300">{t("media.subtitle")}</p>
-          <div className="mt-6">
+          <p className="mx-auto mt-1.5 max-w-lg text-pretty text-xs text-slate-400/90 sm:text-sm">
+            {t("media.subtitle")}
+          </p>
+          <div className="relative mx-auto mt-8 max-w-4xl sm:mt-10">
+            <div
+              className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-to-b from-white/[0.07] to-transparent blur-xl sm:-inset-6"
+              aria-hidden
+            />
+            <MediaKeywordSearchHero
+              variant="embed"
+              featured
+              value={catalogSearchQuery}
+              onChange={setCatalogSearchQuery}
+            />
+          </div>
+          <div className="mt-8 sm:mt-10">
             <SolutionCtaButton
               href="/contact"
+              variant="outline"
               label={isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
               size="lg"
-              className="h-12"
+              className="h-11 border-white/35 bg-white/10 text-white shadow-none backdrop-blur-sm hover:border-white/55 hover:bg-white/18 hover:text-white"
             />
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-10">
+      <section className="border-t border-slate-200/90 bg-white py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {mainTab === "search" ? (
             <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/80">
