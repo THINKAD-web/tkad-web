@@ -473,7 +473,7 @@ export function passesMediaAdvancedFilters(
   if (f.catalogKind === "single" && m.catalogSource === "network") return false;
   if (f.catalogKind === "network" && m.catalogSource !== "network") return false;
 
-  if (m.price < f.priceMin || m.price > f.priceMax) return false;
+  if (f.priceMin > 0 && f.priceMax > 0 && (m.price < f.priceMin || m.price > f.priceMax)) return false;
 
   const foot = m.dailyFootTraffic ?? 0;
   if (
