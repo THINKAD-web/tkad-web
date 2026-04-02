@@ -143,7 +143,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             __html: JSON.stringify(structuredData),
           }}
         />
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <ToastProvider>
             <a href="#main-content" className="skip-link">
               {locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"}

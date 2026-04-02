@@ -64,6 +64,8 @@ import {
 } from "@/lib/media-filter-advanced";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
+  catalogPriceFieldToPriceMan,
+  formatCatalogPriceFieldWon,
   formatMediaPriceWonWithSymbol,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
@@ -123,6 +125,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [networkQuoteOptions, setNetworkQuoteOptions] = useState<
     Record<string, { units: number; regionScope: string }>
   >({});
+  /** 매체별 `priceOptions` 선택 인덱스 (견적 월 단가 반영) */
+  const [mediaPriceOptionIndex, setMediaPriceOptionIndex] = useState<
+    Record<string, number>
+  >({});
   const mediaQueryApplied = useRef(false);
   const [template, setTemplate] = useState<QuoteTemplateId>("default");
   const [sortBy, setSortBy] = useState<
@@ -134,14 +140,25 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   useEffect(() => {
     if (mediaQueryApplied.current) return;
     if (typeof window === "undefined") return;
-    const raw = new URLSearchParams(window.location.search).get("media");
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("media");
     if (!raw) return;
     mediaQueryApplied.current = true;
     const ids = raw
       .split(",")
       .map((x) => x.trim())
       .filter((id) => catalog.some((m) => m.id === id));
-    if (ids.length > 0) setSelectedIds(new Set(ids));
+    if (ids.length === 0) return;
+    setSelectedIds(new Set(ids));
+    const poRaw = params.get("po");
+    const po = poRaw != null ? parseInt(poRaw, 10) : NaN;
+    if (ids.length === 1 && Number.isFinite(po) && po >= 0) {
+      const m = catalog.find((x) => x.id === ids[0]);
+      const n = m?.priceOptions?.length ?? 0;
+      if (n > 0) {
+        setMediaPriceOptionIndex({ [ids[0]]: Math.min(po, n - 1) });
+      }
+    }
   }, [catalog]);
 
   useEffect(() => {
@@ -155,6 +172,26 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
             regionScope: "all",
           };
         }
+      }
+      for (const k of Object.keys(next)) {
+        if (!selectedIds.has(k)) delete next[k];
+      }
+      return next;
+    });
+  }, [selectedIds, catalog]);
+
+  useEffect(() => {
+    setMediaPriceOptionIndex((prev) => {
+      const next = { ...prev };
+      for (const id of selectedIds) {
+        const m = catalog.find((x) => x.id === id);
+        const len = m?.priceOptions?.length ?? 0;
+        if (len === 0) {
+          delete next[id];
+          continue;
+        }
+        const cur = next[id] ?? 0;
+        next[id] = Math.min(Math.max(0, cur), len - 1);
       }
       for (const k of Object.keys(next)) {
         if (!selectedIds.has(k)) delete next[k];
@@ -203,7 +240,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const [budgetMin, setBudgetMin] = useState(() => bounds.minPrice);
   const [budgetMax, setBudgetMax] = useState(() => bounds.maxPrice);
-  const { filters, toggleFilter, resetFilters } = useMediaCatalogFilters();
+  const {
+    filters,
+    toggleFilter,
+    resetFilters,
+    clearCategory,
+    selectAllInCategory,
+  } = useMediaCatalogFilters();
 
   useEffect(() => {
     setBudgetMin(bounds.minPrice);
@@ -275,12 +318,19 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const monthlyCost = useMemo(
     () =>
       selectedMedia.reduce((sum, m) => {
-        if (m.catalogSource !== "network") return sum + m.price;
-        const opt = networkQuoteOptions[m.id];
-        const u = opt?.units ?? m.networkMinUnits ?? 1;
-        return sum + computeNetworkMonthlyFromMediaItem(m, u);
+        if (m.catalogSource === "network") {
+          const opt = networkQuoteOptions[m.id];
+          const u = opt?.units ?? m.networkMinUnits ?? 1;
+          return sum + computeNetworkMonthlyFromMediaItem(m, u);
+        }
+        const opts = m.priceOptions;
+        const idx = mediaPriceOptionIndex[m.id] ?? 0;
+        if (opts?.length && opts[idx]) {
+          return sum + catalogPriceFieldToPriceMan(opts[idx].price);
+        }
+        return sum + m.price;
       }, 0),
-    [selectedMedia, networkQuoteOptions],
+    [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex],
   );
 
   const periodMonths = PERIOD_MONTHS[period];
@@ -305,14 +355,20 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       const isNw = m.catalogSource === "network";
       const opt = networkQuoteOptions[m.id];
       const units = isNw ? opt?.units ?? m.networkMinUnits ?? 1 : 0;
+      const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
+      const priceOpt = !isNw ? m.priceOptions?.[poIdx] : undefined;
       const lineMonthly = isNw
         ? computeNetworkMonthlyFromMediaItem(m, units)
-        : m.price;
+        : priceOpt
+          ? catalogPriceFieldToPriceMan(priceOpt.price)
+          : m.price;
       const baseName = (isKo ? m.name : m.nameEn) || m.name;
-      const name =
-        isNw && units
-          ? `${baseName} (${units}${isKo ? "개소" : " sites"})`
-          : baseName;
+      let name = baseName;
+      if (isNw && units) {
+        name = `${baseName} (${units}${isKo ? "개소" : " sites"})`;
+      } else if (priceOpt?.label) {
+        name = `${baseName} (${priceOpt.label})`;
+      }
       const location =
         isNw && opt
           ? opt.regionScope === "all"
@@ -330,7 +386,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         lineTotalMan: lineMonthly * periodMonths,
       };
     });
-  }, [selectedMedia, networkQuoteOptions, isKo, periodMonths]);
+  }, [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex, isKo, periodMonths]);
 
   const pdfVatMan = useMemo(() => Math.round(totalCost * 0.1), [totalCost]);
   const pdfGrandTotalMan = useMemo(
@@ -703,27 +759,25 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         {t("quote.selectMediaDesc")}
                       </p>
                       <div className="flex flex-col gap-6">
+                        <div>
+                          <label className="mb-2 block text-sm font-semibold text-navy">
+                            {t("common.search")}
+                          </label>
+                          <MediaSearchAutocomplete
+                            key={quoteSearchFieldKey}
+                            locale={locale}
+                            catalog={catalog}
+                            onSelect={(m) => toggleMedia(m.id)}
+                            onSearchSubmit={(q) =>
+                              setMediaTextFilter(q.trim())
+                            }
+                            onQueryChange={(q) => {
+                              if (!q.trim()) setMediaTextFilter("");
+                            }}
+                            searchButtonLabel={t("media.searchButton")}
+                          />
+                        </div>
                         <MediaCatalogFiltersBar
-                          search={
-                            <div>
-                              <label className="mb-2 block text-sm font-semibold text-navy">
-                                {t("common.search")}
-                              </label>
-                              <MediaSearchAutocomplete
-                                key={quoteSearchFieldKey}
-                                locale={locale}
-                                catalog={catalog}
-                                onSelect={(m) => toggleMedia(m.id)}
-                                onSearchSubmit={(q) =>
-                                  setMediaTextFilter(q.trim())
-                                }
-                                onQueryChange={(q) => {
-                                  if (!q.trim()) setMediaTextFilter("");
-                                }}
-                                searchButtonLabel={t("media.searchButton")}
-                              />
-                            </div>
-                          }
                           mediaTypeFilter={mediaTypeFilter}
                           onMediaTypeFilterChange={setMediaTypeFilter}
                           mediaRegionFilter={mediaRegionFilter}
@@ -737,6 +791,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           filters={filters}
                           onToggleFilter={toggleFilter}
                           onReset={resetQuoteMediaFilters}
+                          clearCategory={clearCategory}
+                          selectAllInCategory={selectAllInCategory}
                         />
 
                         <div className="min-w-0">
@@ -833,6 +889,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           const checked = selectedIds.has(media.id);
                           const nwOpt = networkQuoteOptions[media.id];
                           const isNw = media.catalogSource === "network";
+                          const poIdx = mediaPriceOptionIndex[media.id] ?? 0;
                           const displayPrice = isNw
                             ? computeNetworkMonthlyFromMediaItem(
                                 media,
@@ -840,7 +897,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   media.networkMinUnits ??
                                   1,
                               )
-                            : media.price;
+                            : media.priceOptions?.length
+                              ? catalogPriceFieldToPriceMan(
+                                  media.priceOptions[poIdx].price,
+                                )
+                              : media.price;
                           return (
                             <div key={media.id} className="space-y-2">
                               <MediaCatalogGridCard
@@ -922,6 +983,35 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   </div>
                                 </div>
                               ) : null}
+                              {checked &&
+                              !isNw &&
+                              (media.priceOptions?.length ?? 0) > 0 ? (
+                                <div className="space-y-2 rounded-lg border border-navy/10 bg-slate-50 p-3 text-sm">
+                                  <label className="mb-1 block text-xs font-semibold text-navy">
+                                    {t("quote.priceOptionLabel")}
+                                  </label>
+                                  <select
+                                    className="w-full rounded-md border border-navy/15 bg-white px-2 py-1.5 text-sm"
+                                    value={poIdx}
+                                    onChange={(e) => {
+                                      const v = parseInt(e.target.value, 10);
+                                      setMediaPriceOptionIndex((p) => ({
+                                        ...p,
+                                        [media.id]: Number.isFinite(v)
+                                          ? v
+                                          : 0,
+                                      }));
+                                    }}
+                                  >
+                                    {(media.priceOptions ?? []).map((o, i) => (
+                                      <option key={`${o.label}-${i}`} value={i}>
+                                        {o.label} —{" "}
+                                        {formatCatalogPriceFieldWon(o.price)}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              ) : null}
                             </div>
                           );
                         })}
@@ -936,12 +1026,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               null;
                             const nwOpt = networkQuoteOptions[media.id];
                             const isNw = media.catalogSource === "network";
+                            const poIdxC = mediaPriceOptionIndex[media.id] ?? 0;
                             const displayPrice = isNw
                               ? computeNetworkMonthlyFromMediaItem(
                                   media,
                                   nwOpt?.units ?? media.networkMinUnits ?? 1,
                                 )
-                              : media.price;
+                              : media.priceOptions?.length
+                                ? catalogPriceFieldToPriceMan(
+                                    media.priceOptions[poIdxC].price,
+                                  )
+                                : media.price;
                             return (
                               <div key={media.id} className="space-y-2">
                                 <label className="block cursor-pointer">
@@ -1077,8 +1172,40 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                             {label}
                                           </option>
                                         ))}
-                                      </select>
-                                    </div>
+                                    </select>
+                                  </div>
+                                </div>
+                              ) : null}
+                                {checked &&
+                                !isNw &&
+                                (media.priceOptions?.length ?? 0) > 0 ? (
+                                  <div className="space-y-2 rounded-lg border border-navy/10 bg-slate-50 p-3 text-sm">
+                                    <label className="mb-1 block text-xs font-semibold text-navy">
+                                      {t("quote.priceOptionLabel")}
+                                    </label>
+                                    <select
+                                      className="w-full rounded-md border border-navy/15 bg-white px-2 py-1.5 text-sm"
+                                      value={poIdxC}
+                                      onChange={(e) => {
+                                        const v = parseInt(e.target.value, 10);
+                                        setMediaPriceOptionIndex((p) => ({
+                                          ...p,
+                                          [media.id]: Number.isFinite(v)
+                                            ? v
+                                            : 0,
+                                        }));
+                                      }}
+                                    >
+                                      {(media.priceOptions ?? []).map((o, i) => (
+                                        <option
+                                          key={`${o.label}-${i}`}
+                                          value={i}
+                                        >
+                                          {o.label} —{" "}
+                                          {formatCatalogPriceFieldWon(o.price)}
+                                        </option>
+                                      ))}
+                                    </select>
                                   </div>
                                 ) : null}
                               </div>

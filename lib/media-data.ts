@@ -18,6 +18,24 @@ export type MediaPriceOption = {
   price: number;
   /** 개별 옵션 기간 (없으면 기본 `pricePeriod` 사용) */
   period?: MediaPricePeriodKey | string;
+  /** 옵션 부가 설명 (집행 단위·노출 횟수 등) */
+  description?: string;
+};
+
+/** `data/media-items-keyword-filter.json`에서 합성 상세에만 쓰는 메타 */
+export type KeywordFilterDetailMeta = {
+  specialFeature: string[];
+  searchKeywords: string[];
+  budgetMin: number;
+  budgetMax: number;
+  priceText: string;
+  exposureTime: string[];
+  duration: string[];
+  status: string;
+  regionLabels: string[];
+  mediaLabels: string[];
+  targetLabels: string[];
+  industryLabels: string[];
 };
 
 export interface MediaItem {
@@ -94,6 +112,16 @@ export interface MediaItem {
   networkPackageTiers?: { units: number; price: number }[];
   /** 네트워크 견적 시 지역 선택용 (한글 라벨) */
   networkRegionLabels?: string[];
+  /** 키워드 필터 JSON 등 별도 카탈로그의 본문 (상세 탭 상단) */
+  longDescriptionKo?: string;
+  longDescriptionEn?: string;
+  keywordFilter?: KeywordFilterDetailMeta;
+  /** DB `description` 등 상세 본문 (longDescription 없을 때 매체 소개 폴백) */
+  catalogDescription?: string;
+  catalogDescriptionEn?: string;
+  /** DB `description` 원문 — catalog·long이 비었을 때 매체 소개 최종 폴백 */
+  description?: string;
+  descriptionEn?: string;
 }
 
 export function getMediaById(id: string | number): MediaItem | undefined {
@@ -863,18 +891,62 @@ const SYNONYM_MAP: Record<string, string[]> = {
   옥외빌보드: ["옥외 빌보드", "빌보드", "outdoor", "옥외광고"],
   지하철매체: ["지하철 매체", "지하철", "subway", "metro", "스크린도어"],
   버스쉘터: ["버스·쉘터", "버스쉘터", "버스", "shelter", "bus shelter"],
+  랩핑키워드: ["랩핑", "래핑", "아트래핑", "wrapping", "브랜드 랩핑", "건물 랩핑"],
+  mz키워드: ["mz", "mz세대", "z세대", "밀레니얼", "millennial", "gen z", "genz"],
+  kpop키워드: ["k-pop", "kpop", "케이팝", "k-pop", "팬덤", "팬 응원", "응원광고", "아이돌"],
+  핫플키워드: ["핫플", "핫플레이스", "핫 플레이스", "hot place", "번화가", "핫플 광고"],
+  강남권: ["강남", "gangnam", "테헤란", "역삼", "논현", "신논현", "청담"],
+  성수권: ["성수", "seongsu", "성동", "연무장", "성수동"],
+  홍대권: ["홍대", "hongdae", "홍익", "합정", "마포", "상수"],
+  코엑스권: ["코엑스", "coex", "삼성", "삼성동", "무역센터"],
 };
 
-function expandSearchTokens(raw: string): string[] {
-  const base = raw.toLowerCase();
-  const tokens = new Set<string>([base]);
+/** 단어 하나에 동의어·관련어 확장 (복합 검색의 각 토큰용) */
+function expandTokensForWord(word: string): string[] {
+  const base = word.toLowerCase().trim();
+  if (!base) return [];
+  const out = new Set<string>([base]);
   for (const [key, vals] of Object.entries(SYNONYM_MAP)) {
-    if (vals.some((v) => base.includes(v.toLowerCase()))) {
-      tokens.add(key.toLowerCase());
-      for (const v of vals) tokens.add(v.toLowerCase());
+    const keyL = key.toLowerCase();
+    let hit = base === keyL;
+    for (const v of vals) {
+      const vl = v.toLowerCase();
+      if (base === vl) hit = true;
+      if (vl.length >= 2 && base.includes(vl)) hit = true;
+      if (base.length >= 2 && vl.includes(base)) hit = true;
+    }
+    if (hit) {
+      out.add(keyL);
+      for (const v of vals) out.add(v.toLowerCase());
     }
   }
-  return [...tokens];
+  return [...out];
+}
+
+function tokenMatchesHaystack(
+  token: string,
+  haystackPlain: string,
+  tagsText: string,
+  haystackChosung: string,
+): boolean {
+  if (haystackPlain.includes(token)) return true;
+  if (tagsText.includes(token)) return true;
+  if (/^[ㄱ-ㅎ]+$/.test(token)) {
+    if (toChosung(haystackPlain).includes(token)) return true;
+    if (haystackChosung.includes(token)) return true;
+  }
+  return false;
+}
+
+function wordMatchesHaystack(
+  word: string,
+  haystackPlain: string,
+  tagsText: string,
+  haystackChosung: string,
+): boolean {
+  return expandTokensForWord(word).some((t) =>
+    tokenMatchesHaystack(t, haystackPlain, tagsText, haystackChosung),
+  );
 }
 
 export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
@@ -883,6 +955,12 @@ export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
     m.nameEn,
     m.location,
     m.locationEn,
+    m.longDescriptionKo,
+    m.longDescriptionEn,
+    m.catalogDescription,
+    m.catalogDescriptionEn,
+    m.description,
+    m.descriptionEn,
     m.district,
     m.city,
     m.subCategory,
@@ -892,11 +970,23 @@ export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
     m.nearbyLandmarks,
     m.features,
     m.featuresEn,
+    m.targetAge,
     m.networkSubtype,
     typeLabels[m.type]?.ko,
     typeLabels[m.type]?.en,
     normalizeRegionCode(m.region),
   ];
+  const kf = m.keywordFilter;
+  if (kf) {
+    fields.push(
+      ...kf.searchKeywords,
+      ...kf.regionLabels,
+      ...kf.mediaLabels,
+      ...kf.targetLabels,
+      ...kf.industryLabels,
+      kf.priceText,
+    );
+  }
 
   const haystackPlain = fields
     .filter((f): f is string => typeof f === "string" && f.trim().length > 0)
@@ -911,17 +1001,18 @@ export function matchesMediaTextQuery(m: MediaItem, lower: string): boolean {
 
   const tagsText = (m.tags ?? []).join(" ").toLowerCase();
 
-  const tokens = expandSearchTokens(lower);
+  const trimmed = lower.trim().toLowerCase();
+  if (!trimmed) return true;
 
-  for (const token of tokens) {
-    if (haystackPlain.includes(token)) return true;
-    if (tagsText.includes(token)) return true;
-    // 초성 검색: 입력이 전부 한글 초성인 경우에만 검사
-    if (/^[ㄱ-ㅎ]+$/.test(token)) {
-      if (toChosung(haystackPlain).includes(token)) return true;
-      if (haystackChosung.includes(token)) return true;
-    }
+  const fullHay = `${haystackPlain} ${tagsText}`;
+  if (fullHay.includes(trimmed)) return true;
+
+  const words = trimmed.split(/\s+/).filter((w) => w.length > 0);
+  if (words.length <= 1) {
+    return wordMatchesHaystack(words[0] ?? trimmed, haystackPlain, tagsText, haystackChosung);
   }
 
-  return false;
+  return words.every((w) =>
+    wordMatchesHaystack(w, haystackPlain, tagsText, haystackChosung),
+  );
 }

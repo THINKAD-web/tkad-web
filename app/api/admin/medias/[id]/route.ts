@@ -11,6 +11,7 @@ import {
   CATALOG_MEDIA_TYPES,
   isValidCatalogMediaType,
 } from "@/lib/media-auto-categorize";
+import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
 
 export const dynamic = "force-dynamic";
 
@@ -107,6 +108,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
   if (body.priceNote !== undefined)
     data.priceNote = String(body.priceNote ?? "").trim() || null;
+
+  const priceOpts = normalizePriceOptionsForPrisma(body);
+  if (priceOpts.kind === "error") {
+    return json({ error: priceOpts.message }, 400);
+  }
+  if (priceOpts.kind === "ok") {
+    data.priceOptions = priceOpts.data;
+  }
+
   if (body.widthM !== undefined) {
     const n = Number(body.widthM);
     data.widthM = body.widthM === null || !Number.isFinite(n) ? null : n;

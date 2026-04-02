@@ -182,6 +182,100 @@ const emptyForm: AdminMediaForm = {
   pastAdvertisers: "",
 };
 
+type PriceOptDraft = {
+  key: string;
+  label: string;
+  price: string;
+  period: string;
+  description: string;
+};
+
+function newPriceOptDraft(): PriceOptDraft {
+  return {
+    key: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    label: "",
+    price: "",
+    period: "month",
+    description: "",
+  };
+}
+
+function priceOptDraftsFromJson(jsonStr: string): PriceOptDraft[] {
+  const t = jsonStr.trim();
+  if (!t) return [];
+  try {
+    const p = JSON.parse(t) as unknown;
+    if (!Array.isArray(p)) return [];
+    return p.map((x, i) => {
+      const o =
+        x && typeof x === "object" && !Array.isArray(x)
+          ? (x as Record<string, unknown>)
+          : {};
+      return {
+        key: `row-${i}-${Math.random().toString(36).slice(2, 9)}`,
+        label: typeof o.label === "string" ? o.label : "",
+        price:
+          typeof o.price === "number"
+            ? String(o.price)
+            : typeof o.price === "string"
+              ? o.price
+              : "",
+        period:
+          typeof o.period === "string" && o.period.trim()
+            ? o.period.trim()
+            : "month",
+        description:
+          typeof o.description === "string" ? o.description : "",
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+function jsonStringFromPriceOptDrafts(rows: PriceOptDraft[]): string {
+  const arr = rows
+    .filter((r) => r.label.trim())
+    .map((r) => {
+      const price = Number(r.price);
+      const o: Record<string, unknown> = {
+        label: r.label.trim(),
+        price: Number.isFinite(price) ? price : 0,
+      };
+      if (r.period.trim()) o.period = r.period.trim();
+      if (r.description.trim()) o.description = r.description.trim();
+      return o;
+    });
+  return arr.length > 0 ? JSON.stringify(arr, null, 2) : "";
+}
+
+function validatePriceOptionsJsonField(raw: string): string | null {
+  const t = raw.trim();
+  if (!t) return null;
+  try {
+    const p = JSON.parse(t) as unknown;
+    if (!Array.isArray(p)) {
+      return "가격 옵션은 JSON 배열이어야 합니다.";
+    }
+    for (let i = 0; i < p.length; i++) {
+      const row = p[i];
+      if (row === null || typeof row !== "object" || Array.isArray(row)) {
+        return `가격 옵션[${i}]: 객체가 아닙니다.`;
+      }
+      const o = row as Record<string, unknown>;
+      if (typeof o.label !== "string" || !o.label.trim()) {
+        return `가격 옵션[${i}]: label이 필요합니다.`;
+      }
+      if (typeof o.price !== "number" || !Number.isFinite(o.price)) {
+        return `가격 옵션[${i}]: price는 숫자여야 합니다.`;
+      }
+    }
+    return null;
+  } catch {
+    return "가격 옵션 JSON을 파싱할 수 없습니다.";
+  }
+}
+
 function apiToForm(m: AdminMediaDto): AdminMediaForm {
   return {
     name: m.name,
@@ -332,6 +426,8 @@ export default function AdminMediasClient({
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<AdminMediaDto | null>(null);
   const [form, setForm] = useState<AdminMediaForm>(emptyForm);
+  /** 가격 옵션 카드 UI — 저장 시 `form.priceOptionsJson`과 동기화 */
+  const [priceOptDrafts, setPriceOptDrafts] = useState<PriceOptDraft[]>([]);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -557,19 +653,35 @@ export default function AdminMediasClient({
   const openAdd = useCallback(() => {
     setEditing(null);
     setForm(emptyForm);
+    setPriceOptDrafts([]);
     setSaveError(null);
     setModalOpen(true);
   }, []);
 
   const openEdit = useCallback((media: AdminMediaDto) => {
+    const f = apiToForm(media);
     setEditing(media);
-    setForm(apiToForm(media));
+    setForm(f);
+    setPriceOptDrafts(priceOptDraftsFromJson(f.priceOptionsJson));
     setSaveError(null);
     setModalOpen(true);
   }, []);
 
+  const applyPriceOptDrafts = useCallback((rows: PriceOptDraft[]) => {
+    setPriceOptDrafts(rows);
+    setForm((prev) => ({
+      ...prev,
+      priceOptionsJson: jsonStringFromPriceOptDrafts(rows),
+    }));
+  }, []);
+
   const handleSave = useCallback(async () => {
     if (!form.name.trim() || !form.location.trim()) return;
+    const poErr = validatePriceOptionsJsonField(form.priceOptionsJson);
+    if (poErr) {
+      setSaveError(poErr);
+      return;
+    }
     listFetchGenRef.current += 1;
     setSaveLoading(true);
     setSaveError(null);
@@ -633,7 +745,7 @@ export default function AdminMediasClient({
     } finally {
       setSaveLoading(false);
     }
-  }, [editing, form, loadMedias]);
+  }, [editing, form, loadMedias, medias]);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -1704,23 +1816,176 @@ export default function AdminMediasClient({
                   }
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  가격 옵션 (JSON)
-                </label>
-                <textarea
-                  value={form.priceOptionsJson}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, priceOptionsJson: e.target.value }))
-                  }
-                  rows={4}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono text-navy shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  placeholder='[{"label":"20초 기준","price":30000000,"period":"month"},{"label":"15초 기준","price":25000000,"period":"month"}]'
-                />
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  예: [{`{"label":"20초 기준","price":30000000,"period":"month"}`}] —
-                  period는 month/biweekly/week/day 중 하나를 권장합니다.
+              <div className="rounded-xl border border-navy/10 bg-slate-50/80 p-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <label className="text-xs font-semibold text-navy">
+                    가격 옵션
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1 text-xs"
+                      onClick={() =>
+                        applyPriceOptDrafts([
+                          ...priceOptDrafts,
+                          newPriceOptDraft(),
+                        ])
+                      }
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      옵션 추가
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() =>
+                        setPriceOptDrafts(
+                          priceOptDraftsFromJson(form.priceOptionsJson),
+                        )
+                      }
+                    >
+                      JSON → 카드
+                    </Button>
+                  </div>
+                </div>
+                <p className="mb-3 text-[11px] leading-relaxed text-muted-foreground">
+                  카드로 편집하면 아래 JSON이 함께 갱신됩니다. 직접 JSON을
+                  수정한 뒤에는「JSON → 카드」로 불러오세요. 금액은 원(KRW)
+                  또는 만원 단위 숫자 모두 가능하며, 공개 카탈로그는 100만
+                  미만을 만원으로 해석합니다.
                 </p>
+                <div className="space-y-3">
+                  {priceOptDrafts.length === 0 ? (
+                    <p className="rounded-lg border border-dashed border-navy/15 bg-white px-3 py-6 text-center text-xs text-muted-foreground">
+                      옵션이 없습니다.「옵션 추가」또는 JSON을 입력하세요.
+                    </p>
+                  ) : (
+                    priceOptDrafts.map((row, idx) => (
+                      <div
+                        key={row.key}
+                        className="space-y-2 rounded-lg border border-navy/10 bg-white p-3 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-bold text-navy/50">
+                            옵션 {idx + 1}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 gap-1 text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
+                            onClick={() => {
+                              const next = priceOptDrafts.filter(
+                                (r) => r.key !== row.key,
+                              );
+                              applyPriceOptDrafts(next);
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            삭제
+                          </Button>
+                        </div>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="sm:col-span-2">
+                            <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                              라벨 (예: 20초 / 2주 패키지)
+                            </label>
+                            <Input
+                              className="h-9 text-sm"
+                              value={row.label}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                const next = priceOptDrafts.map((r) =>
+                                  r.key === row.key ? { ...r, label: v } : r,
+                                );
+                                applyPriceOptDrafts(next);
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                              금액 (숫자)
+                            </label>
+                            <Input
+                              className="h-9 text-sm tabular-nums"
+                              inputMode="numeric"
+                              value={row.price}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                const next = priceOptDrafts.map((r) =>
+                                  r.key === row.key ? { ...r, price: v } : r,
+                                );
+                                applyPriceOptDrafts(next);
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                              기간
+                            </label>
+                            <select
+                              className="flex h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                              value={row.period}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                const next = priceOptDrafts.map((r) =>
+                                  r.key === row.key ? { ...r, period: v } : r,
+                                );
+                                applyPriceOptDrafts(next);
+                              }}
+                            >
+                              <option value="month">month (월)</option>
+                              <option value="biweekly">biweekly (2주)</option>
+                              <option value="week">week (주)</option>
+                              <option value="day">day (일)</option>
+                            </select>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                              설명 (선택)
+                            </label>
+                            <Input
+                              className="h-9 text-sm"
+                              value={row.description}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                const next = priceOptDrafts.map((r) =>
+                                  r.key === row.key
+                                    ? { ...r, description: v }
+                                    : r,
+                                );
+                                applyPriceOptDrafts(next);
+                              }}
+                              placeholder="노출 횟수·집행 조건 등"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="mt-4">
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    가격 옵션 JSON (동기화)
+                  </label>
+                  <textarea
+                    value={form.priceOptionsJson}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        priceOptionsJson: e.target.value,
+                      }))
+                    }
+                    rows={5}
+                    spellCheck={false}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono text-navy shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    placeholder='[{"label":"20초 기준","price":30000000,"period":"month","description":"피크 15초"}]'
+                  />
+                </div>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">

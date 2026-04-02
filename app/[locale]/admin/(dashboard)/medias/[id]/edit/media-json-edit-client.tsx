@@ -78,9 +78,18 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
       const tags = Array.isArray(o.tags)
         ? o.tags.filter((x): x is string => typeof x === "string")
         : [];
-      const priceOptions = Array.isArray(o.price_options)
-        ? (o.price_options as Array<{ label: string; price: number; period?: string }>)
-            .filter((x) => typeof x.label === "string" && typeof x.price === "number")
+      const rawOpts = o.price_options ?? o.priceOptions;
+      const priceOptions = Array.isArray(rawOpts)
+        ? (
+            rawOpts as Array<{
+              label: string;
+              price: number;
+              period?: string;
+              description?: string;
+            }>
+          ).filter(
+            (x) => typeof x.label === "string" && typeof x.price === "number",
+          )
         : null;
       return { ok: true as const, name, addr, price, tags, priceOptions };
     } catch (e) {
@@ -236,6 +245,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
                             <th className="px-2 py-1.5 text-left font-semibold text-navy/60">구분</th>
                             <th className="px-2 py-1.5 text-right font-semibold text-navy/60">금액</th>
                             <th className="px-2 py-1.5 text-right font-semibold text-navy/60">기간</th>
+                            <th className="px-2 py-1.5 text-left font-semibold text-navy/60">설명</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -244,6 +254,9 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
                               <td className="px-2 py-1.5 font-semibold text-navy">{opt.label}</td>
                               <td className="px-2 py-1.5 text-right tabular-nums text-gold-dark">₩{opt.price.toLocaleString("ko-KR")}</td>
                               <td className="px-2 py-1.5 text-right text-muted-foreground">{opt.period ?? "month"}</td>
+                              <td className="max-w-[10rem] px-2 py-1.5 text-left text-[11px] text-muted-foreground">
+                                {opt.description?.trim() ? opt.description : "—"}
+                              </td>
                             </tr>
                           ))}
                         </tbody>

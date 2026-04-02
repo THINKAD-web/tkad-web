@@ -9,6 +9,8 @@ import {
   type MediaPricePeriodKey,
 } from "@/lib/media-data";
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
+import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail";
+import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
 
 /** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
 export type MediaWithAdvertiserExecutions = Media & {
@@ -78,7 +80,11 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
           | undefined;
         if (typeof label !== "string") continue;
         if (typeof price !== "number") continue;
-        normalized.push({ label, price, period });
+        const description =
+          typeof (item as { description?: unknown }).description === "string"
+            ? (item as { description: string }).description.trim() || undefined
+            : undefined;
+        normalized.push({ label, price, period, description });
       }
       return normalized.length ? normalized : undefined;
     } catch {
@@ -124,6 +130,10 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     visibilityScore: m.visibilityScore,
     features: m.effectMemo ?? m.description ?? undefined,
     featuresEn: m.effectMemo ?? m.description ?? undefined,
+    catalogDescription: m.description?.trim() || undefined,
+    catalogDescriptionEn: m.description?.trim() || undefined,
+    description: m.description?.trim() || undefined,
+    descriptionEn: m.description?.trim() || undefined,
     dailyExposure:
       m.impressions != null ? String(m.impressions) : undefined,
     sampleImages: imgs.length > 0 ? imgs : [],
@@ -156,10 +166,6 @@ function normalizePricePeriod(
   return "month";
 }
 
-/**
- * Active media for public browse. Uses DB when configured and non-empty;
- * otherwise falls back to `mediaData` samples.
- */
 const catalogInclude = {
   advertiserExecutions: {
     select: { advertiserName: true } as const,
@@ -167,10 +173,32 @@ const catalogInclude = {
   },
 } as const;
 
-export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
-  if (!isDatabaseConfigured()) {
-    return mediaData;
+function mergeMockCatalogWithDbRows(dbRows: MediaItem[]): MediaItem[] {
+  const byId = new Map<string, MediaItem>();
+  for (const m of mediaData) byId.set(m.id, m);
+  for (const m of dbRows) byId.set(m.id, m);
+  return [...byId.values()];
+}
+
+async function appendNetworksIfAny(base: MediaItem[]): Promise<MediaItem[]> {
+  try {
+    const networks = await fetchPublicMediaNetworks();
+    return networks.length > 0 ? [...base, ...networks] : base;
+  } catch {
+    return base;
   }
+}
+
+/** 비브라우즈 페이지·API용. `/media` 목록은 `fetchMediaBrowseCatalog()`(`lib/media-browse-catalog`) 사용. */
+export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
+  const forceMockOnly =
+    process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
+    process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
+
+  if (!isDatabaseConfigured() || forceMockOnly) {
+    return appendNetworksIfAny(getMediaBrowseMockCatalog());
+  }
+
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
@@ -178,12 +206,16 @@ export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
       orderBy: { updatedAt: "desc" },
       include: catalogInclude,
     });
-    const mediaItems =
-      rows.length === 0 ? mediaData : rows.map(prismaMediaToMediaItem);
-    const networks = await fetchPublicMediaNetworks();
-    return networks.length > 0 ? [...mediaItems, ...networks] : mediaItems;
+    const dbItems = rows.map(prismaMediaToMediaItem);
+    const merged = mergeMockCatalogWithDbRows(dbItems);
+    const byId = new Map<string, MediaItem>();
+    for (const m of merged) byId.set(m.id, m);
+    for (const m of getMediaBrowseMockCatalog()) {
+      if (!byId.has(m.id)) byId.set(m.id, m);
+    }
+    return appendNetworksIfAny([...byId.values()]);
   } catch {
-    return mediaData;
+    return appendNetworksIfAny(getMediaBrowseMockCatalog());
   }
 }
 
@@ -256,7 +288,7 @@ export async function fetchPlannerMediaCatalog(): Promise<{
   }
 }
 
-/** Detail: static catalog first, then DB by cuid (active only). */
+/** Detail: static catalog first, keyword-filter JSON, then DB by cuid (active only). */
 export async function resolveMediaForDetail(
   id: string,
 ): Promise<MediaItem | null> {
@@ -267,6 +299,8 @@ export async function resolveMediaForDetail(
       pricePeriod: normalizePricePeriod(fromStatic.pricePeriod),
     };
   }
+  const fromKeywordFilter = keywordFilterItemToMediaItem(id);
+  if (fromKeywordFilter) return fromKeywordFilter;
   if (!isDatabaseConfigured()) return null;
   try {
     const db = getPrisma();

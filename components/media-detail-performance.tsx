@@ -28,6 +28,14 @@ export default function MediaDetailPerformance({
   const t = useTranslations("media.detail");
   const format = useFormatter();
   const gradient = donutConicGradient(metrics.donut);
+  /** 고정 문구(번역) — 숫자 보간 없이 자연스러운 안내 문장 */
+  const compareNote = t("performanceAverageCompare");
+  const visibilityBadge =
+    metrics.visibilityScore >= 90
+      ? t("performanceVisibilityBadgeTopTier")
+      : metrics.visibilityScore >= 80
+        ? t("performanceVisibilityBadgeGood")
+        : null;
 
   return (
     <section
@@ -135,9 +143,22 @@ export default function MediaDetailPerformance({
       </div>
 
       <div className="mt-10 rounded-xl border border-gold-dark/25 bg-gradient-to-br from-gold-light/25 via-white to-slate-50 px-5 py-6 sm:px-7 sm:py-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-navy/70">
-          {t("performanceVisibilityTitle")}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-navy/70">
+            {t("performanceVisibilityTitle")}
+          </p>
+          {visibilityBadge ? (
+            <span
+              className={
+                metrics.visibilityScore >= 90
+                  ? "rounded-full border-2 border-gold-dark/55 bg-gradient-to-r from-gold via-gold-light to-gold-dark px-3.5 py-1.5 text-[11px] font-extrabold tracking-wide text-navy shadow-md shadow-gold-dark/25"
+                  : "rounded-full border border-gold-dark/40 bg-gradient-to-r from-gold/35 to-gold-dark/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-navy shadow-sm"
+              }
+            >
+              {visibilityBadge}
+            </span>
+          ) : null}
+        </div>
         <div className="mt-3 flex flex-wrap items-end gap-2">
           <span className="text-4xl font-bold tabular-nums tracking-tight text-navy sm:text-5xl">
             {metrics.visibilityScore}
@@ -160,6 +181,10 @@ export default function MediaDetailPerformance({
           />
         </div>
       </div>
+
+      <p className="mt-8 rounded-xl border border-navy/10 bg-gradient-to-br from-slate-50/90 to-white px-5 py-4 text-sm font-medium leading-relaxed text-navy/90 sm:px-6">
+        {compareNote}
+      </p>
     </section>
   );
 }

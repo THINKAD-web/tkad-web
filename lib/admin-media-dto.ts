@@ -51,7 +51,12 @@ export type AdminMediaDto = {
   isFeatured: boolean;
   /** 추천 노출 순서 (작을수록 앞) */
   featuredOrder: number | null;
-  priceOptions: Array<{ label: string; price: number; period?: string }> | null;
+  priceOptions: Array<{
+    label: string;
+    price: number;
+    period?: string;
+    description?: string;
+  }> | null;
 };
 
 const AVAIL: MediaAvailability[] = ["available", "reserved", "maintenance"];

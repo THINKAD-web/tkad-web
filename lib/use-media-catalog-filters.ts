@@ -9,6 +9,12 @@ export type MediaCatalogFiltersState = {
   duration: Partial<Record<string, boolean>>;
   exposureTime: Partial<Record<string, boolean>>;
   specialFeature: Partial<Record<string, boolean>>;
+  /** /media 정밀 필터 v2 — 핫스팟·포맷 등 */
+  areaSpot: Partial<Record<string, boolean>>;
+  mediaFormat: Partial<Record<string, boolean>>;
+  targetPersona: Partial<Record<string, boolean>>;
+  industryTag: Partial<Record<string, boolean>>;
+  campaignPurpose: Partial<Record<string, boolean>>;
 };
 
 const EMPTY_MAP: Partial<Record<string, boolean>> = {};
@@ -21,6 +27,11 @@ const initialFilters: MediaCatalogFiltersState = {
   duration: { ...EMPTY_MAP },
   exposureTime: { ...EMPTY_MAP },
   specialFeature: { ...EMPTY_MAP },
+  areaSpot: { ...EMPTY_MAP },
+  mediaFormat: { ...EMPTY_MAP },
+  targetPersona: { ...EMPTY_MAP },
+  industryTag: { ...EMPTY_MAP },
+  campaignPurpose: { ...EMPTY_MAP },
 };
 
 export type ToggleMediaCatalogFilter = <
@@ -56,6 +67,30 @@ export function useMediaCatalogFilters() {
     setFilters(initialFilters);
   };
 
+  const clearCategory = (category: keyof MediaCatalogFiltersState) => {
+    setFilters((prev) => ({
+      ...prev,
+      [category]:
+        category === "targetAge"
+          ? ({} as MediaCatalogFiltersState["targetAge"])
+          : {},
+    }));
+  };
+
+  const selectAllInCategory = (
+    category: keyof MediaCatalogFiltersState,
+    keys: readonly string[],
+  ) => {
+    setFilters((prev) => {
+      const next: Record<string, boolean> = {};
+      for (const k of keys) next[k] = true;
+      return {
+        ...prev,
+        [category]: next as MediaCatalogFiltersState[typeof category],
+      };
+    });
+  };
+
   const getActiveFiltersCount = () => {
     let count = 0;
     for (const category of Object.values(filters)) {
@@ -74,6 +109,8 @@ export function useMediaCatalogFilters() {
     filters,
     toggleFilter,
     resetFilters,
+    clearCategory,
+    selectAllInCategory,
     getActiveFiltersCount,
     setFilters,
   };

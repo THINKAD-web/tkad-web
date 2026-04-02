@@ -30,8 +30,16 @@ export type QuickAddMediaJson = {
   longitude: number | null;
   price_per_month: number;
   price_note: string;
-  /** 다양한 가격 옵션: [{label:"15초",price:20000000,period:"month"}, ...] */
-  price_options?: Array<{ label: string; price: number; period?: string }> | null;
+  /**
+   * 다양한 가격 옵션. JSON 편집 시 `priceOptions`(camelCase)도 동일 의미로 허용.
+   * 예: [{ "label":"15초", "price":20000000, "period":"month", "description":"…" }]
+   */
+  price_options?: Array<{
+    label: string;
+    price: number;
+    period?: string;
+    description?: string;
+  }> | null;
   width_m: number | null;
   height_m: number | null;
   resolution: string | null;
@@ -234,10 +242,25 @@ export function validateQuickAddItem(
     nearby_stations: str("nearby_stations", "") || str("nearby_subway", ""),
     nearby_landmarks: str("nearby_landmarks", ""),
     past_advertisers: str("past_advertisers", "") || str("advertiser_history", ""),
-    price_options: Array.isArray(o.price_options)
-      ? (o.price_options as Array<{ label: string; price: number; period?: string }>)
-          .filter((x) => typeof x.label === "string" && typeof x.price === "number")
-      : null,
+    price_options: (() => {
+      const raw = o.price_options ?? o.priceOptions;
+      return Array.isArray(raw)
+        ? (raw as Array<{ label: string; price: number; period?: string; description?: string }>)
+            .filter(
+              (x) => typeof x.label === "string" && typeof x.price === "number",
+            )
+            .map((x) => ({
+              label: x.label,
+              price: x.price,
+              ...(typeof x.period === "string" && x.period.trim()
+                ? { period: x.period.trim() }
+                : {}),
+              ...(typeof x.description === "string" && x.description.trim()
+                ? { description: x.description.trim() }
+                : {}),
+            }))
+        : null;
+    })(),
     ...(typeRaw ? { type: typeRaw.toLowerCase() } : {}),
   };
 
@@ -296,7 +319,12 @@ export type MediaQuickAddCreate = {
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
   pastAdvertisers: string | null;
-  priceOptions: Array<{ label: string; price: number; period?: string }> | null;
+  priceOptions: Array<{
+    label: string;
+    price: number;
+    period?: string;
+    description?: string;
+  }> | null;
 };
 
 export function mediaQuickAddCreateToPrismaUpdate(
@@ -428,6 +456,8 @@ export function quickAddJsonWithAliasKeys(
     surrounding_facilities: row.nearby_facilities,
     nearby_subway: row.nearby_stations,
     advertiser_history: row.past_advertisers,
+    /** `price_options`와 동일 배열 — camelCase 에디터·목업 JSON과 동기화 */
+    priceOptions: row.price_options ?? null,
   };
 }
 
@@ -521,8 +551,23 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     nearbyLandmarks: row.nearby_landmarks.trim() || null,
     pastAdvertisers: row.past_advertisers.trim() || null,
     priceOptions: Array.isArray(row.price_options)
-      ? (row.price_options as Array<{ label: string; price: number; period?: string }>)
+      ? (row.price_options as Array<{
+          label: string;
+          price: number;
+          period?: string;
+          description?: string;
+        }>)
           .filter((o) => typeof o.label === "string" && typeof o.price === "number")
+          .map((o) => ({
+            label: o.label,
+            price: o.price,
+            ...(typeof o.period === "string" && o.period.trim()
+              ? { period: o.period.trim() }
+              : {}),
+            ...(typeof o.description === "string" && o.description.trim()
+              ? { description: o.description.trim() }
+              : {}),
+          }))
       : null,
   };
 }

@@ -1,5 +1,21 @@
 import type { MediaPricePeriodKey } from "@/lib/media-data";
 
+/**
+ * 카탈로그/JSON 가격 숫자 해석.
+ * - `1_000_000` 이상: 원(KRW)으로 간주
+ * - 그 미만: 만원(월 단가 등)으로 간주해 원으로 환산
+ */
+export function catalogPriceFieldToWon(value: number): number {
+  if (!Number.isFinite(value) || value < 0) return 0;
+  if (value >= 1_000_000) return Math.round(value);
+  return Math.round(value * 10_000);
+}
+
+/** 견적·합계용 — 카탈로그와 동일한 «만원(₩1만 단위)» 숫자 */
+export function catalogPriceFieldToPriceMan(value: number): number {
+  return catalogPriceFieldToWon(value) / 10_000;
+}
+
 /** DB·카탈로그 `price`는 원(₩) 단위 */
 export function formatMediaPriceWon(wonUnits: number, locale = "ko-KR"): string {
   return `${wonUnits.toLocaleString(locale)}원`;
@@ -10,6 +26,28 @@ export function formatMediaPriceWonWithSymbol(
   locale = "ko-KR",
 ): string {
   return `₩${wonUnits.toLocaleString(locale)}`;
+}
+
+export function formatCatalogPriceFieldWon(
+  value: number,
+  locale = "ko-KR",
+): string {
+  return formatMediaPriceWonWithSymbol(catalogPriceFieldToWon(value), locale);
+}
+
+/**
+ * 상세·모달용: 한국어 locale에서는 `60,000,000원` 형태(통화 기호 없이), 그 외는 ₩ 표기.
+ */
+export function formatCatalogPriceKrwLong(
+  value: number,
+  locale: string,
+): string {
+  const won = catalogPriceFieldToWon(value);
+  const isKo = locale === "ko" || locale.startsWith("ko");
+  if (isKo) {
+    return `${won.toLocaleString("ko-KR")}원`;
+  }
+  return formatMediaPriceWonWithSymbol(won, "en-US");
 }
 
 export function normalizeMediaPricePeriod(

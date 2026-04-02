@@ -364,17 +364,26 @@ export type CatalogBounds = {
   maxPrice: number;
 };
 
+/** 빈 카탈로그일 때 min=max=0이 되면 고급 필터가 모든 매체를 가격 구간으로 탈락시킴 */
+const EMPTY_CATALOG_PRICE_FALLBACK: CatalogBounds = {
+  minPrice: 100,
+  maxPrice: 15_000,
+};
+
 export function computeCatalogBounds(catalog: MediaItem[]): CatalogBounds {
+  if (catalog.length === 0) return { ...EMPTY_CATALOG_PRICE_FALLBACK };
   let minP = Infinity;
   let maxP = 0;
   for (const m of catalog) {
     minP = Math.min(minP, m.price);
     maxP = Math.max(maxP, m.price);
   }
-  if (!Number.isFinite(minP)) minP = 0;
+  if (!Number.isFinite(minP)) minP = EMPTY_CATALOG_PRICE_FALLBACK.minPrice;
+  const hi = Math.max(maxP, minP);
+  if (hi <= 0) return { ...EMPTY_CATALOG_PRICE_FALLBACK };
   return {
     minPrice: minP,
-    maxPrice: Math.max(maxP, minP),
+    maxPrice: hi,
   };
 }
 

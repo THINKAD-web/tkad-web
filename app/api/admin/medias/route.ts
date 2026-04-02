@@ -10,6 +10,7 @@ import {
   CATALOG_MEDIA_TYPES,
   isValidCatalogMediaType,
 } from "@/lib/media-auto-categorize";
+import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,13 @@ export async function POST(request: NextRequest) {
   if (lng !== undefined) data.longitude = lng;
   const pn = optStr(body.priceNote);
   if (pn !== undefined) data.priceNote = pn;
+  const po = normalizePriceOptionsForPrisma(body);
+  if (po.kind === "error") {
+    return json({ error: po.message }, 400);
+  }
+  if (po.kind === "ok") {
+    data.priceOptions = po.data;
+  }
   const wm = optNum(body.widthM);
   if (wm !== undefined) data.widthM = wm;
   const hm = optNum(body.heightM);

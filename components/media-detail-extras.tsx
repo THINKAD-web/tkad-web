@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { getCampaignMonitoringMapProvider } from "@/components/campaign-monitoring-map";
 import type { MediaItem } from "@/lib/media-data";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
-import { Calculator, MapPin, MessageCircle } from "lucide-react";
+import { MapPin, MessageCircle } from "lucide-react";
+import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
@@ -26,7 +27,8 @@ export default function MediaDetailExtras({
     openKakao: string;
     openGoogle: string;
     inquiry: string;
-    quote: string;
+    /** @deprecated 견적 CTA는 `media.detail` 번역(`stickyCtaQuote`)으로 통일 */
+    quote?: string;
     galleryLightboxClose: string;
     galleryLightboxPrev: string;
     galleryLightboxNext: string;
@@ -60,16 +62,14 @@ export default function MediaDetailExtras({
 
   return (
     <>
-      <div className="mb-4 flex flex-wrap gap-2">
-        <Link href={`/quote?media=${media.id}`}>
-          <Button className="bg-gold font-semibold text-navy hover:bg-gold-dark">
-            <Calculator className="mr-2 h-4 w-4" />
-            {labels.quote}
-          </Button>
-        </Link>
+      <div className="mb-4 flex flex-wrap gap-3">
+        <MediaQuoteCtaButton media={media} variant="inline" />
         <Link href={`/contact?media=${media.id}`}>
-          <Button variant="outline" className="font-semibold border-navy/20">
-            <MessageCircle className="mr-2 h-4 w-4" />
+          <Button
+            variant="outline"
+            className="h-12 border-2 border-navy/25 px-5 font-semibold sm:h-14"
+          >
+            <MessageCircle className="mr-2 h-5 w-5 shrink-0" />
             {labels.inquiry}
           </Button>
         </Link>

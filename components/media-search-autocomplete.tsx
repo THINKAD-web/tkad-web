@@ -23,6 +23,11 @@ interface Props {
   onSearchSubmit?: (query: string) => void;
   /** Fired on every input change so the parent can clear text filters when the field is emptied. */
   onQueryChange?: (query: string) => void;
+  /**
+   * 히어로 검색창 등과 동기화할 때 사용. 둘 다 넘기면 입력값이 부모 state로만 관리됩니다.
+   */
+  catalogSearchQuery?: string;
+  onCatalogSearchQueryChange?: (query: string) => void;
   searchButtonLabel?: string;
   placeholder?: string;
 }
@@ -33,12 +38,21 @@ export default function MediaSearchAutocomplete({
   onSelect,
   onSearchSubmit,
   onQueryChange,
+  catalogSearchQuery,
+  onCatalogSearchQueryChange,
   searchButtonLabel,
   placeholder,
 }: Props) {
   const isKo = locale === "ko";
   const tMedia = useTranslations("media");
-  const [query, setQuery] = useState("");
+  const isControlled =
+    catalogSearchQuery !== undefined &&
+    onCatalogSearchQueryChange !== undefined;
+  const [internalQuery, setInternalQuery] = useState("");
+  const query = isControlled ? catalogSearchQuery! : internalQuery;
+  const setQuery = isControlled
+    ? onCatalogSearchQueryChange!
+    : setInternalQuery;
   const [results, setResults] = useState<MediaItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
