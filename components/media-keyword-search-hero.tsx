@@ -148,15 +148,15 @@ export function MediaKeywordSearchHero({
             type="button"
             onClick={() => applySuggestion(phrase)}
             className={cn(
-              "rounded-full border px-3.5 py-2 text-left font-medium shadow-sm backdrop-blur-md",
+              "rounded-full border px-2.5 py-1 text-left font-medium shadow-sm backdrop-blur-md",
               "transition-all duration-200 ease-out",
               "hover:-translate-y-0.5 hover:border-gold hover:bg-gold/15 hover:text-white hover:shadow-lg hover:shadow-gold/25 motion-reduce:hover:translate-y-0",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
               isFeaturedEmbed
-                ? "border-white/20 bg-white/10 text-xs text-white/90 focus-visible:ring-offset-navy sm:text-sm"
+                ? "border-white/20 bg-white/10 text-[10px] text-white/90 focus-visible:ring-offset-navy"
                 : variant === "embed"
-                  ? "border-white/25 bg-white/10 text-xs text-white/95 focus-visible:ring-offset-navy"
-                  : "border-white/18 bg-white/[0.08] text-xs text-white/95 focus-visible:ring-offset-navy-dark",
+                  ? "border-white/25 bg-white/10 text-[10px] text-white/95 focus-visible:ring-offset-navy"
+                  : "border-white/18 bg-white/[0.08] text-[10px] text-white/95 focus-visible:ring-offset-navy-dark",
             )}
           >
             {phrase}

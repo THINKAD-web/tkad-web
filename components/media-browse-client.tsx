@@ -454,7 +454,7 @@ export default function MediaBrowseClient({
           <p className="mt-2 text-slate-300">
             {t("media.subtitle")}
           </p>
-          <div className="relative mx-auto mt-8 max-w-2xl sm:mt-10">
+          <div className="relative mx-auto mt-8 max-w-lg sm:mt-10">
             <div
               className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-to-b from-white/[0.07] to-transparent blur-xl sm:-inset-6"
               aria-hidden
