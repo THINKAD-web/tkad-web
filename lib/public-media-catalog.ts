@@ -253,6 +253,23 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
   }
 }
 
+/** 홈 인기 매체: 조회수 높은 순. */
+export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
+  if (!isDatabaseConfigured()) return [];
+  try {
+    const db = getPrisma();
+    const rows = await db.media.findMany({
+      where: { isActive: true },
+      orderBy: [{ viewCount: "desc" }, { updatedAt: "desc" }],
+      take: max,
+      include: catalogInclude,
+    });
+    return rows.map(prismaMediaToMediaItem);
+  } catch {
+    return [];
+  }
+}
+
 /**
  * 플래너 전용: 활성 매체만. DB 미설정·조회 오류·0건이면 빈 목록(목업 `mediaData` 미사용).
  */

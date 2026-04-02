@@ -19,7 +19,7 @@ import {
   formatMediaPriceWonWithSymbol,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
-import { fetchHomeFeaturedMedia } from "@/lib/public-media-catalog";
+import { fetchHomeFeaturedMedia, fetchHomePopularMedia } from "@/lib/public-media-catalog";
 import {
   ArrowRight,
   BarChart3,
@@ -88,7 +88,10 @@ export default async function HomePage({ params }: Props) {
    * 추천 매체: Prisma `isFeatured`·`featuredOrder`(홈 하드코딩 ID 없음).
    * DB 연결 시 실제 행만; 미연결 시에만 샘플 카탈로그.
    */
-  const featuredCatalog = await fetchHomeFeaturedMedia(6);
+  const [featuredCatalog, popularCatalog] = await Promise.all([
+    fetchHomeFeaturedMedia(3),
+    fetchHomePopularMedia(4),
+  ]);
 
   return (
     <HomeContent
@@ -96,6 +99,7 @@ export default async function HomePage({ params }: Props) {
       t={t}
       tMedia={tMedia}
       featuredCatalog={featuredCatalog}
+      popularCatalog={popularCatalog}
     />
   );
 }
@@ -105,15 +109,17 @@ function HomeContent({
   t,
   tMedia,
   featuredCatalog,
+  popularCatalog = [],
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
   tMedia: Awaited<ReturnType<typeof getTranslations>>;
   featuredCatalog: MediaItem[];
+  popularCatalog?: MediaItem[];
 }) {
   const isKo = locale === "ko";
   const topThreeFeatured = featuredCatalog.slice(0, 3);
-  const featuredGridItems = featuredCatalog.slice(0, 4);
+  const featuredGridItems = popularCatalog.length > 0 ? popularCatalog.slice(0, 4) : featuredCatalog.slice(0, 4);
 
   return (
     <>
