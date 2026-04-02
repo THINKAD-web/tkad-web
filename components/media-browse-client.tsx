@@ -151,8 +151,13 @@ export default function MediaBrowseClient({
     [bounds],
   );
 
-  const [budgetMin, setBudgetMin] = useState(() => bounds.minPrice);
-  const [budgetMax, setBudgetMax] = useState(() => bounds.maxPrice);
+  const [budgetMin, setBudgetMin] = useState(0);
+  const [budgetMax, setBudgetMax] = useState(999999999);
+
+  useEffect(() => {
+    setBudgetMin(bounds.minPrice);
+    setBudgetMax(bounds.maxPrice);
+  }, [bounds.minPrice, bounds.maxPrice]);
   const {
     filters,
     toggleFilter,
