@@ -30,6 +30,8 @@ export type QuickAddMediaJson = {
   longitude: number | null;
   price_per_month: number;
   price_note: string;
+  /** 대표 가격 기간: month | biweekly | week | day (기본 month) */
+  price_period?: string;
   /**
    * 다양한 가격 옵션. JSON 편집 시 `priceOptions`(camelCase)도 동일 의미로 허용.
    * 예: [{ "label":"15초", "price":20000000, "period":"month", "description":"…" }]
@@ -242,6 +244,7 @@ export function validateQuickAddItem(
     nearby_stations: str("nearby_stations", "") || str("nearby_subway", ""),
     nearby_landmarks: str("nearby_landmarks", ""),
     past_advertisers: str("past_advertisers", "") || str("advertiser_history", ""),
+    price_period: str("price_period", "") || undefined,
     price_options: (() => {
       const raw = o.price_options ?? o.priceOptions;
       return Array.isArray(raw)
@@ -319,6 +322,7 @@ export type MediaQuickAddCreate = {
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
   pastAdvertisers: string | null;
+  pricePeriod?: "month" | "biweekly" | "week" | "day";
   priceOptions: Array<{
     label: string;
     price: number;
@@ -367,6 +371,7 @@ export function mediaQuickAddCreateToPrismaUpdate(
     nearbyStations: p.nearbyStations,
     nearbyLandmarks: p.nearbyLandmarks,
     pastAdvertisers: p.pastAdvertisers,
+    ...(p.pricePeriod ? { pricePeriod: p.pricePeriod as "month" | "biweekly" | "week" | "day" } : {}),
     priceOptions: p.priceOptions !== null && p.priceOptions !== undefined
       ? p.priceOptions
       : Prisma.JsonNull,
@@ -406,6 +411,7 @@ export function mediaDbRowToQuickAddJson(m: {
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
   pastAdvertisers: string | null;
+  pricePeriod?: string | null;
   priceOptions?: unknown;
 }): QuickAddMediaJson {
   return {
@@ -440,6 +446,7 @@ export function mediaDbRowToQuickAddJson(m: {
     nearby_stations: m.nearbyStations ?? "",
     nearby_landmarks: m.nearbyLandmarks ?? "",
     past_advertisers: m.pastAdvertisers ?? "",
+    price_period: m.pricePeriod ?? undefined,
     price_options: Array.isArray(m.priceOptions) ? m.priceOptions as Array<{ label: string; price: number; period?: string }> : null,
   };
 }
@@ -550,6 +557,7 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     nearbyStations: row.nearby_stations.trim() || null,
     nearbyLandmarks: row.nearby_landmarks.trim() || null,
     pastAdvertisers: row.past_advertisers.trim() || null,
+    ...(row.price_period?.trim() ? { pricePeriod: row.price_period.trim() as "month" | "biweekly" | "week" | "day" } : {}),
     priceOptions: Array.isArray(row.price_options)
       ? (row.price_options as Array<{
           label: string;
