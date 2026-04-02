@@ -447,17 +447,14 @@ export default function MediaBrowseClient({
           className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"
           aria-hidden
         />
-        <div className="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35 sm:text-[11px]">
-            {t("media.heroEyebrow")}
-          </p>
-          <h1 className="mt-2 text-balance text-lg font-medium text-white/55 sm:text-xl">
+        <div className="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {t("media.title")}
           </h1>
-          <p className="mx-auto mt-1.5 max-w-lg text-pretty text-xs text-slate-400/90 sm:text-sm">
+          <p className="mt-2 text-slate-300">
             {t("media.subtitle")}
           </p>
-          <div className="relative mx-auto mt-8 max-w-4xl sm:mt-10">
+          <div className="relative mx-auto mt-8 max-w-2xl sm:mt-10">
             <div
               className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-to-b from-white/[0.07] to-transparent blur-xl sm:-inset-6"
               aria-hidden
