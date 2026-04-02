@@ -156,7 +156,7 @@ export default function RecommendPageClient({
         </div>
       </section>
 
-      <section className="bg-white py-16 sm:py-24">
+      <section className="bg-gradient-to-b from-navy/95 via-[#0c1a42] to-[#060d1a] py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {phase === "form" && (
             <MediaAiRecommendForm
