@@ -177,8 +177,8 @@ export default function MediaBrowseClient({
   const filterState = useMemo(
     () => ({
       ...defaultAdvanced,
-      priceMin: budgetMin,
-      priceMax: budgetMax,
+      priceMin: budgetMin * 10000,
+      priceMax: budgetMax * 10000,
       targetAgePick: filters.targetAge,
     }),
     [defaultAdvanced, budgetMin, budgetMax, filters.targetAge],
