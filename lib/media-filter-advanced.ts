@@ -366,8 +366,8 @@ export type CatalogBounds = {
 
 /** 빈 카탈로그일 때 min=max=0이 되면 고급 필터가 모든 매체를 가격 구간으로 탈락시킴 */
 const EMPTY_CATALOG_PRICE_FALLBACK: CatalogBounds = {
-  minPrice: 100,
-  maxPrice: 15_000,
+  minPrice: 0,
+  maxPrice: 999_999_999,
 };
 
 export function computeCatalogBounds(catalog: MediaItem[]): CatalogBounds {
