@@ -207,13 +207,7 @@ export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
       include: catalogInclude,
     });
     const dbItems = rows.map(prismaMediaToMediaItem);
-    const merged = mergeMockCatalogWithDbRows(dbItems);
-    const byId = new Map<string, MediaItem>();
-    for (const m of merged) byId.set(m.id, m);
-    for (const m of getMediaBrowseMockCatalog()) {
-      if (!byId.has(m.id)) byId.set(m.id, m);
-    }
-    return appendNetworksIfAny([...byId.values()]);
+    return appendNetworksIfAny(dbItems);
   } catch {
     return appendNetworksIfAny(getMediaBrowseMockCatalog());
   }
