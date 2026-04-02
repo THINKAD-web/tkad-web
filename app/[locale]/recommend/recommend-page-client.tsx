@@ -134,7 +134,7 @@ export default function RecommendPageClient({
 
   return (
     <>
-      <section className="bg-gradient-to-b from-slate-900 via-navy to-slate-900 py-24 sm:py-28">
+      <section className="bg-navy py-28">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <div className="mb-4 inline-flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-gold" />
@@ -146,17 +146,17 @@ export default function RecommendPageClient({
             </span>
           </div>
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
-            {isKo ? "매디와 함께 매체 탐험 시작! ✨" : tr("heroTitle")}
+            {isKo ? "TKAD Bot과 함께 매체 탐험 시작! ✨" : tr("heroTitle")}
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-slate-300">
             {isKo
-              ? "몇 가지 정보만 알려주시면, 매디가 당신의 캠페인에 꼭 맞는 매체들을 탐험해서 찾아드려요."
+              ? "몇 가지 정보만 알려주시면, TKAD Bot이 캠페인에 꼭 맞는 매체들을 찾아드려요."
               : tr("heroSubtitle")}
           </p>
         </div>
       </section>
 
-      <section className="bg-slate-50 py-16 sm:py-24">
+      <section className="bg-white py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {phase === "form" && (
             <MediaAiRecommendForm

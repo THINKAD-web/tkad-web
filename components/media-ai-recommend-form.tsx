@@ -444,7 +444,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           <section className="space-y-2.5">
             <div className="flex items-center gap-2 text-sm font-semibold text-gold">
               <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo ? "매디가 추천하는 탐험 지역" : tr("form.regionLabel")}
+              {isKo ? "TKAD Bot 추천 지역" : tr("form.regionLabel")}
             </div>
             <div className="flex flex-wrap gap-2">
               {regionDef.map(({ code, label }) => (
@@ -568,7 +568,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
               <Layers className="h-4 w-4 shrink-0" aria-hidden />
               {isKo
-                ? "매디가 탐험할 노출 환경을 골라주세요"
+                ? "TKAD Bot이 탐험할 노출 환경을 골라주세요"
                 : tr("form.placementHintsLabel")}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -606,7 +606,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           <section className="space-y-2.5">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
               <Target className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo ? "매디가 만날 타겟 연령대" : tr("form.ageLabel")}
+              {isKo ? "TKAD Bot이 타겟할 연령대" : tr("form.ageLabel")}
             </div>
             <div className="flex flex-wrap gap-2">
               {ageDef.map(({ code, label }) => (
@@ -643,7 +643,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
               <Wallet className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo ? "매디와 함께 정하는 예산 게이지" : tr("form.budgetLabel")}
+              {isKo ? "TKAD Bot과 함께 정하는 예산 게이지" : tr("form.budgetLabel")}
             </div>
             <div className="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-3">
               <div className="flex items-center justify-between text-[11px] text-slate-300 sm:text-xs">
@@ -689,7 +689,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 </div>
                 <div className="hidden flex-col items-center text-[11px] text-slate-200 sm:flex">
                   <span className="mb-1 rounded-full bg-slate-800 px-2 py-0.5">
-                    {isKo ? "매디 생각" : "Maddy’s view"}
+                    {isKo ? "TKAD Bot 분석" : "Maddy’s view"}
                   </span>
                   <span className="text-[10px] text-slate-300">
                     {isKo
