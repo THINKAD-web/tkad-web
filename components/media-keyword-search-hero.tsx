@@ -109,7 +109,7 @@ export function MediaKeywordSearchHero({
           }
           className={cn(
             "rounded-2xl border-0 bg-white pr-4 text-navy shadow-2xl shadow-black/25 ring-2 ring-white/25",
-            "placeholder:text-navy/35",
+            "placeholder:text-navy/60",
             isFeaturedEmbed
               ? "h-[4.25rem] min-h-[4.25rem] pl-[4.25rem] text-lg placeholder:text-base sm:h-[5rem] sm:min-h-[5rem] sm:pl-[4.75rem] sm:text-xl sm:placeholder:text-lg md:text-2xl md:placeholder:text-xl"
               : variant === "embed"

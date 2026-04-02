@@ -435,24 +435,8 @@ export default function MediaBrowseClient({
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#060d24] via-navy to-[#0c1a42] py-20 sm:py-24">
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(212,175,55,0.18),transparent_55%)]"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute -right-32 -top-20 size-[36rem] rounded-full bg-gold/25 blur-[100px]"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute -bottom-40 left-1/2 size-[32rem] -translate-x-1/2 rounded-full bg-primary/30 blur-[90px]"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"
-          aria-hidden
-        />
-        <div className="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <section className="bg-navy py-28">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
             {t("media.title")}
           </h1>
@@ -460,10 +444,6 @@ export default function MediaBrowseClient({
             {t("media.subtitle")}
           </p>
           <div className="relative mx-auto mt-8 max-w-lg sm:mt-10">
-            <div
-              className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-to-b from-white/[0.07] to-transparent blur-xl sm:-inset-6"
-              aria-hidden
-            />
             <MediaKeywordSearchHero
               variant="embed"
               featured
@@ -596,6 +576,15 @@ export default function MediaBrowseClient({
                   </SheetHeader>
                   <div className="mx-3 mb-4 mt-2 sm:mx-4">
                     <MediaPrecisionFiltersAssistant {...precisionAssistantProps} />
+                  </div>
+                  <div className="sticky bottom-0 border-t border-slate-200/80 bg-background/95 px-4 py-3 backdrop-blur-sm">
+                    <Button
+                      type="button"
+                      className="w-full bg-navy font-semibold text-white hover:bg-navy/90"
+                      onClick={() => setPrecisionFiltersOpen(false)}
+                    >
+                      필터 적용하기
+                    </Button>
                   </div>
                 </SheetContent>
               </Sheet>
