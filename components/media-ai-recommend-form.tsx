@@ -254,27 +254,27 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         );
 
       if (hasYoung && (industry === "entertainment" || industry === "beauty")) {
-        return "TKAD bot: Oho, big fandom energy detected. I’ll sweep Hongdae and Gangnam for hype-ready hero screens that feel tailor‑made for your crowd.";
+        return "TKAD bot: Oho, big fandom energy detected. I'll sweep Hongdae and Gangnam for hype-ready hero screens that feel tailor-made for your crowd.";
       }
       if (hasYoung && hasNight) {
-        return "TKAD bot: Night‑owl crew spotted. I’ll light up neon city routes that really wake up after dark and catch late‑night selfies.";
+        return "TKAD bot: Night-owl crew spotted. I'll light up neon city routes that really wake up after dark and catch late-night selfies.";
       }
       if (hasYoung) {
-        return "TKAD bot: Fresh, active audience locked in. I’ll lean toward vivid hangout spots where foot traffic and buzz both spike.";
+        return "TKAD bot: Fresh, active audience locked in. I'll lean toward vivid hangout spots where foot traffic and buzz both spike.";
       }
       if (hasFamily) {
-        return "TKAD bot: Family routes it is. I’ll trace everyday paths—malls, grocery hubs, family stops—where trust and repetition work together.";
+        return "TKAD bot: Family routes it is. I'll trace everyday paths-malls, grocery hubs, family stops-where trust and repetition work together.";
       }
       if (industry === "fintech" || industry === "auto") {
-        return "TKAD bot: High‑trust category detected. I’ll prioritize premium, credible business corridors where the placements feel “safe but strong.”";
+        return "TKAD bot: High-trust category detected. I'll prioritize premium, credible business corridors where the placements feel "safe but strong."";
       }
       if (budgetMan >= 7000) {
-        return "TKAD bot: Bold budget detected. Instead of a tiny test, let’s sketch a city‑spanning hero route that really feels like a launch.";
+        return "TKAD bot: Bold budget detected. Instead of a tiny test, let's sketch a city-spanning hero route that really feels like a launch.";
       }
       if (budgetMan <= 1000) {
-        return "TKAD bot: Compact budget mode, got it. I’ll snipe a few sharp, high‑efficiency placements where every slot has to pull its weight.";
+        return "TKAD bot: Compact budget mode, got it. I'll snipe a few sharp, high-efficiency placements where every slot has to pull its weight.";
       }
-      return "TKAD bot: Got it. I’ll balance reach, vibe, and efficiency to build a clean first route that still feels a bit like a hidden‑gem tour.";
+      return "TKAD bot: Got it. I'll balance reach, vibe, and efficiency to build a clean first route that still feels a bit like a hidden-gem tour.";
     }
 
     const hasYoung =
@@ -303,7 +303,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       return "신뢰와 전문성이 핵심인 업종이네요. TKAD bot이 프리미엄 입지·비즈니스 동선 위주로 차분하게 스캔해볼게요.";
     }
     if (budgetMan >= 7000) {
-      return "오호~ 제법 든든한 예산이네요. 도시 한 바퀴를 두르는 ‘존재감 폭발’ 루트를 한번 상상해볼게요. 💡";
+      return "오호~ 제법 든든한 예산이네요. 도시 한 바퀴를 두르는 '존재감 폭발' 루트를 한번 상상해볼게요. 💡";
     }
     if (budgetMan <= 1000) {
       return "예산은 슬림하지만 괜찮아요. TKAD bot이 숨겨진 보석 느낌의 알짜 매체 몇 곳만 정확히 찔러볼게요.";
@@ -406,11 +406,11 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
               </p>
             </div>
             <div className="relative flex h-20 w-20 items-center justify-center">
-              <div className="absolute -top-6 right-10 hidden max-w-[160px] rounded-2xl bg-slate-800/95 px-3 py-2 text-[11px] text-slate-50 shadow-lg ring-1 ring-slate-600 sm:block">
+              <div className="absolute -top-8 right-16 hidden whitespace-nowrap rounded-2xl bg-slate-800/95 px-3 py-2 text-[11px] text-slate-50 shadow-lg ring-1 ring-slate-600 sm:block">
                 <span className="block">
                   {isKo
                     ? "어떤 매체를 찾으러 갈까? 조건을 알려줘!"
-                    : "Tell me the vibe. I’ll find your perfect screens!"}
+                    : "Tell me the vibe. I'll find your perfect screens!"}
                 </span>
                 <span className="absolute -bottom-2 right-6 h-3 w-3 rotate-45 bg-slate-800/95" />
               </div>
@@ -502,7 +502,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
               <div className="mt-3 rounded-xl bg-slate-800/80 px-3 py-2 text-[11px] text-emerald-200 sm:text-xs">
                 {isKo
                   ? "이 정도면 출발 준비는 끝났어요. 마음에 안 들면 언제든 Remix로 다른 코스를 타볼 수 있어요."
-                  : "Looks like we’re ready to launch. You can always hit Remix later if you want a different route."}
+                  : "Looks like we're ready to launch. You can always hit Remix later if you want a different route."}
               </div>
             </div>
           </section>
@@ -689,7 +689,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 </div>
                 <div className="hidden flex-col items-center text-[11px] text-slate-200 sm:flex">
                   <span className="mb-1 rounded-full bg-slate-800 px-2 py-0.5">
-                    {isKo ? "TKAD Bot 분석" : "Maddy’s view"}
+                    {isKo ? "TKAD Bot 분석" : "Maddy's view"}
                   </span>
                   <span className="text-[10px] text-slate-300">
                     {isKo
