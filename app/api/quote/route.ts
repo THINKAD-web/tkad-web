@@ -221,11 +221,11 @@ export async function POST(request: NextRequest) {
             ? "[싱커드] 견적서가 도착했습니다"
             : "[THINKAD] Your quote",
           text: isKo
-            ? "첨부 PDF는 요청하신 매체 기준 참고 견적입니다. 진행을 원하시면 메일의 링크 또는 사이트에서 확인해 주세요."
-            : "Please find your reference quote attached. You can proceed from the link on our site.",
+            ? `첨부 PDF는 요청하신 매체 기준 참고 견적입니다.\n\n진행 상황 확인: https://tkad-web.vercel.app/ko/quote/${ooh.id}/status`
+            : `Please find your reference quote attached.\n\nTrack your quote: https://tkad-web.vercel.app/en/quote/${ooh.id}/status`,
           html: isKo
-            ? "<p>첨부 PDF는 요청하신 매체 기준 참고 견적입니다.</p>"
-            : "<p>Please find your reference quote attached.</p>",
+            ? `<p>첨부 PDF는 요청하신 매체 기준 참고 견적입니다.</p><p><a href="https://tkad-web.vercel.app/ko/quote/${ooh.id}/status">진행 상황 확인하기 →</a></p>`
+            : `<p>Please find your reference quote attached.</p><p><a href="https://tkad-web.vercel.app/en/quote/${ooh.id}/status">Track your quote →</a></p>`,
           pdfFilename: "thinkad-quote.pdf",
           pdfBase64,
         });
