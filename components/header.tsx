@@ -132,7 +132,7 @@ export default function Header() {
                 <Link
                   href="/contact"
                   onClick={() => setOpen(false)}
-                  className="mobile-nav-item"
+                  className="mobile-nav-item flex justify-center"
                   style={{ animationDelay: `${navItems.length * 60}ms` }}
                 >
                   <Button
