@@ -266,7 +266,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         return "TKAD bot: Family routes it is. I'll trace everyday paths-malls, grocery hubs, family stops-where trust and repetition work together.";
       }
       if (industry === "fintech" || industry === "auto") {
-        return "TKAD bot: High-trust category detected. I'll prioritize premium, credible business corridors where the placements feel "safe but strong."";
+        return "TKAD bot: High-trust category detected. I'll prioritize premium, credible business corridors where the placements feel 'safe but strong.'";
       }
       if (budgetMan >= 7000) {
         return "TKAD bot: Bold budget detected. Instead of a tiny test, let's sketch a city-spanning hero route that really feels like a launch.";
