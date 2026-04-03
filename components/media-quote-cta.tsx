@@ -34,7 +34,7 @@ export function MediaQuoteCtaButton({
         onClick={() => setOpen(true)}
         className={cn(
           variant === "sticky"
-            ? "h-14 w-full touch-target border-0 bg-gradient-to-b from-gold-light via-gold to-gold-dark text-base font-black tracking-tight text-navy shadow-[0_10px_36px_rgba(201,184,150,0.65)] ring-2 ring-white/60 ring-offset-[3px] ring-offset-navy/25 hover:from-gold hover:via-gold-light hover:to-gold sm:h-16 sm:text-lg sm:tracking-wide"
+            ? "h-10 w-full border-0 bg-gradient-to-b from-gold-light via-gold to-gold-dark text-sm font-bold tracking-tight text-navy shadow-md hover:from-gold hover:via-gold-light hover:to-gold"
             : "h-12 min-w-[200px] bg-gradient-to-b from-gold-light via-gold to-gold-dark px-6 text-base font-extrabold text-navy shadow-lg shadow-gold-dark/20 ring-2 ring-gold-light/70 hover:from-gold hover:via-gold-light hover:to-gold-dark sm:h-14 sm:min-w-[220px] sm:text-lg",
           className,
         )}
