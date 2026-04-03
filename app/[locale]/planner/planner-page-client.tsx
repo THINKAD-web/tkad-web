@@ -464,9 +464,13 @@ export default function PlannerPageClient({
       return;
     }
     setWizardStep((s) => Math.min(7, s + 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const goBack = () => setWizardStep((s) => Math.max(1, s - 1));
+  const goBack = () => {
+    setWizardStep((s) => Math.max(1, s - 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   if (databaseEmpty && catalog.length === 0) {
     return (
