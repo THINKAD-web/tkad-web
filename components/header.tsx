@@ -137,7 +137,7 @@ export default function Header() {
                 >
                   <Button
                     variant="cta"
-                    className="btn-gold mt-3 h-12 w-full rounded-full touch-manipulation shadow-cta/25"
+                    className="btn-gold mt-3 h-10 w-auto min-w-[8rem] rounded-full px-6 touch-manipulation shadow-cta/25"
                   >
                     {t("nav.contact")}
                   </Button>
