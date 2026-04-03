@@ -204,7 +204,7 @@ export default function PlannerMediaPickStep({
         </CardHeader>
         <CardContent className="pt-0">
           <ul
-            className="max-h-[min(52vh,28rem)] space-y-1.5 overflow-y-auto pr-1"
+            className="grid max-h-[min(52vh,28rem)] grid-cols-2 gap-1.5 overflow-y-auto pr-1"
             role="list"
           >
             {listFiltered.length === 0 ? (
