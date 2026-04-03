@@ -13,7 +13,7 @@ type Props = {
 
 /** 바가 열렸을 때 본문 하단에 넣는 여백(콘텐츠가 가려지지 않도록). */
 export const FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS =
-  "h-[7.25rem] sm:h-[6.75rem]";
+  "h-[7.25rem] bg-white sm:h-[6.75rem]";
 
 /**
  * 매체 비교/견적 등 선택 시 하단 고정 바.
