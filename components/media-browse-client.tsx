@@ -139,8 +139,17 @@ export default function MediaBrowseClient({
     "default" | "priceAsc" | "priceDesc" | "trafficDesc"
   >("default");
 
-  /** 서버 카탈로그가 비었을 때 목업 `mediaData`로 폴백 */
-  const effectiveCatalog = catalog.length > 0 ? catalog : mediaData;
+  /** 서버 카탈로그가 비었을 때 목업 `mediaData`로 폴백. 초기 1회만 셔플. */
+  const effectiveCatalog = useMemo(() => {
+    const base = catalog.length > 0 ? catalog : mediaData;
+    const arr = [...base];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const bounds = useMemo(
     () => computeCatalogBounds(effectiveCatalog),
