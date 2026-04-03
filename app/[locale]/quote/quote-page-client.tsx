@@ -466,9 +466,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       return;
     }
     setStep((s) => (s < 4 ? ((s + 1) as WizardStep) : s));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const goPrev = () => setStep((s) => (s > 1 ? ((s - 1) as WizardStep) : s));
+  const goPrev = () => {
+    setStep((s) => (s > 1 ? ((s - 1) as WizardStep) : s));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const onLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -686,7 +690,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         </div>
       </section>
 
-      <section className="py-10">
+      <section className="bg-white py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
             <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-navy/50">
@@ -700,6 +704,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                     onClick={() => {
                       if (n <= step) {
                         setStep(n);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
                         return;
                       }
                       if (selectedMedia.length === 0) {
@@ -707,6 +712,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         return;
                       }
                       setStep(n);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-colors",
