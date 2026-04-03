@@ -446,9 +446,12 @@ export default function MediaBrowseClient({
     <>
       <section className="bg-navy py-28">
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">
-            {t("media.title")}
-          </h1>
+          <div className="flex items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold text-white sm:text-4xl">
+              {t("media.title")}
+            </h1>
+            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">BETA</span>
+          </div>
           <p className="mt-2 text-slate-300">
             {t("media.subtitle")}
           </p>
