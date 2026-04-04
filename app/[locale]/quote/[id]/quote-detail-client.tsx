@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, FileDown, ArrowRight, FilePenLine } from "lucide-react";
@@ -31,6 +31,7 @@ const CONTRACT_PAGE_STATUSES = new Set([
 export default function QuoteDetailClient({ quoteId }: { quoteId: string }) {
   const t = useTranslations("quoteCustomer");
   const { toast } = useToast();
+  const router = useRouter();
   const [quote, setQuote] = useState<QuotePublic | null>(null);
   const [loading, setLoading] = useState(true);
   const [proceeding, setProceeding] = useState(false);
@@ -88,7 +89,7 @@ export default function QuoteDetailClient({ quoteId }: { quoteId: string }) {
         return;
       }
       toast("success", t("proceedOk"));
-      void load();
+      router.push(`/quote/${quoteId}/status`);
     } catch {
       toast("error", t("loadError"));
     } finally {
@@ -113,6 +114,7 @@ export default function QuoteDetailClient({ quoteId }: { quoteId: string }) {
   const canProceed = quote.status === "sent";
 
   return (
+    <div className="min-h-screen bg-white">
     <div className="mx-auto max-w-2xl space-y-6 py-10">
       <div>
         <h1 className="text-2xl font-bold text-navy">{t("detailTitle")}</h1>
@@ -138,7 +140,7 @@ export default function QuoteDetailClient({ quoteId }: { quoteId: string }) {
           </p>
           <p>
             <span className="font-medium text-navy">{t("fieldAmount")}</span>{" "}
-            ₩{quote.totalAmount.toLocaleString("ko-KR")}
+            ₩{Math.round(quote.totalAmount / 10000).toLocaleString("ko-KR")}만원
           </p>
           <p className="text-muted-foreground">
             {t("fieldMediaCount")}: {quote.mediaIds.length}
@@ -185,6 +187,7 @@ export default function QuoteDetailClient({ quoteId }: { quoteId: string }) {
       {canProceed ? (
         <p className="text-xs text-muted-foreground">{t("proceedNote")}</p>
       ) : null}
+    </div>
     </div>
   );
 }
