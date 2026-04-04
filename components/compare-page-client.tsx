@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { GitCompare, ArrowLeft, FileDown, ShieldCheck } from "lucide-react";
+import { GitCompare, ArrowLeft, FileDown, Camera, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useMemo, useState, useCallback, useRef } from "react";
 import { Loader2 } from "lucide-react";
@@ -11,6 +11,7 @@ import { useToast } from "@/components/toast-provider";
 import {
   downloadPdfFromHtmlElement,
   HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
+  captureElementAsPng,
 } from "@/lib/html-to-pdf";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import type { MediaItem } from "@/lib/media-data";
@@ -62,6 +63,22 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
       toast("error", tCommon("pdfGenerationFailed"));
     } finally {
       setComparePdfLoading(false);
+    }
+  }, [toast, tCommon]);
+
+  const [captureLoading, setCaptureLoading] = useState(false);
+  const handleCaptureImage = useCallback(async () => {
+    const el = comparePdfRef.current;
+    if (!el) return;
+    setCaptureLoading(true);
+    try {
+      const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      await captureElementAsPng(el, `싱커드_매체비교_${stamp}.png`);
+    } catch (e) {
+      console.error("[compare-capture]", e);
+      toast("error", tCommon("pdfGenerationFailed"));
+    } finally {
+      setCaptureLoading(false);
     }
   }, [toast, tCommon]);
 
@@ -189,6 +206,20 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                       <FileDown className="mr-2 h-4 w-4" />
                     )}
                     {isKo ? "PDF 다운로드" : "Download PDF"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={captureLoading}
+                    onClick={() => void handleCaptureImage()}
+                    className="h-11 rounded-xl border-2 border-navy/20 px-8 font-bold text-navy hover:bg-navy/5 disabled:opacity-60"
+                  >
+                    {captureLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Camera className="mr-2 h-4 w-4" />
+                    )}
+                    {isKo ? "이미지 저장" : "Save Image"}
                   </Button>
                 </div>
                 <p className="text-center text-[11px] text-muted-foreground">

@@ -18,6 +18,7 @@ import {
   MapPin,
   Send,
   Download,
+  Camera,
   ChevronRight,
   ChevronLeft,
   Sparkles,
@@ -77,6 +78,7 @@ import {
   downloadQuotePdfFromElement,
   quoteElementToPdfBase64,
 } from "@/lib/quote-html-pdf";
+import { captureElementAsPng } from "@/lib/html-to-pdf";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -621,6 +623,22 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       toast("error", t("quote.pdfError"));
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const [capturing, setCapturing] = useState(false);
+  const handleCapture = async () => {
+    const el = pdfPreviewRef.current;
+    if (!el) return;
+    setCapturing(true);
+    try {
+      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      await captureElementAsPng(el, isKo ? `싱커드_견적서_${ymd}.png` : `THINKAD_quote_${ymd}.png`);
+      toast("success", isKo ? "이미지로 저장됐어요" : "Saved as image");
+    } catch {
+      toast("error", t("quote.pdfError"));
+    } finally {
+      setCapturing(false);
     }
   };
 
@@ -1496,6 +1514,20 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               {t("quote.downloadPdf")}
                             </>
                           )}
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleCapture}
+                          disabled={capturing || selectedMedia.length === 0}
+                          variant="outline"
+                          className="flex-1 border-navy/30 text-navy hover:bg-navy/5"
+                        >
+                          {capturing ? (
+                            <Spinner className="mr-2 h-4 w-4" />
+                          ) : (
+                            <Camera className="mr-2 h-4 w-4" />
+                          )}
+                          {isKo ? "이미지 저장" : "Save as Image"}
                         </Button>
                       </div>
 

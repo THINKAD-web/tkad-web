@@ -208,6 +208,30 @@ export async function downloadPdfFromHtmlElement(
   }
 }
 
+/** 화면 캡처 → PNG 이미지로 다운로드 */
+export async function captureElementAsPng(
+  element: HTMLElement,
+  filename = "THINKAD-capture.png",
+): Promise<void> {
+  await waitForFontsAndPaint();
+  const html2canvas = (await import("html2canvas")).default;
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: false,
+    logging: false,
+    backgroundColor: "#ffffff",
+    scrollX: 0,
+    scrollY: -window.scrollY,
+    imageTimeout: 20_000,
+    onclone: replaceUntrustedImagesInClone,
+  });
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    triggerBlobDownload(blob, filename);
+  }, "image/png");
+}
+
 export async function htmlElementToPdfBase64(
   element: HTMLElement,
   options?: HtmlElementToPdfOptions,
