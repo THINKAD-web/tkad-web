@@ -1440,8 +1440,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 periodLabel={periodLabel}
                                 periodMonths={periodMonths}
                                 rows={pdfPreviewRows}
-                                subtotalMan={totalCost}
-                                vatMan={pdfVatMan}
+                                subtotalMan={Math.round(totalCost / 10000)}
+                                vatMan={Math.round(pdfVatMan / 10000)}
                                 grandTotalMan={pdfGrandTotalMan}
                                 issuedAt={quoteIssuedAt}
                               />
@@ -1765,7 +1765,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       <div className="text-lg font-bold text-navy">
                         ₩{monthlyCost.toLocaleString()}
                         <span className="text-xs font-normal text-muted-foreground">
-                          만원 {t("quote.perMonth")}
+                          {" "}{t("quote.perMonth")}
                         </span>
                       </div>
                     </div>
@@ -1776,9 +1776,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </span>
                         <span className="text-xl font-bold text-navy">
                           ₩{totalCost.toLocaleString()}
-                          <span className="text-xs font-normal text-muted-foreground">
-                            만원
-                          </span>
                         </span>
                       </div>
                     </div>
