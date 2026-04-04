@@ -384,6 +384,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         location,
         unitPriceMan: lineMonthly,
         lineTotalMan: lineMonthly * periodMonths,
+        size: m.size ?? undefined,
+        dailyFootTraffic: m.dailyFootTraffic ?? undefined,
+        operatingHours: m.operatingHours ?? undefined,
       };
     });
   }, [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex, isKo, periodMonths]);

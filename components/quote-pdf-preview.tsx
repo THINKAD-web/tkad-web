@@ -12,6 +12,11 @@ export type QuotePdfPreviewRow = {
   location: string;
   unitPriceMan: number;
   lineTotalMan: number;
+  /** 추가 스펙 */
+  size?: string | null;
+  dailyFootTraffic?: number | null;
+  visibilityScore?: number | null;
+  operatingHours?: string | null;
 };
 
 type Props = {
@@ -174,13 +179,13 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
           <h2 className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500">
             {t("pdfMediaSection")}
           </h2>
-          <div className="overflow-hidden rounded-lg border border-slate-200">
+          <div className="overflow-hidden rounded-lg border border-slate-200 shadow-sm">
             <table className="w-full border-collapse text-left text-[10px]">
               <thead>
                 <tr
                   className={cn(
-                    "text-[9px] uppercase tracking-wide text-slate-600",
-                    isPremium ? "bg-[#faf8f3]" : "bg-slate-50",
+                    "text-[9px] uppercase tracking-wide text-white",
+                    isPremium ? "bg-[#b8924a]" : "bg-[#1a2a6c]",
                   )}
                 >
                   <th className="w-14 border-b border-slate-200 px-1.5 py-2 font-semibold">
@@ -204,8 +209,8 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id} className="border-b border-slate-100 align-top">
+                {rows.map((row, idx) => (
+                  <tr key={row.id} className={cn("border-b border-slate-100 align-top", idx % 2 === 0 ? "bg-white" : "bg-slate-50/50")}>
                     <td className="px-1.5 py-2">
                       <div className="h-12 w-12 overflow-hidden rounded border border-slate-100 bg-slate-50">
                         {row.thumbUrl ? (
@@ -224,7 +229,14 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                       </div>
                     </td>
                     <td className="px-1.5 py-2 font-medium text-slate-900">
-                      {row.name}
+                      <p className="font-semibold">{row.name}</p>
+                      <div className="mt-0.5 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-500">
+                        {row.size && <span>사이즈: {row.size}</span>}
+                        {row.dailyFootTraffic != null && (
+                          <span>일 유동: {row.dailyFootTraffic.toLocaleString()}명</span>
+                        )}
+                        {row.operatingHours && <span>운영: {row.operatingHours}</span>}
+                      </div>
                     </td>
                     <td className="px-1.5 py-2 text-slate-700">{row.location}</td>
                     <td className="px-1.5 py-2 text-slate-700">{periodLabel}</td>
@@ -253,9 +265,9 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
               <span className="text-slate-600">{t("pdfVat")}</span>
               <span className="tabular-nums">{formatManWon(vatMan, locale)}</span>
             </div>
-            <div className="flex justify-between gap-4 pt-1">
-              <span className="font-bold text-slate-900">{t("pdfTotal")}</span>
-              <span className="text-base font-bold tabular-nums text-[#0f172a]">
+            <div className="flex justify-between gap-4 rounded-md bg-navy px-3 py-2 pt-2">
+              <span className="font-bold text-white">{t("pdfTotal")}</span>
+              <span className="text-base font-bold tabular-nums text-gold-light">
                 {formatManWon(grandTotalMan, locale)}
               </span>
             </div>
