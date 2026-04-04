@@ -68,7 +68,8 @@ export function CompareSpecTable({
   const t = useTranslations("media");
   const locale = isKo ? "ko-KR" : "en-US";
 
-  const rows: { key: string; label: string; cell: (m: MediaItem) => string }[] =
+  // 항목별 수치 비교 방향: "higher" = 높을수록 좋음, "lower" = 낮을수록 좋음, null = 비교 없음
+  const rows: { key: string; label: string; cell: (m: MediaItem) => string; numVal?: (m: MediaItem) => number | null; better?: "higher" | "lower" }[] =
     [
       {
         key: "price",
@@ -77,6 +78,8 @@ export function CompareSpecTable({
           `${formatMediaPriceWonWithSymbol(m.price, locale)} · ${t(
             mediaPricePeriodTranslationKey(m.pricePeriod),
           )}`,
+        numVal: (m) => m.price > 0 ? m.price : null,
+        better: "lower",
       },
       {
         key: "size",
@@ -90,6 +93,8 @@ export function CompareSpecTable({
           typeof m.dailyFootTraffic === "number" && m.dailyFootTraffic > 0
             ? m.dailyFootTraffic.toLocaleString(locale)
             : "—",
+        numVal: (m) => m.dailyFootTraffic ?? null,
+        better: "higher",
       },
       {
         key: "impressions",
@@ -100,11 +105,19 @@ export function CompareSpecTable({
             ? `${n.toLocaleString(locale)}${t("compareImpressionsSuffix")}`
             : "—";
         },
+        numVal: (m) => estimatedMonthlyImpressions(m) || null,
+        better: "higher",
       },
       {
         key: "cpm",
         label: t("compareRowCpm"),
         cell: (m) => formatCpmDisplay(m, locale),
+        numVal: (m) => {
+          const fromDb = m.cpm;
+          if (typeof fromDb === "number" && fromDb > 0) return fromDb;
+          return estimatedCpmWon(m) ?? null;
+        },
+        better: "lower",
       },
       {
         key: "visibility",
@@ -113,6 +126,8 @@ export function CompareSpecTable({
           m.visibilityScore != null
             ? `${m.visibilityScore}${isKo ? "점" : "/100"}`
             : "—",
+        numVal: (m) => m.visibilityScore ?? null,
+        better: "higher",
       },
       {
         key: "targetAge",
@@ -133,6 +148,26 @@ export function CompareSpecTable({
   const visibleRows = rows.filter((row) =>
     items.some((m) => row.cell(m) !== "—"),
   );
+
+  // 항목별 최고값 인덱스 계산
+  function getBestIdx(row: typeof rows[0]): number | null {
+    if (!row.numVal || !row.better || items.length < 2) return null;
+    const vals = items.map((m) => row.numVal!(m));
+    if (vals.every((v) => v === null)) return null;
+    let bestIdx = -1;
+    let bestVal = row.better === "higher" ? -Infinity : Infinity;
+    vals.forEach((v, i) => {
+      if (v === null) return;
+      if (row.better === "higher" ? v > bestVal : v < bestVal) {
+        bestVal = v;
+        bestIdx = i;
+      }
+    });
+    // 동점이면 강조 없음
+    const winners = vals.filter(v => v === bestVal);
+    if (winners.length > 1) return null;
+    return bestIdx;
+  }
 
   return (
     <div className="mt-12 overflow-hidden rounded-2xl border border-navy/15 bg-white shadow-lg md:mt-14">
@@ -174,7 +209,9 @@ export function CompareSpecTable({
             </tr>
           </thead>
           <tbody>
-            {visibleRows.map((row, rowIdx) => (
+            {visibleRows.map((row, rowIdx) => {
+                const bestIdx = getBestIdx(row);
+                return (
               <tr
                 key={row.key}
                 className={`transition-colors ${rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60"} ${row.key === "price" ? "font-semibold" : ""}`}
@@ -184,17 +221,37 @@ export function CompareSpecTable({
                   className={`sticky left-0 z-10 whitespace-nowrap border-r border-navy/10 px-4 py-3 text-xs font-semibold shadow-[4px_0_8px_-4px_rgba(26,42,108,0.08)] sm:text-sm ${row.key === "price" ? "bg-gold/5 text-navy" : rowIdx % 2 === 0 ? "bg-white text-navy/70" : "bg-slate-50/60 text-navy/70"}`}
                 >
                   {row.label}
+                  {row.better && (
+                    <span className="ml-1 text-[9px] text-muted-foreground">
+                      {row.better === "higher" ? "↑" : "↓"}
+                    </span>
+                  )}
                 </th>
-                {items.map((m, idx) => (
+                {items.map((m, idx) => {
+                  const isBest = bestIdx === idx;
+                  return (
                   <td
                     key={`${row.key}-${m.id}`}
-                    className={`max-w-[16rem] px-4 py-3 text-xs tabular-nums sm:text-sm ${row.key === "price" ? "font-bold text-navy" : "text-navy/80"}`}
+                    className={`max-w-[16rem] px-4 py-3 text-xs tabular-nums sm:text-sm ${
+                      isBest
+                        ? "bg-emerald-50 font-bold text-emerald-700"
+                        : row.key === "price" ? "font-bold text-navy" : "text-navy/80"
+                    }`}
                   >
-                    <span className="line-clamp-4 break-words">{row.cell(m)}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="line-clamp-4 break-words">{row.cell(m)}</span>
+                      {isBest && (
+                        <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700">
+                          {row.better === "higher" ? "최고" : "최저"}
+                        </span>
+                      )}
+                    </div>
                   </td>
-                ))}
+                  );
+                })}
               </tr>
-            ))}
+                );
+            })}
           </tbody>
         </table>
       </div>
