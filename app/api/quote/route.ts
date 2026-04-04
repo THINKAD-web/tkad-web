@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { siteUrl } from "@/lib/seo";
 import { OoHQuoteStatus } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { autoLinkQuoteRequestToCampaign } from "@/lib/quote-campaign-link";
@@ -221,11 +222,11 @@ export async function POST(request: NextRequest) {
             ? "[싱커드] 견적서가 도착했습니다"
             : "[THINKAD] Your quote",
           text: isKo
-            ? `첨부 PDF는 요청하신 매체 기준 참고 견적입니다.\n\n견적 확인 및 진행: https://tkad-web.vercel.app/ko/quote/${ooh.id}\n진행 상황 확인: https://tkad-web.vercel.app/ko/quote/${ooh.id}/status`
-            : `Please find your reference quote attached.\n\nView & proceed: https://tkad-web.vercel.app/en/quote/${ooh.id}\nTrack status: https://tkad-web.vercel.app/en/quote/${ooh.id}/status`,
+            ? `첨부 PDF는 요청하신 매체 기준 참고 견적입니다.\n\n견적 확인 및 진행: ${siteUrl}/ko/quote/${ooh.id}\n진행 상황 확인: ${siteUrl}/ko/quote/${ooh.id}/status`
+            : `Please find your reference quote attached.\n\nView & proceed: ${siteUrl}/en/quote/${ooh.id}\nTrack status: ${siteUrl}/en/quote/${ooh.id}/status`,
           html: isKo
-            ? `<p>첨부 PDF는 요청하신 매체 기준 참고 견적입니다.</p><p>📋 <a href="https://tkad-web.vercel.app/ko/quote/${ooh.id}"><strong>견적 확인 및 진행하기 →</strong></a></p><p>📊 <a href="https://tkad-web.vercel.app/ko/quote/${ooh.id}/status">진행 상황 확인하기 →</a></p>`
-            : `<p>Please find your reference quote attached.</p><p>📋 <a href="https://tkad-web.vercel.app/en/quote/${ooh.id}"><strong>View & Proceed →</strong></a></p><p>📊 <a href="https://tkad-web.vercel.app/en/quote/${ooh.id}/status">Track Status →</a></p>`,
+            ? `<p>첨부 PDF는 요청하신 매체 기준 참고 견적입니다.</p><p>📋 <a href="${siteUrl}/ko/quote/${ooh.id}"><strong>견적 확인 및 진행하기 →</strong></a></p><p>📊 <a href="${siteUrl}/ko/quote/${ooh.id}/status">진행 상황 확인하기 →</a></p>`
+            : `<p>Please find your reference quote attached.</p><p>📋 <a href="${siteUrl}/en/quote/${ooh.id}"><strong>View & Proceed →</strong></a></p><p>📊 <a href="${siteUrl}/en/quote/${ooh.id}/status">Track Status →</a></p>`,
           pdfFilename: "thinkad-quote.pdf",
           pdfBase64,
         });
