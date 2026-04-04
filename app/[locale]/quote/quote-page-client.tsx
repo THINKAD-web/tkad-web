@@ -1293,38 +1293,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           <option value="12months">{t("quote.periods.12months")}</option>
                         </select>
                       </div>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                          <label className="mb-1.5 block text-xs font-medium text-navy">
-                            {t("quote.budgetMin")}
-                          </label>
-                          <Input
-                            type="number"
-                            inputMode="numeric"
-                            min={0}
-                            placeholder="0"
-                            value={form.budgetMin}
-                            onChange={(e) =>
-                              updateField("budgetMin", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-1.5 block text-xs font-medium text-navy">
-                            {t("quote.budgetMax")}
-                          </label>
-                          <Input
-                            type="number"
-                            inputMode="numeric"
-                            min={0}
-                            placeholder="0"
-                            value={form.budgetMax}
-                            onChange={(e) =>
-                              updateField("budgetMax", e.target.value)
-                            }
-                          />
-                        </div>
-                      </div>
+                      {/* 예산 입력 제거 — 매체를 이미 선택했으므로 불필요 */}
                     </div>
                   )}
 
