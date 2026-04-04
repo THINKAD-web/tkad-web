@@ -382,8 +382,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         thumbUrl: getPrimaryMediaImageUrl(m),
         name,
         location,
-        unitPriceMan: lineMonthly,
-        lineTotalMan: lineMonthly * periodMonths,
+        unitPriceMan: Math.round(lineMonthly / 10000),
+        lineTotalMan: Math.round(lineMonthly * periodMonths / 10000),
         size: m.size ?? undefined,
         dailyFootTraffic: m.dailyFootTraffic ?? undefined,
         operatingHours: m.operatingHours ?? undefined,
@@ -1414,7 +1414,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 rows={pdfPreviewRows}
                                 subtotalMan={Math.round(totalCost / 10000)}
                                 vatMan={Math.round(pdfVatMan / 10000)}
-                                grandTotalMan={pdfGrandTotalMan}
+                                grandTotalMan={Math.round(pdfGrandTotalMan / 10000)}
                                 issuedAt={quoteIssuedAt}
                               />
                             </div>
