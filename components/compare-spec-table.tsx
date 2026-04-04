@@ -135,29 +135,34 @@ export function CompareSpecTable({
   );
 
   return (
-    <div className="mt-12 rounded-2xl border border-navy/10 bg-white/80 p-4 shadow-sm md:mt-14 md:p-6">
-      <h2 className="mb-2 text-lg font-bold text-navy md:text-xl">
-        {t("compareSpecTitle")}
-      </h2>
-      <p className="mb-4 text-xs text-muted-foreground md:text-sm">
-        {t("compareSpecHint")}
-      </p>
-      <div className="-mx-4 overflow-x-auto px-0 sm:mx-0 sm:px-0">
-        <table className="w-full min-w-[640px] border-separate border-spacing-y-1 text-left text-sm">
+    <div className="mt-12 overflow-hidden rounded-2xl border border-navy/15 bg-white shadow-lg md:mt-14">
+      {/* 헤더 */}
+      <div className="bg-gradient-to-r from-navy to-[#0c1a42] px-4 py-4 md:px-6">
+        <h2 className="text-lg font-bold text-white md:text-xl">
+          {t("compareSpecTitle")}
+        </h2>
+        <p className="mt-1 text-xs text-slate-300 md:text-sm">
+          {t("compareSpecHint")}
+        </p>
+      </div>
+
+      <div className="-mx-0 overflow-x-auto">
+        <table className="w-full min-w-[640px] border-collapse text-left text-sm">
           <thead>
-            <tr className="bg-slate-50/90">
+            <tr className="bg-navy/5">
               <th
                 scope="col"
-                className="sticky left-0 z-20 min-w-[8.5rem] rounded-l-xl border-r border-navy/10 bg-slate-50/95 px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-navy/70 backdrop-blur-sm sm:min-w-[10rem] sm:px-4"
+                className="sticky left-0 z-20 min-w-[8.5rem] border-b border-r border-navy/10 bg-navy/5 px-4 py-3 text-xs font-bold uppercase tracking-wide text-navy/60 sm:min-w-[10rem]"
               >
                 {t("compareColMetric")}
               </th>
-              {items.map((m) => (
+              {items.map((m, idx) => (
                 <th
                   key={m.id}
                   scope="col"
-                  className="min-w-[9.5rem] max-w-[16rem] border-b border-navy/15 px-3 py-3 align-bottom sm:min-w-[11rem] sm:px-4"
+                  className="min-w-[9.5rem] max-w-[16rem] border-b border-navy/10 px-4 py-3 align-bottom sm:min-w-[11rem]"
                 >
+                  <div className={`mb-1 h-1 rounded-full ${idx === 0 ? "bg-gold" : idx === 1 ? "bg-emerald-400" : "bg-sky-400"}`} />
                   <Link
                     href={mediaItemDetailPath(m.id)}
                     className="line-clamp-2 text-left text-xs font-bold leading-snug text-navy underline-offset-2 hover:text-gold-dark hover:underline sm:text-sm"
@@ -169,21 +174,21 @@ export function CompareSpecTable({
             </tr>
           </thead>
           <tbody>
-            {visibleRows.map((row) => (
+            {visibleRows.map((row, rowIdx) => (
               <tr
                 key={row.key}
-                className="transition-colors hover:bg-slate-50/80"
+                className={`transition-colors ${rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60"} ${row.key === "price" ? "font-semibold" : ""}`}
               >
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 whitespace-nowrap rounded-l-xl border-r border-navy/10 bg-white/95 px-3 py-2.5 text-xs font-semibold text-navy shadow-[4px_0_12px_-4px_rgba(26,42,108,0.12)] backdrop-blur-sm sm:px-4 sm:text-sm"
+                  className={`sticky left-0 z-10 whitespace-nowrap border-r border-navy/10 px-4 py-3 text-xs font-semibold shadow-[4px_0_8px_-4px_rgba(26,42,108,0.08)] sm:text-sm ${row.key === "price" ? "bg-gold/5 text-navy" : rowIdx % 2 === 0 ? "bg-white text-navy/70" : "bg-slate-50/60 text-navy/70"}`}
                 >
                   {row.label}
                 </th>
-                {items.map((m) => (
+                {items.map((m, idx) => (
                   <td
                     key={`${row.key}-${m.id}`}
-                    className="max-w-[16rem] rounded-r-xl bg-white px-3 py-2.5 text-xs tabular-nums text-navy/90 sm:px-4 sm:text-sm"
+                    className={`max-w-[16rem] px-4 py-3 text-xs tabular-nums sm:text-sm ${row.key === "price" ? "font-bold text-navy" : "text-navy/80"}`}
                   >
                     <span className="line-clamp-4 break-words">{row.cell(m)}</span>
                   </td>
