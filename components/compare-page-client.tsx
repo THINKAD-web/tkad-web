@@ -70,12 +70,14 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
       <section className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
         <GitCompare className="mb-4 h-16 w-16 text-navy/15" aria-hidden />
         <h1 className="text-2xl font-bold text-navy">
-          {isKo ? "비교할 매체를 선택해주세요" : "Select media to compare"}
+          {items.length === 1
+            ? (isKo ? "매체를 1개 더 선택해주세요" : "Select one more media")
+            : (isKo ? "비교할 매체를 선택해주세요" : "Select media to compare")}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          {isKo
-            ? "매체 검색에서 2개 이상의 매체를 선택하세요"
-            : "Select at least 2 media from the media search page"}
+          {items.length === 1
+            ? (isKo ? `"${items[0].name}" 선택됨 · 1개 더 선택하면 비교가 시작돼요` : `"${items[0].nameEn}" selected · Select 1 more to compare`)
+            : (isKo ? "매체 검색에서 2개 이상의 매체를 선택하세요" : "Select at least 2 media from the media search page")}
         </p>
         <Link href="/media" className="mt-6">
           <Button className="btn-gold h-11 rounded-xl px-8 font-bold text-navy">

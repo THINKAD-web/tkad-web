@@ -29,7 +29,7 @@
   --color-silver: #b0b8c4;
   --color-cta: #9b3c31;
   --color-cta-hover: #85342a;
-  --color-page: #d6d9e6;
+  --color-page: #ffffff;
   --color-brand-dark: #121a3a;
 
   --font-sans: var(--font-geist-sans);
@@ -43,7 +43,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #d6d9e6;
+  --background: #ffffff;
   --foreground: #121a3a;
   --card: #ffffff;
   --card-foreground: #121a3a;

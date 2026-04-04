@@ -32,6 +32,7 @@ export function formatCatalogPriceFieldWon(
   value: number,
   locale = "ko-KR",
 ): string {
+  if (!value || value <= 0) return "문의";
   return formatMediaPriceWonWithSymbol(catalogPriceFieldToWon(value), locale);
 }
 
