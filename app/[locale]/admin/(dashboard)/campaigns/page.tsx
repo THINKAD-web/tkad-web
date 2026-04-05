@@ -9,12 +9,15 @@ import { Badge } from "@/components/ui/badge";
 import {
   CalendarRange,
   Camera,
+  Eye,
   FileDown,
   FileText,
   Link2,
   Plus,
   Trash2,
 } from "lucide-react";
+import dynamic from "next/dynamic";
+const CampaignReportPreview = dynamic(() => import("@/components/campaign-report-preview"), { ssr: false });
 
 type CampaignStatus =
   | "proposal"
@@ -130,6 +133,7 @@ export default function AdminCampaignsPage() {
   >([]);
   const [proofMsg, setProofMsg] = useState<string | null>(null);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [showReportPreview, setShowReportPreview] = useState(false);
   const [successCaseBusy, setSuccessCaseBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -726,6 +730,16 @@ export default function AdminCampaignsPage() {
                     <Button
                       type="button"
                       size="sm"
+                      variant="outline"
+                      className="gap-1.5 border-navy/20 text-navy hover:bg-navy/5"
+                      onClick={() => setShowReportPreview((v) => !v)}
+                    >
+                      <Eye className="h-4 w-4" />
+                      {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
                       className="gap-1.5 bg-navy text-white hover:bg-navy/90"
                       disabled={pdfBusy}
                       onClick={() => void downloadAiCompletionPdf()}
@@ -748,6 +762,45 @@ export default function AdminCampaignsPage() {
                     일정·증빙·문서만 포함합니다.
                   </p>
                 </div>
+
+                {showReportPreview && selectedId && (
+                  <div className="mt-4">
+                    <CampaignReportPreview
+                      data={{
+                        campaignName: form.name,
+                        clientCompany: form.clientCompany ?? "",
+                        clientName: form.clientName,
+                        clientEmail: form.clientEmail,
+                        status: list.find(c => c.id === selectedId)?.status ?? "진행중",
+                        notes: null,
+                        scheduleEvents: events?.map((e: { title: string; startsAt: string; endsAt: string; kind: string }) => ({
+                          title: e.title,
+                          startsAt: e.startsAt,
+                          endsAt: e.endsAt,
+                          kind: e.kind,
+                        })),
+                        proofPhotos: proofs?.map((p: { imageUrl: string; caption?: string | null }) => ({
+                          imageUrl: p.imageUrl,
+                          caption: p.caption,
+                        })),
+                        mediaBookings: []?.map((b: { title: string; media?: { name: string; location: string }; startsAt: string; endsAt: string; status: string }) => ({
+                          title: b.title,
+                          mediaName: b.media?.name ?? "—",
+                          location: b.media?.location ?? "—",
+                          startsAt: b.startsAt,
+                          endsAt: b.endsAt,
+                          status: b.status,
+                        })),
+                        financialDocs: docs?.map((f: { kind: string; title: string; amountKrw?: number | null; status: string }) => ({
+                          kind: f.kind,
+                          title: f.title,
+                          amountKrw: f.amountKrw,
+                          status: f.status,
+                        })),
+                      }}
+                    />
+                  </div>
+                )}
 
                 <div>
                   <h3 className="mb-2 text-sm font-semibold text-navy">
