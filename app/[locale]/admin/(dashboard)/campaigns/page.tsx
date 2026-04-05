@@ -783,14 +783,15 @@ export default function AdminCampaignsPage() {
                           imageUrl: p.imageUrl,
                           caption: p.caption,
                         })),
-                        mediaBookings: []?.map((b: { title: string; media?: { name: string; location: string }; startsAt: string; endsAt: string; status: string }) => ({
+                        mediaBookings: (list.find(c => c.id === selectedId) as { mediaBookings?: { title: string; media?: { name: string; location: string; dailyFootfall?: number | null }; startsAt: string; endsAt: string; status: string }[] })?.mediaBookings?.map((b) => ({
                           title: b.title,
                           mediaName: b.media?.name ?? "—",
                           location: b.media?.location ?? "—",
                           startsAt: b.startsAt,
                           endsAt: b.endsAt,
                           status: b.status,
-                        })),
+                          dailyFootTraffic: b.media?.dailyFootfall ?? null,
+                        })) ?? [],
                         financialDocs: docs?.map((f: { kind: string; title: string; amountKrw?: number | null; status: string }) => ({
                           kind: f.kind,
                           title: f.title,
