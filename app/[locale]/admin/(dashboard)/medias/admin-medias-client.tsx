@@ -953,18 +953,23 @@ export default function AdminMediasClient({
 
   const handleFormGalleryImagePicked = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
+      const files = Array.from(e.target.files ?? []).filter(f => f.type.startsWith("image/"));
       e.target.value = "";
-      if (!file?.type.startsWith("image/")) return;
+      if (files.length === 0) return;
       setFormImageUploadBusy(true);
       setSaveError(null);
       try {
-        const url = await uploadFileToCloudinary(file);
+        const urls: string[] = [];
+        for (const file of files) {
+          const url = await uploadFileToCloudinary(file);
+          urls.push(url);
+        }
         setForm((f) => {
           const cur = f.extractedImagesText.trim();
+          const added = urls.join("\n");
           return {
             ...f,
-            extractedImagesText: cur ? `${cur}\n${url}` : url,
+            extractedImagesText: cur ? `${cur}\n${added}` : added,
           };
         });
       } catch {
@@ -2027,6 +2032,12 @@ export default function AdminMediasClient({
                   Cloudinary에 올린 뒤 URL이 대표 이미지에 채워집니다. 저장을 눌러
                   반영하세요.
                 </p>
+                {form.image && (
+                  <div className="mt-2 overflow-hidden rounded-lg border border-navy/10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={form.image} alt="대표 이미지" className="h-32 w-full object-cover" />
+                  </div>
+                )}
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -2046,6 +2057,7 @@ export default function AdminMediasClient({
                   ref={formGalleryImageInputRef}
                   type="file"
                   accept="image/*"
+                  multiple
                   className="hidden"
                   onChange={(e) => void handleFormGalleryImagePicked(e)}
                 />
@@ -2062,8 +2074,28 @@ export default function AdminMediasClient({
                   ) : (
                     <ImagePlus className="h-4 w-4" />
                   )}
-                  파일에서 URL 추가
+                  여러 장 한번에 추가
                 </Button>
+                {/* 미리보기 그리드 */}
+                {form.extractedImagesText.trim() && (
+                  <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    {form.extractedImagesText.trim().split("\n").filter(Boolean).map((url, i) => (
+                      <div key={i} className="group relative overflow-hidden rounded-lg border border-navy/10">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt="" className="h-20 w-full object-cover" />
+                        <button
+                          type="button"
+                          className="absolute right-1 top-1 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white group-hover:flex"
+                          onClick={() => {
+                            const lines = form.extractedImagesText.trim().split("\n").filter(Boolean);
+                            lines.splice(i, 1);
+                            setForm(f => ({ ...f, extractedImagesText: lines.join("\n") }));
+                          }}
+                        >✕</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
