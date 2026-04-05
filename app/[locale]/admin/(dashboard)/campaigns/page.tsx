@@ -132,6 +132,13 @@ export default function AdminCampaignsPage() {
     { id: string; imageUrl: string; caption: string | null; createdAt: string }[]
   >([]);
   const [proofMsg, setProofMsg] = useState<string | null>(null);
+  const [mediaBookings, setMediaBookings] = useState<{
+    title: string;
+    media?: { name: string; location: string; dailyFootfall?: number | null; impressions?: number | null; visibilityScore?: number | null } | null;
+    startsAt: string;
+    endsAt: string;
+    status: string;
+  }[]>([]);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [showReportPreview, setShowReportPreview] = useState(false);
   const [successCaseBusy, setSuccessCaseBusy] = useState(false);
@@ -216,12 +223,20 @@ export default function AdminCampaignsPage() {
           createdAt: new Date(p.createdAt).toISOString().slice(0, 16),
         })),
       );
+      setMediaBookings(
+        ((c as { mediaBookings?: typeof mediaBookings }).mediaBookings ?? []).map((b) => ({
+          ...b,
+          startsAt: new Date(b.startsAt).toISOString().slice(0, 10),
+          endsAt: new Date(b.endsAt).toISOString().slice(0, 10),
+        })),
+      );
       setUnlinkedQuotes(uJson.quotes ?? []);
     } catch {
       setEvents([]);
       setDocs([]);
       setLinkedQuotes([]);
       setProofs([]);
+      setMediaBookings([]);
       setUnlinkedQuotes([]);
     }
   };
@@ -790,7 +805,7 @@ export default function AdminCampaignsPage() {
                           imageUrl: p.imageUrl,
                           caption: p.caption,
                         })),
-                        mediaBookings: (list.find(c => c.id === selectedId) as { mediaBookings?: { title: string; media?: { name: string; location: string; dailyFootfall?: number | null }; startsAt: string; endsAt: string; status: string }[] })?.mediaBookings?.map((b) => ({
+                        mediaBookings: mediaBookings.map((b) => ({
                           title: b.title,
                           mediaName: b.media?.name ?? "—",
                           location: b.media?.location ?? "—",
@@ -798,7 +813,7 @@ export default function AdminCampaignsPage() {
                           endsAt: b.endsAt,
                           status: b.status,
                           dailyFootTraffic: b.media?.dailyFootfall ?? null,
-                        })) ?? [],
+                        })),
                         financialDocs: docs?.map((f: { kind: string; title: string; amountKrw?: number | null; status: string }) => ({
                           kind: f.kind,
                           title: f.title,

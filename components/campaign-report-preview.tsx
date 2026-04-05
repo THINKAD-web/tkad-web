@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Download } from "lucide-react";
 import { captureElementAsPng } from "@/lib/html-to-pdf";
-import { downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
 
 export type CampaignReportData = {
   campaignName: string;

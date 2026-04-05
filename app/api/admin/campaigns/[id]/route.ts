@@ -20,6 +20,20 @@ export async function GET(request: NextRequest, { params }: Params) {
       financialDocs: { orderBy: { createdAt: "desc" } },
       quoteRequests: { orderBy: { createdAt: "desc" }, take: 80 },
       proofPhotos: { orderBy: { createdAt: "desc" }, take: 40 },
+      mediaBookings: {
+        include: {
+          media: {
+            select: {
+              name: true,
+              location: true,
+              dailyFootfall: true,
+              impressions: true,
+              visibilityScore: true,
+              type: true,
+            },
+          },
+        },
+      },
       account: true,
     },
   });
