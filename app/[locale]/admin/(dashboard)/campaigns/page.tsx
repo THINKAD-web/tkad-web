@@ -673,11 +673,18 @@ export default function AdminCampaignsPage() {
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files ?? []);
                         e.target.value = "";
-                        if (f) void uploadProofImage(f);
+                        if (files.length === 0) return;
+                        setProofMsg(`0 / ${files.length} 업로드 중…`);
+                        for (let i = 0; i < files.length; i++) {
+                          setProofMsg(`${i + 1} / ${files.length} 업로드 중…`);
+                          await uploadProofImage(files[i]);
+                        }
+                        setProofMsg(`${files.length}장 등록 완료`);
                       }}
                     />
                   </label>
