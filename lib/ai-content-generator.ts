@@ -14,7 +14,7 @@ import prisma, {
 } from "@/lib/prisma";
 
 /** Default Claude 3.5 Sonnet snapshot; override with ANTHROPIC_MODEL. */
-export const ANTHROPIC_DEFAULT_MODEL = "claude-3-5-sonnet-20250219";
+export const ANTHROPIC_DEFAULT_MODEL = "claude-sonnet-4-5-20250929";
 
 const TREND_TOOL = "emit_trend_report" as const;
 const ACADEMY_TOOL = "emit_academy_lesson" as const;
