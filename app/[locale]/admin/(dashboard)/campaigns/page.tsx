@@ -13,6 +13,7 @@ import {
   FileDown,
   FileText,
   Link2,
+  Loader2,
   Plus,
   Trash2,
 } from "lucide-react";
@@ -133,12 +134,16 @@ export default function AdminCampaignsPage() {
   >([]);
   const [proofMsg, setProofMsg] = useState<string | null>(null);
   const [mediaBookings, setMediaBookings] = useState<{
+    id?: string;
     title: string;
     media?: { name: string; location: string; dailyFootfall?: number | null; impressions?: number | null; visibilityScore?: number | null } | null;
     startsAt: string;
     endsAt: string;
     status: string;
   }[]>([]);
+  const [bookingForm, setBookingForm] = useState({ mediaSearch: "", mediaId: "", mediaName: "", startsAt: "", endsAt: "" });
+  const [bookingSearchResults, setBookingSearchResults] = useState<{ id: string; name: string; location: string; dailyFootfall?: number | null }[]>([]);
+  const [bookingBusy, setBookingBusy] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [showReportPreview, setShowReportPreview] = useState(false);
   const [successCaseBusy, setSuccessCaseBusy] = useState(false);
@@ -239,6 +244,35 @@ export default function AdminCampaignsPage() {
       setMediaBookings([]);
       setUnlinkedQuotes([]);
     }
+  };
+
+  const searchMediaForBooking = async (q: string) => {
+    if (!q.trim()) { setBookingSearchResults([]); return; }
+    const res = await fetch(`/api/admin/medias?q=${encodeURIComponent(q)}&limit=8`, { credentials: "include" });
+    const data = (await res.json()) as { medias?: { id: string; name: string; location: string; dailyFootfall?: number | null }[] };
+    setBookingSearchResults(data.medias ?? []);
+  };
+
+  const addMediaBooking = async () => {
+    if (!selectedId || !bookingForm.mediaId || !bookingForm.startsAt || !bookingForm.endsAt) return;
+    setBookingBusy(true);
+    try {
+      const res = await fetch(`/api/admin/campaigns/${selectedId}/bookings`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mediaId: bookingForm.mediaId, startsAt: bookingForm.startsAt, endsAt: bookingForm.endsAt }),
+      });
+      if (!res.ok) { const j = await res.json(); window.alert(j.error ?? "실패"); return; }
+      setBookingForm({ mediaSearch: "", mediaId: "", mediaName: "", startsAt: "", endsAt: "" });
+      setBookingSearchResults([]);
+      await loadDetail(selectedId);
+    } finally { setBookingBusy(false); }
+  };
+
+  const removeMediaBooking = async (bookingId: string) => {
+    if (!selectedId || !window.confirm("매체 연결을 삭제할까요?")) return;
+    await fetch(`/api/admin/campaigns/${selectedId}/bookings?bookingId=${bookingId}`, { method: "DELETE", credentials: "include" });
+    await loadDetail(selectedId);
   };
 
   const uploadProofImage = async (file: File) => {
@@ -824,6 +858,78 @@ export default function AdminCampaignsPage() {
                     />
                   </div>
                 )}
+
+                {/* 집행 매체 연결 */}
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-navy">집행 매체 연결</h3>
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        placeholder="매체명 검색 (예: 뱅뱅빌딩)"
+                        value={bookingForm.mediaSearch}
+                        onChange={(e) => {
+                          setBookingForm(f => ({ ...f, mediaSearch: e.target.value, mediaId: "", mediaName: "" }));
+                          void searchMediaForBooking(e.target.value);
+                        }}
+                        className="text-xs"
+                      />
+                      {bookingSearchResults.length > 0 && !bookingForm.mediaId && (
+                        <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-navy/15 bg-white shadow-lg">
+                          {bookingSearchResults.map(m => (
+                            <button key={m.id} type="button"
+                              className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-xs hover:bg-slate-50"
+                              onClick={() => {
+                                setBookingForm(f => ({ ...f, mediaId: m.id, mediaName: m.name, mediaSearch: m.name }));
+                                setBookingSearchResults([]);
+                              }}
+                            >
+                              <div>
+                                <p className="font-semibold text-navy">{m.name}</p>
+                                <p className="text-muted-foreground">{m.location}</p>
+                              </div>
+                              {m.dailyFootfall && <span className="ml-auto text-muted-foreground">{m.dailyFootfall.toLocaleString()}명/일</span>}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {bookingForm.mediaId && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="mb-1 block text-[10px] text-muted-foreground">시작일</label>
+                          <Input type="date" value={bookingForm.startsAt} onChange={e => setBookingForm(f => ({ ...f, startsAt: e.target.value }))} className="text-xs" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[10px] text-muted-foreground">종료일</label>
+                          <Input type="date" value={bookingForm.endsAt} onChange={e => setBookingForm(f => ({ ...f, endsAt: e.target.value }))} className="text-xs" />
+                        </div>
+                      </div>
+                    )}
+                    {bookingForm.mediaId && (
+                      <Button type="button" size="sm" disabled={bookingBusy || !bookingForm.startsAt || !bookingForm.endsAt} onClick={() => void addMediaBooking()} className="gap-1.5 bg-navy text-white hover:bg-navy/90">
+                        {bookingBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                        매체 연결 추가
+                      </Button>
+                    )}
+                    {mediaBookings.length > 0 && (
+                      <div className="mt-2 space-y-1.5">
+                        {mediaBookings.map((b, i) => (
+                          <div key={b.id ?? i} className="flex items-center gap-2 rounded-lg border border-navy/10 bg-slate-50/60 px-3 py-2 text-xs">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-navy">{b.media?.name ?? b.title}</p>
+                              <p className="text-muted-foreground">{b.startsAt?.slice(0,10)} ~ {b.endsAt?.slice(0,10)} {b.media?.dailyFootfall ? `· ${b.media.dailyFootfall.toLocaleString()}명/일` : ""}</p>
+                            </div>
+                            {b.id && (
+                              <button type="button" onClick={() => void removeMediaBooking(b.id!)} className="text-red-400 hover:text-red-600">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 <div>
                   <h3 className="mb-2 text-sm font-semibold text-navy">
