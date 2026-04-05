@@ -218,7 +218,11 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
                       <td className="px-4 py-2.5 text-xs text-muted-foreground">{f.kind}</td>
                       <td className="px-4 py-2.5 font-semibold text-navy">{f.title}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums text-navy">
-                        {f.amountKrw ? `₩${Math.round(f.amountKrw / 10000).toLocaleString()}만원` : "—"}
+                        {f.amountKrw
+                          ? f.amountKrw >= 100000000
+                            ? `₩${(f.amountKrw / 100000000).toFixed(1).replace(/\.0$/, "")}억원`
+                            : `₩${Math.round(f.amountKrw / 10000).toLocaleString()}만원`
+                          : "—"}
                       </td>
                       <td className="px-4 py-2.5 text-xs text-muted-foreground">{f.status}</td>
                     </tr>
