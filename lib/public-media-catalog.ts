@@ -47,7 +47,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
   const lng = m.longitude ?? 126.978;
   const daily = m.dailyFootfall ?? 0;
   const imgs = dedupeImageUrls(
-    [...(m.image ? [m.image] : []), ...m.extractedImages].filter(
+    [...(m.image ? [m.image] : []), ...(m.extractedImages ?? [])].filter(
       (x): x is string => typeof x === "string" && Boolean(x.trim()),
     ),
   );
