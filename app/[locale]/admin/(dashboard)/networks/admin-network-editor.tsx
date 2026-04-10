@@ -412,18 +412,37 @@ export default function AdminNetworkEditor(props: Props) {
       setError(null);
       try {
         const urls: string[] = [];
+        const errors: string[] = [];
+        // 각 파일을 하나씩 업로드하되, 하나 실패해도 나머지는 계속 진행
         for (const file of images) {
-          const url = await uploadFileToCloudinary(file);
-          urls.push(url);
+          try {
+            const url = await uploadFileToCloudinary(file);
+            urls.push(url);
+          } catch (fileError) {
+            errors.push(
+              `${file.name}: ${fileError instanceof Error ? fileError.message : "업로드 실패"}`,
+            );
+          }
         }
-        setGalleryText((prev) => {
-          const existing = prev
-            .split(/[\n,]/)
-            .map((s) => s.trim())
-            .filter(Boolean);
-          const next = [...existing, ...urls];
-          return next.join("\n");
-        });
+        // 성공한 URL이 있으면 추가
+        if (urls.length > 0) {
+          setGalleryText((prev) => {
+            const existing = prev
+              .split(/[\n,]/)
+              .map((s) => s.trim())
+              .filter(Boolean);
+            const next = [...existing, ...urls];
+            return next.join("\n");
+          });
+        }
+        // 에러 메시지 표시
+        if (errors.length > 0) {
+          setError(
+            errors.length === images.length
+              ? "모든 이미지 업로드에 실패했습니다.\n" + errors.join("\n")
+              : `${images.length - errors.length}개 업로드 성공, ${errors.length}개 실패:\n${errors.join("\n")}`,
+          );
+        }
       } catch (e) {
         setError(
           e instanceof Error
