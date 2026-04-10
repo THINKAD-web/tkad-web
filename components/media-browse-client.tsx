@@ -133,6 +133,8 @@ export default function MediaBrowseClient({
   const [catalogPageSize, setCatalogPageSize] = useState(12);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
   const [mapPopupOpen, setMapPopupOpen] = useState(true);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapZoom, setMapZoom] = useState<number | null>(null);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
@@ -442,10 +444,18 @@ export default function MediaBrowseClient({
     }
     setMapSelectedId((prev) => {
       const next = prev === id ? null : id;
-      if (next) setMapPopupOpen(true);
+      if (next) {
+        setMapPopupOpen(true);
+        // 선택된 매체의 위치로 지도 center 설정 (popupClose 후에도 유지)
+        const selected = effectiveCatalog.find((m) => m.id === next);
+        if (selected) {
+          setMapCenter({ lat: selected.lat, lng: selected.lng });
+          setMapZoom(15);
+        }
+      }
       return next;
     });
-  }, []);
+  }, [effectiveCatalog]);
 
   return (
     <>
@@ -810,6 +820,8 @@ export default function MediaBrowseClient({
                       locale={locale}
                       selectedId={mapSelectedId}
                       onSelectId={handleMapSelectId}
+                      centerOverride={mapCenter}
+                      zoomOverride={mapZoom}
                     />
                     {mapSelectedMedia && mapPopupOpen ? (
                       <div className="pointer-events-none absolute inset-0 z-20 flex items-end justify-center p-3 sm:p-4 md:items-start md:justify-end">
