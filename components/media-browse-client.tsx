@@ -337,8 +337,10 @@ export default function MediaBrowseClient({
 
   useEffect(() => {
     if (mapSelectedId == null) return;
-    if (!gridDisplayList.some((m) => m.id === mapSelectedId))
+    if (!gridDisplayList.some((m) => m.id === mapSelectedId)) {
+      console.log("mapSelectedId not in gridDisplayList, clearing. mapSelectedId:", mapSelectedId, "gridDisplayList length:", gridDisplayList.length);
       setMapSelectedId(null);
+    }
   }, [gridDisplayList, mapSelectedId]);
 
   useEffect(() => {
@@ -363,6 +365,10 @@ export default function MediaBrowseClient({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [browseMode, mapSelectedId]);
+
+  useEffect(() => {
+    console.log("Map state changed - mapSelectedId:", mapSelectedId, "mapPopupOpen:", mapPopupOpen);
+  }, [mapSelectedId, mapPopupOpen]);
 
   const regions = [
     { value: "all", label: t("media.allRegions") },
@@ -436,15 +442,18 @@ export default function MediaBrowseClient({
       : null;
 
   const handleMapSelectId = useCallback((id: string | null) => {
+    console.log("handleMapSelectId called with:", id, "current mapSelectedId:", mapSelectedId);
     if (id == null) {
       // X 버튼 클릭 시에도 selectedId는 유지 (지도 위치 유지)
+      console.log("X button clicked, closing popup");
       setMapPopupOpen(false);
       return;
     }
     // 새로운 매체 선택
+    console.log("New media selected:", id);
     setMapSelectedId(id);
     setMapPopupOpen(true);
-  }, []);
+  }, [mapSelectedId]);
 
   return (
     <>
