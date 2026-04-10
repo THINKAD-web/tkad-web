@@ -249,17 +249,13 @@ export default function MediaNetworkDetailClient({
           </div>
 
           {heroImg ? (
-            <div className="flex justify-center">
-              <div className="overflow-hidden rounded-2xl bg-black/30 px-3 pb-3 pt-3 sm:px-4">
-                <div className="flex items-center justify-center rounded-xl bg-black/40">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={heroImg}
-                    alt={isKo ? data.name : data.nameEn ?? data.name}
-                    className="mx-auto max-h-[260px] w-auto max-w-full object-contain sm:max-h-[300px] lg:max-h-[320px]"
-                  />
-                </div>
-              </div>
+            <div className="relative flex h-[220px] items-center justify-center rounded-xl bg-black/40 sm:h-[260px] lg:h-[280px]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroImg}
+                alt={isKo ? data.name : data.nameEn ?? data.name}
+                className="mx-auto max-h-full w-auto max-w-full object-contain"
+              />
             </div>
           ) : null}
 
