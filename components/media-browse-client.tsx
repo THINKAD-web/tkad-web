@@ -132,6 +132,7 @@ export default function MediaBrowseClient({
   const [catalogPage, setCatalogPage] = useState(1);
   const [catalogPageSize, setCatalogPageSize] = useState(12);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
+  const [mapPopupOpen, setMapPopupOpen] = useState(true);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
@@ -357,7 +358,7 @@ export default function MediaBrowseClient({
   useEffect(() => {
     if (browseMode !== "map" || mapSelectedId == null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMapSelectedId(null);
+      if (e.key === "Escape") setMapPopupOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -439,7 +440,11 @@ export default function MediaBrowseClient({
       setMapSelectedId(null);
       return;
     }
-    setMapSelectedId((prev) => (prev === id ? null : id));
+    setMapSelectedId((prev) => {
+      const next = prev === id ? null : id;
+      if (next) setMapPopupOpen(true);
+      return next;
+    });
   }, []);
 
   return (
@@ -806,7 +811,7 @@ export default function MediaBrowseClient({
                       selectedId={mapSelectedId}
                       onSelectId={handleMapSelectId}
                     />
-                    {mapSelectedMedia ? (
+                    {mapSelectedMedia && mapPopupOpen ? (
                       <div className="pointer-events-none absolute inset-0 z-20 flex items-end justify-center p-3 sm:p-4 md:items-start md:justify-end">
                         <div
                           className="pointer-events-auto w-full max-w-md animate-in fade-in slide-in-from-bottom-3 duration-200 md:slide-in-from-bottom-0 md:slide-in-from-right-3"
@@ -861,7 +866,7 @@ export default function MediaBrowseClient({
                               </div>
                               <button
                                 type="button"
-                                onClick={() => setMapSelectedId(null)}
+                                onClick={() => setMapPopupOpen(false)}
                                 className="-m-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-slate-100 hover:text-navy"
                                 aria-label={t("media.mapPopupClose")}
                               >
