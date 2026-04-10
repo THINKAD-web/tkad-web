@@ -439,23 +439,25 @@ export default function MediaBrowseClient({
 
   const handleMapSelectId = useCallback((id: string | null) => {
     if (id == null) {
-      setMapSelectedId(null);
+      // X 버튼 클릭 시에도 selectedId는 유지 (지도 위치 유지)
+      setMapPopupOpen(false);
       return;
     }
-    setMapSelectedId((prev) => {
-      const next = prev === id ? null : id;
-      if (next) {
-        setMapPopupOpen(true);
-        // 선택된 매체의 위치로 지도 center 설정 (popupClose 후에도 유지)
-        const selected = effectiveCatalog.find((m) => m.id === next);
-        if (selected) {
-          setMapCenter({ lat: selected.lat, lng: selected.lng });
-          setMapZoom(15);
-        }
-      }
-      return next;
-    });
-  }, [effectiveCatalog]);
+    // 새로운 매체 클릭
+    if (mapSelectedId === id) {
+      // 같은 매체 다시 클릭 시 팝업만 열기
+      setMapPopupOpen(true);
+      return;
+    }
+    // 새로운 매체 선택
+    setMapSelectedId(id);
+    setMapPopupOpen(true);
+    const selected = gridDisplayList.find((m) => m.id === id);
+    if (selected) {
+      setMapCenter({ lat: selected.lat, lng: selected.lng });
+      setMapZoom(15);
+    }
+  }, [mapSelectedId, gridDisplayList]);
 
   return (
     <>
