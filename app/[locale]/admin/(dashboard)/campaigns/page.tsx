@@ -91,6 +91,8 @@ export default function AdminCampaignsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [formErr, setFormErr] = useState<string | null>(null);
   const [createBusy, setCreateBusy] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<CampaignStatus | "all">("all");
 
   const [form, setForm] = useState({
     name: "",
@@ -310,6 +312,30 @@ export default function AdminCampaignsPage() {
     },
     [searchMediaForBooking],
   );
+
+  // Filter and search the campaign list
+  const filteredList = useMemo(() => {
+    let result = list;
+
+    // Apply status filter
+    if (statusFilter !== "all") {
+      result = result.filter((c) => c.status === statusFilter);
+    }
+
+    // Apply search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          c.clientCompany.toLowerCase().includes(q) ||
+          c.clientName.toLowerCase().includes(q) ||
+          c.clientEmail.toLowerCase().includes(q),
+      );
+    }
+
+    return result;
+  }, [list, statusFilter, searchQuery]);
 
   const addMediaBooking = async () => {
     if (!selectedId || !bookingForm.mediaId || !bookingForm.startsAt || !bookingForm.endsAt) return;
@@ -683,19 +709,49 @@ export default function AdminCampaignsPage() {
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card>
-          <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="text-base">캠페인 목록</CardTitle>
-            <Button variant="outline" size="sm" onClick={load} type="button">
-              새로고침
-            </Button>
+          <CardHeader>
+            <div className="mb-3 flex items-center justify-between">
+              <CardTitle className="text-base">캠페인 목록</CardTitle>
+              <Button variant="outline" size="sm" onClick={load} type="button">
+                새로고침
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <Input
+                placeholder="캠페인명, 고객사, 담당자, 이메일로 검색…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="text-xs"
+                aria-label="캠페인 검색"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value as CampaignStatus | "all")
+                }
+                className="w-full rounded border border-slate-200 px-2 py-1.5 text-xs"
+                aria-label="상태별 필터"
+              >
+                <option value="all">모든 상태</option>
+                {(Object.keys(STATUS_LABEL) as CampaignStatus[]).map((s) => (
+                  <option key={s} value={s}>
+                    {STATUS_LABEL[s]}
+                  </option>
+                ))}
+              </select>
+            </div>
           </CardHeader>
           <CardContent className="max-h-[420px] space-y-2 overflow-y-auto text-sm">
             {loading ? (
               <p className="text-muted-foreground">불러오는 중…</p>
-            ) : list.length === 0 ? (
-              <p className="text-muted-foreground">등록된 캠페인이 없습니다.</p>
+            ) : filteredList.length === 0 ? (
+              <p className="text-muted-foreground">
+                {list.length === 0
+                  ? "등록된 캠페인이 없습니다."
+                  : "검색 결과가 없습니다."}
+              </p>
             ) : (
-              list.map((c) => (
+              filteredList.map((c) => (
                 <button
                   key={c.id}
                   type="button"
