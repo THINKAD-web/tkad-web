@@ -89,6 +89,8 @@ export default function AdminCampaignsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [formErr, setFormErr] = useState<string | null>(null);
+  const [createBusy, setCreateBusy] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -409,26 +411,60 @@ export default function AdminCampaignsPage() {
   };
 
   const createCampaign = async () => {
-    const res = await fetch("/api/admin/campaigns", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.name,
-        clientCompany: form.clientCompany,
-        clientName: form.clientName,
-        clientEmail: form.clientEmail,
-        clientPhone: form.clientPhone || undefined,
-      }),
-    });
-    if (!res.ok) return;
-    setForm({
-      name: "",
-      clientCompany: "",
-      clientName: "",
-      clientEmail: "",
-      clientPhone: "",
-    });
-    await load();
+    // Validation
+    if (!form.name.trim()) {
+      setFormErr("캠페인명은 필수입니다.");
+      return;
+    }
+    if (!form.clientCompany.trim()) {
+      setFormErr("고객사는 필수입니다.");
+      return;
+    }
+    if (!form.clientName.trim()) {
+      setFormErr("담당자는 필수입니다.");
+      return;
+    }
+    if (!form.clientEmail.trim()) {
+      setFormErr("이메일은 필수입니다.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.clientEmail)) {
+      setFormErr("유효한 이메일 주소를 입력하세요.");
+      return;
+    }
+
+    setFormErr(null);
+    setCreateBusy(true);
+    try {
+      const res = await fetch("/api/admin/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          clientCompany: form.clientCompany,
+          clientName: form.clientName,
+          clientEmail: form.clientEmail,
+          clientPhone: form.clientPhone || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setFormErr(data.error ?? "캠페인 생성에 실패했습니다.");
+        return;
+      }
+      setForm({
+        name: "",
+        clientCompany: "",
+        clientName: "",
+        clientEmail: "",
+        clientPhone: "",
+      });
+      await load();
+    } catch {
+      setFormErr("네트워크 오류가 발생했습니다. 다시 시도하세요.");
+    } finally {
+      setCreateBusy(false);
+    }
   };
 
   const patchStatus = async (id: string, status: CampaignStatus) => {
@@ -584,41 +620,64 @@ export default function AdminCampaignsPage() {
         <CardHeader>
           <CardTitle className="text-base">새 캠페인</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <Input
-            placeholder="캠페인명"
-            value={form.name}
-            onChange={formHandlers.name}
-          />
-          <Input
-            placeholder="고객사"
-            value={form.clientCompany}
-            onChange={formHandlers.clientCompany}
-          />
-          <Input
-            placeholder="담당자"
-            value={form.clientName}
-            onChange={formHandlers.clientName}
-          />
-          <Input
-            placeholder="이메일"
-            value={form.clientEmail}
-            onChange={formHandlers.clientEmail}
-          />
-          <Input
-            placeholder="전화 (선택)"
-            value={form.clientPhone}
-            onChange={formHandlers.clientPhone}
-          />
-          <Button
-            type="button"
-            className="bg-navy"
-            onClick={createCampaign}
-            disabled={loading}
-          >
-            <Plus className="mr-1 h-4 w-4" />
-            등록
-          </Button>
+        <CardContent className="space-y-3">
+          {formErr && (
+            <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {formErr}
+            </div>
+          )}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Input
+              placeholder="캠페인명"
+              value={form.name}
+              onChange={formHandlers.name}
+              aria-label="캠페인명"
+              disabled={createBusy}
+            />
+            <Input
+              placeholder="고객사"
+              value={form.clientCompany}
+              onChange={formHandlers.clientCompany}
+              aria-label="고객사"
+              disabled={createBusy}
+            />
+            <Input
+              placeholder="담당자"
+              value={form.clientName}
+              onChange={formHandlers.clientName}
+              aria-label="담당자"
+              disabled={createBusy}
+            />
+            <Input
+              placeholder="이메일"
+              value={form.clientEmail}
+              onChange={formHandlers.clientEmail}
+              aria-label="이메일"
+              type="email"
+              disabled={createBusy}
+            />
+            <Input
+              placeholder="전화 (선택)"
+              value={form.clientPhone}
+              onChange={formHandlers.clientPhone}
+              aria-label="전화 번호"
+              disabled={createBusy}
+            />
+            <Button
+              type="button"
+              className="bg-navy"
+              onClick={createCampaign}
+              disabled={loading || createBusy}
+              aria-label="새 캠페인 등록"
+            >
+              {createBusy ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="mr-1 h-4 w-4" />
+              )}
+              {createBusy ? "등록 중…" : "등록"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
