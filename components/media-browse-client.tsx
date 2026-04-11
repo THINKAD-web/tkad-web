@@ -144,7 +144,7 @@ export default function MediaBrowseClient({
   const [catalogPage, setCatalogPage] = useState(1);
   const [catalogPageSize, setCatalogPageSize] = useState(12);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
-  const [mapPopupOpen, setMapPopupOpen] = useState(true);
+  const [mapPopupOpen, setMapPopupOpen] = useState(false);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
@@ -252,11 +252,6 @@ export default function MediaBrowseClient({
     localStorage.setItem("mediaCatalogLayout", catalogCardLayout);
   }, [catalogCardLayout]);
 
-  // 테스트: 변경사항이 적용되는지 확인용 팝업
-  useEffect(() => {
-    alert("✅ 코드 변경사항이 적용되었습니다!");
-  }, []);
-
   const clearPrecisionSelections = useCallback(() => {
     setFilters((prev) => ({
       ...prev,
@@ -363,10 +358,12 @@ export default function MediaBrowseClient({
   }, [sortedFiltered, effectiveCatalog]);
 
   useEffect(() => {
-    if (mapSelectedId == null) return;
+    // 팝업이 열려있을 때만 선택된 매체가 리스트에 있는지 검증
+    // (팝업이 닫혀있으면 선택 상태 유지)
+    if (!mapPopupOpen || mapSelectedId == null) return;
     if (!gridDisplayList.some((m) => m.id === mapSelectedId))
       setMapSelectedId(null);
-  }, [gridDisplayList, mapSelectedId]);
+  }, [gridDisplayList, mapSelectedId, mapPopupOpen]);
 
   useEffect(() => {
     setCatalogPage(1);
