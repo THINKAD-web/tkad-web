@@ -465,12 +465,11 @@ export default function MediaBrowseClient({
 
   const handleMapSelectId = useCallback((id: string | null) => {
     if (id == null) {
-      // X 버튼 클릭 시: 지도 초기 상태로 돌아가기 (모든 핀 표시)
-      setMapSelectedId(null);
+      // X 버튼 클릭: 팝업만 닫고, 지도는 그 자리에 그대로 (selectedId 유지)
       setMapPopupOpen(false);
       return;
     }
-    // 새로운 매체 선택: zoom in
+    // 새로운 매체 선택: 지도 줌인 + 팝업 열기
     setMapSelectedId(id);
     setMapPopupOpen(true);
   }, []);
@@ -840,9 +839,9 @@ export default function MediaBrowseClient({
                       onSelectId={handleMapSelectId}
                     />
                     {mapSelectedMedia && mapPopupOpen ? (
-                      <div className="pointer-events-none absolute inset-0 z-20 flex items-end justify-center p-3 sm:p-4 md:items-start md:justify-end">
+                      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 flex justify-center p-3 sm:p-4">
                         <div
-                          className="pointer-events-auto w-full max-w-md animate-in fade-in slide-in-from-bottom-3 duration-200 md:slide-in-from-bottom-0 md:slide-in-from-right-3"
+                          className="pointer-events-auto w-full max-w-md max-h-[40vh] overflow-y-auto animate-in fade-in slide-in-from-bottom-3 duration-200"
                           role="dialog"
                           aria-label={
                             isKo

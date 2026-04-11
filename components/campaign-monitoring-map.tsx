@@ -376,68 +376,10 @@ export function CampaignMonitoringMap({
     if (selectedId === prevSelectedIdRef.current) return;
     prevSelectedIdRef.current = selectedId;
 
-    if (selectedId == null) {
-      // 선택 해제: 초기 상태(모든 핀이 보이는 범위)로 돌아가기
-      if (provider === "kakao") {
-        const ctx = kakaoMapCtxRef.current;
-        if (!ctx) return;
-        // 카카오맵: 모든 핀을 포함하는 bounds 계산
-        const bounds = pins.reduce(
-          (acc, p) => {
-            if (acc.minLat === null) {
-              return { minLat: p.lat, maxLat: p.lat, minLng: p.lng, maxLng: p.lng };
-            }
-            return {
-              minLat: Math.min(acc.minLat, p.lat),
-              maxLat: Math.max(acc.maxLat, p.lat),
-              minLng: Math.min(acc.minLng, p.lng),
-              maxLng: Math.max(acc.maxLng, p.lng),
-            };
-          },
-          { minLat: null, maxLat: null, minLng: null, maxLng: null } as {
-            minLat: number | null;
-            maxLat: number | null;
-            minLng: number | null;
-            maxLng: number | null;
-          },
-        );
-        if (bounds.minLat !== null) {
-          const center = {
-            lat: (bounds.minLat + bounds.maxLat) / 2,
-            lng: (bounds.minLng + bounds.maxLng) / 2,
-          };
-          ctx.map.setCenter(new ctx.LatLng(center.lat, center.lng));
-          // 수평거리 차이가 클수록 줌 아웃
-          const latDiff = bounds.maxLat - bounds.minLat;
-          const lngDiff = bounds.maxLng - bounds.minLng;
-          const maxDiff = Math.max(latDiff, lngDiff);
-          const level = maxDiff > 0.5 ? 10 : maxDiff > 0.2 ? 8 : 6;
-          ctx.map.setLevel(level);
-        }
-        return;
-      }
+    // selectedId가 null이면 아무것도 하지 않음 (초기 상태 유지)
+    if (!selectedId) return;
 
-      if (provider === "google") {
-        const ctx = googleMapCtxRef.current;
-        if (!ctx || pins.length === 0) return;
-        // 구글맵: fitBounds로 모든 핀을 포함하는 범위
-        const bounds = new (window as any).google.maps.LatLngBounds();
-        for (const p of pins) {
-          bounds.extend({ lat: p.lat, lng: p.lng });
-        }
-        ctx.map.fitBounds(bounds);
-        // zoom이 너무 높으면 제한
-        window.setTimeout(() => {
-          const z = (ctx.map as any).getZoom?.();
-          if (typeof z === "number" && z > 14) {
-            ctx.map.setZoom(12);
-          }
-        }, 100);
-      }
-      return;
-    }
-
-    // 선택된 핀이 있을 때: 그 위치로 zoom in
+    // 선택된 핀이 있을 때만: 그 위치로 zoom in
     const pin = pins.find((p) => p.id === selectedId);
     if (!pin) return;
 
@@ -445,7 +387,7 @@ export function CampaignMonitoringMap({
       const ctx = kakaoMapCtxRef.current;
       if (!ctx) return;
       ctx.map.setCenter(new ctx.LatLng(pin.lat, pin.lng));
-      ctx.map.setLevel(4); // 확대
+      ctx.map.setLevel(7); // 지역 범위 확대 (level 1-5는 너무 가까움, 8-10은 너무 멈)
       return;
     }
 
@@ -453,7 +395,7 @@ export function CampaignMonitoringMap({
       const ctx = googleMapCtxRef.current;
       if (!ctx) return;
       ctx.map.panTo({ lat: pin.lat, lng: pin.lng });
-      ctx.map.setZoom(15); // 확대
+      ctx.map.setZoom(14); // 구글맵 zoom 14 = 카카오맵 level 7 정도
     }
   }, [selectedId, pins, provider, mapEpoch]);
 
