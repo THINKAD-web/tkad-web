@@ -383,7 +383,7 @@ function HomeContent({
                     <MediaCatalogThumbnail
                       media={media}
                       placeholderLabel={t("media.imagePreparing")}
-                      className="group relative flex h-52 items-center justify-center"
+                      className="group relative flex h-48 items-center justify-center"
                       imgClassName="opacity-90 transition duration-300 group-hover:scale-105"
                       bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/45 via-transparent to-transparent"
                       placeholderSize="sm"

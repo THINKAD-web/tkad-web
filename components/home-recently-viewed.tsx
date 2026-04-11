@@ -96,7 +96,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                   <MediaCatalogThumbnail
                     media={media}
                     placeholderLabel={tMedia("imagePreparing")}
-                    className="flex h-28 items-center justify-center"
+                    className="flex h-48 items-center justify-center"
                     imgClassName="transition duration-300 group-hover:scale-105"
                     bottomGradientClassName={null}
                     placeholderSize="xs"
