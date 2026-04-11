@@ -48,7 +48,22 @@ export async function GET(request: NextRequest) {
   const db = getPrisma();
   const { searchParams } = new URL(request.url);
   const take = Math.min(Number(searchParams.get("take") ?? 200) || 200, 500);
+  const q = searchParams.get("q")?.trim();
+
+  const where: Prisma.MediaWhereInput | undefined = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { nameEn: { contains: q, mode: "insensitive" } },
+          { location: { contains: q, mode: "insensitive" } },
+          { district: { contains: q, mode: "insensitive" } },
+          { city: { contains: q, mode: "insensitive" } },
+        ],
+      }
+    : undefined;
+
   const medias = await db.media.findMany({
+    where,
     orderBy: { updatedAt: "desc" },
     take,
   });
