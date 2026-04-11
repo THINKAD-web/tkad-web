@@ -465,11 +465,12 @@ export default function MediaBrowseClient({
 
   const handleMapSelectId = useCallback((id: string | null) => {
     if (id == null) {
-      // X 버튼 클릭 시에도 selectedId는 유지 (지도 위치 유지)
+      // X 버튼 클릭 시: 지도 초기 상태로 돌아가기 (모든 핀 표시)
+      setMapSelectedId(null);
       setMapPopupOpen(false);
       return;
     }
-    // 새로운 매체 선택
+    // 새로운 매체 선택: zoom in
     setMapSelectedId(id);
     setMapPopupOpen(true);
   }, []);
