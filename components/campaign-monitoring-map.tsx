@@ -369,8 +369,13 @@ export function CampaignMonitoringMap({
     return undefined;
   }, [mountGoogle, mountKakao, pinLayoutKey, pins.length, provider]);
 
+  const prevSelectedIdRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (!selectedId) return;
+    // selectedId가 실제로 변경되었을 때만 팬/줌 수행
+    if (!selectedId || selectedId === prevSelectedIdRef.current) return;
+    prevSelectedIdRef.current = selectedId;
+
     const pin = pins.find((p) => p.id === selectedId);
     if (!pin) return;
 
