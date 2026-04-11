@@ -125,10 +125,22 @@ export default function MediaBrowseClient({
   const [debouncedCatalogSearch, setDebouncedCatalogSearch] = useState("");
   const [precisionFiltersOpen, setPrecisionFiltersOpen] = useState(false);
   const lgUp = useLgUp();
-  const [browseMode, setBrowseMode] = useState<"list" | "map">("list");
+  const [browseMode, setBrowseMode] = useState<"list" | "map">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("mediaBrowseMode");
+      if (saved === "map" || saved === "list") return saved;
+    }
+    return "list";
+  });
   const [catalogCardLayout, setCatalogCardLayout] = useState<
     "grid" | "compact"
-  >("grid");
+  >(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("mediaCatalogLayout");
+      if (saved === "grid" || saved === "compact") return saved;
+    }
+    return "grid";
+  });
   const [catalogPage, setCatalogPage] = useState(1);
   const [catalogPageSize, setCatalogPageSize] = useState(12);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
@@ -229,6 +241,16 @@ export default function MediaBrowseClient({
       })),
     );
   }, [compareItems]);
+
+  // localStorage에 browseMode 저장
+  useEffect(() => {
+    localStorage.setItem("mediaBrowseMode", browseMode);
+  }, [browseMode]);
+
+  // localStorage에 catalogCardLayout 저장
+  useEffect(() => {
+    localStorage.setItem("mediaCatalogLayout", catalogCardLayout);
+  }, [catalogCardLayout]);
 
   const clearPrecisionSelections = useCallback(() => {
     setFilters((prev) => ({
