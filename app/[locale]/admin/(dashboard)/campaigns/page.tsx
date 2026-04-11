@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -246,12 +246,68 @@ export default function AdminCampaignsPage() {
     }
   };
 
-  const searchMediaForBooking = async (q: string) => {
-    if (!q.trim()) { setBookingSearchResults([]); return; }
-    const res = await fetch(`/api/admin/medias?q=${encodeURIComponent(q)}&limit=8`, { credentials: "include" });
-    const data = (await res.json()) as { medias?: { id: string; name: string; location: string; dailyFootfall?: number | null }[] };
-    setBookingSearchResults(data.medias ?? []);
-  };
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const searchMediaForBooking = useCallback(async (q: string) => {
+    // Cancel previous search
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    if (!q.trim()) {
+      setBookingSearchResults([]);
+      return;
+    }
+
+    // Debounce search by 300ms
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/admin/medias?q=${encodeURIComponent(q)}&limit=8`, {
+          credentials: "include",
+        });
+        const data = (await res.json()) as {
+          medias?: {
+            id: string;
+            name: string;
+            location: string;
+            dailyFootfall?: number | null;
+          }[];
+        };
+        setBookingSearchResults(data.medias ?? []);
+      } catch {
+        setBookingSearchResults([]);
+      }
+    }, 300);
+  }, []);
+
+  // Memoized form field handlers
+  const formHandlers = useMemo(
+    () => ({
+      name: (e: React.ChangeEvent<HTMLInputElement>) =>
+        setForm((f) => ({ ...f, name: e.target.value })),
+      clientCompany: (e: React.ChangeEvent<HTMLInputElement>) =>
+        setForm((f) => ({ ...f, clientCompany: e.target.value })),
+      clientName: (e: React.ChangeEvent<HTMLInputElement>) =>
+        setForm((f) => ({ ...f, clientName: e.target.value })),
+      clientEmail: (e: React.ChangeEvent<HTMLInputElement>) =>
+        setForm((f) => ({ ...f, clientEmail: e.target.value })),
+      clientPhone: (e: React.ChangeEvent<HTMLInputElement>) =>
+        setForm((f) => ({ ...f, clientPhone: e.target.value })),
+    }),
+    [],
+  );
+
+  const handleBookingSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setBookingForm((f) => ({
+        ...f,
+        mediaSearch: value,
+        mediaId: "",
+        mediaName: "",
+      }));
+      void searchMediaForBooking(value);
+    },
+    [searchMediaForBooking],
+  );
 
   const addMediaBooking = async () => {
     if (!selectedId || !bookingForm.mediaId || !bookingForm.startsAt || !bookingForm.endsAt) return;
@@ -532,35 +588,27 @@ export default function AdminCampaignsPage() {
           <Input
             placeholder="캠페인명"
             value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            onChange={formHandlers.name}
           />
           <Input
             placeholder="고객사"
             value={form.clientCompany}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, clientCompany: e.target.value }))
-            }
+            onChange={formHandlers.clientCompany}
           />
           <Input
             placeholder="담당자"
             value={form.clientName}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, clientName: e.target.value }))
-            }
+            onChange={formHandlers.clientName}
           />
           <Input
             placeholder="이메일"
             value={form.clientEmail}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, clientEmail: e.target.value }))
-            }
+            onChange={formHandlers.clientEmail}
           />
           <Input
             placeholder="전화 (선택)"
             value={form.clientPhone}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, clientPhone: e.target.value }))
-            }
+            onChange={formHandlers.clientPhone}
           />
           <Button
             type="button"
@@ -867,10 +915,7 @@ export default function AdminCampaignsPage() {
                       <Input
                         placeholder="매체명 검색 (예: 뱅뱅빌딩)"
                         value={bookingForm.mediaSearch}
-                        onChange={(e) => {
-                          setBookingForm(f => ({ ...f, mediaSearch: e.target.value, mediaId: "", mediaName: "" }));
-                          void searchMediaForBooking(e.target.value);
-                        }}
+                        onChange={handleBookingSearchChange}
                         className="text-xs"
                       />
                       {bookingSearchResults.length > 0 && !bookingForm.mediaId && (
