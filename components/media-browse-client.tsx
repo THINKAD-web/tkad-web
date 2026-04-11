@@ -1,5 +1,6 @@
 "use client";
 
+// 배포 테스트: v1.0 - Vercel 자동 배포 확인 중
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
