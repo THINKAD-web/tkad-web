@@ -23,9 +23,16 @@ import {
   FinancialDocKind,
   FinancialDocStatus,
   STATUS_LABEL,
+  FINANCIAL_DOC_KIND_LABEL,
 } from "./constants";
 
 const CampaignReportPreview = dynamic(() => import("@/components/campaign-report-preview"), { ssr: false });
+
+const DOC_KIND = [
+  { value: "quote", label: FINANCIAL_DOC_KIND_LABEL["quote"] },
+  { value: "contract", label: FINANCIAL_DOC_KIND_LABEL["contract"] },
+  { value: "invoice", label: FINANCIAL_DOC_KIND_LABEL["invoice"] },
+];
 
 /**
  * Helper function for authenticated API calls with error handling
