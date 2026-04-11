@@ -10,9 +10,6 @@ import dynamic from "next/dynamic";
 const AiChatbot = dynamic(() => import("@/components/ai-chatbot"), {
   ssr: false,
 });
-const FloatingCta = dynamic(() => import("@/components/floating-cta"), {
-  ssr: false,
-});
 const FloatingScrollNav = dynamic(
   () => import("@/components/floating-scroll-nav"),
   { ssr: false },
@@ -25,7 +22,6 @@ const ExitIntentPopup = dynamic(
 export default function DeferredPublicWidgets() {
   return (
     <>
-      <FloatingCta />
       <FloatingScrollNav />
       <ExitIntentPopup />
       <AiChatbot />
