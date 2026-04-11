@@ -442,7 +442,7 @@ export default function MediaBrowseClient({
       : null;
 
   const handleMapSelectId = useCallback((id: string | null) => {
-    console.log("handleMapSelectId called with:", id, "current mapSelectedId:", mapSelectedId);
+    console.log("handleMapSelectId called with:", id);
     if (id == null) {
       // X 버튼 클릭 시에도 selectedId는 유지 (지도 위치 유지)
       console.log("X button clicked, closing popup");
@@ -453,7 +453,7 @@ export default function MediaBrowseClient({
     console.log("New media selected:", id);
     setMapSelectedId(id);
     setMapPopupOpen(true);
-  }, [mapSelectedId]);
+  }, []);
 
   return (
     <>
