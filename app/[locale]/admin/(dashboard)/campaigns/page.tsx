@@ -18,22 +18,43 @@ import {
   Trash2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import {
+  CampaignStatus,
+  FinancialDocKind,
+  FinancialDocStatus,
+  STATUS_LABEL,
+} from "./constants";
+
 const CampaignReportPreview = dynamic(() => import("@/components/campaign-report-preview"), { ssr: false });
 
-type CampaignStatus =
-  | "proposal"
-  | "negotiation"
-  | "contract"
-  | "production"
-  | "airing"
-  | "completed";
-type FinancialDocKind = "quote" | "contract" | "invoice";
-type FinancialDocStatus =
-  | "draft"
-  | "sent"
-  | "paid"
-  | "overdue"
-  | "cancelled";
+/**
+ * Helper function for authenticated API calls with error handling
+ */
+async function apiCall<T>(
+  url: string,
+  options?: RequestInit,
+): Promise<{ ok: boolean; data?: T; error?: string }> {
+  try {
+    const res = await fetch(url, {
+      ...options,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+      },
+    });
+
+    const data = (await res.json().catch(() => ({}))) as T & { error?: string };
+
+    if (!res.ok) {
+      return { ok: false, error: data.error ?? "요청에 실패했습니다." };
+    }
+
+    return { ok: true, data };
+  } catch (e) {
+    return { ok: false, error: "네트워크 오류가 발생했습니다." };
+  }
+}
 
 type CampaignRow = {
   id: string;
@@ -58,28 +79,6 @@ type LinkedQuoteRow = {
   createdAt: string;
 };
 
-const STATUS_LABEL: Record<CampaignStatus, string> = {
-  proposal: "제안",
-  negotiation: "협의",
-  contract: "계약",
-  production: "제작",
-  airing: "송출",
-  completed: "완료",
-};
-
-const DOC_KIND: { value: FinancialDocKind; label: string }[] = [
-  { value: "quote", label: "견적" },
-  { value: "contract", label: "계약" },
-  { value: "invoice", label: "청구" },
-];
-
-const DOC_STATUS_LIST: { value: FinancialDocStatus; label: string }[] = [
-  { value: "draft", label: "초안" },
-  { value: "sent", label: "발송" },
-  { value: "paid", label: "결제완료" },
-  { value: "overdue", label: "연체" },
-  { value: "cancelled", label: "취소" },
-];
 
 export default function AdminCampaignsPage() {
   const pathname = usePathname();
