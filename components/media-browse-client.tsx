@@ -252,6 +252,11 @@ export default function MediaBrowseClient({
     localStorage.setItem("mediaCatalogLayout", catalogCardLayout);
   }, [catalogCardLayout]);
 
+  // 테스트: 변경사항이 적용되는지 확인용 팝업
+  useEffect(() => {
+    alert("✅ 코드 변경사항이 적용되었습니다!");
+  }, []);
+
   const clearPrecisionSelections = useCallback(() => {
     setFilters((prev) => ({
       ...prev,
