@@ -43,6 +43,16 @@ export type RegionCheckboxCode =
 type AgeBand = "teens" | "twenties" | "thirties" | "forties";
 type PeriodWeeks = 1 | 2 | 4 | 12;
 
+/** Fisher-Yates shuffle: 새로고침마다 버튼 순서 랜덤화용 */
+function shuffleArray<T>(arr: readonly T[]): T[] {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 function mapAgeBands(bands: ReadonlySet<AgeBand>): TargetAudience {
   if (bands.size === 0) return "mass";
   if (
@@ -95,6 +105,43 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     () => new Set(),
   );
 
+  // 새로고침마다 버튼 순서 랜덤화 (useState 초기화 함수로 한 번만 섞임)
+  const [shuffledOrder] = useState(() => ({
+    regions: shuffleArray<RegionCheckboxCode>([
+      "seoul",
+      "capital",
+      "busan",
+      "jeju",
+      "national",
+    ]),
+    ages: shuffleArray<AgeBand>([
+      "teens",
+      "twenties",
+      "thirties",
+      "forties",
+    ]),
+    industries: shuffleArray<Industry>([
+      "beauty",
+      "retail",
+      "fmcg",
+      "fintech",
+      "auto",
+      "entertainment",
+      "other",
+    ]),
+    periods: shuffleArray<PeriodWeeks>([1, 2, 4, 12]),
+    mediaTypes: shuffleArray<MediaTypeFilter>([
+      "all",
+      "digital",
+      "static",
+      "mobile",
+      "network",
+    ]),
+    placementHints: shuffleArray<(typeof PLACEMENT_HINT_KEYS)[number]>([
+      ...PLACEMENT_HINT_KEYS,
+    ]),
+  }));
+
   const budgetMin = 100;
   const budgetMax = 10000;
 
@@ -125,63 +172,66 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     });
   }, []);
 
-  const regionDef = useMemo(
-    () =>
-      [
-        { code: "seoul" as const, label: tr("form.regionSeoul") },
-        { code: "capital" as const, label: tr("form.regionGyeonggi") },
-        { code: "busan" as const, label: tr("form.regionBusan") },
-        { code: "jeju" as const, label: tr("form.regionJeju") },
-        { code: "national" as const, label: tr("form.regionNational") },
-      ] as const,
-    [tr],
-  );
+  const regionDef = useMemo(() => {
+    const labelMap: Record<RegionCheckboxCode, string> = {
+      seoul: tr("form.regionSeoul"),
+      capital: tr("form.regionGyeonggi"),
+      busan: tr("form.regionBusan"),
+      jeju: tr("form.regionJeju"),
+      national: tr("form.regionNational"),
+    };
+    return shuffledOrder.regions.map((code) => ({ code, label: labelMap[code] }));
+  }, [tr, shuffledOrder.regions]);
 
-  const ageDef = useMemo(
-    () =>
-      [
-        { code: "teens" as const, label: tr("form.ageTeens") },
-        { code: "twenties" as const, label: tr("form.ageTwenties") },
-        { code: "thirties" as const, label: tr("form.ageThirties") },
-        { code: "forties" as const, label: tr("form.ageForties") },
-      ] as const,
-    [tr],
-  );
+  const ageDef = useMemo(() => {
+    const labelMap: Record<AgeBand, string> = {
+      teens: tr("form.ageTeens"),
+      twenties: tr("form.ageTwenties"),
+      thirties: tr("form.ageThirties"),
+      forties: tr("form.ageForties"),
+    };
+    return shuffledOrder.ages.map((code) => ({ code, label: labelMap[code] }));
+  }, [tr, shuffledOrder.ages]);
 
-  const periodDef = useMemo(
-    () =>
-      [
-        { w: 1 as const, label: tr("form.period1w") },
-        { w: 2 as const, label: tr("form.period2w") },
-        { w: 4 as const, label: tr("form.period1m") },
-        { w: 12 as const, label: tr("form.period3m") },
-      ] as const,
-    [tr],
-  );
+  const periodDef = useMemo(() => {
+    const labelMap: Record<PeriodWeeks, string> = {
+      1: tr("form.period1w"),
+      2: tr("form.period2w"),
+      4: tr("form.period1m"),
+      12: tr("form.period3m"),
+    };
+    return shuffledOrder.periods.map((w) => ({ w, label: labelMap[w] }));
+  }, [tr, shuffledOrder.periods]);
 
-  const industryOptions: { value: Industry; label: string }[] = useMemo(
-    () => [
-      { value: "beauty", label: tr("form.industryBeauty") },
-      { value: "retail", label: tr("form.industryRetail") },
-      { value: "fmcg", label: tr("form.industryFmcg") },
-      { value: "fintech", label: tr("form.industryFintech") },
-      { value: "auto", label: tr("form.industryAuto") },
-      { value: "entertainment", label: tr("form.industryEntertainment") },
-      { value: "other", label: tr("form.industryOther") },
-    ],
-    [tr],
-  );
+  const industryOptions: { value: Industry; label: string }[] = useMemo(() => {
+    const labelMap: Record<Industry, string> = {
+      beauty: tr("form.industryBeauty"),
+      retail: tr("form.industryRetail"),
+      fmcg: tr("form.industryFmcg"),
+      fintech: tr("form.industryFintech"),
+      auto: tr("form.industryAuto"),
+      entertainment: tr("form.industryEntertainment"),
+      other: tr("form.industryOther"),
+    };
+    return shuffledOrder.industries.map((value) => ({
+      value,
+      label: labelMap[value],
+    }));
+  }, [tr, shuffledOrder.industries]);
 
-  const mediaTypeOptions: { value: MediaTypeFilter; label: string }[] = useMemo(
-    () => [
-      { value: "all", label: tr("form.mediaTypeAll") },
-      { value: "digital", label: tr("form.mediaTypeDigital") },
-      { value: "static", label: tr("form.mediaTypeStatic") },
-      { value: "mobile", label: tr("form.mediaTypeMobile") },
-      { value: "network", label: tr("form.mediaTypeNetwork") },
-    ],
-    [tr],
-  );
+  const mediaTypeOptions: { value: MediaTypeFilter; label: string }[] = useMemo(() => {
+    const labelMap: Record<MediaTypeFilter, string> = {
+      all: tr("form.mediaTypeAll"),
+      digital: tr("form.mediaTypeDigital"),
+      static: tr("form.mediaTypeStatic"),
+      mobile: tr("form.mediaTypeMobile"),
+      network: tr("form.mediaTypeNetwork"),
+    };
+    return shuffledOrder.mediaTypes.map((value) => ({
+      value,
+      label: labelMap[value],
+    }));
+  }, [tr, shuffledOrder.mediaTypes]);
 
   const handleSubmit = () => {
     if (ageBands.size === 0) return;
@@ -572,7 +622,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 : tr("form.placementHintsLabel")}
             </div>
             <div className="flex flex-wrap gap-2">
-              {PLACEMENT_HINT_KEYS.map((code) => (
+              {shuffledOrder.placementHints.map((code) => (
                 <label
                   key={code}
                   className={cn(
