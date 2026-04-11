@@ -364,10 +364,12 @@ export default function MediaBrowseClient({
   }, [sortedFiltered, effectiveCatalog]);
 
   useEffect(() => {
-    if (mapSelectedId == null) return;
+    // 팝업이 열려있을 때만 선택된 매체가 리스트에 있는지 검증
+    // (팝업이 닫혀있으면 선택 상태 유지)
+    if (!mapPopupOpen || mapSelectedId == null) return;
     if (!gridDisplayList.some((m) => m.id === mapSelectedId))
       setMapSelectedId(null);
-  }, [gridDisplayList, mapSelectedId]);
+  }, [gridDisplayList, mapSelectedId, mapPopupOpen]);
 
   useEffect(() => {
     setCatalogPage(1);
