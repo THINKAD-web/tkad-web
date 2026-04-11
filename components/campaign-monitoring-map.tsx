@@ -119,6 +119,10 @@ export function CampaignMonitoringMap({
   /** Bumps when Kakao/Google map instance is ready so pan-to-selected can run. */
   const [mapEpoch, bumpMapEpoch] = useReducer((n: number) => n + 1, 0);
 
+  /** Track if map is mounted to avoid resetting zoom/center on re-renders */
+  const isMapMountedRef = useRef(false);
+  const mapStateRef = useRef<{ kakaoLevel?: number; googleZoom?: number } | null>(null);
+
   const center = useMemo(() => {
     if (centerOverride) return centerOverride;
     if (pins.length === 0) return { lat: 37.5665, lng: 126.978 };
@@ -194,7 +198,9 @@ export function CampaignMonitoringMap({
         zoom: zoomOverride != null ? zoomOverride : 12,
       });
 
-      if (!centerOverride) {
+      // Only fit bounds on initial mount or when no pin is selected
+      // Preserve zoom/center if map was already showing a selected pin
+      if (!centerOverride && !isMapMountedRef.current) {
         const bounds = new googleMaps.LatLngBounds();
         for (const p of pinList) {
           bounds.extend({ lat: p.lat, lng: p.lng });
@@ -207,8 +213,12 @@ export function CampaignMonitoringMap({
             m.setZoom?.(14);
           }
         }, 400);
+      } else if (mapStateRef.current?.googleZoom != null) {
+        // Restore previous zoom level if available
+        map.setZoom(mapStateRef.current.googleZoom);
       }
 
+      isMapMountedRef.current = true;
       googleMapCtxRef.current = { map };
       bumpMapEpoch();
 
@@ -223,6 +233,14 @@ export function CampaignMonitoringMap({
       }
 
       cleanupRef.current = () => {
+        // Save current zoom before cleanup
+        if (map) {
+          const m = map as { getZoom?: () => number };
+          const z = m.getZoom?.();
+          if (typeof z === "number") {
+            mapStateRef.current = { googleZoom: z };
+          }
+        }
         googleMapCtxRef.current = null;
         for (const m of markers) m.setMap(null);
         el.innerHTML = "";
@@ -305,7 +323,9 @@ export function CampaignMonitoringMap({
               : 8,
         });
 
-        if (!centerOverride) {
+        // Only fit bounds on initial mount or when no pin is selected
+        // Preserve zoom/center if map was already showing a selected pin
+        if (!centerOverride && !isMapMountedRef.current) {
           const bounds = new K.LatLngBounds();
           for (const p of pinList) {
             bounds.extend(new K.LatLng(p.lat, p.lng));
@@ -321,8 +341,12 @@ export function CampaignMonitoringMap({
           if (typeof lv === "number" && lv < minLevelWide) {
             mapAny.setLevel(minLevelWide);
           }
+        } else if (mapStateRef.current?.kakaoLevel != null) {
+          // Restore previous zoom level if available
+          map.setLevel(mapStateRef.current.kakaoLevel);
         }
 
+        isMapMountedRef.current = true;
         kakaoMapCtxRef.current = { map, LatLng: K.LatLng };
         bumpMapEpoch();
 
@@ -338,6 +362,14 @@ export function CampaignMonitoringMap({
       });
 
       cleanupRef.current = () => {
+        // Save current zoom before cleanup
+        if (kakaoMapCtxRef.current?.map) {
+          const m = kakaoMapCtxRef.current.map as { getLevel?: () => number };
+          const lv = m.getLevel?.();
+          if (typeof lv === "number") {
+            mapStateRef.current = { kakaoLevel: lv };
+          }
+        }
         kakaoMapCtxRef.current = null;
         for (const m of markers) m.setMap(null);
         el.innerHTML = "";
@@ -370,11 +402,17 @@ export function CampaignMonitoringMap({
   }, [mountGoogle, mountKakao, pinLayoutKey, pins.length, provider]);
 
   const prevSelectedIdRef = useRef<string | null>(null);
+  const prevMapEpochRef = useRef<number>(0);
 
   useEffect(() => {
-    // selectedId가 변경되지 않았으면 실행 안 함
-    if (selectedId === prevSelectedIdRef.current) return;
+    // selectedId가 변경되지 않았고 map도 remount되지 않았으면 실행 안 함
+    const selectedIdChanged = selectedId !== prevSelectedIdRef.current;
+    const mapRemounted = mapEpoch !== prevMapEpochRef.current;
+
+    if (!selectedIdChanged && !mapRemounted) return;
+
     prevSelectedIdRef.current = selectedId;
+    prevMapEpochRef.current = mapEpoch;
 
     // selectedId가 null이면 아무것도 하지 않음 (초기 상태 유지)
     if (!selectedId) return;
@@ -387,7 +425,7 @@ export function CampaignMonitoringMap({
       const ctx = kakaoMapCtxRef.current;
       if (!ctx) return;
       ctx.map.setCenter(new ctx.LatLng(pin.lat, pin.lng));
-      ctx.map.setLevel(7); // 지역 범위 확대 (level 1-5는 너무 가까움, 8-10은 너무 멈)
+      ctx.map.setLevel(7);
       return;
     }
 
@@ -395,7 +433,7 @@ export function CampaignMonitoringMap({
       const ctx = googleMapCtxRef.current;
       if (!ctx) return;
       ctx.map.panTo({ lat: pin.lat, lng: pin.lng });
-      ctx.map.setZoom(14); // 구글맵 zoom 14 = 카카오맵 level 7 정도
+      ctx.map.setZoom(14);
     }
   }, [selectedId, pins, provider, mapEpoch]);
 

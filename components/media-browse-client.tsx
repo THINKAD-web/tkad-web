@@ -145,7 +145,7 @@ export default function MediaBrowseClient({
   const [catalogPage, setCatalogPage] = useState(1);
   const [catalogPageSize, setCatalogPageSize] = useState(12);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
-  const [mapPopupOpen, setMapPopupOpen] = useState(true);
+  const [mapPopupOpen, setMapPopupOpen] = useState(false);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
@@ -252,11 +252,6 @@ export default function MediaBrowseClient({
   useEffect(() => {
     localStorage.setItem("mediaCatalogLayout", catalogCardLayout);
   }, [catalogCardLayout]);
-
-  // 테스트: 변경사항이 적용되는지 확인용 팝업
-  useEffect(() => {
-    alert("✅ 코드 변경사항이 적용되었습니다!");
-  }, []);
 
   const clearPrecisionSelections = useCallback(() => {
     setFilters((prev) => ({
