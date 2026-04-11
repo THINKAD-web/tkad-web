@@ -41,9 +41,9 @@ export function notoKrFontPathCandidates(): string[] {
   try {
     const here = dirname(fileURLToPath(import.meta.url));
     for (const name of NOTO_KR_FONT_CANDIDATES) {
-      paths.push(join(here, "..", "..", "..", "public", "fonts", name));
-      paths.push(join(here, "..", "..", "public", "fonts", name));
-      paths.push(join(here, "..", "public", "fonts", name));
+      paths.push(join(/*turbopackIgnore: true*/here, "..", "..", "..", "public", "fonts", name));
+      paths.push(join(/*turbopackIgnore: true*/here, "..", "..", "public", "fonts", name));
+      paths.push(join(/*turbopackIgnore: true*/here, "..", "public", "fonts", name));
     }
   } catch {
     /* import.meta.url 없는 환경 무시 */
