@@ -26,6 +26,8 @@ import {
   Receipt,
   FileDown,
   Save,
+  Eye,
+  Download,
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 
@@ -103,6 +105,7 @@ export default function AdminQuoteNewClient() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -773,6 +776,22 @@ export default function AdminQuoteNewClient() {
             </Button>
             <Button
               type="button"
+              variant="outline"
+              className="border-navy/20 text-navy hover:bg-navy/5"
+              disabled={
+                selected.size === 0 ||
+                days <= 0 ||
+                !clientCompany.trim() ||
+                !clientName.trim() ||
+                !clientPhone.trim()
+              }
+              onClick={() => setShowPreview((v) => !v)}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              {showPreview ? "미리보기 닫기" : "미리보기"}
+            </Button>
+            <Button
+              type="button"
               className="bg-navy text-white hover:bg-navy-light"
               disabled={
                 pdfLoading ||
@@ -855,6 +874,138 @@ export default function AdminQuoteNewClient() {
           )}
         </CardContent>
       </Card>
+
+      {showPreview && selected.size > 0 && days > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg text-navy">견적서 미리보기</CardTitle>
+              <button
+                onClick={async () => {
+                  try {
+                    const { default: html2canvas } = await import("html2canvas");
+                    const element = document.getElementById("quote-preview");
+                    if (!element) return;
+                    const canvas = await html2canvas(element, {
+                      backgroundColor: "#ffffff",
+                      scale: 2,
+                    });
+                    const link = document.createElement("a");
+                    link.href = canvas.toDataURL("image/png");
+                    link.download = `quote-${quoteNumber}.png`;
+                    link.click();
+                  } catch (e) {
+                    console.error("캡처 실패:", e);
+                  }
+                }}
+                className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
+              >
+                <Download className="h-4 w-4" />
+                이미지 캡처
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div
+              id="quote-preview"
+              className="mx-auto max-w-2xl space-y-4 rounded-lg border bg-white p-6"
+            >
+              {/* 헤더 */}
+              <div className="border-b pb-4">
+                <h2 className="text-2xl font-bold text-navy">見積書</h2>
+                <p className="text-sm text-muted-foreground">Quote No. {quoteNumber}</p>
+              </div>
+
+              {/* 클라이언트 정보 */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="font-semibold text-navy">회사명</p>
+                  <p>{clientCompany}</p>
+                  <p className="font-semibold text-navy">담당자</p>
+                  <p>{clientName}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-navy">전화</p>
+                  <p>{clientPhone}</p>
+                  <p className="font-semibold text-navy">이메일</p>
+                  <p>{clientEmail || "—"}</p>
+                </div>
+              </div>
+
+              {/* 기간 및 날짜 */}
+              <div className="grid grid-cols-2 gap-4 rounded-lg bg-slate-50 p-3 text-sm">
+                <div>
+                  <p className="text-xs text-muted-foreground">견적 기간</p>
+                  <p className="font-semibold">{campaignPeriodLabel}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">발행일 / 유효기간</p>
+                  <p className="font-semibold">{issueDatePdf} ~ {validUntilPdf}</p>
+                </div>
+              </div>
+
+              {/* 항목 테이블 */}
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b-2 border-navy">
+                    <th className="text-left py-2">매체명</th>
+                    <th className="text-right py-2 w-20">수량</th>
+                    <th className="text-right py-2 w-28">금액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lineItems.map((item) => (
+                    <tr key={item.mediaId} className="border-b">
+                      <td className="py-2">
+                        <div className="font-semibold text-navy">{item.mediaName}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {item.spec} · {item.period}
+                        </div>
+                      </td>
+                      <td className="text-right py-2 tabular-nums">{item.quantity}</td>
+                      <td className="text-right py-2 tabular-nums">{formatWon(item.amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* 합계 */}
+              <div className="space-y-1 border-t pt-3 text-sm">
+                <div className="flex justify-between">
+                  <span>소계</span>
+                  <span className="font-semibold tabular-nums">
+                    {formatWon(totals.linesSubtotalWon)}
+                  </span>
+                </div>
+                {totals.discountTotalWon > 0 && (
+                  <div className="flex justify-between text-red-700">
+                    <span>할인</span>
+                    <span className="font-semibold tabular-nums">
+                      −{formatWon(totals.discountTotalWon)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span>공급가</span>
+                  <span className="font-semibold tabular-nums">
+                    {formatWon(totals.supplyWon)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>부가세</span>
+                  <span className="font-semibold tabular-nums">
+                    {formatWon(totals.vatWon)}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t pt-2 text-lg font-bold text-navy">
+                  <span>합계</span>
+                  <span className="tabular-nums">{formatWon(totals.totalWon)}</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
