@@ -388,54 +388,83 @@ export default function AdminQuoteNewClient() {
     }
     setPdfLoading(true);
     try {
-      const res = await fetch("/api/admin/quotes/pdf", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          quoteNumber,
-          issueDate: issueDatePdf,
-          validUntil: validUntilPdf,
-          clientCompany: clientCompany.trim(),
-          clientName: clientName.trim(),
-          clientPhone: clientPhone.trim(),
-          clientEmail: clientEmail.trim() || undefined,
-          periodLabel: campaignPeriodLabel,
-          vatIncluded,
-          discountTotalWon: totals.discountTotalWon,
-          discountSummary,
-          rows: pdfPostRows,
-          linesSubtotalWon: totals.linesSubtotalWon,
-          supplyWon: totals.supplyWon,
-          vatWon: totals.vatWon,
-          totalWon: totals.totalWon,
-          isKo,
-        }),
-      });
-      if (!res.ok) {
-        let msg = t("pdfFailed");
-        try {
-          const j = (await res.json()) as { error?: string };
-          if (j.error) msg = j.error;
-        } catch {
-          /* ignore */
+      // 먼저 서버 API 시도
+      try {
+        const res = await fetch("/api/admin/quotes/pdf", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            quoteNumber,
+            issueDate: issueDatePdf,
+            validUntil: validUntilPdf,
+            clientCompany: clientCompany.trim(),
+            clientName: clientName.trim(),
+            clientPhone: clientPhone.trim(),
+            clientEmail: clientEmail.trim() || undefined,
+            periodLabel: campaignPeriodLabel,
+            vatIncluded,
+            discountTotalWon: totals.discountTotalWon,
+            discountSummary,
+            rows: pdfPostRows,
+            linesSubtotalWon: totals.linesSubtotalWon,
+            supplyWon: totals.supplyWon,
+            vatWon: totals.vatWon,
+            totalWon: totals.totalWon,
+            isKo,
+          }),
+        });
+        if (res.ok) {
+          const ct = res.headers.get("content-type") ?? "";
+          if (ct.includes("application/pdf")) {
+            const blob = await res.blob();
+            if (blob.size >= 64) {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `thinkad-quote-${quoteNumber}.pdf`;
+              a.click();
+              URL.revokeObjectURL(url);
+              return; // 성공!
+            }
+          }
         }
-        throw new Error(msg);
+      } catch {
+        // 서버 API 실패, 클라이언트 방식 진행
       }
-      const ct = res.headers.get("content-type") ?? "";
-      if (!ct.includes("application/pdf")) {
-        throw new Error(t("pdfFailed"));
-      }
-      const blob = await res.blob();
-      if (blob.size < 64) {
-        throw new Error(t("pdfFailed"));
-      }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `thinkad-quote-${quoteNumber}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
+
+      // 클라이언트 사이드에서 미리보기 이미지로 PDF 생성
+      const { default: html2canvas } = await import("html2canvas");
+      const { jsPDF } = await import("jspdf");
+
+      // 임시로 미리보기 표시
+      setShowPreview(true);
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const element = document.getElementById("quote-preview");
+      if (!element) throw new Error("미리보기를 찾을 수 없습니다");
+
+      const canvas = await html2canvas(element, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        allowTaint: true,
+        useCORS: true,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgWidth = 190;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+
+      pdf.save(`thinkad-quote-${quoteNumber}.pdf`);
+      toast("success", "견적서 PDF가 다운로드되었습니다");
     } catch (e) {
       const msg = e instanceof Error ? e.message : t("pdfFailed");
       setPdfError(msg);
