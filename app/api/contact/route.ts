@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     return json({ success: true }, { status: 201 });
   }
 
-  const { company, name, phone, email, budget, message } = body as Record<
+  const { company, name, phone, email, inquiryType, budget, message } = body as Record<
     string,
     string | undefined
   >;
@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
   if (!name?.trim()) errors.push("name");
   if (!phone?.trim() || !PHONE_RE.test(phone ?? "")) errors.push("phone");
   if (!email?.trim() || !EMAIL_RE.test(email ?? "")) errors.push("email");
+  if (!inquiryType?.trim()) errors.push("inquiryType");
   if (!message?.trim()) errors.push("message");
 
   if (errors.length > 0) {
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
         name: name!.trim(),
         phone: phone!.trim(),
         email: email?.trim() ?? "",
+        inquiryType: inquiryType?.trim() ?? "",
         budget: budget?.trim() ?? "",
         message: message!.trim(),
       },
@@ -103,6 +105,7 @@ export async function POST(request: NextRequest) {
         name: name!.trim(),
         phone: phone!.trim(),
         email: email?.trim() ?? "",
+        inquiryType: inquiryType?.trim() ?? "",
         budget: budget?.trim() ?? "",
         message: message!.trim(),
       });

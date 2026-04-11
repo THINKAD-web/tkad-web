@@ -41,6 +41,7 @@ type FormFields = {
   name: string;
   phone: string;
   email: string;
+  inquiryType: string;
   budget: string;
   message: string;
   website: string; // honeypot
@@ -65,6 +66,7 @@ function validate(form: FormFields): FormErrors {
   } else if (!EMAIL_RE.test(form.email)) {
     errors.email = "올바른 이메일 형식이 아닙니다.";
   }
+  if (!form.inquiryType.trim()) errors.inquiryType = "문의 유형을 선택해 주세요.";
   if (!form.message.trim()) errors.message = "문의 내용을 입력해 주세요.";
   return errors;
 }
@@ -91,6 +93,7 @@ export default function ContactPage() {
     name: "",
     phone: "",
     email: "",
+    inquiryType: "",
     budget: "",
     message: "",
     website: "",
@@ -456,21 +459,42 @@ export default function ContactPage() {
                           {fieldError("email")}
                         </div>
                       </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("contact.budget")}
-                        </label>
-                        <select
-                          className="w-full rounded-md border px-3 py-2 text-sm"
-                          value={form.budget}
-                          onChange={(e) => updateField("budget", e.target.value)}
-                        >
-                          <option value="">{t("contact.budgetPlaceholder")}</option>
-                          <option value="under1000">1,000만원 이하</option>
-                          <option value="1000to3000">1,000~3,000만원</option>
-                          <option value="3000to5000">3,000~5,000만원</option>
-                          <option value="over5000">5,000만원 이상</option>
-                        </select>
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium text-navy">
+                            {t("contact.inquiryType")} <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            className={`w-full rounded-md border px-3 py-2 text-sm ${inputErrorClass("inquiryType")}`}
+                            value={form.inquiryType}
+                            onChange={(e) => updateField("inquiryType", e.target.value)}
+                            onBlur={() => handleBlur("inquiryType")}
+                          >
+                            <option value="">{t("contact.inquiryTypePlaceholder")}</option>
+                            <option value="quote">{t("contact.inquiryTypeQuote")}</option>
+                            <option value="media">{t("contact.inquiryTypeMedia")}</option>
+                            <option value="campaign">{t("contact.inquiryTypeCampaign")}</option>
+                            <option value="partnership">{t("contact.inquiryTypePartnership")}</option>
+                            <option value="other">{t("contact.inquiryTypeOther")}</option>
+                          </select>
+                          {fieldError("inquiryType")}
+                        </div>
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium text-navy">
+                            {t("contact.budget")}
+                          </label>
+                          <select
+                            className="w-full rounded-md border px-3 py-2 text-sm"
+                            value={form.budget}
+                            onChange={(e) => updateField("budget", e.target.value)}
+                          >
+                            <option value="">{t("contact.budgetPlaceholder")}</option>
+                            <option value="under1000">1,000만원 이하</option>
+                            <option value="1000to3000">1,000~3,000만원</option>
+                            <option value="3000to5000">3,000~5,000만원</option>
+                            <option value="over5000">5,000만원 이상</option>
+                          </select>
+                        </div>
                       </div>
                       <div>
                         <label className="mb-1.5 block text-sm font-medium text-navy">

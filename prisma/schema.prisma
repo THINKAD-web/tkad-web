@@ -353,6 +353,7 @@ model ContactInquiry {
   name      String
   phone     String
   email     String?
+  inquiryType String?  @map("inquiry_type")
   budget    String?
   message   String
   createdAt DateTime @default(now()) @map("created_at")

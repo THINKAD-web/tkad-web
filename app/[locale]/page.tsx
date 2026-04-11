@@ -290,7 +290,7 @@ function HomeContent({
         <div className="absolute inset-0 hero-pattern opacity-50" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="count-up">
-            <ScrollStagger className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-6 lg:gap-8">
+            <ScrollStagger className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
               {[
                 {
                   animClass: "stat-count-up stat-count-500",
@@ -307,14 +307,6 @@ function HomeContent({
                 {
                   animClass: "stat-count-up stat-count-15",
                   label: isKo ? "경력" : "Years Experience",
-                },
-                {
-                  animClass: "stat-count-up stat-count-100",
-                  label: isKo ? "전국 커버리지" : "National Coverage",
-                },
-                {
-                  animClass: "stat-count-up stat-count-50",
-                  label: isKo ? "글로벌 네트워크" : "Global Network",
                 },
               ].map((stat) => (
                 <div key={stat.label} className="stat-divider text-center">
@@ -735,7 +727,7 @@ function HomeContent({
         </div>
         <div className="marquee-container">
           <div className="marquee-track">
-            {[...partnerLogos, ...partnerLogos].map((name, i) => (
+            {partnerLogos.map((name, i) => (
               <div
                 key={`${name}-${i}`}
                 className="mx-8 flex h-12 w-28 shrink-0 items-center justify-center rounded-xl bg-white px-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-slate-100 transition-all duration-300 hover:shadow-md"

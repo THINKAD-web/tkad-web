@@ -349,7 +349,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "1",
     name: "코엑스 K-POP 스퀘어",
-    nameEn: "COEX K-POP Square LED",
+    nameEn: "COEX K-POP Square LED Display",
     location: "서울 강남구 영동대로 513 코엑스",
     locationEn: "COEX, 513 Yeongdong-daero, Gangnam-gu, Seoul",
     region: "seoul",
@@ -395,7 +395,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "2",
     name: "강남대로 미디어폴 G-LIGHT",
-    nameEn: "Gangnam-daero Media Pole G-LIGHT",
+    nameEn: "G-LIGHT Media Poles on Gangnam-daero",
     location: "강남역-신논현역 760m 구간",
     locationEn: "760m section between Gangnam Stn – Sinnonhyeon Stn",
     region: "seoul",
@@ -436,7 +436,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "3",
     name: "신논현역 DSG빌딩 전광판",
-    nameEn: "Sinnonhyeon DSG Building LED",
+    nameEn: "Sinnonhyeon Station DSG Building LED Display",
     location: "강남대로 신논현역 사거리",
     locationEn: "Sinnonhyeon Stn intersection, Gangnam-daero",
     region: "seoul",
@@ -468,7 +468,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "4",
     name: "청담동 학동사거리 SS타워 전광판",
-    nameEn: "Cheongdam SS Tower LED",
+    nameEn: "Cheongdam SS Tower LED Display",
     location: "서울 강남구 학동사거리",
     locationEn: "Hakdong intersection, Gangnam-gu, Seoul",
     region: "seoul",
@@ -501,7 +501,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "5",
     name: "성수동 반도 외벽광고",
-    nameEn: "Seongsu Bando Exterior Ad",
+    nameEn: "Seongsu Bando Building Exterior Advertisement",
     location: "서울 성동구 성수동2가",
     locationEn: "Seongsu-dong 2-ga, Seongdong-gu, Seoul",
     region: "seoul",
@@ -540,7 +540,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "6",
     name: "지하철 2호선 성수역 디지털광고",
-    nameEn: "Seongsu Station Line 2 Digital Ad",
+    nameEn: "Line 2 Seongsu Station Digital Advertisement",
     location: "서울 성동구 성수역",
     locationEn: "Seongsu Station, Seoul",
     region: "seoul",
@@ -572,7 +572,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "10",
     name: "코엑스 파르나스 미디어타워",
-    nameEn: "COEX Parnas Media Tower",
+    nameEn: "COEX Parnas Media Tower Digital Display",
     location: "삼성역 코엑스",
     locationEn: "COEX, Samsung Station, Seoul",
     region: "seoul",
@@ -616,7 +616,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "7",
     name: "서면역 디지털 스크린",
-    nameEn: "Seomyeon Station Digital Screen",
+    nameEn: "Seomyeon Station Digital Display",
     location: "부산 부산진구",
     locationEn: "Busanjin-gu, Busan",
     region: "busan",
@@ -642,7 +642,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "8",
     name: "부산역 지하철 광고",
-    nameEn: "Busan Station Subway Ad",
+    nameEn: "Busan KTX Station Subway Advertisement",
     location: "부산 동구",
     locationEn: "Dong-gu, Busan",
     region: "busan",
@@ -668,7 +668,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "9",
     name: "제주공항 디지털 광고",
-    nameEn: "Jeju Airport Digital Ad",
+    nameEn: "Jeju International Airport Digital Advertisement",
     location: "제주시",
     locationEn: "Jeju City",
     region: "jeju",
@@ -694,7 +694,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "11",
     name: "중문관광단지 입구 빌보드",
-    nameEn: "Jungmun Resort Entrance Billboard",
+    nameEn: "Jungmun Tourist District Entrance Billboard",
     location: "서귀포시",
     locationEn: "Seogwipo",
     region: "jeju",
@@ -720,7 +720,7 @@ const rawMediaCatalog: MediaItem[] = [
   {
     id: "12",
     name: "전국 시내버스 루프",
-    nameEn: "National City Bus Loop",
+    nameEn: "Nationwide City Bus Interior Advertising",
     location: "전국 주요 도시",
     locationEn: "Major cities nationwide",
     region: "national",
