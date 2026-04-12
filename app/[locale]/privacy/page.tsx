@@ -240,7 +240,6 @@ function PrivacyContent({
                     <p className="text-slate-600">
                       <strong>주식회사 싱커드 (THINKAD)</strong><br />
                       사업자등록번호: 319-86-00382<br />
-                      대표: 이재한<br />
                       주소: 서울특별시 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호<br />
                       전화: 02-515-2772<br />
                       이메일:{" "}
@@ -250,7 +249,6 @@ function PrivacyContent({
                     <p className="text-slate-600">
                       <strong>THINKAD Co., Ltd.</strong><br />
                       Business Registration: 319-86-00382<br />
-                      CEO: Jaehan Lee<br />
                       Address: #1102, Seongsu A-One Knowledge Industry Center, 48 Ttukseom-ro 17ga-gil, Seongdong-gu, Seoul<br />
                       Phone: +82-2-515-2772<br />
                       Email:{" "}
