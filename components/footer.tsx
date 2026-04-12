@@ -7,9 +7,9 @@ export default function Footer() {
   const t = useTranslations();
 
   const navItems = [
-    { href: "/", label: t("nav.home") },
-    { href: "/media", label: t("nav.media") },
     { href: "/services", label: t("nav.services") },
+    { href: "/media", label: t("footer.linkFeaturedMedia") },
+    { href: "/cases", label: t("nav.cases") },
     { href: "/contact", label: t("nav.contact") },
     { href: "/privacy", label: t("footer.privacy") },
   ];
