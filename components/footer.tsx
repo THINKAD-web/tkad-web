@@ -8,10 +8,10 @@ export default function Footer() {
 
   const navItems = [
     { href: "/", label: t("nav.home") },
-    { href: "/about", label: t("nav.about") },
     { href: "/media", label: t("nav.media") },
-    { href: "/cases", label: t("nav.cases") },
+    { href: "/services", label: t("nav.services") },
     { href: "/contact", label: t("nav.contact") },
+    { href: "/privacy", label: t("footer.privacy") },
   ];
 
   const serviceItems = [

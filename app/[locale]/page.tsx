@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -42,18 +41,10 @@ import {
   PhoneCall,
   Flame,
   Building2,
-  BookOpen,
-  Newspaper,
-  MessageCircle,
 } from "lucide-react";
 
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 
-const HomeRecentlyViewed = dynamic(
-  () => import("@/components/home-recently-viewed"),
-  { loading: () => null },
-);
-const NewsletterForm = dynamic(() => import("@/components/newsletter-form"));
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 const ScrollStagger = dynamic(() =>
   import("@/components/scroll-stagger").then((m) => ({
@@ -707,35 +698,24 @@ function HomeContent({
         </div>
       </section>
 
-      {/* Recently Viewed */}
-      <HomeRecentlyViewed locale={locale} />
-
-      {/* Partner Logos Marquee */}
-      <section className="section-light border-y py-28 overflow-hidden">
+      {/* Partner Logos */}
+      <section className="section-light border-y py-20 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="fade-in">
-            <div className="mb-10 flex flex-col items-center gap-3 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-sm font-bold text-gold-dark">
-                <Building2 className="h-4 w-4" />
-                {isKo ? "100+ 대기업 파트너" : "100+ Enterprise Partners"}
-              </div>
-              <p className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-                {isKo ? "신뢰하는 파트너사" : "Trusted Partners"}
-              </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {partnerLogos.map((name) => (
+                <div
+                  key={name}
+                  className="flex h-11 w-24 items-center justify-center rounded-xl bg-white px-3 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-slate-100"
+                >
+                  <span className="text-xs font-bold text-navy/40">{name}</span>
+                </div>
+              ))}
             </div>
+            <p className="mt-8 text-center text-sm font-semibold text-muted-foreground">
+              {isKo ? "100+ 대기업과 파트너십" : "Partnership with 100+ Leading Companies"}
+            </p>
           </ScrollAnimate>
-        </div>
-        <div className="marquee-container">
-          <div className="marquee-track">
-            {partnerLogos.map((name, i) => (
-              <div
-                key={`${name}-${i}`}
-                className="mx-8 flex h-12 w-28 shrink-0 items-center justify-center rounded-xl bg-white px-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-slate-100 transition-all duration-300 hover:shadow-md"
-              >
-                <span className="text-sm font-bold text-navy/40">{name}</span>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -867,158 +847,6 @@ function HomeContent({
               </Button>
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* Blog / Insight Links */}
-      <section className="section-white py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <div className="text-center">
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "인사이트" : "Insights"}
-              </p>
-              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {isKo ? "OOH 광고 인사이트" : "OOH Advertising Insights"}
-              </h2>
-              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
-                {isKo
-                  ? "최신 OOH 광고 트렌드와 전문가 인사이트를 확인하세요"
-                  : "Stay up to date with the latest OOH advertising trends and expert insights"}
-              </p>
-            </div>
-          </ScrollAnimate>
-          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-            {[
-              {
-                icon: BookOpen,
-                title: isKo ? "2025 OOH 광고 트렌드 리포트" : "2025 OOH Ad Trends Report",
-                desc: isKo
-                  ? "올해 주목해야 할 OOH 광고 트렌드와 디지털 사이니지의 미래를 분석합니다."
-                  : "Analysis of this year's OOH advertising trends and the future of digital signage.",
-                tag: isKo ? "트렌드" : "Trends",
-              },
-              {
-                icon: BarChart3,
-                title: isKo ? "OOH ROI 극대화 가이드" : "OOH ROI Maximization Guide",
-                desc: isKo
-                  ? "데이터 기반으로 OOH 광고 ROI를 극대화하는 5가지 전략을 소개합니다."
-                  : "5 data-driven strategies to maximize your OOH advertising ROI.",
-                tag: isKo ? "가이드" : "Guide",
-              },
-              {
-                icon: Newspaper,
-                title: isKo ? "성공적인 매체 선정 체크리스트" : "Media Selection Checklist",
-                desc: isKo
-                  ? "광고 효과를 극대화하는 매체 선정 기준과 실무 체크리스트를 공유합니다."
-                  : "Practical checklist and criteria for selecting media that maximize advertising effectiveness.",
-                tag: isKo ? "실무 팁" : "Pro Tips",
-              },
-            ].map((item, i) => (
-              <ScrollAnimate key={item.title} delay={i * 100}>
-                <Card className="group cursor-pointer border-0 bg-gradient-to-b from-white to-slate-50/50 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl">
-                  <CardHeader className="pb-3">
-                    <Badge className="w-fit bg-navy/5 text-navy text-xs font-medium">
-                      {item.tag}
-                    </Badge>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/10">
-                        <item.icon className="h-5 w-5 text-gold" />
-                      </div>
-                      <CardTitle className="text-base font-bold text-navy">
-                        {item.title}
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-sm leading-relaxed">
-                      {item.desc}
-                    </CardDescription>
-                    <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-gold opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      {isKo ? "읽어보기" : "Read more"}
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </ScrollAnimate>
-            ))}
-          </div>
-          <div className="mt-10 text-center">
-            <Link href="/resources">
-              <Button
-                variant="outline"
-                size="lg"
-                className="btn-navy-outline rounded-full px-8 font-semibold"
-              >
-                {isKo ? "모든 인사이트 보기" : "View All Insights"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter Subscription */}
-      <section className="section-navy relative border-y py-28 overflow-hidden">
-        <div className="absolute inset-0 hero-pattern opacity-30" />
-        <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-gold">
-              <Newspaper className="h-4 w-4" />
-              Newsletter
-            </div>
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">
-              {isKo
-                ? "OOH 광고 뉴스레터 구독"
-                : "Subscribe to OOH Newsletter"}
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-slate-300/80">
-              {isKo
-                ? "매월 최신 OOH 광고 트렌드, 성공 사례, 업계 소식을 이메일로 받아보세요."
-                : "Receive the latest OOH advertising trends, case studies, and industry news monthly."}
-            </p>
-            <NewsletterForm />
-            <p className="mt-3 text-xs text-slate-400">
-              {isKo
-                ? "스팸 없이, 언제든 구독 해지 가능합니다."
-                : "No spam. Unsubscribe anytime."}
-            </p>
-          </ScrollAnimate>
-        </div>
-      </section>
-
-      {/* Kakao Channel Banner */}
-      <section className="bg-[#FEE500] py-10">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 px-4 text-center sm:flex-row sm:justify-between sm:text-left">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#3C1E1E] text-2xl shadow-md">
-              <MessageCircle className="h-7 w-7 text-[#FEE500]" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-[#3C1E1E]">
-                {isKo ? "카카오채널 친구 추가" : "Add Kakao Channel"}
-              </h3>
-              <p className="text-sm text-[#3C1E1E]/70">
-                {isKo
-                  ? "친구 추가하고 실시간 상담 & 특별 혜택 받으세요!"
-                  : "Add us and get real-time support & exclusive benefits!"}
-              </p>
-            </div>
-          </div>
-          <a
-            href={KAKAO_CHANNEL_PUBLIC_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto touch-manipulation"
-          >
-            <Button
-              size="lg"
-              className="h-12 w-full min-h-11 rounded-full bg-[#3C1E1E] px-8 font-bold text-[#FEE500] transition-all duration-300 hover:bg-[#2A1515] sm:w-auto"
-            >
-              {isKo ? "채널 추가하기" : "Add Channel"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </a>
         </div>
       </section>
 
