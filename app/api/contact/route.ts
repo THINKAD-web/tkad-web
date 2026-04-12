@@ -6,6 +6,13 @@ import { getContactConfirmationEmail } from "@/lib/email/contact-confirmation";
 import { getContactAdminNotifyEmail } from "@/lib/email/contact-admin-notify";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import { verifyTurnstileToken } from "@/lib/turnstile-verify";
+import {
+  budgetLabel,
+  composeStoredMessage,
+  inquiryTypeLabel,
+  parseBudgetCode,
+  parseInquiryTypeCode,
+} from "@/lib/contact-inquiry-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -18,36 +25,6 @@ function json(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
   headers.set("Cache-Control", "no-store, private");
   return NextResponse.json(body, { ...init, headers });
-}
-
-/** Budget option values from contact-client selects + legacy keys. */
-function budgetDisplay(raw: string | undefined): string {
-  const v = raw?.trim() ?? "";
-  if (!v) return "";
-  const map: Record<string, string> = {
-    under10m: "1천만 이하",
-    under_10m: "1천만 이하",
-    "10to50m": "1천~5천만",
-    "10m_50m": "1천~5천만",
-    "50to100m": "5천만~1억",
-    over100m: "1억 이상",
-    over_100m: "1억 이상",
-  };
-  return map[v] ?? v;
-}
-
-/** Inquiry type codes from contact-client + legacy. */
-function inquiryTypeDisplay(raw: string | undefined): string {
-  const v = raw?.trim() ?? "";
-  if (!v) return "";
-  const map: Record<string, string> = {
-    media: "매체 문의",
-    campaign: "캠페인 상담",
-    quote: "견적 요청",
-    partnership: "제휴 문의",
-    other: "기타",
-  };
-  return map[v] ?? v;
 }
 
 export async function POST(request: NextRequest) {
@@ -78,25 +55,33 @@ export async function POST(request: NextRequest) {
     company,
     name,
     phone,
-    email,
-    inquiryType,
-    budget,
-    message,
-    cfTurnstileToken,
+    email: emailRaw,
+    budget: budgetRaw,
+    message: messageRaw,
+    inquiryType: inquiryRaw,
+    locale: localeRaw,
     turnstileToken,
   } = body as Record<string, string | undefined>;
 
-  const cfToken = cfTurnstileToken ?? turnstileToken;
-  const turnstile = await verifyTurnstileToken(cfToken, ip);
+  const locale = localeRaw === "en" ? "en" : "ko";
+
+  const turnstile = await verifyTurnstileToken(turnstileToken, ip);
   if (!turnstile.ok) {
-    return json({ error: "CAPTCHA verification failed" }, { status: 403 });
+    return json({ error: "Turnstile verification failed" }, { status: 403 });
   }
+
+  const inquiryCode = parseInquiryTypeCode(inquiryRaw);
+  const budgetCode = parseBudgetCode(budgetRaw);
 
   const errors: string[] = [];
   if (!name?.trim()) errors.push("name");
   if (!phone?.trim() || !PHONE_RE.test(phone ?? "")) errors.push("phone");
-  if (email?.trim() && !EMAIL_RE.test(email)) errors.push("email");
-  if (!message?.trim()) errors.push("message");
+  if (!messageRaw?.trim()) errors.push("message");
+  if (!inquiryCode) errors.push("inquiryType");
+  if (!budgetCode) errors.push("budget");
+
+  const emailOpt = emailRaw?.trim();
+  if (emailOpt && !EMAIL_RE.test(emailOpt)) errors.push("email");
 
   if (errors.length > 0) {
     return json(
@@ -104,6 +89,18 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
+
+  const inquiry = inquiryCode!;
+  const budget = budgetCode!;
+
+  const inquiryLbl = inquiryTypeLabel(inquiry, locale);
+  const budgetLbl = budgetLabel(budget, locale);
+  const composedMessage = composeStoredMessage(
+    inquiryLbl,
+    messageRaw!.trim(),
+    locale,
+    budgetLbl,
+  );
 
   if (!isDatabaseConfigured()) {
     return json(
@@ -115,21 +112,7 @@ export async function POST(request: NextRequest) {
   const companyVal = company?.trim() ?? "";
   const nameVal = name!.trim();
   const phoneVal = phone!.trim();
-  const emailVal = email?.trim() ?? "";
-  const inquiryRaw = inquiryType?.trim() ?? "";
-  const budgetRaw = budget?.trim() ?? "";
-  const inquiryLabel = inquiryTypeDisplay(inquiryRaw) || inquiryRaw;
-  const budgetLabel = budgetDisplay(budgetRaw) || budgetRaw;
-  const messageVal = message!.trim();
-  const metaLines: string[] = [];
-  if (inquiryLabel) metaLines.push(`[문의 유형: ${inquiryLabel}]`);
-  if (budgetLabel) metaLines.push(`[예상 예산: ${budgetLabel}]`);
-  const composedMessage =
-    metaLines.length > 0
-      ? `${metaLines.join("\n")}\n\n${messageVal}`
-      : messageVal;
-
-  const hasValidEmail = !!(emailVal && EMAIL_RE.test(emailVal));
+  const hasValidEmail = !!(emailOpt && EMAIL_RE.test(emailOpt));
 
   try {
     const db = getPrisma();
@@ -138,15 +121,14 @@ export async function POST(request: NextRequest) {
       name: nameVal,
       phone: phoneVal,
       message: composedMessage,
-      ...(inquiryLabel ? { inquiryType: inquiryLabel } : {}),
-      ...(budgetLabel ? { budget: budgetLabel } : {}),
     };
 
     try {
       await db.contactInquiry.create({
         data: {
           ...base,
-          ...(hasValidEmail ? { email: emailVal } : {}),
+          budget: budgetLbl,
+          ...(hasValidEmail ? { email: emailOpt } : {}),
         },
       });
     } catch (firstErr) {
@@ -154,43 +136,26 @@ export async function POST(request: NextRequest) {
       try {
         await db.contactInquiry.create({
           data: {
-            company: companyVal,
-            name: nameVal,
-            phone: phoneVal,
-            message: composedMessage,
-            ...(hasValidEmail ? { email: emailVal } : { email: "" }),
+            ...base,
+            ...(hasValidEmail ? { email: emailOpt } : { email: "" }),
           },
         });
       } catch (secondErr) {
         console.error("[contact] DB error (compat row):", secondErr);
-        const errMsg = secondErr instanceof Error ? secondErr.message : String(secondErr);
-        return json(
-          {
-            error: "문의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
-            detail: errMsg,
-          },
-          { status: 500 },
-        );
+        return json({ error: "Failed to save inquiry" }, { status: 500 });
       }
     }
   } catch (err) {
-    const errMsg = err instanceof Error ? err.message : String(err);
-    console.error("[contact] DB error:", errMsg, err);
-    return json(
-      {
-        error: "문의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
-        detail: errMsg,
-      },
-      { status: 500 },
-    );
+    console.error("[contact] DB error:", err);
+    return json({ error: "Failed to save inquiry" }, { status: 500 });
   }
 
   void postInternalAlert({
     type: "contact_inquiry",
     title: "새 문의 접수",
-    body: `${companyVal || "(회사미입력)"} / ${nameVal} / ${phoneVal} · ${inquiryLabel || "—"} · ${budgetLabel || "—"}`,
+    body: `${company?.trim() || "(회사미입력)"} / ${name!.trim()} / ${phone!.trim()} · ${inquiryLbl} · ${budgetLbl}`,
     meta: {
-      email: emailVal,
+      email: emailOpt ?? "",
       source: "contact_form",
     },
   }).catch(() => {});
@@ -199,12 +164,11 @@ export async function POST(request: NextRequest) {
   if (alertTo) {
     try {
       const { subject, text, html } = getContactAdminNotifyEmail({
-        company: companyVal,
-        name: nameVal,
-        phone: phoneVal,
-        email: emailVal,
-        inquiryType: inquiryLabel,
-        budget: budgetLabel,
+        company: company?.trim() ?? "",
+        name: name!.trim(),
+        phone: phone!.trim(),
+        email: emailOpt ?? "",
+        budget: budgetLbl,
         message: composedMessage,
       });
       await sendEmail({ to: alertTo, subject, text, html });
@@ -213,13 +177,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (hasValidEmail) {
+  if (emailOpt && EMAIL_RE.test(emailOpt)) {
     try {
       const { subject, text, html } = getContactConfirmationEmail({
         name: name?.trim(),
       });
       await sendEmail({
-        to: emailVal,
+        to: emailOpt,
         subject,
         text,
         html,

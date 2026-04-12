@@ -1,13 +1,22 @@
-import ContactPage from "./contact-client";
+import { setRequestLocale } from "next-intl/server";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
+import ContactPageHero from "@/components/contact-page-hero";
+import ContactPageContent from "@/components/contact-page-content";
 
-/**
- * Bypass ISR cache — always serve fresh content.
- * The layout sets revalidate=3600 which can cause stale cached pages
- * to persist after deployments. force-dynamic ensures every request
- * gets the latest server-rendered HTML.
- */
 export const dynamic = "force-dynamic";
 
-export default function ContactPageWrapper() {
-  return <ContactPage />;
+export default async function ContactPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const locale = await resolveLocaleParam(params);
+  setRequestLocale(locale);
+
+  return (
+    <>
+      <ContactPageHero locale={locale} />
+      <ContactPageContent />
+    </>
+  );
 }
