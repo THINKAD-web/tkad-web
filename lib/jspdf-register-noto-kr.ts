@@ -8,8 +8,7 @@
  */
 import type { jsPDF } from "jspdf";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { basename, join } from "node:path";
 import { NOTO_KR_FONT_FAMILY } from "@/lib/jspdf-kr-font-constants";
 
 /** VFS 등록 시 파일명과 바이트가 일치해야 함 — 후보 파일마다 별도 이름 사용 */
@@ -22,31 +21,27 @@ function isVerboseFontLog(): boolean {
   return process.env.QUOTE_PDF_FONT_DEBUG === "1";
 }
 
-/** Vercel·로컬 등에서 `process.cwd()`와 무관하게 `public/fonts`를 찾기 위한 후보 경로 */
+/**
+ * `public/fonts` 후보 경로 목록.
+ *
+ * NOTE: Vercel/Turbopack NFT(Node File Trace)가 모듈 그래프 전체를 트레이스하지
+ * 않도록, `import.meta.url`/`fileURLToPath` 같은 동적 파일시스템 연산은 피한다.
+ * 공식 배포(Vercel)에서는 `process.cwd()`가 프로젝트 루트를 가리키므로 이것으로
+ * 충분하다. 추가 경로가 필요한 환경은 `QUOTE_PDF_KR_FONT_PATH`로 지정한다.
+ */
 export function notoKrFontPathCandidates(): string[] {
-  const cwd = process.cwd();
   const custom = process.env.QUOTE_PDF_KR_FONT_PATH?.trim();
   const paths: string[] = [];
 
   if (custom) {
-    paths.push(join(cwd, custom));
+    paths.push(join(/*turbopackIgnore: true*/ process.cwd(), custom));
     if (custom.startsWith("/")) paths.push(custom);
   }
 
   for (const name of NOTO_KR_FONT_CANDIDATES) {
-    paths.push(join(cwd, "public", "fonts", name));
-  }
-
-  // 빌드 산출물 기준 (일부 배포에서 chunk 위치 기준)
-  try {
-    const here = dirname(fileURLToPath(import.meta.url));
-    for (const name of NOTO_KR_FONT_CANDIDATES) {
-      paths.push(join(/*turbopackIgnore: true*/here, "..", "..", "..", "public", "fonts", name));
-      paths.push(join(/*turbopackIgnore: true*/here, "..", "..", "public", "fonts", name));
-      paths.push(join(/*turbopackIgnore: true*/here, "..", "public", "fonts", name));
-    }
-  } catch {
-    /* import.meta.url 없는 환경 무시 */
+    paths.push(
+      join(/*turbopackIgnore: true*/ process.cwd(), "public", "fonts", name),
+    );
   }
 
   const seen = new Set<string>();

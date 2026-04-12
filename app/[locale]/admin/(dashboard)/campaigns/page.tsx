@@ -20,6 +20,7 @@ import {
 import dynamic from "next/dynamic";
 import {
   CampaignStatus,
+  DOC_STATUS_LIST,
   FinancialDocKind,
   FinancialDocStatus,
   STATUS_LABEL,

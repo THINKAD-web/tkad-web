@@ -46,3 +46,8 @@ export const FINANCIAL_DOC_STATUS_LABEL: Record<FinancialDocStatus, string> = {
   overdue: "연체",
   cancelled: "취소",
 };
+
+export const DOC_STATUS_LIST: { value: FinancialDocStatus; label: string }[] =
+  (Object.entries(FINANCIAL_DOC_STATUS_LABEL) as [FinancialDocStatus, string][]).map(
+    ([value, label]) => ({ value, label }),
+  );
