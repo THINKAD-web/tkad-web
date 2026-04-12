@@ -198,7 +198,7 @@ function HomeContent({
       </section>
 
       {/* Verification Process */}
-      <section className="section-white relative py-28 overflow-hidden">
+      <section className="section-white relative py-16 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,213,181,0.06)_0%,_transparent_70%)]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
@@ -209,7 +209,7 @@ function HomeContent({
               <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "싱커드만의 4단계 매체 검증" : "THINKAD's 4-Step Media Verification"}
               </h2>
-              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                 {isKo
                   ? "모든 매체는 엄격한 검증 프로세스를 거쳐야만 등록됩니다"
                   : "Every media must pass our rigorous verification process before registration"}
@@ -217,7 +217,7 @@ function HomeContent({
             </div>
           </ScrollAnimate>
 
-          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-8">
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-8">
             {[
               {
                 icon: Search,
@@ -277,7 +277,7 @@ function HomeContent({
       </section>
 
       {/* Stats */}
-      <section className="section-navy relative py-28">
+      <section className="section-navy relative py-14">
         <div className="absolute inset-0 hero-pattern opacity-50" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="count-up">
@@ -315,7 +315,7 @@ function HomeContent({
       </section>
 
       {/* TOP 3 Recommended Media */}
-      <section className="section-light py-28">
+      <section className="section-light py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
@@ -326,7 +326,7 @@ function HomeContent({
               <h2 className="section-title mt-1 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "싱커드 추천 매체 TOP 3" : "THINKAD Recommended Media TOP 3"}
               </h2>
-              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                 {isKo
                   ? "검증 데이터 기반, 가장 효과적인 매체를 엄선했습니다"
                   : "Curated selection of the most effective media based on verified data"}
@@ -335,13 +335,13 @@ function HomeContent({
           </ScrollAnimate>
 
           {topThreeFeatured.length === 0 ? (
-            <p className="mt-10 text-center text-sm text-muted-foreground">
+            <p className="mt-8 text-center text-sm text-muted-foreground">
               {isKo
                 ? "추천 매체를 불러오는 중입니다. 잠시 후 다시 확인해 주세요."
                 : "Featured media will appear here once available."}
             </p>
           ) : (
-          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {topThreeFeatured.map((media, i) => {
               const rank = i + 1;
               const typeLabel = isKo
@@ -456,7 +456,7 @@ function HomeContent({
       </section>
 
       {/* Why THINKAD */}
-      <section className="section-white py-28">
+      <section className="section-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
@@ -466,14 +466,14 @@ function HomeContent({
               <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "왜 싱커드인가?" : "Why THINKAD?"}
               </h2>
-              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                 {isKo
                   ? "검증되지 않은 매체에 광고비를 낭비하지 마세요"
                   : "Don't waste your ad budget on unverified media"}
               </p>
             </div>
           </ScrollAnimate>
-          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {[
               {
                 icon: Eye,
@@ -530,7 +530,7 @@ function HomeContent({
       </section>
 
       {/* Services */}
-      <section className="section-light py-28">
+      <section className="section-light py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
@@ -540,12 +540,12 @@ function HomeContent({
               <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {t("services.title")}
               </h2>
-              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                 {t("services.subtitle")}
               </p>
             </div>
           </ScrollAnimate>
-          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {[
               {
                 icon: MapPin,
@@ -595,7 +595,7 @@ function HomeContent({
       </section>
 
       {/* Featured Media with Verified Badge */}
-      <section className="section-white py-28">
+      <section className="section-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -626,7 +626,7 @@ function HomeContent({
                 : "No featured media yet. Browse the full catalog on Media search."}
             </p>
           ) : (
-          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-7">
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-7">
             {featuredGridItems.map((media, i) => {
               return (
               <ScrollAnimate key={media.id} delay={i * 100}>
@@ -706,7 +706,7 @@ function HomeContent({
       </section>
 
       {/* Partner Logos */}
-      <section className="section-light border-y py-20 overflow-hidden">
+      <section className="section-light border-y py-12 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate variant="fade-in">
             <div className="flex flex-wrap items-center justify-center gap-4">
@@ -719,7 +719,7 @@ function HomeContent({
                 </div>
               ))}
             </div>
-            <p className="mt-8 text-center text-sm font-semibold text-muted-foreground">
+            <p className="mt-4 text-center text-sm font-semibold text-muted-foreground">
               {isKo ? "100+ 대기업과 파트너십" : "Partnership with 100+ Leading Companies"}
             </p>
           </ScrollAnimate>
@@ -727,7 +727,7 @@ function HomeContent({
       </section>
 
       {/* Testimonials */}
-      <section className="section-white py-28">
+      <section className="section-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
@@ -739,7 +739,7 @@ function HomeContent({
               </h2>
             </div>
           </ScrollAnimate>
-          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {[
               {
                 name: isKo ? "김서연 마케팅 이사" : "Seoyeon Kim, Marketing Director",
@@ -802,7 +802,7 @@ function HomeContent({
       </section>
 
       {/* Case Studies */}
-      <section className="section-light py-28">
+      <section className="section-light py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <div className="text-center">
@@ -812,18 +812,18 @@ function HomeContent({
               <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {t("caseStudies.title")}
               </h2>
-              <p className="mx-auto mt-8 max-w-2xl text-muted-foreground">
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                 {t("caseStudies.subtitle")}
               </p>
             </div>
           </ScrollAnimate>
-          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {(["case1", "case2", "case3"] as const).map((key, i) => (
               <ScrollAnimate key={key} delay={i * 100}>
               <Card
                 className="group overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
               >
-                <div className="flex h-48 items-center justify-center bg-gradient-to-br from-gold/10 to-navy/10 overflow-hidden">
+                <div className="flex h-32 items-center justify-center bg-gradient-to-br from-gold/10 to-navy/10 overflow-hidden">
                   <TrendingUp className="h-12 w-12 text-gold/30 transition-transform duration-300 group-hover:scale-110" />
                 </div>
                 <CardHeader>
@@ -843,7 +843,7 @@ function HomeContent({
               </ScrollAnimate>
             ))}
           </div>
-          <div className="mt-12 text-center">
+          <div className="mt-8 text-center">
             <Link href="/cases">
               <Button
                 variant="outline"
@@ -858,14 +858,14 @@ function HomeContent({
       </section>
 
       {/* CTA Banner */}
-      <section className="hero-bg relative overflow-hidden py-28">
+      <section className="hero-bg relative overflow-hidden py-16">
         <div className="absolute inset-0 hero-pattern opacity-30" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,213,181,0.07)_0%,_transparent_70%)]" />
         <ScrollAnimate className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="section-title text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
             {t("ctaBanner.title")}
           </h2>
-          <p className="mx-auto mt-8 max-w-2xl text-lg text-slate-300/90">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-300/90">
             {t("ctaBanner.description")}
           </p>
           <Link href="/contact" className="mx-auto block w-full max-w-xs sm:max-w-none touch-manipulation">
