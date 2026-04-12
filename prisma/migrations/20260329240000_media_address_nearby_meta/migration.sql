@@ -1,4 +1,0 @@
-ALTER TABLE "media" ADD COLUMN IF NOT EXISTS "nearby_stations" TEXT;
-ALTER TABLE "media" ADD COLUMN IF NOT EXISTS "nearby_landmarks" TEXT;
-ALTER TABLE "media" ADD COLUMN IF NOT EXISTS "address_verified" BOOLEAN NOT NULL DEFAULT false;
-ALTER TABLE "media" ADD COLUMN IF NOT EXISTS "auto_populated_at" TIMESTAMPTZ;
