@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
 import { defaultOgImages, pageAlternates, siteUrl } from "@/lib/seo";
@@ -16,18 +16,16 @@ import ConditionalPublicChrome from "@/components/conditional-public-chrome";
 import ToastProvider from "@/components/toast-provider";
 import "../globals.css";
 
-const geistSans = Geist({
+const geistSans = localFont({
+  src: "../fonts/geist-latin.woff2",
   variable: "--font-geist-sans",
-  subsets: ["latin"],
   display: "swap",
-  adjustFontFallback: true,
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "../fonts/geist-mono-latin.woff2",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
   display: "swap",
-  adjustFontFallback: true,
 });
 
 /** ISR: marketing subtree; admin/client opt out via their own layouts. */
