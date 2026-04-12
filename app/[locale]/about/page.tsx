@@ -58,18 +58,6 @@ function AboutContent({
 
   const teamMembers = [
     {
-      nameKo: "이재한",
-      nameEn: "Jaehan Lee",
-      roleKo: "대표",
-      roleEn: "CEO",
-      bioKo:
-        "OOH 광고 업계 15년 이상, 국내외 랜드마크 캠페인을 리드해온 THINKAD의 대표.",
-      bioEn:
-        "Over 15 years in OOH, leading landmark campaigns in Korea and abroad as CEO of THINKAD.",
-      initials: "JL",
-      highlight: true,
-    },
-    {
       nameKo: "김민지",
       nameEn: "Minji Kim",
       roleKo: "미디어 플래닝 리드",
@@ -267,9 +255,7 @@ function AboutContent({
               return (
                 <AnimatedCard key={member.nameEn} delay={i * 90}>
                   <Card
-                    className={`h-full rounded-2xl border border-navy/8 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
-                      member.highlight ? "ring-2 ring-gold/50" : ""
-                    }`}
+                    className="h-full rounded-2xl border border-navy/8 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-3">

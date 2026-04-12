@@ -76,7 +76,6 @@ export async function POST(request: NextRequest) {
   if (!name?.trim()) errors.push("name");
   if (!phone?.trim() || !PHONE_RE.test(phone ?? "")) errors.push("phone");
   if (email?.trim() && !EMAIL_RE.test(email)) errors.push("email");
-  if (!inquiryType?.trim()) errors.push("inquiryType");
   if (!message?.trim()) errors.push("message");
 
   if (errors.length > 0) {
@@ -107,8 +106,15 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
-    console.error("[contact] DB error:", err);
-    return json({ error: "Failed to save inquiry" }, { status: 500 });
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error("[contact] DB error:", errMsg, err);
+    return json(
+      {
+        error: "문의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        detail: errMsg,
+      },
+      { status: 500 },
+    );
   }
 
   void postInternalAlert({

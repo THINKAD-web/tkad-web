@@ -35,7 +35,6 @@ export default function Footer() {
             </p>
             <div className="mt-5 space-y-1.5 text-sm text-silver/90">
               <p>{t("footer.companyName")}</p>
-              <p>{t("footer.ceo")}</p>
               <p>{t("footer.bizNumber")}</p>
             </div>
           </div>
@@ -111,7 +110,7 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-white/10 pt-8">
           <div className="mb-4 text-center text-xs leading-relaxed text-silver/70">
-            <p>{t("footer.companyName")} | {t("footer.ceo")} | {t("footer.bizNumber")}</p>
+            <p>{t("footer.companyName")} | {t("footer.bizNumber")}</p>
             <p>{t("footer.ecommerce")} | {t("footer.address")}</p>
           </div>
           <div className="text-center text-sm text-silver/70">
