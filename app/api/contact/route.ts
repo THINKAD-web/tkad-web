@@ -13,6 +13,25 @@ const limiter = rateLimit({ limit: 5, windowMs: 60_000 });
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 
+async function verifyTurnstile(token: string): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true; // skip if not configured
+  try {
+    const res = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ secret, response: token }),
+      },
+    );
+    const data = (await res.json()) as { success: boolean };
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
 function json(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
   headers.set("Cache-Control", "no-store, private");
@@ -43,15 +62,20 @@ export async function POST(request: NextRequest) {
     return json({ success: true }, { status: 201 });
   }
 
-  const { company, name, phone, email, inquiryType, budget, message } = body as Record<
-    string,
-    string | undefined
-  >;
+  const { company, name, phone, email, inquiryType, budget, message, cfTurnstileToken } =
+    body as Record<string, string | undefined>;
+
+  // Verify Turnstile token (skipped if TURNSTILE_SECRET_KEY not set)
+  if (process.env.TURNSTILE_SECRET_KEY) {
+    if (!cfTurnstileToken || !(await verifyTurnstile(cfTurnstileToken))) {
+      return json({ error: "CAPTCHA verification failed" }, { status: 403 });
+    }
+  }
 
   const errors: string[] = [];
   if (!name?.trim()) errors.push("name");
   if (!phone?.trim() || !PHONE_RE.test(phone ?? "")) errors.push("phone");
-  if (!email?.trim() || !EMAIL_RE.test(email ?? "")) errors.push("email");
+  if (email?.trim() && !EMAIL_RE.test(email)) errors.push("email");
   if (!inquiryType?.trim()) errors.push("inquiryType");
   if (!message?.trim()) errors.push("message");
 
