@@ -333,10 +333,10 @@ export default function ContactPage() {
                     <div className="flex flex-col items-center gap-4 py-12 text-center">
                       <CheckCircle className="h-12 w-12 text-green-500" />
                       <p className="text-lg font-semibold text-navy">
-                        문의가 접수되었습니다.
+                        {t("contact.successTitle")}
                       </p>
                       <p className="text-muted-foreground">
-                        빠른 시일 내에 연락드리겠습니다.
+                        {t("contact.successMessage")}
                       </p>
 
                       <div className="mt-4 w-full max-w-sm rounded-xl border border-yellow-200 bg-[#FEE500]/10 p-5">
@@ -471,10 +471,9 @@ export default function ContactPage() {
                             onBlur={() => handleBlur("inquiryType")}
                           >
                             <option value="">{t("contact.inquiryTypePlaceholder")}</option>
-                            <option value="quote">{t("contact.inquiryTypeQuote")}</option>
                             <option value="media">{t("contact.inquiryTypeMedia")}</option>
                             <option value="campaign">{t("contact.inquiryTypeCampaign")}</option>
-                            <option value="partnership">{t("contact.inquiryTypePartnership")}</option>
+                            <option value="quote">{t("contact.inquiryTypeQuote")}</option>
                             <option value="other">{t("contact.inquiryTypeOther")}</option>
                           </select>
                           {fieldError("inquiryType")}
@@ -489,10 +488,10 @@ export default function ContactPage() {
                             onChange={(e) => updateField("budget", e.target.value)}
                           >
                             <option value="">{t("contact.budgetPlaceholder")}</option>
-                            <option value="under1000">1,000만원 이하</option>
-                            <option value="1000to3000">1,000~3,000만원</option>
-                            <option value="3000to5000">3,000~5,000만원</option>
-                            <option value="over5000">5,000만원 이상</option>
+                            <option value="under10m">{t("contact.budgetUnder10m")}</option>
+                            <option value="10to50m">{t("contact.budget10to50m")}</option>
+                            <option value="50to100m">{t("contact.budget50to100m")}</option>
+                            <option value="over100m">{t("contact.budgetOver100m")}</option>
                           </select>
                         </div>
                       </div>
