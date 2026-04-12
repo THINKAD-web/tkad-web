@@ -365,11 +365,15 @@ function HomeContent({
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
                     <MediaCatalogThumbnail
                       media={media}
+                      fallbackUrl={`https://picsum.photos/id/${[1031, 366, 260][i]}/800/600`}
                       placeholderLabel={t("media.imagePreparing")}
                       className="group relative flex h-48 items-center justify-center"
                       imgClassName="opacity-90 transition duration-300 group-hover:scale-105"
                       bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/45 via-transparent to-transparent"
                       placeholderSize="sm"
+                      alt={isKo ? media.name : media.nameEn}
+                      priority={true}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     >
                       <div className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-light text-lg font-bold text-navy shadow-md">
                         {rank}
@@ -631,11 +635,14 @@ function HomeContent({
               >
                 <MediaCatalogThumbnail
                   media={media}
+                  fallbackUrl={`https://picsum.photos/id/${[429, 416, 180, 274][i % 4]}/800/600`}
                   placeholderLabel={t("media.imagePreparing")}
                   className="group relative flex h-48 items-center justify-center"
                   imgClassName="opacity-90 transition duration-300 group-hover:scale-105"
                   bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/50 via-transparent to-transparent"
                   placeholderSize="sm"
+                  alt={isKo ? media.name : media.nameEn}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 >
                   {i < 3 && (
                     <div className="absolute top-3 left-3 z-10 flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
