@@ -43,6 +43,8 @@ export type KeywordFilterMediaItem = {
   title: string;
   /** 실제 매체명 — 있으면 `MediaItem.name`으로 우선 사용 */
   mediaName?: string;
+  /** English name for /en pages */
+  nameEn?: string;
   region: string[];
   media: string[];
   target: string[];

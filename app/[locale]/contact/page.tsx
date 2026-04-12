@@ -21,6 +21,7 @@ import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { getMediaById, type MediaItem } from "@/lib/media-data";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
+import { TurnstileWidget } from "@/components/turnstile";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 const ScrollStagger = dynamic(() =>
@@ -61,11 +62,6 @@ function validate(form: FormFields): FormErrors {
   } else if (!PHONE_RE.test(form.phone)) {
     errors.phone = "올바른 연락처 형식이 아닙니다.";
   }
-  if (!form.email.trim()) {
-    errors.email = "이메일을 입력해 주세요.";
-  } else if (!EMAIL_RE.test(form.email)) {
-    errors.email = "올바른 이메일 형식이 아닙니다.";
-  }
   if (!form.inquiryType.trim()) errors.inquiryType = "문의 유형을 선택해 주세요.";
   if (!form.message.trim()) errors.message = "문의 내용을 입력해 주세요.";
   return errors;
@@ -104,6 +100,7 @@ export default function ContactPage() {
   const [mainTab, setMainTab] = useState<ContactMainTab>("inquiry");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   useEffect(() => {
     casePrefillDone.current = null;
@@ -253,7 +250,7 @@ export default function ContactPage() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, cfTurnstileToken: turnstileToken }),
       });
       if (!res.ok && !form.website) {
         throw new Error("submit failed");
@@ -408,16 +405,6 @@ export default function ContactPage() {
                       <div className="grid gap-5 sm:grid-cols-2">
                         <div>
                           <label className="mb-1.5 block text-sm font-medium text-navy">
-                            {t("contact.company")}
-                          </label>
-                          <Input
-                            placeholder={t("contact.companyPlaceholder")}
-                            value={form.company}
-                            onChange={(e) => updateField("company", e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-1.5 block text-sm font-medium text-navy">
                             {t("contact.name")} <span className="text-red-500">*</span>
                           </label>
                           <Input
@@ -429,8 +416,6 @@ export default function ContactPage() {
                           />
                           {fieldError("name")}
                         </div>
-                      </div>
-                      <div className="grid gap-5 sm:grid-cols-2">
                         <div>
                           <label className="mb-1.5 block text-sm font-medium text-navy">
                             {t("contact.phone")} <span className="text-red-500">*</span>
@@ -443,20 +428,6 @@ export default function ContactPage() {
                             className={inputErrorClass("phone")}
                           />
                           {fieldError("phone")}
-                        </div>
-                        <div>
-                          <label className="mb-1.5 block text-sm font-medium text-navy">
-                            {t("contact.email")} <span className="text-red-500">*</span>
-                          </label>
-                          <Input
-                            type="email"
-                            placeholder={t("contact.emailPlaceholder")}
-                            value={form.email}
-                            onChange={(e) => updateField("email", e.target.value)}
-                            onBlur={() => handleBlur("email")}
-                            className={inputErrorClass("email")}
-                          />
-                          {fieldError("email")}
                         </div>
                       </div>
                       <div className="grid gap-5 sm:grid-cols-2">
@@ -509,6 +480,7 @@ export default function ContactPage() {
                         />
                         {fieldError("message")}
                       </div>
+                      <TurnstileWidget onVerify={setTurnstileToken} />
                       <Button
                         type="submit"
                         className="w-full bg-gold text-navy hover:bg-gold-dark font-semibold"

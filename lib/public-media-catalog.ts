@@ -41,6 +41,54 @@ function buildNearbyFacilitiesDisplay(m: Media): string | undefined {
   return parts.join(", ");
 }
 
+/**
+ * Korean → English media name fallback map.
+ * Used when the DB `nameEn` column is null so the /en page shows English names
+ * instead of falling back to Korean.
+ */
+const koToEnNameMap: Record<string, string> = {
+  "강남대로 한승빌딩 아트월": "Hansung Building Artwall, Gangnam-daero",
+  "성수역 디지털 15": "Seongsu Station Digital 15",
+  "삼성역 인피니티로드": "Samsung Station Infinity Road",
+  "코엑스 K-POP 스퀘어": "COEX K-POP Square LED Display",
+  "강남대로 미디어폴 G-LIGHT": "G-LIGHT Media Poles, Gangnam-daero",
+  "신논현역 DSG빌딩 전광판": "Sinnonhyeon Station DSG Building LED",
+  "청담동 학동사거리 SS타워 전광판": "Cheongdam SS Tower LED Display",
+  "성수동 반도 외벽광고": "Seongsu Bando Building Exterior Ad",
+  "지하철 2호선 성수역 디지털광고": "Line 2 Seongsu Station Digital Ad",
+  "서면역 디지털 스크린": "Seomyeon Station Digital Screen",
+  "부산역 지하철 광고": "Busan Station Subway Advertisement",
+  "제주공항 디지털 광고": "Jeju Airport Digital Advertisement",
+  "코엑스 파르나스 미디어타워": "COEX Parnas Media Tower",
+  "중문관광단지 입구 빌보드": "Jungmun Resort Entrance Billboard",
+  "전국 시내버스 루프": "Nationwide City Bus Interior Ads",
+  "전국 고속도로 빌보드 패키지": "National Highway Billboard Package",
+  "강남 테헤란로 미디어월": "Gangnam Teheran-ro Media Wall",
+  "성수 연무장길 디지털": "Seongsu Yeonmujang-gil Digital",
+  "홍대입구역 디지털 패널": "Hongdae Station Digital Panel",
+  "여의도 IFC 대형 LED": "Yeouido IFC Large LED",
+  "명동 중앙길 빌보드": "Myeongdong Main Street Billboard",
+  "신논현 강남대로 LED": "Sinnonhyeon Gangnam-daero LED",
+  "잠실역 디지털 사이니지": "Jamsil Station Digital Signage",
+  "서울역 대형 전광판": "Seoul Station Large LED Display",
+  "홍대 걷고싶은길 패널": "Hongdae Walking Street Panel",
+  "선릉역 디지털 미디어월": "Seolleung Station Digital Media Wall",
+  "건대입구역 LED 전광판": "Konkuk Univ. Station LED Display",
+  "압구정 로데오거리 디지털": "Apgujeong Rodeo Street Digital",
+  "이태원 해밀턴호텔 전광판": "Itaewon Hamilton Hotel LED Display",
+  "강남역 지하상가 디지털": "Gangnam Station Underground Digital",
+  "광화문 광장 대형 전광판": "Gwanghwamun Square Large LED",
+  "을지로 디지털 미디어월": "Euljiro Digital Media Wall",
+  "부산 해운대 해수욕장 LED": "Busan Haeundae Beach LED",
+  "대구 동성로 디지털 사이니지": "Daegu Dongseong-ro Digital Signage",
+  "인천공항 디지털 광고": "Incheon Airport Digital Advertisement",
+};
+
+function resolveNameEn(koreanName: string, dbNameEn: string | null | undefined): string {
+  if (dbNameEn?.trim()) return dbNameEn;
+  return koToEnNameMap[koreanName] ?? koreanName;
+}
+
 /** Map Prisma row → public `MediaItem` (list/detail/compare). */
 export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaItem {
   const lat = m.latitude ?? 37.5665;
@@ -95,7 +143,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
   return {
     id: m.id,
     name: m.name,
-    nameEn: m.nameEn ?? m.name,
+    nameEn: resolveNameEn(m.name, m.nameEn),
     location: m.location,
     locationEn,
     region: m.region,

@@ -33,12 +33,12 @@ function PrivacyContent({
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <ScrollAnimate>
             <h1 className="text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-              {isKo ? "개인정보 보호정책" : "Privacy Policy"}
+              {isKo ? "개인정보 처리방침" : "Privacy Policy"}
             </h1>
             <p className="mt-4 text-lg text-slate-300">
               {isKo
-                ? "THINKAD는 고객의 개인정보 보호를 최우선으로 합니다"
-                : "THINKAD is committed to protecting your personal information"}
+                ? "주식회사 싱커드(THINKAD)는 고객의 개인정보 보호를 최우선으로 합니다"
+                : "THINKAD Co., Ltd. is committed to protecting your personal information"}
             </p>
           </ScrollAnimate>
         </div>
@@ -56,8 +56,8 @@ function PrivacyContent({
                 </h2>
                 <p className="text-slate-600 leading-relaxed">
                   {isKo
-                    ? "THINKAD (이하 '회사')는 개인정보보호법 및 관련 법령을 준수하여 고객의 개인정보를 안전하게 관리하고 있습니다. 본 개인정보 보호정책은 회사가 제공하는 서비스(이하 '서비스')를 이용할 때 고객의 개인정보가 어떻게 수집, 사용, 보호되는지에 대해 설명합니다."
-                    : "THINKAD (hereinafter 'Company') complies with the Personal Information Protection Act and related laws to safely manage customer personal information. This Privacy Policy explains how your personal information is collected, used, and protected when you use the services provided by the Company."}
+                    ? "주식회사 싱커드(THINKAD, 이하 '회사')는 「개인정보 보호법」 및 관련 법령을 준수하며, 고객의 개인정보를 안전하게 관리하고 있습니다. 본 개인정보 처리방침은 회사가 제공하는 OOH 광고 기획·매체 중개 서비스(이하 '서비스')를 이용할 때 고객의 개인정보가 어떻게 수집·이용·보관·파기되는지 안내합니다."
+                    : "THINKAD Co., Ltd. (hereinafter 'Company') complies with the Personal Information Protection Act and related laws to safely manage customer personal information. This Privacy Policy explains how your personal information is collected, used, stored, and disposed of when you use the OOH advertising planning and media brokerage services provided by the Company."}
                 </p>
               </div>
 
@@ -235,24 +235,35 @@ function PrivacyContent({
                 <p className="text-slate-600 leading-relaxed mb-4">
                   {isKo ? "개인정보 관련 문의 및 요청사항이 있으시면 다음 주소로 연락주시기 바랍니다:" : "For inquiries or requests regarding personal information, please contact:"}
                 </p>
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <p className="text-slate-600">
-                    <strong>THINKAD</strong>
-                    <br />
-                    {isKo ? "개인정보 보호담당자" : "Data Protection Officer"}
-                    <br />
-                    {isKo ? "이메일: " : "Email: "}
-                    <a href="mailto:privacy@thinkad.co.kr" className="text-gold hover:underline">
-                      {isKo ? "privacy@thinkad.co.kr" : "privacy@thinkad.co.kr"}
-                    </a>
-                  </p>
+                <div className="bg-slate-50 p-4 rounded-lg space-y-1">
+                  {isKo ? (
+                    <p className="text-slate-600">
+                      <strong>주식회사 싱커드 (THINKAD)</strong><br />
+                      사업자등록번호: 319-86-00382<br />
+                      대표: 이재한<br />
+                      주소: 서울특별시 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호<br />
+                      전화: 02-515-2772<br />
+                      이메일:{" "}
+                      <a href="mailto:mannote@tkad.co.kr" className="text-gold hover:underline">mannote@tkad.co.kr</a>
+                    </p>
+                  ) : (
+                    <p className="text-slate-600">
+                      <strong>THINKAD Co., Ltd.</strong><br />
+                      Business Registration: 319-86-00382<br />
+                      CEO: Jaehan Lee<br />
+                      Address: #1102, Seongsu A-One Knowledge Industry Center, 48 Ttukseom-ro 17ga-gil, Seongdong-gu, Seoul<br />
+                      Phone: +82-2-515-2772<br />
+                      Email:{" "}
+                      <a href="mailto:mannote@tkad.co.kr" className="text-gold hover:underline">mannote@tkad.co.kr</a>
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Last Updated */}
               <div className="mt-16 pt-8 border-t border-slate-200">
                 <p className="text-sm text-slate-500">
-                  {isKo ? "마지막 업데이트: 2026년 4월 11일" : "Last Updated: April 11, 2026"}
+                  {isKo ? "최종 업데이트: 2026년 4월" : "Last Updated: April 2026"}
                 </p>
               </div>
             </div>

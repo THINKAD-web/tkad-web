@@ -16,6 +16,16 @@ const nextConfig: NextConfig = {
         hostname: "*.cloudinary.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "fastly.picsum.photos",
+        pathname: "/**",
+      },
     ],
     formats: ["image/webp", "image/avif"],
     qualities: [75, 85],
