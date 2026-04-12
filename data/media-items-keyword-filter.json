@@ -3,6 +3,7 @@
     {
       "id": "gn_wrap_rapping_001",
       "title": "강남 대로변 · 브랜드 랩핑 (시그니처)",
+      "nameEn": "Gangnam Boulevard Brand Wrapping (Signature)",
       "region": ["강남", "서울", "역삼"],
       "media": ["랩핑", "아트래핑", "외벽"],
       "target": ["MZ세대", "2030", "직장인", "쇼핑 방문객"],
@@ -28,6 +29,7 @@
     {
       "id": "ss_led_002",
       "title": "성수 디지털 전광 캔버스",
+      "nameEn": "Seongsu Digital LED Canvas",
       "region": ["성수", "성동구", "서울"],
       "media": ["전광판", "디지털 사이니지"],
       "target": ["MZ세대", "핫플 방문객", "K-POP 팬덤"],
@@ -73,6 +75,7 @@
     {
       "id": "hd_led_003",
       "title": "홍대입구 · 합정역 인근 디지털 패널",
+      "nameEn": "Hongdae · Hapjeong Station Digital Panel",
       "region": ["홍대", "합정", "마포구", "서울"],
       "media": ["전광판", "디지털 사이니지", "LED"],
       "target": ["MZ세대", "2030", "관광객", "문화소비자", "K-POP 팬덤"],
@@ -98,6 +101,7 @@
     {
       "id": "yp_led_004",
       "title": "여의도 IFC 인근 대형 LED",
+      "nameEn": "Yeouido IFC Large LED Display",
       "region": ["여의도", "영등포구", "서울"],
       "media": ["전광판", "빌보드", "LED"],
       "target": ["직장인", "금융권", "MZ세대"],
@@ -122,6 +126,7 @@
     {
       "id": "md_static_005",
       "title": "명동 중앙길 옥외 빌보드 존",
+      "nameEn": "Myeongdong Main Street Outdoor Billboard Zone",
       "region": ["명동", "중구", "서울"],
       "media": ["빌보드", "고정 옥외", "초대형 포스터"],
       "target": ["관광객", "MZ세대", "외국인 관광객"],
@@ -146,6 +151,7 @@
     {
       "id": "coex_led_006",
       "title": "코엑스 K-POP 스퀘어 인근 초대형 LED",
+      "nameEn": "COEX K-POP Square Large LED Display",
       "region": ["코엑스", "삼성동", "강남", "서울"],
       "media": ["전광판", "LED", "디지털 사이니지"],
       "target": ["K-POP 팬덤", "관광객", "MZ세대"],
@@ -171,6 +177,7 @@
     {
       "id": "gn_teherrain_mediawall_007",
       "title": "강남 테헤란로 미디어월 라인",
+      "nameEn": "Gangnam Teheran-ro Media Wall Line",
       "region": ["강남", "테헤란", "역삼", "서울"],
       "media": ["전광판", "미디어월", "디지털 사이니지"],
       "target": ["직장인", "MZ세대", "2030"],
@@ -196,6 +203,7 @@
     {
       "id": "ss_yeonmujang_glass_008",
       "title": "성수 연무장길 글라스 시그니처",
+      "nameEn": "Seongsu Yeonmujang-gil Glass Signature",
       "region": ["성수", "연무장길", "성동구", "서울"],
       "media": ["외벽", "글라스", "디지털 사이니지"],
       "target": ["MZ세대", "핫플 방문객", "패션 크리에이터"],
@@ -221,6 +229,7 @@
     {
       "id": "hd_walkstreet_panel_009",
       "title": "홍대 걷고싶은길 패널 존",
+      "nameEn": "Hongdae Walking Street Panel Zone",
       "region": ["홍대", "마포구", "서울"],
       "media": ["쉘터", "정류장", "디지털 패널"],
       "target": ["2030", "관광객", "문화소비자"],
@@ -246,6 +255,7 @@
     {
       "id": "snh_gangnamdaero_010",
       "title": "신논현 · 강남대로 연결 LED",
+      "nameEn": "Sinnonhyeon · Gangnam-daero LED",
       "region": ["신논현", "강남", "논현", "서울"],
       "media": ["전광판", "LED", "빌보드"],
       "target": ["직장인", "MZ세대", "쇼핑 방문객"],

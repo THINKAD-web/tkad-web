@@ -137,7 +137,7 @@ export function keywordFilterMediaItemToMediaItem(
   const operatingFromExposure =
     k.exposureTime.length > 0 ? k.exposureTime.join(" · ") : undefined;
 
-  const titleEn = titleEnOverride?.trim() || k.title;
+  const titleEn = titleEnOverride?.trim() || k.nameEn?.trim() || k.title;
 
   const longDescriptionParts = [
     k.title,
