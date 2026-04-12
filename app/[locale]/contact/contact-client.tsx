@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle, MessageCircle, MessageSquare, ClipboardList } from "lucide-react";
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
@@ -67,21 +66,29 @@ function validate(form: FormFields): FormErrors {
   return errors;
 }
 
-export default function ContactPage() {
+export type ContactPageProps = {
+  caseSlug?: string | null;
+  topic?: string | null;
+  mediaId?: string | null;
+};
+
+export default function ContactPage({
+  caseSlug = null,
+  topic = null,
+  mediaId = null,
+}: ContactPageProps) {
   const t = useTranslations();
   const locale = useLocale();
   const isKo = locale === "ko";
-  const searchParams = useSearchParams();
-  const caseSlug = searchParams.get("case");
   const [publishedCaseRef, setPublishedCaseRef] = useState<{
     id: string;
     titleKo: string;
     titleEn: string | null;
   } | null>(null);
   const casePrefillDone = useRef<string | null>(null);
-  const academyTopic = searchParams.get("topic") === "academy";
+  const academyTopic = topic === "academy";
   const academyPrefillDone = useRef(false);
-  const mediaIdParam = searchParams.get("media");
+  const mediaIdParam = mediaId ?? null;
   const mediaPrefillDone = useRef(false);
 
   const [form, setForm] = useState<FormFields>({

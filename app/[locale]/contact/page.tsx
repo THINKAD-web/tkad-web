@@ -1,10 +1,16 @@
-import { Suspense } from "react";
 import ContactPage from "./contact-client";
 
-export default function ContactPageWrapper() {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function ContactPageWrapper({ searchParams }: Props) {
+  const params = await searchParams;
   return (
-    <Suspense>
-      <ContactPage />
-    </Suspense>
+    <ContactPage
+      caseSlug={(params.case as string) ?? null}
+      topic={(params.topic as string) ?? null}
+      mediaId={(params.media as string) ?? null}
+    />
   );
 }
