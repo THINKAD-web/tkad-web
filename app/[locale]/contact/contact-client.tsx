@@ -92,10 +92,38 @@ export default function ContactPage() {
         });
 
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(
-            (data as { error?: string }).error || "전송에 실패했습니다.",
-          );
+          const data = (await res.json().catch(() => ({}))) as {
+            error?: string;
+            detail?: string;
+            fields?: string[];
+          };
+
+          let userMsg: string;
+          if (res.status === 429) {
+            userMsg =
+              "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
+          } else if (res.status === 403) {
+            userMsg =
+              "보안 인증에 실패했습니다. 페이지를 새로고침 후 다시 시도해주세요.";
+          } else if (res.status === 400 && data.fields?.length) {
+            userMsg = `입력값을 확인해주세요: ${data.fields.join(", ")}`;
+          } else if (res.status === 503) {
+            userMsg =
+              "서비스가 일시적으로 이용 불가합니다. 잠시 후 다시 시도해주세요.";
+          } else {
+            // Temporarily include detail for debugging
+            userMsg = data.detail
+              ? `${data.error ?? "전송에 실패했습니다."}\n(${data.detail})`
+              : data.error ?? "전송에 실패했습니다.";
+          }
+
+          console.error("[contact] Submit failed:", {
+            status: res.status,
+            error: data.error,
+            detail: data.detail,
+          });
+
+          throw new Error(userMsg);
         }
 
         setSubmitted(true);
