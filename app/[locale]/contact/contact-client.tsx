@@ -1,637 +1,427 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Mail, MapPin, Phone, Clock, CheckCircle, Train, Bus, ParkingCircle, MessageCircle, MessageSquare, ClipboardList } from "lucide-react";
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useLocale } from "next-intl";
-import Spinner from "@/components/spinner";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/toast-provider";
-import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
-import { getMediaById, type MediaItem } from "@/lib/media-data";
-import { cn } from "@/lib/utils";
-import { Link } from "@/i18n/navigation";
 import { TurnstileWidget } from "@/components/turnstile";
+import ScrollAnimate from "@/components/scroll-animate";
+import Spinner from "@/components/spinner";
 
-const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
-const ScrollStagger = dynamic(() =>
-  import("@/components/scroll-stagger").then((m) => ({
-    default: m.ScrollStagger,
-  })),
-);
-const ContactFeedbackSurvey = dynamic(() =>
-  import("@/components/contact-feedback-survey").then((m) => ({
-    default: m.ContactFeedbackSurvey,
-  })),
-);
+/* ── Tailwind class constants (mirrors shadcn/ui styling without Radix imports) ── */
 
-type ContactMainTab = "inquiry" | "feedback";
+const inputCls =
+  "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
-type FormFields = {
-  company: string;
-  name: string;
-  phone: string;
-  email: string;
-  inquiryType: string;
-  budget: string;
-  message: string;
-  website: string; // honeypot
-};
+const selectCls =
+  "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
-type FormErrors = Partial<Record<keyof FormFields, string>>;
+const textareaCls =
+  "flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const btnCls =
+  "inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg text-sm font-semibold whitespace-nowrap shadow-sm transition-all duration-200 outline-none hover:-translate-y-px hover:shadow-md active:translate-y-0 active:scale-95 focus-visible:ring-[3px] focus-visible:ring-cta/35 disabled:pointer-events-none disabled:opacity-50 bg-cta text-white hover:bg-cta-hover h-11 px-6";
+
+const labelCls = "block text-sm font-medium text-foreground mb-1.5";
+
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
-const CASE_CUID_RE = /^c[a-z0-9]{24,}$/i;
 
-function validate(form: FormFields): FormErrors {
-  const errors: FormErrors = {};
-  if (!form.name.trim()) errors.name = "이름을 입력해 주세요.";
-  if (!form.phone.trim()) {
-    errors.phone = "연락처를 입력해 주세요.";
-  } else if (!PHONE_RE.test(form.phone)) {
-    errors.phone = "올바른 연락처 형식이 아닙니다.";
-  }
-  if (!form.inquiryType.trim()) errors.inquiryType = "문의 유형을 선택해 주세요.";
-  if (!form.message.trim()) errors.message = "문의 내용을 입력해 주세요.";
-  return errors;
-}
-
-export type ContactPageProps = {
-  caseSlug?: string | null;
-  topic?: string | null;
-  mediaId?: string | null;
-};
-
-export default function ContactPage({
-  caseSlug = null,
-  topic = null,
-  mediaId = null,
-}: ContactPageProps) {
-  const t = useTranslations();
-  const locale = useLocale();
-  const isKo = locale === "ko";
-  const [publishedCaseRef, setPublishedCaseRef] = useState<{
-    id: string;
-    titleKo: string;
-    titleEn: string | null;
-  } | null>(null);
-  const casePrefillDone = useRef<string | null>(null);
-  const academyTopic = topic === "academy";
-  const academyPrefillDone = useRef(false);
-  const mediaIdParam = mediaId ?? null;
-  const mediaPrefillDone = useRef(false);
-
-  const [form, setForm] = useState<FormFields>({
-    company: "",
-    name: "",
-    phone: "",
-    email: "",
-    inquiryType: "",
-    budget: "",
-    message: "",
-    website: "",
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<Partial<Record<keyof FormFields, boolean>>>({});
+export default function ContactPage() {
+  const t = useTranslations("contact");
   const { toast } = useToast();
-  const [mainTab, setMainTab] = useState<ContactMainTab>("inquiry");
+
+  /* ── form state ── */
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [inquiryType, setInquiryType] = useState("");
+  const [budget, setBudget] = useState("");
+  const [message, setMessage] = useState("");
+  const [cfToken, setCfToken] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
+
+  /* ── URL-param referral context (case study / academy) ── */
+  const [refSource, setRefSource] = useState<string | null>(null);
+  const [caseTitle, setCaseTitle] = useState<string | null>(null);
 
   useEffect(() => {
-    casePrefillDone.current = null;
-  }, [caseSlug]);
-
-  useEffect(() => {
-    academyPrefillDone.current = false;
-  }, [academyTopic]);
-
-  useEffect(() => {
-    mediaPrefillDone.current = false;
-  }, [mediaIdParam]);
-
-  useEffect(() => {
-    if (!mediaIdParam || mediaPrefillDone.current) return;
-    const idKey = mediaIdParam.trim();
-    if (!idKey) return;
-
-    const applySnippet = (refMedia: MediaItem) => {
-      mediaPrefillDone.current = true;
-      const title = isKo ? refMedia.name : refMedia.nameEn;
-      const snippet = isKo
-        ? `매체 "${title}" (ID ${refMedia.id}) 관련 문의드립니다.\n`
-        : `Inquiry regarding media "${title}" (ID ${refMedia.id}).\n`;
-      setForm((prev) => {
-        if (prev.message.trim() !== "") return prev;
-        return { ...prev, message: snippet };
-      });
-    };
-
-    const fromStatic = getMediaById(idKey);
-    if (fromStatic) {
-      applySnippet(fromStatic);
-      return;
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    const cTitle = params.get("case");
+    if (ref) setRefSource(ref);
+    if (cTitle) setCaseTitle(decodeURIComponent(cTitle));
+    if (ref === "case-study" && cTitle) {
+      setMessage(
+        t("caseRefMessageTemplate", { title: decodeURIComponent(cTitle) }),
+      );
+    } else if (ref === "academy") {
+      setMessage(t("academyRefMessageTemplate"));
     }
+  }, [t]);
 
-    let cancelled = false;
-    void (async () => {
-      try {
-        const res = await fetch("/api/public/media-catalog");
-        if (!res.ok || cancelled) return;
-        const catalog = (await res.json()) as MediaItem[];
-        const refMedia = catalog.find((m) => m.id === idKey);
-        if (!refMedia || cancelled) return;
-        applySnippet(refMedia);
-      } catch {
-        /* ignore */
+  /* ── submit ── */
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!name.trim()) {
+        toast("warning", `${t("name")} 필수 입력입니다.`);
+        return;
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [mediaIdParam, isKo]);
+      if (!phone.trim() || !PHONE_RE.test(phone)) {
+        toast("warning", `${t("phone")} 형식을 확인해주세요.`);
+        return;
+      }
+      if (!message.trim()) {
+        toast("warning", `${t("message")} 필수 입력입니다.`);
+        return;
+      }
 
-  useEffect(() => {
-    if (!caseSlug || !CASE_CUID_RE.test(caseSlug)) {
-      setPublishedCaseRef(null);
-      return;
-    }
-    let cancelled = false;
-    void (async () => {
+      setSubmitting(true);
       try {
-        const res = await fetch(`/api/public/success-cases/${caseSlug}`);
-        if (!res.ok || cancelled) {
-          if (!cancelled) setPublishedCaseRef(null);
-          return;
+        const res = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: name.trim(),
+            phone: phone.trim(),
+            inquiryType: inquiryType || undefined,
+            budget: budget || undefined,
+            message: message.trim(),
+            cfTurnstileToken: cfToken || undefined,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(
+            (data as { error?: string }).error || "전송에 실패했습니다.",
+          );
         }
-        const j = (await res.json()) as {
-          id: string;
-          titleKo: string;
-          titleEn: string | null;
-        };
-        if (!cancelled) setPublishedCaseRef(j);
-      } catch {
-        if (!cancelled) setPublishedCaseRef(null);
+
+        setSubmitted(true);
+      } catch (err) {
+        toast(
+          "error",
+          err instanceof Error ? err.message : "전송에 실패했습니다.",
+        );
+      } finally {
+        setSubmitting(false);
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [caseSlug]);
+    },
+    [name, phone, inquiryType, budget, message, cfToken, t, toast],
+  );
 
-  useEffect(() => {
-    if (!caseSlug) casePrefillDone.current = null;
-  }, [caseSlug]);
-
-  useEffect(() => {
-    if (!publishedCaseRef) return;
-    if (casePrefillDone.current === publishedCaseRef.id) return;
-    casePrefillDone.current = publishedCaseRef.id;
-    const title = isKo
-      ? publishedCaseRef.titleKo
-      : publishedCaseRef.titleEn ?? publishedCaseRef.titleKo;
-    const snippet = t("contact.caseRefMessageTemplate", { title });
-    setForm((prev) => {
-      if (prev.message.trim() !== "") return prev;
-      return { ...prev, message: snippet };
-    });
-  }, [publishedCaseRef, isKo, t]);
-
-  useEffect(() => {
-    if (caseSlug || !academyTopic || academyPrefillDone.current) return;
-    academyPrefillDone.current = true;
-    const snippet = t("contact.academyRefMessageTemplate");
-    setForm((prev) => {
-      if (prev.message.trim() !== "") return prev;
-      return { ...prev, message: snippet };
-    });
-  }, [caseSlug, academyTopic, t]);
-
-  const updateField = useCallback((field: keyof FormFields, value: string) => {
-    setForm((prev) => {
-      const next = { ...prev, [field]: value };
-      setErrors((prevErrors) => {
-        const fieldErrors = validate(next);
-        return { ...prevErrors, [field]: fieldErrors[field] };
-      });
-      return next;
-    });
-  }, []);
-
-  const handleBlur = useCallback((field: keyof FormFields) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    const fieldErrors = validate(form);
-    setErrors((prev) => ({ ...prev, [field]: fieldErrors[field] }));
-  }, [form]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const allTouched: typeof touched = {};
-    for (const key of Object.keys(form) as (keyof FormFields)[]) {
-      allTouched[key] = true;
-    }
-    setTouched(allTouched);
-
-    const validationErrors = validate(form);
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) {
-      toast("warning", "필수 항목을 모두 입력해 주세요.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, cfTurnstileToken: turnstileToken }),
-      });
-      if (!res.ok && !form.website) {
-        throw new Error("submit failed");
-      }
-      setSubmitted(true);
-      toast("success", "문의가 접수되었습니다. 빠른 시일 내에 연락드리겠습니다.");
-    } catch {
-      toast("error", "일시적 오류가 발생했습니다. 다시 시도해 주세요.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fieldError = (field: keyof FormFields) =>
-    touched[field] && errors[field] ? (
-      <p className="mt-1 text-xs font-medium text-red-500">{errors[field]}</p>
-    ) : null;
-
-  const inputErrorClass = (field: keyof FormFields) =>
-    touched[field] && errors[field] ? "border-red-400 focus:border-red-500 focus:ring-red-200" : "";
-
-  return (
-    <>
-      <section className="bg-navy py-28">
-        <ScrollAnimate className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">
-            {t("contact.title")}
-          </h1>
-          <p className="mt-2 text-slate-300">{t("contact.subtitle")}</p>
+  /* ── success view ── */
+  if (submitted) {
+    return (
+      <section className="mx-auto max-w-xl px-4 py-24 text-center">
+        <ScrollAnimate>
+          <div className="rounded-2xl border border-border bg-card p-10 shadow-sm">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-7 w-7"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">
+              {t("successTitle")}
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              {t("successMessage")}
+            </p>
+          </div>
         </ScrollAnimate>
       </section>
+    );
+  }
 
-      <section className="py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollStagger className="grid gap-12 lg:grid-cols-5">
-            <div className="lg:col-span-3">
-              <Card className="shadow-md">
-                <CardHeader className="space-y-4">
-                  <div className="flex flex-wrap gap-2 rounded-xl bg-slate-100/80 p-1">
-                    <button
-                      type="button"
-                      onClick={() => setMainTab("inquiry")}
-                      className={cn(
-                        "inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors min-w-[140px]",
-                        mainTab === "inquiry"
-                          ? "bg-white text-navy shadow-sm"
-                          : "text-muted-foreground hover:text-navy",
-                      )}
-                    >
-                      <MessageSquare className="h-4 w-4 shrink-0 text-gold" />
-                      {t("contact.tabInquiry")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMainTab("feedback")}
-                      className={cn(
-                        "inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors min-w-[140px]",
-                        mainTab === "feedback"
-                          ? "bg-white text-navy shadow-sm"
-                          : "text-muted-foreground hover:text-navy",
-                      )}
-                    >
-                      <ClipboardList className="h-4 w-4 shrink-0 text-gold" />
-                      {t("contact.tabFeedback")}
-                    </button>
-                  </div>
-                  <CardTitle className="text-xl text-navy">
-                    {mainTab === "inquiry"
-                      ? t("contact.formTitle")
-                      : t("contact.formTitleFeedback")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {mainTab === "feedback" ? (
-                    <ContactFeedbackSurvey />
-                  ) : submitted ? (
-                    <div className="flex flex-col items-center gap-4 py-12 text-center">
-                      <CheckCircle className="h-12 w-12 text-green-500" />
-                      <p className="text-lg font-semibold text-navy">
-                        {t("contact.successTitle")}
-                      </p>
-                      <p className="text-muted-foreground">
-                        {t("contact.successMessage")}
-                      </p>
+  /* ── form view ── */
+  return (
+    <section className="mx-auto max-w-4xl px-4 py-16 sm:py-20">
+      <ScrollAnimate>
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            {t("title")}
+          </h1>
+          <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
+        </div>
+      </ScrollAnimate>
 
-                      <div className="mt-4 w-full max-w-sm rounded-xl border border-yellow-200 bg-[#FEE500]/10 p-5">
-                        <div className="flex items-center justify-center gap-2 text-sm font-bold text-yellow-800">
-                          <MessageCircle className="h-5 w-5" />
-                          카카오톡 채널 추가하면 빠른 답변!
-                        </div>
-                        <p className="mt-2 text-xs text-yellow-700/70">
-                          카카오톡 채널을 추가하시면 문의 진행 상황을 실시간으로 받아보실 수 있습니다.
-                        </p>
-                        <a
-                          href={KAKAO_CHANNEL_PUBLIC_URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-neutral-800 transition-colors hover:brightness-95"
-                          style={{ backgroundColor: "#FEE500" }}
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                          카카오톡 채널 추가
-                        </a>
-                      </div>
-                    </div>
+      <div className="grid gap-10 lg:grid-cols-5">
+        {/* ── left: form ── */}
+        <div className="lg:col-span-3">
+          <ScrollAnimate delay={100}>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+              <h2 className="mb-6 text-xl font-semibold text-foreground">
+                {t("formTitle")}
+              </h2>
+
+              {/* referral banner */}
+              {refSource === "case-study" && caseTitle && (
+                <div className="mb-6 rounded-lg bg-blue-50 p-3 text-sm text-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
+                  {t("caseRefBanner")}
+                </div>
+              )}
+              {refSource === "academy" && (
+                <div className="mb-6 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+                  {t("academyRefBanner")}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* 이름 */}
+                <div>
+                  <label htmlFor="name" className={labelCls}>
+                    {t("name")} <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    className={inputCls}
+                    placeholder={t("namePlaceholder")}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+
+                {/* 연락처 */}
+                <div>
+                  <label htmlFor="phone" className={labelCls}>
+                    {t("phone")} <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    className={inputCls}
+                    placeholder={t("phonePlaceholder")}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+
+                {/* 문의 유형 */}
+                <div>
+                  <label htmlFor="inquiryType" className={labelCls}>
+                    {t("inquiryType")}
+                  </label>
+                  <select
+                    id="inquiryType"
+                    className={selectCls}
+                    value={inquiryType}
+                    onChange={(e) => setInquiryType(e.target.value)}
+                    disabled={submitting}
+                  >
+                    <option value="">{t("inquiryTypePlaceholder")}</option>
+                    <option value="media">{t("inquiryTypeMedia")}</option>
+                    <option value="campaign">{t("inquiryTypeCampaign")}</option>
+                    <option value="quote">{t("inquiryTypeQuote")}</option>
+                    <option value="partnership">
+                      {t("inquiryTypePartnership")}
+                    </option>
+                    <option value="other">{t("inquiryTypeOther")}</option>
+                  </select>
+                </div>
+
+                {/* 예상 예산 */}
+                <div>
+                  <label htmlFor="budget" className={labelCls}>
+                    {t("budget")}
+                  </label>
+                  <select
+                    id="budget"
+                    className={selectCls}
+                    value={budget}
+                    onChange={(e) => setBudget(e.target.value)}
+                    disabled={submitting}
+                  >
+                    <option value="">{t("budgetPlaceholder")}</option>
+                    <option value="under10m">{t("budgetUnder10m")}</option>
+                    <option value="10to50m">{t("budget10to50m")}</option>
+                    <option value="50to100m">{t("budget50to100m")}</option>
+                    <option value="over100m">{t("budgetOver100m")}</option>
+                  </select>
+                </div>
+
+                {/* 문의 내용 */}
+                <div>
+                  <label htmlFor="message" className={labelCls}>
+                    {t("message")} <span className="text-destructive">*</span>
+                  </label>
+                  <textarea
+                    id="message"
+                    className={textareaCls}
+                    placeholder={t("messagePlaceholder")}
+                    rows={5}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+
+                {/* Turnstile */}
+                <TurnstileWidget
+                  onVerify={setCfToken}
+                  className="flex justify-center"
+                />
+
+                {/* honeypot */}
+                <div className="hidden" aria-hidden="true">
+                  <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+                </div>
+
+                {/* submit */}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className={btnCls}
+                >
+                  {submitting ? (
+                    <>
+                      <Spinner className="h-4 w-4" />
+                      전송 중…
+                    </>
                   ) : (
-                    <form className="relative space-y-5" onSubmit={handleSubmit} noValidate>
-                      {publishedCaseRef ? (
-                        <div className="rounded-xl border border-gold/35 bg-gradient-to-br from-gold/15 to-amber-50/80 p-4 text-sm text-navy">
-                          <p className="font-medium leading-relaxed">
-                            {t("contact.caseRefBanner")}
-                          </p>
-                          <p className="mt-1 text-xs text-navy/65">
-                            {isKo
-                              ? publishedCaseRef.titleKo
-                              : publishedCaseRef.titleEn ??
-                                publishedCaseRef.titleKo}
-                          </p>
-                          <Link
-                            href={`/cases/${publishedCaseRef.id}`}
-                            className="mt-3 inline-flex text-xs font-bold text-gold-dark underline-offset-4 hover:underline"
-                          >
-                            {t("contact.caseRefViewCase")}
-                          </Link>
-                        </div>
-                      ) : academyTopic ? (
-                        <div className="rounded-xl border border-navy/15 bg-gradient-to-br from-navy/[0.06] to-gold/10 p-4 text-sm text-navy">
-                          <p className="font-medium leading-relaxed">
-                            {t("contact.academyRefBanner")}
-                          </p>
-                          <Link
-                            href="/academy"
-                            className="mt-3 inline-flex text-xs font-bold text-gold-dark underline-offset-4 hover:underline"
-                          >
-                            {t("contact.academyRefBack")}
-                          </Link>
-                        </div>
-                      ) : null}
-                      <div className="absolute -left-[9999px]" aria-hidden="true" tabIndex={-1}>
-                        <label htmlFor="website">Website</label>
-                        <input
-                          type="text"
-                          id="website"
-                          name="website"
-                          value={form.website}
-                          onChange={(e) => updateField("website", e.target.value)}
-                          tabIndex={-1}
-                          autoComplete="off"
-                        />
-                      </div>
-
-                      <div className="grid gap-5 sm:grid-cols-2">
-                        <div>
-                          <label className="mb-1.5 block text-sm font-medium text-navy">
-                            {t("contact.name")} <span className="text-red-500">*</span>
-                          </label>
-                          <Input
-                            placeholder={t("contact.namePlaceholder")}
-                            value={form.name}
-                            onChange={(e) => updateField("name", e.target.value)}
-                            onBlur={() => handleBlur("name")}
-                            className={inputErrorClass("name")}
-                          />
-                          {fieldError("name")}
-                        </div>
-                        <div>
-                          <label className="mb-1.5 block text-sm font-medium text-navy">
-                            {t("contact.phone")} <span className="text-red-500">*</span>
-                          </label>
-                          <Input
-                            placeholder={t("contact.phonePlaceholder")}
-                            value={form.phone}
-                            onChange={(e) => updateField("phone", e.target.value)}
-                            onBlur={() => handleBlur("phone")}
-                            className={inputErrorClass("phone")}
-                          />
-                          {fieldError("phone")}
-                        </div>
-                      </div>
-                      <div className="grid gap-5 sm:grid-cols-2">
-                        <div>
-                          <label className="mb-1.5 block text-sm font-medium text-navy">
-                            {t("contact.inquiryType")} <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            className={`w-full rounded-md border px-3 py-2 text-sm ${inputErrorClass("inquiryType")}`}
-                            value={form.inquiryType}
-                            onChange={(e) => updateField("inquiryType", e.target.value)}
-                            onBlur={() => handleBlur("inquiryType")}
-                          >
-                            <option value="">{t("contact.inquiryTypePlaceholder")}</option>
-                            <option value="media">{t("contact.inquiryTypeMedia")}</option>
-                            <option value="campaign">{t("contact.inquiryTypeCampaign")}</option>
-                            <option value="quote">{t("contact.inquiryTypeQuote")}</option>
-                            <option value="other">{t("contact.inquiryTypeOther")}</option>
-                          </select>
-                          {fieldError("inquiryType")}
-                        </div>
-                        <div>
-                          <label className="mb-1.5 block text-sm font-medium text-navy">
-                            {t("contact.budget")}
-                          </label>
-                          <select
-                            className="w-full rounded-md border px-3 py-2 text-sm"
-                            value={form.budget}
-                            onChange={(e) => updateField("budget", e.target.value)}
-                          >
-                            <option value="">{t("contact.budgetPlaceholder")}</option>
-                            <option value="under10m">{t("contact.budgetUnder10m")}</option>
-                            <option value="10to50m">{t("contact.budget10to50m")}</option>
-                            <option value="50to100m">{t("contact.budget50to100m")}</option>
-                            <option value="over100m">{t("contact.budgetOver100m")}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-sm font-medium text-navy">
-                          {t("contact.message")} <span className="text-red-500">*</span>
-                        </label>
-                        <Textarea
-                          rows={5}
-                          placeholder={t("contact.messagePlaceholder")}
-                          value={form.message}
-                          onChange={(e) => updateField("message", e.target.value)}
-                          onBlur={() => handleBlur("message")}
-                          className={inputErrorClass("message")}
-                        />
-                        {fieldError("message")}
-                      </div>
-                      <TurnstileWidget onVerify={setTurnstileToken} />
-                      <Button
-                        type="submit"
-                        className="w-full bg-gold text-navy hover:bg-gold-dark font-semibold"
-                        size="lg"
-                        disabled={loading}
-                      >
-                        {loading ? (
-                          <>
-                            <Spinner className="mr-2" />
-                            전송 중...
-                          </>
-                        ) : (
-                          t("contact.submitButton")
-                        )}
-                      </Button>
-                    </form>
+                    t("submitButton")
                   )}
-                </CardContent>
-              </Card>
+                </button>
+              </form>
             </div>
-
-            <div className="lg:col-span-2">
-              <Card className="shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-xl text-navy">
-                    {t("contact.infoTitle")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
-                      <MapPin className="h-5 w-5 text-gold" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-navy">Address</div>
-                      <div className="text-sm text-muted-foreground">
-                        {t("contact.address")}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
-                      <Phone className="h-5 w-5 text-gold" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-navy">Phone</div>
-                      <div className="text-sm text-muted-foreground">
-                        {t("contact.phoneNumber")}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
-                      <Mail className="h-5 w-5 text-gold" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-navy">Email</div>
-                      <div className="text-sm text-muted-foreground">
-                        {t("contact.emailAddress")}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
-                      <Clock className="h-5 w-5 text-gold" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-navy">Hours</div>
-                      <div className="text-sm text-muted-foreground">
-                        {t("contact.hours")}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </ScrollStagger>
+          </ScrollAnimate>
         </div>
-      </section>
 
-      <section className="bg-slate-50 py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-8 text-center text-2xl font-bold text-navy sm:text-3xl">
-            {t("contact.directionsTitle")}
-          </h2>
+        {/* ── right: contact info ── */}
+        <div className="lg:col-span-2">
+          <ScrollAnimate delay={200}>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+              <h3 className="mb-4 text-lg font-semibold text-foreground">
+                {t("infoTitle")}
+              </h3>
+              <div className="space-y-4 text-sm text-muted-foreground">
+                {/* phone */}
+                <div className="flex items-start gap-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-foreground"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                    />
+                  </svg>
+                  <span>{t("phoneNumber")}</span>
+                </div>
+                {/* email */}
+                <div className="flex items-start gap-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-foreground"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span>{t("emailAddress")}</span>
+                </div>
+                {/* address */}
+                <div className="flex items-start gap-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-foreground"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  <span>{t("address")}</span>
+                </div>
+                {/* hours */}
+                <div className="flex items-start gap-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-foreground"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 6v6l4 2"
+                    />
+                  </svg>
+                  <span>{t("hours")}</span>
+                </div>
+              </div>
 
-          <Card className="overflow-hidden shadow-md">
-            <div className="aspect-video w-full">
-              <iframe
-                title="THINKAD Office Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3163.5!2d127.056!3d37.5445!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca4e3db3e19fb%3A0x1c5a6d1ef2a1c0d0!2z7ISx7IiY7JeQ7J207JuQ7KeA7Iud7IKw7JeF7IS87YSw!5e0!3m2!1sko!2skr!4v1700000000000"
-                className="h-full w-full border-0"
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+              {/* directions */}
+              <div className="mt-6 border-t border-border pt-5">
+                <h4 className="mb-3 text-sm font-semibold text-foreground">
+                  {t("directionsTitle")}
+                </h4>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p>
+                    <span className="font-medium text-foreground">
+                      {t("subway")}
+                    </span>{" "}
+                    {t("subwayDesc")}
+                  </p>
+                  <p>
+                    <span className="font-medium text-foreground">
+                      {t("busTitle")}
+                    </span>{" "}
+                    {t("busDesc")}
+                  </p>
+                  <p>
+                    <span className="font-medium text-foreground">
+                      {t("parkingTitle")}
+                    </span>{" "}
+                    {t("parkingDesc")}
+                  </p>
+                </div>
+              </div>
             </div>
-
-            <CardContent className="grid gap-6 p-6 sm:grid-cols-3">
-              <div className="flex gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
-                  <Train className="h-5 w-5 text-gold" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-navy">
-                    {t("contact.subway")}
-                  </div>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {t("contact.subwayDesc")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
-                  <Bus className="h-5 w-5 text-gold" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-navy">
-                    {t("contact.busTitle")}
-                  </div>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {t("contact.busDesc")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5">
-                  <ParkingCircle className="h-5 w-5 text-gold" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-navy">
-                    {t("contact.parkingTitle")}
-                  </div>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {t("contact.parkingDesc")}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          </ScrollAnimate>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
