@@ -1466,7 +1466,9 @@
     "dataConsulting": "데이터 컨설팅",
     "planningTool": "플래닝 툴",
     "kakaoChannel": "카카오채널",
-    "copyright": "© 2025 주식회사 싱커드(THINKAD). All rights reserved."
+    "copyright": "© 2025 주식회사 싱커드(THINKAD). All rights reserved.",
+    "linkFeaturedMedia": "주요 매체",
+    "privacy": "개인정보처리방침"
   },
   "networkMedia": {
     "backToList": "매체 검색",

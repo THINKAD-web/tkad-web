@@ -1467,7 +1467,9 @@
     "dataConsulting": "Data Consulting",
     "planningTool": "Planning Tool",
     "kakaoChannel": "Kakao Channel",
-    "copyright": "© 2025 THINKAD Inc. All rights reserved."
+    "copyright": "© 2025 THINKAD Inc. All rights reserved.",
+    "linkFeaturedMedia": "Featured Media",
+    "privacy": "Privacy Policy"
   },
   "networkMedia": {
     "backToList": "Media search",
