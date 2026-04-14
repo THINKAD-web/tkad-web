@@ -11,19 +11,6 @@ import { getMediaById, type MediaItem } from "@/lib/media-data";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (
-        container: HTMLElement | string,
-        options: Record<string, unknown>,
-      ) => string;
-      reset: (widgetId?: string) => void;
-      remove: (widgetId: string) => void;
-    };
-  }
-}
-
 type InquiryTypeCode = "media" | "campaign" | "quote" | "other";
 type BudgetCode = "under_10m" | "10m_50m" | "50m_100m" | "over_100m";
 

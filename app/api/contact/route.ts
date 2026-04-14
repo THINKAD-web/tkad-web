@@ -170,6 +170,7 @@ export async function POST(request: NextRequest) {
         email: emailOpt ?? "",
         budget: budgetLbl,
         message: composedMessage,
+        inquiryType: inquiryLbl,
       });
       await sendEmail({ to: alertTo, subject, text, html });
     } catch (err) {
