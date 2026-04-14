@@ -1,5 +1,5 @@
-import type { Prisma } from "@prisma/client";
-import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
+import type { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { enrichNewMediaLocationFromKakao } from "@/lib/media-location-enrich";
@@ -13,6 +13,24 @@ import {
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
 
 export const dynamic = "force-dynamic";
+
+function prismaMediaPostErrorMessage(err: unknown): string {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === "P2021") {
+      return "DB에 필요한 테이블이 없습니다. `prisma migrate deploy`(또는 스키마 동기화)를 실행한 뒤 다시 시도해 주세요.";
+    }
+    if (err.code === "P1001") {
+      return "데이터베이스에 연결할 수 없습니다. DATABASE_URL·Neon 상태·방화벽을 확인해 주세요.";
+    }
+    if (err.code === "P2002") {
+      return "동일한 값이 이미 등록되어 있습니다. (중복 제약)";
+    }
+  }
+  if (err instanceof Error && err.message) {
+    return err.message;
+  }
+  return "매체 저장 중 오류가 발생했습니다.";
+}
 
 function optStr(v: unknown): string | null | undefined {
   if (v === undefined) return undefined;
@@ -176,67 +194,72 @@ export async function POST(request: NextRequest) {
     data.isActive = body.isActive;
   }
 
-  const filled = await enrichNewMediaLocationFromKakao({
-    location: data.location,
-    latitude: data.latitude ?? null,
-    longitude: data.longitude ?? null,
-    city: data.city ?? null,
-    district: data.district ?? null,
-  });
-  data.latitude = filled.latitude;
-  data.longitude = filled.longitude;
-  data.city = filled.city;
-  data.district = filled.district;
-  data.addressVerified = filled.addressVerified;
-
-  const nearbyAuto = await maybeAutoFillNearbyMediaFields({
-    existingFacilities: data.nearbyFacilities ?? null,
-    existingStations: data.nearbyStations ?? null,
-    existingLandmarks: data.nearbyLandmarks ?? null,
-    latitude: data.latitude ?? null,
-    longitude: data.longitude ?? null,
-  });
-  if (nearbyAuto) {
-    if (nearbyAuto.nearbyFacilities != null) {
-      data.nearbyFacilities = nearbyAuto.nearbyFacilities;
-    }
-    if (nearbyAuto.nearbyStations != null) {
-      data.nearbyStations = nearbyAuto.nearbyStations;
-    }
-    if (nearbyAuto.nearbyLandmarks != null) {
-      data.nearbyLandmarks = nearbyAuto.nearbyLandmarks;
-    }
-    data.autoPopulatedAt = nearbyAuto.autoPopulatedAt;
-  }
-
-  const foot = await maybeEstimateDailyFootfall({
-    existingDaily: data.dailyFootfall ?? null,
-    latitude: data.latitude ?? null,
-    longitude: data.longitude ?? null,
-    city: data.city ?? null,
-    district: data.district ?? null,
-  });
-  if (foot != null) {
-    data.dailyFootfall = foot;
-  }
-
-  const db = getPrisma();
-  const media = await db.media.create({ data });
-
-  await db.mediaPriceSnapshot.create({
-    data: {
-      mediaId: media.id,
-      price: media.price,
-      note: "initial",
-    },
-  });
-
-  if (isAdminAuthDebugEnabled()) {
-    console.log("[admin-api] media POST persisted", {
-      id: media.id,
-      name: media.name,
+  try {
+    const filled = await enrichNewMediaLocationFromKakao({
+      location: data.location,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+      city: data.city ?? null,
+      district: data.district ?? null,
     });
-  }
+    data.latitude = filled.latitude;
+    data.longitude = filled.longitude;
+    data.city = filled.city;
+    data.district = filled.district;
+    data.addressVerified = filled.addressVerified;
 
-  return json({ media }, 201);
+    const nearbyAuto = await maybeAutoFillNearbyMediaFields({
+      existingFacilities: data.nearbyFacilities ?? null,
+      existingStations: data.nearbyStations ?? null,
+      existingLandmarks: data.nearbyLandmarks ?? null,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+    });
+    if (nearbyAuto) {
+      if (nearbyAuto.nearbyFacilities != null) {
+        data.nearbyFacilities = nearbyAuto.nearbyFacilities;
+      }
+      if (nearbyAuto.nearbyStations != null) {
+        data.nearbyStations = nearbyAuto.nearbyStations;
+      }
+      if (nearbyAuto.nearbyLandmarks != null) {
+        data.nearbyLandmarks = nearbyAuto.nearbyLandmarks;
+      }
+      data.autoPopulatedAt = nearbyAuto.autoPopulatedAt;
+    }
+
+    const foot = await maybeEstimateDailyFootfall({
+      existingDaily: data.dailyFootfall ?? null,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+      city: data.city ?? null,
+      district: data.district ?? null,
+    });
+    if (foot != null) {
+      data.dailyFootfall = foot;
+    }
+
+    const db = getPrisma();
+    const media = await db.media.create({ data });
+
+    await db.mediaPriceSnapshot.create({
+      data: {
+        mediaId: media.id,
+        price: media.price,
+        note: "initial",
+      },
+    });
+
+    if (isAdminAuthDebugEnabled()) {
+      console.log("[admin-api] media POST persisted", {
+        id: media.id,
+        name: media.name,
+      });
+    }
+
+    return json({ media }, 201);
+  } catch (err) {
+    console.error("[admin-api] media POST failed", err);
+    return json({ error: prismaMediaPostErrorMessage(err) }, 500);
+  }
 }
