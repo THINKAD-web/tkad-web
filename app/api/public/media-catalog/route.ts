@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { NextResponse } from "next/server";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
