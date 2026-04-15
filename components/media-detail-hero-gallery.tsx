@@ -28,7 +28,9 @@ export default function MediaDetailHeroGallery({
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
 
-  const uploads = images.filter((u) => typeof u === "string" && u.trim().length > 0);
+  const uploads = images.filter(
+    (u) => typeof u === "string" && u.trim().length > 0,
+  );
   const mainSrc = heroSrc.trim();
   const hasImage = uploads.length > 0 && mainSrc.length > 0;
 
@@ -54,12 +56,14 @@ export default function MediaDetailHeroGallery({
   if (!hasImage) {
     return (
       <section className="relative w-full overflow-hidden bg-navy">
-        <div className="mx-auto flex h-[220px] w-full max-w-6xl items-center justify-center px-4 py-4 sm:h-[260px] sm:px-6 lg:h-[280px] lg:px-12">
-          <MediaImagePlaceholder
-            label={tMedia("imagePreparing")}
-            size="lg"
-            className="h-full w-full max-w-3xl"
-          />
+        <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-12">
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-black/40">
+            <MediaImagePlaceholder
+              label={tMedia("imagePreparing")}
+              size="lg"
+              className="absolute inset-0 flex h-full w-full items-center justify-center"
+            />
+          </div>
         </div>
         <div className="border-t border-white/10" />
       </section>
@@ -69,20 +73,26 @@ export default function MediaDetailHeroGallery({
   return (
     <section className="relative w-full overflow-hidden bg-navy">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-stretch px-4 py-4 sm:px-6 lg:px-12">
-        <div className="relative flex h-[220px] items-center justify-center rounded-xl bg-black/40 sm:h-[260px] lg:h-[280px]">
+        <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-black/40">
           <button
             type="button"
             onClick={() => openAt(0)}
-            className="relative z-0 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 text-left outline-none ring-inset focus-visible:ring-2 focus-visible:ring-gold/70"
+            className="absolute inset-0 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-gold/70"
             aria-label={labels.expand}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={mainSrc}
               alt={altBase}
-              className="mx-auto max-h-full w-auto max-w-full object-contain"
+              className="absolute inset-0 h-full w-full object-cover"
               fetchPriority="high"
             />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </span>
           </button>
         </div>
 
