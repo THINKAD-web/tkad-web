@@ -11,6 +11,7 @@ import {
   isValidCatalogMediaType,
 } from "@/lib/media-auto-categorize";
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
+import { revalidateMediaCaches } from "@/lib/revalidate-media";
 
 export const dynamic = "force-dynamic";
 
@@ -256,6 +257,8 @@ export async function POST(request: NextRequest) {
         name: media.name,
       });
     }
+
+    revalidateMediaCaches(media.id);
 
     return json({ media }, 201);
   } catch (err) {

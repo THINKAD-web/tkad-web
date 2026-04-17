@@ -10,6 +10,7 @@ import {
   mapQuickAddToDb,
   validateQuickAddItems,
 } from "@/lib/media-quick-add";
+import { revalidateMediaCaches } from "@/lib/revalidate-media";
 
 export const dynamic = "force-dynamic";
 
@@ -117,6 +118,10 @@ export async function POST(request: NextRequest) {
         count: created.length,
         ids: created.map((c) => c.id),
       });
+    }
+
+    for (const c of created) {
+      revalidateMediaCaches(c.id);
     }
 
     return json({ ok: true, count: created.length, created }, 201);

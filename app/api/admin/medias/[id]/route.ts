@@ -12,6 +12,7 @@ import {
   isValidCatalogMediaType,
 } from "@/lib/media-auto-categorize";
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
+import { revalidateMediaCaches } from "@/lib/revalidate-media";
 
 export const dynamic = "force-dynamic";
 
@@ -402,6 +403,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         name: media.name,
       });
     }
+    revalidateMediaCaches(media.id);
     return json({ media });
   } catch {
     return json({ error: "Not found" }, 404);
@@ -415,6 +417,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
   const db = getPrisma();
   try {
     await db.media.delete({ where: { id } });
+    revalidateMediaCaches(id);
     return json({ ok: true });
   } catch {
     return json({ error: "Not found" }, 404);

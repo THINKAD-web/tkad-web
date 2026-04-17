@@ -9,6 +9,7 @@ import {
   validateQuickAddItem,
 } from "@/lib/media-quick-add";
 import { getPrisma } from "@/lib/prisma";
+import { revalidateMediaCaches } from "@/lib/revalidate-media";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
   if (isAdminAuthDebugEnabled()) {
     console.log("[admin-api] media JSON PUT", { id: media.id, name: media.name });
   }
+
+  revalidateMediaCaches(media.id);
 
   const quick = mediaDbRowToQuickAddJson(media);
   return json({
