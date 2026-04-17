@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { CampaignMonitoringMap } from "@/components/campaign-monitoring-map";
+import { CampaignMonitoringMap, type MapBounds } from "@/components/campaign-monitoring-map";
 import { mediaItemsToCampaignPins } from "@/lib/media-data";
 import type { MediaItem } from "@/lib/media-data";
+
+export type { MapBounds };
 
 export default function MediaBrowseMap({
   items,
@@ -12,9 +14,11 @@ export default function MediaBrowseMap({
   onSelectId,
   className,
   fixedMapHeightPx,
+  fullHeight,
   showFooterCaption,
   centerOverride,
   zoomOverride,
+  onBoundsChange,
   pinMetaById,
 }: {
   items: readonly MediaItem[];
@@ -23,9 +27,11 @@ export default function MediaBrowseMap({
   onSelectId: (id: string | null) => void;
   className?: string;
   fixedMapHeightPx?: number;
+  fullHeight?: boolean;
   showFooterCaption?: boolean;
   centerOverride?: { lat: number; lng: number } | null;
   zoomOverride?: number | null;
+  onBoundsChange?: (bounds: MapBounds) => void;
   pinMetaById?: Record<
     string,
     { tone?: "blue" | "green"; nowBadge?: boolean; popular?: boolean }
@@ -41,9 +47,11 @@ export default function MediaBrowseMap({
       isKo={isKo}
       className={className}
       fixedMapHeightPx={fixedMapHeightPx}
+      fullHeight={fullHeight}
       showFooterCaption={showFooterCaption}
       centerOverride={centerOverride ?? null}
       zoomOverride={zoomOverride ?? null}
+      onBoundsChange={onBoundsChange}
       pinMetaById={pinMetaById}
     />
   );

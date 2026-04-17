@@ -17,11 +17,12 @@ import {
   ChevronDown,
   ChevronUp,
   Search,
+  MapPin as MapPinIcon,
 } from "lucide-react";
+import type { MapBounds } from "@/components/media-browse-map";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
-import SolutionCtaButton from "@/components/solution-cta-button";
 import {
   useState,
   useMemo,
@@ -146,6 +147,10 @@ export default function MediaBrowseClient({
   const [catalogPageSize, setCatalogPageSize] = useState(12);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
   const [mapPopupOpen, setMapPopupOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"list" | "map">("list");
+  const [viewportFilterActive, setViewportFilterActive] = useState(false);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
+  const cardRefMap = useRef<Map<string, HTMLElement>>(new Map());
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
@@ -338,25 +343,38 @@ export default function MediaBrowseClient({
     }
   }, [filtered, sortBy]);
 
-  /** 필터 결과가 적을 때 카탈로그에서 부족분만큼 덧붙여 그리드·지도 최소 노출 유지 */
+  /** 지도 영역 필터: 뷰포트 내 좌표만 표시 */
+  const viewportFiltered = useMemo(() => {
+    if (!viewportFilterActive || !mapBounds) return sortedFiltered;
+    return sortedFiltered.filter(
+      (m) =>
+        m.lat != null &&
+        m.lng != null &&
+        m.lat >= mapBounds.swLat &&
+        m.lat <= mapBounds.neLat &&
+        m.lng >= mapBounds.swLng &&
+        m.lng <= mapBounds.neLng,
+    );
+  }, [sortedFiltered, viewportFilterActive, mapBounds]);
+
+  /** 필터 결과가 적을 때 카탈로그에서 부족분만큼 덧붙여 그리드 최소 노출 유지 */
   const { gridDisplayList, catalogMinPadActive } = useMemo(() => {
+    const base = viewportFiltered;
     if (
-      sortedFiltered.length >= MEDIA_BROWSE_GRID_MIN_ITEMS ||
+      viewportFilterActive ||
+      base.length >= MEDIA_BROWSE_GRID_MIN_ITEMS ||
       effectiveCatalog.length < MEDIA_BROWSE_GRID_MIN_ITEMS
     ) {
-      return {
-        gridDisplayList: sortedFiltered,
-        catalogMinPadActive: false,
-      };
+      return { gridDisplayList: base, catalogMinPadActive: false };
     }
-    const need = MEDIA_BROWSE_GRID_MIN_ITEMS - sortedFiltered.length;
-    const seen = new Set(sortedFiltered.map((m) => m.id));
+    const need = MEDIA_BROWSE_GRID_MIN_ITEMS - base.length;
+    const seen = new Set(base.map((m) => m.id));
     const extras = effectiveCatalog.filter((m) => !seen.has(m.id)).slice(0, need);
     return {
-      gridDisplayList: [...sortedFiltered, ...extras],
+      gridDisplayList: [...base, ...extras],
       catalogMinPadActive: extras.length > 0,
     };
-  }, [sortedFiltered, effectiveCatalog]);
+  }, [viewportFiltered, viewportFilterActive, effectiveCatalog]);
 
   useEffect(() => {
     // 팝업이 열려있을 때만 선택된 매체가 리스트에 있는지 검증
@@ -462,628 +480,262 @@ export default function MediaBrowseClient({
 
   const handleMapSelectId = useCallback((id: string | null) => {
     if (id == null) {
-      // X 버튼 클릭: 팝업만 닫고, 지도는 그 자리에 그대로 (selectedId 유지)
       setMapPopupOpen(false);
       return;
     }
-    // 새로운 매체 선택: 지도 줌인 + 팝업 열기
     setMapSelectedId(id);
     setMapPopupOpen(true);
+    // 카드 목록에서 해당 카드로 스크롤
+    const el = cardRefMap.current.get(id);
+    el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, []);
 
   return (
     <>
-      <section className="bg-navy py-28">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold text-white sm:text-4xl">
-              {t("media.title")}
-            </h1>
-            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">BETA</span>
-          </div>
-          <p className="mt-2 text-slate-300">
-            {t("media.subtitle")}
-          </p>
-          <div className="relative mx-auto mt-8 max-w-lg sm:mt-10">
-            <MediaKeywordSearchHero
-              variant="embed"
-              featured
-              value={catalogSearchQuery}
-              onChange={setCatalogSearchQuery}
-            />
-          </div>
-          <div className="mt-8 sm:mt-10">
-            <SolutionCtaButton
-              href="/contact"
-              variant="outline"
-              label={isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
-              size="lg"
-              className="h-11 border-white/35 bg-white/10 text-white shadow-none backdrop-blur-sm hover:border-white/55 hover:bg-white/18 hover:text-white"
-            />
-          </div>
-        </div>
-      </section>
+      {/* ── 모바일 탭 바 ── */}
+      <div className="sticky top-[4.5rem] z-30 flex border-b border-slate-200 bg-white lg:hidden">
+        <button type="button" onClick={() => setMobileTab("list")} className={`flex-1 py-3 text-sm font-semibold transition-colors ${mobileTab === "list" ? "border-b-2 border-navy text-navy" : "text-slate-500"}`}>
+          <LayoutList className="mr-1.5 inline h-4 w-4" />
+          {t("media.browseViewList")}
+          {gridDisplayList.length > 0 ? <span className="ml-1 text-xs font-normal opacity-70">({gridDisplayList.length})</span> : null}
+        </button>
+        <button type="button" onClick={() => setMobileTab("map")} className={`flex-1 py-3 text-sm font-semibold transition-colors ${mobileTab === "map" ? "border-b-2 border-navy text-navy" : "text-slate-500"}`}>
+          <MapIcon className="mr-1.5 inline h-4 w-4" />
+          {t("media.browseViewMap")}
+        </button>
+      </div>
 
-      <section className="border-t border-slate-200/90 bg-white py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {mainTab === "search" ? (
-            <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/80">
-              {t("media.resultsSectionEyebrow")}
-            </p>
-          ) : null}
-          <div className="mb-8 flex justify-center">
-            <div className="inline-flex rounded-full border border-slate-200/90 bg-white p-1 shadow-sm">
-              <button
-                type="button"
-                onClick={() => setMainTab("search")}
-                className={`touch-manipulation rounded-full px-5 py-2.5 text-sm font-semibold transition-colors sm:px-8 ${
-                  mainTab === "search"
-                    ? "bg-navy text-white shadow-sm"
-                    : "text-muted-foreground hover:bg-white"
-                }`}
-              >
-                {t("media.ai.tabSearch")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setMainTab("ai")}
-                className={`touch-manipulation rounded-full px-5 py-2.5 text-sm font-semibold transition-colors sm:px-8 ${
-                  mainTab === "ai"
-                    ? "bg-gradient-to-r from-navy to-navy/90 text-white shadow-sm"
-                    : "text-muted-foreground hover:bg-white"
-                }`}
-              >
-                {t("media.ai.tabAi")}
-              </button>
+      {/* ── 스플릿 패널 ── */}
+      <div className="flex lg:h-[calc(100dvh-4.5rem)] lg:overflow-hidden">
+
+        {/* ── 왼쪽 패널 ── */}
+        <div className={[
+          "flex w-full flex-col bg-white lg:w-[420px] lg:flex-none lg:overflow-y-auto lg:border-r lg:border-slate-200",
+          mobileTab === "map" ? "hidden lg:flex" : "flex",
+        ].join(" ")}>
+
+          {/* 검색 + 탭 */}
+          <div className="sticky top-0 z-10 border-b border-slate-100 bg-white px-4 pb-3 pt-4 lg:static">
+            <div className="mb-3 inline-flex rounded-full border border-slate-200 bg-slate-50 p-0.5">
+              <button type="button" onClick={() => setMainTab("search")} className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${mainTab === "search" ? "bg-white text-navy shadow-sm" : "text-slate-500 hover:text-navy"}`}>{t("media.ai.tabSearch")}</button>
+              <button type="button" onClick={() => setMainTab("ai")} className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${mainTab === "ai" ? "bg-white text-navy shadow-sm" : "text-slate-500 hover:text-navy"}`}>{t("media.ai.tabAi")}</button>
             </div>
+            <MediaKeywordSearchHero variant="embed" featured value={catalogSearchQuery} onChange={setCatalogSearchQuery} />
           </div>
 
           {mainTab === "ai" ? (
-            <MediaAiRecommendPanel
-              locale={locale}
-              regionOptions={regions}
-              catalog={effectiveCatalog}
-              compareItems={compareItems}
-              toggleCompare={toggleCompare}
-              isInCompare={isInCompare}
-              addManyToCompare={addManyToCompare}
-            />
+            <div className="flex-1 p-4">
+              <MediaAiRecommendPanel locale={locale} regionOptions={regions} catalog={effectiveCatalog} compareItems={compareItems} toggleCompare={toggleCompare} isInCompare={isInCompare} addManyToCompare={addManyToCompare} />
+            </div>
           ) : (
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-3">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="inline-flex h-auto w-full items-center justify-center gap-2 border border-dashed border-slate-300/80 bg-slate-50/60 py-2.5 text-xs font-medium text-muted-foreground hover:bg-slate-100/90 sm:w-auto sm:self-start sm:px-4 sm:text-sm"
-                  onClick={togglePrecisionFilters}
-                >
-                  {precisionFiltersOpen
-                    ? t("media.advancedFiltersHide")
-                    : t("media.advancedFiltersShow")}
-                  {precisionFiltersOpen ? (
-                    <ChevronUp className="size-4 shrink-0" aria-hidden />
-                  ) : (
-                    <ChevronDown className="size-4 shrink-0" aria-hidden />
-                  )}
+            <div className="flex flex-col">
+              {/* 필터 토글 */}
+              <div className="border-b border-slate-100 px-4 py-2.5">
+                <Button type="button" variant="ghost" className="h-auto w-full justify-between border border-dashed border-slate-300/80 bg-slate-50/60 py-2 text-xs font-medium text-muted-foreground hover:bg-slate-100/90 sm:w-auto sm:px-4" onClick={togglePrecisionFilters}>
+                  <span>{precisionFiltersOpen ? t("media.advancedFiltersHide") : t("media.advancedFiltersShow")}</span>
+                  {precisionFiltersOpen ? <ChevronUp className="ml-2 h-3.5 w-3.5" /> : <ChevronDown className="ml-2 h-3.5 w-3.5" />}
                 </Button>
-                {!precisionFiltersOpen ? (
-                  <div className="rounded-xl border border-slate-100 bg-white/90 px-4 py-3.5 text-left shadow-sm ring-1 ring-slate-100/80">
-                    <p className="text-[15px] font-semibold leading-snug text-navy sm:text-base">
-                      {t("media.advancedFiltersCollapsedHint")}
-                    </p>
-                    <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground sm:text-sm">
-                      {t("media.advancedFiltersCollapsedSubhint")}
-                    </p>
-                  </div>
-                ) : null}
               </div>
 
               {lgUp && precisionFiltersOpen ? (
-                <div className="space-y-4">
-                  <div className="rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3.5 shadow-sm sm:px-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground/85">
-                      {t("media.advancedFiltersSectionLabel")}
-                    </p>
-                    <p className="mt-1 text-[11px] text-muted-foreground/85">
-                      {t("media.advancedFiltersSectionSubtext")}
-                    </p>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {tMedia("precisionFilterPanelIntro")}
-                    </p>
-                  </div>
+                <div className="border-b border-slate-100 px-4 pb-4 pt-3">
                   <MediaPrecisionFiltersAssistant {...precisionAssistantProps} />
                 </div>
               ) : null}
 
-              <Sheet
-                open={precisionFiltersOpen && !lgUp}
-                onOpenChange={setPrecisionFiltersOpen}
-              >
-                <SheetContent
-                  side="bottom"
-                  showCloseButton
-                  className="max-h-[92vh] gap-0 overflow-y-auto rounded-t-2xl border-t-2 border-dashed border-slate-300/80 bg-slate-50/40 p-0"
-                >
+              <Sheet open={precisionFiltersOpen && !lgUp} onOpenChange={setPrecisionFiltersOpen}>
+                <SheetContent side="bottom" showCloseButton className="max-h-[92vh] gap-0 overflow-y-auto rounded-t-2xl border-t-2 border-dashed border-slate-300/80 bg-slate-50/40 p-0">
                   <SheetHeader className="sticky top-0 z-10 border-b border-dashed border-slate-200/80 bg-background/95 px-4 pb-3 pt-2 text-left backdrop-blur-sm">
-                    <SheetTitle className="text-left text-base font-bold tracking-tight text-navy">
-                      {t("media.advancedFiltersSectionLabel")}
-                    </SheetTitle>
-                    <p className="text-[11px] text-muted-foreground">
-                      {t("media.advancedFiltersSectionSubtext")}
-                    </p>
-                    <p className="pt-1 text-[12px] leading-relaxed text-muted-foreground">
-                      {tMedia("precisionFilterPanelIntro")}
-                    </p>
+                    <SheetTitle className="text-left text-base font-bold tracking-tight text-navy">{t("media.advancedFiltersSectionLabel")}</SheetTitle>
+                    <p className="text-[11px] text-muted-foreground">{t("media.advancedFiltersSectionSubtext")}</p>
+                    <p className="pt-1 text-[12px] leading-relaxed text-muted-foreground">{tMedia("precisionFilterPanelIntro")}</p>
                   </SheetHeader>
-                  <div className="mx-3 mb-4 mt-2 sm:mx-4">
-                    <MediaPrecisionFiltersAssistant {...precisionAssistantProps} />
-                  </div>
+                  <div className="mx-3 mb-4 mt-2 sm:mx-4"><MediaPrecisionFiltersAssistant {...precisionAssistantProps} /></div>
                   <div className="sticky bottom-0 border-t border-slate-200/80 bg-background/95 px-4 py-3 backdrop-blur-sm">
-                    <Button
-                      type="button"
-                      className="w-full bg-navy font-semibold text-white hover:bg-navy/90"
-                      onClick={() => setPrecisionFiltersOpen(false)}
-                    >
-                      필터 적용하기
-                    </Button>
+                    <Button type="button" className="w-full bg-navy font-semibold text-white hover:bg-navy/90" onClick={() => setPrecisionFiltersOpen(false)}>필터 적용하기</Button>
                   </div>
                 </SheetContent>
               </Sheet>
 
-              <div className="min-w-0">
-                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-navy">
-                      {t("media.results")}: {gridDisplayList.length}
-                      {catalogMinPadActive ? (
-                        <span className="ml-2 text-xs font-normal text-muted-foreground">
-                          {tMedia("catalogMinPadCountHint", {
-                            matched: sortedFiltered.length,
-                          })}
-                        </span>
-                      ) : null}
+              {/* 지도 영역 필터 토글 (데스크탑 전용) */}
+              <div className="hidden items-center gap-2 border-b border-slate-100 px-4 py-2.5 lg:flex">
+                <label className="flex cursor-pointer select-none items-center gap-2 text-xs font-medium text-navy/80 hover:text-navy">
+                  <input type="checkbox" checked={viewportFilterActive} onChange={(e) => setViewportFilterActive(e.target.checked)} className="h-3.5 w-3.5 rounded accent-navy" />
+                  <MapPinIcon className="h-3 w-3 text-navy/50" aria-hidden />
+                  {isKo ? "지도 영역 기준으로 표시" : "Show within map view"}
+                </label>
+                {viewportFilterActive && mapBounds ? (
+                  <span className="ml-auto rounded-full bg-navy/8 px-2 py-0.5 text-[10px] font-semibold text-navy/70">{viewportFiltered.length}개</span>
+                ) : null}
+              </div>
+
+              {/* 툴바 */}
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-2.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-semibold text-navy">
+                    {gridDisplayList.length}<span className="ml-1 text-xs font-normal text-muted-foreground">{isKo ? "개 매체" : " media"}</span>
+                  </span>
+                  {catalogMinPadActive ? (
+                    <span className="text-xs text-muted-foreground">{tMedia("catalogMinPadCountHint", { matched: sortedFiltered.length })}</span>
+                  ) : null}
+                  {debouncedCatalogSearch.trim() ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-gold/35 bg-gold/10 px-2.5 py-0.5 text-xs font-semibold text-navy">
+                      <Search className="h-3 w-3 text-gold-dark" />{debouncedCatalogSearch}
                     </span>
-                    {debouncedCatalogSearch.trim() ? (
-                      <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-gold/35 bg-gradient-to-r from-gold/10 to-amber-50/90 px-3 py-1 text-xs font-semibold text-navy shadow-sm">
-                        <Search className="size-3.5 shrink-0 text-gold-dark" aria-hidden />
-                        <span className="min-w-0 truncate">
-                          {t("media.activeKeywordLabel")}: {debouncedCatalogSearch}
-                        </span>
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <label className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-white px-3 py-1.5 text-xs font-medium text-navy">
-                      <span className="text-muted-foreground">
-                        {t("media.sortLabel")}
-                      </span>
-                      <select
-                        className="max-w-[10rem] rounded-md border border-navy/15 bg-slate-50 px-2 py-0.5 text-xs font-semibold"
-                        value={sortBy}
-                        onChange={(e) =>
-                          setSortBy(
-                            e.target.value as typeof sortBy,
-                          )
-                        }
-                      >
-                        <option value="default">
-                          {t("media.sortDefault")}
-                        </option>
-                        <option value="priceAsc">
-                          {t("media.sortPriceAsc")}
-                        </option>
-                        <option value="priceDesc">
-                          {t("media.sortPriceDesc")}
-                        </option>
-                        <option value="trafficDesc">
-                          {t("media.sortTrafficDesc")}
-                        </option>
-                      </select>
-                    </label>
-                    <div className="inline-flex rounded-full border border-navy/15 bg-slate-50 p-0.5">
-                      <button
-                        type="button"
-                        onClick={() => setBrowseMode("list")}
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                          browseMode === "list"
-                            ? "bg-white text-navy shadow-sm"
-                            : "text-muted-foreground hover:text-navy"
-                        }`}
-                      >
-                        <LayoutList className="h-3.5 w-3.5" />
-                        {t("media.browseViewList")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setBrowseMode("map")}
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                          browseMode === "map"
-                            ? "bg-white text-navy shadow-sm"
-                            : "text-muted-foreground hover:text-navy"
-                        }`}
-                      >
-                        <MapIcon className="h-3.5 w-3.5" />
-                        {t("media.browseViewMap")}
-                      </button>
-                    </div>
-                    {browseMode === "list" ? (
-                      <MediaCatalogGridCompactToggle
-                        layout={catalogCardLayout}
-                        onLayoutChange={setCatalogCardLayout}
-                        gridLabel={t("media.browseCardLayoutGrid")}
-                        compactLabel={t("media.browseCardLayoutCompact")}
-                      />
-                    ) : null}
-                    {browseMode === "list" ? (
-                      <PerPageSelect
-                        value={catalogPageSize}
-                        onChange={(next) => {
-                          setCatalogPageSize(next);
-                          setCatalogPage(1);
-                        }}
-                      />
-                    ) : null}
-                    {browseMode === "list" ? (
-                      <>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            addManyToCompare(
-                              pagedCatalog.filter(
-                                (m) => m.catalogSource !== "network",
-                              ),
-                            )
-                          }
-                          disabled={pagedCatalog.length === 0}
-                        >
-                          전체선택
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setCompareItems([])}
-                          disabled={compareItems.length === 0}
-                        >
-                          전체삭제
-                        </Button>
-                      </>
-                    ) : null}
-                    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
-                      <ShieldCheck className="h-4 w-4" aria-hidden />
-                      <span>{tMedia("browseCatalogVerifiedBadge")}</span>
-                    </div>
-                  </div>
+                  ) : null}
                 </div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <select className="rounded-md border border-navy/15 bg-slate-50 px-2 py-1 text-xs font-semibold text-navy" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)}>
+                    <option value="default">{t("media.sortDefault")}</option>
+                    <option value="priceAsc">{t("media.sortPriceAsc")}</option>
+                    <option value="priceDesc">{t("media.sortPriceDesc")}</option>
+                    <option value="trafficDesc">{t("media.sortTrafficDesc")}</option>
+                  </select>
+                  <MediaCatalogGridCompactToggle layout={catalogCardLayout} onLayoutChange={setCatalogCardLayout} gridLabel={t("media.browseCardLayoutGrid")} compactLabel={t("media.browseCardLayoutCompact")} />
+                  <PerPageSelect value={catalogPageSize} onChange={(next) => { setCatalogPageSize(next); setCatalogPage(1); }} />
+                </div>
+              </div>
 
-                {precisionFilterRelaxed ? (
-                  <div
-                    role="status"
-                    className="mb-4 flex flex-col gap-3 rounded-xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <p className="min-w-0 leading-relaxed">
-                      {tMedia("precisionFilterRelaxedBanner")}
-                    </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 border-amber-300 bg-white hover:bg-amber-50"
-                      onClick={clearPrecisionSelections}
-                    >
-                      {tMedia("clearPrecisionFilters")}
-                    </Button>
-                  </div>
-                ) : null}
+              {/* 배너 */}
+              {precisionFilterRelaxed ? (
+                <div role="status" className="mx-4 mt-3 flex flex-col gap-3 rounded-xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="min-w-0 leading-relaxed">{tMedia("precisionFilterRelaxedBanner")}</p>
+                  <Button type="button" variant="outline" size="sm" className="shrink-0 border-amber-300 bg-white hover:bg-amber-50" onClick={clearPrecisionSelections}>{tMedia("clearPrecisionFilters")}</Button>
+                </div>
+              ) : null}
+              {browseLenientSearchTier ? (
+                <div role="status" className="mx-4 mt-3 flex flex-col gap-3 rounded-xl border border-indigo-200/90 bg-indigo-50/90 px-4 py-3 text-sm text-indigo-950 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="min-w-0 leading-relaxed">{tMedia("browseLenientSearchBanner")}</p>
+                  <Button type="button" variant="outline" size="sm" className="shrink-0 border-indigo-300 bg-white hover:bg-indigo-50" onClick={resetFilters}>{tMedia("resetAllBrowseFilters")}</Button>
+                </div>
+              ) : null}
+              {catalogMinPadActive ? (
+                <div role="status" className="mx-4 mt-3 rounded-xl border border-emerald-200/90 bg-emerald-50/90 px-4 py-3 text-sm leading-relaxed text-emerald-950">
+                  {tMedia("catalogMinPadBanner", { matched: sortedFiltered.length, shown: gridDisplayList.length })}
+                </div>
+              ) : null}
 
-                {browseLenientSearchTier ? (
-                  <div
-                    role="status"
-                    className="mb-4 flex flex-col gap-3 rounded-xl border border-indigo-200/90 bg-indigo-50/90 px-4 py-3 text-sm text-indigo-950 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <p className="min-w-0 leading-relaxed">
-                      {tMedia("browseLenientSearchBanner")}
-                    </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 border-indigo-300 bg-white hover:bg-indigo-50"
-                      onClick={resetFilters}
-                    >
-                      {tMedia("resetAllBrowseFilters")}
-                    </Button>
-                  </div>
-                ) : null}
-
-                {catalogMinPadActive ? (
-                  <div
-                    role="status"
-                    className="mb-4 rounded-xl border border-emerald-200/90 bg-emerald-50/90 px-4 py-3 text-sm leading-relaxed text-emerald-950"
-                  >
-                    {tMedia("catalogMinPadBanner", {
-                      matched: sortedFiltered.length,
-                      shown: gridDisplayList.length,
-                    })}
-                  </div>
-                ) : null}
-
+              {/* 카드 */}
+              <div className="flex-1 px-4 pb-4 pt-3">
                 {gridDisplayList.length === 0 ? (
-                  <div className="flex min-h-[32rem] flex-col items-center justify-center gap-8 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/90 px-6 py-20 text-center sm:px-10">
-                    <p className="max-w-2xl text-3xl font-bold tracking-tight text-navy sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
-                      {tMedia("catalogBrowseEmptyTitle")}
-                    </p>
-                    <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                      {tMedia("catalogBrowseEmptySubtitle")}
-                    </p>
-                    <Button
-                      type="button"
-                      size="lg"
-                      className="min-h-12 min-w-[14rem] px-8 text-base font-semibold shadow-md"
-                      onClick={resetFilters}
-                    >
-                      {tMedia("resetAllBrowseFiltersProminent")}
-                    </Button>
+                  <div className="flex min-h-[20rem] flex-col items-center justify-center gap-6 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/90 px-6 py-12 text-center">
+                    <p className="max-w-xs text-xl font-bold text-navy">{tMedia("catalogBrowseEmptyTitle")}</p>
+                    <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">{tMedia("catalogBrowseEmptySubtitle")}</p>
+                    <Button type="button" size="sm" onClick={resetFilters}>{tMedia("resetAllBrowseFiltersProminent")}</Button>
                   </div>
-                ) : browseMode === "map" ? (
-                  <div className="relative">
-                    <MediaBrowseMap
-                      items={gridDisplayList}
-                      locale={locale}
-                      selectedId={mapSelectedId}
-                      onSelectId={handleMapSelectId}
-                    />
-                    {mapSelectedMedia && mapPopupOpen ? (
-                      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 flex justify-center p-3 sm:p-4">
-                        <div
-                          className="pointer-events-auto w-full max-w-md max-h-[40vh] overflow-y-auto animate-in fade-in slide-in-from-bottom-3 duration-200"
-                          role="dialog"
-                          aria-label={
-                            isKo
-                              ? mapSelectedMedia.name
-                              : mapSelectedMedia.nameEn
-                          }
-                        >
-                          <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl shadow-navy/20 ring-1 ring-black/5">
-                            <div className="flex items-start gap-3 border-b border-navy/8 p-3 sm:p-4">
-                              <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg sm:h-24 sm:w-32">
-                                <MediaCatalogThumbnail
-                                  media={mapSelectedMedia}
-                                  placeholderLabel={t("media.imagePreparing")}
-                                  className="h-full w-full rounded-lg"
-                                  bottomGradientClassName={null}
-                                  placeholderSize="xs"
-                                />
-                              </div>
-                              <div className="min-w-0 flex-1 pt-0.5">
-                                <h3 className="line-clamp-2 text-base font-bold leading-snug text-navy sm:text-lg">
-                                  {isKo
-                                    ? mapSelectedMedia.name
-                                    : mapSelectedMedia.nameEn}
-                                </h3>
-                                <p className="mt-1.5 text-sm font-bold tabular-nums text-navy">
-                                  {formatMediaPriceWonWithSymbol(mapSelectedMedia.price)}
-                                  <span className="text-xs font-normal text-muted-foreground">
-                                    {" "}
-                                    ·{" "}
-                                    {tMedia(
-                                      mediaPricePeriodTranslationKey(
-                                        mapSelectedMedia.pricePeriod,
-                                      ),
-                                    )}
-                                  </span>
-                                </p>
-                                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                                  <Users
-                                    className="h-3.5 w-3.5 shrink-0 text-gold-dark"
-                                    aria-hidden
-                                  />
-                                  <span>
-                                    {t("media.mapPopupFootTraffic")}:{" "}
-                                    <span className="font-semibold text-navy/85">
-                                      {mapSelectedMedia.dailyFootTraffic.toLocaleString()}
-                                    </span>
-                                  </span>
-                                </p>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => setMapPopupOpen(false)}
-                                className="-m-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-slate-100 hover:text-navy"
-                                aria-label={t("media.mapPopupClose")}
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
-                            </div>
-                            <div className="flex flex-wrap gap-2 p-3 sm:p-4 sm:pt-3">
-                              <Link
-                                href={mediaItemDetailPath(
-                                  mapSelectedMedia.id,
-                                )}
-                                className="flex-1 min-w-[8rem]"
-                              >
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-10 w-full font-semibold"
-                                >
-                                  <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-                                  {t("media.mapCardDetail")}
-                                </Button>
-                              </Link>
-                              <Button
-                                size="sm"
-                                onClick={() => toggleCompare(mapSelectedMedia)}
-                                className={`h-10 flex-1 min-w-[8rem] font-semibold ${
-                                  isInCompare(mapSelectedMedia.id)
-                                    ? "border-2 border-gold bg-white text-gold hover:bg-gold/10"
-                                    : "bg-navy text-white hover:bg-navy/90"
-                                }`}
-                              >
-                                {isInCompare(mapSelectedMedia.id)
-                                  ? (isKo ? "✓ 선택됨" : "✓ Selected")
-                                  : (isKo ? "+ 비교 추가" : "+ Compare")}
-                              </Button>
-                              <Link
-                                href={`/quote?media=${mapSelectedMedia.id}`}
-                                className="flex-1 min-w-[8rem]"
-                              >
-                                <Button
-                                  size="sm"
-                                  className="h-10 w-full bg-gold font-semibold text-navy hover:bg-gold-dark"
-                                >
-                                  <Calculator className="mr-1.5 h-3.5 w-3.5" />
-                                  {t("media.mapCardQuote")}
-                                </Button>
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : (
-                  <>
-                    {catalogCardLayout === "grid" ? (
+                ) : catalogCardLayout === "grid" ? (
                   <div className={MEDIA_CATALOG_GRID_CLASS}>
                     {pagedCatalog.map((media) => (
-                      <MediaCatalogGridCard
-                        key={media.id}
-                        variant="link"
-                        media={media}
-                        isKo={isKo}
-                        imagePreparingLabel={t("media.imagePreparing")}
-                        popularIds={popularIds}
-                        topLeftSlot={
-                          <label
-                            className="absolute left-2.5 top-2.5 z-20 flex h-9 w-9 cursor-pointer select-none items-center justify-center rounded-full border-2 border-navy bg-white shadow-md"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onKeyDown={(e) => e.stopPropagation()}
-                            title={t("media.compareToggleAria")}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isInCompare(media.id)}
-                              onChange={() => toggleCompare(media)}
-                              disabled={
-                                media.catalogSource === "network" ||
-                                (!isInCompare(media.id) &&
-                                  compareItems.length >= COMPARE_MAX_ITEMS)
-                              }
-                              aria-label={t("media.compareToggleAria")}
-                              className="h-4 w-4 rounded border-2 border-navy bg-white text-gold accent-gold"
-                            />
-                          </label>
-                        }
-                      />
+                      <div key={media.id} ref={(el) => { if (el) cardRefMap.current.set(media.id, el); else cardRefMap.current.delete(media.id); }}>
+                        <MediaCatalogGridCard
+                          variant="link"
+                          media={media}
+                          isKo={isKo}
+                          imagePreparingLabel={t("media.imagePreparing")}
+                          popularIds={popularIds}
+                          topLeftSlot={
+                            <label className="absolute left-2.5 top-2.5 z-20 flex h-9 w-9 cursor-pointer select-none items-center justify-center rounded-full border-2 border-navy bg-white shadow-md" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} onKeyDown={(e) => e.stopPropagation()} title={t("media.compareToggleAria")}>
+                              <input type="checkbox" checked={isInCompare(media.id)} onChange={() => toggleCompare(media)} disabled={media.catalogSource === "network" || (!isInCompare(media.id) && compareItems.length >= COMPARE_MAX_ITEMS)} aria-label={t("media.compareToggleAria")} className="h-4 w-4 rounded border-2 border-navy bg-white text-gold accent-gold" />
+                            </label>
+                          }
+                        />
+                      </div>
                     ))}
                   </div>
-                    ) : (
+                ) : (
                   <div className={MEDIA_CATALOG_COMPACT_GRID_CLASS}>
                     {pagedCatalog.map((media) => (
-                      <MediaCatalogCompactLinkRow
-                        key={media.id}
-                        media={media}
-                        isKo={isKo}
-                        href={mediaItemDetailPath(media.id)}
-                        imagePreparingLabel={t("media.imagePreparing")}
-                        pricePeriodLabel={tMedia(
-                          mediaPricePeriodTranslationKey(media.pricePeriod),
-                        )}
-                        popularIds={popularIds}
-                        leadingSlot={
-                          <label
-                            className="flex h-9 w-9 cursor-pointer select-none items-center justify-center rounded-lg border border-navy/20 bg-white shadow-sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onKeyDown={(e) => e.stopPropagation()}
-                            title={t("media.compareToggleAria")}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isInCompare(media.id)}
-                              onChange={() => toggleCompare(media)}
-                              disabled={
-                                media.catalogSource === "network" ||
-                                (!isInCompare(media.id) &&
-                                  compareItems.length >= COMPARE_MAX_ITEMS)
-                              }
-                              aria-label={t("media.compareToggleAria")}
-                              className="h-4 w-4 rounded border-2 border-navy bg-white text-gold accent-gold shadow-none"
-                            />
+                      <div key={media.id} ref={(el) => { if (el) cardRefMap.current.set(media.id, el); else cardRefMap.current.delete(media.id); }}>
+                        <MediaCatalogCompactLinkRow media={media} isKo={isKo} href={mediaItemDetailPath(media.id)} imagePreparingLabel={t("media.imagePreparing")} pricePeriodLabel={tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))} popularIds={popularIds} leadingSlot={
+                          <label className="flex h-9 w-9 cursor-pointer select-none items-center justify-center rounded-lg border border-navy/20 bg-white shadow-sm" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} onKeyDown={(e) => e.stopPropagation()} title={t("media.compareToggleAria")}>
+                            <input type="checkbox" checked={isInCompare(media.id)} onChange={() => toggleCompare(media)} disabled={media.catalogSource === "network" || (!isInCompare(media.id) && compareItems.length >= COMPARE_MAX_ITEMS)} aria-label={t("media.compareToggleAria")} className="h-4 w-4 rounded border-2 border-navy bg-white text-gold accent-gold shadow-none" />
                           </label>
-                        }
-                      />
+                        } />
+                      </div>
                     ))}
                   </div>
-                    )}
-                    {catalogPageCount > 1 ? (
-                      <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-slate-200 pt-4">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={catalogPage <= 1}
-                          onClick={() =>
-                            setCatalogPage((p) => Math.max(1, p - 1))
-                          }
-                        >
-                          {t("media.pagePrev")}
-                        </Button>
-                        <span className="text-sm text-muted-foreground">
-                          {t("media.pageSummary", {
-                            from:
-                              gridDisplayList.length === 0
-                                ? 0
-                                : (catalogPage - 1) * catalogPageSize + 1,
-                            to: Math.min(
-                              catalogPage * catalogPageSize,
-                              gridDisplayList.length,
-                            ),
-                            total: gridDisplayList.length,
-                          })}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={catalogPage >= catalogPageCount}
-                          onClick={() =>
-                            setCatalogPage((p) =>
-                              Math.min(catalogPageCount, p + 1),
-                            )
-                          }
-                        >
-                          {t("media.pageNext")}
-                        </Button>
-                      </div>
-                    ) : null}
-                  </>
                 )}
+
+                {catalogPageCount > 1 ? (
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-3 border-t border-slate-200 pt-4">
+                    <Button type="button" variant="outline" size="sm" disabled={catalogPage <= 1} onClick={() => setCatalogPage((p) => Math.max(1, p - 1))}>{t("media.pagePrev")}</Button>
+                    <span className="text-sm text-muted-foreground">{t("media.pageSummary", { from: gridDisplayList.length === 0 ? 0 : (catalogPage - 1) * catalogPageSize + 1, to: Math.min(catalogPage * catalogPageSize, gridDisplayList.length), total: gridDisplayList.length })}</span>
+                    <Button type="button" variant="outline" size="sm" disabled={catalogPage >= catalogPageCount} onClick={() => setCatalogPage((p) => Math.min(catalogPageCount, p + 1))}>{t("media.pageNext")}</Button>
+                  </div>
+                ) : null}
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => addManyToCompare(pagedCatalog.filter((m) => m.catalogSource !== "network"))} disabled={pagedCatalog.length === 0}>전체선택</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setCompareItems([])} disabled={compareItems.length === 0}>전체삭제</Button>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <ShieldCheck className="h-3.5 w-3.5" />{tMedia("browseCatalogVerifiedBadge")}
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           <RecentlyViewedMedia locale={locale} />
         </div>
-      </section>
 
-      <CompareBar
-        items={compareItems}
-        locale={locale}
-        onClear={() => setCompareItems([])}
-      />
+        {/* ── 오른쪽 패널: 지도 ── */}
+        <div className={[
+          "relative overflow-hidden",
+          mobileTab === "list" ? "hidden lg:block" : "block",
+          "h-[calc(100dvh-7.5rem)] flex-1 lg:h-auto",
+        ].join(" ")}>
+          <MediaBrowseMap
+            items={sortedFiltered}
+            locale={locale}
+            selectedId={mapSelectedId}
+            onSelectId={handleMapSelectId}
+            onBoundsChange={setMapBounds}
+            fullHeight
+            showFooterCaption={false}
+          />
+          {mapSelectedMedia && mapPopupOpen ? (
+            <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 flex justify-center p-4">
+              <div className="pointer-events-auto w-full max-w-sm animate-in fade-in slide-in-from-bottom-3 duration-200" role="dialog" aria-label={isKo ? mapSelectedMedia.name : mapSelectedMedia.nameEn}>
+                <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl shadow-navy/20">
+                  <div className="flex items-start gap-3 border-b border-navy/8 p-3">
+                    <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg">
+                      <MediaCatalogThumbnail media={mapSelectedMedia} placeholderLabel={t("media.imagePreparing")} className="h-full w-full rounded-lg" bottomGradientClassName={null} placeholderSize="xs" />
+                    </div>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <h3 className="line-clamp-2 text-base font-bold leading-snug text-navy">{isKo ? mapSelectedMedia.name : mapSelectedMedia.nameEn}</h3>
+                      <p className="mt-1 text-sm font-bold tabular-nums text-navy">
+                        {formatMediaPriceWonWithSymbol(mapSelectedMedia.price)}
+                        <span className="text-xs font-normal text-muted-foreground"> · {tMedia(mediaPricePeriodTranslationKey(mapSelectedMedia.pricePeriod))}</span>
+                      </p>
+                      <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Users className="h-3.5 w-3.5 shrink-0 text-gold-dark" />
+                        {t("media.mapPopupFootTraffic")}: <span className="ml-1 font-semibold text-navy/85">{mapSelectedMedia.dailyFootTraffic.toLocaleString()}</span>
+                      </p>
+                    </div>
+                    <button type="button" onClick={() => setMapPopupOpen(false)} className="-m-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-slate-100 hover:text-navy" aria-label={t("media.mapPopupClose")}>
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 p-3">
+                    <Link href={mediaItemDetailPath(mapSelectedMedia.id)} className="min-w-[7rem] flex-1">
+                      <Button size="sm" variant="outline" className="h-10 w-full font-semibold"><ExternalLink className="mr-1.5 h-3.5 w-3.5" />{t("media.mapCardDetail")}</Button>
+                    </Link>
+                    <Button size="sm" onClick={() => toggleCompare(mapSelectedMedia)} className={`h-10 min-w-[7rem] flex-1 font-semibold ${isInCompare(mapSelectedMedia.id) ? "border-2 border-gold bg-white text-gold hover:bg-gold/10" : "bg-navy text-white hover:bg-navy/90"}`}>
+                      {isInCompare(mapSelectedMedia.id) ? (isKo ? "✓ 선택됨" : "✓ Selected") : (isKo ? "+ 비교" : "+ Compare")}
+                    </Button>
+                    <Link href={`/quote?media=${mapSelectedMedia.id}`} className="min-w-[7rem] flex-1">
+                      <Button size="sm" className="h-10 w-full bg-gold font-semibold text-navy hover:bg-gold-dark"><Calculator className="mr-1.5 h-3.5 w-3.5" />{t("media.mapCardQuote")}</Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
 
-      {compareItems.length > 0 ? (
-        <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
-      ) : null}
+      <CompareBar items={compareItems} locale={locale} onClear={() => setCompareItems([])} />
+      {compareItems.length > 0 ? <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden /> : null}
     </>
   );
 }
