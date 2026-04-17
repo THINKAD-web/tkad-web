@@ -325,7 +325,44 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </MediaDetailHeroGallery>
 
-      <section className="bg-white py-12 pb-28 sm:pb-32">
+      {/* ── 주요 지표 바 ── */}
+      <div className="bg-navy">
+        <div className="mx-auto grid max-w-4xl grid-cols-3 divide-x divide-white/10 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center py-5 sm:py-7">
+            <p className="text-xl font-bold tabular-nums text-gold sm:text-2xl">
+              {media.keywordFilter
+                ? formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMin)
+                : formatCatalogPriceFieldWon(
+                    hasPriceOptions && primaryPriceOption
+                      ? primaryPriceOption.price
+                      : media.price,
+                  )}
+            </p>
+            <p className="mt-1 text-[11px] font-medium text-slate-400">
+              {isKo ? "광고 단가" : "Ad rate"}
+            </p>
+          </div>
+          <div className="flex flex-col items-center py-5 sm:py-7">
+            <p className="text-xl font-bold tabular-nums text-white sm:text-2xl">
+              {monthly.toLocaleString()}
+            </p>
+            <p className="mt-1 text-[11px] font-medium text-slate-400">
+              {isKo ? "월 유동인구" : "Monthly traffic"}
+            </p>
+          </div>
+          <div className="flex flex-col items-center py-5 sm:py-7">
+            <p className="text-xl font-bold tabular-nums text-white sm:text-2xl">
+              {performanceMetrics.visibilityScore}
+              <span className="ml-0.5 text-sm font-normal text-slate-500">/100</span>
+            </p>
+            <p className="mt-1 text-[11px] font-medium text-slate-400">
+              {isKo ? "노출 지수" : "Visibility"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <section className="bg-[#f7f8fc] py-14 pb-32 sm:pb-36">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <MediaDetailExtras
             media={media}
@@ -378,11 +415,15 @@ export default async function MediaDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
-            {t("coreInfoTitle")}
-          </h2>
-          <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-lg shadow-navy/5 sm:p-8">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
+          <div className="mb-6 mt-14 flex items-center gap-3">
+            <span className="h-5 w-[3px] rounded-full bg-gradient-to-b from-gold to-amber-400" aria-hidden />
+            <h2 className="text-xl font-bold tracking-tight text-navy">
+              {t("coreInfoTitle")}
+            </h2>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-navy/8 bg-white shadow-md shadow-navy/5">
+            <div className="h-[3px] bg-gradient-to-r from-gold via-amber-400 to-gold/20" />
+            <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 sm:gap-8 sm:p-8">
               <CoreFact
                 icon={Ruler}
                 label={t("size")}
@@ -489,14 +530,17 @@ export default async function MediaDetailPage({ params }: Props) {
               aria-labelledby="media-detail-price-options-heading"
               className="mt-10"
             >
-              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <h2
-                  id="media-detail-price-options-heading"
-                  className="text-xl font-bold tracking-tight text-navy sm:text-2xl"
-                >
-                  {t("priceOptionsSectionTitle")}
-                </h2>
-                <p className="text-xs font-medium uppercase tracking-[0.14em] text-navy/40">
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="h-5 w-[3px] rounded-full bg-gradient-to-b from-gold to-amber-400" aria-hidden />
+                  <h2
+                    id="media-detail-price-options-heading"
+                    className="text-xl font-bold tracking-tight text-navy"
+                  >
+                    {t("priceOptionsSectionTitle")}
+                  </h2>
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-navy/35">
                   THINKAD · OOH
                 </p>
               </div>
@@ -518,27 +562,33 @@ export default async function MediaDetailPage({ params }: Props) {
                   return (
                     <article
                       key={`${opt.label}-${idx}`}
-                      className="group relative flex flex-col overflow-hidden rounded-2xl border border-navy/[0.08] bg-gradient-to-b from-white to-slate-50/90 p-5 shadow-[0_8px_30px_rgba(18,26,58,0.06)] ring-1 ring-navy/[0.04] transition-shadow hover:shadow-[0_12px_40px_rgba(18,26,58,0.1)]"
+                      className="group flex flex-col overflow-hidden rounded-2xl border border-navy/[0.07] bg-white shadow-md shadow-navy/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-navy/10"
                     >
-                      <div className="pointer-events-none absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-gradient-to-br from-gold/15 to-transparent opacity-80" />
-                      <h3 className="relative pr-8 text-base font-bold leading-snug text-navy">
-                        {opt.label}
-                      </h3>
-                      <p className="relative mt-4 text-2xl font-bold tabular-nums tracking-tight text-gold-dark sm:text-[1.65rem]">
-                        {formatCatalogPriceKrwLong(opt.price, locale)}
-                      </p>
-                      <p className="relative mt-2 inline-flex w-fit items-center rounded-full border border-navy/10 bg-navy/[0.03] px-3 py-1 text-[11px] font-semibold text-navy/70">
-                        {t(periodKey)}
-                      </p>
-                      {opt.description?.trim() ? (
-                        <p className="relative mt-4 border-t border-navy/8 pt-4 text-sm leading-relaxed text-muted-foreground">
-                          {opt.description}
+                      <div className="h-[3px] bg-gradient-to-r from-gold via-amber-400 to-gold/30" />
+                      <div className="flex flex-1 flex-col p-5">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-sm font-extrabold uppercase tracking-[0.12em] text-navy/55">
+                            {opt.label}
+                          </h3>
+                          <span className="shrink-0 rounded-full bg-navy/[0.05] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-navy/40">
+                            {t(periodKey)}
+                          </span>
+                        </div>
+                        <p className="mt-3 text-2xl font-bold tabular-nums tracking-tight text-navy sm:text-[1.7rem]">
+                          {formatCatalogPriceKrwLong(opt.price, locale)}
                         </p>
-                      ) : (
-                        <p className="relative mt-4 border-t border-navy/8 pt-4 text-xs text-muted-foreground/70">
-                          {isKo ? "상세 조건은 견적 시 안내드립니다." : "Terms confirmed at quote stage."}
-                        </p>
-                      )}
+                        <div className="mt-4 border-t border-navy/8 pt-4">
+                          {opt.description?.trim() ? (
+                            <p className="text-sm leading-relaxed text-muted-foreground">
+                              {opt.description}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground/55">
+                              {isKo ? "상세 조건은 견적 시 안내드립니다." : "Terms confirmed at quote stage."}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </article>
                   );
                 })}
@@ -546,10 +596,13 @@ export default async function MediaDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
-            {t("specsTitle")}
-          </h2>
-          <dl className="grid gap-3 rounded-xl border bg-white p-6 sm:grid-cols-2">
+          <div className="mb-5 mt-14 flex items-center gap-3">
+            <span className="h-5 w-[3px] rounded-full bg-gradient-to-b from-gold to-amber-400" aria-hidden />
+            <h2 className="text-xl font-bold tracking-tight text-navy">
+              {t("specsTitle")}
+            </h2>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
             {media.keywordFilter ? (
               <>
                 <SpecRow
@@ -585,24 +638,27 @@ export default async function MediaDetailPage({ params }: Props) {
               label={t("targetAge")}
               value={isKo ? media.targetAge : undefined}
             />
-          </dl>
+          </div>
 
           <MediaDetailPerformance metrics={performanceMetrics} />
 
           <section
             aria-labelledby="media-detail-description-heading"
-            className="mt-10 border-t border-navy/10 py-12"
+            className="mt-14 border-t border-navy/10 py-12"
           >
-            <h2
-              id="media-detail-description-heading"
-              className="mb-10 text-xl font-bold tracking-tight text-navy sm:text-2xl"
-            >
-              {t("detailDescriptionTitle")}
-            </h2>
+            <div className="mb-8 flex items-center gap-3">
+              <span className="h-5 w-[3px] rounded-full bg-gradient-to-b from-gold to-amber-400" aria-hidden />
+              <h2
+                id="media-detail-description-heading"
+                className="text-xl font-bold tracking-tight text-navy sm:text-2xl"
+              >
+                {t("detailDescriptionTitle")}
+              </h2>
+            </div>
             <div className="space-y-12">
               {overviewBody?.trim() ? (
                 <div>
-                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <h3 className="mb-4 text-[10px] font-extrabold uppercase tracking-[0.2em] text-navy/35">
                     {t("placementOverviewTitle")}
                   </h3>
                   <div
@@ -618,7 +674,7 @@ export default async function MediaDetailPage({ params }: Props) {
                 </div>
               ) : null}
               <div>
-                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <h3 className="mb-4 text-[10px] font-extrabold uppercase tracking-[0.2em] text-navy/35">
                   {t("historyTitle")}
                 </h3>
                 <div
@@ -639,7 +695,7 @@ export default async function MediaDetailPage({ params }: Props) {
                 </div>
               </div>
               <div>
-                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <h3 className="mb-4 text-[10px] font-extrabold uppercase tracking-[0.2em] text-navy/35">
                   {t("nearbyTitle")}
                 </h3>
                 <div
@@ -676,9 +732,12 @@ export default async function MediaDetailPage({ params }: Props) {
 
           {caseStudyItems.length > 0 ? (
             <>
-              <h2 className="mb-3 mt-12 text-lg font-bold text-navy">
-                {t("caseStudiesTitle")}
-              </h2>
+              <div className="mb-4 mt-14 flex items-center gap-3">
+                <span className="h-5 w-[3px] rounded-full bg-gradient-to-b from-gold to-amber-400" aria-hidden />
+                <h2 className="text-xl font-bold tracking-tight text-navy">
+                  {t("caseStudiesTitle")}
+                </h2>
+              </div>
               <MediaCaseStudyGallery
                 photos={caseStudyItems}
                 isKo={isKo}
@@ -728,17 +787,14 @@ function EffectMemoCallout({
   children: ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-gold-dark/45 bg-gradient-to-br from-gold-light/50 via-white to-gold/18 px-5 py-6 shadow-md shadow-navy/[0.07] ring-1 ring-inset ring-white/60 sm:px-8 sm:py-7">
-      <div
-        className="pointer-events-none absolute inset-y-5 left-0 w-1 rounded-full bg-gradient-to-b from-gold-dark/75 to-gold-dark/20"
-        aria-hidden
-      />
-      <div className="relative flex gap-4 pl-3 sm:pl-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy/[0.07] text-gold-dark">
+    <div className="overflow-hidden rounded-2xl border border-gold/30 bg-white shadow-md shadow-navy/[0.06]">
+      <div className="h-[3px] bg-gradient-to-r from-gold via-amber-400 to-gold/20" />
+      <div className="flex gap-4 px-6 py-6 sm:px-8 sm:py-7">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-gold-dark">
           <Sparkles className="h-5 w-5" strokeWidth={1.75} aria-hidden />
         </div>
         <div className="min-w-0 flex-1 pt-0.5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-navy/75">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-gold-dark/80">
             {title}
           </p>
           <div className="mt-3">{children}</div>
@@ -758,18 +814,18 @@ function CoreFact({
   value: ReactNode;
 }) {
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-3.5">
       <div
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/12 text-gold-dark"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-gold-dark"
         aria-hidden
       >
-        <Icon className="h-5 w-5" strokeWidth={1.75} />
+        <Icon className="h-4.5 w-4.5" strokeWidth={1.75} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-navy/40">
           {label}
         </p>
-        <div className="mt-2 min-w-0 text-sm leading-relaxed text-navy">
+        <div className="mt-1.5 min-w-0 text-sm leading-relaxed text-navy">
           {value}
         </div>
       </div>
@@ -780,11 +836,11 @@ function CoreFact({
 function SpecRow({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
-    <div>
-      <dt className="text-xs font-semibold uppercase text-muted-foreground">
+    <div className="rounded-xl border border-navy/8 bg-white px-4 py-3.5 shadow-sm">
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-navy/35">
         {label}
-      </dt>
-      <dd className="mt-1 text-sm font-medium text-navy">{value}</dd>
+      </p>
+      <p className="mt-1.5 text-sm font-semibold text-navy">{value}</p>
     </div>
   );
 }
