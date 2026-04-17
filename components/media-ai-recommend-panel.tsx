@@ -5,25 +5,16 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  MapPin,
-  Monitor,
   List,
   Map as MapIcon,
   ShoppingBag,
   Calculator,
-  BadgeCheck,
 } from "lucide-react";
+import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import {
   type MediaItem,
-  typeLabels,
   getPrimaryMediaImageUrl,
   matchesMediaTextQuery,
 } from "@/lib/media-data";
@@ -34,11 +25,6 @@ import {
   type ScoredMedia,
 } from "@/lib/ai-media-recommend";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
-import { formatMediaLocationShort } from "@/lib/media-location-format";
-import {
-  formatMediaPriceWonWithSymbol,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
@@ -438,7 +424,6 @@ export default function MediaAiRecommendPanel({
 function AiResultCard({
   scored,
   isKo,
-  compact,
   inCompare,
   onToggleCompare,
   disableCompare,
@@ -456,181 +441,56 @@ function AiResultCard({
 }) {
   const tMedia = useTranslations("media");
   const m = scored.item;
-  const tl = typeLabels[m.type];
-  const primaryUrl = getPrimaryMediaImageUrl(m);
-  const [imgFailed, setImgFailed] = useState(false);
-  const showPlaceholder = !primaryUrl || imgFailed;
-  const exposure =
-    typeof m.dailyFootTraffic === "number" && Number.isFinite(m.dailyFootTraffic) && m.dailyFootTraffic > 0
-      ? (isKo ? `일 ${Math.round(m.dailyFootTraffic).toLocaleString()}명 노출` : `${Math.round(m.dailyFootTraffic).toLocaleString()}/day est.`)
-      : null;
-  const availability =
-    m.availability === "available"
-      ? { text: isKo ? "즉시 예약 가능" : "Available now", className: "bg-emerald-500 text-white" }
-      : m.availability === "reserved" || m.availability === "maintenance"
-        ? { text: isKo ? "협의 필요" : "Check availability", className: "bg-slate-700 text-white" }
-        : null;
 
-  return (
-    <Card
-      className={cn(
-        "overflow-hidden border-navy/10 shadow-md transition-shadow hover:shadow-lg",
-        compact && "text-center",
-      )}
-    >
-      <div
-        className={cn(
-          "relative overflow-hidden bg-gradient-to-br from-navy/8 to-gold/10",
-          compact ? "mx-auto h-28 max-w-sm" : "h-32",
-        )}
-      >
-        {showPlaceholder ? (
-          <div className="flex h-full w-full items-center justify-center">
-            <Monitor className="h-9 w-9 text-navy/25" aria-hidden />
-          </div>
-        ) : (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={primaryUrl}
-              alt=""
-              className="h-full w-full object-cover"
-              onError={() => setImgFailed(true)}
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/50 via-navy/5 to-transparent" />
-          </>
-        )}
-        <Badge className="absolute top-2 right-2 border-0 bg-navy text-white">
-          {scored.score}
-        </Badge>
-        <div
-          className={cn(
-            "absolute top-2 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white",
-            compact ? "left-1/2 -translate-x-1/2" : "left-2",
-          )}
-        >
-          <BadgeCheck className="h-3 w-3" />
-          AI
-        </div>
-      </div>
-      <CardHeader className={cn("pb-2", compact && "flex flex-col items-center")}>
-        <Badge
-          variant="secondary"
-          className={cn(
-            "bg-navy/5 text-xs text-navy",
-            compact ? "mx-auto" : "w-fit",
-          )}
-        >
-          {isKo ? tl.ko : tl.en}
-        </Badge>
-        <CardTitle
-          className={cn(
-            "text-base leading-snug",
-            compact && "text-center",
-          )}
-        >
-          {isKo ? m.name : m.nameEn}
-        </CardTitle>
-      </CardHeader>
-      <CardContent
-        className={cn("space-y-3 text-sm", compact && "flex flex-col items-center")}
-      >
-        {(exposure || availability) && (
-          <div
-            className={cn(
-              "flex flex-wrap items-center gap-2",
-              compact && "justify-center",
-            )}
-          >
-            {exposure ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-navy/5 px-2.5 py-1 text-[11px] font-semibold text-navy">
-                👥 {exposure}
-              </span>
-            ) : null}
-            {availability ? (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-                  availability.className,
-                )}
-              >
-                🟢 {availability.text}
-              </span>
-            ) : null}
-          </div>
-        )}
-        <div
-          className={cn(
-            "flex gap-1 text-muted-foreground",
-            compact ? "items-center justify-center text-center" : "items-start",
-          )}
-        >
-          <MapPin
-            className={cn(
-              "h-3.5 w-3.5 shrink-0",
-              compact ? "" : "mt-0.5",
-            )}
-          />
-          <span className="text-xs leading-snug">
-            {formatMediaLocationShort(m, isKo)}
-          </span>
-        </div>
-        <ul
-          className={cn(
-            "space-y-1 text-[11px] leading-relaxed text-navy/80",
-            compact && "text-center",
-          )}
-        >
-          {scored.reasons.map((r, i) => (
-            <li
-              key={i}
-              className={cn(
-                "flex gap-1.5",
-                compact && "justify-center",
-              )}
-            >
-              <span className="text-gold">·</span>
-              <span className="text-left">{isKo ? r.ko : r.en}</span>
+  const scoreSlot = (
+    <div className="absolute right-2.5 top-2.5 z-20 rounded-full bg-navy/88 px-2.5 py-1 text-[11px] font-extrabold text-gold shadow">
+      AI · {scored.score}
+    </div>
+  );
+
+  const footerSlot = (
+    <div className="space-y-2.5">
+      {scored.reasons.length > 0 ? (
+        <ul className="space-y-1 text-[11px] leading-relaxed text-navy/75">
+          {scored.reasons.slice(0, 2).map((r, i) => (
+            <li key={i} className="flex gap-1.5">
+              <span className="shrink-0 text-gold">·</span>
+              <span>{isKo ? r.ko : r.en}</span>
             </li>
           ))}
         </ul>
-        <div
-          className={cn(
-            "text-lg font-bold text-navy",
-            compact && "text-center",
-          )}
+      ) : null}
+      <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-2.5">
+        <Button
+          type="button"
+          variant={inCompare ? "secondary" : "outline"}
+          size="sm"
+          className="rounded-full text-xs"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleCompare(); }}
+          disabled={disableCompare}
         >
-          {formatMediaPriceWonWithSymbol(m.price)}
-          <span className="text-xs font-normal text-muted-foreground">
-            {" "}
-            · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
-          </span>
-        </div>
-        <div
-          className={cn(
-            "flex flex-wrap gap-2 border-t border-slate-100 pt-3",
-            compact && "justify-center",
-          )}
-        >
-          <Button
-            type="button"
-            variant={inCompare ? "secondary" : "outline"}
-            size="sm"
-            className="rounded-full text-xs"
-            onClick={onToggleCompare}
-            disabled={disableCompare}
-          >
-            {inCompare ? "✓ " : ""}
-            {addCompareLabel}
+          {inCompare ? "✓ " : ""}
+          {addCompareLabel}
+        </Button>
+        <Link href={`/quote?media=${m.id}`} onClick={(e) => e.stopPropagation()}>
+          <Button size="sm" className="btn-gold rounded-full text-xs">
+            <Calculator className="mr-1 h-3.5 w-3.5" />
+            {quoteLabel}
           </Button>
-          <Link href={`/quote?media=${m.id}`}>
-            <Button size="sm" className="btn-gold rounded-full text-xs">
-              <Calculator className="mr-1 h-3.5 w-3.5" />
-              {quoteLabel}
-            </Button>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+        </Link>
+      </div>
+    </div>
+  );
+
+  return (
+    <MediaCatalogGridCard
+      variant="link"
+      media={m}
+      isKo={isKo}
+      imagePreparingLabel={tMedia("imagePreparing")}
+      showPricePeriod
+      topLeftSlot={scoreSlot}
+      footerSlot={footerSlot}
+    />
   );
 }

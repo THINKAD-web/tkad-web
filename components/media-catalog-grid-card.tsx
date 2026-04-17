@@ -3,13 +3,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { MapPin, BadgeCheck, Flame } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { MapPin, BadgeCheck, Flame, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { cn } from "@/lib/utils";
@@ -22,25 +16,24 @@ import {
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
-/** 매체 검색 그리드 카드와 동일한 셸 (리스트/비교/견적 공통) */
 export const mediaCatalogGridCardShellClass =
-  "relative min-w-0 overflow-hidden gap-0 py-0 transition-shadow hover:shadow-lg motion-safe:hover:translate-y-0 sm:motion-safe:hover:-translate-y-[2px]";
+  "relative min-w-0 overflow-hidden rounded-2xl bg-white transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5";
 
 type Common = {
   media: MediaItem;
   isKo: boolean;
   imagePreparingLabel: string;
   popularIds?: ReadonlySet<string>;
-  /** 카탈로그 `price`와 동일 만원 단위 (네트워크 월 환산 등) */
   priceMan?: number;
   showPricePeriod?: boolean;
   className?: string;
+  /** Optional action buttons or extra content below the price */
+  footerSlot?: ReactNode;
 };
 
 export type MediaCatalogGridCardProps =
   | (Common & {
       variant: "link";
-      /** 썸네일 좌측 상단 (예: 비교 체크박스). 링크 전파 차단은 슬롯에서 처리 */
       topLeftSlot?: ReactNode;
     })
   | (Common & {
@@ -52,25 +45,32 @@ export type MediaCatalogGridCardProps =
 
 export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const tMedia = useTranslations("media");
-  const { media, isKo, imagePreparingLabel, popularIds } = props;
+  const { media, isKo, imagePreparingLabel, popularIds, footerSlot } = props;
   const priceNum = props.priceMan ?? media.price;
   const tl = typeLabels[media.type];
   const showPricePeriod = props.showPricePeriod ?? false;
 
   const thumbnailOverlays = (
     <>
+      {/* Verified / Network badge */}
       {media.catalogSource !== "network" ? (
-        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+        <div className="absolute right-2.5 top-2.5 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow">
           <BadgeCheck className="h-3 w-3" />
           Verified
         </div>
       ) : (
-        <div className="absolute top-2.5 right-2.5 z-10 rounded-full bg-navy/90 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
-          {tMedia("networkSitesBadge", {
-            count: media.networkTotalLocations ?? 0,
-          })}
+        <div className="absolute right-2.5 top-2.5 z-10 rounded-full bg-navy/85 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+          {tMedia("networkSitesBadge", { count: media.networkTotalLocations ?? 0 })}
         </div>
       )}
+      {/* Popular flame */}
+      {popularIds?.has(media.id) ? (
+        <div className="absolute bottom-2.5 left-2.5 z-10 flex items-center gap-1 rounded-full bg-gold px-2.5 py-1 text-[10px] font-bold text-navy shadow">
+          <Flame className="h-3 w-3" />
+          {isKo ? "인기" : "Popular"}
+        </div>
+      ) : null}
+      {/* Variant-specific left slot */}
       {props.variant === "link" ? props.topLeftSlot : null}
       {props.variant === "selectable" ? (
         <div
@@ -89,56 +89,84 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           </span>
         </div>
       ) : null}
-      {popularIds?.has(media.id) ? (
-        <div className="absolute bottom-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[10px] font-bold text-navy shadow-sm">
-          <Flame className="h-3 w-3" />
-          {isKo ? "인기" : "Popular"}
-        </div>
-      ) : null}
     </>
   );
 
+  const hasTraffic =
+    typeof media.dailyFootTraffic === "number" && media.dailyFootTraffic > 0;
+
   const body = (
-    <>
+    <div
+      className={cn(
+        mediaCatalogGridCardShellClass,
+        "border border-navy/[0.07] shadow-sm",
+        props.variant === "selectable" && props.selected
+          ? "border-gold ring-2 ring-gold/20"
+          : "",
+      )}
+    >
+      {/* ── Image ── */}
       <MediaCatalogThumbnail
         media={media}
         placeholderLabel={imagePreparingLabel}
-        className="flex h-[7.25rem] items-center justify-center sm:h-36"
-        bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/10 to-transparent"
+        className="h-44 w-full sm:h-48"
+        bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/10 to-transparent"
+        placeholderSize="md"
       >
         {thumbnailOverlays}
       </MediaCatalogThumbnail>
-      <CardHeader className="relative z-0 min-w-0 space-y-1 px-3 pb-1.5 pt-2 sm:px-4 sm:pb-2 sm:pt-2">
-        <div className="flex items-center justify-between gap-2">
+
+      {/* ── Info ── */}
+      <div className="px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
+        {/* Type badge */}
+        <div className="mb-2">
           <Badge
             variant="secondary"
-            className="bg-navy/5 text-[11px] text-navy sm:text-xs"
+            className="bg-navy/6 px-2 py-0.5 text-[10px] font-semibold text-navy"
           >
             {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
           </Badge>
         </div>
-        <CardTitle className="line-clamp-2 min-w-0 break-words text-[13px] leading-snug sm:text-sm">
+
+        {/* Name */}
+        <p className="mb-1.5 line-clamp-2 text-[13px] font-bold leading-snug text-navy sm:text-sm">
           {isKo ? media.name : media.nameEn}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="relative z-0 min-w-0 space-y-1.5 px-3 pb-2.5 pt-0 sm:px-4 sm:pb-3">
-        <div className="flex min-w-0 items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-xs">
-          <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-          <span className="min-w-0 line-clamp-2 sm:line-clamp-2">
-            {formatMediaLocationShort(media, isKo)}
-          </span>
+        </p>
+
+        {/* Location */}
+        <div className="mb-2.5 flex min-w-0 items-center gap-1 text-[11px] text-slate-500">
+          <MapPin className="h-2.5 w-2.5 shrink-0 text-slate-400" />
+          <span className="min-w-0 truncate">{formatMediaLocationShort(media, isKo)}</span>
         </div>
-        <div className="min-w-0 break-words text-[15px] font-bold tabular-nums leading-tight text-navy sm:text-base sm:leading-normal">
-          {formatMediaPriceWonWithSymbol(priceNum)}
+
+        {/* Price */}
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-[15px] font-extrabold tabular-nums text-amber-700 sm:text-base">
+            {formatMediaPriceWonWithSymbol(priceNum)}
+          </span>
           {showPricePeriod ? (
-            <span className="text-xs font-normal text-muted-foreground">
-              {" "}
+            <span className="text-[11px] font-normal text-muted-foreground">
               · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
             </span>
           ) : null}
         </div>
-      </CardContent>
-    </>
+
+        {/* Foot traffic */}
+        {hasTraffic ? (
+          <div className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-500">
+            <Users className="h-2.5 w-2.5 shrink-0 text-slate-400" />
+            <span>
+              {isKo
+                ? `일 ${media.dailyFootTraffic.toLocaleString()}명`
+                : `${media.dailyFootTraffic.toLocaleString()}/day`}
+            </span>
+          </div>
+        ) : null}
+
+        {/* Optional footer (compare/quote buttons etc.) */}
+        {footerSlot ? <div className="mt-3">{footerSlot}</div> : null}
+      </div>
+    </div>
   );
 
   const wrapClass = cn(
@@ -153,7 +181,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         aria-label={isKo ? media.name : media.nameEn}
         className={wrapClass}
       >
-        <Card className={mediaCatalogGridCardShellClass}>{body}</Card>
+        {body}
       </Link>
     );
   }
@@ -172,15 +200,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         onChange={props.onToggleSelected}
         aria-label={props.selectionAriaLabel}
       />
-      <Card
-        className={cn(
-          mediaCatalogGridCardShellClass,
-          "border-2 border-transparent",
-          props.selected && "border-gold ring-2 ring-gold/20",
-        )}
-      >
-        {body}
-      </Card>
+      {body}
     </label>
   );
 }

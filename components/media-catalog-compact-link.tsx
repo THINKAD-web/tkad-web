@@ -51,7 +51,7 @@ export function MediaCatalogCompactLinkRow({
       aria-label={isKo ? media.name : media.nameEn}
       className={cn(
         MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 hover:border-gold/30 hover:shadow-md transition-all duration-150",
         className,
       )}
     >
@@ -64,43 +64,42 @@ export function MediaCatalogCompactLinkRow({
         media={media}
         primaryImageUrl={primaryThumb}
         placeholderLabel={imagePreparingLabel}
-        className="relative z-10 h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-md sm:h-24 sm:w-28 sm:rounded-lg"
+        className="relative z-10 h-20 w-20 shrink-0 overflow-hidden rounded-xl sm:h-24 sm:w-28"
         bottomGradientClassName={null}
         placeholderSize="xs"
       >
         {thumbnailOverlay}
       </MediaCatalogThumbnail>
-      <div className="relative z-0 flex min-w-0 flex-1 flex-col items-center justify-center gap-1 overflow-hidden text-center sm:gap-1.5">
-        <div className="flex min-w-0 flex-wrap items-center justify-center gap-1 sm:gap-1.5">
+      <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 overflow-hidden px-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-1">
           <Badge
             variant="secondary"
-            className="max-w-full shrink bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
+            className="shrink-0 bg-navy/6 px-1.5 py-0 text-[9px] font-semibold text-navy sm:text-[10px]"
           >
             {isKo
               ? (typeLabels[media.type]?.ko ?? media.type)
               : (typeLabels[media.type]?.en ?? media.type)}
           </Badge>
           {popularIds?.has(media.id) ? (
-            <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[8px] font-bold text-navy sm:text-[9px]">
-              <Flame className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+            <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gold px-1.5 py-0 text-[8px] font-bold text-navy">
+              <Flame className="h-2 w-2" />
               {isKo ? "인기" : "Hot"}
             </span>
           ) : null}
         </div>
-        <p className="line-clamp-2 min-w-0 break-words text-center text-[13px] font-bold leading-snug text-navy sm:line-clamp-1 sm:text-sm sm:leading-relaxed">
+        <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug text-navy sm:line-clamp-1 sm:text-sm">
           {isKo ? media.name : media.nameEn}
         </p>
-        <p className="flex min-w-0 items-center justify-center gap-0.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
-          <MapPin className="h-2.5 w-2.5 shrink-0 sm:h-3 sm:w-3" />
-          <span className="min-w-0 line-clamp-2 sm:line-clamp-1">
+        <p className="flex min-w-0 items-center gap-0.5 text-[10px] text-slate-500 sm:text-[11px]">
+          <MapPin className="h-2.5 w-2.5 shrink-0 text-slate-400" />
+          <span className="min-w-0 truncate">
             {formatMediaLocationShort(media, isKo)}
           </span>
         </p>
-        <p className="min-w-0 break-words text-center text-[13px] font-bold tabular-nums leading-tight text-navy sm:text-sm sm:leading-none">
+        <p className="text-[13px] font-extrabold tabular-nums text-amber-700 sm:text-sm">
           {formatMediaPriceWonWithSymbol(media.price)}
-          <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
-            {" "}
-            · {pricePeriodLabel}
+          <span className="text-[10px] font-normal text-muted-foreground">
+            {" "}· {pricePeriodLabel}
           </span>
         </p>
       </div>
