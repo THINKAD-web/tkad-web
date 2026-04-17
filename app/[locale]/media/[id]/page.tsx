@@ -326,10 +326,11 @@ export default async function MediaDetailPage({ params }: Props) {
       </MediaDetailHeroGallery>
 
       {/* ── 주요 지표 바 ── */}
-      <div className="bg-navy">
-        <div className="mx-auto grid max-w-4xl grid-cols-3 divide-x divide-white/10 px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center py-5 sm:py-7">
-            <p className="text-xl font-bold tabular-nums text-gold sm:text-2xl">
+      <div className="relative overflow-hidden bg-slate-900">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-navy via-slate-900 to-slate-800" />
+        <div className="relative mx-auto grid max-w-4xl grid-cols-3 divide-x divide-white/[0.08] px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center px-4 py-8 sm:py-10">
+            <p className="text-2xl font-bold tabular-nums text-gold sm:text-3xl">
               {media.keywordFilter
                 ? formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMin)
                 : formatCatalogPriceFieldWon(
@@ -338,25 +339,25 @@ export default async function MediaDetailPage({ params }: Props) {
                       : media.price,
                   )}
             </p>
-            <p className="mt-1 text-[11px] font-medium text-slate-400">
-              {isKo ? "광고 단가" : "Ad rate"}
+            <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+              {isKo ? "광고 단가" : "AD RATE"}
             </p>
           </div>
-          <div className="flex flex-col items-center py-5 sm:py-7">
-            <p className="text-xl font-bold tabular-nums text-white sm:text-2xl">
+          <div className="flex flex-col items-center px-4 py-8 sm:py-10">
+            <p className="text-2xl font-bold tabular-nums text-white sm:text-3xl">
               {monthly.toLocaleString()}
             </p>
-            <p className="mt-1 text-[11px] font-medium text-slate-400">
-              {isKo ? "월 유동인구" : "Monthly traffic"}
+            <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+              {isKo ? "월 유동인구" : "MONTHLY TRAFFIC"}
             </p>
           </div>
-          <div className="flex flex-col items-center py-5 sm:py-7">
-            <p className="text-xl font-bold tabular-nums text-white sm:text-2xl">
+          <div className="flex flex-col items-center px-4 py-8 sm:py-10">
+            <p className="text-2xl font-bold tabular-nums text-white sm:text-3xl">
               {performanceMetrics.visibilityScore}
-              <span className="ml-0.5 text-sm font-normal text-slate-500">/100</span>
+              <span className="ml-1 text-base font-normal text-slate-600">/100</span>
             </p>
-            <p className="mt-1 text-[11px] font-medium text-slate-400">
-              {isKo ? "노출 지수" : "Visibility"}
+            <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+              {isKo ? "노출 지수" : "VISIBILITY"}
             </p>
           </div>
         </div>
@@ -415,112 +416,98 @@ export default async function MediaDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          <div className="mb-6 mt-14 flex items-center gap-3">
+          {/* ── 핵심 지표 카드 그리드 ── */}
+          <div className="mb-4 mt-14 flex items-center gap-3">
             <span className="h-5 w-[3px] rounded-full bg-gradient-to-b from-gold to-amber-400" aria-hidden />
             <h2 className="text-xl font-bold tracking-tight text-navy">
               {t("coreInfoTitle")}
             </h2>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-navy/8 bg-white shadow-md shadow-navy/5">
-            <div className="h-[3px] bg-gradient-to-r from-gold via-amber-400 to-gold/20" />
-            <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 sm:gap-8 sm:p-8">
-              <CoreFact
-                icon={Ruler}
-                label={t("size")}
-                value={
-                  <span className="font-semibold">
-                    {media.size || t("empty")}
-                  </span>
-                }
-              />
-              <CoreFact
-                icon={Monitor}
-                label={t("resolution")}
-                value={
-                  <span className="font-semibold">
-                    {media.resolution || t("empty")}
-                  </span>
-                }
-              />
-              <CoreFact
-                icon={CircleDollarSign}
-                label={t("priceTitle")}
-                value={
-                  media.keywordFilter ? (
+          <div className="grid grid-cols-2 gap-3">
+            {/* 월 유동인구 — 다크 강조 풀카드 */}
+            <div className="col-span-2 flex flex-col rounded-2xl bg-navy px-6 py-6 text-white">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
+                {t("footTrafficTitle")}
+              </p>
+              <p className="mt-2 text-5xl font-bold tabular-nums sm:text-6xl">
+                {monthly.toLocaleString()}
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
+                {t("monthly")} · {t("daily")} {media.dailyFootTraffic.toLocaleString()}
+              </p>
+            </div>
+
+            {/* 사이즈 */}
+            <div className="flex flex-col rounded-2xl bg-slate-800 px-5 py-5 text-white">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
+                {t("size")}
+              </p>
+              <p className="mt-auto pt-3 text-lg font-bold leading-snug">
+                {media.size || t("empty")}
+              </p>
+            </div>
+
+            {/* 해상도 */}
+            <div className="flex flex-col rounded-2xl bg-slate-800 px-5 py-5 text-white">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
+                {t("resolution")}
+              </p>
+              <p className="mt-auto pt-3 text-lg font-bold leading-snug">
+                {media.resolution || t("empty")}
+              </p>
+            </div>
+
+            {/* 가격 — gold 어센트 */}
+            <div className="col-span-2 overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-amber-50 via-white to-gold/[0.05]">
+              <div className="h-[3px] bg-gradient-to-r from-gold via-amber-400 to-gold/20" />
+              <div className="px-6 py-5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold-dark/55">
+                  {t("priceTitle")}
+                </p>
+                <div className="mt-3">
+                  {media.keywordFilter ? (
                     <>
                       {hasPriceOptions && primaryPriceOption ? (
-                        <span className="break-all text-base font-semibold tabular-nums text-gold-dark sm:text-lg">
+                        <p className="text-3xl font-bold tabular-nums text-gold-dark sm:text-4xl">
                           {formatCatalogPriceFieldWon(primaryPriceOption.price)}
-                        </span>
+                        </p>
                       ) : (
-                        <span className="break-all text-base font-semibold tabular-nums text-gold-dark sm:text-lg">
-                          {formatMediaPriceWonWithSymbol(
-                            media.keywordFilter.budgetMin,
-                          )}{" "}
-                          ~{" "}
-                          {formatMediaPriceWonWithSymbol(
-                            media.keywordFilter.budgetMax,
-                          )}
-                        </span>
+                        <p className="text-2xl font-bold tabular-nums text-gold-dark sm:text-3xl">
+                          {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMin)}{" "}~{" "}
+                          {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMax)}
+                        </p>
                       )}
-                      <span className="mt-1 block text-sm font-semibold text-navy">
+                      <p className="mt-1 text-sm font-semibold text-navy">
                         {media.keywordFilter.priceText}
-                      </span>
-                      <span className="mt-1 block text-xs font-normal text-muted-foreground">
-                        {hasPriceOptions
-                          ? t("priceOptionsSummaryHint")
-                          : `${t("budgetRangeHint")} · ${t("priceUnitWon")} · ${periodLabel}`}
-                      </span>
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {hasPriceOptions ? t("priceOptionsSummaryHint") : periodLabel}
+                      </p>
                     </>
                   ) : hasPriceOptions && primaryPriceOption ? (
                     <>
-                      <span className="break-all text-base font-semibold tabular-nums text-gold-dark sm:text-lg">
+                      <p className="text-3xl font-bold tabular-nums text-gold-dark sm:text-4xl">
                         {formatCatalogPriceFieldWon(primaryPriceOption.price)}
-                      </span>
-                      <span className="mt-1 block text-sm font-semibold text-navy">
-                        {primaryPriceOption.label} ·{" "}
-                        {t(
-                          mediaDetailPricePeriodTranslationKey(
-                            (primaryPriceOption.period as
-                              | MediaPricePeriodKey
-                              | undefined) ?? media.pricePeriod,
-                          ),
-                        )}
-                      </span>
-                      <span className="mt-1 block text-xs font-normal text-muted-foreground">
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-navy">
+                        {primaryPriceOption.label} · {primaryPricePeriodLabel}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
                         {t("priceOptionsSummaryHint")}
-                      </span>
+                      </p>
                     </>
                   ) : (
                     <>
-                      <span className="break-all text-base font-semibold tabular-nums text-gold-dark sm:text-lg">
+                      <p className="text-3xl font-bold tabular-nums text-gold-dark sm:text-4xl">
                         {formatCatalogPriceFieldWon(media.price)}
-                      </span>
-                      <span className="mt-1 block text-xs font-normal text-muted-foreground">
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
                         {t("priceUnit")} · {periodLabel}
-                      </span>
+                      </p>
                     </>
-                  )
-                }
-              />
-              <CoreFact
-                icon={Users}
-                label={t("footTrafficTitle")}
-                value={
-                  <>
-                    <span className="block text-lg font-bold leading-tight text-navy sm:text-xl">
-                      {monthly.toLocaleString()}
-                    </span>
-                    <span className="mt-0.5 block text-xs font-medium text-muted-foreground">
-                      {t("monthly")}
-                    </span>
-                    <span className="mt-2 block text-sm text-muted-foreground">
-                      {t("daily")}{" "}
-                      {media.dailyFootTraffic.toLocaleString()}
-                    </span>
-                  </>
-                }
-              />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -528,62 +515,105 @@ export default async function MediaDetailPage({ params }: Props) {
             <section
               id="media-detail-price-options"
               aria-labelledby="media-detail-price-options-heading"
-              className="mt-10"
+              className="-mx-4 mt-14 bg-navy px-4 py-12 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
             >
-              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="h-5 w-[3px] rounded-full bg-gradient-to-b from-gold to-amber-400" aria-hidden />
+              {/* 섹션 헤더 */}
+              <div className="mb-8 flex items-end justify-between gap-4">
+                <div>
+                  <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-gold/70">
+                    PRICING
+                  </p>
                   <h2
                     id="media-detail-price-options-heading"
-                    className="text-xl font-bold tracking-tight text-navy"
+                    className="text-2xl font-bold text-white sm:text-3xl"
                   >
                     {t("priceOptionsSectionTitle")}
                   </h2>
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-navy/35">
-                  THINKAD · OOH
-                </p>
-              </div>
-              {media.keywordFilter?.priceText ? (
-                <div className="mb-6 rounded-2xl border border-gold/35 bg-gradient-to-r from-gold/[0.12] via-amber-50/80 to-gold/[0.08] px-5 py-4 shadow-sm ring-1 ring-gold/20">
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-gold-dark/90">
-                    {isKo ? "안내 요금" : "Rate note"}
-                  </p>
-                  <p className="mt-1.5 text-sm font-semibold leading-relaxed text-navy">
+                {media.keywordFilter?.priceText ? (
+                  <p className="hidden max-w-[45%] text-right text-xs leading-relaxed text-slate-400 sm:block">
                     {media.keywordFilter.priceText}
                   </p>
-                </div>
-              ) : null}
-              <div className="grid gap-4 sm:grid-cols-2">
+                ) : null}
+              </div>
+
+              {/* 가격 카드 */}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {priceOptions.map((opt, idx) => {
                   const periodKey = mediaDetailPricePeriodTranslationKey(
                     (opt.period as string | undefined) ?? media.pricePeriod,
                   );
+                  const isFeatured = idx === 0;
                   return (
                     <article
                       key={`${opt.label}-${idx}`}
-                      className="group flex flex-col overflow-hidden rounded-2xl border border-navy/[0.07] bg-white shadow-md shadow-navy/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-navy/10"
+                      className={
+                        isFeatured
+                          ? "relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/40 ring-1 ring-gold/40 transition-transform duration-300 hover:-translate-y-1"
+                          : "flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.11]"
+                      }
                     >
-                      <div className="h-[3px] bg-gradient-to-r from-gold via-amber-400 to-gold/30" />
-                      <div className="flex flex-1 flex-col p-5">
+                      {isFeatured && (
+                        <div className="h-[3px] bg-gradient-to-r from-gold via-amber-400 to-gold/30" />
+                      )}
+                      <div className="flex flex-1 flex-col p-6">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="text-sm font-extrabold uppercase tracking-[0.12em] text-navy/55">
+                          <h3
+                            className={
+                              isFeatured
+                                ? "text-[10px] font-extrabold uppercase tracking-[0.22em] text-gold-dark/80"
+                                : "text-[10px] font-extrabold uppercase tracking-[0.22em] text-white/40"
+                            }
+                          >
                             {opt.label}
                           </h3>
-                          <span className="shrink-0 rounded-full bg-navy/[0.05] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-navy/40">
-                            {t(periodKey)}
-                          </span>
+                          {isFeatured && (
+                            <span className="shrink-0 rounded-full bg-gold px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-navy">
+                              {isKo ? "대표" : "TOP"}
+                            </span>
+                          )}
                         </div>
-                        <p className="mt-3 text-2xl font-bold tabular-nums tracking-tight text-navy sm:text-[1.7rem]">
+                        <p
+                          className={
+                            isFeatured
+                              ? "mt-4 text-4xl font-bold tabular-nums tracking-tight text-navy"
+                              : "mt-4 text-4xl font-bold tabular-nums tracking-tight text-white"
+                          }
+                        >
                           {formatCatalogPriceKrwLong(opt.price, locale)}
                         </p>
-                        <div className="mt-4 border-t border-navy/8 pt-4">
+                        <span
+                          className={
+                            isFeatured
+                              ? "mt-3 inline-flex w-fit rounded-full bg-navy/8 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-navy/50"
+                              : "mt-3 inline-flex w-fit rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white/45"
+                          }
+                        >
+                          {t(periodKey)}
+                        </span>
+                        <div
+                          className={
+                            isFeatured
+                              ? "mt-5 border-t border-navy/10 pt-5"
+                              : "mt-5 border-t border-white/10 pt-5"
+                          }
+                        >
                           {opt.description?.trim() ? (
-                            <p className="text-sm leading-relaxed text-muted-foreground">
+                            <p
+                              className={
+                                isFeatured
+                                  ? "text-sm leading-relaxed text-slate-500"
+                                  : "text-sm leading-relaxed text-white/45"
+                              }
+                            >
                               {opt.description}
                             </p>
                           ) : (
-                            <p className="text-xs text-muted-foreground/55">
+                            <p
+                              className={
+                                isFeatured ? "text-xs text-slate-400" : "text-xs text-white/30"
+                              }
+                            >
                               {isKo ? "상세 조건은 견적 시 안내드립니다." : "Terms confirmed at quote stage."}
                             </p>
                           )}
@@ -644,13 +674,13 @@ export default async function MediaDetailPage({ params }: Props) {
 
           <section
             aria-labelledby="media-detail-description-heading"
-            className="mt-14 border-t border-navy/10 py-12"
+            className="mt-14 border-t border-navy/10 pt-14 pb-10"
           >
-            <div className="mb-8 flex items-center gap-3">
-              <span className="h-5 w-[3px] rounded-full bg-gradient-to-b from-gold to-amber-400" aria-hidden />
+            <div className="mb-10 flex items-center gap-3">
+              <span className="h-6 w-[3px] rounded-full bg-gradient-to-b from-gold to-amber-400" aria-hidden />
               <h2
                 id="media-detail-description-heading"
-                className="text-xl font-bold tracking-tight text-navy sm:text-2xl"
+                className="text-2xl font-bold tracking-tight text-navy"
               >
                 {t("detailDescriptionTitle")}
               </h2>
