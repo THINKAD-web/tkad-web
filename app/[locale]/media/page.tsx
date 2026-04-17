@@ -1,6 +1,3 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import MediaBrowseClient from "@/components/media-browse-client";
 

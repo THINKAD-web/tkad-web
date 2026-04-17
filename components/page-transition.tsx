@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "@/i18n/navigation";
-import { useEffect, useState, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export default function PageTransition({ children }: { children: ReactNode }) {
@@ -10,7 +10,10 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   const [displayChildren, setDisplayChildren] = useState(children);
   const firstPaint = useRef(true);
   const childrenRef = useRef(children);
-  childrenRef.current = children;
+
+  useLayoutEffect(() => {
+    childrenRef.current = children;
+  });
 
   useEffect(() => {
     if (firstPaint.current) {

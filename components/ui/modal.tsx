@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const EMPTY_SUBSCRIBE = () => () => {};
+const getClientMounted = () => true;
+const getServerMounted = () => false;
 
 type ModalProps = {
   open: boolean;
@@ -26,11 +30,11 @@ export default function Modal({
   ariaLabelledBy,
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    EMPTY_SUBSCRIBE,
+    getClientMounted,
+    getServerMounted,
+  );
 
   useEffect(() => {
     if (!open) return;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,34 +11,56 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+const SCROLL_STATE_DEFAULT = { scrollable: false, nearTop: true, nearBottom: false };
+type ScrollState = typeof SCROLL_STATE_DEFAULT;
+
+function readScrollState(): ScrollState {
+  const el = document.documentElement;
+  const y = window.scrollY;
+  const vh = window.innerHeight;
+  const sh = el.scrollHeight;
+  const maxScroll = Math.max(0, sh - vh);
+  return {
+    scrollable: maxScroll > 48,
+    nearTop: y < 72,
+    nearBottom: y >= maxScroll - 72,
+  };
+}
+
+let cachedScrollState: ScrollState = SCROLL_STATE_DEFAULT;
+
+function getScrollSnapshot(): ScrollState {
+  const next = readScrollState();
+  const prev = cachedScrollState;
+  if (
+    prev.scrollable === next.scrollable &&
+    prev.nearTop === next.nearTop &&
+    prev.nearBottom === next.nearBottom
+  ) {
+    return prev;
+  }
+  cachedScrollState = next;
+  return next;
+}
+
+function subscribeScroll(onChange: () => void): () => void {
+  window.addEventListener("scroll", onChange, { passive: true });
+  window.addEventListener("resize", onChange, { passive: true });
+  return () => {
+    window.removeEventListener("scroll", onChange);
+    window.removeEventListener("resize", onChange);
+  };
+}
+
+const getServerScrollSnapshot = () => SCROLL_STATE_DEFAULT;
+
 export default function FloatingScrollNav() {
   const t = useTranslations("common");
-  const [mounted, setMounted] = useState(false);
-  const [scrollable, setScrollable] = useState(false);
-  const [nearTop, setNearTop] = useState(true);
-  const [nearBottom, setNearBottom] = useState(false);
-
-  const update = useCallback(() => {
-    const el = document.documentElement;
-    const y = window.scrollY;
-    const vh = window.innerHeight;
-    const sh = el.scrollHeight;
-    const maxScroll = Math.max(0, sh - vh);
-    setScrollable(maxScroll > 48);
-    setNearTop(y < 72);
-    setNearBottom(y >= maxScroll - 72);
-  }, []);
-
-  useEffect(() => {
-    setMounted(true);
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [update]);
+  const { scrollable, nearTop, nearBottom } = useSyncExternalStore(
+    subscribeScroll,
+    getScrollSnapshot,
+    getServerScrollSnapshot,
+  );
 
   const goTop = useCallback(() => {
     const behavior = prefersReducedMotion() ? "auto" : "smooth";
@@ -52,7 +74,7 @@ export default function FloatingScrollNav() {
     window.scrollTo({ top, behavior });
   }, []);
 
-  if (!mounted || !scrollable) return null;
+  if (!scrollable) return null;
 
   return (
     <div

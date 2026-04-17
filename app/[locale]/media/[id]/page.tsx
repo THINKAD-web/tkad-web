@@ -37,6 +37,7 @@ import {
   formatMediaPriceWonWithSymbol,
   mediaDetailPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
+import type { MediaPricePeriodKey } from "@/lib/media-data";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
@@ -107,7 +108,7 @@ export default async function MediaDetailPage({ params }: Props) {
   const primaryPricePeriodLabel = primaryPriceOption?.period
     ? t(
         mediaDetailPricePeriodTranslationKey(
-          primaryPriceOption.period as any,
+          primaryPriceOption.period as MediaPricePeriodKey,
         ),
       )
     : periodLabel;
@@ -439,8 +440,9 @@ export default async function MediaDetailPage({ params }: Props) {
                         {primaryPriceOption.label} ·{" "}
                         {t(
                           mediaDetailPricePeriodTranslationKey(
-                            (primaryPriceOption.period as any) ??
-                              media.pricePeriod,
+                            (primaryPriceOption.period as
+                              | MediaPricePeriodKey
+                              | undefined) ?? media.pricePeriod,
                           ),
                         )}
                       </span>

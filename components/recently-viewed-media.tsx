@@ -30,24 +30,22 @@ export default function RecentlyViewedMedia({ locale }: Props) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const ids = readRecentlyViewedIds();
-    if (ids.length === 0) {
-      setReady(true);
-      return;
-    }
     let cancelled = false;
+    const ids = readRecentlyViewedIds();
+    const finish = (data: MediaItem[]) => {
+      if (cancelled) return;
+      setItems(data);
+      setReady(true);
+    };
+    if (ids.length === 0) {
+      void Promise.resolve().then(() => finish([]));
+      return () => {
+        cancelled = true;
+      };
+    }
     void fetchRecentlyViewedItems()
-      .then((data) => {
-        if (cancelled) return;
-        setItems(data);
-        setReady(true);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setItems([]);
-          setReady(true);
-        }
-      });
+      .then(finish)
+      .catch(() => finish([]));
     return () => {
       cancelled = true;
     };

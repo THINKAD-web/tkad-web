@@ -120,6 +120,7 @@ export default function ClientDashboardPage() {
       bases[p.id] = p.metrics!.impressions;
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial seed for live simulation
     setLiveImp((prev) => {
       const next = { ...prev };
       for (const id of Object.keys(bases)) {
@@ -128,6 +129,7 @@ export default function ClientDashboardPage() {
       return next;
     });
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial seed for live simulation
     setImpHistory((prev) => {
       const nh = { ...prev };
       for (const p of inProgress) {
@@ -173,6 +175,7 @@ export default function ClientDashboardPage() {
   useEffect(() => {
     if (chatOpen) {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear unread when chat panel visible
       setChatUnread(0);
     }
   }, [chatMessages, chatOpen]);

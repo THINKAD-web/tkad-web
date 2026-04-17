@@ -280,9 +280,12 @@ export function MediaKeywordFilterClient({
     [selection],
   );
 
-  useEffect(() => {
+  const resetKey = `${debouncedQuery}|${selectionFingerprint}|${sorted.length}`;
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+  if (prevResetKey !== resetKey) {
+    setPrevResetKey(resetKey);
     setVisibleCount(Math.min(INITIAL_VISIBLE_COUNT, sorted.length));
-  }, [debouncedQuery, selectionFingerprint, sorted.length]);
+  }
 
   /**
    * --------------------------------------------------------------------------

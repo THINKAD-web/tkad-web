@@ -120,9 +120,10 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
       const normalized: MediaPriceOption[] = [];
       for (const item of arr) {
         if (!item || typeof item !== "object") continue;
-        const label = (item as any).label;
-        const price = (item as any).price;
-        const period = (item as any).period as
+        const rec = item as Record<string, unknown>;
+        const label = rec.label;
+        const price = rec.price;
+        const period = rec.period as
           | MediaPricePeriodKey
           | string
           | undefined;
@@ -220,13 +221,6 @@ const catalogInclude = {
     orderBy: { createdAt: "desc" as const },
   },
 } as const;
-
-function mergeMockCatalogWithDbRows(dbRows: MediaItem[]): MediaItem[] {
-  const byId = new Map<string, MediaItem>();
-  for (const m of mediaData) byId.set(m.id, m);
-  for (const m of dbRows) byId.set(m.id, m);
-  return [...byId.values()];
-}
 
 async function appendNetworksIfAny(base: MediaItem[]): Promise<MediaItem[]> {
   try {

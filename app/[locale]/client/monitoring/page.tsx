@@ -124,6 +124,7 @@ export default function ClientMonitoringPage() {
     [liveImp],
   );
 
+  /* eslint-disable react-hooks/refs -- scaleForProject reads write-once baselineImpRef */
   const pins = useMemo(() => {
     return basePins.map((p) => {
       const r = scaleForProject(p.projectId);
@@ -134,6 +135,7 @@ export default function ClientMonitoringPage() {
       };
     });
   }, [basePins, scaleForProject]);
+  /* eslint-enable react-hooks/refs */
 
   const inProgress = useMemo(
     () => (client ? getInProgressProjects(client) : []),

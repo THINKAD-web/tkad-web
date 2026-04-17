@@ -26,7 +26,7 @@ export function CountUpValue({
     if (!el) return;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setValue(end);
+      queueMicrotask(() => setValue(end));
       return;
     }
 

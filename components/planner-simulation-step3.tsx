@@ -65,9 +65,11 @@ export default function PlannerSimulationStep3({
 
   const maxIdx = Math.max(0, mediaCards.length - 1);
 
-  useEffect(() => {
+  const [prevMaxIdx, setPrevMaxIdx] = useState(maxIdx);
+  if (prevMaxIdx !== maxIdx) {
+    setPrevMaxIdx(maxIdx);
     setSlideIndex((i) => Math.min(i, maxIdx));
-  }, [maxIdx]);
+  }
 
   const goPrev = useCallback(() => {
     setSlideIndex((i) => {

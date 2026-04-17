@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -30,14 +30,14 @@ export default function MediaDetailQuoteModal({
   const opts = media.priceOptions ?? [];
   const hasOpts = opts.length > 0;
   const [optIdx, setOptIdx] = useState(0);
-
-  useEffect(() => {
+  const [prevResetKey, setPrevResetKey] = useState<string>(
+    open ? `${media.id}:open` : `${media.id}:closed`,
+  );
+  const currentResetKey = open ? `${media.id}:open` : `${media.id}:closed`;
+  if (prevResetKey !== currentResetKey) {
+    setPrevResetKey(currentResetKey);
     if (open) setOptIdx(0);
-  }, [open, media.id]);
-
-  useEffect(() => {
-    if (optIdx >= opts.length) setOptIdx(0);
-  }, [optIdx, opts.length]);
+  }
 
   const safeIdx = hasOpts ? Math.min(Math.max(0, optIdx), opts.length - 1) : 0;
   const selected = hasOpts ? opts[safeIdx] : undefined;

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -95,20 +95,14 @@ export function MediaMapView({
   const locale = useLocale();
   const isKo = locale === "ko";
   const [listOpen, setListOpen] = useState(false);
-  const [mapHeightPx, setMapHeightPx] = useState(520);
-
-  const updateMapHeight = useCallback(() => {
-    if (typeof window === "undefined") return;
-    setMapHeightPx(
-      Math.min(Math.round(window.innerHeight * 0.72), 640),
-    );
-  }, []);
-
-  useEffect(() => {
-    updateMapHeight();
-    window.addEventListener("resize", updateMapHeight);
-    return () => window.removeEventListener("resize", updateMapHeight);
-  }, [updateMapHeight]);
+  const mapHeightPx = useSyncExternalStore(
+    (onChange) => {
+      window.addEventListener("resize", onChange);
+      return () => window.removeEventListener("resize", onChange);
+    },
+    () => Math.min(Math.round(window.innerHeight * 0.72), 640),
+    () => 520,
+  );
 
   const mapSelectedMedia = useMemo(() => {
     if (mapSelectedId == null) return null;

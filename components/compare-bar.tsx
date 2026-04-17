@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { FloatingSelectionBar } from "@/components/floating-selection-bar";
@@ -21,11 +21,12 @@ interface Props {
 export default function CompareBar({ items, locale, onClear }: Props) {
   const t = useTranslations("media");
   const isKo = locale === "ko";
-  const stashRef = useRef<MediaItem[]>([]);
-  if (items.length > 0) stashRef.current = items;
-
+  const [stashed, setStashed] = useState<MediaItem[]>(items);
   const open = items.length > 0;
-  const displayItems = open ? items : stashRef.current;
+  if (open && items !== stashed) {
+    setStashed(items);
+  }
+  const displayItems = open ? items : stashed;
 
   const ids = displayItems.map((m) => m.id).join(",");
   const compareHref = `/compare?ids=${displayItems.map((m) => m.id).join(",")}`;
