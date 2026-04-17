@@ -8,19 +8,14 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
   ShieldCheck,
-  Calculator,
   LayoutList,
   Map as MapIcon,
-  ExternalLink,
-  X,
-  Users,
   ChevronDown,
   ChevronUp,
   Search,
   MapPin as MapPinIcon,
 } from "lucide-react";
 import type { MapBounds } from "@/components/media-browse-map";
-import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
 import {
@@ -90,10 +85,7 @@ import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import {
-  formatMediaPriceWonWithSymbol,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
+import { mediaPricePeriodTranslationKey } from "@/lib/media-price-format";
 import { KEYWORD_FILTER_SEARCH_DEBOUNCE_MS } from "@/lib/media-keyword-filter-logic";
 
 function subscribeMediaLg(cb: () => void) {
@@ -146,7 +138,6 @@ export default function MediaBrowseClient({
   const [catalogPage, setCatalogPage] = useState(1);
   const [catalogPageSize, setCatalogPageSize] = useState(12);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
-  const [mapPopupOpen, setMapPopupOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<"list" | "map">("list");
   const [viewportFilterActive, setViewportFilterActive] = useState(false);
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
@@ -377,12 +368,10 @@ export default function MediaBrowseClient({
   }, [viewportFiltered, viewportFilterActive, effectiveCatalog]);
 
   useEffect(() => {
-    // 팝업이 열려있을 때만 선택된 매체가 리스트에 있는지 검증
-    // (팝업이 닫혀있으면 선택 상태 유지)
-    if (!mapPopupOpen || mapSelectedId == null) return;
+    if (mapSelectedId == null) return;
     if (!gridDisplayList.some((m) => m.id === mapSelectedId))
       setMapSelectedId(null);
-  }, [gridDisplayList, mapSelectedId, mapPopupOpen]);
+  }, [gridDisplayList, mapSelectedId]);
 
   useEffect(() => {
     setCatalogPage(1);
@@ -399,13 +388,13 @@ export default function MediaBrowseClient({
   );
 
   useEffect(() => {
-    if (browseMode !== "map" || mapSelectedId == null) return;
+    if (mapSelectedId == null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMapPopupOpen(false);
+      if (e.key === "Escape") setMapSelectedId(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [browseMode, mapSelectedId]);
+  }, [mapSelectedId]);
 
   const regions = [
     { value: "all", label: t("media.allRegions") },
@@ -473,21 +462,12 @@ export default function MediaBrowseClient({
 
   const isInCompare = (id: string) => compareItems.some((m) => m.id === id);
 
-  const mapSelectedMedia =
-    mapSelectedId != null
-      ? gridDisplayList.find((m) => m.id === mapSelectedId) ?? null
-      : null;
-
   const handleMapSelectId = useCallback((id: string | null) => {
-    if (id == null) {
-      setMapPopupOpen(false);
-      return;
-    }
     setMapSelectedId(id);
-    setMapPopupOpen(true);
-    // 카드 목록에서 해당 카드로 스크롤
-    const el = cardRefMap.current.get(id);
-    el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (id != null) {
+      const el = cardRefMap.current.get(id);
+      el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   }, []);
 
   return (
@@ -693,44 +673,6 @@ export default function MediaBrowseClient({
             fullHeight
             showFooterCaption={false}
           />
-          {mapSelectedMedia && mapPopupOpen ? (
-            <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 flex justify-center p-4">
-              <div className="pointer-events-auto w-full max-w-sm animate-in fade-in slide-in-from-bottom-3 duration-200" role="dialog" aria-label={isKo ? mapSelectedMedia.name : mapSelectedMedia.nameEn}>
-                <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl shadow-navy/20">
-                  <div className="flex items-start gap-3 border-b border-navy/8 p-3">
-                    <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg">
-                      <MediaCatalogThumbnail media={mapSelectedMedia} placeholderLabel={t("media.imagePreparing")} className="h-full w-full rounded-lg" bottomGradientClassName={null} placeholderSize="xs" />
-                    </div>
-                    <div className="min-w-0 flex-1 pt-0.5">
-                      <h3 className="line-clamp-2 text-base font-bold leading-snug text-navy">{isKo ? mapSelectedMedia.name : mapSelectedMedia.nameEn}</h3>
-                      <p className="mt-1 text-sm font-bold tabular-nums text-navy">
-                        {formatMediaPriceWonWithSymbol(mapSelectedMedia.price)}
-                        <span className="text-xs font-normal text-muted-foreground"> · {tMedia(mediaPricePeriodTranslationKey(mapSelectedMedia.pricePeriod))}</span>
-                      </p>
-                      <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Users className="h-3.5 w-3.5 shrink-0 text-gold-dark" />
-                        {t("media.mapPopupFootTraffic")}: <span className="ml-1 font-semibold text-navy/85">{mapSelectedMedia.dailyFootTraffic.toLocaleString()}</span>
-                      </p>
-                    </div>
-                    <button type="button" onClick={() => setMapPopupOpen(false)} className="-m-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-slate-100 hover:text-navy" aria-label={t("media.mapPopupClose")}>
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 p-3">
-                    <Link href={mediaItemDetailPath(mapSelectedMedia.id)} className="min-w-[7rem] flex-1">
-                      <Button size="sm" variant="outline" className="h-10 w-full font-semibold"><ExternalLink className="mr-1.5 h-3.5 w-3.5" />{t("media.mapCardDetail")}</Button>
-                    </Link>
-                    <Button size="sm" onClick={() => toggleCompare(mapSelectedMedia)} className={`h-10 min-w-[7rem] flex-1 font-semibold ${isInCompare(mapSelectedMedia.id) ? "border-2 border-gold bg-white text-gold hover:bg-gold/10" : "bg-navy text-white hover:bg-navy/90"}`}>
-                      {isInCompare(mapSelectedMedia.id) ? (isKo ? "✓ 선택됨" : "✓ Selected") : (isKo ? "+ 비교" : "+ Compare")}
-                    </Button>
-                    <Link href={`/quote?media=${mapSelectedMedia.id}`} className="min-w-[7rem] flex-1">
-                      <Button size="sm" className="h-10 w-full bg-gold font-semibold text-navy hover:bg-gold-dark"><Calculator className="mr-1.5 h-3.5 w-3.5" />{t("media.mapCardQuote")}</Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
         </div>
       </div>
 

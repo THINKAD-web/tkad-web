@@ -38,22 +38,6 @@ function mediaLabel(type: CampaignMapMediaType, isKo: boolean): string {
   return isKo ? m[type][0] : m[type][1];
 }
 
-/** SVG 핀 이미지 data URI — 타입별 색상 + 선택 상태 */
-function makePinDataUri(type: CampaignMapMediaType, selected: boolean): string {
-  const fill = selected
-    ? "#C49B2A"
-    : type === "digital"
-      ? "#2563EB"
-      : type === "billboard"
-        ? "#0f172a"
-        : type === "transport"
-          ? "#D97706"
-          : "#7C3AED";
-  const stroke = selected ? "#fff" : "#fff";
-  const sw = selected ? 3 : 2.5;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 36 46"><path d="M18 0C8.059 0 0 8.059 0 18c0 9.37 16.31 28 18 28s18-18.63 18-28C36 8.059 27.941 0 18 0z" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/><circle cx="18" cy="17" r="6.5" fill="white" opacity="0.92"/></svg>`;
-  return "data:image/svg+xml," + encodeURIComponent(svg);
-}
 
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -131,6 +115,12 @@ type KakaoAPI = {
   event: {
     addListener(target: unknown, evt: string, fn: () => void): void;
   };
+  CustomOverlay: new (opts: {
+    position: unknown;
+    content: HTMLElement | string;
+    yAnchor?: number;
+    zIndex?: number;
+  }) => { setMap(m: unknown): void };
 };
 
 type KakaoMapCtx = {
@@ -191,6 +181,11 @@ export function CampaignMonitoringMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const kakaoMapCtxRef = useRef<KakaoMapCtx | null>(null);
+  const kakaoActionsRef = useRef<{
+    showPopup: (pin: CampaignMapPin) => void;
+    hidePopup: () => void;
+    highlightPin: (id: string | null) => void;
+  } | null>(null);
   const googleMapCtxRef = useRef<GoogleMapCtx | null>(null);
   const onBoundsChangeRef = useRef(onBoundsChange);
   useLayoutEffect(() => { onBoundsChangeRef.current = onBoundsChange; }, [onBoundsChange]);
@@ -315,7 +310,6 @@ export function CampaignMonitoringMap({
     if (!el || !appKey || pinList.length === 0) return;
 
     let cancelled = false;
-    const markers: KakaoMarker[] = [];
 
     void (async () => {
       try {
@@ -355,55 +349,139 @@ export function CampaignMonitoringMap({
         kakaoMapCtxRef.current = { map, LatLng: K.LatLng };
         bumpMapEpoch();
 
-        // Custom SVG markers per media type
-        for (const p of pinList) {
-          const uri = makePinDataUri(p.mediaType, false);
-          const img = new K.MarkerImage(
-            uri,
-            new K.Size(36, 46),
-            { offset: new K.Point(18, 46) },
-          );
-          const marker = new K.Marker({
-            position: new K.LatLng(p.lat, p.lng),
-            map,
-            title: isKo ? p.spotNameKo : p.spotNameEn,
-            image: img,
-          });
-          K.event.addListener(marker, "click", () => onSelectPin(p.id));
-          markers.push(marker);
+        // ── Price-label CustomOverlay pins ──────────────────────────────
+        const overlayEls = new Map<string, HTMLElement>();
+        const overlays: Array<{ setMap(m: unknown): void }> = [];
+        const pinById = new Map<string, CampaignMapPin>();
+        for (const p of pinList) pinById.set(p.id, p);
+
+        function getPinBg(type: CampaignMapMediaType): string {
+          if (type === "digital") return "#2563EB";
+          if (type === "billboard") return "#0f172a";
+          if (type === "transport") return "#D97706";
+          return "#7C3AED";
         }
 
-        // Clusterer
-        if (K.MarkerClusterer) {
-          const clusterer = new K.MarkerClusterer({
-            map,
-            averageCenter: true,
-            minLevel: 6,
-            disableClickZoom: false,
-            styles: [
-              {
-                width: "44px",
-                height: "44px",
-                background: "rgba(15,23,42,0.85)",
-                borderRadius: "50%",
-                color: "#fff",
-                textAlign: "center",
-                lineHeight: "44px",
-                fontWeight: "700",
-                fontSize: "14px",
-                border: "2px solid #C49B2A",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
-              },
-            ],
-          });
-          clusterer.addMarkers(markers);
-          // Replace cleanup to also remove clusterer
-          const prevCleanup = cleanupRef.current;
-          cleanupRef.current = () => {
-            prevCleanup?.();
-            clusterer.setMap(null);
-          };
+        function getPriceText(p: CampaignMapPin): string {
+          const cap = isKo ? p.creativeCaptionKo : p.creativeCaptionEn;
+          const parts = cap.split(" · ");
+          return parts[parts.length - 1] ?? cap;
         }
+
+        function makePinEl(p: CampaignMapPin, selected: boolean): HTMLElement {
+          const bg = selected ? "#C49B2A" : getPinBg(p.mediaType);
+          const el2 = document.createElement("div");
+          el2.setAttribute("data-pinid", p.id);
+          el2.style.cssText = [
+            `background:${bg}`,
+            "color:white",
+            "border-radius:20px",
+            "padding:4px 10px",
+            "font-size:11px",
+            "font-weight:700",
+            "cursor:pointer",
+            "white-space:nowrap",
+            "border:2px solid rgba(255,255,255,0.85)",
+            "box-shadow:0 2px 8px rgba(0,0,0,0.35)",
+            "transition:background 0.15s,transform 0.15s",
+            "user-select:none",
+            `transform:${selected ? "scale(1.15)" : "scale(1)"}`,
+            "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+            "line-height:1.4",
+          ].join(";");
+          el2.textContent = getPriceText(p);
+          el2.addEventListener("click", (e) => {
+            e.stopPropagation();
+            onSelectPin(p.id);
+          });
+          return el2;
+        }
+
+        for (const p of pinList) {
+          const pinEl = makePinEl(p, false);
+          const overlay = new K.CustomOverlay({
+            position: new K.LatLng(p.lat, p.lng),
+            content: pinEl,
+            yAnchor: 1.0,
+            zIndex: 3,
+          });
+          overlay.setMap(map);
+          overlayEls.set(p.id, pinEl);
+          overlays.push(overlay);
+        }
+
+        // ── On-map popup ─────────────────────────────────────────────────
+        let popupOverlay: { setMap(m: unknown): void } | null = null;
+
+        function hidePopup() {
+          if (popupOverlay) { popupOverlay.setMap(null); popupOverlay = null; }
+        }
+
+        function showPopup(pin: CampaignMapPin) {
+          hidePopup();
+          const pfx = isKo ? "" : "/en";
+          const href = `${pfx}/media/${pin.id}`;
+          const quoteHref = `${pfx}/quote?media=${pin.id}`;
+          const name = isKo ? pin.spotNameKo : pin.spotNameEn;
+          const priceText = getPriceText(pin);
+          const wrapper = document.createElement("div");
+          wrapper.style.cssText = [
+            "width:260px",
+            "background:white",
+            "border-radius:12px",
+            "box-shadow:0 8px 32px rgba(0,0,0,0.22)",
+            "overflow:hidden",
+            "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+            "border:1px solid rgba(15,23,42,0.1)",
+            "position:relative",
+          ].join(";");
+          const imgBlock = pin.imageUrl
+            ? `<img src="${pin.imageUrl}" style="width:100%;height:130px;object-fit:cover;display:block;" alt="" />`
+            : `<div style="width:100%;height:60px;background:linear-gradient(135deg,#1e293b,#334155);"></div>`;
+          wrapper.innerHTML = `${imgBlock}
+<div style="padding:10px 12px 12px;">
+  <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</p>
+  <p style="margin:0 0 10px;font-size:12px;font-weight:700;color:#B8892A;">${priceText}</p>
+  <div style="display:flex;gap:7px;">
+    <a href="${href}" style="flex:1;display:flex;align-items:center;justify-content:center;height:34px;background:#0f172a;color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">${isKo ? "상세보기" : "Details"}</a>
+    <a href="${quoteHref}" style="flex:1;display:flex;align-items:center;justify-content:center;height:34px;background:#C49B2A;color:#0f172a;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">${isKo ? "견적문의" : "Quote"}</a>
+  </div>
+</div>
+<button style="position:absolute;top:8px;right:8px;width:26px;height:26px;background:rgba(0,0,0,0.55);border:none;border-radius:50%;cursor:pointer;color:white;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;" id="kmap-popup-close">×</button>`;
+          wrapper.querySelector("#kmap-popup-close")?.addEventListener("click", (e) => {
+            e.stopPropagation();
+            hidePopup();
+            highlightPin(null);
+            onSelectPin(null);
+          });
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          popupOverlay = new K!.CustomOverlay({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            position: new K!.LatLng(pin.lat, pin.lng),
+            content: wrapper,
+            yAnchor: 1.35,
+            zIndex: 10,
+          });
+          popupOverlay.setMap(map);
+        }
+
+        function highlightPin(id: string | null) {
+          for (const [pid, pinEl2] of overlayEls) {
+            const sel = pid === id;
+            const p2 = pinById.get(pid);
+            pinEl2.style.background = sel ? "#C49B2A" : (p2 ? getPinBg(p2.mediaType) : "#0f172a");
+            pinEl2.style.transform = sel ? "scale(1.15)" : "scale(1)";
+          }
+        }
+
+        kakaoActionsRef.current = { showPopup, hidePopup, highlightPin };
+
+        // Dismiss popup on map background click
+        K.event.addListener(map as unknown as KakaoMarker, "click", () => {
+          hidePopup();
+          highlightPin(null);
+          onSelectPin(null);
+        });
 
         // Bounds change on idle
         K.event.addListener(map as unknown as KakaoMarker, "idle", () => {
@@ -425,8 +503,10 @@ export function CampaignMonitoringMap({
             const lv = kakaoMapCtxRef.current.map.getLevel();
             if (typeof lv === "number") mapStateRef.current = { kakaoLevel: lv };
           }
+          kakaoActionsRef.current = null;
           kakaoMapCtxRef.current = null;
-          for (const m of markers) m.setMap(null);
+          hidePopup();
+          for (const o of overlays) o.setMap(null);
           el.innerHTML = "";
         };
       });
@@ -457,7 +537,13 @@ export function CampaignMonitoringMap({
     if (!selectedIdChanged && !mapRemounted) return;
     prevSelectedIdRef.current = selectedId;
     prevMapEpochRef.current = mapEpoch;
-    if (!selectedId) return;
+    if (!selectedId) {
+      if (provider === "kakao") {
+        kakaoActionsRef.current?.highlightPin(null);
+        kakaoActionsRef.current?.hidePopup();
+      }
+      return;
+    }
 
     const pin = pins.find((p) => p.id === selectedId);
     if (!pin) return;
@@ -466,7 +552,10 @@ export function CampaignMonitoringMap({
       const ctx = kakaoMapCtxRef.current;
       if (!ctx) return;
       ctx.map.setCenter(new ctx.LatLng(pin.lat, pin.lng));
-      ctx.map.setLevel(5);
+      const lv = ctx.map.getLevel();
+      if (lv > 5) ctx.map.setLevel(5);
+      kakaoActionsRef.current?.highlightPin(selectedId);
+      kakaoActionsRef.current?.showPopup(pin);
       return;
     }
     if (provider === "google") {
