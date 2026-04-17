@@ -30,6 +30,7 @@ import {
   Download,
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
+import { logClientError } from "@/lib/client-log";
 
 function formatWon(n: number) {
   return `${new Intl.NumberFormat("ko-KR").format(Math.round(n))}원`;
@@ -924,7 +925,7 @@ export default function AdminQuoteNewClient() {
                     link.download = `quote-${quoteNumber}.png`;
                     link.click();
                   } catch (e) {
-                    console.error("캡처 실패:", e);
+                    logClientError("캡처 실패:", e);
                   }
                 }}
                 className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"

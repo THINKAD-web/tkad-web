@@ -6,6 +6,7 @@ import { useToast } from "@/components/toast-provider";
 import { TurnstileWidget } from "@/components/turnstile";
 import ScrollAnimate from "@/components/scroll-animate";
 import Spinner from "@/components/spinner";
+import { logClientError } from "@/lib/client-log";
 
 /* ── Tailwind class constants (mirrors shadcn/ui styling without Radix imports) ── */
 
@@ -117,7 +118,7 @@ export default function ContactPage() {
               : data.error ?? "전송에 실패했습니다.";
           }
 
-          console.error("[contact] Submit failed:", {
+          logClientError("[contact] Submit failed:", {
             status: res.status,
             error: data.error,
             detail: data.detail,

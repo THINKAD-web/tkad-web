@@ -20,6 +20,7 @@ import {
   filterCatalogByRegionCodes,
 } from "@/lib/ai-media-recommend";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { logClientError } from "@/lib/client-log";
 
 const RecommendCartBar = dynamic(
   () => import("@/components/recommend-cart-bar"),
@@ -94,7 +95,7 @@ export default function RecommendPageClient({
           setFullList(scored);
           setPhase(scored.length > 0 ? "dashboard" : "noResults");
         } catch (e) {
-          console.error("[recommend] runAnalysis", e);
+          logClientError("[recommend] runAnalysis", e);
           setFullList(null);
           setPhase("form");
           toast("error", tr("analysisFailed"));

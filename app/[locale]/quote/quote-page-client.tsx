@@ -79,6 +79,7 @@ import {
   quoteElementToPdfBase64,
 } from "@/lib/quote-html-pdf";
 import { captureElementAsPng } from "@/lib/html-to-pdf";
+import { logClientError } from "@/lib/client-log";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -619,7 +620,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       await downloadQuotePdfFromElement(el, filename);
       toast("success", t("quote.pdfDownloaded"));
     } catch (e) {
-      console.error("[quote pdf download]", e);
+      logClientError("[quote pdf download]", e);
       toast("error", t("quote.pdfError"));
     } finally {
       setDownloading(false);
@@ -682,7 +683,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       }
       toast("success", t("quote.pdfEmailed"));
     } catch (e) {
-      console.error("[quote pdf email]", e);
+      logClientError("[quote pdf email]", e);
       toast("error", t("quote.pdfEmailFail"));
     } finally {
       setEmailPdfLoading(false);

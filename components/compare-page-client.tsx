@@ -25,6 +25,7 @@ import {
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { mediaPricePeriodTranslationKey } from "@/lib/media-price-format";
+import { logClientError } from "@/lib/client-log";
 
 export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   const locale = useLocale();
@@ -59,7 +60,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
         timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
       });
     } catch (e) {
-      console.error("[compare-pdf]", e);
+      logClientError("[compare-pdf]", e);
       toast("error", tCommon("pdfGenerationFailed"));
     } finally {
       setComparePdfLoading(false);
@@ -75,7 +76,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
       const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       await captureElementAsPng(el, `싱커드_매체비교_${stamp}.png`);
     } catch (e) {
-      console.error("[compare-capture]", e);
+      logClientError("[compare-capture]", e);
       toast("error", tCommon("pdfGenerationFailed"));
     } finally {
       setCaptureLoading(false);

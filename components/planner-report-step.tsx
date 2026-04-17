@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import { useTranslations } from "next-intl";
-import { ExternalLink, FileDown, Loader2, Mail, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -33,6 +32,7 @@ function isPdfTimeoutError(e: unknown): boolean {
 }
 import { useToast } from "@/components/toast-provider";
 import PlannerReportPreview from "@/components/planner-report-preview";
+import { logClientError } from "@/lib/client-log";
 
 export type PlannerReportSharedProps = {
   isKo: boolean;
@@ -180,7 +180,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         urlRef.current = nextUrl;
         setPdfUrl(nextUrl);
       } catch (e) {
-        console.error("[planner-pdf html2canvas]", e);
+        logClientError("[planner-pdf html2canvas]", e);
         if (!cancelled) {
           const timedOut = isPdfTimeoutError(e);
           setError(timedOut ? t("reportPdfTimeout") : t("reportPdfError"));
@@ -237,7 +237,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         a.remove();
         toast("success", t("reportPdfDownloaded"));
       } catch (e) {
-        console.error("[planner-pdf download from preview blob]", e);
+        logClientError("[planner-pdf download from preview blob]", e);
         setError(t("reportPdfError"));
         toast("error", tCommon("pdfGenerationFailed"));
       } finally {
@@ -262,7 +262,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         });
         toast("success", t("reportPdfDownloaded"));
       } catch (e) {
-        console.error("[planner-pdf download regenerate]", e);
+        logClientError("[planner-pdf download regenerate]", e);
         const timedOut = isPdfTimeoutError(e);
         setError(timedOut ? t("reportPdfTimeout") : t("reportPdfError"));
         toast(
@@ -318,7 +318,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           screenshotBase64 = canvas.toDataURL("image/png");
         }
       } catch (e) {
-        console.error("[planner-email] screenshot failed", e);
+        logClientError("[planner-email] screenshot failed", e);
       }
 
       const res = await fetch("/api/planner/email-report", {
@@ -545,7 +545,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
       });
       toast("success", t("reportPdfDownloaded"));
     } catch (e) {
-      console.error("[planner-pdf compact]", e);
+      logClientError("[planner-pdf compact]", e);
       toast(
         "error",
         isPdfTimeoutError(e) ? t("reportPdfTimeout") : tCommon("pdfGenerationFailed"),
@@ -596,7 +596,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           screenshotBase64 = canvas.toDataURL("image/png");
         }
       } catch (e) {
-        console.error("[planner-email] compact screenshot failed", e);
+        logClientError("[planner-email] compact screenshot failed", e);
       }
 
       const res = await fetch("/api/planner/email-report", {
