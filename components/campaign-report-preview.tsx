@@ -298,6 +298,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+const KPI_STYLES = {
+  default: { bg: "border-slate-200 bg-white",    label: "text-slate-400", value: "text-navy"     },
+  accent:  { bg: "border-navy/15 bg-navy",       label: "text-white/60",  value: "text-white"    },
+  gold:    { bg: "border-amber-200 bg-amber-50", label: "text-amber-700", value: "text-amber-900" },
+} as const;
+
 function KpiCard({
   label,
   value,
@@ -305,31 +311,13 @@ function KpiCard({
 }: {
   label: string;
   value: string;
-  variant?: "default" | "accent" | "gold";
+  variant?: keyof typeof KPI_STYLES;
 }) {
-  const bg =
-    variant === "accent"
-      ? "border-navy/15 bg-navy"
-      : variant === "gold"
-        ? "border-amber-200 bg-amber-50"
-        : "border-slate-200 bg-white";
-  const labelCls =
-    variant === "accent"
-      ? "text-white/60"
-      : variant === "gold"
-        ? "text-amber-700"
-        : "text-slate-400";
-  const valueCls =
-    variant === "accent"
-      ? "text-white"
-      : variant === "gold"
-        ? "text-amber-900"
-        : "text-navy";
-
+  const s = KPI_STYLES[variant];
   return (
-    <div className={`rounded-xl border px-4 py-3 text-center ${bg}`}>
-      <p className={`text-[10px] font-semibold uppercase tracking-wide ${labelCls}`}>{label}</p>
-      <p className={`mt-1 text-[22px] font-extrabold tabular-nums ${valueCls}`}>{value}</p>
+    <div className={`rounded-xl border px-4 py-3 text-center ${s.bg}`}>
+      <p className={`text-[10px] font-semibold uppercase tracking-wide ${s.label}`}>{label}</p>
+      <p className={`mt-1 text-[22px] font-extrabold tabular-nums ${s.value}`}>{value}</p>
     </div>
   );
 }

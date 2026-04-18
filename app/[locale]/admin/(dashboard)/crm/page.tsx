@@ -14,6 +14,7 @@ import {
   type CustomerSegment,
   type SegmentRationaleKey,
 } from "@/lib/crm-scoring";
+import type { CrmLeadStage } from "@/lib/crm-demo-data";
 import {
   Brain,
   Gauge,
@@ -30,14 +31,12 @@ import Spinner from "@/components/spinner";
 
 type TabId = "dashboard" | "leads" | "intelligence" | "automation";
 
-type CrmLeadStage =
-  | "new"
-  | "contacted"
-  | "qualified"
-  | "proposal"
-  | "negotiation"
-  | "won"
-  | "lost";
+const TABS: { id: TabId; icon: typeof Gauge }[] = [
+  { id: "dashboard", icon: Gauge },
+  { id: "leads", icon: Users },
+  { id: "intelligence", icon: Brain },
+  { id: "automation", icon: Zap },
+];
 
 // ── API types ─────────────────────────────────────────────────────────────────
 
@@ -354,13 +353,6 @@ export default function AdminCrmPage() {
       lost: t("stages.lost"),
     })[s];
 
-  const tabs: { id: TabId; icon: typeof Gauge }[] = [
-    { id: "dashboard", icon: Gauge },
-    { id: "leads", icon: Users },
-    { id: "intelligence", icon: Brain },
-    { id: "automation", icon: Zap },
-  ];
-
   if (dbError) {
     return (
       <Card>
@@ -381,7 +373,7 @@ export default function AdminCrmPage() {
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-1.5">
-        {tabs.map(({ id, icon: Icon }) => (
+        {TABS.map(({ id, icon: Icon }) => (
           <button
             key={id}
             type="button"

@@ -180,11 +180,8 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   {rows.map((row, idx) => (
                     <tr
                       key={row.id}
-                      className={cn(
-                        "border-b border-slate-100 align-top",
-                        idx % 2 === 0 ? "bg-white" : "",
-                      )}
-                      style={idx % 2 === 1 ? { background: accentLight } : undefined}
+                      className="border-b border-slate-100 align-top"
+                      style={{ background: idx % 2 === 0 ? "white" : accentLight }}
                     >
                       <td className="px-2 py-2">
                         <div className="h-12 w-12 overflow-hidden rounded-lg border border-slate-100 bg-slate-50">
