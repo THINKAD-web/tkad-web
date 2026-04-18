@@ -69,8 +69,8 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
       day: "numeric",
     }).format(issuedAt);
 
-    const accentColor = isPremium ? "#b8924a" : "#1a2a6c";
-    const accentLight = isPremium ? "#fdf8ef" : "#f0f4ff";
+    const accentColor = isPremium ? "#b8924a" : "#0d1b2e";
+    const accentLight = isPremium ? "#fdf8ef" : "#f0f3f7";
 
     return (
       <div
@@ -121,7 +121,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   style={{
                     background: accentLight,
                     color: accentColor,
-                    border: `1px solid ${isPremium ? "#e8d5b5" : "#c7d2fe"}`,
+                    border: `1px solid ${isPremium ? "#e8d5b5" : "#c0cad4"}`,
                   }}
                 >
                   THINKAD
@@ -247,7 +247,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 <span className="text-[11px] font-bold text-white">{t("pdfTotal")}</span>
                 <span
                   className="text-[15px] font-extrabold tabular-nums"
-                  style={{ color: isPremium ? "#fdf8ef" : "#e8d5b5" }}
+                  style={{ color: isPremium ? "#fdf8ef" : "#c8913c" }}
                 >
                   {formatManWon(grandTotalMan, locale)}
                 </span>

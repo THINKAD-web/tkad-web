@@ -90,18 +90,18 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
       <p className="mb-2 px-1 text-[11px] text-slate-500">{tr("resultChartHint")}</p>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(26,42,108,0.1)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(13,27,46,0.1)" />
           <XAxis
             type="number"
             dataKey="x"
             name="fit"
             domain={[0, 100]}
-            tick={{ fill: "#1a2a6c", fontSize: 11 }}
-            stroke="rgba(26,42,108,0.3)"
+            tick={{ fill: "#0d1b2e", fontSize: 11 }}
+            stroke="rgba(13,27,46,0.3)"
             label={{
               value: isKo ? "AI 적합도" : "AI fit (0–100)",
               position: "bottom",
-              fill: "#1a2a6c",
+              fill: "#0d1b2e",
               fontSize: 11,
             }}
           />
@@ -109,8 +109,8 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
             type="number"
             dataKey="y"
             name="reach"
-            tick={{ fill: "#1a2a6c", fontSize: 11 }}
-            stroke="rgba(26,42,108,0.3)"
+            tick={{ fill: "#0d1b2e", fontSize: 11 }}
+            stroke="rgba(13,27,46,0.3)"
             tickFormatter={(v) =>
               v >= 1_000_000
                 ? `${(v / 1_000_000).toFixed(1)}M`
@@ -121,7 +121,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
               value: isKo ? "월 추정 노출" : "Est. monthly reach",
               angle: -90,
               position: "insideLeft",
-              fill: "#1a2a6c",
+              fill: "#0d1b2e",
               fontSize: 11,
             }}
           />

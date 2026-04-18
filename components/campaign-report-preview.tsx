@@ -116,10 +116,10 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
         style={{ fontFamily: "system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" }}
       >
         {/* Header */}
-        <div className="bg-gradient-to-br from-[#1a2a6c] to-[#0c1842] px-8 py-7">
+        <div className="bg-gradient-to-br from-[#0d1b2e] to-[#060e1a] px-8 py-7">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#e8d5b5]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#c8913c]">
                 THINKAD · OOH 광고 게재 완료 보고서
               </p>
               <h1 className="mt-2 text-[22px] font-extrabold leading-tight text-white">
@@ -130,7 +130,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
               </p>
             </div>
             <div className="shrink-0 text-right">
-              <span className="inline-flex items-center rounded-full bg-[#e8d5b5] px-3 py-1 text-[11px] font-bold text-[#1a2a6c]">
+              <span className="inline-flex items-center rounded-full bg-[#c8913c] px-3 py-1 text-[11px] font-bold text-white">
                 게재 완료
               </span>
               <p className="mt-2 text-[10px] text-white/45">
@@ -221,7 +221,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
               <div className="space-y-2">
                 {data.scheduleEvents.map((e, i) => (
                   <div key={i} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-2.5">
-                    <span className="h-2 w-2 shrink-0 rounded-full bg-[#e8d5b5]" />
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-[#c8913c]" />
                     <span className="flex-1 text-[12px] font-semibold text-navy">{e.title}</span>
                     <span className="text-[11px] text-slate-400">{fmtDate(e.startsAt)}</span>
                   </div>
@@ -253,7 +253,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
                     ))}
                     {totalAmount > 0 && (
                       <tr className="border-t-2 border-navy/10 bg-navy">
-                        <td colSpan={2} className="px-3 py-2.5 text-[12px] font-bold text-[#e8d5b5]">합계</td>
+                        <td colSpan={2} className="px-3 py-2.5 text-[12px] font-bold text-[#c8913c]">합계</td>
                         <td className="px-3 py-2.5 text-[14px] font-extrabold text-white">{fmtAmount(totalAmount)}</td>
                         <td />
                       </tr>

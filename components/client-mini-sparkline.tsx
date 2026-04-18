@@ -51,8 +51,8 @@ export function ClientMiniSparkline({
     >
       <defs>
         <linearGradient id={`sf-${rid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#1a2a6c" stopOpacity="0.14" />
-          <stop offset="100%" stopColor="#e8d5b5" stopOpacity="0.04" />
+          <stop offset="0%" stopColor="#0d1b2e" stopOpacity="0.16" />
+          <stop offset="100%" stopColor="#c8913c" stopOpacity="0.04" />
         </linearGradient>
       </defs>
       <path

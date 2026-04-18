@@ -4,14 +4,14 @@ import type { Config } from "tailwindcss";
  * THINKAD 2025 rebrand — canonical hex. Runtime utilities: `app/globals.css` (`@theme inline`).
  */
 export const brandColors = {
-  primary: "#1A2A6C",
-  accent: "#E8D5B5",
-  silver: "#B0B8C4",
-  background: "#D6D9E6",
-  cta: "#9B3C31",
-  ctaHover: "#85342A",
-  primaryLight: "#2E4078",
-  primaryDark: "#121A3A",
+  primary: "#0D1B2E",
+  accent: "#C8913C",
+  silver: "#8B97A6",
+  background: "#FFFFFF",
+  cta: "#C8913C",
+  ctaHover: "#A47430",
+  primaryLight: "#1B3354",
+  primaryDark: "#060E1A",
   white: "#FFFFFF",
 } as const;
 
