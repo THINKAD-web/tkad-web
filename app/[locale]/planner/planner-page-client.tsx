@@ -604,7 +604,7 @@ export default function PlannerPageClient({
 
             {wizardStep === 2 ? (
               <>
-                <div className="space-y-2 text-center sm:text-left">
+                <div className="space-y-2">
                   <h2 className="text-lg font-bold text-navy sm:text-xl">
                     {t("stepMediaTitle")}
                   </h2>

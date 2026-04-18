@@ -132,7 +132,7 @@ export default function PlannerSimulationStep3({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2 text-center sm:text-left">
+      <div className="space-y-2">
         <h2 className="text-lg font-bold text-navy sm:text-xl">
           {t("stepSimTitle")}
         </h2>
@@ -156,7 +156,18 @@ export default function PlannerSimulationStep3({
             >
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(232,213,181,0.14),transparent_55%)] opacity-0 transition group-hover:opacity-100" />
               <div className="relative flex flex-col items-center justify-center gap-2 text-center">
-                <ImageUp className="h-7 w-7 text-gold" aria-hidden />
+                {creativeObjectUrl ? (
+                  <div className="mx-auto max-w-[180px] overflow-hidden rounded-xl border border-gold/40 shadow-md">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={creativeObjectUrl}
+                      alt=""
+                      className="h-auto w-full object-contain"
+                    />
+                  </div>
+                ) : (
+                  <ImageUp className="h-7 w-7 text-gold" aria-hidden />
+                )}
                 <p className="text-sm font-semibold text-navy">
                   {t("creativeUploadCta")}
                 </p>
@@ -213,12 +224,6 @@ export default function PlannerSimulationStep3({
           <CardDescription>{t("simViewDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 rounded-xl border border-amber-200/80 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 shadow-sm">
-            <p className="font-semibold text-navy">{t("simCompositeDisabledTitle")}</p>
-            <p className="mt-1 text-xs leading-relaxed text-amber-950/90">
-              {t("simCompositeDisabledBody")}
-            </p>
-          </div>
           {mediaCards.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-navy/15 bg-slate-50/60 py-12 text-center text-sm text-muted-foreground">
               {t("simEmpty")}
@@ -309,10 +314,27 @@ export default function PlannerSimulationStep3({
                             </div>
                           )}
 
+                          {creativeObjectUrl && (
+                            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-10">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={creativeObjectUrl}
+                                alt=""
+                                className="max-h-[65%] max-w-[65%] rounded-lg object-contain shadow-2xl ring-2 ring-gold/70"
+                                draggable={false}
+                              />
+                            </div>
+                          )}
+
                           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0" />
                           <div className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/25 bg-black/35 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white/90 backdrop-blur-sm">
                             {t("simBadge")}
                           </div>
+                          {creativeObjectUrl && (
+                            <div className="pointer-events-none absolute right-3 top-3 z-20 rounded-full border border-gold/40 bg-black/50 px-3 py-1 text-[10px] font-semibold text-gold backdrop-blur-sm">
+                              {t("creativeUploadTitle")}
+                            </div>
+                          )}
                           <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-10">
                             <p className="line-clamp-2 text-sm font-bold text-white drop-shadow">
                               {current.name}
