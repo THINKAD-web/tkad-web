@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Download, Loader2 } from "lucide-react";
-import { captureElementAsPng } from "@/lib/html-to-pdf";
+import { captureElementAsPng, downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
 
 export type CampaignReportData = {
   campaignName: string;
@@ -14,12 +14,20 @@ export type CampaignReportData = {
   notes?: string | null;
   scheduleEvents?: { title: string; startsAt: string; endsAt: string; kind: string }[];
   proofPhotos?: { imageUrl: string; caption?: string | null }[];
-  mediaBookings?: { title: string; mediaName: string; location: string; startsAt: string; endsAt: string; status: string; dailyFootTraffic?: number | null }[];
+  mediaBookings?: {
+    title: string;
+    mediaName: string;
+    location: string;
+    startsAt: string;
+    endsAt: string;
+    status: string;
+    dailyFootTraffic?: number | null;
+  }[];
   financialDocs?: { kind: string; title: string; amountKrw?: number | null; status: string }[];
 };
 
-function diffDays(start: string, end: string): number {
-  return Math.max(1, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000));
+function diffDays(start: string, end: string) {
+  return Math.max(1, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86_400_000));
 }
 
 function fmtDate(d: string) {
@@ -32,13 +40,30 @@ function fmtAmount(n: number) {
   return `₩${n.toLocaleString()}`;
 }
 
+const KIND_LABEL: Record<string, string> = {
+  quote: "견적서",
+  contract: "계약서",
+  invoice: "세금계산서",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  draft: "초안",
+  sent: "발송",
+  paid: "완납",
+  overdue: "연체",
+  cancelled: "취소",
+  completed: "완료",
+  hold: "보류",
+};
+
 export default function CampaignReportPreview({ data }: { data: CampaignReportData }) {
   const ref = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
 
   const stats = (() => {
     if (!data.mediaBookings?.length) return null;
-    let totalExposure = 0, totalDays = 0;
+    let totalExposure = 0;
+    let totalDays = 0;
     for (const b of data.mediaBookings) {
       const days = diffDays(b.startsAt, b.endsAt);
       totalExposure += (b.dailyFootTraffic ?? 0) * days;
@@ -54,8 +79,10 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
     setBusy(true);
     try {
       const d = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      await captureElementAsPng(ref.current, `싱커드_게재보고서_${d}.png`);
-    } finally { setBusy(false); }
+      await captureElementAsPng(ref.current, `THINKAD_게재보고서_${d}.png`);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const handlePdf = async () => {
@@ -63,25 +90,10 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
     setBusy(true);
     try {
       const d = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      const html2canvas = (await import("html2canvas")).default;
-      const { default: JsPDF } = await import("jspdf");
-      const canvas = await html2canvas(ref.current, {
-        scale: 2, useCORS: true, allowTaint: false,
-        backgroundColor: "#ffffff", scrollX: 0, scrollY: -window.scrollY, imageTimeout: 20000,
-      });
-      const imgData = canvas.toDataURL("image/jpeg", 0.92);
-      const pdf = new JsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = (canvas.height * pdfW) / canvas.width;
-      const pageH = pdf.internal.pageSize.getHeight();
-      let y = 0;
-      while (y < pdfH) {
-        if (y > 0) pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, -y, pdfW, pdfH);
-        y += pageH;
-      }
-      pdf.save(`싱커드_게재보고서_${d}.pdf`);
-    } finally { setBusy(false); }
+      await downloadPdfFromHtmlElement(ref.current, `THINKAD_게재보고서_${d}.pdf`);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -97,202 +109,227 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
         </Button>
       </div>
 
-      {/* ───── 보고서 본문 ───── */}
-      <div ref={ref} className="bg-white font-sans" style={{ fontFamily: "system-ui, sans-serif" }}>
-
-        {/* 헤더 배너 */}
-        <div style={{ background: "linear-gradient(135deg, #1a2a6c 0%, #0c1a42 100%)", padding: "32px 40px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div>
-              <p style={{ color: "#e8d5b5", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", margin: 0 }}>
-                THINKAD · 싱커드
+      {/* Report body */}
+      <div
+        ref={ref}
+        className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-navy/8"
+        style={{ fontFamily: "system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" }}
+      >
+        {/* Header */}
+        <div className="bg-gradient-to-br from-[#1a2a6c] to-[#0c1842] px-8 py-7">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#e8d5b5]">
+                THINKAD · OOH 광고 게재 완료 보고서
               </p>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", margin: "2px 0 16px" }}>
-                OOH 광고 게재 완료 보고서
-              </p>
-              <h1 style={{ color: "#ffffff", fontSize: "24px", fontWeight: 800, margin: "0 0 6px", lineHeight: 1.2 }}>
+              <h1 className="mt-2 text-[22px] font-extrabold leading-tight text-white">
                 {data.campaignName || "캠페인명"}
               </h1>
-              <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "13px", margin: 0 }}>
+              <p className="mt-1.5 text-[13px] text-white/65">
                 {[data.clientCompany, data.clientName, data.clientEmail].filter(Boolean).join(" · ")}
               </p>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ background: "#e8d5b5", color: "#1a2a6c", borderRadius: "20px", padding: "4px 14px", fontSize: "11px", fontWeight: 700, display: "inline-block" }}>
+            <div className="shrink-0 text-right">
+              <span className="inline-flex items-center rounded-full bg-[#e8d5b5] px-3 py-1 text-[11px] font-bold text-[#1a2a6c]">
                 게재 완료
-              </div>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", margin: "8px 0 0", textAlign: "right" }}>
+              </span>
+              <p className="mt-2 text-[10px] text-white/45">
                 발행일 {new Date().toLocaleDateString("ko-KR")}
               </p>
             </div>
           </div>
         </div>
 
-        <div style={{ padding: "32px 40px" }}>
-
-          {/* 핵심 KPI */}
+        <div className="space-y-7 px-8 py-7">
+          {/* KPI */}
           {(stats || totalAmount > 0) && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "32px" }}>
-              {stats && (<>
-                <div style={{ background: "#f8faff", borderRadius: "12px", padding: "16px", border: "1px solid #e2e8f0", textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>집행 매체</p>
-                  <p style={{ fontSize: "28px", fontWeight: 800, color: "#1a2a6c", margin: 0 }}>{stats.mediaCount}<span style={{ fontSize: "14px" }}>개</span></p>
-                </div>
-                <div style={{ background: "#f8faff", borderRadius: "12px", padding: "16px", border: "1px solid #e2e8f0", textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>집행 기간</p>
-                  <p style={{ fontSize: "28px", fontWeight: 800, color: "#1a2a6c", margin: 0 }}>{stats.totalDays}<span style={{ fontSize: "14px" }}>일</span></p>
-                </div>
-                <div style={{ background: "#1a2a6c", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#e8d5b5", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>누적 노출 추정</p>
-                  <p style={{ fontSize: "22px", fontWeight: 800, color: "#ffffff", margin: 0 }}>
-                    {stats.totalExposure > 0 ? `${Math.round(stats.totalExposure / 10000).toLocaleString()}만` : "—"}
-                  </p>
-                </div>
-              </>)}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {stats && (
+                <>
+                  <KpiCard label="집행 매체" value={`${stats.mediaCount}개`} />
+                  <KpiCard label="집행 기간" value={`${stats.totalDays}일`} />
+                  <KpiCard
+                    label="누적 노출 추정"
+                    value={stats.totalExposure > 0 ? `${Math.round(stats.totalExposure / 10_000).toLocaleString()}만` : "—"}
+                    variant="accent"
+                  />
+                </>
+              )}
               {totalAmount > 0 && (
-                <div style={{ background: "#fffbeb", borderRadius: "12px", padding: "16px", border: "1px solid #fde68a", textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#92400e", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>총 집행 금액</p>
-                  <p style={{ fontSize: "22px", fontWeight: 800, color: "#92400e", margin: 0 }}>{fmtAmount(totalAmount)}</p>
-                </div>
+                <KpiCard label="총 집행 금액" value={fmtAmount(totalAmount)} variant="gold" />
               )}
             </div>
           )}
 
-          {/* 집행 매체 */}
-          {data.mediaBookings && data.mediaBookings.length > 0 && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                📍 집행 매체 상세
-              </h2>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
-                <thead>
-                  <tr style={{ background: "#1a2a6c", color: "#ffffff" }}>
-                    {["매체명", "위치", "집행 기간", "일 유동인구", "상태"].map(h => (
-                      <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 600, fontSize: "11px" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.mediaBookings.map((b, i) => (
-                    <tr key={i} style={{ background: i % 2 === 0 ? "#ffffff" : "#f8faff", borderBottom: "1px solid #e2e8f0" }}>
-                      <td style={{ padding: "10px 12px", fontWeight: 600, color: "#1a2a6c" }}>{b.mediaName}</td>
-                      <td style={{ padding: "10px 12px", color: "#475569" }}>{b.location}</td>
-                      <td style={{ padding: "10px 12px", color: "#475569", fontSize: "11px" }}>
-                        {fmtDate(b.startsAt)} ~ {fmtDate(b.endsAt)}
-                        <span style={{ color: "#94a3b8", marginLeft: "4px" }}>({diffDays(b.startsAt, b.endsAt)}일)</span>
-                      </td>
-                      <td style={{ padding: "10px 12px", color: "#1a2a6c", fontWeight: 600 }}>
-                        {b.dailyFootTraffic ? `${b.dailyFootTraffic.toLocaleString()}명` : "—"}
-                      </td>
-                      <td style={{ padding: "10px 12px" }}>
-                        <span style={{ background: "#ecfdf5", color: "#065f46", borderRadius: "20px", padding: "2px 10px", fontSize: "10px", fontWeight: 700 }}>
-                          {b.status}
-                        </span>
-                      </td>
+          {/* Media table */}
+          {!!data.mediaBookings?.length && (
+            <Section title="집행 매체 상세">
+              <div className="overflow-hidden rounded-xl border border-slate-200">
+                <table className="w-full text-[12px]">
+                  <thead>
+                    <tr className="bg-navy text-white">
+                      {["매체명", "위치", "집행 기간", "일 유동인구", "상태"].map((h) => (
+                        <th key={h} className="px-3 py-2.5 text-left text-[11px] font-semibold">{h}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {data.mediaBookings.map((b, i) => (
+                      <tr key={i} className={`border-t border-slate-100 ${i % 2 === 1 ? "bg-slate-50/60" : "bg-white"}`}>
+                        <td className="px-3 py-2.5 font-semibold text-navy">{b.mediaName}</td>
+                        <td className="px-3 py-2.5 text-slate-500">{b.location}</td>
+                        <td className="px-3 py-2.5 text-[11px] text-slate-500">
+                          {fmtDate(b.startsAt)} – {fmtDate(b.endsAt)}
+                          <span className="ml-1 text-slate-400">({diffDays(b.startsAt, b.endsAt)}일)</span>
+                        </td>
+                        <td className="px-3 py-2.5 font-semibold text-navy">
+                          {b.dailyFootTraffic ? `${b.dailyFootTraffic.toLocaleString()}명` : "—"}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                            {STATUS_LABEL[b.status] ?? b.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Section>
           )}
 
-          {/* 게재 사진 */}
-          {data.proofPhotos && data.proofPhotos.length > 0 && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                📸 게재 증빙 사진
-              </h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
+          {/* Proof photos */}
+          {!!data.proofPhotos?.length && (
+            <Section title="게재 증빙 사진">
+              <div className="grid grid-cols-3 gap-2.5">
                 {data.proofPhotos.slice(0, 9).map((p, i) => (
-                  <div key={i} style={{ borderRadius: "10px", overflow: "hidden", border: "1px solid #e2e8f0" }}>
+                  <div key={i} className="overflow-hidden rounded-xl border border-slate-200">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.imageUrl} alt={p.caption ?? ""} crossOrigin="anonymous"
-                      style={{ width: "100%", height: "160px", objectFit: "cover", display: "block" }} />
+                    <img src={p.imageUrl} alt={p.caption ?? ""} crossOrigin="anonymous" className="h-36 w-full object-cover" />
                     {p.caption && (
-                      <p style={{ margin: 0, padding: "6px 10px", fontSize: "10px", color: "#64748b", background: "#f8faff" }}>{p.caption}</p>
+                      <p className="bg-slate-50 px-2.5 py-1.5 text-[10px] text-slate-500">{p.caption}</p>
                     )}
                   </div>
                 ))}
               </div>
-            </div>
+            </Section>
           )}
 
-          {/* 진행 일정 */}
-          {data.scheduleEvents && data.scheduleEvents.length > 0 && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                📅 진행 일정
-              </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          {/* Schedule */}
+          {!!data.scheduleEvents?.length && (
+            <Section title="진행 일정">
+              <div className="space-y-2">
                 {data.scheduleEvents.map((e, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#e8d5b5", flexShrink: 0 }} />
-                    <span style={{ flex: 1, fontSize: "12px", fontWeight: 600, color: "#1a2a6c" }}>{e.title}</span>
-                    <span style={{ fontSize: "11px", color: "#94a3b8" }}>{fmtDate(e.startsAt)}</span>
+                  <div key={i} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-2.5">
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-[#e8d5b5]" />
+                    <span className="flex-1 text-[12px] font-semibold text-navy">{e.title}</span>
+                    <span className="text-[11px] text-slate-400">{fmtDate(e.startsAt)}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </Section>
           )}
 
-          {/* 비용 내역 */}
-          {data.financialDocs && data.financialDocs.length > 0 && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                💰 비용 내역
-              </h2>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
-                <thead>
-                  <tr style={{ background: "#f1f5f9" }}>
-                    {["구분", "항목", "금액", "상태"].map(h => (
-                      <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#475569" }}>{h}</th>
+          {/* Financial */}
+          {!!data.financialDocs?.length && (
+            <Section title="비용 내역">
+              <div className="overflow-hidden rounded-xl border border-slate-200">
+                <table className="w-full text-[12px]">
+                  <thead>
+                    <tr className="bg-slate-50">
+                      {["구분", "항목", "금액", "상태"].map((h) => (
+                        <th key={h} className="px-3 py-2.5 text-left text-[11px] font-semibold text-slate-500">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.financialDocs.map((f, i) => (
+                      <tr key={i} className={`border-t border-slate-100 ${i % 2 === 1 ? "bg-slate-50/60" : "bg-white"}`}>
+                        <td className="px-3 py-2.5 text-[11px] text-slate-500">{KIND_LABEL[f.kind] ?? f.kind}</td>
+                        <td className="px-3 py-2.5 font-semibold text-navy">{f.title}</td>
+                        <td className="px-3 py-2.5 font-bold text-navy">{f.amountKrw ? fmtAmount(f.amountKrw) : "—"}</td>
+                        <td className="px-3 py-2.5 text-[11px] text-slate-500">{STATUS_LABEL[f.status] ?? f.status}</td>
+                      </tr>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.financialDocs.map((f, i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", background: i % 2 === 0 ? "#ffffff" : "#f8faff" }}>
-                      <td style={{ padding: "8px 12px", color: "#64748b", fontSize: "11px" }}>{f.kind}</td>
-                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "#1a2a6c" }}>{f.title}</td>
-                      <td style={{ padding: "8px 12px", fontWeight: 700, color: "#1a2a6c" }}>{f.amountKrw ? fmtAmount(f.amountKrw) : "—"}</td>
-                      <td style={{ padding: "8px 12px", fontSize: "11px", color: "#64748b" }}>{f.status}</td>
-                    </tr>
-                  ))}
-                  {totalAmount > 0 && (
-                    <tr style={{ background: "#1a2a6c" }}>
-                      <td colSpan={2} style={{ padding: "10px 12px", color: "#e8d5b5", fontWeight: 700, fontSize: "12px" }}>합계</td>
-                      <td style={{ padding: "10px 12px", color: "#ffffff", fontWeight: 800, fontSize: "14px" }}>{fmtAmount(totalAmount)}</td>
-                      <td style={{ padding: "10px 12px" }} />
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    {totalAmount > 0 && (
+                      <tr className="border-t-2 border-navy/10 bg-navy">
+                        <td colSpan={2} className="px-3 py-2.5 text-[12px] font-bold text-[#e8d5b5]">합계</td>
+                        <td className="px-3 py-2.5 text-[14px] font-extrabold text-white">{fmtAmount(totalAmount)}</td>
+                        <td />
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Section>
           )}
 
-          {/* 특이사항 */}
+          {/* Notes */}
           {data.notes && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                📝 특이사항
-              </h2>
-              <p style={{ background: "#f8faff", borderRadius: "8px", padding: "14px 16px", fontSize: "12px", color: "#334155", margin: 0, whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+            <Section title="특이사항">
+              <p className="whitespace-pre-wrap rounded-xl bg-slate-50 px-4 py-3.5 text-[12px] leading-relaxed text-slate-700">
                 {data.notes}
               </p>
-            </div>
+            </Section>
           )}
 
-          {/* 푸터 */}
-          <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          {/* Footer */}
+          <div className="flex items-center justify-between border-t border-slate-100 pt-5">
             <div>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: "#1a2a6c", margin: "0 0 2px" }}>주식회사 싱커드 (THINKAD)</p>
-              <p style={{ fontSize: "10px", color: "#94a3b8", margin: 0 }}>mannote@tkad.co.kr · 02-515-2772 · 서울특별시 성동구</p>
+              <p className="text-[11px] font-bold text-navy">주식회사 싱커드 (THINKAD)</p>
+              <p className="mt-0.5 text-[10px] text-slate-400">mannote@tkad.co.kr · 02-515-2772 · 서울특별시 성동구</p>
             </div>
-            <p style={{ fontSize: "10px", color: "#cbd5e1", margin: 0 }}>© 2026 THINKAD. All rights reserved.</p>
+            <p className="text-[10px] text-slate-300">© 2026 THINKAD. All rights reserved.</p>
           </div>
-
         </div>
       </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-3 border-b border-slate-100 pb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+function KpiCard({
+  label,
+  value,
+  variant = "default",
+}: {
+  label: string;
+  value: string;
+  variant?: "default" | "accent" | "gold";
+}) {
+  const bg =
+    variant === "accent"
+      ? "border-navy/15 bg-navy"
+      : variant === "gold"
+        ? "border-amber-200 bg-amber-50"
+        : "border-slate-200 bg-white";
+  const labelCls =
+    variant === "accent"
+      ? "text-white/60"
+      : variant === "gold"
+        ? "text-amber-700"
+        : "text-slate-400";
+  const valueCls =
+    variant === "accent"
+      ? "text-white"
+      : variant === "gold"
+        ? "text-amber-900"
+        : "text-navy";
+
+  return (
+    <div className={`rounded-xl border px-4 py-3 text-center ${bg}`}>
+      <p className={`text-[10px] font-semibold uppercase tracking-wide ${labelCls}`}>{label}</p>
+      <p className={`mt-1 text-[22px] font-extrabold tabular-nums ${valueCls}`}>{value}</p>
     </div>
   );
 }

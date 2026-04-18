@@ -348,16 +348,21 @@ model QuoteTemplate {
 }
 
 model ContactInquiry {
-  id        String   @id @default(cuid())
-  company   String
-  name      String
-  phone     String
-  email     String?
+  id          String   @id @default(cuid())
+  company     String
+  name        String
+  phone       String
+  email       String?
   inquiryType String?  @map("inquiry_type")
-  budget    String?
-  message   String
-  createdAt DateTime @default(now()) @map("created_at")
+  budget      String?
+  message     String
+  /// pending | processing | completed
+  status      String   @default("pending")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
+  @@index([status])
+  @@index([createdAt])
   @@map("contact_inquiries")
 }
 

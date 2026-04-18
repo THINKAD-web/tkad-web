@@ -40,6 +40,12 @@ export async function GET(request: NextRequest) {
       topMedia: [] as { id: string; name: string; picks: number }[],
       inquiries30d: 0,
       quotes30d: 0,
+      mediaTotal: 0,
+      pendingInquiries: 0,
+      recentInquiries: [] as {
+        id: string; company: string; name: string; phone: string;
+        status: string; createdAt: string;
+      }[],
       monthlySeries: [] as {
         key: string;
         label: string;
@@ -234,6 +240,21 @@ export async function GET(request: NextRequest) {
     .map(([type, totalKrw]) => ({ type, totalKrw }))
     .sort((a, b) => b.totalKrw - a.totalKrw);
 
+  const [mediaTotal, pendingInquiries, recentInquiriesRaw] = await Promise.all([
+    db.media.count({ where: { isActive: true } }),
+    db.contactInquiry.count({ where: { status: "pending" } }),
+    db.contactInquiry.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { id: true, company: true, name: true, phone: true, status: true, createdAt: true },
+    }),
+  ]);
+
+  const recentInquiries = recentInquiriesRaw.map((i) => ({
+    ...i,
+    createdAt: i.createdAt.toISOString(),
+  }));
+
   return json({
     configured: true,
     monthlyRevenueKrw,
@@ -241,6 +262,9 @@ export async function GET(request: NextRequest) {
     topMedia,
     inquiries30d,
     quotes30d,
+    mediaTotal,
+    pendingInquiries,
+    recentInquiries,
     monthlySeries,
     funnel: {
       inquiries: inquiriesTotal,

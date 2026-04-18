@@ -17,6 +17,18 @@ export async function GET(request: NextRequest) {
       _count: {
         select: { contactLogs: true, notes: true, followUps: true },
       },
+      campaigns: {
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          startDate: true,
+          endDate: true,
+          budgetMin: true,
+          budgetMax: true,
+        },
+        orderBy: { createdAt: "desc" },
+      },
     },
   });
   return json({ accounts });

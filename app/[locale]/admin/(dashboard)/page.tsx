@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,157 +18,21 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const stats = [
-  {
-    label: "총 매체 수",
-    value: 128,
-    change: "+5",
-    icon: Monitor,
-    color: "bg-blue-50 text-blue-600",
-  },
-  {
-    label: "총 문의 수",
-    value: 347,
-    change: "+23",
-    icon: MessageSquareText,
-    color: "bg-emerald-50 text-emerald-600",
-  },
-  {
-    label: "이번 달 문의",
-    value: 42,
-    change: "+12",
-    icon: CalendarDays,
-    color: "bg-amber-50 text-amber-600",
-  },
-  {
-    label: "대기 중 문의",
-    value: 18,
-    change: "-3",
-    icon: Clock,
-    color: "bg-rose-50 text-rose-600",
-  },
-];
-
-const recentInquiries = [
-  {
-    id: "INQ-347",
-    company: "삼성전자",
-    contact: "김영수",
-    phone: "010-1234-5678",
-    date: "2026-03-28",
-    status: "pending" as const,
-  },
-  {
-    id: "INQ-346",
-    company: "LG유플러스",
-    contact: "이미라",
-    phone: "010-9876-5432",
-    date: "2026-03-27",
-    status: "processing" as const,
-  },
-  {
-    id: "INQ-345",
-    company: "현대자동차",
-    contact: "박진호",
-    phone: "010-5555-1234",
-    date: "2026-03-26",
-    status: "completed" as const,
-  },
-  {
-    id: "INQ-344",
-    company: "카카오",
-    contact: "정수빈",
-    phone: "010-3333-7890",
-    date: "2026-03-25",
-    status: "pending" as const,
-  },
-  {
-    id: "INQ-343",
-    company: "네이버",
-    contact: "최은지",
-    phone: "010-2222-4567",
-    date: "2026-03-24",
-    status: "processing" as const,
-  },
-];
-
-const monthlyData = [
-  { month: "10월", count: 28 },
-  { month: "11월", count: 35 },
-  { month: "12월", count: 31 },
-  { month: "1월", count: 38 },
-  { month: "2월", count: 45 },
-  { month: "3월", count: 42 },
-];
-
-const popularMedia = [
-  {
-    rank: 1,
-    name: "코엑스 K-POP 스퀘어 전광판",
-    type: "디지털",
-    inquiries: 45,
-    trend: "+8",
-  },
-  {
-    rank: 2,
-    name: "강남대로 미디어폴 G-LIGHT",
-    type: "디지털",
-    inquiries: 38,
-    trend: "+5",
-  },
-  {
-    rank: 3,
-    name: "뉴욕 타임스퀘어 전광판",
-    type: "디지털",
-    inquiries: 32,
-    trend: "+12",
-  },
-  {
-    rank: 4,
-    name: "두바이 부르즈 할리파 LED",
-    type: "디지털",
-    inquiries: 28,
-    trend: "+3",
-  },
-  {
-    rank: 5,
-    name: "성수동 반도 외벽광고",
-    type: "빌보드",
-    inquiries: 24,
-    trend: "+6",
-  },
-];
-
-const conversionData = {
-  total: 347,
-  contracted: 89,
-  rate: 25.6,
-  monthlyRates: [
-    { month: "10월", rate: 22 },
-    { month: "11월", rate: 24 },
-    { month: "12월", rate: 23 },
-    { month: "1월", rate: 26 },
-    { month: "2월", rate: 28 },
-    { month: "3월", rate: 25.6 },
-  ],
+type RecentInquiry = {
+  id: string;
+  company: string;
+  name: string;
+  phone: string;
+  status: string;
+  createdAt: string;
 };
 
-const regionData = [
-  { region: "서울", count: 198, percentage: 57.1, color: "bg-navy" },
-  { region: "부산", count: 52, percentage: 15.0, color: "bg-blue-500" },
-  { region: "제주", count: 34, percentage: 9.8, color: "bg-emerald-500" },
-  {
-    region: "전국(해외)",
-    count: 63,
-    percentage: 18.1,
-    color: "bg-amber-500",
-  },
-];
-
-const statusMap: Record<string, { label: string; className: string }> = {
-  pending: { label: "대기", className: "bg-amber-100 text-amber-700" },
-  processing: { label: "처리중", className: "bg-blue-100 text-blue-700" },
-  completed: { label: "완료", className: "bg-emerald-100 text-emerald-700" },
+type MonthlySeries = {
+  key: string;
+  label: string;
+  inquiries: number;
+  quotes: number;
+  revenueKrw: number;
 };
 
 type LiveStats = {
@@ -178,88 +42,119 @@ type LiveStats = {
   topMedia: { id: string; name: string; picks: number }[];
   inquiries30d: number;
   quotes30d: number;
+  mediaTotal: number;
+  pendingInquiries: number;
+  recentInquiries: RecentInquiry[];
+  monthlySeries: MonthlySeries[];
+  funnel: { inquiries: number; quotes: number; pastProposal: number; contracted: number };
+  regionQuotes: { region: string; count: number }[];
 };
+
+const statusMap: Record<string, { label: string; className: string }> = {
+  pending:    { label: "대기",   className: "bg-amber-100 text-amber-700" },
+  processing: { label: "처리중", className: "bg-blue-100 text-blue-700" },
+  completed:  { label: "완료",   className: "bg-emerald-100 text-emerald-700" },
+};
+
+function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded bg-slate-100 ${className}`} />;
+}
 
 export default function AdminDashboardPage() {
   const pathname = usePathname();
   const locale = pathname.split("/")[1] || "ko";
-  const maxCount = Math.max(...monthlyData.map((d) => d.count));
-  const maxConversionRate = Math.max(
-    ...conversionData.monthlyRates.map((d) => d.rate),
-  );
-
   const [live, setLive] = useState<LiveStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     let cancelled = false;
     fetch("/api/admin/stats")
       .then((r) => r.json())
-      .then((data) => {
-        if (!cancelled) setLive(data as LiveStats);
-      })
-      .catch(() => {
-        if (!cancelled) setLive(null);
-      });
-    return () => {
-      cancelled = true;
-    };
+      .then((data) => { if (!cancelled) { setLive(data as LiveStats); setLoading(false); } })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
-  const popularMediaForCard = useMemo(() => {
-    if (live?.configured && live.topMedia.length > 0) {
-      return live.topMedia.slice(0, 10).map((m, i) => ({
-        rank: i + 1,
-        name: m.name,
-        type: "견적 포함",
-        inquiries: m.picks,
-        trend: "" as string,
-      }));
-    }
-    return popularMedia;
-  }, [live]);
+  const isConfigured = live?.configured === true;
+
+  const statsCards = [
+    {
+      label: "활성 매체 수",
+      value: isConfigured ? live!.mediaTotal : null,
+      icon: Monitor,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      label: "총 문의 수",
+      value: isConfigured ? live!.funnel.inquiries : null,
+      icon: MessageSquareText,
+      color: "bg-emerald-50 text-emerald-600",
+    },
+    {
+      label: "이번 달 문의",
+      value: isConfigured ? live!.inquiries30d : null,
+      icon: CalendarDays,
+      color: "bg-amber-50 text-amber-600",
+    },
+    {
+      label: "대기 중 문의",
+      value: isConfigured ? live!.pendingInquiries : null,
+      icon: Clock,
+      color: "bg-rose-50 text-rose-600",
+    },
+  ];
+
+  const monthlyData = isConfigured ? live!.monthlySeries : [];
+  const maxMonthly = Math.max(...monthlyData.map((d) => d.inquiries), 1);
+
+  const regionData = isConfigured
+    ? (() => {
+        const total = live!.regionQuotes.reduce((s, r) => s + r.count, 0) || 1;
+        const colors = ["bg-navy", "bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-violet-500"];
+        return live!.regionQuotes.slice(0, 5).map((r, i) => ({
+          region: r.region,
+          count: r.count,
+          percentage: Math.round((r.count / total) * 1000) / 10,
+          color: colors[i % colors.length],
+        }));
+      })()
+    : [];
 
   return (
     <div className="space-y-6 print-dashboard">
-      {/* Print Button */}
-      <div className="flex justify-end print:hidden">
-        <Button
-          variant="outline"
-          onClick={() => window.print()}
-        >
+      {/* Print / DB notice */}
+      <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
+        {live && !isConfigured ? (
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            DATABASE_URL을 설정하면 실데이터가 표시됩니다.{" "}
+            <a href="https://neon.tech" target="_blank" rel="noopener noreferrer" className="underline">Neon 무료 DB →</a>
+          </p>
+        ) : <span />}
+        <Button variant="outline" onClick={() => window.print()}>
           <Printer className="h-4 w-4" />
           인쇄
         </Button>
       </div>
 
-      {/* Stats Cards */}
+      {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => {
+        {statsCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card key={stat.label}>
               <CardContent className="flex items-center gap-4 py-0">
-                <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${stat.color}`}
-                >
+                <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${stat.color}`}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    {stat.label}
-                  </p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold text-navy">
-                      {stat.value.toLocaleString()}
-                    </span>
-                    <span
-                      className={`text-xs font-semibold ${
-                        stat.change.startsWith("+")
-                          ? "text-emerald-600"
-                          : "text-rose-600"
-                      }`}
-                    >
-                      {stat.change}
-                    </span>
-                  </div>
+                  <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
+                  {loading ? (
+                    <Skeleton className="mt-1 h-7 w-20" />
+                  ) : stat.value != null ? (
+                    <p className="text-2xl font-bold text-navy">{stat.value.toLocaleString()}</p>
+                  ) : (
+                    <p className="text-2xl font-bold text-slate-300">—</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -267,71 +162,12 @@ export default function AdminDashboardPage() {
         })}
       </div>
 
-      {live?.configured ? (
-        <Card className="border-gold/30 bg-gold/5 print:hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base text-navy">
-              DB 연동 지표 (실데이터)
-            </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              최근 30일 문의·견적, 이번 달 유료 확정 금액, 견적 요청에 많이 포함된 매체
-              TOP 10
-            </p>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                이번 달 매출 (유료 확정)
-              </p>
-              <p className="mt-1 text-2xl font-bold text-navy">
-                {(live.monthlyRevenueKrw / 10000).toLocaleString()}만원
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                문의 → 견적 전환 (30일)
-              </p>
-              <p className="mt-1 text-2xl font-bold text-navy">
-                {live.inquiryConversionPct}%
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                문의 {live.inquiries30d} · 견적 {live.quotes30d}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                인기 매체 (견적에 포함된 횟수)
-              </p>
-              <ol className="mt-2 max-h-36 space-y-1 overflow-y-auto text-xs">
-                {live.topMedia.slice(0, 10).map((m, i) => (
-                  <li key={m.id} className="flex justify-between gap-2">
-                    <span className="truncate text-navy">
-                      {i + 1}. {m.name}
-                    </span>
-                    <span className="shrink-0 text-muted-foreground">
-                      {m.picks}회
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </CardContent>
-        </Card>
-      ) : live && !live.configured ? (
-        <p className="text-xs text-muted-foreground print:hidden">
-          DATABASE_URL을 설정하면 위 카드에 실데이터 지표가 표시됩니다.
-        </p>
-      ) : null}
-
+      {/* Recent inquiries + Monthly chart */}
       <div className="grid gap-6 xl:grid-cols-5">
-        {/* Recent Inquiries */}
         <Card className="xl:col-span-3">
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle className="text-base">최근 문의</CardTitle>
-            <Link
-              href={`/${locale}/admin/inquiries`}
-              className="text-xs font-medium text-gold hover:underline"
-            >
+            <Link href={`/${locale}/admin/inquiries`} className="text-xs font-medium text-gold hover:underline">
               전체 보기 →
             </Link>
           </CardHeader>
@@ -342,196 +178,202 @@ export default function AdminDashboardPage() {
                   <tr className="border-b text-left text-xs font-medium text-muted-foreground">
                     <th className="pb-3 pr-4">회사명</th>
                     <th className="pb-3 pr-4">담당자</th>
-                    <th className="pb-3 pr-4 hidden sm:table-cell">연락처</th>
-                    <th className="pb-3 pr-4">날짜</th>
+                    <th className="pb-3 pr-4 hidden sm:table-cell">날짜</th>
                     <th className="pb-3">상태</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentInquiries.map((inq) => (
-                    <tr key={inq.id} className="border-b last:border-0">
-                      <td className="py-3 pr-4 font-medium text-navy">
-                        {inq.company}
-                      </td>
-                      <td className="py-3 pr-4 text-muted-foreground">
-                        {inq.contact}
-                      </td>
-                      <td className="py-3 pr-4 text-muted-foreground hidden sm:table-cell">
-                        {inq.phone}
-                      </td>
-                      <td className="py-3 pr-4 text-muted-foreground">
-                        {inq.date}
-                      </td>
-                      <td className="py-3">
-                        <Badge
-                          variant="secondary"
-                          className={statusMap[inq.status].className}
-                        >
-                          {statusMap[inq.status].label}
-                        </Badge>
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="border-b last:border-0">
+                        <td className="py-3 pr-4"><Skeleton className="h-4 w-28" /></td>
+                        <td className="py-3 pr-4"><Skeleton className="h-4 w-16" /></td>
+                        <td className="py-3 pr-4 hidden sm:table-cell"><Skeleton className="h-4 w-20" /></td>
+                        <td className="py-3"><Skeleton className="h-5 w-12 rounded-full" /></td>
+                      </tr>
+                    ))
+                  ) : !isConfigured ? (
+                    <tr>
+                      <td colSpan={4} className="py-8 text-center text-xs text-muted-foreground">
+                        DB 연결 후 실제 문의가 표시됩니다.
                       </td>
                     </tr>
-                  ))}
+                  ) : live!.recentInquiries.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="py-8 text-center text-xs text-muted-foreground">
+                        문의 내역이 없습니다.
+                      </td>
+                    </tr>
+                  ) : (
+                    live!.recentInquiries.map((inq) => (
+                      <tr key={inq.id} className="border-b last:border-0">
+                        <td className="py-3 pr-4 font-medium text-navy">{inq.company}</td>
+                        <td className="py-3 pr-4 text-muted-foreground">{inq.name}</td>
+                        <td className="py-3 pr-4 text-muted-foreground hidden sm:table-cell">
+                          {new Date(inq.createdAt).toLocaleDateString("ko-KR")}
+                        </td>
+                        <td className="py-3">
+                          <Badge variant="secondary" className={(statusMap[inq.status] ?? statusMap.pending).className}>
+                            {(statusMap[inq.status] ?? statusMap.pending).label}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
           </CardContent>
         </Card>
 
-        {/* Monthly Chart */}
+        {/* Monthly chart */}
         <Card className="xl:col-span-2">
           <CardHeader className="flex-row items-center gap-2">
             <TrendingUp className="h-4 w-4 text-gold" />
             <CardTitle className="text-base">월별 문의 추이</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-end gap-3 pt-2" style={{ height: 200 }}>
-              {monthlyData.map((d) => (
-                <div
-                  key={d.month}
-                  className="flex flex-1 flex-col items-center gap-1.5"
-                >
-                  <span className="text-xs font-semibold text-navy">
-                    {d.count}
-                  </span>
-                  <div
-                    className="w-full rounded-t-md bg-gradient-to-t from-navy to-navy-light transition-all"
-                    style={{
-                      height: `${(d.count / maxCount) * 140}px`,
-                    }}
-                  />
-                  <span className="text-[11px] text-muted-foreground">
-                    {d.month}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-end gap-3 pt-2" style={{ height: 200 }}>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
+                    <Skeleton className="h-3 w-8" />
+                    <div className="w-full animate-pulse rounded-t-md bg-slate-100" style={{ height: `${40 + i * 15}px` }} />
+                    <Skeleton className="h-3 w-6" />
+                  </div>
+                ))}
+              </div>
+            ) : monthlyData.length === 0 ? (
+              <p className="py-12 text-center text-xs text-muted-foreground">DB 연결 후 데이터가 표시됩니다.</p>
+            ) : (
+              <div className="flex items-end gap-3 pt-2" style={{ height: 200 }}>
+                {monthlyData.map((d) => (
+                  <div key={d.key} className="flex flex-1 flex-col items-center gap-1.5">
+                    <span className="text-xs font-semibold text-navy">{d.inquiries}</span>
+                    <div
+                      className="w-full rounded-t-md bg-gradient-to-t from-navy to-navy-light transition-all"
+                      style={{ height: `${(d.inquiries / maxMonthly) * 140}px`, minHeight: 4 }}
+                    />
+                    <span className="text-[11px] text-muted-foreground">{d.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
 
+      {/* Popular media + Conversion + Region */}
       <div className="grid gap-6 xl:grid-cols-3">
         <Card className="xl:col-span-1">
           <CardHeader className="flex-row items-center gap-2">
             <Award className="h-4 w-4 text-gold" />
-            <CardTitle className="text-base">
-              인기 매체 TOP {popularMediaForCard.length}
-            </CardTitle>
+            <CardTitle className="text-base">인기 매체 TOP {isConfigured ? live!.topMedia.length : "—"}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {popularMediaForCard.map((item) => (
-              <div
-                key={`${item.rank}-${item.name}`}
-                className="flex items-center gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0"
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold text-sm font-bold text-navy">
-                  {item.rank}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-navy">{item.name}</p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <Badge variant="secondary">{item.type}</Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {item.type === "견적 포함"
-                        ? `${item.inquiries}회`
-                        : `문의 ${item.inquiries}건`}
-                    </span>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 border-b border-slate-100 pb-3 last:border-0">
+                  <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-3 w-20" />
                   </div>
                 </div>
-                {item.trend ? (
-                  <span className="shrink-0 text-sm font-semibold text-emerald-600">
-                    {item.trend}
-                  </span>
-                ) : null}
-              </div>
-            ))}
+              ))
+            ) : !isConfigured || live!.topMedia.length === 0 ? (
+              <p className="py-8 text-center text-xs text-muted-foreground">DB 연결 후 표시됩니다.</p>
+            ) : (
+              live!.topMedia.map((m, i) => (
+                <div key={m.id} className="flex items-center gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold text-sm font-bold text-navy">
+                    {i + 1}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-navy">{m.name}</p>
+                    <span className="text-xs text-muted-foreground">견적 {m.picks}회 포함</span>
+                  </div>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
         <Card className="xl:col-span-1">
           <CardHeader className="flex-row items-center gap-2">
             <Percent className="h-4 w-4 text-gold" />
-            <CardTitle className="text-base">계약 전환율</CardTitle>
+            <CardTitle className="text-base">문의 → 견적 전환율</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <p className="text-4xl font-bold text-gold">
-                {live?.configured
-                  ? `${live.inquiryConversionPct}%`
-                  : `${conversionData.rate}%`}
-              </p>
-              {live?.configured ? (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  최근 30일 문의 대비 견적 요청 비율 (실데이터)
-                </p>
-              ) : null}
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                <span>
-                  총 문의{" "}
-                  <span className="font-semibold text-navy">
-                    {conversionData.total.toLocaleString()}건
-                  </span>
-                </span>
-                <span>
-                  계약{" "}
-                  <span className="font-semibold text-navy">
-                    {conversionData.contracted.toLocaleString()}건
-                  </span>
-                </span>
-              </div>
-            </div>
-            <div>
-              <p className="mb-2 text-xs font-medium text-muted-foreground">
-                월별 전환율
-              </p>
-              <div className="flex items-end gap-2" style={{ height: 120 }}>
-                {conversionData.monthlyRates.map((d) => (
-                  <div
-                    key={d.month}
-                    className="flex flex-1 flex-col items-center gap-1"
-                  >
-                    <span className="text-[10px] font-semibold text-navy">
-                      {d.rate}%
-                    </span>
-                    <div
-                      className="w-full rounded-t-sm bg-gradient-to-t from-navy to-navy-light"
-                      style={{
-                        height: `${(d.rate / maxConversionRate) * 72}px`,
-                        minHeight: 4,
-                      }}
-                    />
-                    <span className="text-[10px] text-muted-foreground">
-                      {d.month}
-                    </span>
+            {loading ? (
+              <Skeleton className="h-12 w-24" />
+            ) : !isConfigured ? (
+              <p className="py-8 text-center text-xs text-muted-foreground">DB 연결 후 표시됩니다.</p>
+            ) : (
+              <>
+                <div>
+                  <p className="text-4xl font-bold text-gold">{live!.inquiryConversionPct}%</p>
+                  <p className="mt-1 text-xs text-muted-foreground">최근 30일 기준</p>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    <span>문의 <span className="font-semibold text-navy">{live!.funnel.inquiries.toLocaleString()}건</span></span>
+                    <span>견적 <span className="font-semibold text-navy">{live!.funnel.quotes.toLocaleString()}건</span></span>
+                    <span>계약 <span className="font-semibold text-navy">{live!.funnel.contracted.toLocaleString()}건</span></span>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">월별 문의·견적 추이</p>
+                  <div className="flex items-end gap-2" style={{ height: 120 }}>
+                    {live!.monthlySeries.map((d) => {
+                      const maxQ = Math.max(...live!.monthlySeries.map((x) => x.quotes), 1);
+                      return (
+                        <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
+                          <span className="text-[10px] font-semibold text-navy">{d.quotes}</span>
+                          <div
+                            className="w-full rounded-t-sm bg-gradient-to-t from-navy to-navy-light"
+                            style={{ height: `${(d.quotes / maxQ) * 72}px`, minHeight: 4 }}
+                          />
+                          <span className="text-[10px] text-muted-foreground">{d.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card className="xl:col-span-1">
           <CardHeader className="flex-row items-center gap-2">
             <MapPin className="h-4 w-4 text-gold" />
-            <CardTitle className="text-base">지역별 문의 분포</CardTitle>
+            <CardTitle className="text-base">지역별 견적 분포</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {regionData.map((r) => (
-              <div key={r.region} className="space-y-1.5">
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span className="font-medium text-navy">{r.region}</span>
-                  <span className="text-muted-foreground">
-                    {r.count.toLocaleString()}건 · {r.percentage}%
-                  </span>
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <Skeleton className="h-2.5 w-full rounded-full" />
                 </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className={`h-full rounded-full ${r.color}`}
-                    style={{ width: `${r.percentage}%` }}
-                  />
+              ))
+            ) : regionData.length === 0 ? (
+              <p className="py-8 text-center text-xs text-muted-foreground">DB 연결 후 표시됩니다.</p>
+            ) : (
+              regionData.map((r) => (
+                <div key={r.region} className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="font-medium text-navy">{r.region}</span>
+                    <span className="text-muted-foreground">{r.count.toLocaleString()}건 · {r.percentage}%</span>
+                  </div>
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className={`h-full rounded-full ${r.color}`} style={{ width: `${r.percentage}%` }} />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
       </div>
