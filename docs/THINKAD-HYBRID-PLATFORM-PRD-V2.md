@@ -870,13 +870,27 @@ Admin AC (P1):
 
 **Acceptance Criteria**
 
-챗봇 AC (P1):
-- [ ] 모든 페이지 우하단 플로팅 챗 위젯 (높이 60px 원형 버튼, amber `#C8913C`)
-- [ ] Claude 4.7 Sonnet/Opus 스트리밍 응답
+**2단계 단계화 전략** — Claude 통짜가 아닌 rule → Claude 정밀화 (Phase 3 내부)
+
+Stage 1 AC (P1, Sprint 13-14 출시): **Rule-based MVP + 핸드오프**
+- [ ] 모든 페이지 우하단 플로팅 챗 위젯 (높이 60px 원형 버튼, amber `#C8913C`) — 최종 UI 동일
+- [ ] 키워드 매칭 기반 FAQ 규칙 엔진 (10~15 카테고리: 예산·지역·매체 유형·검증 배지·절차 등)
+- [ ] 사전 정의된 빠른 질문 칩 (예산 상담·지역 추천·제안서 요청)
+- [ ] "전문가 연결" 버튼 상시 노출 (하이브리드 AC 참조)
+- [ ] `ChatSession`/`ChatMessage` DB 모델 — 질문 로그 전량 축적 (Stage 2 프롬프트 재료)
+- [ ] Rate limit: 로그인 30 req/hr, 게스트 10 req/hr (Claude 전환 전이므로 낮게)
+- [ ] Admin 대시보드: 주간 질문 로그 분석 리포트 (FAQ 규칙이 답하지 못한 질문 집계)
+
+Stage 2 AC (P1, Sprint 21-22 고도화): **Claude 4.7 tool use 전환**
+- [ ] Claude 4.7 Sonnet/Opus 스트리밍 응답 (Stage 1에서 축적된 3,000+ 질문 로그 기반 프롬프트 튜닝)
 - [ ] **Tool use 강제**: `search_media`, `create_plan_draft`, `check_availability`, `get_footfall`, `book_consultation`
-- [ ] 환각 방지: tool 결과 기반 응답, "확실하지 않음" 답변 허용
+- [ ] 환각 방지: tool 결과 기반 응답, "확실하지 않음" 답변 허용, 응답 검증 레이어
+- [ ] Prompt caching (시스템 프롬프트 + 도메인 지식 `cache_control: ephemeral`)
 - [ ] 대화 이력 저장 (로그인 시 DB, 비로그인 시 localStorage)
 - [ ] 한국어/영어 자동 감지 (Phase 3 말에 중국어/일본어 확장)
+- [ ] Rate limit 상향: 로그인 60 req/hr, 게스트 10 req/hr
+- [ ] Rule 엔진은 **폴백 레이어**로 유지 — Claude 실패·월 비용 상한 도달 시 자동 복귀
+- [ ] A/B 테스트: Stage 1 rule vs Stage 2 Claude 응답 만족도 비교
 
 하이브리드 AC (P1):
 - [ ] **"전문가 연결" 버튼** — 챗봇 답변 하단에 항상 노출
@@ -886,9 +900,10 @@ Admin AC (P1):
 - [ ] 상담 히스토리는 `/my/consultations`에서 확인
 
 품질 AC (P1):
-- [ ] Rate limit: 로그인 60 req/hr · 게스트 10 req/hr
-- [ ] 응답 첫 토큰 < 1.5s (Streaming)
+- [ ] Stage 1 (rule) 응답 지연 < 200ms
+- [ ] Stage 2 (Claude) 응답 첫 토큰 < 1.5s (Streaming)
 - [ ] 상담 응답 SLA: 업무 시간 10분, 야간 익일 10시
+- [ ] Stage 2 비용 상한: Anthropic 월 예산 80% 도달 시 rule-only 모드 자동 전환
 
 **UI/UX**
 ```
@@ -2574,12 +2589,17 @@ export async function middleware(req: Request) {
 | Phase | 기간 | 주요 목표 | 릴리즈 | 팀 규모 |
 |---|---|---|---|---|
 | **Pre-sprint** | 2026-04-21 ~ 2026-04-30 | 킥오프·계약·환경 준비 | — | 현재 팀 |
-| **Phase 1 (MVP)** | 2026-05 ~ 2026-07 | 지도·제안서·플래너·회원 | **2026-07-31 베타** | FE×2, BE×2, 디자인×1, PM×1 |
-| **Phase 2 (차별화)** | 2026-08 ~ 2026-10 | 유동인구·알림·VR·배지 전면 | **2026-10-31 정식** | + 데이터엔지니어×1 |
-| **Phase 3 (플랫폼)** | 2026-11 ~ 2027-04 | 챗봇·오너·대행사·자동보고서 | **분기별 마일스톤** | + AI엔지니어×1 |
-| **Phase 4 (글로벌)** | 2027-05 ~ | 다국어·PWA·이벤트 | **반기별** | + 글로벌 GTM×1 |
+| **Phase 1 (MVP)** | 2026-05 ~ 2026-08 초 (**13주**) | 지도·제안서·플래너·회원 | **2026-08-07 베타** | FE×2, BE×2, 디자인×1, PM×1 |
+| **Phase 2 (차별화)** | 2026-08 중 ~ 2026-11 초 | 유동인구·알림·VR·배지 전면 | **2026-11-06 정식** | + 데이터엔지니어×1 |
+| **Phase 3 (플랫폼)** | 2026-11 ~ 2027-04 | 챗봇(rule→Claude 단계적)·오너·대행사·자동보고서 | **분기별 마일스톤** | + AI엔지니어×1 (Sprint 21~22 시점 채용) |
+| **Phase 4 (글로벌)** | 2027-05 ~ | 다국어·PWA·이벤트·Stripe primary | **반기별** | + 글로벌 GTM×1 |
 
-### 5.2 MVP 최소 기능 정의 (2026-07-31 베타 출시 기준)
+**2026-04-20 리뷰 반영 변경 사항**
+- Phase 1: **12주 → 13주**로 확장 — Sprint 1 (인증 기반) 2주 → 3주 현실화. next-auth v5 + Kakao/Google OAuth + localStorage↔서버 세션 동기화 복잡도 반영.
+- 베타 출시: 2026-07-31 → **2026-08-07** (1주 이동, Phase 2~4 전체 1주 시프트)
+- Phase 3 챗봇: 16주 Claude tool use 통짜 구현 → **4주 rule-based MVP 선행 + 4주 Claude 고도화 후행** (질문 로그 축적 후 정밀 프롬프트)
+
+### 5.2 MVP 최소 기능 정의 (2026-08-07 베타 출시 기준)
 
 **반드시 포함 (P0)**
 - [x] F1.1 지도 기반 매체 검색 (클러스터·필터·반경)
@@ -2622,21 +2642,31 @@ export async function middleware(req: Request) {
 - [ ] Figma 디자인 시스템 컴포넌트 정리 (shadcn 매핑)
 - [ ] Playwright E2E 시나리오 초안 작성 (기존 `docs/e2e-test-scenarios.md` 확장)
 
-### 5.4 Phase 1 스프린트 (12주 / 6 스프린트, 2주 단위)
+### 5.4 Phase 1 스프린트 (13주 / 6 스프린트; Sprint 1은 3주, 이후 2주)
 
-#### Sprint 1 (W1-2): 인증 기반 + 회원 모델
-**목표**: `/my` 진입 가능, 로그인/가입 정상 동작
+> **왜 Sprint 1만 3주인가**: next-auth v5 (App Router 호환) + Kakao/Google OAuth + 자체 세션 대안 비교 + **비로그인→로그인 전환 시 localStorage 플래너 자동 서버 동기화** (F1.4 핵심 UX) + 미들웨어 권한 분기(광고주/오너/대행사)까지 통합 테스트 포함. 2주로는 현실적으로 불충분.
+
+#### Sprint 1 (W1-3, 3주): 인증 기반 + 회원 모델 + `/my` 셸
+**목표**: 로그인/가입·OAuth·세션 동기화 정상 동작, `/my` 진입 + 권한 분기
 
 - [ ] Prisma 신규 모델 마이그레이션: `User`, `UserSession`, `UserOAuthAccount`, `UserFavoriteMedia`, `PlannerPlan`
-- [ ] `next-auth` v5 또는 자체 세션 구현 (Credentials + Kakao + Google)
-- [ ] `app/(auth)/login`, `app/(auth)/register`, `/forgot-password` 페이지
-- [ ] 이메일 인증 (Resend 템플릿)
-- [ ] 미들웨어 `/my/*` 보호
-- [ ] `/my` 기본 레이아웃 + 빈 탭들
+- [ ] 인증 라이브러리 의사결정 (**W1 중 스파이크**): `next-auth v5` vs 자체 세션 (`AdminUser` 구조 재사용)
+- [ ] Credentials (이메일·비밀번호, argon2id 해싱) + Kakao OAuth + Google OAuth 3-channel 구현
+- [ ] `app/(auth)/login`, `/register`, `/forgot-password` · 이메일 인증 (Resend)
+- [ ] **localStorage ↔ 서버 세션 동기화 훅** (`tkad-planner-plan-v2` → `PlannerPlan` 자동 마이그레이션)
+- [ ] 미들웨어 `/my/*` 보호 + **role 분기** (advertiser→/my, agency→/partner, owner→/owner 리다이렉트 placeholder)
+- [ ] `/my` 기본 레이아웃 + 빈 탭 (Sprint 3에서 채움)
+- [ ] 세션 IP 바인딩 · CSRF (Origin 검증) · rate-limit 기본값 · audit log 뼈대
 
-**산출물**: 로그인 → `/my` 대시보드 진입, 회원가입 → 이메일 인증 → 로그인
+**산출물**: E2E 시나리오 통과
+- 이메일 가입 → 이메일 인증 → 로그인 → `/my` 진입
+- Kakao 로그인 → 자동 프로필 연동 → `/my` 진입
+- 비로그인 플래너 저장 → 로그인 → localStorage 데이터 자동 서버 이관 확인
 
-#### Sprint 2 (W3-4): 지도 MVP
+**병렬 작업 (W2~W3 Sprint 2 선행 준비)**
+- Kakao Map SDK 키 설정 · 환경변수 배치 (BE 한 명이 중반부터 Sprint 2 착수 가능)
+
+#### Sprint 2 (W4-5): 지도 MVP
 **목표**: `/media` 지도 뷰에서 매체 탐색·핀 클릭·필터 작동
 
 - [ ] Kakao Map SDK 통합 + `ssr:false` dynamic import
@@ -2649,7 +2679,7 @@ export async function middleware(req: Request) {
 
 **산출물**: `/media` 지도/리스트 토글, 1,000개 더미 데이터로 60fps 검증
 
-#### Sprint 3 (W5-6): My THINKAD + 장바구니
+#### Sprint 3 (W6-7): My THINKAD + 장바구니
 **목표**: 플래너 저장·즐겨찾기·견적 이력 기본 탭 동작
 
 - [ ] `localStorage tkad-planner-plan-v2` ↔ `PlannerPlan` 서버 동기화 훅
@@ -2661,7 +2691,7 @@ export async function middleware(req: Request) {
 
 **산출물**: 비로그인 플래너 저장 → 로그인 시 자동 동기화 시나리오 E2E 검증
 
-#### Sprint 4 (W7-8): 플래너 위자드 + Claude 추천
+#### Sprint 4 (W8-9): 플래너 위자드 + Claude 추천
 **목표**: 7단계 위자드 작동, AI 3안 추천 완주율 60%+
 
 - [ ] Prisma `MediaVerificationBadge` 모델 + 시드 데이터 (실제 매체 30개 4단계 점수 입력)
@@ -2675,7 +2705,7 @@ export async function middleware(req: Request) {
 
 **산출물**: 플래너 완주 → 3안 표시 → 제안서 장바구니 진입 (전체 E2E)
 
-#### Sprint 5 (W9-10): 자동 제안서 PDF + 검증 배지 UI
+#### Sprint 5 (W10-11): 자동 제안서 PDF + 검증 배지 UI
 **목표**: 1클릭 PDF 생성 45~60초 이내(p95 < 60s) + 검증 배지 시각화 + 공개 웹뷰 보안 정책 적용
 
 - [ ] `lib/build-quote-pdf.ts` 확장 (검증 배지 · Kakao 정적 지도 · 유동인구 자리표시)
@@ -2689,7 +2719,7 @@ export async function middleware(req: Request) {
 
 **산출물**: 플래너 → 제안서 담기 → PDF 다운로드 전체 플로우 E2E (보안 정책 포함)
 
-#### Sprint 6 (W11-12): 안정화 + 베타 준비
+#### Sprint 6 (W12-13): 안정화 + 베타 준비
 **목표**: 베타 출시 품질 게이트 통과
 
 - [ ] Playwright E2E 확장: Flow A·B 전체 커버
@@ -2699,53 +2729,67 @@ export async function middleware(req: Request) {
 - [ ] 결제 연동 (Toss Payments 실결제 테스트)
 - [ ] 베타 사용자 30명 모집 (기존 광고주 풀)
 - [ ] 내부 QA 워크숍 → 크리티컬 버그 수정
-- [ ] **2026-07-31 베타 공개**
+- [ ] **2026-08-07 베타 공개**
 
 **산출물**: 베타 URL `beta.thinkad.kr` 공개 + 초기 사용자 피드백 수집 시작
 
 ---
 
-### 5.5 Phase 2 스프린트 (12주, 2026-08 ~ 2026-10)
+### 5.5 Phase 2 스프린트 (12주, 2026-08 중 ~ 2026-11 초)
 
-#### Sprint 7 (W13-14): 유동인구 데이터 파이프라인
-- [ ] 공공데이터 API 계약·호환성 테스트 (서울열린데이터광장·KT/SKT)
+#### Sprint 7 (W14-15): 유동인구 데이터 파이프라인 + 3-Tier 폴백
+- [ ] **Tier 1 (즉시, 계약 불필요)**: 서울열린데이터광장·행정안전부·통계청 공공 API 연동 (무료, 신청 즉시)
+  - 서울 생활인구 OpenAPI · 행정동 인구통계 API
+  - `lib/footfall-public-data.ts` 기본 구현
+- [ ] **Tier 2 (계약 지연 대응, 최대 1개월 운영)**: heuristic 폴백 + **매체본부 수동 입력 모드**
+  - 기존 `lib/footfall-district-heuristic.ts` 유지
+  - `/admin/medias/[id]/footfall/manual` 입력 UI (시간대별 추정치 직접 입력)
+  - 매체 상세에 "매체본부 추정 데이터" 뱃지 명시
+- [ ] **Tier 3 (정식)**: KT/SKT 통신사 유동인구 B2B 계약 체결 후 합류
+  - 계약·법무 검토 **Pre-sprint에 착수** (리드타임 4~8주)
+  - 수신 포맷 정규화 → `FootfallSnapshot.source = 'kt' | 'skt'`
 - [ ] `FootfallSnapshot` 모델 + `geohash` 인덱스
-- [ ] `lib/footfall-public-data.ts` 일일 수집 cron
-- [ ] heuristic 폴백 유지
+- [ ] 일일 수집 cron · Tier 우선순위 로직 (정식 > 공공 > heuristic/수동)
 
-#### Sprint 8 (W15-16): 유동인구 UI + PDF 통합
+**리스크 R4 계약 지연 대응 (Sprint 7 기본 원칙)**
+- [ ] 계약 지연이 확정되는 시점에 **자동 Tier 2 운영 전환** (feature flag `footfall.tier3.enabled` OFF)
+- [ ] 광고주·제안서 PDF에는 항상 **데이터 출처 명시** (Tier 1/2/3 뱃지)
+- [ ] Tier 2 수동 입력은 매체본부 주간 10곳 목표 — 우선순위: 베타 30명이 관심 가진 매체 top
+- [ ] Tier 3 합류 완료 전엔 "KT/SKT 통신사 데이터는 추가 예정" 공지
+
+#### Sprint 8 (W16-17): 유동인구 UI + PDF 통합
 - [ ] 매체 상세 유동인구 탭 (Recharts)
 - [ ] `GET /api/public/footfall?lat&lng&radiusM`
 - [ ] PDF 차트 자동 삽입 (F1.2 Sprint 5의 자리표시 실데이터화)
 - [ ] 플래너 결과에 유동인구 근거 툴팁
 
-#### Sprint 9 (W17-18): 실시간 알림 시스템
+#### Sprint 9 (W18-19): 실시간 알림 시스템
 - [ ] Prisma `Notification`, `NotificationSubscription`, `NotificationQueue`, `WebPushSubscription`
 - [ ] Admin PUT 훅에서 `enqueueNotification()` 트리거
 - [ ] `/api/cron/dispatch-notifications` 1분 cron
 - [ ] Web Push + Resend 이메일 발송
 - [ ] `/my/notifications` 알림 센터 UI
 
-#### Sprint 10 (W19-20): 검증 배지 관리 + 리포트 PDF
+#### Sprint 10 (W20-21): 검증 배지 관리 + 리포트 PDF
 - [ ] `/admin/medias/[id]/verification` Stepper 입력 UI
 - [ ] `lib/verification-scoring.ts` 점수 → 등급 매핑
 - [ ] 현장 사진 업로드 (Cloudinary, 최소 4장)
 - [ ] `lib/build-verification-report-pdf.ts` 신규
 - [ ] 배지 만료 7일 전 알림 cron
 
-#### Sprint 11 (W21-22): VR 투어 파일럿
+#### Sprint 11 (W22-23): VR 투어 파일럿
 - [ ] Cloudinary equirectangular 업로드 + 워터마크 자동화
 - [ ] `/admin/medias/[id]/vr-tour` 핫스팟 에디터
 - [ ] `components/vr-tour-viewer.tsx` (Marzipano)
 - [ ] 파일럿 10개 매체 촬영·업로드 (실사팀)
 - [ ] 매체 상세 "VR" 탭
 
-#### Sprint 12 (W23-24): 성공사례 메트릭 자동화 + 정식 출시 준비
+#### Sprint 12 (W24-25): 성공사례 메트릭 자동화 + 정식 출시 준비
 - [ ] `Campaign.status=completed` 시 `SuccessCase` 초안 자동 생성
 - [ ] `SuccessCase.metricsJson` zod 스키마
 - [ ] 트렌드 리포트 월 1일 자동 초안 생성 (Claude)
 - [ ] `/insights/trend-reports/[month]` 페이지
-- [ ] **2026-10-31 정식 출시** (`beta.` → 루트 도메인 승격)
+- [ ] **2026-11-06 정식 출시** (`beta.` → 루트 도메인 승격)
 
 **Phase 2 산출물**: HOO 대비 8축 압도 포지셔닝 완성, GMV 월 3억+ 돌파 기반
 
@@ -2753,16 +2797,25 @@ export async function middleware(req: Request) {
 
 ### 5.6 Phase 3 스프린트 (24주, 2026-11 ~ 2027-04)
 
-#### Sprint 13-16 (W25-32): AI 챗봇 컨설턴트 (F3.2)
-- [ ] `app/api/chat/route.ts` Anthropic streaming + tool use 확장
-- [ ] `ChatSession`, `ChatMessage` 모델 + 게스트 localStorage 동기화
-- [ ] 플로팅 챗 위젯 UI (`components/chat-widget.tsx`)
-- [ ] Tool: `search_media`, `create_plan_draft`, `check_availability`, `book_consultation`
-- [ ] "전문가 연결" → CrmAccount 생성 + Slack 알림
-- [ ] 업무 시간/야간 배지 분기
-- [ ] Rate limit (60 req/hr 로그인, 10 req/hr 게스트)
+> **Phase 3 챗봇 단계화 원칙**: 처음부터 Claude tool use 통짜를 만들면 (1) 비용 폭증 리스크 (2) 프롬프트 부정확성 (3) 실제 질문 패턴 미파악 문제 발생. **rule-based MVP를 먼저 띄워 질문 로그 축적 후, 그 데이터로 Claude 고도화를 정밀하게 한다.**
 
-#### Sprint 17-20 (W33-40): 매체사 포털 (F3.1) + 대행사 포털 (F3.4)
+#### Sprint 13-14 (W26-29, 4주): 챗봇 MVP — **Rule-based + 전문가 핸드오프**
+- [ ] 플로팅 챗 위젯 UI (`components/chat-widget.tsx`) — **일반 UI는 최종 버전**
+- [ ] `ChatSession`, `ChatMessage` DB 모델 (질문 로그 축적용)
+- [ ] **Rule 엔진**: 키워드 매칭 기반 FAQ (예산·지역·매체 유형·검증 배지·절차 등 10~15개 카테고리)
+- [ ] 사전 정의된 빠른 질문 칩: "예산 상담" · "지역 추천" · "제안서 요청"
+- [ ] **즉시 "전문가 연결" 버튼** (Phase 3 핵심 전환 퍼널)
+  - `CrmAccount` 자동 생성 + 매체본부 Slack 알림
+  - 업무 시간 내 "10분 내 응답" 배지, 야간 "익일 오전 첫 응답" 배지
+- [ ] 질문 로그 분석 대시보드 (Admin) — 어떤 질문이 많이 오는지 주간 리포트
+- [ ] Rate limit (30 req/hr 로그인, 10 req/hr 게스트 — Claude 전환 전이므로 낮게)
+
+**Sprint 13-14 성과 측정** (Sprint 21-22 Claude 고도화 전에 확인)
+- 일 평균 챗봇 세션 수 · "전문가 연결" 전환율
+- FAQ 규칙이 답하지 못하는 질문 비율 (→ Claude 고도화 prompt 재료)
+- 누적 질문 로그 최소 3,000건 목표 (Claude 튜닝 데이터)
+
+#### Sprint 15-18 (W30-37, 8주): 매체사 포털 (F3.1) + 대행사 포털 (F3.4)
 - [ ] `MediaOwner`, `MediaOwnerMembership`, `Agency`, `AgencyCommission` 모델
 - [ ] `Media.ownerId` FK 추가 + 권한 미들웨어
 - [ ] `/owner` 포털: 가입·CSV 업로드·대시보드·정산
@@ -2771,21 +2824,35 @@ export async function middleware(req: Request) {
 - [ ] 월간 정산 PDF (오너 · 대행사 각각)
 - [ ] 파일럿: 매체사 3곳 + 대행사 2곳 초청 온보딩
 
-#### Sprint 21-22 (W41-44): 캠페인 성과 보고서 완전 자동화 (D3)
+#### Sprint 19-20 (W38-41, 4주): 캠페인 성과 보고서 완전 자동화 (D3)
 - [ ] `/api/cron/generate-completion-reports` 주 1회
 - [ ] 업종 평균 CPM 벤치마크 테이블 시드
-- [ ] AI 인사이트 섹션 (Claude + 캠페인 데이터)
+- [ ] AI 인사이트 섹션 (Claude + 캠페인 데이터 — prompt caching)
 - [ ] 광고주·대행사 브랜딩 맞춤 커버
 - [ ] 자동 이메일 발송 (Resend)
 
-#### Sprint 23-24 (W45-48): 성능·보안 감사 + SOC 2 준비 킥오프
+#### Sprint 21-22 (W42-45, 4주): **챗봇 Claude 고도화** — Sprint 13-14 로그 기반 정밀 업그레이드
+- [ ] Sprint 13-14 축적된 질문 로그 분석 (3,000건+) → prompt engineering 재료화
+- [ ] `app/api/chat/route.ts` Anthropic streaming + **tool use 구현**
+- [ ] 시스템 프롬프트 + OOH 도메인 지식 `cache_control: ephemeral` 적용 (비용 90% 절감)
+- [ ] **Tool 구현**: `search_media` · `estimate_reach` · `get_footfall` · `book_consultation`
+- [ ] 환각 방지 레이어 — 추천 매체 ID DB 재검증, 예산·가용 기간 재확인
+- [ ] Rule 엔진은 **폴백 레이어**로 유지 (Claude 실패·비용 상한 시)
+- [ ] Rate limit 상향: 60 req/hr 로그인, 10 req/hr 게스트
+- [ ] A/B 테스트: rule vs Claude 응답 만족도 비교 (베타 사용자)
+- [ ] **비용 가드레일**: Anthropic 월 예산 80% 도달 시 자동 rule-only 모드 전환
+
+#### Sprint 23-24 (W46-49, 4주): 성능·보안 감사 + SOC 2 준비 킥오프
 - [ ] PostgreSQL PostGIS 이관 검토 (지리쿼리 최적화)
 - [ ] 읽기 replica 2대 구성
 - [ ] 외부 보안 감사 (OWASP Top 10 + BDA)
 - [ ] ISMS-P 인증 준비 자료 수집
 - [ ] SOC 2 Type I 킥오프 미팅
 
-**Phase 3 산출물**: 양면 시장 (매체사·대행사) 확보, 챗봇 DAU 500+, MCC 150건/월
+**Phase 3 산출물**: 양면 시장 (매체사·대행사) 확보, 챗봇 DAU 500+ (rule-based로 시작해 Claude 전환), MCC 150건/월
+
+**AI 엔지니어 채용 타이밍 권고**
+- Sprint 21-22 Claude 고도화 **4주 전 (W38 경)** 에 AI 엔지니어 실제 온보딩 완료 목표 → Sprint 13-14 로그 분석을 직접 수행
 
 ---
 
