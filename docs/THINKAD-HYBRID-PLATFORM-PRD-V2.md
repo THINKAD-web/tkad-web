@@ -2676,17 +2676,18 @@ export async function middleware(req: Request) {
 **산출물**: 플래너 완주 → 3안 표시 → 제안서 장바구니 진입 (전체 E2E)
 
 #### Sprint 5 (W9-10): 자동 제안서 PDF + 검증 배지 UI
-**목표**: 1클릭 PDF 생성 30초 이내 + 검증 배지 시각화
+**목표**: 1클릭 PDF 생성 45~60초 이내(p95 < 60s) + 검증 배지 시각화 + 공개 웹뷰 보안 정책 적용
 
 - [ ] `lib/build-quote-pdf.ts` 확장 (검증 배지 · Kakao 정적 지도 · 유동인구 자리표시)
 - [ ] `POST /api/quotes` + `POST /api/quotes/:id/pdf` 비동기 잡
 - [ ] 진행 모달 + 완료 시 자동 다운로드
-- [ ] `/quote/[id]` 공개 웹뷰 (토큰 기반)
+- [ ] `/quote/[id]?t=<token>` 공개 웹뷰 (토큰 기반, 7일 TTL)
+- [ ] **공개 웹뷰 보안 정책**: 토큰 재발급 · IP geo-restriction 옵션 · Redis rate-limit · 다운로드 50회 상한 · `QuoteViewAudit` 로깅 · Cloudinary signed URL · `noindex` · Turnstile 챌린지 (의심 트래픽)
 - [ ] 카드·상세·비교·PDF에 검증 배지 공통 컴포넌트 노출
 - [ ] D1 "Verified Only" 토글 구현
 - [ ] D2 3-Tier 서비스 선택 UI (Self·Assisted 분기 처리)
 
-**산출물**: 플래너 → 제안서 담기 → PDF 다운로드 전체 플로우 E2E
+**산출물**: 플래너 → 제안서 담기 → PDF 다운로드 전체 플로우 E2E (보안 정책 포함)
 
 #### Sprint 6 (W11-12): 안정화 + 베타 준비
 **목표**: 베타 출시 품질 게이트 통과
