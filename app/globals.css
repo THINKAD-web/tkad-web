@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* THINKAD 2025 — Primary #1A2A6C · Accent #E8D5B5 · Silver #B0B8C4 · Page #D6D9E6 · CTA #9B3C31 */
+/* THINKAD 2025 — Primary #0D1B2E · Accent #C8913C · Silver #B0B8C4 · Page #D6D9E6 · CTA #9B3C31 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -20,17 +20,17 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-navy: #1a2a6c;
-  --color-navy-light: #2e4078;
-  --color-navy-dark: #121a3a;
-  --color-gold: #e8d5b5;
-  --color-gold-light: #f3ead6;
-  --color-gold-dark: #c9b896;
+  --color-navy: #0d1b2e;
+  --color-navy-light: #1e3a5f;
+  --color-navy-dark: #0a1420;
+  --color-gold: #c8913c;
+  --color-gold-light: #e0a85f;
+  --color-gold-dark: #a67524;
   --color-silver: #b0b8c4;
   --color-cta: #9b3c31;
   --color-cta-hover: #85342a;
   --color-page: #ffffff;
-  --color-brand-dark: #121a3a;
+  --color-brand-dark: #0a1420;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -44,21 +44,21 @@
 :root {
   --radius: 0.625rem;
   --background: #ffffff;
-  --foreground: #121a3a;
+  --foreground: #0a1420;
   --card: #ffffff;
-  --card-foreground: #121a3a;
-  --primary: #1a2a6c;
+  --card-foreground: #0a1420;
+  --primary: #0d1b2e;
   --primary-foreground: #ffffff;
   --secondary: #e4e7f0;
-  --secondary-foreground: #121a3a;
-  --accent: #e8d5b5;
-  --accent-foreground: #121a3a;
+  --secondary-foreground: #0a1420;
+  --accent: #c8913c;
+  --accent-foreground: #0a1420;
   --muted: #dfe3ec;
   --muted-foreground: #5a6372;
   --destructive: #dc2626;
   --border: #c1c7d4;
   --input: #c1c7d4;
-  --ring: #1a2a6c;
+  --ring: #0d1b2e;
   --cta: #9b3c31;
   --cta-hover: #85342a;
 }
@@ -239,7 +239,7 @@ body {
     radial-gradient(circle at 18% 28%, rgba(232, 213, 181, 0.12) 0%, transparent 46%),
     radial-gradient(circle at 82% 72%, rgba(176, 184, 196, 0.14) 0%, transparent 48%),
     radial-gradient(circle at 50% 88%, rgba(155, 60, 49, 0.08) 0%, transparent 38%),
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e8d5b5' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8913c' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* Hero overlays — 2025 accent (gold) + CTA + page silver */
@@ -310,7 +310,7 @@ body {
   bottom: -8px;
   width: 48px;
   height: 2px;
-  background: linear-gradient(90deg, #1a2a6c, #e8d5b5);
+  background: linear-gradient(90deg, #0d1b2e, #c8913c);
   border-radius: 2px;
   transform: translateX(-50%);
 }
@@ -502,7 +502,7 @@ body {
   background: color-mix(in srgb, #d6d9e6 55%, #ffffff 45%);
 }
 .section-navy {
-  background: linear-gradient(135deg, #1a2a6c 0%, #121a3a 55%, #0e1228 100%);
+  background: linear-gradient(135deg, #0d1b2e 0%, #0a1420 55%, #040914 100%);
   color: #ffffff;
 }
 

@@ -63,8 +63,8 @@ export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMet
     monthlyImpressions: monthly,
     dailyFootfall: media.dailyFootTraffic,
     donut: [
-      { key: "peak", percent: peak, color: "#1a2a6c" },
-      { key: "standard", percent: standard, color: "#c9b896" },
+      { key: "peak", percent: peak, color: "#0d1b2e" },
+      { key: "standard", percent: standard, color: "#a67524" },
       { key: "extended", percent: extended, color: "#94a3b8" },
     ],
     bars: [

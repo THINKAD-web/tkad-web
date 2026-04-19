@@ -185,7 +185,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 <tr
                   className={cn(
                     "text-[9px] uppercase tracking-wide text-white",
-                    isPremium ? "bg-[#b8924a]" : "bg-[#1a2a6c]",
+                    isPremium ? "bg-[#b8924a]" : "bg-[#0d1b2e]",
                   )}
                 >
                   <th className="w-14 border-b border-slate-200 px-1.5 py-2 font-semibold">

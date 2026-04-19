@@ -101,10 +101,10 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
       <div ref={ref} className="bg-white font-sans" style={{ fontFamily: "system-ui, sans-serif" }}>
 
         {/* 헤더 배너 */}
-        <div style={{ background: "linear-gradient(135deg, #1a2a6c 0%, #0c1a42 100%)", padding: "32px 40px" }}>
+        <div style={{ background: "linear-gradient(135deg, #0d1b2e 0%, #070e18 100%)", padding: "32px 40px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <p style={{ color: "#e8d5b5", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", margin: 0 }}>
+              <p style={{ color: "#c8913c", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", margin: 0 }}>
                 THINKAD · 싱커드
               </p>
               <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", margin: "2px 0 16px" }}>
@@ -118,7 +118,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
               </p>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ background: "#e8d5b5", color: "#1a2a6c", borderRadius: "20px", padding: "4px 14px", fontSize: "11px", fontWeight: 700, display: "inline-block" }}>
+              <div style={{ background: "#c8913c", color: "#0d1b2e", borderRadius: "20px", padding: "4px 14px", fontSize: "11px", fontWeight: 700, display: "inline-block" }}>
                 게재 완료
               </div>
               <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", margin: "8px 0 0", textAlign: "right" }}>
@@ -136,14 +136,14 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
               {stats && (<>
                 <div style={{ background: "#f8faff", borderRadius: "12px", padding: "16px", border: "1px solid #e2e8f0", textAlign: "center" }}>
                   <p style={{ fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>집행 매체</p>
-                  <p style={{ fontSize: "28px", fontWeight: 800, color: "#1a2a6c", margin: 0 }}>{stats.mediaCount}<span style={{ fontSize: "14px" }}>개</span></p>
+                  <p style={{ fontSize: "28px", fontWeight: 800, color: "#0d1b2e", margin: 0 }}>{stats.mediaCount}<span style={{ fontSize: "14px" }}>개</span></p>
                 </div>
                 <div style={{ background: "#f8faff", borderRadius: "12px", padding: "16px", border: "1px solid #e2e8f0", textAlign: "center" }}>
                   <p style={{ fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>집행 기간</p>
-                  <p style={{ fontSize: "28px", fontWeight: 800, color: "#1a2a6c", margin: 0 }}>{stats.totalDays}<span style={{ fontSize: "14px" }}>일</span></p>
+                  <p style={{ fontSize: "28px", fontWeight: 800, color: "#0d1b2e", margin: 0 }}>{stats.totalDays}<span style={{ fontSize: "14px" }}>일</span></p>
                 </div>
-                <div style={{ background: "#1a2a6c", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#e8d5b5", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>누적 노출 추정</p>
+                <div style={{ background: "#0d1b2e", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
+                  <p style={{ fontSize: "10px", color: "#c8913c", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>누적 노출 추정</p>
                   <p style={{ fontSize: "22px", fontWeight: 800, color: "#ffffff", margin: 0 }}>
                     {stats.totalExposure > 0 ? `${Math.round(stats.totalExposure / 10000).toLocaleString()}만` : "—"}
                   </p>
@@ -166,7 +166,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
               </h2>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
                 <thead>
-                  <tr style={{ background: "#1a2a6c", color: "#ffffff" }}>
+                  <tr style={{ background: "#0d1b2e", color: "#ffffff" }}>
                     {["매체명", "위치", "집행 기간", "일 유동인구", "상태"].map(h => (
                       <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 600, fontSize: "11px" }}>{h}</th>
                     ))}
@@ -175,13 +175,13 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
                 <tbody>
                   {data.mediaBookings.map((b, i) => (
                     <tr key={i} style={{ background: i % 2 === 0 ? "#ffffff" : "#f8faff", borderBottom: "1px solid #e2e8f0" }}>
-                      <td style={{ padding: "10px 12px", fontWeight: 600, color: "#1a2a6c" }}>{b.mediaName}</td>
+                      <td style={{ padding: "10px 12px", fontWeight: 600, color: "#0d1b2e" }}>{b.mediaName}</td>
                       <td style={{ padding: "10px 12px", color: "#475569" }}>{b.location}</td>
                       <td style={{ padding: "10px 12px", color: "#475569", fontSize: "11px" }}>
                         {fmtDate(b.startsAt)} ~ {fmtDate(b.endsAt)}
                         <span style={{ color: "#94a3b8", marginLeft: "4px" }}>({diffDays(b.startsAt, b.endsAt)}일)</span>
                       </td>
-                      <td style={{ padding: "10px 12px", color: "#1a2a6c", fontWeight: 600 }}>
+                      <td style={{ padding: "10px 12px", color: "#0d1b2e", fontWeight: 600 }}>
                         {b.dailyFootTraffic ? `${b.dailyFootTraffic.toLocaleString()}명` : "—"}
                       </td>
                       <td style={{ padding: "10px 12px" }}>
@@ -226,8 +226,8 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 {data.scheduleEvents.map((e, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#e8d5b5", flexShrink: 0 }} />
-                    <span style={{ flex: 1, fontSize: "12px", fontWeight: 600, color: "#1a2a6c" }}>{e.title}</span>
+                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#c8913c", flexShrink: 0 }} />
+                    <span style={{ flex: 1, fontSize: "12px", fontWeight: 600, color: "#0d1b2e" }}>{e.title}</span>
                     <span style={{ fontSize: "11px", color: "#94a3b8" }}>{fmtDate(e.startsAt)}</span>
                   </div>
                 ))}
@@ -253,14 +253,14 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
                   {data.financialDocs.map((f, i) => (
                     <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", background: i % 2 === 0 ? "#ffffff" : "#f8faff" }}>
                       <td style={{ padding: "8px 12px", color: "#64748b", fontSize: "11px" }}>{f.kind}</td>
-                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "#1a2a6c" }}>{f.title}</td>
-                      <td style={{ padding: "8px 12px", fontWeight: 700, color: "#1a2a6c" }}>{f.amountKrw ? fmtAmount(f.amountKrw) : "—"}</td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "#0d1b2e" }}>{f.title}</td>
+                      <td style={{ padding: "8px 12px", fontWeight: 700, color: "#0d1b2e" }}>{f.amountKrw ? fmtAmount(f.amountKrw) : "—"}</td>
                       <td style={{ padding: "8px 12px", fontSize: "11px", color: "#64748b" }}>{f.status}</td>
                     </tr>
                   ))}
                   {totalAmount > 0 && (
-                    <tr style={{ background: "#1a2a6c" }}>
-                      <td colSpan={2} style={{ padding: "10px 12px", color: "#e8d5b5", fontWeight: 700, fontSize: "12px" }}>합계</td>
+                    <tr style={{ background: "#0d1b2e" }}>
+                      <td colSpan={2} style={{ padding: "10px 12px", color: "#c8913c", fontWeight: 700, fontSize: "12px" }}>합계</td>
                       <td style={{ padding: "10px 12px", color: "#ffffff", fontWeight: 800, fontSize: "14px" }}>{fmtAmount(totalAmount)}</td>
                       <td style={{ padding: "10px 12px" }} />
                     </tr>
@@ -285,7 +285,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
           {/* 푸터 */}
           <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: "#1a2a6c", margin: "0 0 2px" }}>주식회사 싱커드 (THINKAD)</p>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: "#0d1b2e", margin: "0 0 2px" }}>주식회사 싱커드 (THINKAD)</p>
               <p style={{ fontSize: "10px", color: "#94a3b8", margin: 0 }}>mannote@tkad.co.kr · 02-515-2772 · 서울특별시 성동구</p>
             </div>
             <p style={{ fontSize: "10px", color: "#cbd5e1", margin: 0 }}>© 2026 THINKAD. All rights reserved.</p>

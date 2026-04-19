@@ -94,7 +94,7 @@ export default function RootNotFound() {
                   gap: "0.5rem",
                   padding: "0.75rem 1.5rem",
                   borderRadius: "9999px",
-                  background: "#1a2a6c",
+                  background: "#0d1b2e",
                   color: "#ffffff",
                   fontWeight: 700,
                   fontSize: "0.875rem",
