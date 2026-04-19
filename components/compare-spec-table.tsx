@@ -172,7 +172,7 @@ export function CompareSpecTable({
   return (
     <div className="mt-12 overflow-hidden rounded-2xl border border-navy/15 bg-white shadow-lg md:mt-14">
       {/* 헤더 */}
-      <div className="bg-gradient-to-r from-navy to-[#0c1a42] px-4 py-4 md:px-6">
+      <div className="bg-gradient-to-r from-navy to-[#070e18] px-4 py-4 md:px-6">
         <h2 className="text-lg font-bold text-white md:text-xl">
           {t("compareSpecTitle")}
         </h2>

@@ -180,7 +180,7 @@ function buildPlannerReportHtml(data: {
 
   return `
     <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 640px; margin: 0 auto; background: #f1f5f9;">
-      <div style="background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); color: white; padding: 24px 20px; text-align: center;">
+      <div style="background: linear-gradient(135deg, #0d1b2e, #b21f1f, #fdbb2d); color: white; padding: 24px 20px; text-align: center;">
         <h1 style="margin: 0; font-size: 24px; letter-spacing: 0.04em;">THINKAD 미디어 플래너</h1>
         <p style="margin: 8px 0 0; opacity: 0.9; font-size: 14px;">캠페인 보고서</p>
       </div>

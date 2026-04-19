@@ -96,12 +96,12 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
             dataKey="x"
             name="fit"
             domain={[0, 100]}
-            tick={{ fill: "#1a2a6c", fontSize: 11 }}
+            tick={{ fill: "#0d1b2e", fontSize: 11 }}
             stroke="rgba(26,42,108,0.3)"
             label={{
               value: isKo ? "AI 적합도" : "AI fit (0–100)",
               position: "bottom",
-              fill: "#1a2a6c",
+              fill: "#0d1b2e",
               fontSize: 11,
             }}
           />
@@ -109,7 +109,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
             type="number"
             dataKey="y"
             name="reach"
-            tick={{ fill: "#1a2a6c", fontSize: 11 }}
+            tick={{ fill: "#0d1b2e", fontSize: 11 }}
             stroke="rgba(26,42,108,0.3)"
             tickFormatter={(v) =>
               v >= 1_000_000
@@ -121,7 +121,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
               value: isKo ? "월 추정 노출" : "Est. monthly reach",
               angle: -90,
               position: "insideLeft",
-              fill: "#1a2a6c",
+              fill: "#0d1b2e",
               fontSize: 11,
             }}
           />
