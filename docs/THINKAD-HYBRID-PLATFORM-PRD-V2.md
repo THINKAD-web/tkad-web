@@ -25,9 +25,11 @@
 
 ### 1.1 One-line Positioning (한 줄 포지셔닝)
 
-> **"THINKAD — 한국에서 가장 신뢰받는 OOH, 가장 편리한 플랫폼."**
+> **"검증된 OOH만. 30분이면 됩니다."**
 >
-> _We are the **trust layer** for OOH advertising — where every media is field-verified, every quote is data-backed, and every campaign is proven._
+> _Verified OOH. Delivered in minutes._
+>
+> THINKAD는 OOH 광고의 **신뢰 레이어(Trust Layer)**다. 모든 매체는 현장 검증되고, 모든 견적은 데이터로 뒷받침되며, 모든 캠페인은 결과로 증명된다.
 
 ### 1.2 Product Vision
 
@@ -183,7 +185,7 @@
 #### F1.2 자동 제안서 생성기 (1클릭 PDF + 검증 배지) `P0` `기존 확장`
 
 **User Story**
-> 광고주로서, 마음에 든 매체 3~5개를 장바구니에 담은 뒤 **단 1번의 클릭으로 자사 로고가 박힌 제안서 PDF를 30초 내에 다운로드**받아 C-레벨에 당일 공유하고 싶다. 제안서 안에 **THINKAD 4단계 검증 배지**가 박혀 있어야 의사결정자가 한눈에 신뢰한다.
+> 광고주로서, 마음에 든 매체 3~5개를 장바구니에 담은 뒤 **단 1번의 클릭으로 자사 로고가 박힌 제안서 PDF를 1분 이내(45~60초)에 다운로드**받아 C-레벨에 당일 공유하고 싶다. 제안서 안에 **THINKAD 4단계 검증 배지**가 박혀 있어야 의사결정자가 한눈에 신뢰한다.
 
 **Acceptance Criteria**
 
@@ -191,15 +193,26 @@
 - [ ] 매체 카드·상세·비교 페이지에 "📋 제안서에 담기" 버튼
 - [ ] 우상단 장바구니 배지 (담긴 매체 수)
 - [ ] `/quote/new` 페이지: 담긴 매체 목록 · 캠페인 정보 폼 (브랜드명·기간·예산·연락처)
-- [ ] **"PDF 생성" 1클릭** → 30초 내 다운로드 (서버에서 jsPDF + Noto Sans KR)
+- [ ] **"PDF 생성" 1클릭** → **45~60초 내 다운로드** (서버에서 jsPDF + Noto Sans KR · p95 < 60초)
 - [ ] PDF 구성 (필수 섹션):
   1. **커버**: THINKAD 로고 · 광고주 로고 · 캠페인명 · 발행일 · QR (웹뷰 URL)
   2. **요약**: 총 매체 수 · 총 예상 노출 · 총 견적 · 캠페인 기간
   3. **매체별 상세** (각 1페이지): 매체 사진 · 위치 지도(Kakao 정적 이미지) · 가격 · 가용 일자 · **🛡️ 4단계 배지** · 유동인구 차트 · CPM
   4. **검증 배지 부록**: 4단계 검증의 의미·기준
   5. **계약 안내**: e-서명 링크 · 결제 방법 · 담당자 연락처
-- [ ] 공개 웹뷰 `/quote/[id]` (비로그인도 토큰으로 접근 가능)
+- [ ] 공개 웹뷰 `/quote/[id]?t=<token>` (비로그인도 토큰으로 접근 가능)
 - [ ] 견적 PDF 다운로드 카운트·만료일(7일) 추적
+
+공개 웹뷰 보안 정책 AC (P0):
+- [ ] **토큰 만료**: 발급 후 7일 TTL · 만료 시 "링크 만료됨 — 견적 재요청" 안내 페이지
+- [ ] **토큰 재발급**: 광고주가 `/my/quotes/[id]`에서 1클릭 재발급 (기존 토큰 즉시 무효화)
+- [ ] **IP 지역 제한** (옵션, 기본 OFF): 광고주가 설정 시 한국(KR) IP만 허용, 해외 IP는 차단 페이지
+- [ ] **IP 기반 rate limit**: `/quote/[id]?t=*` 엔드포인트 IP당 분당 30회 (Upstash Redis)
+- [ ] **다운로드 수 상한**: 동일 토큰 PDF 재다운로드 최대 50회 (초과 시 만료)
+- [ ] **접근 감사 로그**: `QuoteViewAudit` 테이블 — 토큰·IP·UA·timestamp 저장 (PIPA 대응 + 보안 포렌식)
+- [ ] **Referer 기반 hotlink 방지**: PDF 파일 직접 링크는 Cloudinary signed URL (5분 TTL) 재발급 강제
+- [ ] **robots.txt + noindex 메타**: `/quote/[id]` 경로 검색엔진 색인 차단
+- [ ] **Turnstile 챌린지** (의심 트래픽): 동일 IP가 5분 내 10개+ 다른 토큰 조회 시 CAPTCHA 요구
 
 차별화 AC (P0):
 - [ ] **검증 배지 4종**(입지·가시성·조도·경쟁매체)이 각 매체 행에 ●○●○ 형태로 시각화
@@ -265,8 +278,10 @@ PPT 옵션 AC (P1):
 
 **측정 지표**
 - PDF 생성 → 견적 확정 전환율 (목표 25%+)
-- 평균 PDF 생성 시간 (목표 < 30s)
+- 평균 PDF 생성 시간 (목표 p95 < 60s, p50 < 45s)
 - 검수 옵션 선택률 (어시스트 트랙 트래픽)
+- 공개 웹뷰 토큰 평균 재발급 횟수 (보안 운영 지표)
+- 토큰 만료·IP 제한 차단 비율 (정상 vs 의심 트래픽)
 
 ---
 
@@ -1841,7 +1856,9 @@ AI 번역 AC (P2):
 | **파일 저장** | Cloudinary | 이미 채택 | 이미지 변환·equirectangular (VR)·동영상 |
 | **인증** | next-auth v5 또는 자체 세션 | App Router 호환 | Kakao/Google OAuth + Credentials |
 | **AI** | Anthropic SDK | **0.88.0** (Claude 4.7) | 이미 채택. prompt caching + tool use |
-| **지도** | Kakao Map JS SDK | `libraries=clusterer,services` | KR 필수. Naver Map 폴백 |
+| **지도 (인터랙티브)** | Kakao Map JS SDK | `libraries=clusterer,services` | KR 필수. Naver Map 폴백 |
+| **지도 (정적 이미지)** | **Kakao Static Map API** | `https://dapi.kakao.com/v2/maps/staticmap` | **PDF·OG 이미지·이메일 임베드 전용** (JS SDK 대신 서버사이드 렌더) |
+| **지도 (글로벌)** | Google Maps Static/JS API | Phase 3~4 해외 접속 시 자동 전환 | 비KR IP에서 Kakao 대신 사용 |
 | **i18n** | next-intl | 4.8.3 | 이미 채택. ko/en/zh/ja |
 | **이메일** | Resend | HTML 템플릿 | 트랜잭션 · 트렌드 리포트 · 완성 보고서 |
 | **푸시** | web-push (VAPID) | 브라우저 표준 | F2.2 알림 · F3.3 PWA |
@@ -1856,13 +1873,29 @@ AI 번역 AC (P2):
 | **이벤트 분석** | PostHog (self-hosted) 또는 Plausible | | KR 법령·개인정보 고려 |
 | **배포** | Vercel (primary) | 향후 Railway/Fly.io 이중화 | Next.js 최적화 |
 | **배경 작업** | Vercel Cron | `/api/cron/*` | 일·주 단위 동기화 |
-| **결제** | Toss Payments (KR) + Stripe (글로벌 Phase 4) | | KR 카드·간편결제 완결 |
-| **전자서명** | 모두싸인 또는 이폼사인 | 국내 전자서명법 부합 | 계약 무결성 |
+| **결제 (Phase 1~3)** | Toss Payments (primary) | KR 카드·계좌이체·간편결제 | KR 내수 커버, 세금계산서 자동 |
+| **결제 (Phase 4+)** | **Stripe (primary 전환)** + Toss (KR 잔여) | 해외 카드·PayPal·SEPA | 해외 광고주 비율 20%+ 도달 시 primary 이관 (아래 전환 로드맵 참조) |
+| **전자서명** | 모두싸인 또는 이폼사인 | 국내 전자서명법 부합 | 계약 무결성 · Phase 4에 DocuSign 글로벌 병행 |
 
 **사용자 요청 대비 변경 사유**
 - 원 요청: "Next.js 15" → **16.2.3** (프로젝트 실제 버전, AGENTS.md 준수)
 - 원 요청: "Supabase/Firebase/AWS" → **PostgreSQL + Prisma 유지** (Supabase 호스팅만 채택 검토, 코드는 현재 ORM 유지)
 - 원 요청: "GPT/국내 LLM 고려" → **Claude 4.7 단일** (기존 코드 통합 + SDK 0.88 이미 채택)
+
+**결제 PG 전환 로드맵 (Toss → Stripe primary)**
+
+| 단계 | 기간 | Primary | 역할 분담 | 트리거 |
+|---|---|---|---|---|
+| P1~P2 | 2026-05 ~ 2026-10 | **Toss** | Toss 단일. GMV 99%+ KR | — |
+| P3 | 2026-11 ~ 2027-04 | **Toss** | Toss + Stripe 병행 도입 (해외 광고주 옵션 제공) | 해외 광고주 세션 비율 10% 도달 |
+| **P4** | **2027-05 ~** | **Stripe (primary)** | Stripe로 기본 체크아웃 전환, Toss는 KR 간편결제 잔여 루트 | 해외 광고주 세션 비율 **20%+** 또는 글로벌 GMV 30%+ |
+
+**전환 시 기술 체크리스트**
+- [ ] 추상화 레이어 `lib/payment-provider.ts` Phase 3에 선제 도입 (provider-agnostic 인터페이스)
+- [ ] 멀티 currency 지원 (KRW 기본, USD/CNY/JPY 환산) — `Toss`는 KRW only
+- [ ] Stripe Radar · 3DS 2.0 · SCA 대응
+- [ ] 세금계산서: KR 결제는 Toss가 자동, Stripe KR 건은 자체 발행 시스템 필요 (F4 요구사항)
+- [ ] Webhook 병행 운영 기간(P3~P4 초) 대응 — 중복 처리 방지 idempotency key
 
 ---
 
