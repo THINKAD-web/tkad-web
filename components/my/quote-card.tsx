@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ChevronRight, Download } from "lucide-react";
 import { QuoteStatusBadge } from "./quote-status-badge";
 

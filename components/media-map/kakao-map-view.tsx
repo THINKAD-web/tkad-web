@@ -185,9 +185,10 @@ export default function KakaoMapView({
     if (!map) return;
     const kakao = (window as unknown as { kakao: any }).kakao;
 
-    // 기존 InfoWindow 닫기
+    // 기존 InfoWindow 닫기 (CustomOverlay는 setMap(null))
     const existingInfo = infoWindowRef.current as any;
-    if (existingInfo?.close) existingInfo.close();
+    if (existingInfo?.setMap) existingInfo.setMap(null);
+    infoWindowRef.current = null;
 
     if (!selectedId) return;
     const m = markers.find((x) => x.id === selectedId);

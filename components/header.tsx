@@ -51,6 +51,7 @@ export default function Header() {
     { href: "/", label: t("nav.home") },
     { href: "/services", label: t("nav.services") },
     { href: "/media", label: t("nav.media") },
+    { href: "/media/map", label: "지도 검색" },
     { href: "/recommend", label: t("nav.recommend") },
     { href: "/planner", label: t("nav.planner") },
     { href: "/cases", label: t("nav.cases") },
