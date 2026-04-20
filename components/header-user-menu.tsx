@@ -42,12 +42,12 @@ export function HeaderUserMenu({ onNavigate }: { onNavigate?: () => void }) {
       <Link
         href="/cart"
         onClick={onNavigate}
-        className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/60 transition-colors"
-        aria-label="장바구니"
+        className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/60 active:scale-95 transition-all duration-150"
+        aria-label={`장바구니${ids.length > 0 ? ` (${ids.length})` : ""}`}
       >
-        <ShoppingCart className="h-4 w-4" />
+        <ShoppingCart className="h-4 w-4" strokeWidth={2} />
         {ids.length > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+          <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white shadow-sm">
             {ids.length}
           </span>
         )}

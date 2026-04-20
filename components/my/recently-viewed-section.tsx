@@ -77,7 +77,7 @@ export function RecentlyViewedSection() {
             href={`/media/${m.id}`}
             className="flex-shrink-0 w-40 snap-start group"
           >
-            <div className="aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden mb-2">
+            <div className="aspect-[4/3] bg-secondary rounded-lg overflow-hidden mb-2 ring-1 ring-border/60 group-hover:ring-primary/40 transition-all">
               {m.image ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
