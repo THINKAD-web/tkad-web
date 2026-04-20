@@ -743,3 +743,14 @@ model UserSession {
   @@index([expiresAt])
   @@map("user_sessions")
 }
+
+model UserFavoriteMedia {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  mediaId   String   @map("media_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, mediaId])
+  @@index([mediaId])
+  @@map("user_favorite_medias")
+}
