@@ -23,7 +23,7 @@ const cards = [
   },
   {
     key: "totalQuotes" as const,
-    label: "전체 제안서",
+    label: "전체 견적서",
     icon: FileText,
     accent: "from-indigo-50 to-white",
     iconClass: "text-indigo-600 bg-indigo-100",

@@ -103,7 +103,7 @@ export default function QuotePreviewPage() {
   }, [id]);
 
   if (loading) {
-    return <FullPageSpinner label="제안서 불러오는 중…" />;
+    return <FullPageSpinner label="견적서 불러오는 중…" />;
   }
 
   if (err || !quote) {
@@ -111,10 +111,10 @@ export default function QuotePreviewPage() {
       <div className="max-w-4xl mx-auto px-4 py-10">
         <EmptyState
           icon="⚠️"
-          title="제안서를 불러올 수 없습니다"
+          title="견적서를 불러올 수 없습니다"
           description={
             err === "NOT_FOUND"
-              ? "요청한 제안서를 찾을 수 없습니다. 링크를 다시 확인해주세요."
+              ? "요청한 견적서를 찾을 수 없습니다. 링크를 다시 확인해주세요."
               : "잠시 후 다시 시도해주세요."
           }
           action={
@@ -145,7 +145,7 @@ export default function QuotePreviewPage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h1 className="text-xl sm:text-2xl font-bold text-primary">
-                제안서 #{quote.id.slice(-8)}
+                견적서 #{quote.id.slice(-8)}
               </h1>
               <QuoteStatusBadge status={quote.status} />
             </div>

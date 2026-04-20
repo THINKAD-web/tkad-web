@@ -3,6 +3,8 @@ import { attachmentContentDisposition } from "@/lib/content-disposition";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { ooHQuotePdfToBase64 } from "@/lib/server-ooh-quote-pdf";
+import { buildKoreanQuotePdf } from "@/lib/build-korean-quote-pdf";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -35,24 +37,57 @@ export async function GET(
     const row = await db.ooHQuote.findUnique({ where: { id } });
     if (!row) return new NextResponse("Not found", { status: 404 });
 
-    const b64 = await ooHQuotePdfToBase64(db, {
-      clientCompany: row.clientCompany,
-      clientName: row.clientName,
-      period: row.period,
-      periodKey: row.periodKey,
-      budgetMin: row.budgetMin,
-      budgetMax: row.budgetMax,
-      pdfTemplate: row.pdfTemplate,
-      locale: row.locale,
-      mediaIds: row.mediaIds,
-      totalAmount: row.totalAmount,
-      networkSelections: row.networkSelections ?? undefined,
-    });
-    const buf = Buffer.from(b64, "base64");
-    const locale = row.locale?.toLowerCase().startsWith("ko") ? "ko" : "en";
-    const displayName =
-      locale === "ko" ? "싱커드-견적서.pdf" : "THINKAD-quote.pdf";
-    return new NextResponse(buf, {
+    const localeKo = !row.locale || row.locale.toLowerCase().startsWith("ko");
+    let buf: Buffer;
+
+    if (localeKo) {
+      // 한국어 견적서 (신규 Noto Sans KR + THINKAD 브랜드 레이아웃)
+      const catalog = await fetchPublicMediaCatalog();
+      const rows = catalog
+        .filter((m) => row.mediaIds.includes(m.id))
+        .map((m) => ({
+          name: m.name,
+          location: m.location,
+          type: m.type,
+          price: m.price,
+          pricePeriod: m.pricePeriod ?? "month",
+          visibilityScore: m.visibilityScore ?? 0,
+        }));
+      const bytes = await buildKoreanQuotePdf({
+        quoteId: row.id,
+        createdAt: row.createdAt,
+        clientName: row.clientName,
+        clientEmail: row.clientEmail,
+        clientCompany: row.clientCompany,
+        period: row.period,
+        startDate: row.startDate,
+        endDate: row.endDate,
+        budgetMin: row.budgetMin,
+        budgetMax: row.budgetMax,
+        totalAmount: row.totalAmount,
+        rows,
+      });
+      buf = Buffer.from(bytes);
+    } else {
+      // 영어: 기존 영문 PDF 빌더
+      const b64 = await ooHQuotePdfToBase64(db, {
+        clientCompany: row.clientCompany,
+        clientName: row.clientName,
+        period: row.period,
+        periodKey: row.periodKey,
+        budgetMin: row.budgetMin,
+        budgetMax: row.budgetMax,
+        pdfTemplate: row.pdfTemplate,
+        locale: row.locale,
+        mediaIds: row.mediaIds,
+        totalAmount: row.totalAmount,
+        networkSelections: row.networkSelections ?? undefined,
+      });
+      buf = Buffer.from(b64, "base64");
+    }
+
+    const displayName = localeKo ? "싱커드-견적서.pdf" : "THINKAD-quote.pdf";
+    return new NextResponse(new Uint8Array(buf), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
