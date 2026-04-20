@@ -23,11 +23,13 @@
     "@pdfme/common": "^5.5.10",
     "@prisma/adapter-pg": "^7.6.0",
     "@prisma/client": "^7.6.0",
+    "argon2": "^0.41.1",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "html2canvas": "^1.4.1",
+    "jose": "^5.10.0",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.7.0",
     "next": "^16.2.3",
@@ -42,11 +44,13 @@
     "react-signature-canvas": "^1.1.0-alpha.2",
     "recharts": "^2.15.4",
     "resend": "^4.8.0",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.19",
+    "@types/argon2": "^0.15.4",
     "@types/node": "^20",
     "@types/nodemailer": "^7.0.11",
     "@types/pg": "^8.20.0",
