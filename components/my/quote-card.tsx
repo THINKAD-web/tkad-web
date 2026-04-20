@@ -31,7 +31,7 @@ export function QuoteCard({
   variant?: "list" | "campaign";
 }) {
   return (
-    <li className="bg-white border border-gray-200 rounded-xl p-4 hover:border-primary/40 hover:shadow-md transition-all">
+    <li className="bg-card border border-border/60 rounded-xl p-4 hover:border-primary/40 hover:shadow-md hover:-translate-y-px transition-all duration-200">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold text-gray-900 truncate">
@@ -57,7 +57,7 @@ export function QuoteCard({
         <div className="flex items-center gap-1.5">
           <Link
             href={`/quote/${item.id}/preview`}
-            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50"
+            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 border border-border bg-card rounded-lg text-foreground hover:bg-secondary/60 transition-colors"
           >
             상세
             <ChevronRight className="w-3 h-3" />
@@ -65,7 +65,7 @@ export function QuoteCard({
           {variant !== "campaign" && (
             <a
               href={`/api/quote/${item.id}/pdf`}
-              className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 bg-primary text-white rounded-lg hover:opacity-90"
+              className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 bg-primary text-white rounded-lg hover:opacity-90 hover:shadow-sm transition-all"
             >
               <Download className="w-3 h-3" />
               PDF

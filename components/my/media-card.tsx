@@ -22,7 +22,7 @@ export function MediaCard({
   onRemove?: (id: string) => void;
 }) {
   return (
-    <li className="group relative bg-white border border-gray-200 rounded-xl p-3 flex gap-3 hover:border-primary hover:shadow-md transition-all">
+    <li className="group relative bg-card border border-border/60 rounded-xl p-3 flex gap-3 hover:border-primary hover:shadow-md hover:-translate-y-px transition-all duration-200">
       <Link
         href={`/media/${item.id}`}
         className="absolute inset-0 rounded-xl"

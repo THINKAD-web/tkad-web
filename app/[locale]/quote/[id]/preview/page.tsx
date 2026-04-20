@@ -135,9 +135,9 @@ export default function QuotePreviewPage() {
       <div className="max-w-4xl mx-auto px-4 py-6 sm:py-10">
         <Link
           href="/my"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-4 transition-colors group"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           대시보드로
         </Link>
 
@@ -155,7 +155,7 @@ export default function QuotePreviewPage() {
           </div>
           <a
             href={`/api/quote/${quote.id}/pdf`}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity"
+            className="inline-flex items-center justify-center gap-1.5 h-11 px-5 bg-primary text-white rounded-lg text-sm font-semibold shadow-sm hover:-translate-y-px hover:shadow-md active:translate-y-0 active:scale-[0.98] transition-all duration-200"
           >
             <Download className="w-4 h-4" />
             PDF 다운로드
@@ -195,13 +195,16 @@ export default function QuotePreviewPage() {
           </header>
           <ul className="divide-y divide-border/60">
             {quote.medias.map((m) => (
-              <li key={m.id} className="p-4 sm:p-5 flex gap-3 sm:gap-4">
+              <li
+                key={m.id}
+                className="group p-4 sm:p-5 flex gap-3 sm:gap-4 hover:bg-secondary/30 transition-colors"
+              >
                 {m.image ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={m.image}
                     alt=""
-                    className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg flex-shrink-0"
+                    className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg flex-shrink-0 group-hover:scale-[1.02] transition-transform"
                   />
                 ) : (
                   <div className="w-20 h-20 sm:w-24 sm:h-24 bg-secondary rounded-lg flex-shrink-0" />

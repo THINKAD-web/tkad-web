@@ -40,10 +40,11 @@ export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Pro
         onClick={handleClick}
         className={`
           inline-flex items-center justify-center gap-2 h-11 px-5 rounded-lg
-          text-sm font-semibold transition-all
+          text-sm font-semibold transition-all duration-200
+          hover:-translate-y-px active:translate-y-0 active:scale-[0.98]
           ${inCart
-            ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
-            : "bg-primary text-white hover:opacity-90 shadow-sm"
+            ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:shadow-sm"
+            : "bg-primary text-white hover:opacity-90 shadow-sm hover:shadow-md"
           }
         `}
         aria-pressed={inCart}
