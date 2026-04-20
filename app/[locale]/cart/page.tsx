@@ -107,8 +107,9 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-semibold mb-6">제안서 요청</h1>
+    <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
+      <h1 className="text-xl sm:text-2xl font-bold text-primary mb-1">제안서 요청</h1>
+      <p className="text-sm text-muted-foreground mb-6">선택한 매체로 30분 안에 PDF 제안서를 받아보세요</p>
 
       {ids.length === 0 ? (
         <EmptyState
@@ -135,7 +136,7 @@ export default function CartPage() {
               {items.map((it) => (
                 <li
                   key={it.id}
-                  className="flex items-center gap-3 bg-white border rounded-lg p-3"
+                  className="flex items-center gap-3 bg-card border border-border/60 rounded-xl p-3 shadow-sm"
                 >
                   {it.image ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -172,8 +173,8 @@ export default function CartPage() {
             </div>
           </div>
 
-          <aside className="bg-white border rounded-xl p-5 h-fit">
-            <h2 className="text-base font-semibold mb-4">캠페인 정보</h2>
+          <aside className="bg-card border border-border/60 rounded-2xl shadow-sm p-5 h-fit md:sticky md:top-24">
+            <h2 className="text-base font-semibold mb-4 text-foreground">캠페인 정보</h2>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium mb-1">담당자 이름 *</label>
@@ -183,7 +184,7 @@ export default function CartPage() {
                   maxLength={40}
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
               <div>
@@ -193,7 +194,7 @@ export default function CartPage() {
                   required
                   value={clientEmail}
                   onChange={(e) => setClientEmail(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
               <div>
@@ -203,7 +204,7 @@ export default function CartPage() {
                   maxLength={80}
                   value={clientCompany}
                   onChange={(e) => setClientCompany(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
               <div>
@@ -213,7 +214,7 @@ export default function CartPage() {
                   maxLength={20}
                   value={clientPhone}
                   onChange={(e) => setClientPhone(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
               <div>
@@ -223,7 +224,7 @@ export default function CartPage() {
                   required
                   value={period}
                   onChange={(e) => setPeriod(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -233,7 +234,7 @@ export default function CartPage() {
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-2 py-2 border rounded-lg text-sm"
+                    className="w-full h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   />
                 </div>
                 <div>
@@ -242,7 +243,7 @@ export default function CartPage() {
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-2 py-2 border rounded-lg text-sm"
+                    className="w-full h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   />
                 </div>
               </div>
@@ -253,7 +254,7 @@ export default function CartPage() {
                   min="0"
                   value={budgetMax}
                   onChange={(e) => setBudgetMax(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
 

@@ -18,9 +18,9 @@ export function Spinner({ size = "md", label, className = "" }: SpinnerProps) {
       className={`inline-flex items-center gap-2 ${className}`}
     >
       <span
-        className={`${SIZE[size]} animate-spin rounded-full border-gray-200 border-t-primary`}
+        className={`${SIZE[size]} animate-spin rounded-full border-border border-t-primary`}
       />
-      {label && <span className="text-sm text-gray-500">{label}</span>}
+      {label && <span className="text-sm text-muted-foreground">{label}</span>}
     </div>
   );
 }
@@ -45,11 +45,13 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="bg-white border rounded-xl p-8 sm:p-12 text-center">
+    <div className="bg-card border border-border/60 rounded-2xl p-8 sm:p-12 text-center shadow-sm">
       {icon && <div className="text-4xl mb-3">{icon}</div>}
-      <h3 className="text-base font-semibold text-gray-800 mb-2">{title}</h3>
+      <h3 className="text-base font-semibold text-foreground mb-2">{title}</h3>
       {description && (
-        <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">{description}</p>
+        <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto leading-relaxed">
+          {description}
+        </p>
       )}
       {action}
     </div>

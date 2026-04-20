@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function RegisterPage() {
@@ -18,12 +19,10 @@ export default function RegisterPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-
     if (password.length < 8) {
       setError("비밀번호는 8자 이상이어야 합니다.");
       return;
     }
-
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
@@ -46,7 +45,7 @@ export default function RegisterPage() {
               ? "입력값을 확인해주세요."
               : code === "RATE_LIMITED"
                 ? "요청이 너무 많습니다. 잠시 후 다시 시도해주세요."
-                : "회원가입에 실패했습니다.",
+                : data?.error?.message ?? "회원가입에 실패했습니다.",
         );
         return;
       }
@@ -60,98 +59,117 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-background">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow p-8">
-        <h1 className="text-2xl font-semibold text-primary mb-2">회원가입</h1>
-        <p className="text-sm text-gray-500 mb-6">THINKAD 계정을 만들어보세요</p>
+    <div className="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-10 bg-gradient-to-b from-secondary/30 to-background">
+      <div className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold text-primary">회원가입</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            THINKAD 계정을 만들어보세요
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-1">
-              이름
-            </label>
-            <input
-              id="name"
-              type="text"
-              required
-              maxLength={40}
-              autoComplete="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+        <div className="bg-card border border-border/60 rounded-2xl shadow-sm p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Field label="이름" htmlFor="name">
+              <input
+                id="name"
+                type="text"
+                required
+                maxLength={40}
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={inputCls}
+              />
+            </Field>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
-              이메일
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+            <Field label="이메일" htmlFor="email">
+              <input
+                id="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputCls}
+              />
+            </Field>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1">
-              비밀번호 <span className="text-gray-400 text-xs">(8자 이상)</span>
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              minLength={8}
-              maxLength={128}
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+            <Field
+              label="비밀번호"
+              htmlFor="password"
+              hint="(8자 이상)"
+            >
+              <input
+                id="password"
+                type="password"
+                required
+                minLength={8}
+                maxLength={128}
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputCls}
+              />
+            </Field>
 
-          <div>
-            <label htmlFor="company" className="block text-sm font-medium mb-1">
-              회사 <span className="text-gray-400 text-xs">(선택)</span>
-            </label>
-            <input
-              id="company"
-              type="text"
-              maxLength={80}
-              autoComplete="organization"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+            <Field label="회사" htmlFor="company" hint="(선택)">
+              <input
+                id="company"
+                type="text"
+                maxLength={80}
+                autoComplete="organization"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                className={inputCls}
+              />
+            </Field>
 
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="text-sm text-destructive bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2">
+                {error}
+              </div>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 bg-primary text-white rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading && <Spinner size="sm" />}
-            {loading ? "가입 중…" : "가입하기"}
-          </button>
-        </form>
+            <Button type="submit" disabled={loading} className="w-full h-11">
+              {loading && <Spinner size="sm" />}
+              {loading ? "가입 중…" : "가입하기"}
+            </Button>
+          </form>
+        </div>
 
-        <div className="mt-6 text-sm text-center text-gray-600">
+        <p className="mt-6 text-sm text-center text-muted-foreground">
           이미 계정이 있으신가요?{" "}
-          <Link href="/login" className="text-primary font-medium hover:underline">
+          <Link href="/login" className="text-primary font-semibold hover:underline">
             로그인
           </Link>
-        </div>
+        </p>
       </div>
+    </div>
+  );
+}
+
+const inputCls =
+  "w-full h-11 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
+
+function Field({
+  label,
+  hint,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-foreground">
+        {label}
+        {hint && <span className="ml-1 text-xs text-muted-foreground">{hint}</span>}
+      </label>
+      {children}
     </div>
   );
 }
