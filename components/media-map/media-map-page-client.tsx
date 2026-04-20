@@ -303,7 +303,11 @@ export default function MediaMapPageClient() {
           onSelect={setSelectedId}
           onBoundsChange={setBounds}
           onMarkerDetail={(id) => {
-            window.location.href = `/media/${id}`;
+            const locale =
+              typeof document !== "undefined"
+                ? document.documentElement.lang || "ko"
+                : "ko";
+            window.location.href = `/${locale}/media/${id}`;
           }}
         />
 

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { LogOut } from "lucide-react";
 import { FullPageSpinner, Spinner, EmptyState } from "@/components/ui/spinner";
 import { SummaryCards } from "@/components/my/summary-cards";

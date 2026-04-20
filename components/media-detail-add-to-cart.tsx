@@ -3,7 +3,7 @@
 import { useCart } from "@/lib/cart";
 import { useAppToast } from "@/lib/use-toast";
 import { Check, Plus, ShoppingCart } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 type Props = {
   mediaId: string;
