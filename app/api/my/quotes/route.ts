@@ -22,7 +22,7 @@ export async function GET() {
       });
     }
 
-    const rows = await prisma.oOHQuote.findMany({
+    const rows = await prisma.ooHQuote.findMany({
       where: { clientEmail: user.email },
       orderBy: { createdAt: "desc" },
       take: 50,

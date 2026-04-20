@@ -57,7 +57,7 @@ export async function POST(req: Request) {
 
     const totalAmount = picked.reduce((sum, m) => sum + (m.price ?? 0), 0);
 
-    const quote = await prisma.oOHQuote.create({
+    const quote = await prisma.ooHQuote.create({
       data: {
         status: "draft",
         clientName,

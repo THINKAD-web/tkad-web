@@ -11,7 +11,7 @@ export async function GET(
 ) {
   try {
     const { id } = await ctx.params;
-    const quote = await prisma.oOHQuote.findUnique({ where: { id } });
+    const quote = await prisma.ooHQuote.findUnique({ where: { id } });
     if (!quote) {
       return apiError("NOT_FOUND", 404, {
         message: "제안서를 찾을 수 없습니다.",
