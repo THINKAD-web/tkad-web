@@ -115,16 +115,16 @@ export default function MyDashboardPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
       <header className="flex items-start justify-between mb-6 sm:mb-8">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">
             안녕하세요, {me.name}님
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">{me.email}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">{me.email}</p>
         </div>
         <button
           type="button"
           onClick={logout}
-          className="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-500 hover:text-gray-900 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+          className="flex-shrink-0 inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground px-2 py-1.5 rounded-md hover:bg-secondary/60 transition-colors"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">로그아웃</span>
