@@ -170,20 +170,25 @@ export default function MediaMapPageClient() {
   return (
     <div className="flex h-[calc(100vh-64px)] flex-col md:flex-row">
       {/* Side list */}
-      <aside className="w-full md:w-[380px] md:flex-shrink-0 border-r overflow-y-auto bg-white">
-        <div className="sticky top-0 z-10 border-b bg-white p-3 space-y-2">
-          <input
-            type="search"
-            placeholder="매체명/지역 검색"
-            value={filter.q}
-            onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg text-sm"
-          />
+      <aside className="w-full md:w-[380px] md:flex-shrink-0 md:border-r border-border/60 overflow-y-auto bg-card">
+        <div className="sticky top-0 z-10 border-b border-border/60 bg-card/95 backdrop-blur-sm p-3 space-y-2">
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              type="search"
+              placeholder="매체명 · 지역 검색"
+              value={filter.q}
+              onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))}
+              className="w-full h-10 pl-9 pr-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            />
+          </div>
           <div className="flex gap-2">
             <select
               value={filter.type}
               onChange={(e) => setFilter((f) => ({ ...f, type: e.target.value }))}
-              className="flex-1 px-2 py-2 border rounded-lg text-sm"
+              className="flex-1 h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             >
               <option value="">유형 전체</option>
               {facets.types.map((t) => (
@@ -195,7 +200,7 @@ export default function MediaMapPageClient() {
             <select
               value={filter.region}
               onChange={(e) => setFilter((f) => ({ ...f, region: e.target.value }))}
-              className="flex-1 px-2 py-2 border rounded-lg text-sm"
+              className="flex-1 h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             >
               <option value="">지역 전체</option>
               {facets.regions.map((r) => (
@@ -211,14 +216,14 @@ export default function MediaMapPageClient() {
               placeholder="최소 가격"
               value={filter.priceMin}
               onChange={(e) => setFilter((f) => ({ ...f, priceMin: e.target.value }))}
-              className="flex-1 px-2 py-2 border rounded-lg text-sm"
+              className="flex-1 h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
             <input
               type="number"
               placeholder="최대 가격"
               value={filter.priceMax}
               onChange={(e) => setFilter((f) => ({ ...f, priceMax: e.target.value }))}
-              className="flex-1 px-2 py-2 border rounded-lg text-sm"
+              className="flex-1 h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500">
@@ -273,7 +278,7 @@ export default function MediaMapPageClient() {
                           : "bg-white text-primary border-primary"
                       }`}
                     >
-                      {inCart(it.id) ? "담김" : "제안서에"}
+                      {inCart(it.id) ? "담김" : "견적서에"}
                     </button>
                   </div>
                 </div>
@@ -342,7 +347,7 @@ export default function MediaMapPageClient() {
                     : "bg-white text-primary border border-primary"
                 }`}
               >
-                {inCart(selected.id) ? "장바구니에 담김" : "제안서에 담기"}
+                {inCart(selected.id) ? "장바구니에 담김" : "견적서에 담기"}
               </button>
             </div>
           </div>

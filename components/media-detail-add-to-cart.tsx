@@ -57,7 +57,7 @@ export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Pro
         ) : (
           <>
             <Plus className="w-4 h-4" />
-            제안서에 담기
+            견적서에 담기
           </>
         )}
       </button>

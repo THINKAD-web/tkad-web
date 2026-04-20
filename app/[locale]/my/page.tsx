@@ -103,10 +103,9 @@ export default function MyDashboardPage() {
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
     toast.success("로그아웃되었습니다.");
     router.push("/login");
-    router.refresh();
   }
 
   if (meLoading || !me) {
@@ -209,7 +208,7 @@ function QuotesTab({ loading, items }: { loading: boolean; items: Quote[] }) {
   if (loading) {
     return (
       <div className="py-12 text-center">
-        <Spinner size="md" label="제안서 불러오는 중…" />
+        <Spinner size="md" label="견적서 불러오는 중…" />
       </div>
     );
   }
@@ -217,8 +216,8 @@ function QuotesTab({ loading, items }: { loading: boolean; items: Quote[] }) {
     return (
       <EmptyState
         icon="📄"
-        title="아직 제안서가 없습니다"
-        description="관심 매체를 장바구니에 담고 제안서를 생성해보세요."
+        title="아직 견적서가 없습니다"
+        description="관심 매체를 장바구니에 담고 견적서를 생성해보세요."
         action={
           <Link
             href="/media/map"
@@ -245,7 +244,7 @@ function CampaignsTab({ items }: { items: Quote[] }) {
       <EmptyState
         icon="🚀"
         title="진행 중인 캠페인이 없습니다"
-        description="제안서가 예약 확정되면 여기에 표시됩니다."
+        description="견적서가 예약 확정되면 여기에 표시됩니다."
       />
     );
   }

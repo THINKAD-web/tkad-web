@@ -37,7 +37,7 @@ export function QuoteCard({
           <div className="text-sm font-semibold text-gray-900 truncate">
             {variant === "campaign"
               ? item.clientCompany ?? item.clientName
-              : `제안서 #${item.id.slice(-8)}`}
+              : `견적서 #${item.id.slice(-8)}`}
           </div>
           <div className="text-xs text-gray-500 mt-0.5">
             {variant === "campaign"

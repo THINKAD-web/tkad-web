@@ -96,13 +96,13 @@ export default function CartPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        const msg = data?.error?.message ?? "제안서 생성에 실패했습니다.";
+        const msg = data?.error?.message ?? "견적서 생성에 실패했습니다.";
         setError(msg);
         toast.error(msg);
         return;
       }
       clear();
-      toast.success("제안서가 생성되었습니다.");
+      toast.success("견적서가 생성되었습니다.");
       router.push(`/quote/${data.data.id}/preview`);
     } catch {
       const msg = "네트워크 오류가 발생했습니다.";
@@ -120,14 +120,14 @@ export default function CartPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
-      <h1 className="text-xl sm:text-2xl font-bold text-primary mb-1">제안서 요청</h1>
-      <p className="text-sm text-muted-foreground mb-6">선택한 매체로 30분 안에 PDF 제안서를 받아보세요</p>
+      <h1 className="text-xl sm:text-2xl font-bold text-primary mb-1">견적서 요청</h1>
+      <p className="text-sm text-muted-foreground mb-6">선택한 매체로 30분 안에 PDF 견적서를 받아보세요</p>
 
       {ids.length === 0 ? (
         <EmptyState
           icon="🛒"
           title="장바구니가 비어있습니다"
-          description="지도에서 관심 매체를 '제안서에 담기'로 추가해보세요."
+          description="지도에서 관심 매체를 '견적서에 담기'로 추가해보세요."
           action={
             <Link
               href="/media/map"
@@ -282,7 +282,7 @@ export default function CartPage() {
                 className="w-full py-2.5 bg-primary text-white rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {submitting && <Spinner size="sm" />}
-                {submitting ? "생성 중…" : "제안서 생성"}
+                {submitting ? "생성 중…" : "견적서 생성"}
               </button>
             </form>
           </aside>
