@@ -10,6 +10,7 @@ import { DashboardTabs, type Tab } from "@/components/my/dashboard-tabs";
 import { MediaCard, type MediaCardItem } from "@/components/my/media-card";
 import { QuoteCard, type QuoteCardItem } from "@/components/my/quote-card";
 import { RecentlyViewedSection } from "@/components/my/recently-viewed-section";
+import { useAppToast } from "@/lib/use-toast";
 
 type Me = { id: string; email: string; name: string; role: string } | null;
 
@@ -22,6 +23,7 @@ type Quote = QuoteCardItem & { isInProgress: boolean };
 
 export default function MyDashboardPage() {
   const router = useRouter();
+  const toast = useAppToast();
   const [me, setMe] = useState<Me>(null);
   const [meLoading, setMeLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("favorites");
@@ -86,6 +88,7 @@ export default function MyDashboardPage() {
   }, [me]);
 
   async function removeFavorite(mediaId: string) {
+    const target = favorites.find((f) => f.id === mediaId);
     const res = await fetch("/api/my/favorite", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -93,11 +96,15 @@ export default function MyDashboardPage() {
     });
     if (res.ok) {
       setFavorites((prev) => prev.filter((f) => f.id !== mediaId));
+      toast.warning(target ? `${target.name}이(가) 관심 매체에서 제거되었습니다.` : "관심 매체에서 제거되었습니다.");
+    } else {
+      toast.error("제거에 실패했습니다. 잠시 후 다시 시도해주세요.");
     }
   }
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
+    toast.success("로그아웃되었습니다.");
     router.push("/login");
     router.refresh();
   }

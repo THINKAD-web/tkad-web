@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
 import { Spinner, EmptyState } from "@/components/ui/spinner";
+import { useAppToast } from "@/lib/use-toast";
 
 type MediaItem = {
   id: string;
@@ -23,6 +24,7 @@ function formatKRW(v: number): string {
 
 export default function CartPage() {
   const router = useRouter();
+  const toast = useAppToast();
   const { ids, remove, clear } = useCart();
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -94,16 +96,26 @@ export default function CartPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setError(data?.error?.code ?? "제안서 생성에 실패했습니다.");
+        const msg = data?.error?.message ?? "제안서 생성에 실패했습니다.";
+        setError(msg);
+        toast.error(msg);
         return;
       }
       clear();
+      toast.success("제안서가 생성되었습니다.");
       router.push(`/quote/${data.data.id}/preview`);
     } catch {
-      setError("네트워크 오류가 발생했습니다.");
+      const msg = "네트워크 오류가 발생했습니다.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function handleRemove(id: string, name?: string) {
+    remove(id);
+    toast.warning(name ? `${name}이(가) 장바구니에서 제거되었습니다.` : "장바구니에서 제거되었습니다.");
   }
 
   return (
@@ -159,7 +171,7 @@ export default function CartPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => remove(it.id)}
+                    onClick={() => handleRemove(it.id, it.name)}
                     className="text-xs text-red-500 hover:underline px-2"
                   >
                     제거

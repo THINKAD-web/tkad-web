@@ -1,23 +1,43 @@
 "use client";
 
 import { useCart } from "@/lib/cart";
+import { useAppToast } from "@/lib/use-toast";
 import { Check, Plus } from "lucide-react";
 import Link from "next/link";
 
 type Props = {
   mediaId: string;
+  mediaName?: string;
   className?: string;
 };
 
-export function MediaDetailAddToCart({ mediaId, className = "" }: Props) {
+export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Props) {
   const { has, toggle, ids } = useCart();
+  const toast = useAppToast();
   const inCart = has(mediaId);
+
+  function handleClick() {
+    toggle(mediaId);
+    if (inCart) {
+      toast.warning(
+        mediaName
+          ? `${mediaName}이(가) 장바구니에서 제거되었습니다.`
+          : "장바구니에서 제거되었습니다.",
+      );
+    } else {
+      toast.success(
+        mediaName
+          ? `${mediaName}이(가) 장바구니에 담겼습니다.`
+          : "매체가 장바구니에 담겼습니다.",
+      );
+    }
+  }
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <button
         type="button"
-        onClick={() => toggle(mediaId)}
+        onClick={handleClick}
         className={`
           inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
           text-sm font-semibold transition-all
