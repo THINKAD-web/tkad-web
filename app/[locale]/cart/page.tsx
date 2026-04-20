@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
+import { Spinner, EmptyState } from "@/components/ui/spinner";
 
 type MediaItem = {
   id: string;
@@ -110,22 +111,26 @@ export default function CartPage() {
       <h1 className="text-2xl font-semibold mb-6">제안서 요청</h1>
 
       {ids.length === 0 ? (
-        <div className="bg-white border rounded-xl p-12 text-center">
-          <p className="text-gray-500 mb-4">장바구니가 비어있습니다.</p>
-          <Link
-            href="/media/map"
-            className="inline-block px-4 py-2 bg-primary text-white rounded-lg text-sm"
-          >
-            매체 탐색하러 가기
-          </Link>
-        </div>
+        <EmptyState
+          icon="🛒"
+          title="장바구니가 비어있습니다"
+          description="지도에서 관심 매체를 '제안서에 담기'로 추가해보세요."
+          action={
+            <Link
+              href="/media/map"
+              className="inline-block px-4 py-2 bg-primary text-white rounded-lg text-sm"
+            >
+              매체 탐색하러 가기
+            </Link>
+          }
+        />
       ) : (
         <div className="grid md:grid-cols-[1fr_360px] gap-6">
           <div className="space-y-3">
             <h2 className="text-sm font-medium text-gray-500">
               선택한 매체 · {items.length}개
             </h2>
-            {loading && <div className="text-sm text-gray-400">불러오는 중…</div>}
+            {loading && <Spinner size="sm" label="불러오는 중…" />}
             <ul className="space-y-2">
               {items.map((it) => (
                 <li
@@ -261,8 +266,9 @@ export default function CartPage() {
               <button
                 type="submit"
                 disabled={submitting || items.length === 0}
-                className="w-full py-2.5 bg-primary text-white rounded-lg font-medium disabled:opacity-50"
+                className="w-full py-2.5 bg-primary text-white rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2"
               >
+                {submitting && <Spinner size="sm" />}
                 {submitting ? "생성 중…" : "제안서 생성"}
               </button>
             </form>

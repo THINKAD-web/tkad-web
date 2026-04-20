@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { apiError, apiOk, apiServerError } from "@/lib/api-response";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,35 +9,33 @@ export async function GET(
   _req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await ctx.params;
-  const quote = await prisma.oOHQuote.findUnique({ where: { id } });
-  if (!quote) {
-    return NextResponse.json(
-      { ok: false, error: { code: "NOT_FOUND" } },
-      { status: 404 },
-    );
-  }
+  try {
+    const { id } = await ctx.params;
+    const quote = await prisma.oOHQuote.findUnique({ where: { id } });
+    if (!quote) {
+      return apiError("NOT_FOUND", 404, {
+        message: "제안서를 찾을 수 없습니다.",
+      });
+    }
 
-  const catalog = await fetchPublicMediaCatalog();
-  const medias = catalog
-    .filter((m) => quote.mediaIds.includes(m.id))
-    .map((m) => ({
-      id: m.id,
-      name: m.name,
-      location: m.location,
-      region: m.region,
-      type: m.type,
-      price: m.price,
-      pricePeriod: m.pricePeriod ?? "month",
-      image: m.sampleImages?.[0] ?? null,
-      visibilityScore: m.visibilityScore ?? 0,
-      dailyFootTraffic: m.dailyFootTraffic ?? null,
-      impressions: m.impressions ?? null,
-    }));
+    const catalog = await fetchPublicMediaCatalog();
+    const medias = catalog
+      .filter((m) => quote.mediaIds.includes(m.id))
+      .map((m) => ({
+        id: m.id,
+        name: m.name,
+        location: m.location,
+        region: m.region,
+        type: m.type,
+        price: m.price,
+        pricePeriod: m.pricePeriod ?? "month",
+        image: m.sampleImages?.[0] ?? null,
+        visibilityScore: m.visibilityScore ?? 0,
+        dailyFootTraffic: m.dailyFootTraffic ?? null,
+        impressions: m.impressions ?? null,
+      }));
 
-  return NextResponse.json({
-    ok: true,
-    data: {
+    return apiOk({
       id: quote.id,
       status: quote.status,
       clientName: quote.clientName,
@@ -51,6 +49,8 @@ export async function GET(
       budgetMax: quote.budgetMax,
       createdAt: quote.createdAt,
       medias,
-    },
-  });
+    });
+  } catch (e) {
+    return apiServerError(e, "quote/[id]/detail");
+  }
 }

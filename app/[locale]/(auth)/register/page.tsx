@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -137,8 +138,9 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-primary text-white rounded-lg font-medium disabled:opacity-50"
+            className="w-full py-2.5 bg-primary text-white rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2"
           >
+            {loading && <Spinner size="sm" />}
             {loading ? "가입 중…" : "가입하기"}
           </button>
         </form>

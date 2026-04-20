@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FullPageSpinner, Spinner, EmptyState } from "@/components/ui/spinner";
 
 type Me = { id: string; email: string; name: string; role: string } | null;
 
@@ -139,11 +140,7 @@ export default function MyDashboardPage() {
   }
 
   if (meLoading || !me) {
-    return (
-      <div className="max-w-5xl mx-auto px-4 py-12 text-center text-gray-500 text-sm">
-        불러오는 중…
-      </div>
-    );
+    return <FullPageSpinner label="대시보드 불러오는 중…" />;
   }
 
   return (
@@ -162,7 +159,7 @@ export default function MyDashboardPage() {
         </button>
       </header>
 
-      <section className="grid grid-cols-3 gap-3 mb-8">
+      <section className="grid grid-cols-3 gap-2 sm:gap-3 mb-8">
         <div className="bg-white border rounded-xl p-4">
           <div className="text-xs text-gray-500">관심 매체</div>
           <div className="text-2xl font-bold mt-1">{favorites.length}</div>
@@ -204,17 +201,23 @@ export default function MyDashboardPage() {
       {tab === "favorites" && (
         <div>
           {favLoading ? (
-            <p className="text-sm text-gray-400 text-center py-8">불러오는 중…</p>
-          ) : favorites.length === 0 ? (
-            <div className="bg-white border rounded-xl p-12 text-center">
-              <p className="text-gray-500 mb-4">관심 매체가 없습니다.</p>
-              <Link
-                href="/media/map"
-                className="inline-block px-4 py-2 bg-primary text-white rounded-lg text-sm"
-              >
-                매체 탐색
-              </Link>
+            <div className="py-12 text-center">
+              <Spinner size="md" label="관심 매체 불러오는 중…" />
             </div>
+          ) : favorites.length === 0 ? (
+            <EmptyState
+              icon="⭐"
+              title="관심 매체가 없습니다"
+              description="지도에서 매체 카드의 하트 아이콘을 눌러 관심 매체로 저장해보세요."
+              action={
+                <Link
+                  href="/media/map"
+                  className="inline-block px-4 py-2 bg-primary text-white rounded-lg text-sm"
+                >
+                  매체 탐색하러 가기
+                </Link>
+              }
+            />
           ) : (
             <ul className="grid md:grid-cols-2 gap-3">
               {favorites.map((m) => (
@@ -265,17 +268,23 @@ export default function MyDashboardPage() {
       {tab === "quotes" && (
         <div>
           {qLoading ? (
-            <p className="text-sm text-gray-400 text-center py-8">불러오는 중…</p>
-          ) : quotes.length === 0 ? (
-            <div className="bg-white border rounded-xl p-12 text-center">
-              <p className="text-gray-500 mb-4">아직 제안서가 없습니다.</p>
-              <Link
-                href="/cart"
-                className="inline-block px-4 py-2 bg-primary text-white rounded-lg text-sm"
-              >
-                장바구니 가기
-              </Link>
+            <div className="py-12 text-center">
+              <Spinner size="md" label="제안서 불러오는 중…" />
             </div>
+          ) : quotes.length === 0 ? (
+            <EmptyState
+              icon="📄"
+              title="아직 제안서가 없습니다"
+              description="관심 매체를 장바구니에 담고 제안서를 생성해보세요."
+              action={
+                <Link
+                  href="/media/map"
+                  className="inline-block px-4 py-2 bg-primary text-white rounded-lg text-sm"
+                >
+                  매체 탐색하러 가기
+                </Link>
+              }
+            />
           ) : (
             <ul className="space-y-3">
               {quotes.map((q) => (
@@ -322,9 +331,11 @@ export default function MyDashboardPage() {
       {tab === "campaigns" && (
         <div>
           {inProgress.length === 0 ? (
-            <div className="bg-white border rounded-xl p-12 text-center">
-              <p className="text-gray-500">진행 중인 캠페인이 없습니다.</p>
-            </div>
+            <EmptyState
+              icon="🚀"
+              title="진행 중인 캠페인이 없습니다"
+              description="제안서가 예약 확정되면 여기에 표시됩니다."
+            />
           ) : (
             <ul className="space-y-3">
               {inProgress.map((q) => (

@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
@@ -9,6 +8,14 @@ import {
   createUserSessionToken,
   userSessionCookieOptions,
 } from "@/lib/user-session";
+import {
+  apiError,
+  apiOk,
+  apiServerError,
+  apiZodError,
+  getClientIp,
+  readJson,
+} from "@/lib/api-response";
 
 export const runtime = "nodejs";
 
@@ -23,78 +30,63 @@ const Body = z.object({
 
 const limiter = rateLimit({ limit: 5, windowMs: 60 * 60 * 1000 });
 
-function getIp(req: Request): string {
-  return req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
-}
-
 export async function POST(req: Request) {
-  const ip = getIp(req);
-  if (!limiter.check(`register:${ip}`)) {
-    return NextResponse.json(
-      { ok: false, error: { code: "RATE_LIMITED" } },
-      { status: 429 },
-    );
-  }
-
-  let body: unknown;
   try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json(
-      { ok: false, error: { code: "INVALID_JSON" } },
-      { status: 400 },
-    );
+    const ip = getClientIp(req);
+    if (!limiter.check(`register:${ip}`)) {
+      return apiError("RATE_LIMITED", 429, {
+        message: "너무 많은 요청입니다. 잠시 후 다시 시도해주세요.",
+      });
+    }
+
+    const body = await readJson(req);
+    if (!body) return apiError("INVALID_JSON", 400);
+
+    const parsed = Body.safeParse(body);
+    if (!parsed.success) return apiZodError(parsed.error);
+
+    const { email, password, name, phone, company, locale } = parsed.data;
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return apiError("EMAIL_IN_USE", 409, {
+        message: "이미 사용 중인 이메일입니다.",
+      });
+    }
+
+    const passwordHash = await hashPassword(password);
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        name,
+        phone,
+        company,
+        locale,
+        role: "advertiser",
+        lastLoginAt: new Date(),
+      },
+      select: { id: true, email: true, name: true, role: true },
+    });
+
+    const token = createUserSessionToken(user.id, user.role);
+    if (!token) {
+      return apiError("SESSION_SECRET_MISSING", 500, {
+        message: "서버 설정 오류입니다. 관리자에게 문의해주세요.",
+      });
+    }
+
+    await createSessionRecord({
+      userId: user.id,
+      token,
+      userAgent: req.headers.get("user-agent") ?? undefined,
+      ip,
+    });
+
+    const res = apiOk(user, { status: 201 });
+    res.cookies.set(USER_SESSION_COOKIE, token, userSessionCookieOptions());
+    return res;
+  } catch (e) {
+    return apiServerError(e, "auth/register");
   }
-
-  const parsed = Body.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { ok: false, error: { code: "INVALID_INPUT", issues: parsed.error.flatten() } },
-      { status: 400 },
-    );
-  }
-
-  const { email, password, name, phone, company, locale } = parsed.data;
-
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    return NextResponse.json(
-      { ok: false, error: { code: "EMAIL_IN_USE" } },
-      { status: 409 },
-    );
-  }
-
-  const passwordHash = await hashPassword(password);
-  const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      name,
-      phone,
-      company,
-      locale,
-      role: "advertiser",
-      lastLoginAt: new Date(),
-    },
-    select: { id: true, email: true, name: true, role: true },
-  });
-
-  const token = createUserSessionToken(user.id, user.role);
-  if (!token) {
-    return NextResponse.json(
-      { ok: false, error: { code: "SESSION_SECRET_MISSING" } },
-      { status: 500 },
-    );
-  }
-
-  await createSessionRecord({
-    userId: user.id,
-    token,
-    userAgent: req.headers.get("user-agent") ?? undefined,
-    ip,
-  });
-
-  const res = NextResponse.json({ ok: true, data: user }, { status: 201 });
-  res.cookies.set(USER_SESSION_COOKIE, token, userSessionCookieOptions());
-  return res;
 }

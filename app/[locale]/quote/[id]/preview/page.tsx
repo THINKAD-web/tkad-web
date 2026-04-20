@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { FullPageSpinner, EmptyState } from "@/components/ui/spinner";
 
 type Media = {
   id: string;
@@ -84,15 +85,24 @@ export default function QuotePreviewPage() {
   }, [id]);
 
   if (loading) {
-    return <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-500">불러오는 중…</div>;
+    return <FullPageSpinner label="제안서 불러오는 중…" />;
   }
   if (err || !quote) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <p className="text-red-600 mb-4">{err ?? "제안서를 찾을 수 없습니다."}</p>
-        <Link href="/media/map" className="text-sm text-primary underline">
-          매체 탐색하러 가기
-        </Link>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <EmptyState
+          icon="⚠️"
+          title="제안서를 불러올 수 없습니다"
+          description={err === "NOT_FOUND" ? "요청한 제안서를 찾을 수 없습니다." : "잠시 후 다시 시도해주세요."}
+          action={
+            <Link
+              href="/media/map"
+              className="inline-block px-4 py-2 bg-primary text-white rounded-lg text-sm"
+            >
+              매체 탐색하러 가기
+            </Link>
+          }
+        />
       </div>
     );
   }
