@@ -23,6 +23,7 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onBoundsChange: (b: MapBounds) => void;
+  onMarkerDetail?: (id: string) => void;
   center?: { lat: number; lng: number };
   zoom?: number;
 };
@@ -35,6 +36,15 @@ declare global {
 
 const KAKAO_SDK_URL = (appkey: string) =>
   `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false&libraries=clusterer`;
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 function loadKakaoSdk(appkey: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -73,6 +83,7 @@ export default function KakaoMapView({
   selectedId,
   onSelect,
   onBoundsChange,
+  onMarkerDetail,
   center = { lat: 37.5665, lng: 126.978 },
   zoom = 8,
 }: Props) {
@@ -80,7 +91,13 @@ export default function KakaoMapView({
   const mapRef = useRef<unknown>(null);
   const markerObjsRef = useRef<Map<string, unknown>>(new Map());
   const clustererRef = useRef<unknown>(null);
+  const infoWindowRef = useRef<unknown>(null);
+  const onMarkerDetailRef = useRef(onMarkerDetail);
   const [sdkError, setSdkError] = useState<string | null>(null);
+
+  useEffect(() => {
+    onMarkerDetailRef.current = onMarkerDetail;
+  }, [onMarkerDetail]);
 
   useEffect(() => {
     const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
@@ -165,11 +182,59 @@ export default function KakaoMapView({
 
   useEffect(() => {
     const map = mapRef.current as any;
-    if (!map || !selectedId) return;
+    if (!map) return;
     const kakao = (window as unknown as { kakao: any }).kakao;
+
+    // 기존 InfoWindow 닫기
+    const existingInfo = infoWindowRef.current as any;
+    if (existingInfo?.close) existingInfo.close();
+
+    if (!selectedId) return;
     const m = markers.find((x) => x.id === selectedId);
     if (!m) return;
+
     map.panTo(new kakao.maps.LatLng(m.lat, m.lng));
+
+    // 가격 포맷
+    const priceLabel =
+      m.price >= 100_000_000
+        ? `${(m.price / 100_000_000).toFixed(1)}억`
+        : m.price >= 10_000
+          ? `${Math.round(m.price / 10_000).toLocaleString("ko-KR")}만원`
+          : `${m.price.toLocaleString("ko-KR")}원`;
+
+    const containerEl = document.createElement("div");
+    containerEl.style.cssText =
+      "padding:10px 12px;min-width:200px;font-family:Pretendard,system-ui,sans-serif;";
+    containerEl.innerHTML = `
+      <div style="font-size:13px;font-weight:600;color:#0D1B2E;margin-bottom:4px;line-height:1.3;">
+        ${escapeHtml(m.name)}
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#C8913C;margin-bottom:8px;">
+        ${priceLabel}
+      </div>
+      <button type="button" data-detail="${escapeHtml(m.id)}"
+        style="width:100%;padding:6px 10px;background:#0D1B2E;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">
+        자세히 보기 →
+      </button>
+    `;
+    const btn = containerEl.querySelector<HTMLButtonElement>("[data-detail]");
+    btn?.addEventListener("click", () => {
+      onMarkerDetailRef.current?.(m.id);
+    });
+
+    const info = new kakao.maps.CustomOverlay({
+      position: new kakao.maps.LatLng(m.lat, m.lng),
+      content: containerEl,
+      yAnchor: 1.4,
+      zIndex: 100,
+    });
+    info.setMap(map);
+    infoWindowRef.current = info;
+
+    return () => {
+      info.setMap(null);
+    };
   }, [selectedId, markers]);
 
   if (sdkError) {

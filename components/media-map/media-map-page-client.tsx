@@ -168,7 +168,7 @@ export default function MediaMapPageClient() {
   );
 
   return (
-    <div className="flex h-[calc(100vh-64px)] flex-col md:flex-row">
+    <div className="flex min-h-[calc(100vh-72px)] flex-col md:h-[calc(100vh-72px)] md:flex-row">
       {/* Side list */}
       <aside className="w-full md:w-[380px] md:flex-shrink-0 md:border-r border-border/60 overflow-y-auto bg-card">
         <div className="sticky top-0 z-10 border-b border-border/60 bg-card/95 backdrop-blur-sm p-3 space-y-2">
@@ -286,18 +286,25 @@ export default function MediaMapPageClient() {
             </li>
           ))}
           {items.length === 0 && !loading && (
-            <li className="p-6 text-center text-sm text-gray-500">검색 결과가 없습니다</li>
+            <li className="p-8 text-center">
+              <div className="text-3xl mb-2">🔍</div>
+              <p className="text-sm font-medium text-foreground mb-1">검색 결과가 없습니다</p>
+              <p className="text-xs text-muted-foreground">필터를 조정하거나 지도를 이동해보세요.</p>
+            </li>
           )}
         </ul>
       </aside>
 
       {/* Map */}
-      <div className="relative flex-1 min-h-[50vh] md:min-h-0">
+      <div className="relative flex-1 min-h-[60vh] md:min-h-0">
         <KakaoMapView
           markers={markers}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onBoundsChange={setBounds}
+          onMarkerDetail={(id) => {
+            window.location.href = `/media/${id}`;
+          }}
         />
 
         {selected && (

@@ -158,11 +158,11 @@ export default function CartPage() {
                       className="w-16 h-16 object-cover rounded-md flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0" />
+                    <div className="w-16 h-16 bg-secondary rounded-md flex-shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{it.name}</div>
-                    <div className="text-xs text-gray-500 truncate">
+                    <div className="text-xs text-muted-foreground truncate">
                       {it.region} · {it.type}
                     </div>
                     <div className="text-sm font-semibold text-primary mt-0.5">
@@ -179,9 +179,9 @@ export default function CartPage() {
                 </li>
               ))}
             </ul>
-            <div className="flex justify-between items-center pt-4 border-t">
-              <span className="text-sm text-gray-500">합계</span>
-              <span className="text-lg font-bold text-primary">{formatKRW(total)}</span>
+            <div className="flex justify-between items-center pt-4 border-t border-border/60">
+              <span className="text-sm text-muted-foreground">합계</span>
+              <span className="text-lg font-bold text-primary tabular-nums">{formatKRW(total)}</span>
             </div>
           </div>
 

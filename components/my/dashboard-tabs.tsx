@@ -20,7 +20,7 @@ export function DashboardTabs({ active, onChange, counts }: Props) {
   return (
     <nav
       role="tablist"
-      className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6 overflow-x-auto"
+      className="flex gap-1 p-1 bg-secondary/60 border border-border/60 rounded-xl mb-6 overflow-x-auto"
     >
       {tabs.map(({ key, label, icon: Icon }) => {
         const isActive = active === key;
