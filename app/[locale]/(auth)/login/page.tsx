@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function LoginPage() {
@@ -33,7 +34,7 @@ export default function LoginPage() {
             ? "이메일 또는 비밀번호가 올바르지 않습니다."
             : code === "RATE_LIMITED"
               ? "요청이 너무 많습니다. 잠시 후 다시 시도해주세요."
-              : "로그인에 실패했습니다.",
+              : data?.error?.message ?? "로그인에 실패했습니다.",
         );
         return;
       }
@@ -47,65 +48,71 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-background">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow p-8">
-        <h1 className="text-2xl font-semibold text-primary mb-2">로그인</h1>
-        <p className="text-sm text-gray-500 mb-6">THINKAD 계정으로 로그인하세요</p>
+    <div className="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-10 bg-gradient-to-b from-secondary/30 to-background">
+      <div className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold text-primary">로그인</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            THINKAD 계정으로 로그인하세요
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
-              이메일
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1">
-              비밀번호
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              {error}
+        <div className="bg-card border border-border/60 rounded-2xl shadow-sm p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground">
+                이메일
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full h-11 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 bg-primary text-white rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading && <Spinner size="sm" />}
-            {loading ? "로그인 중…" : "로그인"}
-          </button>
-        </form>
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                비밀번호
+              </label>
+              <input
+                id="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-11 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              />
+            </div>
 
-        <div className="mt-6 text-sm text-center text-gray-600">
+            {error && (
+              <div className="text-sm text-destructive bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2">
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-11"
+            >
+              {loading && <Spinner size="sm" />}
+              {loading ? "로그인 중…" : "로그인"}
+            </Button>
+          </form>
+        </div>
+
+        <p className="mt-6 text-sm text-center text-muted-foreground">
           계정이 없으신가요?{" "}
-          <Link href="/register" className="text-primary font-medium hover:underline">
+          <Link href="/register" className="text-primary font-semibold hover:underline">
             회원가입
           </Link>
-        </div>
+        </p>
       </div>
     </div>
   );

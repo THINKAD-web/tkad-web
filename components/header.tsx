@@ -5,6 +5,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import { HeaderUserMenu } from "@/components/header-user-menu";
 import { useState, useEffect, useTransition } from "react";
 
 function LanguageToggle() {
@@ -92,6 +93,7 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <HeaderUserMenu />
           <LanguageToggle />
             <Link href="/contact">
             <Button
@@ -103,7 +105,8 @@ export default function Header() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-1.5 md:hidden">
+          <HeaderUserMenu />
           <LanguageToggle />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
