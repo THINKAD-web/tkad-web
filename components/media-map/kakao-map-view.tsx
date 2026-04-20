@@ -83,9 +83,9 @@ export default function KakaoMapView({
   const [sdkError, setSdkError] = useState<string | null>(null);
 
   useEffect(() => {
-    const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
+    const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
     if (!appkey) {
-      setSdkError("NEXT_PUBLIC_KAKAO_MAP_KEY 미설정");
+      setSdkError("NEXT_PUBLIC_KAKAO_MAP_APP_KEY 미설정");
       return;
     }
 
