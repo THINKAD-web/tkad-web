@@ -2,7 +2,7 @@
 
 import { useCart } from "@/lib/cart";
 import { useAppToast } from "@/lib/use-toast";
-import { Check, Plus } from "lucide-react";
+import { Check, Plus, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 
 type Props = {
@@ -39,7 +39,7 @@ export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Pro
         type="button"
         onClick={handleClick}
         className={`
-          inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+          inline-flex items-center justify-center gap-2 h-11 px-5 rounded-lg
           text-sm font-semibold transition-all
           ${inCart
             ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
@@ -63,9 +63,13 @@ export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Pro
       {ids.length > 0 && (
         <Link
           href="/cart"
-          className="inline-flex items-center text-xs font-medium px-3 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50"
+          className="inline-flex items-center gap-1.5 h-11 px-3 sm:px-4 border border-border bg-card rounded-lg text-xs sm:text-sm font-medium text-foreground hover:bg-secondary/60 transition-colors"
         >
-          장바구니 ({ids.length})
+          <ShoppingCart className="w-4 h-4" />
+          <span className="hidden sm:inline">장바구니</span>
+          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[10px] font-bold">
+            {ids.length}
+          </span>
         </Link>
       )}
     </div>
