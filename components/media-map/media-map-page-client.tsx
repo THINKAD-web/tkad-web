@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { MapBounds, MapMarker } from "./kakao-map-view";
+import { Spinner } from "@/components/ui/spinner";
 
 const KakaoMapView = dynamic(() => import("./kakao-map-view"), {
   ssr: false,
@@ -211,7 +212,11 @@ export default function MediaMapPageClient() {
             />
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>{loading ? "불러오는 중…" : `${items.length}개 매체`}</span>
+            {loading ? (
+              <Spinner size="sm" label="불러오는 중…" />
+            ) : (
+              <span>{`${items.length}개 매체`}</span>
+            )}
             {cartIds.length > 0 && (
               <span className="text-primary font-medium">장바구니 {cartIds.length}</span>
             )}
