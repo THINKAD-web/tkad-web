@@ -699,7 +699,7 @@ model GenerationLog {
   @@map("generation_logs")
 }
 
-enum UserRole {
+enum AppUserRole {
   advertiser
   agency
   owner
@@ -714,7 +714,7 @@ model User {
   phone           String?
   company         String?
   locale          String    @default("ko")
-  role            UserRole  @default(advertiser)
+  role            AppUserRole @default(advertiser)
   emailVerifiedAt DateTime? @map("email_verified_at")
   lastLoginAt     DateTime? @map("last_login_at")
   deletedAt       DateTime? @map("deleted_at")

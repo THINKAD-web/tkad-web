@@ -1,7 +1,7 @@
 import { createHmac, createHash, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import type { UserRole } from "@prisma/client";
+import type { AppUserRole } from "@prisma/client";
 
 export const USER_SESSION_COOKIE = "tkad_user_session";
 
@@ -23,13 +23,13 @@ function signPayload(payload: string, secret: string): string {
 type SessionPayload = {
   v: 1;
   sub: string;
-  role: UserRole;
+  role: AppUserRole;
   exp: number;
 };
 
 export function createUserSessionToken(
   userId: string,
-  role: UserRole,
+  role: AppUserRole,
 ): string | null {
   const secret = sessionSecret();
   if (!secret) return null;
@@ -53,7 +53,7 @@ export type UserSessionVerifyCode =
   | "expired";
 
 export type UserSessionVerifyResult =
-  | { ok: true; code: "ok"; userId: string; role: UserRole; exp: number }
+  | { ok: true; code: "ok"; userId: string; role: AppUserRole; exp: number }
   | { ok: false; code: Exclude<UserSessionVerifyCode, "ok"> };
 
 export function verifyUserSessionDetails(
@@ -107,7 +107,7 @@ export function verifyUserSessionDetails(
     ok: true,
     code: "ok",
     userId: data.sub,
-    role: data.role as UserRole,
+    role: data.role as AppUserRole,
     exp: data.exp,
   };
 }
@@ -134,7 +134,7 @@ export type CurrentUser = {
   id: string;
   email: string;
   name: string;
-  role: UserRole;
+  role: AppUserRole;
   locale: string;
   emailVerifiedAt: Date | null;
 };
