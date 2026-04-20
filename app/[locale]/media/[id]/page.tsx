@@ -325,9 +325,14 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </MediaDetailHeroGallery>
 
-      <div className="bg-white border-b">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-end">
-          <MediaDetailAddToCart mediaId={media.id} />
+      <div className="bg-card border-b border-border/60 sticky top-[72px] z-30 backdrop-blur-md bg-card/90 sm:static sm:bg-card sm:backdrop-blur-0">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">
+              관심 가는 매체라면 제안서에 담아보세요
+            </p>
+          </div>
+          <MediaDetailAddToCart mediaId={media.id} mediaName={isKo ? media.name : media.nameEn} />
         </div>
       </div>
 
