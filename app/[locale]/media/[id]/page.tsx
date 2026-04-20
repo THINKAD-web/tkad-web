@@ -49,6 +49,7 @@ import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
 import TrackMediaView from "@/components/track-media-view";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import MediaDetailHeroGallery from "@/components/media-detail-hero-gallery";
+import { MediaDetailAddToCart } from "@/components/media-detail-add-to-cart";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
@@ -323,6 +324,12 @@ export default async function MediaDetailPage({ params }: Props) {
           </div>
         </div>
       </MediaDetailHeroGallery>
+
+      <div className="bg-white border-b">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-end">
+          <MediaDetailAddToCart mediaId={media.id} />
+        </div>
+      </div>
 
       <section className="bg-white py-12 pb-28 sm:pb-32">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
