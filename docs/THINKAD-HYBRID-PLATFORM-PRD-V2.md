@@ -3267,11 +3267,11 @@ export async function middleware(req: Request) {
 
 ---
 
-### 7.4 Phase 1 MVP를 가장 빠르고 효과적으로 출시하는 방법 (12주 실행 전략)
+### 7.4 Phase 1 MVP를 가장 빠르고 효과적으로 출시하는 방법 (13주 실행 전략)
 
 #### 원칙 — "Fake It Till You Make It, But Never Fake Data"
 
-- **목표**: 2026-07-31 베타 출시
+- **목표**: **2026-08-07 베타 출시** (Sprint 1 3주 확장 반영)
 - **금기**: 공개 매체 경로는 **절대 mock 데이터 금지** (AGENTS.md · fetchPublicMediaCatalog DB-backed 유지)
 - **허용**: UI 셸·플레이스홀더·관리자 내부 작업 우회
 
@@ -3304,17 +3304,17 @@ Phase 1은 Full-Verified 매체 300개로 시작 → **13,000 매체는 "배지 
 
 ---
 
-#### ⚡ 전략 3. "스프린트 0 병렬 트랙" — 출시 전 4주를 3개 팀이 병렬 실행
+#### ⚡ 전략 3. "스프린트 0 병렬 트랙" — 출시 전 4.5주를 3개 팀이 병렬 실행
 
-Sprint 1 시작 전(Pre-sprint 10일 + Sprint 1) 4주간 **3개 독립 트랙 병렬**:
+Pre-sprint 10일 + Sprint 1 (3주) = **약 4.5주간 3개 독립 트랙 병렬**:
 
 | 트랙 | 담당 | 산출물 |
 |---|---|---|
-| **Track A — Infra** | BE 2명 + DevOps | 인증·DB 마이그레이션·CI/CD·Sentry·Redis |
+| **Track A — Infra / 인증** | BE 2명 + DevOps | 인증(next-auth)·OAuth·DB 마이그레이션·CI/CD·Sentry·Redis·localStorage↔서버 동기화 |
 | **Track B — Design System** | 디자인·FE 1 | Figma → shadcn 컴포넌트·색·폰트·Tailwind 토큰 |
 | **Track C — Data** | 매체본부 + BE 1 | 기존 매체 200곳 CSV 마이그레이션·검증 배지 시드 30곳 |
 
-4주차에 3트랙 합류 → Sprint 2(지도 MVP)부터 **전속력 기능 개발 가능**.
+Sprint 1 종료(W3) 시점에 3트랙 합류 → Sprint 2(W4-5, 지도 MVP)부터 **전속력 기능 개발 가능**. 이 구조 덕분에 Sprint 1 3주 확장이 비싸지 않음.
 
 ---
 
@@ -3335,9 +3335,9 @@ Sprint 1 시작 전(Pre-sprint 10일 + Sprint 1) 4주간 **3개 독립 트랙 �
 
 #### ⚡ 전략 5. "엔드투엔드 E2E 먼저 · 유닛 테스트는 핵심만"
 
-12주 안에 품질과 속도 둘 다 잡으려면:
+13주 안에 품질과 속도 둘 다 잡으려면:
 - **Playwright E2E**: Flow A 전체(랜딩→지도→플래너→제안서→결제)를 Sprint 3부터 **반드시 통과**하는 GitHub Actions 게이트
-- **Vitest 유닛**: PDF 렌더링·검증 점수 계산·유동인구 지오해시 등 **핵심 로직만**
+- **Vitest 유닛**: PDF 렌더링·검증 점수 계산·유동인구 지오해시·**공개 웹뷰 토큰/rate-limit 로직** 등 **핵심 로직만**
 - **Storybook**: 디자인 시스템 컴포넌트만 (화면 전체 아님)
 
 **근거**: 단기간 MVP에선 "기능 하나가 망가져도 플로우 전체는 돈다"가 중요. 유닛 100% 커버리지보다 E2E 3~5개 시나리오 100% 통과가 훨씬 가치 있음.
@@ -3370,16 +3370,17 @@ Sprint 1 시작 전(Pre-sprint 10일 + Sprint 1) 4주간 **3개 독립 트랙 �
 
 ---
 
-### 7.5 종합 체크리스트 — 베타 출시 4주 전 (2026-07-01) 점검
+### 7.5 종합 체크리스트 — 베타 출시 4주 전 (2026-07-10) 점검
 
 **기술**
 - [ ] Sprint 1~5 모든 P0 AC 통과
 - [ ] Playwright Flow A E2E 95%+ 통과
 - [ ] Lighthouse Performance ≥ 85 (모바일)
 - [ ] Sentry 에러율 < 1%
-- [ ] PDF 생성 p95 < 30초
+- [ ] **PDF 생성 p95 < 60초, p50 < 45초**
 - [ ] Claude 추천 p95 < 10초
 - [ ] Kakao Map 1,000 매체 60fps
+- [ ] **공개 웹뷰 보안 정책 통과** (토큰 TTL·IP geo-restriction·rate-limit·다운로드 상한·`QuoteViewAudit` 로깅·`noindex`·Turnstile — F1.2 AC 8항목 전체)
 
 **제품·운영**
 - [ ] Verified 매체 300개 시드 완료
@@ -3398,7 +3399,7 @@ Sprint 1 시작 전(Pre-sprint 10일 + Sprint 1) 4주간 **3개 독립 트랙 �
 **마케팅**
 - [ ] `/changelog` 초기 콘텐츠
 - [ ] Founders 프로그램 초청 메일
-- [ ] 베타 런칭 공식 보도자료
+- [ ] 베타 런칭 공식 보도자료 (**2026-08-07 기준**)
 - [ ] LinkedIn / 업계 커뮤니티 티저 3건
 
 ---
@@ -3438,24 +3439,4 @@ Sprint 1 시작 전(Pre-sprint 10일 + Sprint 1) 4주간 **3개 독립 트랙 �
 > **버전**: v2.0 (7섹션 통합 제품 기획 · 전면 재작성)
 > **다음 리뷰**: Phase 1 Sprint 3 완료 시점 (2026-06-중순)
 > **담당**: Product Team
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
