@@ -1507,6 +1507,8 @@
     "campaigns": "캠페인",
     "crmRecords": "CRM 기록",
     "medias": "매체 관리",
+    "verification": "검증 큐",
+    "users": "사용자 관리",
     "networks": "네트워크 매체",
     "mediaHub": "매체 허브",
     "quoteTemplates": "견적 PDF",

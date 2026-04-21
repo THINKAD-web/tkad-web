@@ -21,6 +21,8 @@ import {
   ClipboardList,
   Sparkles,
   Share2,
+  ShieldCheck,
+  UserCog,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -46,6 +48,8 @@ const navDefs = [
   { href: "/admin/crm-records", key: "crmRecords" as const, icon: ContactRound },
   { href: "/admin/crm", key: "crm" as const, icon: UsersRound },
   { href: "/admin/medias", key: "medias" as const, icon: Monitor },
+  { href: "/admin/verification", key: "verification" as const, icon: ShieldCheck },
+  { href: "/admin/users", key: "users" as const, icon: UserCog },
   { href: "/admin/networks", key: "networks" as const, icon: Share2 },
   { href: "/admin/media-hub", key: "mediaHub" as const, icon: Database },
   { href: "/admin/quote-templates", key: "quoteTemplates" as const, icon: FileText },
