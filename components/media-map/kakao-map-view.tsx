@@ -93,11 +93,16 @@ export default function KakaoMapView({
   const clustererRef = useRef<unknown>(null);
   const infoWindowRef = useRef<unknown>(null);
   const onMarkerDetailRef = useRef(onMarkerDetail);
+  const markersRef = useRef<MapMarker[]>(markers);
   const [sdkError, setSdkError] = useState<string | null>(null);
 
   useEffect(() => {
     onMarkerDetailRef.current = onMarkerDetail;
   }, [onMarkerDetail]);
+
+  useEffect(() => {
+    markersRef.current = markers;
+  }, [markers]);
 
   useEffect(() => {
     const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
@@ -197,7 +202,7 @@ export default function KakaoMapView({
     infoWindowRef.current = null;
 
     if (!selectedId) return;
-    const m = markers.find((x) => x.id === selectedId);
+    const m = markersRef.current.find((x) => x.id === selectedId);
     if (!m) return;
 
     map.panTo(new kakao.maps.LatLng(m.lat, m.lng));
@@ -212,7 +217,7 @@ export default function KakaoMapView({
 
     const containerEl = document.createElement("div");
     containerEl.style.cssText =
-      "padding:10px 12px;min-width:200px;font-family:Pretendard,system-ui,sans-serif;";
+      "padding:10px 12px;min-width:220px;background:#fff;border:1px solid #e4e6ec;border-radius:12px;box-shadow:0 8px 24px rgba(13,27,46,0.15);font-family:Pretendard,system-ui,sans-serif;";
     containerEl.innerHTML = `
       <div style="font-size:13px;font-weight:600;color:#0D1B2E;margin-bottom:4px;line-height:1.3;">
         ${escapeHtml(m.name)}
@@ -221,7 +226,7 @@ export default function KakaoMapView({
         ${priceLabel}
       </div>
       <button type="button" data-detail="${escapeHtml(m.id)}"
-        style="width:100%;padding:6px 10px;background:#0D1B2E;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">
+        style="width:100%;padding:7px 10px;background:#0D1B2E;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">
         자세히 보기 →
       </button>
     `;
@@ -242,7 +247,9 @@ export default function KakaoMapView({
     return () => {
       info.setMap(null);
     };
-  }, [selectedId, markers]);
+  // markers는 매번 바뀔 수 있으므로 ref로 조회 (InfoWindow 재생성 방지)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
 
   if (sdkError) {
     return (
