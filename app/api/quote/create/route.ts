@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
   apiError,
   apiOk,
@@ -55,7 +56,10 @@ export async function POST(req: Request) {
       });
     }
 
-    const totalAmount = picked.reduce((sum, m) => sum + (m.price ?? 0), 0);
+    const totalAmount = picked.reduce(
+      (sum, m) => sum + catalogPriceFieldToWon(m.price ?? 0),
+      0,
+    );
 
     const quote = await prisma.ooHQuote.create({
       data: {

@@ -119,13 +119,17 @@ export default function KakaoMapView({
         });
         mapRef.current = map;
 
-        const clusterer = new kakao.maps.MarkerClusterer({
-          map,
-          averageCenter: true,
-          minLevel: 6,
-          gridSize: 60,
-        });
-        clustererRef.current = clusterer;
+        if (typeof kakao.maps.MarkerClusterer === "function") {
+          clustererRef.current = new kakao.maps.MarkerClusterer({
+            map,
+            averageCenter: true,
+            minLevel: 6,
+            gridSize: 60,
+          });
+        } else {
+          // clusterer 라이브러리 미로드 시 fallback: map에 직접 마커 추가
+          clustererRef.current = null;
+        }
 
         const fireBounds = () => {
           const b = map.getBounds();
@@ -152,8 +156,8 @@ export default function KakaoMapView({
 
   useEffect(() => {
     const map = mapRef.current as any;
+    if (!map) return;
     const clusterer = clustererRef.current as any;
-    if (!map || !clusterer) return;
     const kakao = (window as unknown as { kakao: any }).kakao;
 
     const existing = markerObjsRef.current;
@@ -161,7 +165,8 @@ export default function KakaoMapView({
 
     for (const [id, m] of existing) {
       if (!nextIds.has(id)) {
-        clusterer.removeMarker(m);
+        if (clusterer) clusterer.removeMarker(m);
+        else (m as any).setMap(null);
         existing.delete(id);
       }
     }
@@ -175,9 +180,10 @@ export default function KakaoMapView({
       });
       kakao.maps.event.addListener(marker, "click", () => onSelect(mk.id));
       existing.set(mk.id, marker);
-      toAdd.push(marker);
+      if (clusterer) toAdd.push(marker);
+      else marker.setMap(map);
     }
-    if (toAdd.length) clusterer.addMarkers(toAdd);
+    if (clusterer && toAdd.length) clusterer.addMarkers(toAdd);
   }, [markers, onSelect]);
 
   useEffect(() => {
