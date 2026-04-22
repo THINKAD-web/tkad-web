@@ -318,7 +318,7 @@ export default function AdminOohQuotesClient() {
                       <td className="px-3 py-2">
                         <div className="flex flex-wrap gap-1">
                           <Button size="sm" variant="outline" asChild>
-                            <Link href={`/quote/${row.id}`} target="_blank" rel="noreferrer">
+                            <Link href={`/quote/${row.id}/preview`} target="_blank" rel="noreferrer">
                               <ExternalLink className="mr-1 h-3 w-3" />
                               {t("openDetail")}
                             </Link>
