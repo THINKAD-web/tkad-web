@@ -84,6 +84,11 @@ export default function MediaMapPageClient() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [cartIds, setCartIds] = useState<string[]>([]);
+  const itemsRef = useRef<Item[]>([]);
+
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   useEffect(() => {
     setCartIds(readCart());
@@ -153,14 +158,12 @@ export default function MediaMapPageClient() {
   }, [selectedId, items]);
 
   // 마커 클릭 시 즉시 selectedId + selectedItem을 한 번에 set (지연 없이 카드 표시)
-  const handleSelect = useCallback(
-    (id: string) => {
-      const item = items.find((i) => i.id === id);
-      setSelectedId(id);
-      if (item) setSelectedItem(item);
-    },
-    [items],
-  );
+  // itemsRef를 사용해 stale closure 를 회피한다 (items가 자주 바뀌어도 안전)
+  const handleSelect = useCallback((id: string) => {
+    setSelectedId(id);
+    const item = itemsRef.current.find((i) => i.id === id);
+    if (item) setSelectedItem(item);
+  }, []);
 
   const selected = selectedItem;
 
@@ -333,7 +336,10 @@ export default function MediaMapPageClient() {
         />
 
         {selected && (
-          <div className="absolute left-3 bottom-3 right-3 md:left-auto md:right-3 md:w-[320px] bg-white rounded-xl shadow-lg border p-3">
+          <div
+            style={{ zIndex: 100000 }}
+            className="absolute left-3 bottom-3 right-3 md:left-auto md:right-3 md:w-[320px] md:bottom-4 bg-white rounded-xl shadow-2xl border p-3"
+          >
             <button
               type="button"
               onClick={() => {
