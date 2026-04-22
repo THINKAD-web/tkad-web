@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/user-session";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { apiError, apiOk, apiServerError } from "@/lib/api-response";
 
 export const runtime = "nodejs";
@@ -34,7 +35,7 @@ export async function GET() {
           location: m.location,
           region: m.region,
           type: m.type,
-          price: m.price,
+          price: catalogPriceFieldToWon(m.price ?? 0),
           pricePeriod: m.pricePeriod ?? "month",
           image: m.sampleImages?.[0] ?? null,
           visibilityScore: m.visibilityScore ?? 0,

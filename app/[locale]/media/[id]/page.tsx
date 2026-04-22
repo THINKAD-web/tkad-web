@@ -50,6 +50,7 @@ import TrackMediaView from "@/components/track-media-view";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import MediaDetailHeroGallery from "@/components/media-detail-hero-gallery";
 import { MediaDetailAddToCart } from "@/components/media-detail-add-to-cart";
+import { MediaFavoriteButton } from "@/components/media-favorite-button";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
@@ -332,7 +333,13 @@ export default async function MediaDetailPage({ params }: Props) {
               관심 가는 매체라면 견적서에 담아보세요
             </p>
           </div>
-          <MediaDetailAddToCart mediaId={media.id} mediaName={isKo ? media.name : media.nameEn} />
+          <div className="flex items-center gap-2">
+            <MediaFavoriteButton
+              mediaId={media.id}
+              mediaName={isKo ? media.name : media.nameEn}
+            />
+            <MediaDetailAddToCart mediaId={media.id} mediaName={isKo ? media.name : media.nameEn} />
+          </div>
         </div>
       </div>
 

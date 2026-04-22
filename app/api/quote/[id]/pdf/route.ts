@@ -5,6 +5,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { ooHQuotePdfToBase64 } from "@/lib/server-ooh-quote-pdf";
 import { buildKoreanQuotePdf } from "@/lib/build-korean-quote-pdf";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export async function GET(
           name: m.name,
           location: m.location,
           type: m.type,
-          price: m.price,
+          price: catalogPriceFieldToWon(m.price ?? 0),
           pricePeriod: m.pricePeriod ?? "month",
           visibilityScore: m.visibilityScore ?? 0,
         }));

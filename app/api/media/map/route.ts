@@ -1,4 +1,5 @@
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { apiOk, apiServerError } from "@/lib/api-response";
 
 export const runtime = "nodejs";
@@ -43,8 +44,9 @@ export async function GET(req: Request) {
         if (type && m.type !== type) return false;
         if (region && m.region !== region && m.city !== region && m.district !== region)
           return false;
-        if (priceMin != null && (m.price ?? 0) < priceMin) return false;
-        if (priceMax != null && (m.price ?? 0) > priceMax) return false;
+        const priceWon = catalogPriceFieldToWon(m.price ?? 0);
+        if (priceMin != null && priceWon < priceMin) return false;
+        if (priceMax != null && priceWon > priceMax) return false;
         if (q) {
           const hay = [m.name, m.location, m.region, m.city, m.district]
             .filter(Boolean)
@@ -63,7 +65,7 @@ export async function GET(req: Request) {
         district: m.district ?? null,
         type: m.type,
         subCategory: m.subCategory ?? null,
-        price: m.price,
+        price: catalogPriceFieldToWon(m.price ?? 0),
         pricePeriod: m.pricePeriod ?? "month",
         lat: m.lat as number,
         lng: m.lng as number,

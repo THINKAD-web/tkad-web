@@ -40,6 +40,23 @@ export default function CartPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 로그인 사용자 정보 자동 입력
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/session", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled || !d?.ok || !d.data) return;
+        const u = d.data;
+        setClientName((prev) => prev || u.name || "");
+        setClientEmail((prev) => prev || u.email || "");
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     async function load() {
