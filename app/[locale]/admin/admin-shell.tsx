@@ -42,19 +42,24 @@ function SignOutButton({ locale, label }: { locale: string; label: string }) {
 }
 
 const navDefs = [
+  // 1. 메인
   { href: "/admin", key: "dashboard" as const, icon: LayoutDashboard },
+  // 2. 영업 입구 (일 단위)
   { href: "/admin/inquiries", key: "inquiries" as const, icon: MessageSquareText },
-  { href: "/admin/campaigns", key: "campaigns" as const, icon: Megaphone },
-  { href: "/admin/crm-records", key: "crmRecords" as const, icon: ContactRound },
-  { href: "/admin/crm", key: "crm" as const, icon: UsersRound },
-  { href: "/admin/medias", key: "medias" as const, icon: Monitor },
-  { href: "/admin/verification", key: "verification" as const, icon: ShieldCheck },
-  { href: "/admin/users", key: "users" as const, icon: UserCog },
-  { href: "/admin/networks", key: "networks" as const, icon: Share2 },
-  { href: "/admin/media-hub", key: "mediaHub" as const, icon: Database },
-  { href: "/admin/quote-templates", key: "quoteTemplates" as const, icon: FileText },
   { href: "/admin/quotes", key: "quotesList" as const, icon: ClipboardList },
   { href: "/admin/quotes/new", key: "quotesNew" as const, icon: Calculator },
+  { href: "/admin/campaigns", key: "campaigns" as const, icon: Megaphone },
+  // 3. 매체 자산
+  { href: "/admin/medias", key: "medias" as const, icon: Monitor },
+  { href: "/admin/verification", key: "verification" as const, icon: ShieldCheck },
+  { href: "/admin/networks", key: "networks" as const, icon: Share2 },
+  { href: "/admin/media-hub", key: "mediaHub" as const, icon: Database },
+  // 4. 사람
+  { href: "/admin/users", key: "users" as const, icon: UserCog },
+  { href: "/admin/crm", key: "crm" as const, icon: UsersRound },
+  { href: "/admin/crm-records", key: "crmRecords" as const, icon: ContactRound },
+  // 5. 도구·분석
+  { href: "/admin/quote-templates", key: "quoteTemplates" as const, icon: FileText },
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
   { href: "/admin/ai-content", key: "aiContent" as const, icon: Sparkles },
 ];
