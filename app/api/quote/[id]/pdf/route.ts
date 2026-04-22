@@ -40,51 +40,66 @@ export async function GET(
 
     const localeKo = !row.locale || row.locale.toLowerCase().startsWith("ko");
     let buf: Buffer;
+    const quoteRow = row;
+
+    async function buildEnglishFallback(): Promise<Buffer> {
+      const b64 = await ooHQuotePdfToBase64(db, {
+        clientCompany: quoteRow.clientCompany,
+        clientName: quoteRow.clientName,
+        period: quoteRow.period,
+        periodKey: quoteRow.periodKey,
+        budgetMin: quoteRow.budgetMin,
+        budgetMax: quoteRow.budgetMax,
+        pdfTemplate: quoteRow.pdfTemplate,
+        locale: quoteRow.locale,
+        mediaIds: quoteRow.mediaIds,
+        totalAmount: quoteRow.totalAmount,
+        networkSelections: quoteRow.networkSelections ?? undefined,
+      });
+      return Buffer.from(b64, "base64");
+    }
 
     if (localeKo) {
-      // 한국어 견적서 (신규 Noto Sans KR + THINKAD 브랜드 레이아웃)
-      const catalog = await fetchPublicMediaCatalog();
-      const rows = catalog
-        .filter((m) => row.mediaIds.includes(m.id))
-        .map((m) => ({
-          name: m.name,
-          location: m.location,
-          type: m.type,
-          price: catalogPriceFieldToWon(m.price ?? 0),
-          pricePeriod: m.pricePeriod ?? "month",
-          visibilityScore: m.visibilityScore ?? 0,
-        }));
-      const bytes = await buildKoreanQuotePdf({
-        quoteId: row.id,
-        createdAt: row.createdAt,
-        clientName: row.clientName,
-        clientEmail: row.clientEmail,
-        clientCompany: row.clientCompany,
-        period: row.period,
-        startDate: row.startDate,
-        endDate: row.endDate,
-        budgetMin: row.budgetMin,
-        budgetMax: row.budgetMax,
-        totalAmount: row.totalAmount,
-        rows,
-      });
-      buf = Buffer.from(bytes);
+      // 한국어 견적서 (Noto Sans KR + THINKAD 브랜드)
+      try {
+        const catalog = await fetchPublicMediaCatalog();
+        const rows = catalog
+          .filter((m) => row.mediaIds.includes(m.id))
+          .map((m) => ({
+            name: m.name,
+            location: m.location,
+            type: m.type,
+            price: catalogPriceFieldToWon(m.price ?? 0),
+            pricePeriod: m.pricePeriod ?? "month",
+            visibilityScore: m.visibilityScore ?? 0,
+          }));
+        if (rows.length === 0) {
+          // 매체 매칭 실패 시 즉시 영문 fallback
+          console.warn("[quote pdf GET] no media rows matched, fallback to en", { id, mediaIds: row.mediaIds });
+          buf = await buildEnglishFallback();
+        } else {
+          const bytes = await buildKoreanQuotePdf({
+            quoteId: row.id,
+            createdAt: row.createdAt,
+            clientName: row.clientName,
+            clientEmail: row.clientEmail,
+            clientCompany: row.clientCompany,
+            period: row.period,
+            startDate: row.startDate,
+            endDate: row.endDate,
+            budgetMin: row.budgetMin,
+            budgetMax: row.budgetMax,
+            totalAmount: row.totalAmount,
+            rows,
+          });
+          buf = Buffer.from(bytes);
+        }
+      } catch (koErr) {
+        console.error("[quote pdf GET] korean builder failed, fallback to en", koErr);
+        buf = await buildEnglishFallback();
+      }
     } else {
-      // 영어: 기존 영문 PDF 빌더
-      const b64 = await ooHQuotePdfToBase64(db, {
-        clientCompany: row.clientCompany,
-        clientName: row.clientName,
-        period: row.period,
-        periodKey: row.periodKey,
-        budgetMin: row.budgetMin,
-        budgetMax: row.budgetMax,
-        pdfTemplate: row.pdfTemplate,
-        locale: row.locale,
-        mediaIds: row.mediaIds,
-        totalAmount: row.totalAmount,
-        networkSelections: row.networkSelections ?? undefined,
-      });
-      buf = Buffer.from(b64, "base64");
+      buf = await buildEnglishFallback();
     }
 
     const displayName = localeKo ? "싱커드-견적서.pdf" : "THINKAD-quote.pdf";

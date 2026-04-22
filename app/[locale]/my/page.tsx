@@ -103,8 +103,11 @@ export default function MyDashboardPage() {
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
-    toast.success("로그아웃되었습니다.");
-    router.push("/login");
+    // 모든 client state(GNB session 등) 완전 초기화 위해 hard navigation
+    if (typeof window !== "undefined") {
+      const lang = document.documentElement.lang || "ko";
+      window.location.href = `/${lang}/login`;
+    }
   }
 
   if (meLoading || !me) {
