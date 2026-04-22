@@ -20,17 +20,15 @@ function LanguageToggle() {
     });
   };
 
+  const next = locale === "ko" ? "en" : "ko";
   return (
     <button
-      onClick={() => switchLocale(locale === "ko" ? "en" : "ko")}
+      onClick={() => switchLocale(next)}
       disabled={isPending}
       aria-label={locale === "ko" ? "Switch to English" : "한국어로 전환"}
-      className="touch-target flex min-h-11 items-center gap-1.5 rounded-full border border-primary/14 bg-white/88 px-3 py-2 text-xs font-semibold text-foreground transition-all duration-300 hover:border-silver/55 hover:bg-white disabled:opacity-60 touch-manipulation"
+      className="inline-flex h-9 min-w-9 items-center justify-center rounded-full border border-primary/14 bg-white/88 px-2.5 text-[11px] font-semibold uppercase tracking-wide text-primary/75 transition-all duration-300 hover:border-silver/55 hover:bg-white hover:text-primary disabled:opacity-60"
     >
-      <span className="text-base leading-none">{locale === "ko" ? "🇰🇷" : "🇺🇸"}</span>
-      <span className="text-primary/70">{locale === "ko" ? "한국어" : "EN"}</span>
-      <span className="text-primary/25">|</span>
-      <span className="text-primary/45">{locale === "ko" ? "EN" : "한국어"}</span>
+      {next === "ko" ? "KO" : "EN"}
     </button>
   );
 }
@@ -77,12 +75,12 @@ export default function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-0.5 lg:flex">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`nav-link rounded-md px-4 py-2 text-sm font-medium transition-colors duration-300 hover:text-primary motion-safe:hover:-translate-y-0.5 ${
+              className={`nav-link rounded-md px-2.5 py-2 text-sm font-medium transition-colors duration-300 hover:text-primary motion-safe:hover:-translate-y-0.5 ${
                 pathname === item.href
                   ? "active text-primary"
                   : "text-muted-foreground"
@@ -93,20 +91,20 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
           <HeaderUserMenu />
           <LanguageToggle />
             <Link href="/contact">
             <Button
               variant="cta"
-              className="btn-gold rounded-full px-6 shadow-md shadow-cta/25"
+              className="btn-gold rounded-full px-4 shadow-md shadow-cta/25"
             >
               {t("nav.contact")}
             </Button>
           </Link>
         </div>
 
-        <div className="flex items-center gap-1.5 md:hidden">
+        <div className="flex items-center gap-1.5 lg:hidden">
           <HeaderUserMenu />
           <LanguageToggle />
           <Sheet open={open} onOpenChange={setOpen}>

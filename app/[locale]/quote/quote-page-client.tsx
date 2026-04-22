@@ -330,7 +330,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         if (opts?.length && opts[idx]) {
           return sum + catalogPriceFieldToPriceMan(opts[idx].price);
         }
-        return sum + m.price;
+        return sum + catalogPriceFieldToPriceMan(m.price);
       }, 0),
     [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex],
   );
@@ -1767,7 +1767,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   <CardContent className="space-y-4 text-sm">
                     <div>
                       <div className="text-lg font-bold text-navy">
-                        ₩{monthlyCost.toLocaleString()}
+                        {isKo
+                          ? `${monthlyCost.toLocaleString()}만원`
+                          : `₩${(monthlyCost * 10_000).toLocaleString()}`}
                         <span className="text-xs font-normal text-muted-foreground">
                           {" "}{t("quote.perMonth")}
                         </span>
@@ -1779,7 +1781,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           {t("quote.total")}
                         </span>
                         <span className="text-xl font-bold text-navy">
-                          ₩{totalCost.toLocaleString()}
+                          {isKo
+                            ? `${totalCost.toLocaleString()}만원`
+                            : `₩${(totalCost * 10_000).toLocaleString()}`}
                         </span>
                       </div>
                     </div>
