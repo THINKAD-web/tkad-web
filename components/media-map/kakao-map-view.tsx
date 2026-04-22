@@ -93,12 +93,17 @@ export default function KakaoMapView({
   const clustererRef = useRef<unknown>(null);
   const infoWindowRef = useRef<unknown>(null);
   const onMarkerDetailRef = useRef(onMarkerDetail);
+  const onSelectRef = useRef(onSelect);
   const markersRef = useRef<MapMarker[]>(markers);
   const [sdkError, setSdkError] = useState<string | null>(null);
 
   useEffect(() => {
     onMarkerDetailRef.current = onMarkerDetail;
   }, [onMarkerDetail]);
+
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
 
   useEffect(() => {
     markersRef.current = markers;
@@ -183,13 +188,14 @@ export default function KakaoMapView({
         position: new kakao.maps.LatLng(mk.lat, mk.lng),
         title: mk.name,
       });
-      kakao.maps.event.addListener(marker, "click", () => onSelect(mk.id));
+      kakao.maps.event.addListener(marker, "click", () => onSelectRef.current(mk.id));
       existing.set(mk.id, marker);
       if (clusterer) toAdd.push(marker);
       else marker.setMap(map);
     }
     if (clusterer && toAdd.length) clusterer.addMarkers(toAdd);
-  }, [markers, onSelect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [markers]);
 
   useEffect(() => {
     const map = mapRef.current as any;

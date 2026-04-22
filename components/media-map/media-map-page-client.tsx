@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import type { MapBounds, MapMarker } from "./kakao-map-view";
 import { Spinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/use-toast";
+import { MediaFavoriteButton } from "@/components/media-favorite-button";
 
 const KakaoMapView = dynamic(() => import("./kakao-map-view"), {
   ssr: false,
@@ -365,10 +366,13 @@ export default function MediaMapPageClient() {
                 </div>
               </div>
             </div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex items-center gap-2">
+              <div className="flex-shrink-0">
+                <MediaFavoriteButton mediaId={selected.id} mediaName={selected.name} />
+              </div>
               <a
                 href={`/media/${selected.id}`}
-                className="flex-1 text-center text-xs py-2 border rounded-md hover:bg-gray-50"
+                className="flex-1 inline-flex items-center justify-center text-xs py-2 border rounded-md hover:bg-gray-50"
               >
                 상세 보기
               </a>
