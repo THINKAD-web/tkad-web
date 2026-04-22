@@ -31,7 +31,64 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 /**
  * 외부 http(s) 이미지는 canvas 오염(CORS)을 유발할 수 있어 클론에서 플레이스홀더로 교체합니다.
  */
+/**
+ * Tailwind v4 등이 lab()/oklch()/lch()/oklab() 색 함수를 사용하면 html2canvas가
+ * "Attempting to parse an unsupported color function 'lab'" 에러를 낸다.
+ * onclone에서 다음 2단계 처리:
+ * 1) 클론된 문서의 모든 element: computed color를 inline rgb로 강제 주입
+ * 2) inline style에 남은 lab/oklch 표현은 rgb(0,0,0)로 치환 (최후 수단)
+ */
+function flattenModernColorsToInline(clonedDoc: Document, cloned: HTMLElement) {
+  const COLOR_PROPS = [
+    "color",
+    "background-color",
+    "border-top-color",
+    "border-right-color",
+    "border-bottom-color",
+    "border-left-color",
+    "outline-color",
+    "fill",
+    "stroke",
+    "text-decoration-color",
+  ];
+  const win = clonedDoc.defaultView;
+  if (!win) return;
+  const all: HTMLElement[] = [cloned, ...Array.from(cloned.querySelectorAll<HTMLElement>("*"))];
+  for (const el of all) {
+    let cs: CSSStyleDeclaration;
+    try {
+      cs = win.getComputedStyle(el);
+    } catch {
+      continue;
+    }
+    for (const prop of COLOR_PROPS) {
+      const val = cs.getPropertyValue(prop);
+      if (!val) continue;
+      if (/(^|\s)(lab|oklch|lch|oklab)\(/.test(val)) {
+        el.style.setProperty(prop, "rgb(0,0,0)");
+      } else {
+        el.style.setProperty(prop, val);
+      }
+    }
+  }
+}
+
 function replaceUntrustedImagesInClone(clonedDoc: Document, cloned: HTMLElement) {
+  try {
+    flattenModernColorsToInline(clonedDoc, cloned);
+    // inline style에 남은 잔존 color 함수 치환
+    cloned.querySelectorAll<HTMLElement>("*").forEach((el) => {
+      const s = el.getAttribute("style");
+      if (s && /(lab|oklch|lch|oklab)\(/.test(s)) {
+        el.setAttribute(
+          "style",
+          s.replace(/(lab|oklch|lch|oklab)\([^)]+\)/g, "rgb(0,0,0)"),
+        );
+      }
+    });
+  } catch {
+    /* ignore */
+  }
   cloned.querySelectorAll("img").forEach((node) => {
     const img = node as HTMLImageElement;
     const src = (img.getAttribute("src") ?? img.src ?? "").trim();
