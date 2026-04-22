@@ -80,8 +80,8 @@ export default async function HomePage({ params }: Props) {
    * DB 연결 시 실제 행만; 미연결 시에만 샘플 카탈로그.
    */
   const [featuredCatalog, popularCatalog] = await Promise.all([
-    fetchHomeFeaturedMedia(3),
-    fetchHomePopularMedia(4),
+    fetchHomeFeaturedMedia(6),
+    fetchHomePopularMedia(6),
   ]);
 
   return (

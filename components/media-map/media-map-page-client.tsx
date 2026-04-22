@@ -81,6 +81,7 @@ export default function MediaMapPageClient() {
     q: "",
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [cartIds, setCartIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -140,10 +141,16 @@ export default function MediaMapPageClient() {
     [items],
   );
 
-  const selected = useMemo(
-    () => items.find((i) => i.id === selectedId) ?? null,
-    [items, selectedId],
-  );
+  // selected를 state에 pin — bounds 변경으로 items가 갱신돼도 팝업 유지
+  useEffect(() => {
+    if (!selectedId) {
+      setSelectedItem(null);
+      return;
+    }
+    const hit = items.find((i) => i.id === selectedId);
+    if (hit) setSelectedItem(hit);
+  }, [selectedId, items]);
+  const selected = selectedItem;
 
   const inCart = useCallback((id: string) => cartIds.includes(id), [cartIds]);
   const toast = useAppToast();
@@ -251,13 +258,15 @@ export default function MediaMapPageClient() {
                   <img
                     src={it.image}
                     alt={it.name}
-                    className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                    className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0" />
+                  <div className="w-24 h-24 bg-secondary rounded-lg flex-shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{it.name}</div>
+                  <div className="text-sm font-semibold text-foreground line-clamp-2 leading-snug">
+                    {it.name}
+                  </div>
                   <div className="text-xs text-gray-500 truncate">
                     {[it.region, it.district, it.city].filter(Boolean).join(" · ") || it.location}
                   </div>
