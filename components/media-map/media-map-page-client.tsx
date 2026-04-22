@@ -150,6 +150,17 @@ export default function MediaMapPageClient() {
     const hit = items.find((i) => i.id === selectedId);
     if (hit) setSelectedItem(hit);
   }, [selectedId, items]);
+
+  // 마커 클릭 시 즉시 selectedId + selectedItem을 한 번에 set (지연 없이 카드 표시)
+  const handleSelect = useCallback(
+    (id: string) => {
+      const item = items.find((i) => i.id === id);
+      setSelectedId(id);
+      if (item) setSelectedItem(item);
+    },
+    [items],
+  );
+
   const selected = selectedItem;
 
   const inCart = useCallback((id: string) => cartIds.includes(id), [cartIds]);
@@ -250,7 +261,7 @@ export default function MediaMapPageClient() {
             <li
               key={it.id}
               className={`p-3 cursor-pointer hover:bg-gray-50 ${selectedId === it.id ? "bg-amber-50" : ""}`}
-              onClick={() => setSelectedId(it.id)}
+              onClick={() => handleSelect(it.id)}
             >
               <div className="flex gap-3">
                 {it.image ? (
@@ -309,7 +320,7 @@ export default function MediaMapPageClient() {
         <KakaoMapView
           markers={markers}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={handleSelect}
           onBoundsChange={setBounds}
           onMarkerDetail={(id) => {
             const locale =
@@ -324,7 +335,10 @@ export default function MediaMapPageClient() {
           <div className="absolute left-3 bottom-3 right-3 md:left-auto md:right-3 md:w-[320px] bg-white rounded-xl shadow-lg border p-3">
             <button
               type="button"
-              onClick={() => setSelectedId(null)}
+              onClick={() => {
+                setSelectedId(null);
+                setSelectedItem(null);
+              }}
               className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-sm"
               aria-label="닫기"
             >

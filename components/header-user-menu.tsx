@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User as UserIcon } from "lucide-react";
@@ -9,6 +10,7 @@ import { useCart } from "@/lib/cart";
 type Session = { id: string; email: string; name: string; role: string } | null;
 
 function useSession() {
+  const pathname = usePathname();
   const [session, setSession] = useState<Session>(null);
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
@@ -27,7 +29,7 @@ function useSession() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [pathname]); // 경로 변경(로그아웃 후 /login 이동 등) 시 재조회
   return { session, loaded };
 }
 

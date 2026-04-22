@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ShieldCheck,
   Eye,
+  FileText,
 } from "lucide-react";
 import { FullPageSpinner, EmptyState } from "@/components/ui/spinner";
 import { QuoteStatusBadge } from "@/components/my/quote-status-badge";
@@ -80,6 +81,7 @@ export default function QuotePreviewPage() {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -153,14 +155,34 @@ export default function QuotePreviewPage() {
               생성일 {formatDate(quote.createdAt)}
             </p>
           </div>
-          <a
-            href={`/api/quote/${quote.id}/pdf`}
-            className="inline-flex items-center justify-center gap-1.5 h-11 px-5 bg-primary text-white rounded-lg text-sm font-semibold shadow-sm hover:-translate-y-px hover:shadow-md active:translate-y-0 active:scale-[0.98] transition-all duration-200"
-          >
-            <Download className="w-4 h-4" />
-            PDF 다운로드
-          </a>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setShowPdfPreview((v) => !v)}
+              className="inline-flex items-center justify-center gap-1.5 h-11 px-4 bg-card border border-border text-foreground rounded-lg text-sm font-semibold hover:bg-secondary/60 hover:-translate-y-px active:translate-y-0 active:scale-[0.98] transition-all duration-200"
+            >
+              <FileText className="w-4 h-4" />
+              {showPdfPreview ? "미리보기 닫기" : "PDF 미리보기"}
+            </button>
+            <a
+              href={`/api/quote/${quote.id}/pdf`}
+              className="inline-flex items-center justify-center gap-1.5 h-11 px-5 bg-primary text-white rounded-lg text-sm font-semibold shadow-sm hover:-translate-y-px hover:shadow-md active:translate-y-0 active:scale-[0.98] transition-all duration-200"
+            >
+              <Download className="w-4 h-4" />
+              PDF 다운로드
+            </a>
+          </div>
         </header>
+
+        {showPdfPreview && (
+          <section className="mb-5 bg-card border border-border/60 rounded-2xl shadow-sm overflow-hidden">
+            <iframe
+              src={`/api/quote/${quote.id}/pdf#toolbar=0`}
+              title="견적서 PDF 미리보기"
+              className="w-full h-[600px] sm:h-[800px]"
+            />
+          </section>
+        )}
 
         <section className="bg-card border border-border/60 rounded-2xl shadow-sm p-5 sm:p-6 mb-5">
           <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
