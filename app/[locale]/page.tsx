@@ -38,6 +38,13 @@ import {
 
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { ProcessStepImage } from "@/components/process-step-image";
+import {
+  VisibilityGauge,
+  FootTrafficBadge,
+  ImpressionsCompact,
+  VerifiedBadge,
+  MediaTypeBadge,
+} from "@/components/media-metric-viz";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
@@ -325,18 +332,21 @@ function HomeContent({
               const typeLabel = isKo
                 ? (typeLabels[media.type]?.ko ?? media.type)
                 : (typeLabels[media.type]?.en ?? media.type);
-              const daily =
-                media.dailyFootTraffic > 0
-                  ? media.dailyFootTraffic.toLocaleString()
-                  : "—";
-              const vis =
-                media.visibilityScore != null
-                  ? String(media.visibilityScore)
-                  : "—";
-              const monthlyImp =
-                media.monthlyFootTraffic != null
-                  ? media.monthlyFootTraffic.toLocaleString()
-                  : "—";
+              /**
+               * 전국 상위 백분위 — 간단 휴리스틱:
+               *   일 유동 100,000+ → top 5%
+               *   50,000+ → top 10%
+               *   20,000+ → top 25%
+               *   10,000+ → top 50%
+               *   그 외 → null (표시 생략)
+               */
+              const daily = media.dailyFootTraffic ?? 0;
+              const topPercentile =
+                daily >= 100_000 ? 5
+                  : daily >= 50_000 ? 10
+                  : daily >= 20_000 ? 25
+                  : daily >= 10_000 ? 50
+                  : null;
               return (
                 <ScrollAnimate key={media.id} delay={i * 100}>
                   <Card className="group relative overflow-hidden border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl">
@@ -356,18 +366,12 @@ function HomeContent({
                       <div className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-light text-lg font-bold text-navy shadow-md">
                         {rank}
                       </div>
-                      <div className="absolute top-4 right-4 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
-                        <BadgeCheck className="h-3.5 w-3.5" />
-                        Verified
+                      <div className="absolute top-4 right-4 z-10">
+                        <VerifiedBadge className="bg-emerald-500/95 border-emerald-400 text-white shadow-sm" />
                       </div>
                     </MediaCatalogThumbnail>
                     <CardHeader className="pb-3">
-                      <Badge
-                        variant="secondary"
-                        className="w-fit bg-navy/5 text-xs font-medium text-navy"
-                      >
-                        {typeLabel}
-                      </Badge>
+                      <MediaTypeBadge type={media.type} label={typeLabel} />
                       <CardTitle className="text-lg font-bold text-navy">
                         {isKo ? media.name : (media.nameEn || media.name)}
                       </CardTitle>
@@ -377,30 +381,24 @@ function HomeContent({
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-3 gap-3 rounded-xl bg-slate-50 p-3">
-                        <div className="text-center">
-                          <div className="text-xs text-muted-foreground">
-                            {isKo ? "일 유동(명)" : "Daily footfall"}
-                          </div>
-                          <div className="mt-0.5 text-sm font-bold text-navy">
-                            {daily}
-                          </div>
-                        </div>
-                        <div className="border-x text-center">
-                          <div className="text-xs text-muted-foreground">
-                            {isKo ? "가시성" : "Visibility"}
-                          </div>
-                          <div className="mt-0.5 text-sm font-bold text-gold-dark">
-                            {vis}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-muted-foreground">
-                            {isKo ? "월 노출" : "Mo. impr."}
-                          </div>
-                          <div className="mt-0.5 text-sm font-bold text-emerald-600">
-                            {monthlyImp}
-                          </div>
+                      <div className="space-y-3 rounded-xl bg-slate-50 p-3">
+                        <FootTrafficBadge
+                          daily={media.dailyFootTraffic}
+                          topPercentile={topPercentile}
+                        />
+                        <VisibilityGauge score={media.visibilityScore ?? 0} />
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-200/80">
+                          <ImpressionsCompact
+                            value={media.monthlyFootTraffic ?? null}
+                            label={isKo ? "월 노출" : "Mo. impr."}
+                          />
+                          {media.dailyFootTraffic > 0 && (
+                            <ImpressionsCompact
+                              value={media.dailyFootTraffic * 30}
+                              label={isKo ? "누적/월" : "Monthly"}
+                              suffix={isKo ? "명" : ""}
+                            />
+                          )}
                         </div>
                       </div>
 
