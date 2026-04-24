@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Download, Loader2 } from "lucide-react";
-import { captureElementAsPng } from "@/lib/html-to-pdf";
+import { captureElementAsPng, downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
 
 export type CampaignReportData = {
   campaignName: string;
@@ -55,7 +55,14 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
     try {
       const d = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       await captureElementAsPng(ref.current, `싱커드_게재보고서_${d}.png`);
-    } finally { setBusy(false); }
+    } catch (e) {
+      console.error("[campaign-report] png capture failed", e);
+      window.alert(
+        `이미지 저장에 실패했습니다.\n${e instanceof Error ? e.message : String(e)}`,
+      );
+    } finally {
+      setBusy(false);
+    }
   };
 
   const handlePdf = async () => {
@@ -63,25 +70,18 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
     setBusy(true);
     try {
       const d = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      const html2canvas = (await import("html2canvas")).default;
-      const { default: JsPDF } = await import("jspdf");
-      const canvas = await html2canvas(ref.current, {
-        scale: 2, useCORS: true, allowTaint: false,
-        backgroundColor: "#ffffff", scrollX: 0, scrollY: -window.scrollY, imageTimeout: 20000,
-      });
-      const imgData = canvas.toDataURL("image/jpeg", 0.92);
-      const pdf = new JsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = (canvas.height * pdfW) / canvas.width;
-      const pageH = pdf.internal.pageSize.getHeight();
-      let y = 0;
-      while (y < pdfH) {
-        if (y > 0) pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, -y, pdfW, pdfH);
-        y += pageH;
-      }
-      pdf.save(`싱커드_게재보고서_${d}.pdf`);
-    } finally { setBusy(false); }
+      await downloadPdfFromHtmlElement(
+        ref.current,
+        `싱커드_게재보고서_${d}.pdf`,
+      );
+    } catch (e) {
+      console.error("[campaign-report] pdf export failed", e);
+      window.alert(
+        `PDF 생성에 실패했습니다.\n${e instanceof Error ? e.message : String(e)}`,
+      );
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (

@@ -523,7 +523,11 @@ export default function AdminCampaignsPage() {
       );
       if (!res.ok) {
         const j = (await res.json().catch(() => ({}))) as { error?: string };
-        window.alert(j.error ?? "PDF 생성 실패");
+        const hint =
+          res.status === 503
+            ? "\n(서버에 ANTHROPIC_API_KEY 가 설정되어 있지 않습니다. Vercel 환경변수를 확인해주세요.)"
+            : "";
+        window.alert(`${j.error ?? "PDF 생성 실패"}${hint}`);
         return;
       }
       const blob = await res.blob();
@@ -537,6 +541,11 @@ export default function AdminCampaignsPage() {
       a.download = name;
       a.click();
       URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("[admin/campaigns] AI PDF fetch failed", e);
+      window.alert(
+        `PDF 생성 중 네트워크 오류가 발생했습니다.\n${e instanceof Error ? e.message : String(e)}`,
+      );
     } finally {
       setPdfBusy(false);
     }

@@ -17,6 +17,8 @@ import {
   lineSupplyWon,
   monthFactorFromDays,
 } from "@/lib/admin-quote-calc";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import { QuotePdfPreview } from "@/components/quote-pdf-preview";
 import {
   Calculator,
   Loader2,
@@ -265,7 +267,7 @@ export default function AdminQuoteNewClient() {
         mediaName: isKo ? m.name : m.nameEn || m.name,
         spec: mediaSpecLine(m),
         period: campaignPeriodLabel,
-        unitPrice: m.price * 10_000,
+        unitPrice: catalogPriceFieldToWon(m.price),
         quantity: qty,
         amount: lineSupplyWon(m.price, monthFactor, qty),
       });
@@ -912,125 +914,102 @@ export default function AdminQuoteNewClient() {
               <button
                 onClick={async () => {
                   try {
-                    const { default: html2canvas } = await import("html2canvas");
-                    const element = document.getElementById("quote-preview");
-                    if (!element) return;
-                    const canvas = await html2canvas(element, {
-                      backgroundColor: "#ffffff",
-                      scale: 2,
-                    });
-                    const link = document.createElement("a");
-                    link.href = canvas.toDataURL("image/png");
-                    link.download = `quote-${quoteNumber}.png`;
-                    link.click();
+                    const el = document.getElementById("quote-preview");
+                    if (!el) return;
+                    const { downloadPdfFromHtmlElement } = await import(
+                      "@/lib/html-to-pdf"
+                    );
+                    await downloadPdfFromHtmlElement(el, `quote-${quoteNumber}.pdf`);
                   } catch (e) {
-                    console.error("캡처 실패:", e);
+                    console.error("[admin-quote-new] PDF download failed", e);
+                    window.alert(
+                      `PDF 생성 실패\n${e instanceof Error ? e.message : String(e)}`,
+                    );
                   }
                 }}
                 className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
               >
                 <Download className="h-4 w-4" />
-                이미지 캡처
+                PDF 저장
               </button>
             </div>
           </CardHeader>
           <CardContent>
-            <div
-              id="quote-preview"
-              className="mx-auto max-w-2xl space-y-4 rounded-lg border bg-white p-6"
-            >
-              {/* 헤더 */}
-              <div className="border-b pb-4">
-                <h2 className="text-2xl font-bold text-navy">見積書</h2>
-                <p className="text-sm text-muted-foreground">Quote No. {quoteNumber}</p>
+            <div className="overflow-x-auto rounded-xl border border-navy/10 bg-slate-100/90 p-4 md:p-6">
+              <div className="mx-auto w-fit max-w-full">
+                <div id="quote-preview">
+                  <QuotePdfPreview
+                    template="default"
+                    customerLogoSrc={null}
+                    company={clientCompany}
+                    contactName={clientName}
+                    contactPhone={clientPhone}
+                    contactEmail={clientEmail}
+                    periodLabel={campaignPeriodLabel}
+                    periodMonths={Math.max(1, Math.round(monthFactor))}
+                    rows={lineItems.map((it) => {
+                      const m = medias.find((x) => x.id === it.mediaId);
+                      const size =
+                        m?.width && m?.height
+                          ? `${m.width}×${m.height}`
+                          : m?.resolution ?? null;
+                      return {
+                        id: it.mediaId,
+                        thumbUrl: m?.image ?? null,
+                        name: it.mediaName,
+                        location: m?.location ?? "—",
+                        unitPriceMan: Math.round(it.unitPrice / 10_000),
+                        lineTotalMan: Math.round(it.amount / 10_000),
+                        size,
+                        dailyFootTraffic: m?.dailyFootfall ?? null,
+                        visibilityScore: m?.visibilityScore ?? null,
+                        operatingHours: m?.operatingHours ?? null,
+                      };
+                    })}
+                    subtotalMan={Math.round(totals.supplyWon / 10_000)}
+                    vatMan={Math.round(totals.vatWon / 10_000)}
+                    grandTotalMan={Math.round(totals.totalWon / 10_000)}
+                    issuedAt={new Date(issueDatePdf)}
+                  />
+                </div>
               </div>
+            </div>
 
-              {/* 클라이언트 정보 */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-semibold text-navy">회사명</p>
-                  <p>{clientCompany}</p>
-                  <p className="font-semibold text-navy">담당자</p>
-                  <p>{clientName}</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-navy">전화</p>
-                  <p>{clientPhone}</p>
-                  <p className="font-semibold text-navy">이메일</p>
-                  <p>{clientEmail || "—"}</p>
-                </div>
+            {/* 관리자용 세부 합계 (할인 포함) */}
+            <div className="mx-auto mt-4 max-w-md space-y-1 rounded-lg border bg-white p-4 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">소계</span>
+                <span className="font-semibold tabular-nums">
+                  {formatWon(totals.linesSubtotalWon)}
+                </span>
               </div>
-
-              {/* 기간 및 날짜 */}
-              <div className="grid grid-cols-2 gap-4 rounded-lg bg-slate-50 p-3 text-sm">
-                <div>
-                  <p className="text-xs text-muted-foreground">견적 기간</p>
-                  <p className="font-semibold">{campaignPeriodLabel}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">발행일 / 유효기간</p>
-                  <p className="font-semibold">{issueDatePdf} ~ {validUntilPdf}</p>
-                </div>
-              </div>
-
-              {/* 항목 테이블 */}
-              <table className="w-full text-sm border-collapse">
-                <thead>
-                  <tr className="border-b-2 border-navy">
-                    <th className="text-left py-2">매체명</th>
-                    <th className="text-right py-2 w-20">수량</th>
-                    <th className="text-right py-2 w-28">금액</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lineItems.map((item) => (
-                    <tr key={item.mediaId} className="border-b">
-                      <td className="py-2">
-                        <div className="font-semibold text-navy">{item.mediaName}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {item.spec} · {item.period}
-                        </div>
-                      </td>
-                      <td className="text-right py-2 tabular-nums">{item.quantity}</td>
-                      <td className="text-right py-2 tabular-nums">{formatWon(item.amount)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* 합계 */}
-              <div className="space-y-1 border-t pt-3 text-sm">
-                <div className="flex justify-between">
-                  <span>소계</span>
+              {totals.discountTotalWon > 0 && (
+                <div className="flex justify-between text-red-700">
+                  <span>할인</span>
                   <span className="font-semibold tabular-nums">
-                    {formatWon(totals.linesSubtotalWon)}
+                    −{formatWon(totals.discountTotalWon)}
                   </span>
                 </div>
-                {totals.discountTotalWon > 0 && (
-                  <div className="flex justify-between text-red-700">
-                    <span>할인</span>
-                    <span className="font-semibold tabular-nums">
-                      −{formatWon(totals.discountTotalWon)}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span>공급가</span>
-                  <span className="font-semibold tabular-nums">
-                    {formatWon(totals.supplyWon)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>부가세</span>
-                  <span className="font-semibold tabular-nums">
-                    {formatWon(totals.vatWon)}
-                  </span>
-                </div>
-                <div className="flex justify-between border-t pt-2 text-lg font-bold text-navy">
-                  <span>합계</span>
-                  <span className="tabular-nums">{formatWon(totals.totalWon)}</span>
-                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">공급가</span>
+                <span className="font-semibold tabular-nums">
+                  {formatWon(totals.supplyWon)}
+                </span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">부가세</span>
+                <span className="font-semibold tabular-nums">
+                  {formatWon(totals.vatWon)}
+                </span>
+              </div>
+              <div className="flex justify-between border-t pt-2 text-base font-bold text-navy">
+                <span>합계</span>
+                <span className="tabular-nums">{formatWon(totals.totalWon)}</span>
+              </div>
+              <p className="pt-1 text-[11px] text-muted-foreground">
+                견적번호 {quoteNumber} · 유효기간 {validUntilPdf}
+              </p>
             </div>
           </CardContent>
         </Card>

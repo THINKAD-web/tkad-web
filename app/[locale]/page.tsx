@@ -13,22 +13,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import HeroParallaxBackground from "@/components/hero-parallax-background";
 import { type MediaItem } from "@/lib/media-data";
-import { formatMediaLocationShort } from "@/lib/media-location-format";
-import {
-  formatMediaPriceWonWithSymbol,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
-import { fetchHomeFeaturedMedia, fetchHomePopularMedia } from "@/lib/public-media-catalog";
+import { fetchHomeFeaturedMedia } from "@/lib/public-media-catalog";
 import {
   ArrowRight,
   BarChart3,
   BadgeCheck,
   CheckCircle,
-  Globe,
   MapPin,
-  TrendingUp,
   ChevronDown,
-  ShieldCheck,
   Eye,
   FileCheck,
   Star,
@@ -39,18 +31,11 @@ import {
   ClipboardCheck,
   Trophy,
   PhoneCall,
-  Flame,
-  Building2,
 } from "lucide-react";
 
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
-const ScrollStagger = dynamic(() =>
-  import("@/components/scroll-stagger").then((m) => ({
-    default: m.ScrollStagger,
-  })),
-);
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -63,34 +48,21 @@ const typeLabels: Record<string, { ko: string; en: string }> = {
   network: { ko: "네트워크/패키지", en: "Network / package" },
 };
 
-const partnerLogos = [
-  "Samsung", "LG", "Hyundai", "SK", "Lotte",
-  "CJ", "Kakao", "Naver", "Amorepacific", "Shinsegae",
-  "Hana", "KB", "KT", "POSCO", "Hanwha",
-  "GS", "Doosan", "Kumho", "Mirae Asset", "Celltrion",
-];
-
 export default async function HomePage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const t = await getTranslations();
-  const tMedia = await getTranslations({ locale, namespace: "media" });
   /**
    * 추천 매체: Prisma `isFeatured`·`featuredOrder`(홈 하드코딩 ID 없음).
    * DB 연결 시 실제 행만; 미연결 시에만 샘플 카탈로그.
    */
-  const [featuredCatalog, popularCatalog] = await Promise.all([
-    fetchHomeFeaturedMedia(6),
-    fetchHomePopularMedia(6),
-  ]);
+  const [featuredCatalog] = await Promise.all([fetchHomeFeaturedMedia(6)]);
 
   return (
     <HomeContent
       locale={locale}
       t={t}
-      tMedia={tMedia}
       featuredCatalog={featuredCatalog}
-      popularCatalog={popularCatalog}
     />
   );
 }
@@ -98,19 +70,14 @@ export default async function HomePage({ params }: Props) {
 function HomeContent({
   locale,
   t,
-  tMedia,
   featuredCatalog,
-  popularCatalog = [],
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
-  tMedia: Awaited<ReturnType<typeof getTranslations>>;
   featuredCatalog: MediaItem[];
-  popularCatalog?: MediaItem[];
 }) {
   const isKo = locale === "ko";
   const topThreeFeatured = featuredCatalog.slice(0, 3);
-  const featuredGridItems = popularCatalog.length > 0 ? popularCatalog.slice(0, 4) : featuredCatalog.slice(0, 4);
 
   return (
     <>
@@ -187,6 +154,23 @@ function HomeContent({
               ? "30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
               : "Apply in 30 seconds · Expert consultant contacts within 24h"}
           </p>
+
+          <div className="hero-fade-in hero-fade-in-seq-7 mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-white/75">
+            {[
+              { value: "500+", label: isKo ? "검증 매체" : "Verified media" },
+              { value: "15년", label: isKo ? "OOH 경력" : "Years of OOH" },
+              { value: "100+", label: isKo ? "대기업 파트너" : "Enterprise partners" },
+            ].map((s) => (
+              <div key={s.label} className="flex items-baseline gap-2">
+                <span className="text-2xl font-extrabold text-gold sm:text-3xl">
+                  {s.value}
+                </span>
+                <span className="text-xs font-medium tracking-wide uppercase text-white/50">
+                  {s.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div
@@ -273,44 +257,6 @@ function HomeContent({
               </ScrollAnimate>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="section-navy relative py-14">
-        <div className="absolute inset-0 hero-pattern opacity-50" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate variant="count-up">
-            <ScrollStagger className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-              {[
-                {
-                  animClass: "stat-count-up stat-count-500",
-                  label: isKo ? "검증된 매체" : "Verified Media",
-                },
-                {
-                  animClass: "stat-count-up stat-count-100b",
-                  label: isKo ? "누적 집행액" : "Total Ad Spend",
-                },
-                {
-                  animClass: "stat-count-up stat-count-100p",
-                  label: isKo ? "대기업 파트너" : "Enterprise Partners",
-                },
-                {
-                  animClass: "stat-count-up stat-count-15",
-                  label: isKo ? "경력" : "Years Experience",
-                },
-              ].map((stat) => (
-                <div key={stat.label} className="stat-divider text-center">
-                  <div
-                    className={`text-3xl font-extrabold text-gold sm:text-4xl ${stat.animClass}`}
-                  />
-                  <div className="mt-3 text-sm font-medium tracking-wide text-white/60 uppercase">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </ScrollStagger>
-          </ScrollAnimate>
         </div>
       </section>
 
@@ -529,203 +475,6 @@ function HomeContent({
         </div>
       </section>
 
-      {/* Services */}
-      <section className="section-light py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <div className="text-center">
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "서비스" : "Services"}
-              </p>
-              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {t("services.title")}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {t("services.subtitle")}
-              </p>
-            </div>
-          </ScrollAnimate>
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-            {[
-              {
-                icon: MapPin,
-                title: t("services.domestic.title"),
-                desc: t("services.domestic.description"),
-                accent: "from-gold/10 to-gold/5",
-              },
-              {
-                icon: Globe,
-                title: t("services.crossBorder.title"),
-                desc: t("services.crossBorder.description"),
-                accent: "from-navy/10 to-navy/5",
-              },
-              {
-                icon: BarChart3,
-                title: t("services.dataConsulting.title"),
-                desc: t("services.dataConsulting.description"),
-                accent: "from-gold/10 to-navy/5",
-              },
-            ].map((service, i) => (
-              <ScrollAnimate key={service.title} delay={i * 100}>
-              <Card
-                className="service-card group cursor-pointer border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] rounded-2xl"
-              >
-                <CardHeader className="pb-4">
-                  <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${service.accent} ring-1 ring-navy/5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}>
-                    <service.icon className="h-7 w-7 text-gold" />
-                  </div>
-                  <CardTitle className="text-xl font-bold text-navy">
-                    {service.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-sm leading-relaxed">
-                    {service.desc}
-                  </CardDescription>
-                  <div className="mt-6 flex items-center gap-1 text-sm font-semibold text-gold opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    {isKo ? "자세히 보기" : "Learn more"}
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </div>
-                </CardContent>
-              </Card>
-              </ScrollAnimate>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Media with Verified Badge */}
-      <section className="section-white py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
-                  <ShieldCheck className="h-4 w-4" />
-                  Verified Media
-                </div>
-                <h2 className="mt-1 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                  {t("featuredMedia.title")}
-                </h2>
-                <p className="mt-2 text-muted-foreground">
-                  {t("featuredMedia.subtitle")}
-                </p>
-              </div>
-              <Link
-                href="/media"
-                className="link-underline-grow inline-flex min-h-11 shrink-0 items-center gap-1 self-start text-sm font-semibold text-gold transition-colors duration-300 hover:text-gold-dark sm:min-h-0 sm:self-auto"
-              >
-                {t("common.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </ScrollAnimate>
-          {featuredGridItems.length === 0 ? (
-            <p className="mt-10 text-center text-sm text-muted-foreground">
-              {isKo
-                ? "등록된 추천 매체가 없습니다. 매체 검색에서 전체 목록을 확인해 주세요."
-                : "No featured media yet. Browse the full catalog on Media search."}
-            </p>
-          ) : (
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-7">
-            {featuredGridItems.map((media, i) => {
-              return (
-              <ScrollAnimate key={media.id} delay={i * 100}>
-              <Card
-                className="group min-w-0 overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
-              >
-                <MediaCatalogThumbnail
-                  media={media}
-                  fallbackUrl={`https://picsum.photos/id/${[429, 416, 180, 274][i % 4]}/800/600`}
-                  placeholderLabel={t("media.imagePreparing")}
-                  className="group relative flex h-48 items-center justify-center"
-                  imgClassName="opacity-90 transition duration-300 group-hover:scale-105"
-                  bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/50 via-transparent to-transparent"
-                  placeholderSize="sm"
-                  alt={isKo ? media.name : media.nameEn}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                >
-                  {i < 3 && (
-                    <div className="absolute top-3 left-3 z-10 flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
-                      <Flame className="h-3 w-3" />
-                      {isKo ? "인기" : "Popular"}
-                    </div>
-                  )}
-                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
-                    <BadgeCheck className="h-3 w-3" />
-                    Verified
-                  </div>
-                  <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-white/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                </MediaCatalogThumbnail>
-                <CardHeader className="min-w-0 space-y-1 px-4 pb-2 pt-4">
-                  <div className="flex items-center justify-between">
-                    <Badge
-                      variant="secondary"
-                      className="bg-navy/5 text-navy text-xs font-medium"
-                    >
-                      {isKo
-                        ? (typeLabels[media.type]?.ko ?? media.type)
-                        : (typeLabels[media.type]?.en ?? media.type)}
-                    </Badge>
-                  </div>
-                  <CardTitle className="truncate text-base font-bold leading-snug">
-                    {isKo ? media.name : media.nameEn}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="min-w-0 px-4 pb-4 pt-0">
-                  <div className="flex min-w-0 items-start gap-1 text-sm leading-snug text-muted-foreground">
-                    <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-                    <span className="min-w-0 truncate">
-                      {formatMediaLocationShort(media, isKo)}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-lg font-bold text-navy">
-                    {formatMediaPriceWonWithSymbol(media.price)}
-                    <span className="ml-1 text-xs font-normal text-muted-foreground">
-                      · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
-                    </span>
-                  </div>
-                  <div className="mt-4">
-                    <Link href={`/media/${media.id}`} className="block">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="btn-navy-outline w-full text-xs font-semibold rounded-lg"
-                      >
-                        {isKo ? "상세 보기" : "View details"}
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-              </ScrollAnimate>
-              );
-            })}
-          </div>
-          )}
-        </div>
-      </section>
-
-      {/* Partner Logos */}
-      <section className="section-light border-y py-12 overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate variant="fade-in">
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              {partnerLogos.map((name) => (
-                <div
-                  key={name}
-                  className="flex h-11 w-24 items-center justify-center rounded-xl bg-white px-3 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-slate-100"
-                >
-                  <span className="text-xs font-bold text-navy/40">{name}</span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-4 text-center text-sm font-semibold text-muted-foreground">
-              {isKo ? "100+ 대기업과 파트너십" : "Partnership with 100+ Leading Companies"}
-            </p>
-          </ScrollAnimate>
-        </div>
-      </section>
-
       {/* Testimonials */}
       <section className="section-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -797,62 +546,6 @@ function HomeContent({
               </Card>
               </ScrollAnimate>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Case Studies */}
-      <section className="section-light py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <div className="text-center">
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "성공 사례" : "Case Studies"}
-              </p>
-              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {t("caseStudies.title")}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {t("caseStudies.subtitle")}
-              </p>
-            </div>
-          </ScrollAnimate>
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-            {(["case1", "case2", "case3"] as const).map((key, i) => (
-              <ScrollAnimate key={key} delay={i * 100}>
-              <Card
-                className="group overflow-hidden border-0 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
-              >
-                <div className="flex h-32 items-center justify-center bg-gradient-to-br from-gold/10 to-navy/10 overflow-hidden">
-                  <TrendingUp className="h-12 w-12 text-gold/30 transition-transform duration-300 group-hover:scale-110" />
-                </div>
-                <CardHeader>
-                  <Badge className="w-fit bg-gold/10 text-gold-dark text-xs font-medium">
-                    {t(`caseStudies.${key}.category`)}
-                  </Badge>
-                  <CardTitle className="text-base font-bold">
-                    {t(`caseStudies.${key}.title`)}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-sm leading-relaxed">
-                    {t(`caseStudies.${key}.description`)}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-              </ScrollAnimate>
-            ))}
-          </div>
-          <div className="mt-8 text-center">
-            <Link href="/cases">
-              <Button
-                variant="outline"
-                size="lg"
-                className="btn-navy-outline rounded-full px-8 font-semibold"
-              >
-                {t("common.viewAll")} <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
           </div>
         </div>
       </section>

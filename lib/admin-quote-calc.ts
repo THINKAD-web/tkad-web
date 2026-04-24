@@ -1,3 +1,5 @@
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+
 /** 부가세율 (한국) */
 const VAT_RATE = 0.1;
 const MS_PER_DAY = 86_400_000;
@@ -22,19 +24,19 @@ export function monthFactorFromDays(days: number): number {
 }
 
 /**
- * 매체 DB `price`는 월 단가(만원)로 가정.
- * 공급가(원) = 만원×10,000 × 월계수 × 수량
+ * 매체 DB `price`는 1,000,000 미만이면 "만원" 단위, 이상이면 "원" 단위로 저장되어 있음
+ * (lib/media-price-format.ts 의 catalogPriceFieldToWon 규칙). 항상 원(KRW)으로 환산한 뒤
+ * 월계수·수량을 곱해 공급가(원)를 반환한다.
  */
 export function lineSupplyWon(
-  priceManPerMonth: number,
+  rawDbPrice: number,
   monthFactor: number,
   quantity: number,
 ): number {
-  const p = Math.max(0, priceManPerMonth);
+  const priceWon = catalogPriceFieldToWon(rawDbPrice);
   const m = Math.max(0, monthFactor);
   const q = Math.max(0, quantity);
-  // DB price는 이미 원 단위
-  return Math.round(p * m * q);
+  return Math.round(priceWon * m * q);
 }
 
 export type AdminQuoteTotals = {

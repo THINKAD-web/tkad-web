@@ -190,9 +190,9 @@ export default function MediaMapPageClient() {
   );
 
   return (
-    <div className="flex min-h-[calc(100vh-72px)] flex-col md:h-[calc(100vh-72px)] md:flex-row">
-      {/* Side list */}
-      <aside className="w-full md:w-[380px] md:flex-shrink-0 md:border-r border-border/60 overflow-y-auto bg-card">
+    <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row">
+      {/* Side list — 모바일에서는 지도 아래 */}
+      <aside className="order-2 md:order-1 w-full md:w-[380px] md:flex-shrink-0 md:border-r border-border/60 md:overflow-y-auto bg-card">
         <div className="sticky top-0 z-10 border-b border-border/60 bg-card/95 backdrop-blur-sm p-3 space-y-2">
           <div className="relative">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -319,8 +319,8 @@ export default function MediaMapPageClient() {
         </ul>
       </aside>
 
-      {/* Map */}
-      <div className="relative flex-1 min-h-[60vh] md:min-h-0">
+      {/* Map — 모바일에서는 최상단 */}
+      <div className="relative order-1 md:order-2 flex-1 h-[60vh] md:h-auto md:min-h-0">
         <KakaoMapView
           markers={markers}
           selectedId={selectedId}
