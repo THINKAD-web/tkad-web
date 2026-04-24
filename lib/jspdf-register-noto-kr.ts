@@ -113,8 +113,30 @@ export function attachNotoSansKrBuffer(
   vfsFileName: string,
 ): boolean {
   try {
-    const binary = buf.toString("latin1");
-    doc.addFileToVFS(vfsFileName, binary);
+    // jsPDF v4 내장 폰트 파서는 TTF(glyf table) 만 지원한다.
+    // OTF(CFF/CFF2) 를 넣으면 parse 는 통과한 듯 보이지만 metadata.Unicode 가
+    // 미설정된 상태로 남아 이후 doc.text() 호출에서
+    // "Cannot read properties of undefined (reading 'Unicode')" 로 터진다.
+    // 폰트 매직 4바이트로 판별해 OTF 면 등록을 거부하고 Helvetica 로 폴백한다.
+    const magic = buf.length >= 4 ? buf.subarray(0, 4).toString("ascii") : "";
+    const isOtf = magic === "OTTO"; // CFF-backed OpenType
+    const isTtc = magic === "ttcf" || magic === "OTTO" || magic === "true";
+    if (isOtf) {
+      console.warn(
+        "[jspdf-kr] OTF font is not supported by jsPDF v4 parser — skipping registration",
+        { vfsFileName, bytes: buf.length },
+      );
+      return false;
+    }
+    if (magic === "ttcf") {
+      console.warn("[jspdf-kr] TTC (collection) not supported, skipping");
+      return false;
+    }
+    // TTF (\x00\x01\x00\x00) 인 경우에만 등록. base64 문자열 경로로 통일해
+    // jsPDF 의 font loader(addFont 이벤트)가 atob 로 안전하게 복원하도록 함.
+    void isTtc;
+    const base64 = buf.toString("base64");
+    doc.addFileToVFS(vfsFileName, base64);
     doc.addFont(
       vfsFileName,
       NOTO_KR_FONT_FAMILY,

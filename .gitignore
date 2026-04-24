@@ -26,6 +26,7 @@
 
 # Korean PDF font (fetched by scripts/ensure-noto-kr-font.mjs on postinstall)
 public/fonts/*.otf
+public/fonts/*.ttf
 
 # debug
 npm-debug.log*
