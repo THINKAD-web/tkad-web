@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
+import { ProcessStepImage } from "@/components/process-step-image";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
@@ -224,6 +225,7 @@ function HomeContent({
               {
                 icon: Search,
                 step: "01",
+                image: "/images/process/step-1-site-visit.jpg",
                 title: isKo ? "현장 방문" : "Site Visit",
                 desc: isKo
                   ? "담당자가 직접 매체 현장을 방문하여 설치 환경과 주변 유동인구를 확인합니다."
@@ -232,6 +234,7 @@ function HomeContent({
               {
                 icon: Camera,
                 step: "02",
+                image: "/images/process/step-2-measurement.jpg",
                 title: isKo ? "촬영 및 실측" : "Photo & Measurement",
                 desc: isKo
                   ? "매체 크기, 시인성, 조도를 정밀 측정하고 다각도 촬영으로 기록합니다."
@@ -240,6 +243,7 @@ function HomeContent({
               {
                 icon: Database,
                 step: "03",
+                image: "/images/process/step-3-data-review.jpg",
                 title: isKo ? "데이터 검증" : "Data Verification",
                 desc: isKo
                   ? "유동인구 데이터, 차량 통행량, 노출 빈도를 분석하여 매체 효과를 검증합니다."
@@ -248,28 +252,38 @@ function HomeContent({
               {
                 icon: ClipboardCheck,
                 step: "04",
+                image: "/images/process/step-4-registration.jpg",
                 title: isKo ? "매체 등록" : "Media Registration",
                 desc: isKo
                   ? "검증을 통과한 매체만 싱커드 플랫폼에 등록되어 광고주에게 제안됩니다."
                   : "Only verified media are registered on the THINKAD platform and proposed to advertisers.",
               },
             ].map((item, index) => (
-              <ScrollAnimate key={item.step} delay={index * 100}>
+              <ScrollAnimate key={item.step} delay={index * 120}>
               <div className="verification-step group relative">
+                {/* 단계 연결선 — 데스크톱 수평 타임라인 */}
                 {index < 3 && (
-                  <div className="absolute top-10 right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
+                  <div className="absolute top-[44%] right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
                 )}
-                <div className="relative flex flex-col items-center text-center">
-                  <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 ring-1 ring-gold/20 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-gold/10">
-                    <item.icon className="h-8 w-8 text-gold" />
-                    <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-navy to-navy-light text-[11px] font-bold text-white shadow-md">
-                      {item.step}
+                <div className="relative h-full flex flex-col overflow-hidden rounded-2xl border border-navy/8 bg-white shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
+                  {/* 현장 사진 영역 (placeholder 가 자동) */}
+                  <div className="relative aspect-[16/9] bg-gradient-to-br from-navy/8 via-navy/3 to-gold/5">
+                    <ProcessStepImage src={item.image} alt="" />
+                    {/* 번호 뱃지 */}
+                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-navy px-2.5 py-1 text-[10px] font-bold text-gold-light shadow-sm">
+                      STEP {item.step}
+                    </span>
+                    {/* 아이콘 — 이미지 우측 하단에 오버레이 */}
+                    <span className="absolute right-3 bottom-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/92 backdrop-blur-sm ring-1 ring-gold/25 shadow-sm">
+                      <item.icon className="h-5 w-5 text-gold-dark" strokeWidth={1.75} />
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-navy">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {item.desc}
-                  </p>
+                  <div className="flex flex-1 flex-col px-5 py-5">
+                    <h3 className="text-base font-bold text-navy sm:text-lg">{item.title}</h3>
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
               </div>
               </ScrollAnimate>
