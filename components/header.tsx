@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { HeaderUserMenu } from "@/components/header-user-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useState, useEffect, useTransition, useRef } from "react";
 
 type NavLeaf = { href: string; label: string; desc?: string; icon?: LucideIcon };
@@ -222,6 +223,7 @@ export default function Header() {
         <div className="hidden items-center gap-2 md:flex">
           <HeaderUserMenu />
           <LanguageToggle />
+          <ThemeToggle />
           <Link href="/contact">
             <Button
               variant="cta"
@@ -235,6 +237,7 @@ export default function Header() {
         <div className="flex items-center gap-1.5 md:hidden">
           <HeaderUserMenu />
           <LanguageToggle />
+          <ThemeToggle />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button
