@@ -746,6 +746,8 @@ export default function PlannerPageClient({
                 metrics={metrics}
                 reachCorePct={reachSplit.corePct}
                 reachExtendedPct={reachSplit.extendedPct}
+                logoUrl={creativeUploadedUrl || creativeObjectUrl}
+                mediaPlacements={mediaPlacements}
               />
             ) : null}
 
@@ -1264,6 +1266,8 @@ export default function PlannerPageClient({
                   metrics={metrics}
                   reachCorePct={reachSplit.corePct}
                   reachExtendedPct={reachSplit.extendedPct}
+                  logoUrl={creativeUploadedUrl || creativeObjectUrl}
+                  mediaPlacements={mediaPlacements}
                 />
               </>
             ) : null}
