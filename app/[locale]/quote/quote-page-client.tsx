@@ -323,7 +323,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         if (m.catalogSource === "network") {
           const opt = networkQuoteOptions[m.id];
           const u = opt?.units ?? m.networkMinUnits ?? 1;
-          return sum + computeNetworkMonthlyFromMediaItem(m, u);
+          return sum + catalogPriceFieldToPriceMan(computeNetworkMonthlyFromMediaItem(m, u));
         }
         const opts = m.priceOptions;
         const idx = mediaPriceOptionIndex[m.id] ?? 0;
@@ -360,10 +360,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
       const priceOpt = !isNw ? m.priceOptions?.[poIdx] : undefined;
       const lineMonthly = isNw
-        ? computeNetworkMonthlyFromMediaItem(m, units)
+        ? catalogPriceFieldToPriceMan(computeNetworkMonthlyFromMediaItem(m, units))
         : priceOpt
           ? catalogPriceFieldToPriceMan(priceOpt.price)
-          : m.price;
+          : catalogPriceFieldToPriceMan(m.price);
       const baseName = (isKo ? m.name : m.nameEn) || m.name;
       let name = baseName;
       if (isNw && units) {
@@ -384,8 +384,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         thumbUrl: getPrimaryMediaImageUrl(m),
         name,
         location,
-        unitPriceMan: Math.round(lineMonthly / 10000),
-        lineTotalMan: Math.round(lineMonthly * periodMonths / 10000),
+        unitPriceMan: Math.round(lineMonthly),
+        lineTotalMan: Math.round(lineMonthly * periodMonths),
         size: m.size ?? undefined,
         dailyFootTraffic: m.dailyFootTraffic ?? undefined,
         operatingHours: m.operatingHours ?? undefined,
@@ -1430,9 +1430,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 periodLabel={periodLabel}
                                 periodMonths={periodMonths}
                                 rows={pdfPreviewRows}
-                                subtotalMan={Math.round(totalCost / 10000)}
-                                vatMan={Math.round(pdfVatMan / 10000)}
-                                grandTotalMan={Math.round(pdfGrandTotalMan / 10000)}
+                                subtotalMan={Math.round(totalCost)}
+                                vatMan={Math.round(pdfVatMan)}
+                                grandTotalMan={Math.round(pdfGrandTotalMan)}
                                 issuedAt={quoteIssuedAt}
                               />
                             </div>
