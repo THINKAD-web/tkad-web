@@ -218,7 +218,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                           <img
                             src={row.thumbUrl}
                             alt=""
-                            crossOrigin="anonymous"
+                            referrerPolicy="no-referrer"
                             className="h-full w-full object-cover"
                           />
                         ) : (

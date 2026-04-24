@@ -127,8 +127,9 @@ export default function QuotePreviewView({
       );
       toast.success("PDF를 다운로드했습니다.");
     } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
       console.error("[quote preview] pdf export failed", e);
-      toast.error("PDF 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      window.alert(`PDF 생성 실패\n${msg}`);
     } finally {
       setDownloading(false);
     }
@@ -161,13 +162,34 @@ export default function QuotePreviewView({
     (async () => {
       try {
         const res = await fetch(`/api/quote/${quoteId}/detail`, { cache: "no-store" });
-        const data = await res.json();
-        if (!cancelled) {
-          if (data.ok) setQuote(data.data);
-          else setErr(data?.error?.code ?? "조회 실패");
+        let data: unknown = null;
+        try {
+          data = await res.json();
+        } catch {
+          /* non-JSON response */
         }
-      } catch {
-        if (!cancelled) setErr("네트워크 오류");
+        if (cancelled) return;
+        const d = data as
+          | { ok?: boolean; data?: Quote; error?: { code?: string; message?: string } }
+          | null;
+        if (res.ok && d?.ok) {
+          setQuote(d.data ?? null);
+        } else {
+          const code = d?.error?.code ?? `HTTP_${res.status}`;
+          const message = d?.error?.message ?? res.statusText ?? "조회 실패";
+          console.error("[quote preview] detail API failed", {
+            quoteId,
+            status: res.status,
+            code,
+            message,
+          });
+          setErr(`${code}: ${message}`);
+        }
+      } catch (e) {
+        console.error("[quote preview] detail fetch threw", e);
+        if (!cancelled) {
+          setErr(`NETWORK: ${e instanceof Error ? e.message : String(e)}`);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -182,15 +204,18 @@ export default function QuotePreviewView({
   }
 
   if (err || !quote) {
+    const isNotFound = err?.startsWith("NOT_FOUND");
     return (
       <div className="max-w-4xl mx-auto px-4 py-10">
         <EmptyState
           icon="⚠️"
           title="견적서를 불러올 수 없습니다"
           description={
-            err === "NOT_FOUND"
+            isNotFound
               ? "요청한 견적서를 찾을 수 없습니다. 링크를 다시 확인해주세요."
-              : "잠시 후 다시 시도해주세요."
+              : err
+                ? `오류: ${err}`
+                : "잠시 후 다시 시도해주세요."
           }
           action={
             <Link
