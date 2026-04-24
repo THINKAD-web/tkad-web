@@ -45,6 +45,8 @@ import {
   VerifiedBadge,
   MediaTypeBadge,
 } from "@/components/media-metric-viz";
+import { TestimonialsCarousel } from "@/components/testimonials-carousel";
+import { testimonials } from "@/data/testimonials";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
@@ -570,7 +572,7 @@ function HomeContent({
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials (캐러셀 — data/testimonials.ts 에서 관리) */}
       <section className="section-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
@@ -581,66 +583,15 @@ function HomeContent({
               <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "광고주가 직접 전하는 이야기" : "What Our Clients Say"}
               </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                {isKo
+                  ? "싱커드와 함께 성장한 파트너사의 실제 이야기"
+                  : "Real stories from partners who grew with THINKAD"}
+              </p>
             </div>
           </ScrollAnimate>
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-            {[
-              {
-                name: isKo ? "김서연 마케팅 이사" : "Seoyeon Kim, Marketing Director",
-                company: isKo ? "글로벌 뷰티 브랜드 A사" : "Global Beauty Brand A",
-                text: isKo
-                  ? "싱커드 덕분에 강남역 일대 10개 빌보드를 동시에 진행할 수 있었습니다. 무엇보다 매체 하나하나 직접 검증해준 데이터 덕에 안심하고 결정할 수 있었어요. 캠페인 후 브랜드 인지도 300% 상승이라는 결과가 모든 걸 말해줍니다."
-                  : "Thanks to THINKAD, we ran 10 billboards simultaneously around Gangnam Station. The verified data for each media gave us confidence. A 300% increase in brand awareness speaks for itself.",
-                rating: 5,
-              },
-              {
-                name: isKo ? "박준혁 대표" : "Junhyuk Park, CEO",
-                company: isKo ? "테크 스타트업 B사" : "Tech Startup B",
-                text: isKo
-                  ? "스타트업이라 광고 예산이 빠듯했는데, 싱커드가 데이터 기반으로 가장 효율적인 매체 조합을 제안해줬습니다. 코엑스 디지털 캠페인으로 2주 만에 150만 노출을 달성했어요. 계약부터 사후관리까지 원스톱이라 정말 편했습니다."
-                  : "As a startup with a tight budget, THINKAD proposed the most efficient media mix based on data. We achieved 1.5M impressions in 2 weeks with COEX digital. The one-stop service from contract to post-care was incredibly convenient.",
-                rating: 5,
-              },
-              {
-                name: isKo ? "이하은 팀장" : "Haeun Lee, Team Lead",
-                company: isKo ? "엔터테인먼트 C사" : "Entertainment Company C",
-                text: isKo
-                  ? "지하철 랩핑 광고를 처음 해봤는데, 싱커드가 역사별 유동인구 데이터와 실제 시인성까지 꼼꼼하게 분석해줘서 7개 역사를 최적으로 선정할 수 있었습니다. 앨범 초동 판매 200% 증가! 다음 캠페인도 무조건 싱커드입니다."
-                  : "It was our first subway wrapping ad. THINKAD meticulously analyzed foot traffic and visibility for each station, helping us optimally select 7 stations. 200% increase in first-week album sales! Definitely using THINKAD for our next campaign.",
-                rating: 5,
-              },
-            ].map((testimonial, i) => (
-              <ScrollAnimate key={testimonial.name} delay={i * 100}>
-              <Card
-                className="relative border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
-              >
-                <CardHeader className="pb-3">
-                  <Quote className="h-8 w-8 text-gold/30" />
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-4 w-4 fill-gold text-gold"
-                      />
-                    ))}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-relaxed text-navy/80">
-                    &ldquo;{testimonial.text}&rdquo;
-                  </p>
-                  <div className="mt-6 border-t pt-4">
-                    <p className="text-sm font-bold text-navy">
-                      {testimonial.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {testimonial.company}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-              </ScrollAnimate>
-            ))}
+          <div className="mt-10">
+            <TestimonialsCarousel items={testimonials} isKo={isKo} />
           </div>
         </div>
       </section>

@@ -1,0 +1,194 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
+import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { type Testimonial } from "@/data/testimonials";
+
+type Props = {
+  items: Testimonial[];
+  isKo: boolean;
+};
+
+/**
+ * Embla 기반 캐러셀 — 5초 간격 자동 재생, hover 정지, 모바일은 스와이프·데스크톱은 화살표.
+ */
+export function TestimonialsCarousel({ items, isKo }: Props) {
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      loop: true,
+      align: "start",
+      skipSnaps: false,
+      slidesToScroll: 1,
+    },
+    [Autoplay({ delay: 5_000, stopOnInteraction: false, stopOnMouseEnter: true })],
+  );
+
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+  const [selected, setSelected] = useState(0);
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const scrollTo = useCallback(
+    (i: number) => emblaApi?.scrollTo(i),
+    [emblaApi],
+  );
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => {
+      setCanPrev(emblaApi.canScrollPrev());
+      setCanNext(emblaApi.canScrollNext());
+      setSelected(emblaApi.selectedScrollSnap());
+    };
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    onSelect();
+  }, [emblaApi]);
+
+  return (
+    <div className="relative">
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex gap-5 sm:gap-6">
+          {items.map((t) => (
+            <article
+              key={t.id}
+              className="relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card p-5 shadow-sm sm:p-6 md:basis-[48%] lg:basis-[32%]"
+            >
+              {/* 따옴표 SVG */}
+              <Quote
+                aria-hidden
+                className="absolute right-5 top-5 h-8 w-8 text-gold/15"
+                strokeWidth={1.25}
+                fill="currentColor"
+              />
+
+              {/* 아바타 + 이름 */}
+              <header className="mb-4 flex items-start gap-3">
+                {t.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={t.avatarUrl}
+                    alt=""
+                    className="h-12 w-12 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <span
+                    aria-hidden
+                    className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-sm font-extrabold text-white shadow-sm ${
+                      t.avatarGradient ?? "from-navy to-navy-light"
+                    }`}
+                  >
+                    {t.initials}
+                  </span>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-bold text-foreground truncate">
+                    {isKo ? t.nameKo : t.nameEn}
+                  </div>
+                  <div className="text-[11px] font-semibold text-muted-foreground">
+                    {isKo ? t.roleKo : t.roleEn}
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    {t.logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={t.logoUrl} alt="" className="h-4 w-auto" />
+                    ) : null}
+                    <span className="truncate">
+                      {isKo ? t.companyKo : t.companyEn}
+                    </span>
+                    <span className="text-foreground/20">·</span>
+                    <span className="truncate">
+                      {isKo ? t.industryKo : t.industryEn}
+                    </span>
+                  </div>
+                </div>
+              </header>
+
+              {/* 성과 지표 하이라이트 */}
+              <div
+                className="mb-4 inline-flex w-fit items-center gap-1.5 rounded-xl border border-gold/25 bg-gradient-to-r from-gold/15 to-gold/5 px-3 py-1.5"
+                aria-label={isKo ? "성과 수치" : "Key outcome"}
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gold-dark">
+                  {isKo ? "성과" : "Result"}
+                </span>
+                <span className="text-sm font-extrabold text-navy">
+                  {isKo ? t.metricKo : t.metricEn}
+                </span>
+              </div>
+
+              {/* 본문 */}
+              <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
+                "{isKo ? t.bodyKo : t.bodyEn}"
+              </p>
+
+              <footer className="mt-4 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-0.5" aria-label={`별점 ${t.rating}`}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-3.5 w-3.5 ${
+                        i < t.rating ? "fill-gold text-gold" : "text-slate-200"
+                      }`}
+                      strokeWidth={1.5}
+                    />
+                  ))}
+                </div>
+                {t.caseHref && (
+                  <Link
+                    href={t.caseHref}
+                    className="text-[11px] font-semibold text-gold hover:text-gold-dark"
+                  >
+                    {isKo ? "사례 보기 →" : "View case →"}
+                  </Link>
+                )}
+              </footer>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      {/* 화살표 (데스크톱) */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 right-0 hidden items-center justify-between md:flex">
+        <button
+          type="button"
+          onClick={scrollPrev}
+          disabled={!canPrev}
+          aria-label="이전 후기"
+          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/60 bg-card shadow-md text-foreground hover:bg-secondary/60 disabled:opacity-40 transition-colors"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          onClick={scrollNext}
+          disabled={!canNext}
+          aria-label="다음 후기"
+          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/60 bg-card shadow-md text-foreground hover:bg-secondary/60 disabled:opacity-40 transition-colors"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* 페이지 도트 (모바일/공통) */}
+      <div className="mt-6 flex justify-center gap-1.5">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => scrollTo(i)}
+            aria-label={`${i + 1}번 후기로 이동`}
+            aria-current={selected === i}
+            className={`h-1.5 rounded-full transition-all ${
+              selected === i ? "w-6 bg-gold" : "w-1.5 bg-muted hover:bg-muted-foreground/40"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
