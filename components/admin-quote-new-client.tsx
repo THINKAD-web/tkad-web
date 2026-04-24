@@ -953,9 +953,13 @@ export default function AdminQuoteNewClient() {
                         m?.width && m?.height
                           ? `${m.width}×${m.height}`
                           : m?.resolution ?? null;
+                      const thumb =
+                        (m?.extractedImages ?? []).find((u) => !!u?.trim()) ||
+                        m?.image ||
+                        null;
                       return {
                         id: it.mediaId,
-                        thumbUrl: m?.image ?? null,
+                        thumbUrl: thumb,
                         name: it.mediaName,
                         location: m?.location ?? "—",
                         unitPriceMan: Math.round(it.unitPrice / 10_000),
