@@ -225,6 +225,30 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
   }
 
+  if (body.isPopular !== undefined) {
+    if (typeof body.isPopular !== "boolean") {
+      return json({ error: "isPopular must be boolean" }, 400);
+    }
+    data.isPopular = body.isPopular;
+    if (!body.isPopular) {
+      data.popularOrder = null;
+    }
+  }
+  if (body.popularOrder !== undefined) {
+    if (body.popularOrder === null) {
+      data.popularOrder = null;
+    } else {
+      const n = Math.round(Number(body.popularOrder));
+      if (!Number.isFinite(n)) {
+        return json(
+          { error: "popularOrder must be a number or null" },
+          400,
+        );
+      }
+      data.popularOrder = n;
+    }
+  }
+
   if (body.nearbyFacilities !== undefined) {
     if (body.nearbyFacilities === null) {
       data.nearbyFacilities = null;

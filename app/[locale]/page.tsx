@@ -13,7 +13,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import HeroParallaxBackground from "@/components/hero-parallax-background";
 import { type MediaItem } from "@/lib/media-data";
-import { fetchHomeFeaturedMedia } from "@/lib/public-media-catalog";
+import {
+  fetchHomeFeaturedMedia,
+  fetchHomePopularMedia,
+} from "@/lib/public-media-catalog";
 import {
   ArrowRight,
   BarChart3,
@@ -53,16 +56,20 @@ export default async function HomePage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations();
   /**
-   * 추천 매체: Prisma `isFeatured`·`featuredOrder`(홈 하드코딩 ID 없음).
-   * DB 연결 시 실제 행만; 미연결 시에만 샘플 카탈로그.
+   * 추천 매체: Prisma `isFeatured`·`featuredOrder` (관리자에서 지정).
+   * 인기 매체: Prisma `isPopular`·`popularOrder` (관리자에서 별도 지정).
    */
-  const [featuredCatalog] = await Promise.all([fetchHomeFeaturedMedia(6)]);
+  const [featuredCatalog, popularCatalog] = await Promise.all([
+    fetchHomeFeaturedMedia(6),
+    fetchHomePopularMedia(8),
+  ]);
 
   return (
     <HomeContent
       locale={locale}
       t={t}
       featuredCatalog={featuredCatalog}
+      popularCatalog={popularCatalog}
     />
   );
 }
@@ -71,13 +78,19 @@ function HomeContent({
   locale,
   t,
   featuredCatalog,
+  popularCatalog,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
   featuredCatalog: MediaItem[];
+  popularCatalog: MediaItem[];
 }) {
   const isKo = locale === "ko";
   const topThreeFeatured = featuredCatalog.slice(0, 3);
+  /** 추천과 겹치는 항목은 인기 섹션에서 제외해 중복 노출 방지 */
+  const popularItems = popularCatalog
+    .filter((m) => !topThreeFeatured.some((f) => f.id === m.id))
+    .slice(0, 6);
 
   return (
     <>
@@ -400,6 +413,71 @@ function HomeContent({
           )}
         </div>
       </section>
+
+      {/* 인기 매체 — 추천과 별개로 관리 (isPopular / popularOrder) */}
+      {popularItems.length > 0 && (
+        <section className="section-white py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <ScrollAnimate>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-4 py-1.5 text-sm font-bold text-rose-600">
+                    <span>🔥</span>
+                    {isKo ? "인기 매체" : "Popular"}
+                  </div>
+                  <h2 className="section-title mt-1 text-3xl font-bold text-navy sm:text-4xl">
+                    {isKo ? "지금 가장 주목받는 매체" : "Trending Right Now"}
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {isKo
+                      ? "최근 집행·관심도 기준으로 관리자가 선별한 매체"
+                      : "Hand-picked by our team based on recent bookings and demand"}
+                  </p>
+                </div>
+                <Link
+                  href="/media"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-gold hover:text-gold-dark"
+                >
+                  {isKo ? "전체 매체" : "View all"}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </ScrollAnimate>
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {popularItems.slice(0, 6).map((media, i) => (
+                <ScrollAnimate key={media.id} delay={i * 60}>
+                  <Link href={`/media/${media.id}`} className="block touch-manipulation">
+                    <Card className="group overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-1">
+                      <MediaCatalogThumbnail
+                        media={media}
+                        placeholderLabel={t("media.imagePreparing")}
+                        className="relative flex h-44 items-center justify-center"
+                        imgClassName="transition-transform duration-300 group-hover:scale-105"
+                        bottomGradientClassName={null}
+                        placeholderSize="xs"
+                      />
+                      <CardHeader className="space-y-1 p-3 pb-1.5">
+                        <Badge variant="secondary" className="w-fit bg-rose-50 text-rose-700 text-[10px] font-semibold">
+                          {isKo ? "인기" : "Popular"}
+                        </Badge>
+                        <CardTitle className="truncate text-sm font-bold leading-snug text-navy">
+                          {isKo ? media.name : (media.nameEn || media.name)}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="px-3 pb-3">
+                        <div className="flex items-center gap-1 text-xs leading-snug text-muted-foreground truncate">
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          {isKo ? media.location : (media.locationEn || media.location)}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </ScrollAnimate>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Why THINKAD */}
       <section className="section-white py-16">

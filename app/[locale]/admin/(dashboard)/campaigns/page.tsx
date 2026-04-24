@@ -524,6 +524,41 @@ export default function AdminCampaignsPage() {
     if (selectedId === id) await loadDetail(id);
   };
 
+  const deleteCampaign = async (id: string, name: string) => {
+    if (
+      !window.confirm(
+        `"${name}" 캠페인을 삭제하시겠습니까?\n연결된 일정·매체·증빙·문서도 함께 사라질 수 있습니다. 되돌릴 수 없습니다.`,
+      )
+    ) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/campaigns/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        window.alert(data.error ?? "삭제에 실패했습니다.");
+        return;
+      }
+      if (selectedId === id) {
+        setSelectedId(null);
+        setEvents([]);
+        setDocs([]);
+        setLinkedQuotes([]);
+        setProofs([]);
+        setMediaBookings([]);
+      }
+      await load();
+    } catch (e) {
+      console.error("[admin/campaigns] delete failed", e);
+      window.alert("네트워크 오류가 발생했습니다.");
+    }
+  };
+
   const downloadAiCompletionPdf = async () => {
     if (!selectedId) return;
     setPdfBusy(true);
@@ -804,20 +839,34 @@ export default function AdminCampaignsPage() {
                     {c._count.financialDocs} · 견적요청{" "}
                     {c._count.quoteRequests ?? 0}
                   </p>
-                  <select
-                    className="mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
-                    value={c.status}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) =>
-                      patchStatus(c.id, e.target.value as CampaignStatus)
-                    }
-                  >
-                    {(Object.keys(STATUS_LABEL) as CampaignStatus[]).map((s) => (
-                      <option key={s} value={s}>
-                        {STATUS_LABEL[s]}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="mt-2 flex items-center gap-2">
+                    <select
+                      className="flex-1 rounded border border-slate-200 px-2 py-1 text-xs"
+                      value={c.status}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) =>
+                        patchStatus(c.id, e.target.value as CampaignStatus)
+                      }
+                    >
+                      {(Object.keys(STATUS_LABEL) as CampaignStatus[]).map((s) => (
+                        <option key={s} value={s}>
+                          {STATUS_LABEL[s]}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void deleteCampaign(c.id, c.name);
+                      }}
+                      title="캠페인 삭제"
+                      aria-label="캠페인 삭제"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded border border-red-200 bg-white text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </button>
               ))
             )}
