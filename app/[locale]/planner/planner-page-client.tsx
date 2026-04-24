@@ -61,6 +61,7 @@ import PlannerReportStep, {
 } from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
+import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import {
   PLANNER_AGE_KEYS,
   PLANNER_BUDGET_MAX,
@@ -630,15 +631,30 @@ export default function PlannerPageClient({
               </Card>
             ) : null}
 
-            {/* Step 4 — 매체 선택 (PR-3에서 AI 추천 얹음) */}
+            {/* Step 4 — 매체 선택 (AI 추천 + 직접 탐색) */}
             {wizardStep === 4 ? (
-              <>
+              <div className="space-y-6">
                 <div className="space-y-2 text-center sm:text-left">
                   <h2 className="text-lg font-bold text-navy sm:text-xl">
                     {t("stepMediaTitle")}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {t("stepMediaDesc")}
+                  </p>
+                </div>
+
+                <PlannerRecommendationPanel
+                  catalog={catalog}
+                  isKo={isKo}
+                  regionLabel={mediaRegionLabel}
+                />
+
+                <div className="space-y-2 pt-4">
+                  <h3 className="text-base font-bold text-navy">
+                    {t("recommendBrowseTitle")}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {t("recommendBrowseDesc")}
                   </p>
                 </div>
                 <PlannerMediaSelector
@@ -648,7 +664,7 @@ export default function PlannerPageClient({
                   isKo={isKo}
                   regionLabel={mediaRegionLabel}
                 />
-              </>
+              </div>
             ) : null}
 
             {/* Step 5 — 로고 업로드 + 합성 미리보기 */}

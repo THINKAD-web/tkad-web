@@ -1448,7 +1448,22 @@
     "selectGoal": "Please select a campaign goal.",
     "needMediaPick": "Add at least one medium to your campaign.",
     "selectRegion": "Select at least one region.",
-    "targetSummaryLabel": "Plan summary"
+    "targetSummaryLabel": "Plan summary",
+    "recommendHeading": "AI media mix recommendations",
+    "recommendDesc": "Suggested media picks based on your goal, regions, and budget.",
+    "recommendLoading": "Analyzing optimal media mix...",
+    "recommendEmpty": "No matches for current filters. Adjust inputs or pick manually below.",
+    "recommendRefresh": "Refresh",
+    "recommendAdd": "Add",
+    "recommendAdded": "Added",
+    "recommendAddAll": "Add all",
+    "recommendBrowseTitle": "Browse more",
+    "recommendBrowseDesc": "Search the full catalog and add to your campaign.",
+    "recommendReason.matchRegion": "Region match",
+    "recommendReason.ageMatch": "Age match",
+    "recommendReason.budgetEfficient": "Budget efficient",
+    "recommendReason.goalFit": "Goal fit",
+    "recommendReason.highVisibility": "High visibility"
   },
   "footer": {
     "description": "The Thinking Ad Agency, THINKAD",

@@ -1447,7 +1447,22 @@
     "selectGoal": "목표를 선택해 주세요.",
     "needMediaPick": "캠페인에 담을 매체를 1개 이상 선택해 주세요.",
     "selectRegion": "지역을 한 곳 이상 선택해 주세요.",
-    "targetSummaryLabel": "플랜 요약"
+    "targetSummaryLabel": "플랜 요약",
+    "recommendHeading": "AI 매체 믹스 추천",
+    "recommendDesc": "입력하신 목표·지역·예산을 바탕으로 가장 적합한 매체를 자동으로 제안합니다.",
+    "recommendLoading": "AI가 최적 매체 조합을 분석 중입니다...",
+    "recommendEmpty": "조건에 맞는 추천 매체가 없습니다. 상단 필터를 조정하거나 아래에서 직접 선택해 주세요.",
+    "recommendRefresh": "새로고침",
+    "recommendAdd": "담기",
+    "recommendAdded": "담김",
+    "recommendAddAll": "전체 담기",
+    "recommendBrowseTitle": "더 찾아보기",
+    "recommendBrowseDesc": "추천 외에도 직접 검색해서 「내 캠페인」에 담을 수 있습니다.",
+    "recommendReason.matchRegion": "타깃 지역 매칭",
+    "recommendReason.ageMatch": "타깃 연령 매칭",
+    "recommendReason.budgetEfficient": "예산 효율 우수",
+    "recommendReason.goalFit": "목표 적합",
+    "recommendReason.highVisibility": "고가시성"
   },
   "footer": {
     "description": "생각하는 광고회사, 싱커드",
