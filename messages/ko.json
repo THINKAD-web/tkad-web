@@ -1473,7 +1473,15 @@
     "simGridLabel": "선택한 매체 한눈에 보기",
     "editLogo": "로고 편집",
     "editLogoDone": "완료",
-    "editLogoReset": "기본 위치로 되돌리기"
+    "editLogoReset": "기본 위치로 되돌리기",
+    "kpiImpressions": "예상 총 노출",
+    "kpiImpressionsHint": "캠페인 기간 누적 (추정)",
+    "kpiReach": "예상 도달",
+    "kpiReachHint": "중복 제거 추정치",
+    "kpiCpm": "예상 CPM",
+    "kpiCpmHint": "1,000회 노출당 비용",
+    "kpiRoi": "예상 ROI (기대)",
+    "kpiRoiHint": "낙관·보수 시나리오는 아래 참고"
   },
   "footer": {
     "description": "생각하는 광고회사, 싱커드",

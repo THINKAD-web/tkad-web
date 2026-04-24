@@ -1474,7 +1474,15 @@
     "simGridLabel": "Selected media at a glance",
     "editLogo": "Edit logo",
     "editLogoDone": "Done",
-    "editLogoReset": "Reset placement"
+    "editLogoReset": "Reset placement",
+    "kpiImpressions": "Total impressions",
+    "kpiImpressionsHint": "Cumulative over campaign (est.)",
+    "kpiReach": "Reach",
+    "kpiReachHint": "De-duplicated estimate",
+    "kpiCpm": "CPM",
+    "kpiCpmHint": "Cost per 1,000 impressions",
+    "kpiRoi": "Expected ROI",
+    "kpiRoiHint": "See scenarios below"
   },
   "footer": {
     "description": "The Thinking Ad Agency, THINKAD",

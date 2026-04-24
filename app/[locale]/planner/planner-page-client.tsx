@@ -63,6 +63,11 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import {
+  CompositePreview,
+  DEFAULT_LOGO_PLACEMENT,
+} from "@/components/planner/composite-preview";
+import { getPrimaryMediaImageUrl } from "@/lib/media-data";
+import {
   PLANNER_AGE_KEYS,
   PLANNER_BUDGET_MAX,
   PLANNER_BUDGET_MIN,
@@ -123,6 +128,7 @@ export default function PlannerPageClient({
   const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
   const creativeObjectUrl = usePlannerStore((s) => s.creativeObjectUrl);
   const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
+  const mediaPlacements = usePlannerStore((s) => s.mediaPlacements);
 
   const setWizardStep = usePlannerStore((s) => s.setWizardStep);
   const goNextStepAction = usePlannerStore((s) => s.goNextStep);
@@ -818,6 +824,71 @@ export default function PlannerPageClient({
                   {t(industryKey)}
                 </p>
 
+                {/* PR-7: 핵심 KPI 4장 — Impressions / Reach / CPM / ROI(기대) */}
+                {(() => {
+                  const budgetKrw = budgetNum * 10_000;
+                  const estReach = Math.round(
+                    metrics.estimatedTotalImpressions * 0.75,
+                  );
+                  const estCpm =
+                    metrics.estimatedTotalImpressions > 0
+                      ? Math.round(
+                          (budgetKrw /
+                            metrics.estimatedTotalImpressions) *
+                            1000,
+                        )
+                      : 0;
+                  return (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="rounded-xl border border-navy/10 bg-white p-4 shadow-sm">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t("kpiImpressions")}
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-gold-dark">
+                          {metrics.estimatedTotalImpressions.toLocaleString()}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {t("kpiImpressionsHint")}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-navy/10 bg-white p-4 shadow-sm">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t("kpiReach")}
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-navy">
+                          {estReach.toLocaleString()}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {t("kpiReachHint")}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-navy/10 bg-white p-4 shadow-sm">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t("kpiCpm")}
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-navy">
+                          ₩{estCpm.toLocaleString()}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {t("kpiCpmHint")}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 shadow-sm">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t("kpiRoi")}
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-gold-dark">
+                          {metrics.roiExpected}
+                          {t("roiUnit")}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {t("kpiRoiHint")}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <Card className="border-navy/10 shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-navy">{t("comboTitle")}</CardTitle>
@@ -832,23 +903,37 @@ export default function PlannerPageClient({
                       <Link
                         key={m.id}
                         href={mediaItemDetailPath(m.id)}
-                        className="rounded-xl border border-navy/10 bg-white p-3 shadow-sm transition hover:border-gold/40 hover:shadow-md"
+                        className="group flex flex-col gap-2 rounded-xl border border-navy/10 bg-white p-3 shadow-sm transition hover:border-gold/40 hover:shadow-md"
                       >
-                        <p className="line-clamp-2 text-sm font-bold text-navy">
-                          {isKo ? m.name : (m.nameEn || m.name) || m.name}
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {tm(`regions.${m.region}`)} ·{" "}
-                          {isKo
-                            ? m.location.slice(0, 40)
-                            : (m.locationEn || m.location).slice(0, 40)}
-                        </p>
-                        <p className="mt-2 text-sm font-bold text-gold-dark">
-                          ₩{m.price.toLocaleString()}
-                          <span className="text-xs font-medium text-navy/60">
-                            {isKo ? "만/월" : " ₩10K/mo"}
-                          </span>
-                        </p>
+                        <CompositePreview
+                          mediaImageUrl={getPrimaryMediaImageUrl(m)}
+                          mediaName={isKo ? m.name : m.nameEn || m.name}
+                          logoUrl={
+                            creativeUploadedUrl || creativeObjectUrl
+                          }
+                          placement={
+                            mediaPlacements[m.id] ?? DEFAULT_LOGO_PLACEMENT
+                          }
+                          compact
+                          missingLabel={t("mediaPhotoMissing")}
+                        />
+                        <div>
+                          <p className="line-clamp-2 text-sm font-bold text-navy">
+                            {isKo ? m.name : (m.nameEn || m.name) || m.name}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {tm(`regions.${m.region}`)} ·{" "}
+                            {isKo
+                              ? m.location.slice(0, 40)
+                              : (m.locationEn || m.location).slice(0, 40)}
+                          </p>
+                          <p className="mt-2 text-sm font-bold text-gold-dark">
+                            ₩{m.price.toLocaleString()}
+                            <span className="text-xs font-medium text-navy/60">
+                              {isKo ? "만/월" : " ₩10K/mo"}
+                            </span>
+                          </p>
+                        </div>
                       </Link>
                     ))}
                   </CardContent>
@@ -886,14 +971,8 @@ export default function PlannerPageClient({
                         <p className="text-xs font-medium text-muted-foreground">
                           {t("estMonthlyImp")}
                         </p>
-                        <p className="mt-1 text-2xl font-extrabold text-gold-dark">
-                          {metrics.estimatedMonthlyImpressions.toLocaleString()}
-                        </p>
-                        <p className="mt-3 text-xs font-medium text-muted-foreground">
-                          {t("estTotalImp")}
-                        </p>
                         <p className="mt-1 text-xl font-bold text-navy">
-                          {metrics.estimatedTotalImpressions.toLocaleString()}
+                          {metrics.estimatedMonthlyImpressions.toLocaleString()}
                         </p>
                       </div>
                     </CardContent>
