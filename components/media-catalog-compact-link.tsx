@@ -48,7 +48,7 @@ export function MediaCatalogCompactLinkRow({
   return (
     <Link
       href={href}
-      aria-label={isKo ? media.name : media.nameEn}
+      aria-label={isKo ? media.name : (media.nameEn || media.name)}
       className={cn(
         MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40",
@@ -88,7 +88,7 @@ export function MediaCatalogCompactLinkRow({
           ) : null}
         </div>
         <p className="line-clamp-2 min-w-0 break-words text-center text-[13px] font-bold leading-snug text-navy sm:line-clamp-1 sm:text-sm sm:leading-relaxed">
-          {isKo ? media.name : media.nameEn}
+          {isKo ? media.name : (media.nameEn || media.name)}
         </p>
         <p className="flex min-w-0 items-center justify-center gap-0.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px] sm:leading-relaxed">
           <MapPin className="h-2.5 w-2.5 shrink-0 sm:h-3 sm:w-3" />

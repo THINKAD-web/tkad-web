@@ -71,6 +71,11 @@ type CampaignRow = {
   clientName: string;
   clientEmail: string;
   status: CampaignStatus;
+  notes?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  budgetMin?: number | null;
+  budgetMax?: number | null;
   _count: {
     scheduleEvents: number;
     financialDocs: number;
@@ -147,7 +152,16 @@ export default function AdminCampaignsPage() {
   const [mediaBookings, setMediaBookings] = useState<{
     id?: string;
     title: string;
-    media?: { name: string; location: string; dailyFootfall?: number | null; impressions?: number | null; visibilityScore?: number | null } | null;
+    media?: {
+      name: string;
+      location: string;
+      dailyFootfall?: number | null;
+      impressions?: number | null;
+      visibilityScore?: number | null;
+      type?: string | null;
+      region?: string | null;
+      operatingHours?: string | null;
+    } | null;
     startsAt: string;
     endsAt: string;
     status: string;
@@ -1007,7 +1021,11 @@ export default function AdminCampaignsPage() {
                         clientName: form.clientName,
                         clientEmail: form.clientEmail,
                         status: list.find(c => c.id === selectedId)?.status ?? "진행중",
-                        notes: null,
+                        notes: list.find(c => c.id === selectedId)?.notes ?? null,
+                        startDate: list.find(c => c.id === selectedId)?.startDate ?? null,
+                        endDate: list.find(c => c.id === selectedId)?.endDate ?? null,
+                        budgetMin: list.find(c => c.id === selectedId)?.budgetMin ?? null,
+                        budgetMax: list.find(c => c.id === selectedId)?.budgetMax ?? null,
                         scheduleEvents: events?.map((e: { title: string; startsAt: string; endsAt: string; kind: string }) => ({
                           title: e.title,
                           startsAt: e.startsAt,
@@ -1026,6 +1044,11 @@ export default function AdminCampaignsPage() {
                           endsAt: b.endsAt,
                           status: b.status,
                           dailyFootTraffic: b.media?.dailyFootfall ?? null,
+                          type: b.media?.type ?? null,
+                          region: b.media?.region ?? null,
+                          visibilityScore: b.media?.visibilityScore ?? null,
+                          operatingHours: b.media?.operatingHours ?? null,
+                          impressions: b.media?.impressions ?? null,
                         })),
                         financialDocs: docs?.map((f: { kind: string; title: string; amountKrw?: number | null; status: string }) => ({
                           kind: f.kind,

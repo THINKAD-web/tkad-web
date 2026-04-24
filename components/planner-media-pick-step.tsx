@@ -78,8 +78,8 @@ export default function PlannerMediaPickStep({
     const q = query.trim().toLowerCase();
     if (!q) return catalog;
     return catalog.filter((m) => {
-      const name = (isKo ? m.name : m.nameEn || m.name).toLowerCase();
-      const loc = (isKo ? m.location : m.locationEn || m.location).toLowerCase();
+      const name = (isKo ? m.name : (m.nameEn || m.name) || m.name).toLowerCase();
+      const loc = (isKo ? m.location : (m.locationEn || m.location) || m.location).toLowerCase();
       return name.includes(q) || loc.includes(q);
     });
   }, [catalog, query, isKo]);
@@ -232,11 +232,11 @@ export default function PlannerMediaPickStep({
                       />
                       <div className="min-w-0 flex-1">
                         <p className="line-clamp-2 text-sm font-semibold text-navy">
-                          {isKo ? m.name : m.nameEn || m.name}
+                          {isKo ? m.name : (m.nameEn || m.name) || m.name}
                         </p>
                         <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
                           {regionLabel(m.region)} ·{" "}
-                          {(isKo ? m.location : m.locationEn || m.location).slice(
+                          {(isKo ? m.location : (m.locationEn || m.location) || m.location).slice(
                             0,
                             48,
                           )}
@@ -349,7 +349,7 @@ export default function PlannerMediaPickStep({
                       />
                       <div className="min-w-0 flex-1">
                         <p className="line-clamp-2 text-sm font-semibold text-navy">
-                          {isKo ? m.name : m.nameEn || m.name}
+                          {isKo ? m.name : (m.nameEn || m.name) || m.name}
                         </p>
                         <p className="mt-0.5 text-xs text-muted-foreground">
                           {regionLabel(m.region)}

@@ -138,7 +138,7 @@ export default function MediaSimilarCarousel({
                   </span>
                 ) : null}
                 <p className="line-clamp-2 min-h-[2.35rem] text-sm font-bold leading-snug text-navy group-hover:text-gold-dark">
-                  {isKo ? m.name : m.nameEn}
+                  {isKo ? m.name : (m.nameEn || m.name)}
                 </p>
                 <p className="mt-2 text-sm font-bold tabular-nums text-gold-dark sm:text-base">
                   {formatMediaPriceWonWithSymbol(m.price)}

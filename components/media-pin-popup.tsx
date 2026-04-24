@@ -45,7 +45,7 @@ export function MediaPinPopup({
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-extrabold text-navy">
-              {isKo ? media.name : media.nameEn}
+              {isKo ? media.name : (media.nameEn || media.name)}
             </p>
             <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
               {formatMediaLocationShort(media, isKo)}

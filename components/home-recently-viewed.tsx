@@ -121,7 +121,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                       {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
                     </Badge>
                     <CardTitle className="truncate text-sm font-bold leading-snug">
-                      {isKo ? media.name : media.nameEn}
+                      {isKo ? media.name : (media.nameEn || media.name)}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="min-w-0 px-3 pb-3">

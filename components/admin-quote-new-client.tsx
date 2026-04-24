@@ -265,7 +265,7 @@ export default function AdminQuoteNewClient() {
       const qty = quantities[id] ?? 1;
       list.push({
         mediaId: m.id,
-        mediaName: isKo ? m.name : m.nameEn || m.name,
+        mediaName: isKo ? m.name : (m.nameEn || m.name) || m.name,
         spec: mediaSpecLine(m),
         period: campaignPeriodLabel,
         unitPrice: catalogPriceFieldToWon(m.price),

@@ -12,9 +12,26 @@ export type CampaignReportData = {
   clientEmail: string;
   status: string;
   notes?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  budgetMin?: number | null;
+  budgetMax?: number | null;
   scheduleEvents?: { title: string; startsAt: string; endsAt: string; kind: string }[];
   proofPhotos?: { imageUrl: string; caption?: string | null }[];
-  mediaBookings?: { title: string; mediaName: string; location: string; startsAt: string; endsAt: string; status: string; dailyFootTraffic?: number | null }[];
+  mediaBookings?: {
+    title: string;
+    mediaName: string;
+    location: string;
+    startsAt: string;
+    endsAt: string;
+    status: string;
+    dailyFootTraffic?: number | null;
+    type?: string | null;
+    region?: string | null;
+    visibilityScore?: number | null;
+    operatingHours?: string | null;
+    impressions?: number | null;
+  }[];
   financialDocs?: { kind: string; title: string; amountKrw?: number | null; status: string }[];
 };
 
@@ -38,16 +55,64 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
 
   const stats = (() => {
     if (!data.mediaBookings?.length) return null;
-    let totalExposure = 0, totalDays = 0;
+    let totalExposure = 0, totalDays = 0, totalImpressions = 0;
     for (const b of data.mediaBookings) {
       const days = diffDays(b.startsAt, b.endsAt);
       totalExposure += (b.dailyFootTraffic ?? 0) * days;
       totalDays += days;
+      totalImpressions += (b.impressions ?? 0) * days;
     }
-    return { totalExposure, totalDays, mediaCount: data.mediaBookings.length };
+    const avgDaily = totalDays > 0 ? Math.round(totalExposure / totalDays) : 0;
+    const maxDays = Math.max(...data.mediaBookings.map((b) => diffDays(b.startsAt, b.endsAt)));
+    return {
+      totalExposure,
+      totalDays,
+      mediaCount: data.mediaBookings.length,
+      avgDaily,
+      maxDays,
+      totalImpressions,
+    };
+  })();
+
+  /** 유형·지역 분포 */
+  const distribution = (() => {
+    if (!data.mediaBookings?.length) return null;
+    const byType: Record<string, number> = {};
+    const byRegion: Record<string, number> = {};
+    for (const b of data.mediaBookings) {
+      const t = (b.type ?? "기타").toString();
+      const r = (b.region ?? b.location?.split(" ")[0] ?? "-").toString();
+      byType[t] = (byType[t] ?? 0) + 1;
+      byRegion[r] = (byRegion[r] ?? 0) + 1;
+    }
+    return {
+      types: Object.entries(byType).sort((a, b) => b[1] - a[1]),
+      regions: Object.entries(byRegion).sort((a, b) => b[1] - a[1]).slice(0, 6),
+    };
+  })();
+
+  /** 평균 검증 점수 */
+  const avgVisibility = (() => {
+    const scores = (data.mediaBookings ?? [])
+      .map((b) => b.visibilityScore)
+      .filter((v): v is number => typeof v === "number" && v > 0);
+    if (scores.length === 0) return null;
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    return Math.round(avg * 10) / 10; // 1 decimal
   })();
 
   const totalAmount = data.financialDocs?.reduce((s, f) => s + (f.amountKrw ?? 0), 0) ?? 0;
+  const campaignPeriod = (() => {
+    if (data.startDate && data.endDate) {
+      return `${fmtDate(data.startDate)} ~ ${fmtDate(data.endDate)}`;
+    }
+    if (data.mediaBookings?.length) {
+      const starts = data.mediaBookings.map((b) => new Date(b.startsAt).getTime());
+      const ends = data.mediaBookings.map((b) => new Date(b.endsAt).getTime());
+      return `${fmtDate(new Date(Math.min(...starts)).toISOString())} ~ ${fmtDate(new Date(Math.max(...ends)).toISOString())}`;
+    }
+    return null;
+  })();
 
   const handleCapture = async () => {
     if (!ref.current || busy) return;
@@ -130,6 +195,47 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
 
         <div style={{ padding: "32px 40px" }}>
 
+          {/* 캠페인 개요 */}
+          <div style={{ marginBottom: "28px" }}>
+            <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
+              📋 캠페인 개요
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", fontSize: "12px" }}>
+              <div style={{ padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>고객사</p>
+                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 700, color: "#0d1b2e" }}>{data.clientCompany || "—"}</p>
+              </div>
+              <div style={{ padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>담당자</p>
+                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 700, color: "#0d1b2e" }}>{data.clientName || "—"}</p>
+              </div>
+              <div style={{ padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>이메일</p>
+                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600, color: "#0d1b2e" }}>{data.clientEmail || "—"}</p>
+              </div>
+              <div style={{ padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>캠페인 기간</p>
+                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 700, color: "#0d1b2e" }}>{campaignPeriod ?? "—"}</p>
+              </div>
+              {(data.budgetMin != null || data.budgetMax != null) && (
+                <div style={{ padding: "10px 14px", background: "#fffbeb", borderRadius: "8px", border: "1px solid #fde68a", gridColumn: "span 2" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#92400e", fontWeight: 600 }}>예산 범위</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 700, color: "#92400e" }}>
+                    {data.budgetMin != null ? fmtAmount(data.budgetMin) : "—"}
+                    {" ~ "}
+                    {data.budgetMax != null ? fmtAmount(data.budgetMax) : "—"}
+                  </p>
+                </div>
+              )}
+              {data.notes && (
+                <div style={{ padding: "10px 14px", background: "#f1f5f9", borderRadius: "8px", border: "1px solid #e2e8f0", gridColumn: "span 2" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>비고</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#334155", lineHeight: 1.5 }}>{data.notes}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* 핵심 KPI */}
           {(stats || totalAmount > 0) && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "32px" }}>
@@ -155,6 +261,88 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
                   <p style={{ fontSize: "22px", fontWeight: 800, color: "#92400e", margin: 0 }}>{fmtAmount(totalAmount)}</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* 부가 KPI (일평균·최장 기간·평균 검증·예상 임프레션) */}
+          {stats && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "32px" }}>
+              <div style={{ background: "#ffffff", borderRadius: "10px", padding: "14px", border: "1px solid #e2e8f0" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>일평균 유동</p>
+                <p style={{ margin: "2px 0 0", fontSize: "18px", fontWeight: 800, color: "#0d1b2e" }}>
+                  {stats.avgDaily > 0 ? `${stats.avgDaily.toLocaleString()}명` : "—"}
+                </p>
+              </div>
+              <div style={{ background: "#ffffff", borderRadius: "10px", padding: "14px", border: "1px solid #e2e8f0" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>최장 집행</p>
+                <p style={{ margin: "2px 0 0", fontSize: "18px", fontWeight: 800, color: "#0d1b2e" }}>
+                  {stats.maxDays}일
+                </p>
+              </div>
+              <div style={{ background: "#ffffff", borderRadius: "10px", padding: "14px", border: "1px solid #e2e8f0" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>평균 검증</p>
+                <p style={{ margin: "2px 0 0", fontSize: "18px", fontWeight: 800, color: "#0d1b2e" }}>
+                  {avgVisibility != null ? `${avgVisibility} / 4` : "—"}
+                </p>
+              </div>
+              <div style={{ background: "#ffffff", borderRadius: "10px", padding: "14px", border: "1px solid #e2e8f0" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>예상 임프레션</p>
+                <p style={{ margin: "2px 0 0", fontSize: "18px", fontWeight: 800, color: "#0d1b2e" }}>
+                  {stats.totalImpressions > 0
+                    ? `${Math.round(stats.totalImpressions / 10000).toLocaleString()}만`
+                    : "—"}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* 유형 / 지역 분포 */}
+          {distribution && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "28px" }}>
+              <div>
+                <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 10px" }}>
+                  📊 유형 분포
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  {distribution.types.map(([label, count]) => {
+                    const total = stats?.mediaCount ?? 0;
+                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div key={label} style={{ background: "#f8faff", borderRadius: "8px", padding: "8px 12px", border: "1px solid #e2e8f0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#0d1b2e" }}>{label}</span>
+                          <span style={{ fontSize: "11px", color: "#64748b" }}>{count}개 · {pct}%</span>
+                        </div>
+                        <div style={{ height: "4px", background: "#e2e8f0", borderRadius: "2px", overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, background: "#c8913c" }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 10px" }}>
+                  🗺️ 지역 분포
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  {distribution.regions.map(([label, count]) => {
+                    const total = stats?.mediaCount ?? 0;
+                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div key={label} style={{ background: "#f8faff", borderRadius: "8px", padding: "8px 12px", border: "1px solid #e2e8f0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#0d1b2e" }}>{label}</span>
+                          <span style={{ fontSize: "11px", color: "#64748b" }}>{count}개 · {pct}%</span>
+                        </div>
+                        <div style={{ height: "4px", background: "#e2e8f0", borderRadius: "2px", overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, background: "#0d1b2e" }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 

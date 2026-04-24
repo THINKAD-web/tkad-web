@@ -160,7 +160,7 @@ export default async function MediaDetailPage({ params }: Props) {
       isKo ? media.longDescriptionKo : media.longDescriptionEn
     )?.trim();
     if (long) return long;
-    const desc = (isKo ? media.description : media.descriptionEn)?.trim();
+    const desc = (isKo ? media.description : (media.descriptionEn || media.description))?.trim();
     return desc ?? "";
   })();
 
@@ -171,7 +171,7 @@ export default async function MediaDetailPage({ params }: Props) {
       <MediaDetailHeroGallery
         images={galleryImages}
         heroSrc={heroImage}
-        altBase={isKo ? media.name : media.nameEn}
+        altBase={isKo ? media.name : (media.nameEn || media.name)}
         labels={{
           close: t("galleryLightboxClose"),
           prev: t("galleryLightboxPrev"),
@@ -199,7 +199,7 @@ export default async function MediaDetailPage({ params }: Props) {
             <div className="min-w-0 space-y-3 text-white">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <h1 className="break-words text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
-                  {isKo ? media.name : media.nameEn}
+                  {isKo ? media.name : (media.nameEn || media.name)}
                 </h1>
                 <Badge
                   variant="secondary"
@@ -336,9 +336,9 @@ export default async function MediaDetailPage({ params }: Props) {
           <div className="flex items-center gap-2">
             <MediaFavoriteButton
               mediaId={media.id}
-              mediaName={isKo ? media.name : media.nameEn}
+              mediaName={isKo ? media.name : (media.nameEn || media.name)}
             />
-            <MediaDetailAddToCart mediaId={media.id} mediaName={isKo ? media.name : media.nameEn} />
+            <MediaDetailAddToCart mediaId={media.id} mediaName={isKo ? media.name : (media.nameEn || media.name)} />
           </div>
         </div>
       </div>

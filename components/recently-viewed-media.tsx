@@ -127,7 +127,7 @@ export default function RecentlyViewedMedia({ locale }: Props) {
                 />
                 <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-1.5 pr-2.5 pl-2">
                   <span className="truncate text-[11px] font-semibold leading-tight text-foreground group-hover:text-navy">
-                    {isKo ? media.name : media.nameEn}
+                    {isKo ? media.name : (media.nameEn || media.name)}
                   </span>
                   <span className="text-[10px] font-bold tabular-nums leading-tight text-navy group-hover:text-navy">
                     {formatMediaPriceWonWithSymbol(media.price)}

@@ -334,7 +334,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           ageText: props.ageText,
           industryText: props.industryText,
           mediaList: props.portfolio.map((m) => ({
-            name: props.isKo ? m.name : m.nameEn,
+            name: props.isKo ? m.name : (m.nameEn || m.name),
             price: m.price,
             location: m.location,
           })),
@@ -612,7 +612,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           ageText: props.ageText,
           industryText: props.industryText,
           mediaList: props.portfolio.map((m) => ({
-            name: props.isKo ? m.name : m.nameEn,
+            name: props.isKo ? m.name : (m.nameEn || m.name),
             price: m.price,
             location: m.location,
           })),

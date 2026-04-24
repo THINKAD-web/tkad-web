@@ -408,7 +408,7 @@ export default function AiChatbot() {
                           className="flex items-center gap-2 rounded-xl border border-navy/10 bg-slate-50/90 px-3 py-2.5 text-xs shadow-sm"
                         >
                           <span className="min-w-0 flex-1 truncate font-medium text-navy">
-                            {isKo ? e.name : e.nameEn || e.name}
+                            {isKo ? e.name : (e.nameEn || e.name) || e.name}
                           </span>
                           <button
                             type="button"

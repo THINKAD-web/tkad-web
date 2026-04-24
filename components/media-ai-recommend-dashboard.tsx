@@ -421,7 +421,7 @@ function Top3DashCard({
         </span>
       </div>
       <p className="mt-3 line-clamp-2 text-sm font-bold leading-snug text-slate-50">
-        {isKo ? m.name : m.nameEn}
+        {isKo ? m.name : (m.nameEn || m.name)}
       </p>
       <p className="mt-1 text-[11px] text-slate-300">
         {isKo ? tl.ko : tl.en}

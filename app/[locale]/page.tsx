@@ -317,7 +317,7 @@ function HomeContent({
                       imgClassName="opacity-90 transition duration-300 group-hover:scale-105"
                       bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/45 via-transparent to-transparent"
                       placeholderSize="sm"
-                      alt={isKo ? media.name : media.nameEn}
+                      alt={isKo ? media.name : (media.nameEn || media.name)}
                       priority={true}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     >
@@ -337,11 +337,11 @@ function HomeContent({
                         {typeLabel}
                       </Badge>
                       <CardTitle className="text-lg font-bold text-navy">
-                        {isKo ? media.name : media.nameEn}
+                        {isKo ? media.name : (media.nameEn || media.name)}
                       </CardTitle>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <MapPin className="h-3.5 w-3.5" />
-                        {isKo ? media.location : media.locationEn}
+                        {isKo ? media.location : (media.locationEn || media.location)}
                       </div>
                     </CardHeader>
                     <CardContent>
