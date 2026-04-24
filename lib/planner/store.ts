@@ -39,8 +39,10 @@ export type PlannerStoreState = {
   ageKey: PlannerAgeKey;
   industryKey: PlannerIndustryKey;
   campaignMediaIds: string[];
-  /** Object URL. 메모리 전용이라 persist 대상에서 제외. */
+  /** 로컬 Object URL. 메모리 전용이라 persist 대상에서 제외. */
   creativeObjectUrl: string | null;
+  /** Cloudinary 업로드된 크리에이티브 secure_url. persist 포함. */
+  creativeUploadedUrl: string | null;
 };
 
 export type PlannerStoreActions = {
@@ -60,6 +62,7 @@ export type PlannerStoreActions = {
   setCampaignMediaIds: (action: SetStateAction<string[]>) => void;
   /** React `Dispatch<SetStateAction<string | null>>` 호환 */
   setCreativeObjectUrl: (action: SetStateAction<string | null>) => void;
+  setCreativeUploadedUrl: (url: string | null) => void;
   applyPreset: (id: PlannerPresetId) => void;
   reset: () => void;
 };
@@ -77,6 +80,7 @@ const INITIAL_STATE: PlannerStoreState = {
   industryKey: "indOther",
   campaignMediaIds: [],
   creativeObjectUrl: null,
+  creativeUploadedUrl: null,
 };
 
 function clampWizardStep(n: number): PlannerWizardStep {
@@ -162,6 +166,8 @@ export const usePlannerStore = create<PlannerStore>()(
               : action,
         })),
 
+      setCreativeUploadedUrl: (url) => set({ creativeUploadedUrl: url }),
+
       applyPreset: (id) =>
         set(() => {
           if (id === "premium") {
@@ -202,6 +208,7 @@ export const usePlannerStore = create<PlannerStore>()(
         ageKey: state.ageKey,
         industryKey: state.industryKey,
         campaignMediaIds: state.campaignMediaIds,
+        creativeUploadedUrl: state.creativeUploadedUrl,
       }),
       /**
        * 레거시 포맷:
@@ -256,6 +263,10 @@ export const usePlannerStore = create<PlannerStore>()(
           merged.campaignMediaIds = raw.campaignMediaIds.filter(
             (id): id is string => typeof id === "string",
           );
+        }
+
+        if (typeof raw.creativeUploadedUrl === "string") {
+          merged.creativeUploadedUrl = raw.creativeUploadedUrl;
         }
 
         return merged as unknown as PlannerStore;

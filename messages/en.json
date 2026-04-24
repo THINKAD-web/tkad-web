@@ -1463,7 +1463,12 @@
     "recommendReason.ageMatch": "Age match",
     "recommendReason.budgetEfficient": "Budget efficient",
     "recommendReason.goalFit": "Goal fit",
-    "recommendReason.highVisibility": "High visibility"
+    "recommendReason.highVisibility": "High visibility",
+    "creativeUploadProgress": "Uploading... {pct}%",
+    "creativeUploadSuccess": "Upload complete",
+    "creativeUploadError": "Upload failed. Please try again.",
+    "creativeUploadErrorType": "Only PNG / JPG / SVG formats are supported.",
+    "creativeUploadErrorSize": "File must be under 10MB."
   },
   "footer": {
     "description": "The Thinking Ad Agency, THINKAD",

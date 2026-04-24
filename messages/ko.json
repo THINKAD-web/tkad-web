@@ -1462,7 +1462,12 @@
     "recommendReason.ageMatch": "타깃 연령 매칭",
     "recommendReason.budgetEfficient": "예산 효율 우수",
     "recommendReason.goalFit": "목표 적합",
-    "recommendReason.highVisibility": "고가시성"
+    "recommendReason.highVisibility": "고가시성",
+    "creativeUploadProgress": "업로드 중... {pct}%",
+    "creativeUploadSuccess": "업로드 완료",
+    "creativeUploadError": "업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    "creativeUploadErrorType": "PNG / JPG / SVG 형식만 지원합니다.",
+    "creativeUploadErrorSize": "10MB 이하 파일만 업로드할 수 있습니다."
   },
   "footer": {
     "description": "생각하는 광고회사, 싱커드",

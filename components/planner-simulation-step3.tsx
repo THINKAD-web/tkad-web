@@ -10,7 +10,14 @@ import {
   type SetStateAction,
 } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight, ImageUp, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  ImageUp,
+  Loader2,
+  Trash2,
+} from "lucide-react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,16 +30,26 @@ import {
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
+import {
+  PLANNER_CREATIVE_ACCEPTED_TYPES,
+  uploadPlannerCreative,
+  validateCreativeFile,
+} from "@/lib/planner/creative-upload";
+import { useToast } from "@/components/toast-provider";
 
 type Props = {
   selectedMedia: MediaItem[];
   creativeObjectUrl: string | null;
   setCreativeObjectUrl: Dispatch<SetStateAction<string | null>>;
+  creativeUploadedUrl: string | null;
+  setCreativeUploadedUrl: (url: string | null) => void;
 };
 
-function isValidCreativeFile(file: File): boolean {
-  return file.type === "image/png" || file.type === "image/jpeg";
-}
+type UploadState =
+  | { status: "idle" }
+  | { status: "uploading"; pct: number }
+  | { status: "done" }
+  | { status: "error"; message: string };
 
 function mediaSimulationPhotoUrl(m: MediaItem): string | null {
   const primary = getPrimaryMediaImageUrl(m);
@@ -47,11 +64,17 @@ export default function PlannerSimulationStep3({
   selectedMedia,
   creativeObjectUrl,
   setCreativeObjectUrl,
+  creativeUploadedUrl,
+  setCreativeUploadedUrl,
 }: Props) {
   const t = useTranslations("planner");
+  const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
   const [slideDir, setSlideDir] = useState<0 | 1 | -1>(0);
+  const [upload, setUpload] = useState<UploadState>(
+    creativeUploadedUrl ? { status: "done" } : { status: "idle" },
+  );
 
   const mediaCards = useMemo(
     () =>
@@ -65,9 +88,10 @@ export default function PlannerSimulationStep3({
 
   const maxIdx = Math.max(0, mediaCards.length - 1);
 
-  useEffect(() => {
-    setSlideIndex((i) => Math.min(i, maxIdx));
-  }, [maxIdx]);
+  // slideIndex 가 새 maxIdx 범위를 초과하면 render 단계에서 즉시 보정 (effect 불필요)
+  if (slideIndex > maxIdx) {
+    setSlideIndex(maxIdx);
+  }
 
   const goPrev = useCallback(() => {
     setSlideIndex((i) => {
@@ -110,8 +134,10 @@ export default function PlannerSimulationStep3({
       if (prev) URL.revokeObjectURL(prev);
       return null;
     });
+    setCreativeUploadedUrl(null);
+    setUpload({ status: "idle" });
     if (inputRef.current) inputRef.current.value = "";
-  }, [setCreativeObjectUrl]);
+  }, [setCreativeObjectUrl, setCreativeUploadedUrl]);
 
   useEffect(() => {
     return () => {
@@ -119,13 +145,43 @@ export default function PlannerSimulationStep3({
     };
   }, [creativeObjectUrl]);
 
-  const onPickFile = (file: File | null) => {
+  const onPickFile = async (file: File | null) => {
     if (!file) return;
-    if (!isValidCreativeFile(file)) return;
+    const validation = validateCreativeFile(file);
+    if (validation) {
+      const key =
+        validation === "type"
+          ? "creativeUploadErrorType"
+          : validation === "size"
+            ? "creativeUploadErrorSize"
+            : "creativeUploadError";
+      toast("error", t(key));
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
+    // 즉시 로컬 미리보기
     setCreativeObjectUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return URL.createObjectURL(file);
     });
+
+    // 백그라운드 Cloudinary 업로드
+    setUpload({ status: "uploading", pct: 0 });
+    try {
+      const result = await uploadPlannerCreative(file, {
+        onProgress: (pct) => setUpload({ status: "uploading", pct }),
+      });
+      setCreativeUploadedUrl(result.secureUrl);
+      setUpload({ status: "done" });
+      toast("success", t("creativeUploadSuccess"));
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "upload failed";
+      setCreativeUploadedUrl(null);
+      setUpload({ status: "error", message });
+      toast("error", t("creativeUploadError"));
+    }
   };
 
   return (
@@ -165,7 +221,7 @@ export default function PlannerSimulationStep3({
                   <input
                     ref={inputRef}
                     type="file"
-                    accept="image/png,image/jpeg"
+                    accept={PLANNER_CREATIVE_ACCEPTED_TYPES.join(",")}
                     className="sr-only"
                     onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
                   />
@@ -173,10 +229,14 @@ export default function PlannerSimulationStep3({
                     type="button"
                     className="btn-gold rounded-full px-5 font-semibold"
                     onClick={() => inputRef.current?.click()}
+                    disabled={upload.status === "uploading"}
                   >
+                    {upload.status === "uploading" ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                    ) : null}
                     {t("creativeUploadButton")}
                   </Button>
-                  {creativeObjectUrl ? (
+                  {creativeObjectUrl || creativeUploadedUrl ? (
                     <Button
                       type="button"
                       variant="outline"
@@ -188,6 +248,31 @@ export default function PlannerSimulationStep3({
                     </Button>
                   ) : null}
                 </div>
+
+                {upload.status === "uploading" ? (
+                  <div
+                    className="mt-3 w-full max-w-xs"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={upload.pct}
+                  >
+                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
+                      <div
+                        className="h-full rounded-full bg-gold transition-all"
+                        style={{ width: `${upload.pct}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {t("creativeUploadProgress", { pct: upload.pct })}
+                    </p>
+                  </div>
+                ) : upload.status === "done" ? (
+                  <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
+                    <Check className="h-3.5 w-3.5" aria-hidden />
+                    {t("creativeUploadSuccess")}
+                  </p>
+                ) : null}
               </div>
             </div>
 

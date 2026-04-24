@@ -122,6 +122,7 @@ export default function PlannerPageClient({
   const industryKey = usePlannerStore((s) => s.industryKey);
   const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
   const creativeObjectUrl = usePlannerStore((s) => s.creativeObjectUrl);
+  const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
 
   const setWizardStep = usePlannerStore((s) => s.setWizardStep);
   const goNextStepAction = usePlannerStore((s) => s.goNextStep);
@@ -135,6 +136,9 @@ export default function PlannerPageClient({
   const setIndustryKey = usePlannerStore((s) => s.setIndustryKey);
   const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
   const setCreativeObjectUrl = usePlannerStore((s) => s.setCreativeObjectUrl);
+  const setCreativeUploadedUrl = usePlannerStore(
+    (s) => s.setCreativeUploadedUrl,
+  );
   const applyPresetAction = usePlannerStore((s) => s.applyPreset);
 
   const selectedRegions = useMemo(() => new Set(regions), [regions]);
@@ -673,6 +677,8 @@ export default function PlannerPageClient({
                 selectedMedia={selectedMediaForSimulation}
                 creativeObjectUrl={creativeObjectUrl}
                 setCreativeObjectUrl={setCreativeObjectUrl}
+                creativeUploadedUrl={creativeUploadedUrl}
+                setCreativeUploadedUrl={setCreativeUploadedUrl}
               />
             ) : null}
 
