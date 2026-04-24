@@ -19,6 +19,7 @@ import {
   type PlannerPresetId,
   type PlannerWizardStep,
 } from "@/lib/planner/types";
+import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 
 /**
  * localStorage key. 과거 `tkad-planner-plan-v2` 포맷(v2/v3)과 호환되도록
@@ -43,6 +44,8 @@ export type PlannerStoreState = {
   creativeObjectUrl: string | null;
   /** Cloudinary 업로드된 크리에이티브 secure_url. persist 포함. */
   creativeUploadedUrl: string | null;
+  /** 매체별 로고 배치 좌표 (Canvas 편집 결과). key = media id. persist 포함. */
+  mediaPlacements: Record<string, CompositeLogoPlacement>;
 };
 
 export type PlannerStoreActions = {
@@ -63,6 +66,12 @@ export type PlannerStoreActions = {
   /** React `Dispatch<SetStateAction<string | null>>` 호환 */
   setCreativeObjectUrl: (action: SetStateAction<string | null>) => void;
   setCreativeUploadedUrl: (url: string | null) => void;
+  setMediaPlacement: (
+    mediaId: string,
+    placement: CompositeLogoPlacement,
+  ) => void;
+  clearMediaPlacement: (mediaId: string) => void;
+  resetAllMediaPlacements: () => void;
   applyPreset: (id: PlannerPresetId) => void;
   reset: () => void;
 };
@@ -81,6 +90,7 @@ const INITIAL_STATE: PlannerStoreState = {
   campaignMediaIds: [],
   creativeObjectUrl: null,
   creativeUploadedUrl: null,
+  mediaPlacements: {},
 };
 
 function clampWizardStep(n: number): PlannerWizardStep {
@@ -168,6 +178,21 @@ export const usePlannerStore = create<PlannerStore>()(
 
       setCreativeUploadedUrl: (url) => set({ creativeUploadedUrl: url }),
 
+      setMediaPlacement: (mediaId, placement) =>
+        set((s) => ({
+          mediaPlacements: { ...s.mediaPlacements, [mediaId]: placement },
+        })),
+
+      clearMediaPlacement: (mediaId) =>
+        set((s) => {
+          if (!(mediaId in s.mediaPlacements)) return {};
+          const next = { ...s.mediaPlacements };
+          delete next[mediaId];
+          return { mediaPlacements: next };
+        }),
+
+      resetAllMediaPlacements: () => set({ mediaPlacements: {} }),
+
       applyPreset: (id) =>
         set(() => {
           if (id === "premium") {
@@ -209,6 +234,7 @@ export const usePlannerStore = create<PlannerStore>()(
         industryKey: state.industryKey,
         campaignMediaIds: state.campaignMediaIds,
         creativeUploadedUrl: state.creativeUploadedUrl,
+        mediaPlacements: state.mediaPlacements,
       }),
       /**
        * 레거시 포맷:
@@ -267,6 +293,17 @@ export const usePlannerStore = create<PlannerStore>()(
 
         if (typeof raw.creativeUploadedUrl === "string") {
           merged.creativeUploadedUrl = raw.creativeUploadedUrl;
+        }
+
+        if (
+          raw.mediaPlacements &&
+          typeof raw.mediaPlacements === "object" &&
+          !Array.isArray(raw.mediaPlacements)
+        ) {
+          merged.mediaPlacements = raw.mediaPlacements as Record<
+            string,
+            CompositeLogoPlacement
+          >;
         }
 
         return merged as unknown as PlannerStore;

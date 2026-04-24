@@ -36,7 +36,12 @@ import {
   validateCreativeFile,
 } from "@/lib/planner/creative-upload";
 import { useToast } from "@/components/toast-provider";
-import { CompositePreview } from "@/components/planner/composite-preview";
+import {
+  CompositePreview,
+  DEFAULT_LOGO_PLACEMENT,
+} from "@/components/planner/composite-preview";
+import { usePlannerStore } from "@/lib/planner/store";
+import { Move, RotateCcw } from "lucide-react";
 
 type Props = {
   selectedMedia: MediaItem[];
@@ -75,6 +80,12 @@ export default function PlannerSimulationStep3({
   const [slideDir, setSlideDir] = useState<0 | 1 | -1>(0);
   const [upload, setUpload] = useState<UploadState>(
     creativeUploadedUrl ? { status: "done" } : { status: "idle" },
+  );
+  const [editing, setEditing] = useState(false);
+  const mediaPlacements = usePlannerStore((s) => s.mediaPlacements);
+  const setMediaPlacement = usePlannerStore((s) => s.setMediaPlacement);
+  const clearMediaPlacement = usePlannerStore(
+    (s) => s.clearMediaPlacement,
   );
 
   const mediaCards = useMemo(
@@ -343,6 +354,9 @@ export default function PlannerSimulationStep3({
                             logoUrl={
                               creativeUploadedUrl || creativeObjectUrl
                             }
+                            placement={
+                              mediaPlacements[m.id] ?? DEFAULT_LOGO_PLACEMENT
+                            }
                             compact
                             missingLabel={t("mediaPhotoMissing")}
                           />
@@ -357,12 +371,43 @@ export default function PlannerSimulationStep3({
                 <p className="text-xs font-semibold text-muted-foreground">
                   {t("simPerMediaLabel")}
                 </p>
-                <p className="text-xs font-bold text-navy">
-                  {t("simCounter", {
-                    current: slideIndex + 1,
-                    total: mediaCards.length,
-                  })}
-                </p>
+                <div className="flex items-center gap-2">
+                  {(creativeObjectUrl || creativeUploadedUrl) && current ? (
+                    <>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={editing ? "default" : "outline"}
+                        className={cn(
+                          "h-7 rounded-full px-3 text-[11px]",
+                          editing && "btn-gold border-0",
+                        )}
+                        onClick={() => setEditing((v) => !v)}
+                      >
+                        <Move className="mr-1 h-3 w-3" aria-hidden />
+                        {editing ? t("editLogoDone") : t("editLogo")}
+                      </Button>
+                      {editing && mediaPlacements[current.id] ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-7 rounded-full px-2 text-[11px] border-navy/20"
+                          onClick={() => clearMediaPlacement(current.id)}
+                          aria-label={t("editLogoReset")}
+                        >
+                          <RotateCcw className="h-3 w-3" aria-hidden />
+                        </Button>
+                      ) : null}
+                    </>
+                  ) : null}
+                  <p className="text-xs font-bold text-navy">
+                    {t("simCounter", {
+                      current: slideIndex + 1,
+                      total: mediaCards.length,
+                    })}
+                  </p>
+                </div>
               </div>
 
               <div className="relative">
@@ -428,6 +473,14 @@ export default function PlannerSimulationStep3({
                           mediaName={current.name}
                           logoUrl={
                             creativeUploadedUrl || creativeObjectUrl
+                          }
+                          placement={
+                            mediaPlacements[current.id] ??
+                            DEFAULT_LOGO_PLACEMENT
+                          }
+                          editable={editing}
+                          onPlacementChange={(next) =>
+                            setMediaPlacement(current.id, next)
                           }
                           missingLabel={t("mediaPhotoMissing")}
                           badgeLabel={t("simBadge")}

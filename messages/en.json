@@ -1471,7 +1471,10 @@
     "creativeUploadErrorSize": "File must be under 10MB.",
     "simCompositeApproxTitle": "Approximate preview",
     "simCompositeApproxBody": "Your logo is placed automatically. In the next step you'll be able to fine-tune position and size.",
-    "simGridLabel": "Selected media at a glance"
+    "simGridLabel": "Selected media at a glance",
+    "editLogo": "Edit logo",
+    "editLogoDone": "Done",
+    "editLogoReset": "Reset placement"
   },
   "footer": {
     "description": "The Thinking Ad Agency, THINKAD",
