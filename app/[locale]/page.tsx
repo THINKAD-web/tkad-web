@@ -49,8 +49,13 @@ import { TestimonialsCarousel } from "@/components/testimonials-carousel";
 import { testimonials } from "@/data/testimonials";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
+/**
+ * HeroKenBurns 는 "use client" 컴포넌트. Server Component(page.tsx) 안에서는
+ * `ssr: false` 옵션을 쓸 수 없다(Next.js 16). 대신 그냥 code-split 만 적용하고,
+ * 초기 SSR 렌더에서는 클라이언트 훅(useEffect) 없이 기본 index=0 상태로
+ * 첫 이미지만 노출 → 클라이언트 하이드레이션 후 애니/캐러셀 시작.
+ */
 const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
-  ssr: false,
   loading: () => (
     <div aria-hidden className="absolute inset-0 z-0 bg-navy" />
   ),
