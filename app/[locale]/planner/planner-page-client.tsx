@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Check,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -25,14 +24,9 @@ import {
   CalendarRange,
   ArrowRight,
   MessageCircle,
-  Upload,
 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import {
-  type PlannerCampaignGoal,
-  type PlannerCategory,
-  type PlannerMapRegion,
-  PLANNER_MAP_REGIONS,
   filterPlannerMediaMulti,
   countPlannerMediaByRegion,
   computePlannerMetrics,
@@ -66,10 +60,19 @@ import PlannerReportStep, {
   PlannerReportPdfCompact,
 } from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-
-const BUDGET_MIN = 500;
-const BUDGET_MAX = 100_000;
-const STORAGE_KEY = "tkad-planner-plan-v2";
+import { PlannerStepper } from "@/components/planner/stepper";
+import {
+  PLANNER_AGE_KEYS,
+  PLANNER_BUDGET_MAX,
+  PLANNER_BUDGET_MIN,
+  PLANNER_INDUSTRY_KEYS,
+  PLANNER_LAST_INPUT_STEP,
+  type PlannerCampaignGoal,
+  type PlannerCategory,
+  type PlannerMapRegion,
+} from "@/lib/planner/types";
+import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
+import { canProceedFromStep } from "@/lib/planner/validation";
 
 const GOALS: {
   key: PlannerCampaignGoal;
@@ -92,41 +95,6 @@ const CATEGORIES: {
   { key: "mobile", labelKey: "catMobile" },
 ];
 
-const DEFAULT_CATEGORIES: PlannerCategory[] = [
-  "digital",
-  "static",
-  "mobile",
-];
-
-function normalizePlannerCategoriesFromStorage(raw: unknown): Set<PlannerCategory> {
-  const allowed = new Set<string>(["digital", "static", "mobile"]);
-  const legacy: Record<string, PlannerCategory> = {
-    billboard: "static",
-    bus: "mobile",
-    subway: "mobile",
-  };
-  if (!Array.isArray(raw)) return new Set(DEFAULT_CATEGORIES);
-  const next = new Set<PlannerCategory>();
-  for (const c of raw) {
-    if (typeof c !== "string") continue;
-    const mapped = legacy[c] ?? (allowed.has(c) ? (c as PlannerCategory) : null);
-    if (mapped === "digital" || mapped === "static" || mapped === "mobile") {
-      next.add(mapped);
-    }
-  }
-  return next.size > 0 ? next : new Set(DEFAULT_CATEGORIES);
-}
-
-const AGE_KEYS = ["ageAll", "age20s", "age30s", "age40s", "age50plus"] as const;
-const INDUSTRY_KEYS = [
-  "indFb",
-  "indRetail",
-  "indTech",
-  "indFinance",
-  "indEnt",
-  "indOther",
-] as const;
-
 type Props = {
   catalog: MediaItem[];
   databaseEmpty: boolean;
@@ -142,49 +110,42 @@ export default function PlannerPageClient({
   const isKo = locale === "ko";
   const { toast } = useToast();
 
-  const [wizardStep, setWizardStep] = useState(1);
-  const [campaignGoal, setCampaignGoal] = useState<PlannerCampaignGoal | null>(
-    null,
-  );
-  const [selectedRegions, setSelectedRegions] = useState<Set<string>>(
-    () => new Set<string>(["seoul"]),
-  );
-  const [categories, setCategories] = useState<Set<PlannerCategory>>(
-    () => new Set<PlannerCategory>(DEFAULT_CATEGORIES),
-  );
-  const [budget, setBudget] = useState<string>("5000");
-  const [months, setMonths] = useState<number>(3);
-  const [ageKey, setAgeKey] = useState<(typeof AGE_KEYS)[number]>("ageAll");
-  const [industryKey, setIndustryKey] =
-    useState<(typeof INDUSTRY_KEYS)[number]>("indOther");
-  const [campaignMediaIds, setCampaignMediaIds] = useState<string[]>([]);
-  const [creativeObjectUrl, setCreativeObjectUrl] = useState<string | null>(null);
+  const wizardStep = usePlannerStore((s) => s.wizardStep);
+  const campaignGoal = usePlannerStore((s) => s.campaignGoal);
+  const regions = usePlannerStore((s) => s.regions);
+  const categoriesArr = usePlannerStore((s) => s.categories);
+  const budget = usePlannerStore((s) => s.budget);
+  const budgetNum = usePlannerStore(selectBudgetNum);
+  const months = usePlannerStore((s) => s.months);
+  const ageKey = usePlannerStore((s) => s.ageKey);
+  const industryKey = usePlannerStore((s) => s.industryKey);
+  const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
+  const creativeObjectUrl = usePlannerStore((s) => s.creativeObjectUrl);
 
-  const toggleCategory = (key: PlannerCategory) => {
-    setCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        if (next.size <= 1) return prev;
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
-  };
+  const setWizardStep = usePlannerStore((s) => s.setWizardStep);
+  const goNextStepAction = usePlannerStore((s) => s.goNextStep);
+  const goPrevStepAction = usePlannerStore((s) => s.goPrevStep);
+  const setCampaignGoal = usePlannerStore((s) => s.setCampaignGoal);
+  const toggleRegion = usePlannerStore((s) => s.toggleRegion);
+  const toggleCategoryAction = usePlannerStore((s) => s.toggleCategory);
+  const setBudget = usePlannerStore((s) => s.setBudget);
+  const setMonths = usePlannerStore((s) => s.setMonths);
+  const setAgeKey = usePlannerStore((s) => s.setAgeKey);
+  const setIndustryKey = usePlannerStore((s) => s.setIndustryKey);
+  const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
+  const setCreativeObjectUrl = usePlannerStore((s) => s.setCreativeObjectUrl);
+  const applyPresetAction = usePlannerStore((s) => s.applyPreset);
 
-  const toggleRegion = useCallback((r: PlannerMapRegion) => {
-    setSelectedRegions((prev) => {
-      const next = new Set(prev);
-      if (next.has(r)) {
-        if (next.size <= 1) return prev;
-        next.delete(r);
-      } else {
-        next.add(r);
-      }
-      return next;
-    });
-  }, []);
+  const selectedRegions = useMemo(() => new Set(regions), [regions]);
+  const categories = useMemo(
+    () => new Set<PlannerCategory>(categoriesArr),
+    [categoriesArr],
+  );
+
+  const toggleCategory = useCallback(
+    (key: PlannerCategory) => toggleCategoryAction(key),
+    [toggleCategoryAction],
+  );
 
   const regionCounts = useMemo(
     () => countPlannerMediaByRegion(catalog, categories),
@@ -219,21 +180,15 @@ export default function PlannerPageClient({
     return ordered;
   }, [campaignMediaIds, catalog, filtered]);
 
-  const budgetNum = useMemo(() => {
-    const n = Number.parseInt(budget.replace(/,/g, ""), 10);
-    if (!Number.isFinite(n)) return BUDGET_MIN;
-    return Math.min(BUDGET_MAX, Math.max(BUDGET_MIN, n));
-  }, [budget]);
-
   const metrics = useMemo(() => {
-    if (filtered.length === 0 || budgetNum < BUDGET_MIN) return null;
+    if (filtered.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return null;
     return computePlannerMetrics(filtered, budgetNum, months, {
       campaignGoal,
     });
   }, [filtered, budgetNum, months, campaignGoal]);
 
   const portfolio = useMemo(() => {
-    if (filtered.length === 0 || budgetNum < BUDGET_MIN) return [];
+    if (filtered.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return [];
     if (manualIntersectedPortfolio.length > 0) {
       return portfolioFromManualSelection(
         manualIntersectedPortfolio,
@@ -302,118 +257,21 @@ export default function PlannerPageClient({
       ? `/quote?media=${portfolio.map((m) => m.id).join(",")}`
       : "/quote";
 
-  const applyPreset = (id: "premium" | "national" | "value") => {
-    if (id === "premium") {
-      setSelectedRegions(new Set<PlannerMapRegion>(["seoul"]));
-      setCategories(new Set<PlannerCategory>(["digital", "static"]));
-    } else if (id === "national") {
-      setSelectedRegions(
-        new Set<PlannerMapRegion>(["seoul", "busan", "jeju"]),
-      );
-      setCategories(new Set<PlannerCategory>(DEFAULT_CATEGORIES));
-    } else {
-      setSelectedRegions(
-        new Set<PlannerMapRegion>(["seoul", "busan", "national"]),
-      );
-      setCategories(new Set<PlannerCategory>(DEFAULT_CATEGORIES));
-    }
-    toast("success", isKo ? "프리셋이 적용되었습니다." : "Preset applied.");
-  };
+  const applyPreset = useCallback(
+    (id: "premium" | "national" | "value") => {
+      applyPresetAction(id);
+      toast("success", isKo ? "프리셋이 적용되었습니다." : "Preset applied.");
+    },
+    [applyPresetAction, toast, isKo],
+  );
 
+  /**
+   * 입력 상태는 Zustand persist 가 매 변경마다 localStorage 에 자동 저장한다.
+   * 이 버튼은 사용자에게 명시적 "저장되었다" 피드백을 제공하는 용도로만 유지 —
+   * PR-2 이후 DB 기반 플랜 저장/공유로 대체될 자리.
+   */
   const savePlan = useCallback(() => {
-    try {
-      const payload = {
-        version: 3 as const,
-        savedAt: new Date().toISOString(),
-        wizardStep,
-        campaignGoal,
-        regions: [...selectedRegions],
-        categories: [...categories],
-        budget: budgetNum,
-        months,
-        ageKey,
-        industryKey,
-        mediaIds: portfolio.map((m) => m.id),
-        campaignMediaIds,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      toast("success", t("savedToast"));
-    } catch {
-      toast("error", isKo ? "저장에 실패했습니다." : "Could not save plan.");
-    }
-  }, [
-    wizardStep,
-    campaignGoal,
-    selectedRegions,
-    categories,
-    budgetNum,
-    months,
-    ageKey,
-    industryKey,
-    portfolio,
-    campaignMediaIds,
-    toast,
-    t,
-    isKo,
-  ]);
-
-  const loadPlan = useCallback(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        toast("error", t("loadNoneToast"));
-        return;
-      }
-      const p = JSON.parse(raw) as Record<string, unknown>;
-      if (p.version === 3 || p.version === 2) {
-        if (Array.isArray(p.regions))
-          setSelectedRegions(new Set(p.regions as string[]));
-        setCategories(normalizePlannerCategoriesFromStorage(p.categories));
-        if (typeof p.budget === "number")
-          setBudget(String(Math.max(BUDGET_MIN, Math.min(BUDGET_MAX, p.budget))));
-        if (typeof p.months === "number") setMonths(p.months);
-        if (typeof p.campaignGoal === "string")
-          setCampaignGoal(p.campaignGoal as PlannerCampaignGoal);
-        if (
-          typeof p.ageKey === "string" &&
-          (AGE_KEYS as readonly string[]).includes(p.ageKey)
-        ) {
-          setAgeKey(p.ageKey as (typeof AGE_KEYS)[number]);
-        }
-        if (
-          typeof p.industryKey === "string" &&
-          (INDUSTRY_KEYS as readonly string[]).includes(p.industryKey)
-        ) {
-          setIndustryKey(p.industryKey as (typeof INDUSTRY_KEYS)[number]);
-        }
-        if (typeof p.wizardStep === "number") {
-          let w = p.wizardStep as number;
-          if (p.version === 2 && w === 6) w = 7;
-          if (w > 7) w = 7;
-          setWizardStep(w);
-        }
-        if (Array.isArray(p.campaignMediaIds))
-          setCampaignMediaIds(p.campaignMediaIds as string[]);
-        toast("success", t("loadedToast"));
-        return;
-      }
-      if (p.version === 1) {
-        const r = p.region as string;
-        if (r === "all")
-          setSelectedRegions(new Set(PLANNER_MAP_REGIONS));
-        else setSelectedRegions(new Set([r]));
-        setCategories(normalizePlannerCategoriesFromStorage(p.categories));
-        if (typeof p.budget === "number")
-          setBudget(String(Math.max(BUDGET_MIN, Math.min(BUDGET_MAX, p.budget))));
-        if (typeof p.months === "number") setMonths(p.months);
-        setWizardStep(7);
-        toast("success", t("loadedToast"));
-        return;
-      }
-      toast("error", t("loadNoneToast"));
-    } catch {
-      toast("error", t("loadNoneToast"));
-    }
+    toast("success", t("savedToast"));
   }, [toast, t]);
 
   const mapLabel = useCallback(
@@ -446,31 +304,23 @@ export default function PlannerPageClient({
     [categories, t],
   );
 
-  const goNext = () => {
-    if (wizardStep === 1 && !campaignGoal) {
-      toast("error", t("selectGoal"));
+  const goNext = useCallback(() => {
+    const check = canProceedFromStep(
+      usePlannerStore.getState(),
+      wizardStep,
+    );
+    if (!check.ok) {
+      toast("error", t(check.errorKey));
       return;
     }
-    if (wizardStep === 2 && campaignMediaIds.length === 0) {
-      toast("error", t("needMediaPick"));
-      return;
-    }
-    if (wizardStep === 4 && budgetNum < BUDGET_MIN) {
-      toast("error", t("needBudget"));
-      return;
-    }
-    if (wizardStep === 5 && selectedRegions.size === 0) {
-      toast("error", t("selectRegion"));
-      return;
-    }
-    setWizardStep((s) => Math.min(7, s + 1));
+    goNextStepAction();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, [goNextStepAction, wizardStep, toast, t]);
 
-  const goBack = () => {
-    setWizardStep((s) => Math.max(1, s - 1));
+  const goBack = useCallback(() => {
+    goPrevStepAction();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, [goPrevStepAction]);
 
   if (databaseEmpty && catalog.length === 0) {
     return (
@@ -526,57 +376,21 @@ export default function PlannerPageClient({
           <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
             {t("subtitle")}
           </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
-              onClick={loadPlan}
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              {t("loadPlan")}
-            </Button>
-          </div>
         </div>
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        {wizardStep < 7 ? (
-          <div className="mb-8 flex flex-col items-center gap-3">
-            <p className="text-sm font-semibold text-navy">
-              {t("stepOf", { current: wizardStep, total: 6 })}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-              {[1, 2, 3, 4, 5, 6].map((s) => (
-                <div key={s} className="flex items-center gap-2 sm:gap-4">
-                  <div
-                    className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors",
-                      wizardStep === s
-                        ? "bg-gold text-navy shadow-md"
-                        : wizardStep > s
-                          ? "bg-navy/15 text-navy ring-2 ring-gold/50"
-                          : "bg-slate-200 text-muted-foreground",
-                    )}
-                  >
-                    {wizardStep > s ? <Check className="h-4 w-4" /> : s}
-                  </div>
-                  {s < 6 ? (
-                    <div
-                      className={cn(
-                        "hidden h-0.5 w-8 sm:block sm:w-10",
-                        wizardStep > s ? "bg-gold/70" : "bg-slate-200",
-                      )}
-                    />
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </div>
+        {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
+          <PlannerStepper
+            currentStep={wizardStep}
+            stepOfLabel={t("stepOf", {
+              current: wizardStep,
+              total: PLANNER_LAST_INPUT_STEP,
+            })}
+          />
         ) : null}
 
-        {wizardStep < 7 ? (
+        {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
           <div
             className={cn(
               "mx-auto space-y-8",
@@ -647,8 +461,8 @@ export default function PlannerPageClient({
                     </div>
                     <input
                       type="range"
-                      min={BUDGET_MIN}
-                      max={BUDGET_MAX}
+                      min={PLANNER_BUDGET_MIN}
+                      max={PLANNER_BUDGET_MAX}
                       step={500}
                       value={budgetNum}
                       onChange={(e) => setBudget(e.target.value)}
@@ -789,7 +603,7 @@ export default function PlannerPageClient({
                       {t("ageLabel")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      {AGE_KEYS.map((k) => (
+                      {PLANNER_AGE_KEYS.map((k) => (
                         <Button
                           key={k}
                           type="button"
@@ -811,7 +625,7 @@ export default function PlannerPageClient({
                       {t("industryLabel")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      {INDUSTRY_KEYS.map((k) => (
+                      {PLANNER_INDUSTRY_KEYS.map((k) => (
                         <Button
                           key={k}
                           type="button"
@@ -937,7 +751,7 @@ export default function PlannerPageClient({
                   </Button>
                 </CardContent>
               </Card>
-            ) : budgetNum < BUDGET_MIN ? (
+            ) : budgetNum < PLANNER_BUDGET_MIN ? (
               <Card className="border-dashed border-gold/30 bg-gold/5">
                 <CardContent className="py-10 text-center text-navy">
                   {t("needBudget")}
