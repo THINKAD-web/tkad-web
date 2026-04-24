@@ -278,6 +278,7 @@ export default function PlannerPageClient({
 
   const [saving, setSaving] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
 
   /**
    * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
@@ -313,6 +314,7 @@ export default function PlannerPageClient({
         typeof window !== "undefined" ? window.location.origin : "";
       const url = `${origin}/${locale}/planner/shared/${data.id}`;
       setShareUrl(url);
+      setSavedPlanId(data.id);
       // 링크를 즉시 클립보드에도 복사
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(url).catch(() => {});
@@ -441,6 +443,7 @@ export default function PlannerPageClient({
               current: wizardStep,
               total: PLANNER_LAST_INPUT_STEP,
             })}
+            onStepClick={(s) => setWizardStep(s)}
           />
         ) : null}
 
@@ -1238,7 +1241,14 @@ export default function PlannerPageClient({
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                       </Button>
-                      <Link href="/contact" className="w-full">
+                      <Link
+                        href={
+                          savedPlanId
+                            ? `/contact?plan=${savedPlanId}`
+                            : "/contact"
+                        }
+                        className="w-full"
+                      >
                         <Button
                           size="lg"
                           variant="outline"
