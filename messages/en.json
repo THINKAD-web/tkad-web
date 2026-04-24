@@ -1468,7 +1468,10 @@
     "creativeUploadSuccess": "Upload complete",
     "creativeUploadError": "Upload failed. Please try again.",
     "creativeUploadErrorType": "Only PNG / JPG / SVG formats are supported.",
-    "creativeUploadErrorSize": "File must be under 10MB."
+    "creativeUploadErrorSize": "File must be under 10MB.",
+    "simCompositeApproxTitle": "Approximate preview",
+    "simCompositeApproxBody": "Your logo is placed automatically. In the next step you'll be able to fine-tune position and size.",
+    "simGridLabel": "Selected media at a glance"
   },
   "footer": {
     "description": "The Thinking Ad Agency, THINKAD",

@@ -36,6 +36,7 @@ import {
   validateCreativeFile,
 } from "@/lib/planner/creative-upload";
 import { useToast } from "@/components/toast-provider";
+import { CompositePreview } from "@/components/planner/composite-preview";
 
 type Props = {
   selectedMedia: MediaItem[];
@@ -296,18 +297,62 @@ export default function PlannerSimulationStep3({
           <CardDescription>{t("simViewDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 rounded-xl border border-amber-200/80 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 shadow-sm">
-            <p className="font-semibold text-navy">{t("simCompositeDisabledTitle")}</p>
-            <p className="mt-1 text-xs leading-relaxed text-amber-950/90">
-              {t("simCompositeDisabledBody")}
-            </p>
-          </div>
+          {creativeObjectUrl || creativeUploadedUrl ? (
+            <div className="mb-4 rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-sm text-navy shadow-sm">
+              <p className="font-semibold text-navy">
+                {t("simCompositeApproxTitle")}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-navy/80">
+                {t("simCompositeApproxBody")}
+              </p>
+            </div>
+          ) : null}
           {mediaCards.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-navy/15 bg-slate-50/60 py-12 text-center text-sm text-muted-foreground">
               {t("simEmpty")}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* 썸네일 그리드 — 3개 이상일 때 한눈에 비교 */}
+              {mediaCards.length >= 2 ? (
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-muted-foreground">
+                    {t("simGridLabel")}
+                  </p>
+                  <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                    {mediaCards.map((m, i) => (
+                      <li key={m.id}>
+                        <button
+                          type="button"
+                          className={cn(
+                            "w-full overflow-hidden rounded-lg border-2 transition",
+                            i === slideIndex
+                              ? "border-gold shadow-md"
+                              : "border-transparent hover:border-gold/40",
+                          )}
+                          onClick={() => {
+                            setSlideDir((i > slideIndex ? 1 : -1) as 1 | -1);
+                            setSlideIndex(i);
+                          }}
+                          aria-current={i === slideIndex ? "true" : undefined}
+                          aria-label={m.name}
+                        >
+                          <CompositePreview
+                            mediaImageUrl={m.url}
+                            mediaName={m.name}
+                            logoUrl={
+                              creativeUploadedUrl || creativeObjectUrl
+                            }
+                            compact
+                            missingLabel={t("mediaPhotoMissing")}
+                          />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold text-muted-foreground">
                   {t("simPerMediaLabel")}
@@ -378,30 +423,16 @@ export default function PlannerSimulationStep3({
                         onDragEnd={onSlideDragEnd}
                         className="touch-pan-y"
                       >
-                        <div className="relative aspect-video w-full select-none bg-black/5">
-                          {current.url ? (
-                            <img
-                              src={current.url}
-                              alt=""
-                              className="absolute inset-0 h-full w-full object-cover"
-                              draggable={false}
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
-                              {t("mediaPhotoMissing")}
-                            </div>
-                          )}
-
-                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0" />
-                          <div className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/25 bg-black/35 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white/90 backdrop-blur-sm">
-                            {t("simBadge")}
-                          </div>
-                          <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-10">
-                            <p className="line-clamp-2 text-sm font-bold text-white drop-shadow">
-                              {current.name}
-                            </p>
-                          </div>
-                        </div>
+                        <CompositePreview
+                          mediaImageUrl={current.url}
+                          mediaName={current.name}
+                          logoUrl={
+                            creativeUploadedUrl || creativeObjectUrl
+                          }
+                          missingLabel={t("mediaPhotoMissing")}
+                          badgeLabel={t("simBadge")}
+                          className="rounded-none"
+                        />
                       </motion.div>
                     ) : null}
                   </AnimatePresence>
