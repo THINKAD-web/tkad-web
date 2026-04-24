@@ -394,9 +394,8 @@ export default function PlannerPageClient({
           <div
             className={cn(
               "mx-auto space-y-8",
-              wizardStep === 2 ||
-                wizardStep === 3 ||
-                wizardStep === 6
+              // 매체 선택·소재 업로드·보고서 단계는 넓은 캔버스 필요
+              wizardStep === 4 || wizardStep === 5 || wizardStep === 6
                 ? "max-w-6xl"
                 : "max-w-3xl",
             )}
@@ -408,6 +407,8 @@ export default function PlannerPageClient({
               hasCreative={Boolean(creativeObjectUrl)}
               budgetNum={budgetNum}
             />
+
+            {/* Step 1 — 캠페인 목표 */}
             {wizardStep === 1 ? (
               <PlannerCampaignStep1
                 campaignGoal={campaignGoal}
@@ -416,121 +417,18 @@ export default function PlannerPageClient({
               />
             ) : null}
 
+            {/* Step 2 — 타깃 · 지역 */}
             {wizardStep === 2 ? (
-              <>
+              <div className="space-y-6">
                 <div className="space-y-2 text-center sm:text-left">
                   <h2 className="text-lg font-bold text-navy sm:text-xl">
-                    {t("stepMediaTitle")}
+                    {t("stepRegionTitle")}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    {t("stepMediaDesc")}
+                    {t("stepRegionDesc")}
                   </p>
                 </div>
-                <PlannerMediaSelector
-                  catalog={catalog}
-                  campaignMediaIds={campaignMediaIds}
-                  setCampaignMediaIds={setCampaignMediaIds}
-                  isKo={isKo}
-                  regionLabel={mediaRegionLabel}
-                />
-              </>
-            ) : null}
 
-            {wizardStep === 3 ? (
-              <PlannerSimulationStep3
-                selectedMedia={selectedMediaForSimulation}
-                creativeObjectUrl={creativeObjectUrl}
-                setCreativeObjectUrl={setCreativeObjectUrl}
-              />
-            ) : null}
-
-            {wizardStep === 4 ? (
-              <Card className="border-navy/10 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-navy">
-                    <Wallet className="h-5 w-5 text-gold" />
-                    {t("stepBudgetTitle")}
-                  </CardTitle>
-                  <CardDescription>{t("stepBudgetDesc")}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <div className="mb-2 flex justify-between text-xs font-medium text-muted-foreground">
-                      <span>{t("budgetSliderMin")}</span>
-                      <span>{t("budgetSliderMax")}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={PLANNER_BUDGET_MIN}
-                      max={PLANNER_BUDGET_MAX}
-                      step={500}
-                      value={budgetNum}
-                      onChange={(e) => setBudget(e.target.value)}
-                      className="h-2 w-full cursor-pointer accent-gold"
-                      aria-label={t("budget")}
-                    />
-                    <div className="mt-3 flex flex-wrap items-end gap-3">
-                      <div className="flex-1 min-w-[8rem]">
-                        <label className="text-xs font-semibold text-navy">
-                          {t("budget")}
-                        </label>
-                        <Input
-                          inputMode="numeric"
-                          value={budget}
-                          onChange={(e) =>
-                            setBudget(e.target.value.replace(/[^\d]/g, ""))
-                          }
-                          className="mt-1 h-11 border-navy/15 font-semibold"
-                        />
-                      </div>
-                      <p className="text-sm text-muted-foreground pb-1">
-                        {t("budgetPerMonthSummary", {
-                          amount: Math.round(budgetNum / Math.max(months, 1)),
-                        })}
-                      </p>
-                    </div>
-                    {blurbParts ? (
-                      <p className="mt-3 rounded-xl border border-gold/25 bg-gold/5 px-3 py-2 text-xs leading-relaxed text-navy">
-                        {t("budgetBlurb", {
-                          name: blurbParts.sampleName.slice(0, 32),
-                          price: blurbParts.samplePrice,
-                          slots: blurbParts.slotsAtMonth,
-                        })}
-                      </p>
-                    ) : null}
-                  </div>
-                  <div>
-                    <p className="mb-2 flex items-center gap-2 text-sm font-bold text-navy">
-                      <CalendarRange className="h-4 w-4 text-gold" />
-                      {t("period")}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {PLANNER_PERIOD_OPTIONS.map((opt) => {
-                        const selected = Math.abs(months - opt.months) < 0.04;
-                        return (
-                          <Button
-                            key={opt.id}
-                            type="button"
-                            variant={selected ? "default" : "outline"}
-                            size="sm"
-                            className={cn(
-                              "rounded-full",
-                              selected && "btn-gold border-0",
-                            )}
-                            onClick={() => setMonths(opt.months)}
-                          >
-                            {t(opt.labelKey)}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null}
-
-            {wizardStep === 5 ? (
-              <div className="space-y-6">
                 <Card className="border-navy/10 shadow-lg">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-navy">
@@ -646,6 +544,122 @@ export default function PlannerPageClient({
               </div>
             ) : null}
 
+            {/* Step 3 — 예산 · 기간 */}
+            {wizardStep === 3 ? (
+              <Card className="border-navy/10 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-navy">
+                    <Wallet className="h-5 w-5 text-gold" />
+                    {t("stepBudgetTitle")}
+                  </CardTitle>
+                  <CardDescription>{t("stepBudgetDesc")}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <div className="mb-2 flex justify-between text-xs font-medium text-muted-foreground">
+                      <span>{t("budgetSliderMin")}</span>
+                      <span>{t("budgetSliderMax")}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={PLANNER_BUDGET_MIN}
+                      max={PLANNER_BUDGET_MAX}
+                      step={500}
+                      value={budgetNum}
+                      onChange={(e) => setBudget(e.target.value)}
+                      className="h-2 w-full cursor-pointer accent-gold"
+                      aria-label={t("budget")}
+                    />
+                    <div className="mt-3 flex flex-wrap items-end gap-3">
+                      <div className="flex-1 min-w-[8rem]">
+                        <label className="text-xs font-semibold text-navy">
+                          {t("budget")}
+                        </label>
+                        <Input
+                          inputMode="numeric"
+                          value={budget}
+                          onChange={(e) =>
+                            setBudget(e.target.value.replace(/[^\d]/g, ""))
+                          }
+                          className="mt-1 h-11 border-navy/15 font-semibold"
+                        />
+                      </div>
+                      <p className="text-sm text-muted-foreground pb-1">
+                        {t("budgetPerMonthSummary", {
+                          amount: Math.round(budgetNum / Math.max(months, 1)),
+                        })}
+                      </p>
+                    </div>
+                    {blurbParts ? (
+                      <p className="mt-3 rounded-xl border border-gold/25 bg-gold/5 px-3 py-2 text-xs leading-relaxed text-navy">
+                        {t("budgetBlurb", {
+                          name: blurbParts.sampleName.slice(0, 32),
+                          price: blurbParts.samplePrice,
+                          slots: blurbParts.slotsAtMonth,
+                        })}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div>
+                    <p className="mb-2 flex items-center gap-2 text-sm font-bold text-navy">
+                      <CalendarRange className="h-4 w-4 text-gold" />
+                      {t("period")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {PLANNER_PERIOD_OPTIONS.map((opt) => {
+                        const selected = Math.abs(months - opt.months) < 0.04;
+                        return (
+                          <Button
+                            key={opt.id}
+                            type="button"
+                            variant={selected ? "default" : "outline"}
+                            size="sm"
+                            className={cn(
+                              "rounded-full",
+                              selected && "btn-gold border-0",
+                            )}
+                            onClick={() => setMonths(opt.months)}
+                          >
+                            {t(opt.labelKey)}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {/* Step 4 — 매체 선택 (PR-3에서 AI 추천 얹음) */}
+            {wizardStep === 4 ? (
+              <>
+                <div className="space-y-2 text-center sm:text-left">
+                  <h2 className="text-lg font-bold text-navy sm:text-xl">
+                    {t("stepMediaTitle")}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {t("stepMediaDesc")}
+                  </p>
+                </div>
+                <PlannerMediaSelector
+                  catalog={catalog}
+                  campaignMediaIds={campaignMediaIds}
+                  setCampaignMediaIds={setCampaignMediaIds}
+                  isKo={isKo}
+                  regionLabel={mediaRegionLabel}
+                />
+              </>
+            ) : null}
+
+            {/* Step 5 — 로고 업로드 + 합성 미리보기 */}
+            {wizardStep === 5 ? (
+              <PlannerSimulationStep3
+                selectedMedia={selectedMediaForSimulation}
+                creativeObjectUrl={creativeObjectUrl}
+                setCreativeObjectUrl={setCreativeObjectUrl}
+              />
+            ) : null}
+
             {wizardStep === 6 ? (
               <PlannerReportStep
                 isKo={isKo}
@@ -680,12 +694,7 @@ export default function PlannerPageClient({
                 className="btn-gold rounded-full px-8 font-semibold"
                 onClick={goNext}
               >
-                {wizardStep === 5 ? (
-                  <>
-                    {t("stepRegionNext")}
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </>
-                ) : wizardStep === 6 ? (
+                {wizardStep === 6 ? (
                   <>
                     {t("viewEffectDashboard")}
                     <ChevronRight className="ml-1 h-4 w-4" />
@@ -713,7 +722,7 @@ export default function PlannerPageClient({
                 type="button"
                 variant="outline"
                 className="w-full rounded-full border-navy/20 sm:w-auto"
-                onClick={() => setWizardStep(5)}
+                onClick={() => setWizardStep(2)}
               >
                 <ChevronLeft className="mr-1 h-4 w-4" />
                 {t("editInputs")}
@@ -745,7 +754,7 @@ export default function PlannerPageClient({
                     type="button"
                     className="mt-4 rounded-full"
                     variant="outline"
-                    onClick={() => setWizardStep(5)}
+                    onClick={() => setWizardStep(2)}
                   >
                     {t("editInputs")}
                   </Button>
