@@ -192,18 +192,27 @@ export default function MediaMapPageClient() {
   return (
     <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row">
       {/* Side list — 모바일에서는 지도 아래 */}
-      <aside className="order-2 md:order-1 w-full md:w-[380px] md:flex-shrink-0 md:border-r border-border/60 md:overflow-y-auto bg-card">
-        <div className="sticky top-0 z-10 border-b border-border/60 bg-card/95 backdrop-blur-sm p-3 space-y-2">
+      <aside className="order-2 md:order-1 w-full md:w-[440px] md:flex-shrink-0 md:border-r border-border/60 md:overflow-y-auto bg-card">
+        <div className="sticky top-0 z-10 border-b border-border/60 bg-card/95 backdrop-blur-sm p-4 space-y-3">
           <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+            <svg
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-primary/60"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
             </svg>
             <input
               type="search"
-              placeholder="매체명 · 지역 검색"
+              placeholder="매체명 · 지역으로 검색"
               value={filter.q}
               onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))}
-              className="w-full h-10 pl-9 pr-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className="w-full h-12 pl-11 pr-4 bg-background border border-border/80 rounded-full text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary focus:shadow-md transition-all"
             />
           </div>
           <div className="flex gap-2">
@@ -260,57 +269,61 @@ export default function MediaMapPageClient() {
           </div>
         </div>
 
-        <ul className="divide-y">
+        <ul className="grid grid-cols-2 gap-3 p-3">
           {items.map((it) => (
             <li
               key={it.id}
-              className={`p-3 cursor-pointer hover:bg-gray-50 ${selectedId === it.id ? "bg-amber-50" : ""}`}
+              className={`group rounded-xl border bg-white overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+                selectedId === it.id
+                  ? "border-primary ring-2 ring-primary/20 shadow-md"
+                  : "border-border/70 hover:border-primary/40"
+              }`}
               onClick={() => handleSelect(it.id)}
             >
-              <div className="flex gap-3">
+              <div className="relative aspect-[4/3] bg-secondary">
                 {it.image ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={it.image}
                     alt={it.name}
-                    className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
+                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform"
                   />
-                ) : (
-                  <div className="w-24 h-24 bg-secondary rounded-lg flex-shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-foreground line-clamp-2 leading-snug">
-                    {it.name}
-                  </div>
-                  <div className="text-xs text-gray-500 truncate">
-                    {[it.region, it.district, it.city].filter(Boolean).join(" · ") || it.location}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-0.5">{it.type}</div>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-sm font-semibold text-primary">
-                      {formatPrice(it.price, it.pricePeriod)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCart(it.id);
-                      }}
-                      className={`text-xs px-2 py-1 rounded-md border ${
-                        inCart(it.id)
-                          ? "bg-primary text-white border-primary"
-                          : "bg-white text-primary border-primary"
-                      }`}
-                    >
-                      {inCart(it.id) ? "담김" : "견적서에"}
-                    </button>
-                  </div>
+                ) : null}
+                <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-foreground/80 shadow-sm">
+                  {it.type}
+                </span>
+              </div>
+              <div className="p-2.5 space-y-1">
+                <div className="text-[13px] font-semibold text-foreground line-clamp-1 leading-snug">
+                  {it.name}
+                </div>
+                <div className="text-[11px] text-muted-foreground line-clamp-1">
+                  {[it.region, it.district].filter(Boolean).join(" · ") || it.location}
+                </div>
+                <div className="flex items-center justify-between pt-0.5">
+                  <span className="text-xs font-bold text-primary tabular-nums">
+                    {formatPrice(it.price, it.pricePeriod)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCart(it.id);
+                    }}
+                    className={`text-[10px] font-semibold px-2 py-1 rounded-full border transition-colors ${
+                      inCart(it.id)
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white text-primary border-primary hover:bg-primary/5"
+                    }`}
+                  >
+                    {inCart(it.id) ? "담김" : "담기"}
+                  </button>
                 </div>
               </div>
             </li>
           ))}
           {items.length === 0 && !loading && (
-            <li className="p-8 text-center">
+            <li className="col-span-2 p-8 text-center">
               <div className="text-3xl mb-2">🔍</div>
               <p className="text-sm font-medium text-foreground mb-1">검색 결과가 없습니다</p>
               <p className="text-xs text-muted-foreground">필터를 조정하거나 지도를 이동해보세요.</p>

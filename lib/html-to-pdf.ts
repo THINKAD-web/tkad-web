@@ -89,14 +89,22 @@ function replaceUntrustedImagesInClone(clonedDoc: Document, cloned: HTMLElement)
   } catch {
     /* ignore */
   }
+  // onclone 훅은 동기. preloadImagesAsProxyDataUrls 가 사전에 외부 http(s) 이미지를
+  // data URL 로 치환해 둔다. 여기서는 혹시 누락된 외부 이미지가 남아 있을 경우
+  // 캔버스 오염을 방지하기 위한 안전망으로 placeholder 로 바꾼다 (same-origin / data
+  // / blob 은 그대로 통과).
   cloned.querySelectorAll("img").forEach((node) => {
     const img = node as HTMLImageElement;
     const src = (img.getAttribute("src") ?? img.src ?? "").trim();
     if (!src || src.startsWith("data:") || src.startsWith("blob:")) {
       return;
     }
-    if (!/^https?:\/\//i.test(src)) {
-      return;
+    try {
+      const origin = clonedDoc.defaultView?.location?.origin;
+      const u = new URL(src, clonedDoc.defaultView?.location?.href);
+      if (origin && u.origin === origin) return;
+    } catch {
+      /* ignore */
     }
     const inTable = img.closest("td");
     const ph = clonedDoc.createElement("div");
@@ -113,6 +121,47 @@ function replaceUntrustedImagesInClone(clonedDoc: Document, cloned: HTMLElement)
     ph.style.flexShrink = "0";
     img.replaceWith(ph);
   });
+}
+
+/**
+ * 캡처 전에 element 내부의 외부 http(s) <img> 를 `/api/image-proxy` 경로로
+ * 가져와 data URL 로 교체한다 — html2canvas 가 CORS 오염 없이 실제 이미지를
+ * 캡처할 수 있게 함. 실패 시 원래 src 유지 (onclone 의 placeholder 안전망 작동).
+ */
+async function preloadImagesAsProxyDataUrls(element: HTMLElement): Promise<void> {
+  if (typeof window === "undefined") return;
+  const imgs = Array.from(element.querySelectorAll("img"));
+  await Promise.all(
+    imgs.map(async (img) => {
+      const src = (img.getAttribute("src") ?? img.src ?? "").trim();
+      if (!src || src.startsWith("data:") || src.startsWith("blob:")) return;
+      let u: URL;
+      try {
+        u = new URL(src, window.location.href);
+      } catch {
+        return;
+      }
+      if (u.origin === window.location.origin) return;
+      if (u.protocol !== "http:" && u.protocol !== "https:") return;
+      try {
+        const proxied = `/api/image-proxy?url=${encodeURIComponent(u.toString())}`;
+        const res = await fetch(proxied, { cache: "force-cache" });
+        if (!res.ok) return;
+        const blob = await res.blob();
+        if (!blob.type.startsWith("image/")) return;
+        const dataUrl: string = await new Promise((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () =>
+            resolve(typeof fr.result === "string" ? fr.result : "");
+          fr.onerror = () => reject(fr.error ?? new Error("FileReader error"));
+          fr.readAsDataURL(blob);
+        });
+        if (dataUrl) img.src = dataUrl;
+      } catch {
+        /* ignore */
+      }
+    }),
+  );
 }
 
 async function waitForFontsAndPaint(): Promise<void> {
@@ -137,6 +186,7 @@ async function htmlElementToPdfInner(element: HTMLElement): Promise<jsPDF> {
     throw new Error("htmlElementToPdf is browser-only");
   }
 
+  await preloadImagesAsProxyDataUrls(element);
   await waitForFontsAndPaint();
 
   const rect = element.getBoundingClientRect();
@@ -270,6 +320,7 @@ export async function captureElementAsPng(
   element: HTMLElement,
   filename = "THINKAD-capture.png",
 ): Promise<void> {
+  await preloadImagesAsProxyDataUrls(element);
   await waitForFontsAndPaint();
   const html2canvas = (await import("html2canvas")).default;
   const canvas = await html2canvas(element, {
