@@ -378,7 +378,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <div className="space-y-2 text-center">
         <h2 className="text-lg font-bold text-navy sm:text-xl">
           {t("stepReportTitle")}

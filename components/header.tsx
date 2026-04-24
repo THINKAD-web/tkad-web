@@ -4,11 +4,25 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ChevronDown, Globe, Menu } from "lucide-react";
+import {
+  ChevronDown,
+  Globe,
+  Home as HomeIcon,
+  Menu,
+  Map as MapIcon,
+  Layers,
+  Sparkles,
+  ClipboardList,
+  BookOpen,
+  LineChart,
+  GraduationCap,
+  Briefcase,
+  type LucideIcon,
+} from "lucide-react";
 import { HeaderUserMenu } from "@/components/header-user-menu";
 import { useState, useEffect, useTransition, useRef } from "react";
 
-type NavLeaf = { href: string; label: string; desc?: string };
+type NavLeaf = { href: string; label: string; desc?: string; icon?: LucideIcon };
 type NavGroup = { label: string; items: NavLeaf[] };
 type NavEntry = NavLeaf | NavGroup;
 
@@ -153,30 +167,26 @@ export default function Header() {
   }, []);
 
   const navEntries: NavEntry[] = [
-    { href: "/", label: t("nav.home") },
-    { href: "/services", label: t("nav.services") },
+    { href: "/", label: t("nav.home"), icon: HomeIcon },
+    { href: "/services", label: t("nav.services"), icon: Briefcase },
     {
       label: t("nav.media"),
       items: [
-        { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록" },
-        { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색" },
-        { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천" },
-        { href: "/planner", label: t("nav.planner"), desc: "예산·기간별 플래닝" },
+        { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록", icon: Layers },
+        { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색", icon: MapIcon },
+        { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천", icon: Sparkles },
+        { href: "/planner", label: t("nav.planner"), desc: "예산·기간별 플래닝", icon: ClipboardList },
       ],
     },
     {
       label: t("nav.insights"),
       items: [
-        { href: "/cases", label: t("nav.cases"), desc: "집행 사례 모음" },
-        { href: "/insights", label: t("nav.insights"), desc: "OOH 트렌드 리포트" },
-        { href: "/academy", label: t("nav.academy"), desc: "광고주 교육 콘텐츠" },
+        { href: "/cases", label: t("nav.cases"), desc: "집행 사례 모음", icon: BookOpen },
+        { href: "/insights", label: t("nav.insights"), desc: "OOH 트렌드 리포트", icon: LineChart },
+        { href: "/academy", label: t("nav.academy"), desc: "광고주 교육 콘텐츠", icon: GraduationCap },
       ],
     },
   ];
-
-  const flatNavLinks: NavLeaf[] = navEntries.flatMap((e) =>
-    isGroup(e) ? e.items : [e],
-  );
 
   return (
     <header
@@ -239,59 +249,124 @@ export default function Header() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="mobile-sheet border-l-0 bg-white/96 backdrop-blur-xl"
+              className="mobile-sheet border-l-0 bg-white backdrop-blur-xl p-0 w-[88vw] sm:max-w-sm"
             >
-              <nav className="mt-8 flex flex-col gap-1">
-                {navEntries.map((entry, gi) =>
-                  isGroup(entry) ? (
-                    <div key={`g-${gi}`} className="mt-2 first:mt-0">
-                      <div className="px-4 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        {entry.label}
-                      </div>
-                      {entry.items.map((leaf) => (
-                        <Link
-                          key={leaf.href}
-                          href={leaf.href}
-                          onClick={() => setOpen(false)}
-                          className={`mobile-nav-item touch-manipulation rounded-lg px-4 py-3 text-sm font-medium transition-all duration-300 hover:bg-accent/15 motion-safe:active:scale-[0.98] ${
-                            pathname === leaf.href
-                              ? "bg-accent/20 text-primary font-bold"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {leaf.label}
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
-                    <Link
-                      key={entry.href}
-                      href={entry.href}
-                      onClick={() => setOpen(false)}
-                      className={`mobile-nav-item touch-manipulation rounded-lg px-4 py-3.5 text-sm font-medium transition-all duration-300 hover:bg-accent/15 motion-safe:active:scale-[0.98] ${
-                        pathname === entry.href
-                          ? "bg-accent/20 text-primary font-bold"
-                          : "text-muted-foreground"
-                      }`}
+              <div className="flex h-full flex-col overflow-y-auto">
+                <div className="sticky top-0 z-10 border-b border-border/60 bg-white/95 backdrop-blur-sm px-5 py-4">
+                  <span className="text-lg font-extrabold tracking-tight text-primary">
+                    THINK
+                    <span className="bg-gradient-to-r from-gold via-gold-light to-silver bg-clip-text text-transparent">
+                      AD
+                    </span>
+                  </span>
+                </div>
+
+                <nav className="flex flex-col gap-5 px-4 py-5">
+                  {/* 단일 항목(홈·서비스) 은 아이콘 행으로 */}
+                  <div className="space-y-1">
+                    {navEntries
+                      .filter((e): e is NavLeaf => !isGroup(e))
+                      .map((leaf) => {
+                        const active = pathname === leaf.href;
+                        const Icon = leaf.icon;
+                        return (
+                          <Link
+                            key={leaf.href}
+                            href={leaf.href}
+                            onClick={() => setOpen(false)}
+                            className={`flex items-center gap-3 rounded-xl px-3.5 py-3 transition-colors ${
+                              active
+                                ? "bg-primary/8 text-primary"
+                                : "text-foreground hover:bg-secondary/60"
+                            }`}
+                          >
+                            {Icon && (
+                              <span
+                                className={`flex h-9 w-9 items-center justify-center rounded-lg ${
+                                  active
+                                    ? "bg-primary text-white"
+                                    : "bg-secondary text-muted-foreground"
+                                }`}
+                              >
+                                <Icon className="h-4 w-4" />
+                              </span>
+                            )}
+                            <span className="text-sm font-semibold">{leaf.label}</span>
+                          </Link>
+                        );
+                      })}
+                  </div>
+
+                  {/* 그룹 항목은 카드 형태 */}
+                  {navEntries
+                    .filter((e): e is NavGroup => isGroup(e))
+                    .map((group, gi) => (
+                      <section
+                        key={`g-${gi}`}
+                        className="rounded-2xl border border-border/60 bg-card/50 p-2"
+                      >
+                        <h3 className="px-3 pt-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          {group.label}
+                        </h3>
+                        <div className="space-y-0.5">
+                          {group.items.map((leaf) => {
+                            const active = pathname === leaf.href;
+                            const Icon = leaf.icon;
+                            return (
+                              <Link
+                                key={leaf.href}
+                                href={leaf.href}
+                                onClick={() => setOpen(false)}
+                                className={`flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                                  active
+                                    ? "bg-primary/8"
+                                    : "hover:bg-secondary/60"
+                                }`}
+                              >
+                                {Icon && (
+                                  <span
+                                    className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${
+                                      active
+                                        ? "bg-primary text-white"
+                                        : "bg-secondary text-muted-foreground"
+                                    }`}
+                                  >
+                                    <Icon className="h-4 w-4" />
+                                  </span>
+                                )}
+                                <div className="min-w-0">
+                                  <div
+                                    className={`text-sm font-semibold ${
+                                      active ? "text-primary" : "text-foreground"
+                                    }`}
+                                  >
+                                    {leaf.label}
+                                  </div>
+                                  {leaf.desc && (
+                                    <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                                      {leaf.desc}
+                                    </div>
+                                  )}
+                                </div>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    ))}
+                </nav>
+
+                <div className="sticky bottom-0 mt-auto border-t border-border/60 bg-white/95 backdrop-blur-sm px-4 py-4">
+                  <Link href="/contact" onClick={() => setOpen(false)} className="block">
+                    <Button
+                      variant="cta"
+                      className="btn-gold h-11 w-full rounded-full text-sm font-semibold shadow-md shadow-cta/25"
                     >
-                      {entry.label}
-                    </Link>
-                  ),
-                )}
-                <Link
-                  href="/contact"
-                  onClick={() => setOpen(false)}
-                  className="mobile-nav-item flex justify-center"
-                  style={{ animationDelay: `${flatNavLinks.length * 60}ms` }}
-                >
-                  <Button
-                    variant="cta"
-                    className="btn-gold mt-3 h-10 w-auto min-w-[8rem] rounded-full px-6 touch-manipulation shadow-cta/25"
-                  >
-                    {t("nav.contact")}
-                  </Button>
-                </Link>
-              </nav>
+                      {t("nav.contact")}
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </SheetContent>
           </Sheet>
         </div>

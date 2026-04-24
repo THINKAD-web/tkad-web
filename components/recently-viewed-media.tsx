@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import {
+  clearRecentlyViewed,
   fetchRecentlyViewedItems,
   readRecentlyViewedIds,
   RECENTLY_VIEWED_MAX,
@@ -16,6 +17,7 @@ import {
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
+import { RotateCcw } from "lucide-react";
 
 const DISPLAY_MAX = RECENTLY_VIEWED_MAX;
 
@@ -73,9 +75,23 @@ export default function RecentlyViewedMedia({ locale }: Props) {
     >
       {/* 모바일: 하단 fixed 아님 — 페이지 스크롤에 포함 */}
       <div className="overflow-hidden rounded-xl bg-muted p-4 md:p-5">
-        <h3 className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground">
-          {isKo ? "최근 본 매체" : "Recently viewed"}
-        </h3>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-xs font-semibold tracking-wide text-muted-foreground">
+            {isKo ? "최근 본 매체" : "Recently viewed"}
+          </h3>
+          <button
+            type="button"
+            onClick={() => {
+              clearRecentlyViewed();
+              setItems([]);
+            }}
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-background/80 px-2.5 py-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors"
+            aria-label={isKo ? "최근 본 매체 초기화" : "Reset recently viewed"}
+          >
+            <RotateCcw className="h-3 w-3" />
+            {isKo ? "초기화" : "Reset"}
+          </button>
+        </div>
 
         <div
           role="list"

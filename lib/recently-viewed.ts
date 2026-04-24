@@ -100,3 +100,13 @@ export function replaceRecentlyViewedIdsFromResolvedItems(
     // ignore
   }
 }
+
+export function clearRecentlyViewed(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    notifyChanged();
+  } catch {
+    // ignore
+  }
+}
