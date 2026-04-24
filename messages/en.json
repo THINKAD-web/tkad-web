@@ -1482,7 +1482,18 @@
     "kpiCpm": "CPM",
     "kpiCpmHint": "Cost per 1,000 impressions",
     "kpiRoi": "Expected ROI",
-    "kpiRoiHint": "See scenarios below"
+    "kpiRoiHint": "See scenarios below",
+    "savingInProgress": "Saving...",
+    "shareBannerTitle": "Shareable link created (valid for 30 days)",
+    "shareBannerExpiry": "Auto-deleted after 30 days. Re-save to get a new link.",
+    "shareCopy": "Copy",
+    "shareCopied": "Link copied.",
+    "shareViewBadge": "Shared plan",
+    "shareViewSubtitle": "You're viewing this plan in read-only mode.",
+    "shareExpiredTitle": "This plan has expired",
+    "shareExpiredBody": "Saved plans auto-expire after 30 days. Please start a new one.",
+    "shareExpiredCta": "Start a new plan",
+    "shareStartOwnCta": "Start your own plan"
   },
   "footer": {
     "description": "The Thinking Ad Agency, THINKAD",

@@ -1481,7 +1481,18 @@
     "kpiCpm": "예상 CPM",
     "kpiCpmHint": "1,000회 노출당 비용",
     "kpiRoi": "예상 ROI (기대)",
-    "kpiRoiHint": "낙관·보수 시나리오는 아래 참고"
+    "kpiRoiHint": "낙관·보수 시나리오는 아래 참고",
+    "savingInProgress": "저장 중...",
+    "shareBannerTitle": "공유 링크가 생성되었습니다 (30일 유효)",
+    "shareBannerExpiry": "30일 후 자동 삭제됩니다. 재저장 시 새 링크가 발급됩니다.",
+    "shareCopy": "복사",
+    "shareCopied": "링크가 복사되었습니다.",
+    "shareViewBadge": "공유된 플랜",
+    "shareViewSubtitle": "읽기 전용으로 플랜 내용을 확인하실 수 있습니다.",
+    "shareExpiredTitle": "이 플랜은 만료되었습니다",
+    "shareExpiredBody": "저장된 지 30일이 지나 자동 삭제되었습니다. 새 플랜을 시작해 주세요.",
+    "shareExpiredCta": "새 플랜 시작하기",
+    "shareStartOwnCta": "나도 플랜 만들기"
   },
   "footer": {
     "description": "생각하는 광고회사, 싱커드",

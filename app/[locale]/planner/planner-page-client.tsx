@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -276,14 +276,57 @@ export default function PlannerPageClient({
     [applyPresetAction, toast, isKo],
   );
 
+  const [saving, setSaving] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+
   /**
-   * 입력 상태는 Zustand persist 가 매 변경마다 localStorage 에 자동 저장한다.
-   * 이 버튼은 사용자에게 명시적 "저장되었다" 피드백을 제공하는 용도로만 유지 —
-   * PR-2 이후 DB 기반 플랜 저장/공유로 대체될 자리.
+   * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
+   * 기존 localStorage persist 는 유지 — DB 저장은 "공유/이메일 발송" 시점에만.
    */
-  const savePlan = useCallback(() => {
-    toast("success", t("savedToast"));
-  }, [toast, t]);
+  const savePlan = useCallback(async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const state = usePlannerStore.getState();
+      const planJson = {
+        campaignGoal: state.campaignGoal,
+        regions: state.regions,
+        categories: state.categories,
+        budget: state.budget,
+        months: state.months,
+        ageKey: state.ageKey,
+        industryKey: state.industryKey,
+        campaignMediaIds: state.campaignMediaIds,
+        creativeUploadedUrl: state.creativeUploadedUrl,
+        mediaPlacements: state.mediaPlacements,
+      };
+      const res = await fetch("/api/planner/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planJson }),
+      });
+      if (!res.ok) {
+        throw new Error(`save failed: ${res.status}`);
+      }
+      const data = (await res.json()) as { id: string; expiresAt: string };
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const url = `${origin}/${locale}/planner/shared/${data.id}`;
+      setShareUrl(url);
+      // 링크를 즉시 클립보드에도 복사
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(url).catch(() => {});
+      }
+      toast("success", t("savedToast"));
+    } catch {
+      toast(
+        "error",
+        isKo ? "저장에 실패했습니다." : "Could not save plan.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }, [saving, toast, t, isKo, locale]);
 
   const mapLabel = useCallback(
     (r: PlannerMapRegion) =>
@@ -761,9 +804,10 @@ export default function PlannerPageClient({
                   variant="outline"
                   className="rounded-full border-navy/20"
                   onClick={savePlan}
+                  disabled={saving}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  {t("ctaSave")}
+                  {saving ? t("savingInProgress") : t("ctaSave")}
                 </Button>
                 <Button className="btn-gold rounded-full font-semibold" asChild>
                   <Link href={quoteHref}>
@@ -773,6 +817,47 @@ export default function PlannerPageClient({
                 </Button>
               </div>
             </div>
+
+            {shareUrl ? (
+              <div
+                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950 shadow-sm"
+                role="status"
+              >
+                <p className="font-semibold">{t("shareBannerTitle")}</p>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <input
+                    readOnly
+                    value={shareUrl}
+                    onFocus={(e) => e.currentTarget.select()}
+                    className="min-w-0 flex-1 rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-mono text-xs"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full border-emerald-300"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(shareUrl);
+                        toast("success", t("shareCopied"));
+                      } catch {
+                        toast(
+                          "error",
+                          isKo
+                            ? "복사에 실패했습니다."
+                            : "Copy failed.",
+                        );
+                      }
+                    }}
+                  >
+                    {t("shareCopy")}
+                  </Button>
+                </div>
+                <p className="mt-1 text-[11px] text-emerald-950/80">
+                  {t("shareBannerExpiry")}
+                </p>
+              </div>
+            ) : null}
 
             {filtered.length === 0 ? (
               <Card className="border-dashed border-navy/20 bg-slate-50/80">
