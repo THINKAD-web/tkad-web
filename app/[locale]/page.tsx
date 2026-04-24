@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import HeroParallaxBackground from "@/components/hero-parallax-background";
+// HeroKenBurns 는 아래 ScrollAnimate 정의 이후에 const 로 선언됨
 import { type MediaItem } from "@/lib/media-data";
 import {
   fetchHomeFeaturedMedia,
@@ -39,6 +39,12 @@ import {
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
+const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
+  ssr: false,
+  loading: () => (
+    <div aria-hidden className="absolute inset-0 z-0 bg-navy" />
+  ),
+});
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -96,9 +102,8 @@ function HomeContent({
     <>
       {/* Hero */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
-        <HeroParallaxBackground />
-        <div className="pointer-events-none absolute inset-0 z-[2] hero-radial-accent" />
-        <div className="pointer-events-none absolute inset-0 z-[2] hero-radial-cta" />
+        {/* Ken Burns 배경 — 내부에서 가독성 그라디언트/accent 오버레이까지 함께 적용 */}
+        <HeroKenBurns />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
           <div className="hero-fade-in hero-fade-in-seq-0 mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">

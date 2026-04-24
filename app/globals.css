@@ -748,3 +748,36 @@ select:focus-visible {
 .stat-divider:last-child::after {
   display: none;
 }
+
+/* ── Ken Burns (slow zoom + pan) for hero ── */
+.kb {
+  transform-origin: center;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes kb-center {
+    0% { transform: scale(1.08) translate(0, 0); }
+    100% { transform: scale(1.16) translate(0, -1.5%); }
+  }
+  @keyframes kb-tl {
+    0% { transform: scale(1.08) translate(-1%, -1%); }
+    100% { transform: scale(1.18) translate(-2.5%, -2.2%); }
+  }
+  @keyframes kb-tr {
+    0% { transform: scale(1.08) translate(1%, -1%); }
+    100% { transform: scale(1.18) translate(2.5%, -2.2%); }
+  }
+  @keyframes kb-bl {
+    0% { transform: scale(1.08) translate(-1%, 1%); }
+    100% { transform: scale(1.18) translate(-2.5%, 2.2%); }
+  }
+  @keyframes kb-br {
+    0% { transform: scale(1.08) translate(1%, 1%); }
+    100% { transform: scale(1.18) translate(2.5%, 2.2%); }
+  }
+  .kb-center { animation: kb-center 14s ease-out both; transform-origin: center; }
+  .kb-tl { animation: kb-tl 14s ease-out both; transform-origin: top left; }
+  .kb-tr { animation: kb-tr 14s ease-out both; transform-origin: top right; }
+  .kb-bl { animation: kb-bl 14s ease-out both; transform-origin: bottom left; }
+  .kb-br { animation: kb-br 14s ease-out both; transform-origin: bottom right; }
+}

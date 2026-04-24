@@ -26,6 +26,11 @@ const nextConfig: NextConfig = {
         hostname: "fastly.picsum.photos",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
     ],
     formats: ["image/webp", "image/avif"],
     qualities: [75, 85],
