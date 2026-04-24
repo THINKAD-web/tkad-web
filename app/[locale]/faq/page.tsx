@@ -289,13 +289,13 @@ export default function FaqPage() {
                       aria-expanded={open}
                       className="flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-slate-50/80 md:gap-4 md:p-5"
                     >
-                      <ChevronDown
-                        className={cn(
-                          "mt-0.5 h-5 w-5 shrink-0 text-gold transition-transform duration-300",
-                          open && "rotate-180"
-                        )}
+                      {/* Q 마커 */}
+                      <span
                         aria-hidden
-                      />
+                        className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold/12 text-[11px] font-extrabold tracking-wide text-gold-dark ring-1 ring-gold/25"
+                      >
+                        Q
+                      </span>
                       <span className="min-w-0 flex-1 space-y-2">
                         <Badge
                           variant="outline"
@@ -307,6 +307,13 @@ export default function FaqPage() {
                           {isKo ? item.questionKo : item.questionEn}
                         </span>
                       </span>
+                      <ChevronDown
+                        className={cn(
+                          "mt-1 h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300",
+                          open && "rotate-180"
+                        )}
+                        aria-hidden
+                      />
                     </button>
                     <div
                       className={cn(
@@ -315,8 +322,15 @@ export default function FaqPage() {
                       )}
                     >
                       <div className="min-h-0 overflow-hidden">
-                        <div className="border-t border-navy/5 px-4 pb-5 pt-0 md:px-5 md:pl-[3.25rem]">
-                          <p className="pt-4 text-sm leading-relaxed text-navy/80">
+                        <div className="flex items-start gap-3 border-t border-navy/5 px-4 pb-5 pt-4 md:gap-4 md:px-5">
+                          {/* A 마커 */}
+                          <span
+                            aria-hidden
+                            className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy text-[11px] font-extrabold text-white"
+                          >
+                            A
+                          </span>
+                          <p className="min-w-0 flex-1 text-sm leading-relaxed text-navy/80">
                             {isKo ? item.answerKo : item.answerEn}
                           </p>
                         </div>
