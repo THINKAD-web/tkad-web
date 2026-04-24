@@ -96,11 +96,11 @@ function DraggableCatalogRow({
         </button>
         <div className="min-w-0 flex-1">
           <p className="line-clamp-2 text-sm font-semibold text-navy">
-            {isKo ? m.name : m.nameEn || m.name}
+            {isKo ? m.name : (m.nameEn || m.name) || m.name}
           </p>
           <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
             {regionLabel(m.region)} ·{" "}
-            {(isKo ? m.location : m.locationEn || m.location).slice(0, 48)}
+            {(isKo ? m.location : (m.locationEn || m.location) || m.location).slice(0, 48)}
           </p>
           <p className="mt-1 text-xs font-medium text-gold-dark">
             ₩{m.price.toLocaleString()}
@@ -169,7 +169,7 @@ function SortableBasketRow({
         </button>
         <div className="min-w-0 flex-1">
           <p className="line-clamp-2 text-sm font-semibold text-navy">
-            {isKo ? m.name : m.nameEn || m.name}
+            {isKo ? m.name : (m.nameEn || m.name) || m.name}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {regionLabel(m.region)}
@@ -227,8 +227,8 @@ export default function PlannerMediaSelector({
     const q = query.trim().toLowerCase();
     if (!q) return catalog;
     return catalog.filter((m) => {
-      const name = (isKo ? m.name : m.nameEn || m.name).toLowerCase();
-      const loc = (isKo ? m.location : m.locationEn || m.location).toLowerCase();
+      const name = (isKo ? m.name : (m.nameEn || m.name) || m.name).toLowerCase();
+      const loc = (isKo ? m.location : (m.locationEn || m.location) || m.location).toLowerCase();
       return name.includes(q) || loc.includes(q);
     });
   }, [catalog, query, isKo]);
@@ -427,7 +427,7 @@ export default function PlannerMediaSelector({
         {dragPreview ? (
           <div className="max-w-sm rounded-xl border border-gold/40 bg-white p-3 shadow-xl">
             <p className="line-clamp-2 text-sm font-semibold text-navy">
-              {isKo ? dragPreview.name : dragPreview.nameEn || dragPreview.name}
+              {isKo ? dragPreview.name : (dragPreview.nameEn || dragPreview.name) || dragPreview.name}
             </p>
           </div>
         ) : null}

@@ -42,7 +42,7 @@ export default function MediaDetailExtras({
   const isKo = locale === "ko";
   const tMedia = useTranslations("media");
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(media.id);
-  const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(isKo ? media.name : media.nameEn)},${media.lat},${media.lng}`;
+  const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(isKo ? media.name : (media.nameEn || media.name))},${media.lat},${media.lng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${media.lat},${media.lng}`;
   const mapProvider = useMemo(() => getCampaignMonitoringMapProvider(), []);
   const regionDisplay = useMemo(() => {
@@ -84,7 +84,7 @@ export default function MediaDetailExtras({
               {labels.locationAddressLabel}
             </p>
             <p className="text-base font-medium leading-relaxed text-navy">
-              {isKo ? media.location : media.locationEn}
+              {isKo ? media.location : (media.locationEn || media.location)}
             </p>
           </div>
           <div>

@@ -156,8 +156,8 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {portfolio.map((m) => {
               const src = thumbUrl(m);
-              const name = isKo ? m.name : m.nameEn || m.name;
-              const loc = isKo ? m.location : m.locationEn || m.location;
+              const name = isKo ? m.name : (m.nameEn || m.name) || m.name;
+              const loc = isKo ? m.location : (m.locationEn || m.location) || m.location;
               return (
                 <li
                   key={m.id}

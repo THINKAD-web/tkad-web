@@ -46,12 +46,12 @@ export default function RecommendCartBar({
               className="flex shrink-0 items-center gap-2 rounded-full border bg-slate-50 px-3 py-1.5 text-xs"
             >
               <span className="max-w-[120px] truncate font-medium text-navy">
-                {isKo ? media.name : media.nameEn}
+                {isKo ? media.name : (media.nameEn || media.name)}
               </span>
               <button
                 type="button"
                 onClick={() => onRemove(media.id)}
-                aria-label={`${isKo ? media.name : media.nameEn} ${t("cartRemoveSuffix")}`}
+                aria-label={`${isKo ? media.name : (media.nameEn || media.name)} ${t("cartRemoveSuffix")}`}
                 className="text-muted-foreground hover:text-red-500"
               >
                 <X className="h-3.5 w-3.5" />

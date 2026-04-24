@@ -30,6 +30,8 @@ export async function GET(request: NextRequest, { params }: Params) {
               impressions: true,
               visibilityScore: true,
               type: true,
+              region: true,
+              operatingHours: true,
             },
           },
         },

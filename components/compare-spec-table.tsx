@@ -202,7 +202,7 @@ export function CompareSpecTable({
                     href={mediaItemDetailPath(m.id)}
                     className="line-clamp-2 text-left text-xs font-bold leading-snug text-navy underline-offset-2 hover:text-gold-dark hover:underline sm:text-sm"
                   >
-                    {isKo ? m.name : m.nameEn}
+                    {isKo ? m.name : (m.nameEn || m.name)}
                   </Link>
                 </th>
               ))}

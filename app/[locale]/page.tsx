@@ -11,9 +11,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import HeroParallaxBackground from "@/components/hero-parallax-background";
+// HeroKenBurns 는 아래 ScrollAnimate 정의 이후에 const 로 선언됨
 import { type MediaItem } from "@/lib/media-data";
-import { fetchHomeFeaturedMedia } from "@/lib/public-media-catalog";
+import {
+  fetchHomeFeaturedMedia,
+  fetchHomePopularMedia,
+} from "@/lib/public-media-catalog";
 import {
   ArrowRight,
   BarChart3,
@@ -34,8 +37,24 @@ import {
 } from "lucide-react";
 
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
+import { ProcessStepImage } from "@/components/process-step-image";
+import {
+  VisibilityGauge,
+  FootTrafficBadge,
+  ImpressionsCompact,
+  VerifiedBadge,
+  MediaTypeBadge,
+} from "@/components/media-metric-viz";
+import { TestimonialsCarousel } from "@/components/testimonials-carousel";
+import { testimonials } from "@/data/testimonials";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
+const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
+  ssr: false,
+  loading: () => (
+    <div aria-hidden className="absolute inset-0 z-0 bg-navy" />
+  ),
+});
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -53,16 +72,20 @@ export default async function HomePage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations();
   /**
-   * 추천 매체: Prisma `isFeatured`·`featuredOrder`(홈 하드코딩 ID 없음).
-   * DB 연결 시 실제 행만; 미연결 시에만 샘플 카탈로그.
+   * 추천 매체: Prisma `isFeatured`·`featuredOrder` (관리자에서 지정).
+   * 인기 매체: Prisma `isPopular`·`popularOrder` (관리자에서 별도 지정).
    */
-  const [featuredCatalog] = await Promise.all([fetchHomeFeaturedMedia(6)]);
+  const [featuredCatalog, popularCatalog] = await Promise.all([
+    fetchHomeFeaturedMedia(6),
+    fetchHomePopularMedia(8),
+  ]);
 
   return (
     <HomeContent
       locale={locale}
       t={t}
       featuredCatalog={featuredCatalog}
+      popularCatalog={popularCatalog}
     />
   );
 }
@@ -71,21 +94,26 @@ function HomeContent({
   locale,
   t,
   featuredCatalog,
+  popularCatalog,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
   featuredCatalog: MediaItem[];
+  popularCatalog: MediaItem[];
 }) {
   const isKo = locale === "ko";
   const topThreeFeatured = featuredCatalog.slice(0, 3);
+  /** 추천과 겹치는 항목은 인기 섹션에서 제외해 중복 노출 방지 */
+  const popularItems = popularCatalog
+    .filter((m) => !topThreeFeatured.some((f) => f.id === m.id))
+    .slice(0, 6);
 
   return (
     <>
       {/* Hero */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
-        <HeroParallaxBackground />
-        <div className="pointer-events-none absolute inset-0 z-[2] hero-radial-accent" />
-        <div className="pointer-events-none absolute inset-0 z-[2] hero-radial-cta" />
+        {/* Ken Burns 배경 — 내부에서 가독성 그라디언트/accent 오버레이까지 함께 적용 */}
+        <HeroKenBurns />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
           <div className="hero-fade-in hero-fade-in-seq-0 mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">
@@ -206,6 +234,7 @@ function HomeContent({
               {
                 icon: Search,
                 step: "01",
+                image: "/images/process/step-1-site-visit.jpg",
                 title: isKo ? "현장 방문" : "Site Visit",
                 desc: isKo
                   ? "담당자가 직접 매체 현장을 방문하여 설치 환경과 주변 유동인구를 확인합니다."
@@ -214,6 +243,7 @@ function HomeContent({
               {
                 icon: Camera,
                 step: "02",
+                image: "/images/process/step-2-measurement.jpg",
                 title: isKo ? "촬영 및 실측" : "Photo & Measurement",
                 desc: isKo
                   ? "매체 크기, 시인성, 조도를 정밀 측정하고 다각도 촬영으로 기록합니다."
@@ -222,6 +252,7 @@ function HomeContent({
               {
                 icon: Database,
                 step: "03",
+                image: "/images/process/step-3-data-review.jpg",
                 title: isKo ? "데이터 검증" : "Data Verification",
                 desc: isKo
                   ? "유동인구 데이터, 차량 통행량, 노출 빈도를 분석하여 매체 효과를 검증합니다."
@@ -230,28 +261,38 @@ function HomeContent({
               {
                 icon: ClipboardCheck,
                 step: "04",
+                image: "/images/process/step-4-registration.jpg",
                 title: isKo ? "매체 등록" : "Media Registration",
                 desc: isKo
                   ? "검증을 통과한 매체만 싱커드 플랫폼에 등록되어 광고주에게 제안됩니다."
                   : "Only verified media are registered on the THINKAD platform and proposed to advertisers.",
               },
             ].map((item, index) => (
-              <ScrollAnimate key={item.step} delay={index * 100}>
+              <ScrollAnimate key={item.step} delay={index * 120}>
               <div className="verification-step group relative">
+                {/* 단계 연결선 — 데스크톱 수평 타임라인 */}
                 {index < 3 && (
-                  <div className="absolute top-10 right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
+                  <div className="absolute top-[44%] right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
                 )}
-                <div className="relative flex flex-col items-center text-center">
-                  <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 ring-1 ring-gold/20 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-gold/10">
-                    <item.icon className="h-8 w-8 text-gold" />
-                    <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-navy to-navy-light text-[11px] font-bold text-white shadow-md">
-                      {item.step}
+                <div className="relative h-full flex flex-col overflow-hidden rounded-2xl border border-navy/8 bg-white shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
+                  {/* 현장 사진 영역 (placeholder 가 자동) */}
+                  <div className="relative aspect-[16/9] bg-gradient-to-br from-navy/8 via-navy/3 to-gold/5">
+                    <ProcessStepImage src={item.image} alt="" />
+                    {/* 번호 뱃지 */}
+                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-navy px-2.5 py-1 text-[10px] font-bold text-gold-light shadow-sm">
+                      STEP {item.step}
+                    </span>
+                    {/* 아이콘 — 이미지 우측 하단에 오버레이 */}
+                    <span className="absolute right-3 bottom-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/92 backdrop-blur-sm ring-1 ring-gold/25 shadow-sm">
+                      <item.icon className="h-5 w-5 text-gold-dark" strokeWidth={1.75} />
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-navy">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {item.desc}
-                  </p>
+                  <div className="flex flex-1 flex-col px-5 py-5">
+                    <h3 className="text-base font-bold text-navy sm:text-lg">{item.title}</h3>
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
               </div>
               </ScrollAnimate>
@@ -293,18 +334,21 @@ function HomeContent({
               const typeLabel = isKo
                 ? (typeLabels[media.type]?.ko ?? media.type)
                 : (typeLabels[media.type]?.en ?? media.type);
-              const daily =
-                media.dailyFootTraffic > 0
-                  ? media.dailyFootTraffic.toLocaleString()
-                  : "—";
-              const vis =
-                media.visibilityScore != null
-                  ? String(media.visibilityScore)
-                  : "—";
-              const monthlyImp =
-                media.monthlyFootTraffic != null
-                  ? media.monthlyFootTraffic.toLocaleString()
-                  : "—";
+              /**
+               * 전국 상위 백분위 — 간단 휴리스틱:
+               *   일 유동 100,000+ → top 5%
+               *   50,000+ → top 10%
+               *   20,000+ → top 25%
+               *   10,000+ → top 50%
+               *   그 외 → null (표시 생략)
+               */
+              const daily = media.dailyFootTraffic ?? 0;
+              const topPercentile =
+                daily >= 100_000 ? 5
+                  : daily >= 50_000 ? 10
+                  : daily >= 20_000 ? 25
+                  : daily >= 10_000 ? 50
+                  : null;
               return (
                 <ScrollAnimate key={media.id} delay={i * 100}>
                   <Card className="group relative overflow-hidden border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl">
@@ -317,58 +361,46 @@ function HomeContent({
                       imgClassName="opacity-90 transition duration-300 group-hover:scale-105"
                       bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/45 via-transparent to-transparent"
                       placeholderSize="sm"
-                      alt={isKo ? media.name : media.nameEn}
+                      alt={isKo ? media.name : (media.nameEn || media.name)}
                       priority={true}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     >
                       <div className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-light text-lg font-bold text-navy shadow-md">
                         {rank}
                       </div>
-                      <div className="absolute top-4 right-4 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
-                        <BadgeCheck className="h-3.5 w-3.5" />
-                        Verified
+                      <div className="absolute top-4 right-4 z-10">
+                        <VerifiedBadge className="bg-emerald-500/95 border-emerald-400 text-white shadow-sm" />
                       </div>
                     </MediaCatalogThumbnail>
                     <CardHeader className="pb-3">
-                      <Badge
-                        variant="secondary"
-                        className="w-fit bg-navy/5 text-xs font-medium text-navy"
-                      >
-                        {typeLabel}
-                      </Badge>
+                      <MediaTypeBadge type={media.type} label={typeLabel} />
                       <CardTitle className="text-lg font-bold text-navy">
-                        {isKo ? media.name : media.nameEn}
+                        {isKo ? media.name : (media.nameEn || media.name)}
                       </CardTitle>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <MapPin className="h-3.5 w-3.5" />
-                        {isKo ? media.location : media.locationEn}
+                        {isKo ? media.location : (media.locationEn || media.location)}
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-3 gap-3 rounded-xl bg-slate-50 p-3">
-                        <div className="text-center">
-                          <div className="text-xs text-muted-foreground">
-                            {isKo ? "일 유동(명)" : "Daily footfall"}
-                          </div>
-                          <div className="mt-0.5 text-sm font-bold text-navy">
-                            {daily}
-                          </div>
-                        </div>
-                        <div className="border-x text-center">
-                          <div className="text-xs text-muted-foreground">
-                            {isKo ? "가시성" : "Visibility"}
-                          </div>
-                          <div className="mt-0.5 text-sm font-bold text-gold-dark">
-                            {vis}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-muted-foreground">
-                            {isKo ? "월 노출" : "Mo. impr."}
-                          </div>
-                          <div className="mt-0.5 text-sm font-bold text-emerald-600">
-                            {monthlyImp}
-                          </div>
+                      <div className="space-y-3 rounded-xl bg-slate-50 p-3">
+                        <FootTrafficBadge
+                          daily={media.dailyFootTraffic}
+                          topPercentile={topPercentile}
+                        />
+                        <VisibilityGauge score={media.visibilityScore ?? 0} />
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-200/80">
+                          <ImpressionsCompact
+                            value={media.monthlyFootTraffic ?? null}
+                            label={isKo ? "월 노출" : "Mo. impr."}
+                          />
+                          {media.dailyFootTraffic > 0 && (
+                            <ImpressionsCompact
+                              value={media.dailyFootTraffic * 30}
+                              label={isKo ? "누적/월" : "Monthly"}
+                              suffix={isKo ? "명" : ""}
+                            />
+                          )}
                         </div>
                       </div>
 
@@ -400,6 +432,71 @@ function HomeContent({
           )}
         </div>
       </section>
+
+      {/* 인기 매체 — 추천과 별개로 관리 (isPopular / popularOrder) */}
+      {popularItems.length > 0 && (
+        <section className="section-white py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <ScrollAnimate>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-4 py-1.5 text-sm font-bold text-rose-600">
+                    <span>🔥</span>
+                    {isKo ? "인기 매체" : "Popular"}
+                  </div>
+                  <h2 className="section-title mt-1 text-3xl font-bold text-navy sm:text-4xl">
+                    {isKo ? "지금 가장 주목받는 매체" : "Trending Right Now"}
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {isKo
+                      ? "최근 집행·관심도 기준으로 관리자가 선별한 매체"
+                      : "Hand-picked by our team based on recent bookings and demand"}
+                  </p>
+                </div>
+                <Link
+                  href="/media"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-gold hover:text-gold-dark"
+                >
+                  {isKo ? "전체 매체" : "View all"}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </ScrollAnimate>
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {popularItems.slice(0, 6).map((media, i) => (
+                <ScrollAnimate key={media.id} delay={i * 60}>
+                  <Link href={`/media/${media.id}`} className="block touch-manipulation">
+                    <Card className="group overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-1">
+                      <MediaCatalogThumbnail
+                        media={media}
+                        placeholderLabel={t("media.imagePreparing")}
+                        className="relative flex h-44 items-center justify-center"
+                        imgClassName="transition-transform duration-300 group-hover:scale-105"
+                        bottomGradientClassName={null}
+                        placeholderSize="xs"
+                      />
+                      <CardHeader className="space-y-1 p-3 pb-1.5">
+                        <Badge variant="secondary" className="w-fit bg-rose-50 text-rose-700 text-[10px] font-semibold">
+                          {isKo ? "인기" : "Popular"}
+                        </Badge>
+                        <CardTitle className="truncate text-sm font-bold leading-snug text-navy">
+                          {isKo ? media.name : (media.nameEn || media.name)}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="px-3 pb-3">
+                        <div className="flex items-center gap-1 text-xs leading-snug text-muted-foreground truncate">
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          {isKo ? media.location : (media.locationEn || media.location)}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </ScrollAnimate>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Why THINKAD */}
       <section className="section-white py-16">
@@ -475,7 +572,7 @@ function HomeContent({
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials (캐러셀 — data/testimonials.ts 에서 관리) */}
       <section className="section-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
@@ -486,66 +583,15 @@ function HomeContent({
               <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
                 {isKo ? "광고주가 직접 전하는 이야기" : "What Our Clients Say"}
               </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                {isKo
+                  ? "싱커드와 함께 성장한 파트너사의 실제 이야기"
+                  : "Real stories from partners who grew with THINKAD"}
+              </p>
             </div>
           </ScrollAnimate>
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-            {[
-              {
-                name: isKo ? "김서연 마케팅 이사" : "Seoyeon Kim, Marketing Director",
-                company: isKo ? "글로벌 뷰티 브랜드 A사" : "Global Beauty Brand A",
-                text: isKo
-                  ? "싱커드 덕분에 강남역 일대 10개 빌보드를 동시에 진행할 수 있었습니다. 무엇보다 매체 하나하나 직접 검증해준 데이터 덕에 안심하고 결정할 수 있었어요. 캠페인 후 브랜드 인지도 300% 상승이라는 결과가 모든 걸 말해줍니다."
-                  : "Thanks to THINKAD, we ran 10 billboards simultaneously around Gangnam Station. The verified data for each media gave us confidence. A 300% increase in brand awareness speaks for itself.",
-                rating: 5,
-              },
-              {
-                name: isKo ? "박준혁 대표" : "Junhyuk Park, CEO",
-                company: isKo ? "테크 스타트업 B사" : "Tech Startup B",
-                text: isKo
-                  ? "스타트업이라 광고 예산이 빠듯했는데, 싱커드가 데이터 기반으로 가장 효율적인 매체 조합을 제안해줬습니다. 코엑스 디지털 캠페인으로 2주 만에 150만 노출을 달성했어요. 계약부터 사후관리까지 원스톱이라 정말 편했습니다."
-                  : "As a startup with a tight budget, THINKAD proposed the most efficient media mix based on data. We achieved 1.5M impressions in 2 weeks with COEX digital. The one-stop service from contract to post-care was incredibly convenient.",
-                rating: 5,
-              },
-              {
-                name: isKo ? "이하은 팀장" : "Haeun Lee, Team Lead",
-                company: isKo ? "엔터테인먼트 C사" : "Entertainment Company C",
-                text: isKo
-                  ? "지하철 랩핑 광고를 처음 해봤는데, 싱커드가 역사별 유동인구 데이터와 실제 시인성까지 꼼꼼하게 분석해줘서 7개 역사를 최적으로 선정할 수 있었습니다. 앨범 초동 판매 200% 증가! 다음 캠페인도 무조건 싱커드입니다."
-                  : "It was our first subway wrapping ad. THINKAD meticulously analyzed foot traffic and visibility for each station, helping us optimally select 7 stations. 200% increase in first-week album sales! Definitely using THINKAD for our next campaign.",
-                rating: 5,
-              },
-            ].map((testimonial, i) => (
-              <ScrollAnimate key={testimonial.name} delay={i * 100}>
-              <Card
-                className="relative border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
-              >
-                <CardHeader className="pb-3">
-                  <Quote className="h-8 w-8 text-gold/30" />
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-4 w-4 fill-gold text-gold"
-                      />
-                    ))}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-relaxed text-navy/80">
-                    &ldquo;{testimonial.text}&rdquo;
-                  </p>
-                  <div className="mt-6 border-t pt-4">
-                    <p className="text-sm font-bold text-navy">
-                      {testimonial.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {testimonial.company}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-              </ScrollAnimate>
-            ))}
+          <div className="mt-10">
+            <TestimonialsCarousel items={testimonials} isKo={isKo} />
           </div>
         </div>
       </section>

@@ -31,15 +31,21 @@ export function ServicesFaq({ title, items, className }: Props) {
                   <button
                     type="button"
                     onClick={() => setOpenIndex(open ? null : i)}
-                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-navy/[0.03] sm:px-6"
+                    className="flex w-full items-start gap-3 px-5 py-4 text-left transition-colors hover:bg-navy/[0.03] sm:px-6"
                     aria-expanded={open}
                   >
-                    <span className="text-sm font-semibold text-navy sm:text-base">
+                    <span
+                      aria-hidden
+                      className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold/12 text-[11px] font-extrabold text-gold-dark ring-1 ring-gold/25"
+                    >
+                      Q
+                    </span>
+                    <span className="flex-1 text-sm font-semibold text-navy sm:text-base">
                       {item.question}
                     </span>
                     <ChevronDown
                       className={cn(
-                        "h-5 w-5 shrink-0 text-gold transition-transform duration-200",
+                        "mt-1 h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200",
                         open && "rotate-180",
                       )}
                       aria-hidden
@@ -52,9 +58,17 @@ export function ServicesFaq({ title, items, className }: Props) {
                     )}
                   >
                     <div className="min-h-0 overflow-hidden">
-                      <p className="px-5 pb-4 pt-0 text-sm leading-relaxed text-muted-foreground sm:px-6 sm:pb-5">
-                        {item.answer}
-                      </p>
+                      <div className="flex items-start gap-3 border-t border-navy/5 px-5 pb-4 pt-4 sm:px-6 sm:pb-5">
+                        <span
+                          aria-hidden
+                          className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy text-[11px] font-extrabold text-white"
+                        >
+                          A
+                        </span>
+                        <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
+                          {item.answer}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

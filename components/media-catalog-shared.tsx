@@ -3,9 +3,9 @@
 import { LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** 매체 카탈로그 그리드 카드 — 매체검색·견적·비교 공통 */
+/** 매체 카탈로그 그리드 카드 — 매체검색·견적·비교 공통. 데스크톱은 3열 고정 (카드 크기 확대). */
 export const MEDIA_CATALOG_GRID_CLASS =
-  "grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+  "grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6";
 
 /** 컴팩트 행 그리드 — 매체검색·견적·비교 공통 */
 export const MEDIA_CATALOG_COMPACT_GRID_CLASS =

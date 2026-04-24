@@ -51,6 +51,10 @@ export type AdminMediaDto = {
   isFeatured: boolean;
   /** 추천 노출 순서 (작을수록 앞) */
   featuredOrder: number | null;
+  /** 홈 인기 매체 */
+  isPopular: boolean;
+  /** 인기 노출 순서 (작을수록 앞) */
+  popularOrder: number | null;
   priceOptions: Array<{
     label: string;
     price: number;
@@ -216,6 +220,8 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     isActive,
     isFeatured: pickBool(r, "isFeatured", "is_featured", false),
     featuredOrder: pickInt(r, "featuredOrder", "featured_order"),
+    isPopular: pickBool(r, "isPopular", "is_popular", false),
+    popularOrder: pickInt(r, "popularOrder", "popular_order"),
     priceOptions: Array.isArray((r as Record<string, unknown>).priceOptions)
       ? (r as Record<string, unknown>).priceOptions as Array<{ label: string; price: number; period?: string }>
       : Array.isArray((r as Record<string, unknown>).price_options)
@@ -290,6 +296,8 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     isActive: m.isActive,
     isFeatured: m.isFeatured,
     featuredOrder: m.featuredOrder,
+    isPopular: m.isPopular,
+    popularOrder: m.popularOrder,
     priceOptions: Array.isArray(m.priceOptions)
       ? m.priceOptions as Array<{ label: string; price: number; period?: string }>
       : null,

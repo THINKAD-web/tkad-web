@@ -25,7 +25,7 @@ export default function MediaDetailQuoteModal({
   const t = useTranslations("media.detail");
   const locale = useLocale();
   const isKo = locale === "ko";
-  const mediaTitle = isKo ? media.name : media.nameEn;
+  const mediaTitle = isKo ? media.name : (media.nameEn || media.name);
 
   const opts = media.priceOptions ?? [];
   const hasOpts = opts.length > 0;

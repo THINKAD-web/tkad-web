@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Clock, MapPin, ArrowRight } from "lucide-react";
+import { Clock, MapPin, ArrowRight, RotateCcw } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
 import {
+  clearRecentlyViewed,
   fetchRecentlyViewedItems,
   readRecentlyViewedIds,
   subscribeRecentlyViewedChanged,
@@ -80,12 +81,26 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                 {isKo ? "최근 확인한 매체" : "Recently Viewed Media"}
               </h2>
             </div>
-            <Link
-              href="/media"
-              className="link-underline-grow inline-flex min-h-11 shrink-0 items-center gap-1 self-start text-sm font-semibold text-gold transition-colors hover:text-gold-dark sm:min-h-0 sm:self-auto"
-            >
-              {isKo ? "전체 보기" : "View All"} <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            <div className="flex items-center gap-3 self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  clearRecentlyViewed();
+                  setItems([]);
+                }}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-white px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors sm:min-h-0"
+                aria-label={isKo ? "최근 본 매체 초기화" : "Reset recently viewed"}
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                {isKo ? "초기화" : "Reset"}
+              </button>
+              <Link
+                href="/media"
+                className="link-underline-grow inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-gold transition-colors hover:text-gold-dark sm:min-h-0"
+              >
+                {isKo ? "전체 보기" : "View All"} <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
         </ScrollAnimate>
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
@@ -106,7 +121,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                       {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
                     </Badge>
                     <CardTitle className="truncate text-sm font-bold leading-snug">
-                      {isKo ? media.name : media.nameEn}
+                      {isKo ? media.name : (media.nameEn || media.name)}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="min-w-0 px-3 pb-3">

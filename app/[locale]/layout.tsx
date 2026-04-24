@@ -14,6 +14,7 @@ import TopLoader from "@/components/top-loader";
 import PageTransition from "@/components/page-transition";
 import ConditionalPublicChrome from "@/components/conditional-public-chrome";
 import ToastProvider from "@/components/toast-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import "../globals.css";
 
 const geistSans = localFont({
@@ -132,6 +133,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html
       lang={locale}
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
@@ -141,24 +143,26 @@ export default async function LocaleLayout({ children, params }: Props) {
             __html: JSON.stringify(structuredData),
           }}
         />
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ToastProvider>
-            <a href="#main-content" className="skip-link">
-              {locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"}
-            </a>
-            <ConditionalPublicChrome>
-              <TopLoader />
-              <Header />
-            </ConditionalPublicChrome>
-            <main id="main-content" className="flex-1">
-              <PageTransition>{children}</PageTransition>
-            </main>
-            <ConditionalPublicChrome>
-              <Footer />
-              <DeferredPublicWidgets />
-            </ConditionalPublicChrome>
-          </ToastProvider>
-        </NextIntlClientProvider>
+        <ThemeProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ToastProvider>
+              <a href="#main-content" className="skip-link">
+                {locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"}
+              </a>
+              <ConditionalPublicChrome>
+                <TopLoader />
+                <Header />
+              </ConditionalPublicChrome>
+              <main id="main-content" className="flex-1">
+                <PageTransition>{children}</PageTransition>
+              </main>
+              <ConditionalPublicChrome>
+                <Footer />
+                <DeferredPublicWidgets />
+              </ConditionalPublicChrome>
+            </ToastProvider>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

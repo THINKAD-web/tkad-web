@@ -990,7 +990,7 @@ export default function PlannerPageClient({
                         className="rounded-xl border border-navy/10 bg-white p-3 shadow-sm transition hover:border-gold/40 hover:shadow-md"
                       >
                         <p className="line-clamp-2 text-sm font-bold text-navy">
-                          {isKo ? m.name : m.nameEn || m.name}
+                          {isKo ? m.name : (m.nameEn || m.name) || m.name}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {tm(`regions.${m.region}`)} ·{" "}

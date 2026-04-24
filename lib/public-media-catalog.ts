@@ -301,18 +301,42 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
   }
 }
 
-/** 홈 인기 매체: 조회수 높은 순. */
+/** 홈 인기 매체: `isPopular=true` 우선, 없으면 최근 업데이트 순 폴백. */
 export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
   if (!isDatabaseConfigured()) return [];
+  const db = getPrisma();
+
+  // 1) isPopular=true 우선 조회. DB 에 컬럼이 없는 배포 직후 환경은 catch 로 폴백.
   try {
-    const db = getPrisma();
-    const rows = await db.media.findMany({
+    const popular = await db.media.findMany({
+      where: { isActive: true, isPopular: true },
+      include: catalogInclude,
+    });
+    if (popular.length > 0) {
+      const sorted = [...popular].sort((a, b) => {
+        const ao = a.popularOrder ?? 9999;
+        const bo = b.popularOrder ?? 9999;
+        if (ao !== bo) return ao - bo;
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      });
+      return sorted.slice(0, max).map(prismaMediaToMediaItem);
+    }
+  } catch (e) {
+    console.warn(
+      "[fetchHomePopularMedia] isPopular query failed (column may be missing before migration)",
+      e instanceof Error ? e.message : e,
+    );
+  }
+
+  // 2) 폴백: 가장 최근 업데이트된 매체
+  try {
+    const fallback = await db.media.findMany({
       where: { isActive: true },
       orderBy: [{ updatedAt: "desc" }],
       take: max,
       include: catalogInclude,
     });
-    return rows.map(prismaMediaToMediaItem);
+    return fallback.map(prismaMediaToMediaItem);
   } catch {
     return [];
   }

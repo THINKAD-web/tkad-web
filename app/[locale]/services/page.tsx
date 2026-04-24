@@ -11,12 +11,16 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Award,
   BarChart3,
-  Check,
   ClipboardList,
+  HeadphonesIcon,
   Lightbulb,
   MapPinned,
   Radio,
+  ShieldCheck,
+  TrendingUp,
+  type LucideIcon,
 } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { AnimatedCard } from "@/components/animated-card";
@@ -58,11 +62,11 @@ export default async function ServicesPage({ params }: Props) {
     { label: "5", title: t("step5Title"), body: t("step5Body") },
   ];
 
-  const differentiators = [
-    t("diff1"),
-    t("diff2"),
-    t("diff3"),
-    t("diff4"),
+  const differentiators: { icon: LucideIcon; text: string }[] = [
+    { icon: ShieldCheck, text: t("diff1") },
+    { icon: TrendingUp, text: t("diff2") },
+    { icon: Award, text: t("diff3") },
+    { icon: HeadphonesIcon, text: t("diff4") },
   ];
 
   const faqItems = [
@@ -200,12 +204,18 @@ export default async function ServicesPage({ params }: Props) {
               className="mb-10"
             />
             <ul className="grid gap-5 sm:grid-cols-2">
-              {differentiators.map((line) => (
-                <li key={line} className="flex gap-3 text-sm leading-relaxed sm:text-base">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold/15 text-navy">
-                    <Check className="h-3.5 w-3.5 text-gold" strokeWidth={2.5} />
+              {differentiators.map(({ icon: Icon, text }) => (
+                <li
+                  key={text}
+                  className="flex gap-3 text-sm leading-relaxed sm:text-base"
+                >
+                  <span
+                    className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold/18 to-gold/6 text-gold-dark ring-1 ring-gold/25"
+                    aria-hidden
+                  >
+                    <Icon className="h-4 w-4" strokeWidth={1.75} />
                   </span>
-                  <span className="text-muted-foreground">{line}</span>
+                  <span className="pt-1 text-muted-foreground">{text}</span>
                 </li>
               ))}
             </ul>

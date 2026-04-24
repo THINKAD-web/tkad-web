@@ -529,7 +529,7 @@ function AiResultCard({
             compact && "text-center",
           )}
         >
-          {isKo ? m.name : m.nameEn}
+          {isKo ? m.name : (m.nameEn || m.name)}
         </CardTitle>
       </CardHeader>
       <CardContent

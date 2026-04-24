@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Pretendard — 한글·영문 공통 본문 (jsDelivr CDN, subset woff2) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
 /* THINKAD 2025 — Primary #0D1B2E · Accent #C8913C · Silver #B0B8C4 · Page #D6D9E6 · CTA #9B3C31 */
 @theme inline {
   --color-background: var(--background);
@@ -20,25 +23,82 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /* Navy 스케일 (Primary) */
+  --color-navy-50: #eef1f6;
+  --color-navy-100: #d3d9e5;
+  --color-navy-200: #a8b4c9;
+  --color-navy-300: #7684a0;
+  --color-navy-400: #4c5a75;
+  --color-navy-500: #2c3a54;
+  --color-navy-600: #1e3a5f;
   --color-navy: #0d1b2e;
   --color-navy-light: #1e3a5f;
   --color-navy-dark: #0a1420;
+  --color-navy-700: #0d1b2e;
+  --color-navy-800: #0a1420;
+  --color-navy-900: #050a14;
+
+  /* Gold 스케일 (Accent) */
+  --color-gold-50: #fdf6e7;
+  --color-gold-100: #f8e7c2;
+  --color-gold-200: #f0cd85;
+  --color-gold-300: #e5b35a;
+  --color-gold-400: #d49e44;
   --color-gold: #c8913c;
   --color-gold-light: #e0a85f;
   --color-gold-dark: #a67524;
+  --color-gold-500: #c8913c;
+  --color-gold-600: #a67524;
+  --color-gold-700: #7e5818;
+  --color-gold-800: #573c10;
+  --color-gold-900: #2e2008;
+
+  /* Silver / Neutral 스케일 */
+  --color-silver-50: #f6f7f9;
+  --color-silver-100: #e4e7f0;
+  --color-silver-200: #c1c7d4;
   --color-silver: #b0b8c4;
+  --color-silver-300: #b0b8c4;
+  --color-silver-400: #8a94a3;
+  --color-silver-500: #5a6372;
+  --color-silver-600: #3d4656;
+  --color-silver-700: #262c39;
+  --color-silver-800: #151922;
+  --color-silver-900: #0a0d14;
+
   --color-cta: #9b3c31;
   --color-cta-hover: #85342a;
   --color-page: #ffffff;
   --color-brand-dark: #0a1420;
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Semantic status (신규) */
+  --color-success: #10b981;
+  --color-success-soft: #ecfdf5;
+  --color-warning: #f59e0b;
+  --color-warning-soft: #fffbeb;
+  --color-info: #3b82f6;
+  --color-info-soft: #eff6ff;
+
+  /* Font — Pretendard Variable → Geist 폴백 → 시스템 */
+  --font-sans: "Pretendard Variable", var(--font-geist-sans),
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard,
+    "Malgun Gothic", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
+    monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 12px);
+  --radius-full: 9999px;
+
+  /* Elevation 스케일 (일관된 그림자) */
+  --shadow-xs: 0 1px 2px rgba(13, 27, 46, 0.04);
+  --shadow-sm: 0 2px 8px rgba(13, 27, 46, 0.06);
+  --shadow-md: 0 4px 16px rgba(13, 27, 46, 0.08);
+  --shadow-lg: 0 12px 32px rgba(13, 27, 46, 0.12);
+  --shadow-xl: 0 24px 56px rgba(13, 27, 46, 0.16);
 }
 
 :root {
@@ -63,10 +123,32 @@
   --cta-hover: #85342a;
 }
 
+/* Dark mode tokens (next-themes 가 html.dark 클래스 토글 시 적용) */
+.dark {
+  --background: #0a0d14;
+  --foreground: #f5f6fa;
+  --card: #151922;
+  --card-foreground: #f5f6fa;
+  --primary: #e0a85f;
+  --primary-foreground: #0a1420;
+  --secondary: #1e232e;
+  --secondary-foreground: #f5f6fa;
+  --accent: #e0a85f;
+  --accent-foreground: #0a1420;
+  --muted: #1a1f29;
+  --muted-foreground: #a3adbb;
+  --destructive: #ef4444;
+  --border: #262c39;
+  --input: #262c39;
+  --ring: #e0a85f;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* Pretendard Variable 이 선두 — 한글·영문 모두 동일 톤 */
+  font-family: var(--font-sans);
+  font-feature-settings: "ss06", "tnum"; /* Pretendard 공식 권장 */
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -665,4 +747,129 @@ select:focus-visible {
 }
 .stat-divider:last-child::after {
   display: none;
+}
+
+/* ── Ken Burns (slow zoom + pan) for hero ── */
+.kb {
+  transform-origin: center;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes kb-center {
+    0% { transform: scale(1.08) translate(0, 0); }
+    100% { transform: scale(1.16) translate(0, -1.5%); }
+  }
+  @keyframes kb-tl {
+    0% { transform: scale(1.08) translate(-1%, -1%); }
+    100% { transform: scale(1.18) translate(-2.5%, -2.2%); }
+  }
+  @keyframes kb-tr {
+    0% { transform: scale(1.08) translate(1%, -1%); }
+    100% { transform: scale(1.18) translate(2.5%, -2.2%); }
+  }
+  @keyframes kb-bl {
+    0% { transform: scale(1.08) translate(-1%, 1%); }
+    100% { transform: scale(1.18) translate(-2.5%, 2.2%); }
+  }
+  @keyframes kb-br {
+    0% { transform: scale(1.08) translate(1%, 1%); }
+    100% { transform: scale(1.18) translate(2.5%, 2.2%); }
+  }
+  .kb-center { animation: kb-center 14s ease-out both; transform-origin: center; }
+  .kb-tl { animation: kb-tl 14s ease-out both; transform-origin: top left; }
+  .kb-tr { animation: kb-tr 14s ease-out both; transform-origin: top right; }
+  .kb-bl { animation: kb-bl 14s ease-out both; transform-origin: bottom left; }
+  .kb-br { animation: kb-br 14s ease-out both; transform-origin: bottom right; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Micro-interactions (PR-I) — GPU 가속(transform/opacity) 만 사용
+   prefers-reduced-motion 시 모두 비활성
+   ───────────────────────────────────────────────────────────── */
+
+/* 모바일 가로 스크롤 방지 — 루트에서 보장 */
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 기본 버튼 탭 피드백 (button / [role=button] 공통) */
+@media (prefers-reduced-motion: no-preference) {
+  button, [role="button"], a.btn {
+    transition: transform 180ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  button:active, [role="button"]:active, a.btn:active {
+    transform: scale(0.98);
+  }
+}
+
+/* 폼 input focus ring 강화 */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(200, 145, 60, 0.25);
+  border-color: var(--gold);
+}
+
+/* 링크 underline slide-in (좌→우) — .link-underline-grow 클래스에 적용 */
+.link-underline-grow {
+  position: relative;
+  display: inline-flex;
+}
+.link-underline-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1.5px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 250ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .link-underline-grow:hover::after,
+  .link-underline-grow:focus-visible::after {
+    transform: scaleX(1);
+  }
+}
+
+/* 포커스 링 통일 — 접근성 강화 */
+*:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 이미지 드래그 방지 (원치 않는 ghost) */
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* min-width: 0 가드 — flex child text overflow 처리 */
+.truncate-child > * {
+  min-width: 0;
+}
+
+/* Safe area inset 지원 (notch iOS) */
+@supports (padding: max(0px)) {
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+/* prefers-reduced-motion: 전역 감속 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

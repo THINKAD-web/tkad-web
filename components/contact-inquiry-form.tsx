@@ -100,7 +100,7 @@ export default function ContactInquiryForm() {
 
     const applySnippet = (refMedia: MediaItem) => {
       mediaPrefillDone.current = true;
-      const title = isKo ? refMedia.name : refMedia.nameEn;
+      const title = isKo ? refMedia.name : (refMedia.nameEn || refMedia.name);
       const snippet = isKo
         ? `매체 "${title}" (ID ${refMedia.id}) 관련 문의드립니다.\n`
         : `Inquiry regarding media "${title}" (ID ${refMedia.id}).\n`;

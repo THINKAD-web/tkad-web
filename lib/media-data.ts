@@ -221,6 +221,34 @@ export function getMediaDetailGalleryUrls(m: MediaItem): string[] {
   return dedupeImageUrls(m.sampleImages ?? []);
 }
 
+/**
+ * 로케일별 매체 텍스트 선택 — EN 이 비어 있으면 KO 로 폴백.
+ * 매체·상세·카탈로그·지도 등 모든 리스팅에서 일관되게 쓰도록 제공.
+ */
+export function mediaLocalizedText(
+  ko: string | null | undefined,
+  en: string | null | undefined,
+  locale: string,
+): string {
+  const isKo = locale.toLowerCase().startsWith("ko");
+  if (isKo) return (ko ?? "").trim() || (en ?? "").trim();
+  return (en ?? "").trim() || (ko ?? "").trim();
+}
+
+export function mediaLocalizedName(
+  m: Pick<MediaItem, "name" | "nameEn">,
+  locale: string,
+): string {
+  return mediaLocalizedText(m.name, m.nameEn, locale);
+}
+
+export function mediaLocalizedLocation(
+  m: Pick<MediaItem, "location" | "locationEn">,
+  locale: string,
+): string {
+  return mediaLocalizedText(m.location, m.locationEn, locale);
+}
+
 export function latLngToFallbackPercent(lat: number, lng: number): { x: number; y: number } {
   const latMin = 33.2;
   const latMax = 38.6;

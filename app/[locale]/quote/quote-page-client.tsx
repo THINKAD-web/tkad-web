@@ -364,7 +364,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         : priceOpt
           ? catalogPriceFieldToPriceMan(priceOpt.price)
           : catalogPriceFieldToPriceMan(m.price);
-      const baseName = (isKo ? m.name : m.nameEn) || m.name;
+      const baseName = (isKo ? m.name : (m.nameEn || m.name)) || m.name;
       let name = baseName;
       if (isNw && units) {
         name = `${baseName} (${units}${isKo ? "개소" : " sites"})`;
@@ -378,7 +378,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               ? "지역: 전체"
               : "Regions: all"
             : opt.regionScope
-          : (isKo ? m.location : m.locationEn) || m.location;
+          : (isKo ? m.location : (m.locationEn || m.location)) || m.location;
       return {
         id: m.id,
         thumbUrl: getPrimaryMediaImageUrl(m),
@@ -1117,7 +1117,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                         ) : null}
                                       </div>
                                       <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug text-navy sm:line-clamp-1 sm:text-sm sm:leading-relaxed">
-                                        {isKo ? media.name : media.nameEn}
+                                        {isKo ? media.name : (media.nameEn || media.name)}
                                       </p>
                                       <p className="flex min-w-0 items-start gap-0.5 text-[10px] leading-snug text-muted-foreground sm:items-center sm:text-[11px] sm:leading-relaxed">
                                         <MapPin className="mt-0.5 h-2.5 w-2.5 shrink-0 sm:mt-0 sm:h-3 sm:w-3" />

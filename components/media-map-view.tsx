@@ -309,7 +309,7 @@ export function MediaMapView({
                           </Badge>
                         </div>
                         <CardTitle className="text-sm font-bold leading-snug text-navy">
-                          {isKo ? media.name : media.nameEn}
+                          {isKo ? media.name : (media.nameEn || media.name)}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="pt-0 px-3 pb-3">
@@ -334,7 +334,7 @@ export function MediaMapView({
                           <ShareButtons
                             compact
                             url={`/${locale}${mediaItemDetailPath(media.id)}`}
-                            title={isKo ? media.name : media.nameEn}
+                            title={isKo ? media.name : (media.nameEn || media.name)}
                             description={`${formatMediaLocationShort(media, isKo)} - ${formatMediaPriceWonWithSymbol(media.price)} · ${tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}`}
                             locale={locale}
                           />

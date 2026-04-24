@@ -118,7 +118,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           </Badge>
         </div>
         <CardTitle className="line-clamp-2 min-w-0 break-words text-[13px] leading-snug sm:text-sm">
-          {isKo ? media.name : media.nameEn}
+          {isKo ? media.name : (media.nameEn || media.name)}
         </CardTitle>
       </CardHeader>
       <CardContent className="relative z-0 min-w-0 space-y-1.5 px-3 pb-2.5 pt-0 sm:px-4 sm:pb-3">
@@ -150,7 +150,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
     return (
       <Link
         href={mediaItemDetailPath(media.id)}
-        aria-label={isKo ? media.name : media.nameEn}
+        aria-label={isKo ? media.name : (media.nameEn || media.name)}
         className={wrapClass}
       >
         <Card className={mediaCatalogGridCardShellClass}>{body}</Card>

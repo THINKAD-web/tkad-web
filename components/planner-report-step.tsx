@@ -334,7 +334,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           ageText: props.ageText,
           industryText: props.industryText,
           mediaList: props.portfolio.map((m) => ({
-            name: props.isKo ? m.name : m.nameEn,
+            name: props.isKo ? m.name : (m.nameEn || m.name),
             price: m.price,
             location: m.location,
           })),
@@ -378,7 +378,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <div className="space-y-2 text-center">
         <h2 className="text-lg font-bold text-navy sm:text-xl">
           {t("stepReportTitle")}
@@ -612,7 +612,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           ageText: props.ageText,
           industryText: props.industryText,
           mediaList: props.portfolio.map((m) => ({
-            name: props.isKo ? m.name : m.nameEn,
+            name: props.isKo ? m.name : (m.nameEn || m.name),
             price: m.price,
             location: m.location,
           })),

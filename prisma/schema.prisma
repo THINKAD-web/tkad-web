@@ -133,6 +133,11 @@ model Media {
   /// 홈 추천 정렬: 오름차순, null은 뒤로
   featuredOrder Int?    @map("featured_order")
 
+  /// 홈 인기 매체 영역 — `fetchHomePopularMedia`가 `isPopular=true` 우선 조회 (추천과 독립)
+  isPopular     Boolean @default(false) @map("is_popular")
+  /// 홈 인기 정렬: 오름차순, null은 뒤로
+  popularOrder  Int?    @map("popular_order")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -144,6 +149,7 @@ model Media {
   networkLocations MediaNetworkLocation[]
 
   @@index([isFeatured, featuredOrder])
+  @@index([isPopular, popularOrder])
   @@map("media")
 }
 

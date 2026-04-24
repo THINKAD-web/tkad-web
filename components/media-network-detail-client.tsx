@@ -253,7 +253,7 @@ export default function MediaNetworkDetailClient({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={heroImg}
-                alt={isKo ? data.name : data.nameEn ?? data.name}
+                alt={isKo ? data.name : (data.nameEn || data.name) ?? data.name}
                 className="mx-auto max-h-full w-auto max-w-full object-contain"
               />
             </div>
@@ -262,7 +262,7 @@ export default function MediaNetworkDetailClient({
           <div className="mx-auto grid w-full max-w-4xl gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.3fr)] lg:items-end">
             <div className="min-w-0 space-y-3 text-white">
               <h1 className="break-words text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
-                {isKo ? data.name : data.nameEn ?? data.name}
+                {isKo ? data.name : (data.nameEn || data.name) ?? data.name}
               </h1>
               <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-200 sm:text-base">
                 <span className="inline-flex items-center gap-2">

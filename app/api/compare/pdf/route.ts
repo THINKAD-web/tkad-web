@@ -22,8 +22,8 @@ function parseIds(raw: string | null): string[] {
 
 function mediaToPdfRow(m: MediaItem, isKo: boolean): ComparePdfMediaRow {
   return {
-    name: (isKo ? m.name : m.nameEn) || m.name,
-    location: (isKo ? m.location : m.locationEn) || m.location,
+    name: (isKo ? m.name : (m.nameEn || m.name)) || m.name,
+    location: (isKo ? m.location : (m.locationEn || m.location)) || m.location,
     price: m.price,
     size: m.size || "—",
     resolution: m.resolution || "—",

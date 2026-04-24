@@ -21,6 +21,7 @@ import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { QuotePdfPreview } from "@/components/quote-pdf-preview";
 import {
   Calculator,
+  Camera,
   Loader2,
   Search,
   Percent,
@@ -264,7 +265,7 @@ export default function AdminQuoteNewClient() {
       const qty = quantities[id] ?? 1;
       list.push({
         mediaId: m.id,
-        mediaName: isKo ? m.name : m.nameEn || m.name,
+        mediaName: isKo ? m.name : (m.nameEn || m.name) || m.name,
         spec: mediaSpecLine(m),
         period: campaignPeriodLabel,
         unitPrice: catalogPriceFieldToWon(m.price),
@@ -909,29 +910,57 @@ export default function AdminQuoteNewClient() {
       {showPreview && selected.size > 0 && days > 0 && (
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="text-lg text-navy">견적서 미리보기</CardTitle>
-              <button
-                onClick={async () => {
-                  try {
-                    const el = document.getElementById("quote-preview");
-                    if (!el) return;
-                    const { downloadPdfFromHtmlElement } = await import(
-                      "@/lib/html-to-pdf"
-                    );
-                    await downloadPdfFromHtmlElement(el, `quote-${quoteNumber}.pdf`);
-                  } catch (e) {
-                    console.error("[admin-quote-new] PDF download failed", e);
-                    window.alert(
-                      `PDF 생성 실패\n${e instanceof Error ? e.message : String(e)}`,
-                    );
-                  }
-                }}
-                className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
-              >
-                <Download className="h-4 w-4" />
-                PDF 저장
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const el = document.getElementById("quote-preview");
+                      if (!el) return;
+                      const { captureElementAsPng } = await import(
+                        "@/lib/html-to-pdf"
+                      );
+                      await captureElementAsPng(el, `quote-${quoteNumber}.png`);
+                    } catch (e) {
+                      console.error("[admin-quote-new] PNG capture failed", e);
+                      window.alert(
+                        `이미지 캡처 실패\n${e instanceof Error ? e.message : String(e)}`,
+                      );
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
+                >
+                  <Camera className="h-4 w-4" />
+                  이미지 캡처
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const el = document.getElementById("quote-preview");
+                      if (!el) return;
+                      const { downloadPdfFromHtmlElement } = await import(
+                        "@/lib/html-to-pdf"
+                      );
+                      await downloadPdfFromHtmlElement(
+                        el,
+                        `quote-${quoteNumber}.pdf`,
+                      );
+                    } catch (e) {
+                      console.error("[admin-quote-new] PDF download failed", e);
+                      window.alert(
+                        `PDF 생성 실패\n${e instanceof Error ? e.message : String(e)}`,
+                      );
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
+                >
+                  <Download className="h-4 w-4" />
+                  PDF 저장
+                </button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>

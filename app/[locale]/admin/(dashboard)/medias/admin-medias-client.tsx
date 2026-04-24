@@ -30,6 +30,7 @@ import {
   Loader2,
   AlertCircle,
   Star,
+  Flame,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
@@ -789,7 +790,12 @@ export default function AdminMediasClient({
   const patchFeaturedFields = useCallback(
     async (
       m: AdminMediaDto,
-      patch: { isFeatured?: boolean; featuredOrder?: number | null },
+      patch: {
+        isFeatured?: boolean;
+        featuredOrder?: number | null;
+        isPopular?: boolean;
+        popularOrder?: number | null;
+      },
     ) => {
       listFetchGenRef.current += 1;
       try {
@@ -1183,6 +1189,8 @@ export default function AdminMediasClient({
                     <th className="px-4 py-3 text-center">상태</th>
                     <th className="px-4 py-3 text-center">추천</th>
                     <th className="px-4 py-3 text-center w-[5.5rem]">순서</th>
+                    <th className="px-4 py-3 text-center">인기</th>
+                    <th className="px-4 py-3 text-center w-[5.5rem]">순서</th>
                     <th className="px-4 py-3 text-center">관리</th>
                   </tr>
                 </thead>
@@ -1310,6 +1318,61 @@ export default function AdminMediasClient({
                               if (!Number.isFinite(n)) return;
                               void patchFeaturedFields(media, {
                                 featuredOrder: n,
+                              });
+                            }}
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            type="button"
+                            title={
+                              media.isPopular
+                                ? "인기 해제"
+                                : "홈 인기 매체로 지정"
+                            }
+                            onClick={() =>
+                              void patchFeaturedFields(media, {
+                                isPopular: !media.isPopular,
+                              })
+                            }
+                            className="inline-flex touch-manipulation rounded-full p-1.5 transition-colors hover:bg-rose-50"
+                          >
+                            <Flame
+                              className={`h-5 w-5 ${
+                                media.isPopular
+                                  ? "fill-rose-400 text-rose-500"
+                                  : "text-slate-300"
+                              }`}
+                            />
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Input
+                            key={`po-${media.id}-${media.popularOrder ?? "n"}`}
+                            type="number"
+                            min={1}
+                            max={99}
+                            placeholder="—"
+                            disabled={!media.isPopular}
+                            defaultValue={
+                              media.popularOrder != null
+                                ? String(media.popularOrder)
+                                : ""
+                            }
+                            className="mx-auto h-8 w-14 text-center text-xs disabled:opacity-40"
+                            onBlur={(e) => {
+                              if (!media.isPopular) return;
+                              const raw = e.target.value.trim();
+                              if (!raw) {
+                                void patchFeaturedFields(media, {
+                                  popularOrder: null,
+                                });
+                                return;
+                              }
+                              const n = parseInt(raw, 10);
+                              if (!Number.isFinite(n)) return;
+                              void patchFeaturedFields(media, {
+                                popularOrder: n,
                               });
                             }}
                           />
