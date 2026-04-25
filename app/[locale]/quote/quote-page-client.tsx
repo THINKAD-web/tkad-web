@@ -90,6 +90,7 @@ import { QuotePeriodStep } from "@/components/quote/period-step";
 import { QuoteCreativeStep } from "@/components/quote/creative-step";
 import { QuoteCustomerForm } from "@/components/quote/customer-form";
 import type { QuoteCustomerInfo } from "@/lib/quote/types";
+import { usePlannerStore } from "@/lib/planner/store";
 import {
   computeQuoteTotals,
   inclusiveCampaignDays,
@@ -516,12 +517,18 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const pdfPreviewRef = useRef<HTMLDivElement>(null);
   const quoteFloatingStashRef = useRef<MediaItem[]>([]);
 
+  // PR-7: composite 모드 + Planner 합성 결과를 PDF 행에 동봉.
+  const creativeMode = useQuoteStore((s) => s.creativeMode);
+  const plannerLogoUrl = usePlannerStore((s) => s.creativeUploadedUrl);
+  const plannerPlacements = usePlannerStore((s) => s.mediaPlacements);
+
   const pdfPreviewRows = useMemo(() => {
     // quoteTotals 가 있으면 라인별 lineKrw 를 만원 환산해 사용 → 합계와 100% 일치.
     // 없으면 legacy `monthly × periodMonths` 폴백.
     const totalsLineMap = new Map<string, number>(
       quoteTotals?.lines.map((l) => [l.mediaId, l.lineKrw]) ?? [],
     );
+    const showComposite = creativeMode === "composite" && Boolean(plannerLogoUrl);
     return selectedMedia.map((m) => {
       const isNw = m.catalogSource === "network";
       const opt = networkQuoteOptions[m.id];
@@ -553,6 +560,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               : "Regions: all"
             : opt.regionScope
           : (isKo ? m.location : (m.locationEn || m.location)) || m.location;
+      const placement = plannerPlacements[m.id];
+      const compositeLogo =
+        showComposite && plannerLogoUrl && placement
+          ? { url: plannerLogoUrl, placement }
+          : undefined;
       return {
         id: m.id,
         thumbUrl: getPrimaryMediaImageUrl(m),
@@ -563,6 +575,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         size: m.size ?? undefined,
         dailyFootTraffic: m.dailyFootTraffic ?? undefined,
         operatingHours: m.operatingHours ?? undefined,
+        compositeLogo,
       };
     });
   }, [
@@ -572,7 +585,18 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     isKo,
     periodMonths,
     quoteTotals,
+    creativeMode,
+    plannerLogoUrl,
+    plannerPlacements,
   ]);
+
+  // PDF 할인 라인용 — quoteTotals 가 없으면 0 반환(legacy 경로는 할인 없음).
+  const pdfDiscountMan = useMemo(() => {
+    if (!quoteTotals) return 0;
+    return Math.round(
+      (quoteTotals.subtotalKrw - quoteTotals.discountedKrw) / 10_000,
+    );
+  }, [quoteTotals]);
 
   // PDF 출력은 만원 단위. dates 가 있으면 quoteTotals 의 vat/total 을 환산, 없으면 legacy 식.
   const pdfVatMan = useMemo(
@@ -1520,35 +1544,78 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   )}
 
                   {step === 3 && (
-                    <div className="space-y-8">
-                      <QuoteCreativeStep selectedMedia={selectedMedia} />
+                    <QuoteCreativeStep selectedMedia={selectedMedia} />
+                  )}
 
-                      {/* PDF 견적서 옵션 — 템플릿 + 헤더 로고. 추후 별도 PR 에서 step 4 로 이전 가능. */}
-                      <details className="group rounded-xl border border-navy/10 bg-slate-50/60 p-4">
-                        <summary className="cursor-pointer text-sm font-semibold text-navy">
+                  {step === 4 && !submitted && (
+                    <div className="space-y-6">
+                      {selectedMedia.length > 0 ? (
+                        <div className="space-y-2">
+                          <h3 className="text-sm font-semibold text-navy">
+                            {t("quote.pdfPreviewTitle")}
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            {t("quote.pdfPreviewHint")}
+                          </p>
+                          <div className="overflow-x-auto rounded-xl border border-navy/10 bg-slate-100/90 p-4 md:p-6">
+                            <div className="mx-auto w-fit max-w-full">
+                              <QuotePdfPreview
+                                ref={pdfPreviewRef}
+                                template={template}
+                                customerLogoSrc={logoDataUrl}
+                                company={customer.company}
+                                contactName={customer.name}
+                                contactPhone={customer.phone}
+                                contactEmail={customer.email}
+                                periodLabel={periodLabel}
+                                periodMonths={periodMonths}
+                                rows={pdfPreviewRows}
+                                subtotalMan={
+                                  quoteTotals
+                                    ? Math.round(
+                                        quoteTotals.subtotalKrw / 10_000,
+                                      )
+                                    : Math.round(totalCost)
+                                }
+                                discountMan={pdfDiscountMan}
+                                discountLabel={
+                                  quoteTotals?.discount.label || undefined
+                                }
+                                vatMan={Math.round(pdfVatMan)}
+                                grandTotalMan={Math.round(pdfGrandTotalMan)}
+                                issuedAt={quoteIssuedAt}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {/* PDF 옵션: 템플릿 + 로고. 미리보기 위 / 요약 사이. */}
+                      <div className="rounded-xl border border-navy/10 bg-white p-4">
+                        <p className="mb-3 text-sm font-semibold text-navy">
                           {t("quote.pdfOptionsTitle")}
-                        </summary>
-                        <div className="mt-4 space-y-6">
+                        </p>
+                        <div className="space-y-5">
                           <div>
-                            <p className="mb-3 text-sm text-muted-foreground">
+                            <p className="mb-2 text-xs text-muted-foreground">
                               {t("quote.templateDesc")}
                             </p>
-                            <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="grid gap-3 sm:grid-cols-2">
                               <button
                                 type="button"
                                 onClick={() => setTemplate("default")}
                                 className={cn(
-                                  "rounded-xl border-2 p-4 text-left transition-all",
+                                  "rounded-xl border-2 p-3 text-left transition-all",
                                   template === "default"
                                     ? "border-gold bg-gold/5 ring-2 ring-gold/20"
                                     : "border-navy/10 hover:border-navy/25",
                                 )}
                               >
-                                <LayoutTemplate className="mb-2 h-8 w-8 text-navy" />
-                                <p className="font-bold text-navy">
+                                <LayoutTemplate className="mb-1.5 h-6 w-6 text-navy" />
+                                <p className="text-sm font-bold text-navy">
                                   {t("quote.templateDefault")}
                                 </p>
-                                <p className="mt-1 text-xs text-muted-foreground">
+                                <p className="mt-0.5 text-xs text-muted-foreground">
                                   {t("quote.templateDefaultDesc")}
                                 </p>
                               </button>
@@ -1556,24 +1623,24 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 type="button"
                                 onClick={() => setTemplate("premium")}
                                 className={cn(
-                                  "rounded-xl border-2 p-4 text-left transition-all",
+                                  "rounded-xl border-2 p-3 text-left transition-all",
                                   template === "premium"
                                     ? "border-gold bg-gold/5 ring-2 ring-gold/20"
                                     : "border-navy/10 hover:border-navy/25",
                                 )}
                               >
-                                <Sparkles className="mb-2 h-8 w-8 text-gold-dark" />
-                                <p className="font-bold text-navy">
+                                <Sparkles className="mb-1.5 h-6 w-6 text-gold-dark" />
+                                <p className="text-sm font-bold text-navy">
                                   {t("quote.templatePremium")}
                                 </p>
-                                <p className="mt-1 text-xs text-muted-foreground">
+                                <p className="mt-0.5 text-xs text-muted-foreground">
                                   {t("quote.templatePremiumDesc")}
                                 </p>
                               </button>
                             </div>
                           </div>
                           <div>
-                            <label className="mb-2 block text-sm font-semibold text-navy">
+                            <label className="mb-1.5 block text-sm font-semibold text-navy">
                               {t("quote.logoLabel")}
                             </label>
                             <p className="mb-2 text-xs text-muted-foreground">
@@ -1603,53 +1670,18 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               ) : null}
                             </div>
                             {logoDataUrl ? (
-                              <div className="mt-4 inline-block rounded-lg border border-navy/10 bg-slate-50 p-3">
+                              <div className="mt-3 inline-block rounded-lg border border-navy/10 bg-slate-50 p-2">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                   src={logoDataUrl}
                                   alt={t("quote.logoPreviewAlt")}
-                                  className="max-h-24 max-w-[200px] object-contain"
+                                  className="max-h-20 max-w-[180px] object-contain"
                                 />
                               </div>
                             ) : null}
                           </div>
                         </div>
-                      </details>
-                    </div>
-                  )}
-
-                  {step === 4 && !submitted && (
-                    <div className="space-y-6">
-                      {selectedMedia.length > 0 ? (
-                        <div className="space-y-2">
-                          <h3 className="text-sm font-semibold text-navy">
-                            {t("quote.pdfPreviewTitle")}
-                          </h3>
-                          <p className="text-xs text-muted-foreground">
-                            {t("quote.pdfPreviewHint")}
-                          </p>
-                          <div className="overflow-x-auto rounded-xl border border-navy/10 bg-slate-100/90 p-4 md:p-6">
-                            <div className="mx-auto w-fit max-w-full">
-                              <QuotePdfPreview
-                                ref={pdfPreviewRef}
-                                template={template}
-                                customerLogoSrc={logoDataUrl}
-                                company={customer.company}
-                                contactName={customer.name}
-                                contactPhone={customer.phone}
-                                contactEmail={customer.email}
-                                periodLabel={periodLabel}
-                                periodMonths={periodMonths}
-                                rows={pdfPreviewRows}
-                                subtotalMan={Math.round(totalCost)}
-                                vatMan={Math.round(pdfVatMan)}
-                                grandTotalMan={Math.round(pdfGrandTotalMan)}
-                                issuedAt={quoteIssuedAt}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
+                      </div>
 
                       <div className="rounded-xl border border-navy/10 bg-slate-50/80 p-4 text-sm">
                         <p className="font-semibold text-navy">

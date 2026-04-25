@@ -4,6 +4,10 @@ import { forwardRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
 import { cn } from "@/lib/utils";
+import {
+  CompositePreview,
+  type CompositeLogoPlacement,
+} from "@/components/planner/composite-preview";
 
 export type QuotePdfPreviewRow = {
   id: string;
@@ -17,6 +21,14 @@ export type QuotePdfPreviewRow = {
   dailyFootTraffic?: number | null;
   visibilityScore?: number | null;
   operatingHours?: string | null;
+  /**
+   * Planner composite 결과 — `creativeMode === "composite"` 일 때 매체별 합성 로고를
+   * thumbnail 위에 오버레이해 PDF 출력에 그대로 노출한다. 없으면 평면 thumbUrl 만 사용.
+   */
+  compositeLogo?: {
+    url: string;
+    placement: CompositeLogoPlacement;
+  };
 };
 
 type Props = {
@@ -31,6 +43,10 @@ type Props = {
   periodMonths: number;
   rows: QuotePdfPreviewRow[];
   subtotalMan: number;
+  /** 할인 금액(만원). 0 이면 할인 라인 미표시. */
+  discountMan?: number;
+  /** 할인 정책 라벨(예: "30일 이상 장기 할인"). */
+  discountLabel?: string;
   vatMan: number;
   grandTotalMan: number;
   issuedAt: Date;
@@ -55,6 +71,8 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
       periodMonths,
       rows,
       subtotalMan,
+      discountMan,
+      discountLabel,
       vatMan,
       grandTotalMan,
       issuedAt,
@@ -213,7 +231,17 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   <tr key={row.id} className={cn("border-b border-slate-100 align-top", idx % 2 === 0 ? "bg-white" : "bg-slate-50/50")}>
                     <td className="px-1.5 py-2">
                       <div className="h-12 w-12 overflow-hidden rounded border border-slate-100 bg-slate-50">
-                        {row.thumbUrl ? (
+                        {row.compositeLogo && row.thumbUrl ? (
+                          <CompositePreview
+                            mediaImageUrl={row.thumbUrl}
+                            mediaName={row.name}
+                            logoUrl={row.compositeLogo.url}
+                            placement={row.compositeLogo.placement}
+                            editable={false}
+                            compact
+                            className="h-full w-full"
+                          />
+                        ) : row.thumbUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={row.thumbUrl}
@@ -254,13 +282,23 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
         </section>
 
         <section className="mt-8 flex justify-end">
-          <div className="w-full max-w-[240px] space-y-2 text-[11px]">
+          <div className="w-full max-w-[260px] space-y-2 text-[11px]">
             <div className="flex justify-between gap-4 border-b border-slate-100 pb-1.5">
               <span className="text-slate-600">{t("pdfSupply")}</span>
               <span className="tabular-nums font-medium">
                 {formatManWon(subtotalMan, locale)}
               </span>
             </div>
+            {discountMan != null && discountMan > 0 ? (
+              <div className="flex justify-between gap-4 border-b border-slate-100 pb-1.5">
+                <span className="min-w-0 truncate text-emerald-700">
+                  {discountLabel || t("pdfDiscount")}
+                </span>
+                <span className="tabular-nums font-medium text-emerald-700">
+                  −{formatManWon(discountMan, locale)}
+                </span>
+              </div>
+            ) : null}
             <div className="flex justify-between gap-4 border-b border-slate-100 pb-1.5">
               <span className="text-slate-600">{t("pdfVat")}</span>
               <span className="tabular-nums">{formatManWon(vatMan, locale)}</span>
