@@ -401,7 +401,7 @@ export default function MediaAiRecommendPanel({
                       key={s.item.id}
                       className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
                       style={{ left: `${x}%`, top: `${y}%` }}
-                      title={isKo ? s.item.name : s.item.nameEn}
+                      title={isKo ? s.item.name : (s.item.nameEn || s.item.name)}
                     >
                       <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gold text-[10px] font-extrabold text-navy shadow-md">
                         {s.score}
@@ -418,7 +418,7 @@ export default function MediaAiRecommendPanel({
                   className="flex justify-between gap-2 text-navy"
                 >
                   <span className="truncate">
-                    {isKo ? s.item.name : s.item.nameEn}
+                    {isKo ? s.item.name : (s.item.nameEn || s.item.name)}
                   </span>
                   <span className="shrink-0 font-mono text-gold-dark">
                     {s.score}
