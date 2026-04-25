@@ -640,6 +640,10 @@ model TrendReport {
   updatedAt          DateTime  @updatedAt @map("updated_at")
   generationMethod   String    @default("manual") @map("generation_method")
   aiModel            String?   @map("ai_model")
+  /// Tavily 등 웹 검색에서 인용한 출처 [{title, url, snippet, domain, publishedAt?, trustGrade?}]
+  sources            Json?     @default("[]")
+  /// generator 가 참고한 자체 매체 DB 인사이트 라벨 ("지역별 매체 분포 TOP 5" 등)
+  internalDataUsed   String[]  @default([]) @map("internal_data_used")
 
   @@map("trend_reports")
 }

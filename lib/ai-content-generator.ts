@@ -564,20 +564,63 @@ function compactCampaignForAi(c: {
 /**
  * Generates a draft trend report for the given month (YYYY-MM) using Claude 3.5 Sonnet.
  * The model must respond via structured tool input (JSON schema).
+ *
+ * Optional `context` (PR-2): 외부 웹 출처 + 자체 매체 DB 인사이트를
+ * user 프롬프트에 주입해 LLM 내부 지식만으로 작성되는 환각·재탕을 줄임.
+ * 빈 컨텍스트면 기존 동작 유지.
  */
-export async function generateTrendReport(month: string): Promise<TrendReport> {
+export interface TrendReportGenerationContext {
+  webSources?: Array<{
+    title: string;
+    url: string;
+    snippet: string;
+    domain: string;
+    publishedAt?: string | null;
+  }>;
+  internalInsights?: Array<{ title: string; summary: string }>;
+}
+
+function buildContextSection(ctx?: TrendReportGenerationContext): string {
+  if (!ctx) return "";
+  const parts: string[] = [];
+  if (ctx.webSources && ctx.webSources.length > 0) {
+    const lines = ctx.webSources
+      .slice(0, 8)
+      .map(
+        (s, i) =>
+          `[${i + 1}] ${s.title} — ${s.snippet.slice(0, 280)} (출처: ${s.domain}${
+            s.publishedAt ? `, ${s.publishedAt}` : ""
+          })`,
+      )
+      .join("\n");
+    parts.push(`Reference web sources (cite by [n]):\n${lines}`);
+  }
+  if (ctx.internalInsights && ctx.internalInsights.length > 0) {
+    const lines = ctx.internalInsights
+      .map((i) => `- ${i.title}: ${i.summary}`)
+      .join("\n");
+    parts.push(`THINKAD internal data (use to differentiate):\n${lines}`);
+  }
+  return parts.length > 0 ? `\n\n${parts.join("\n\n")}` : "";
+}
+
+export async function generateTrendReport(
+  month: string,
+  context?: TrendReportGenerationContext,
+): Promise<TrendReport> {
   assertMonthFormat(month);
   const model = resolveModel();
   const client = getAnthropicClient();
 
   const system = withOohExpertContext(trendReportTaskGuidance(month));
 
-  const user = `Call emit_trend_report once with every required field for month ${month}.
+  const baseUser = `Call emit_trend_report once with every required field for month ${month}.
 - titleKo and optional titleEn
 - contentKo: long-form Markdown (snapshot, market, DOOH, outlook)
 - summaryKo: 3–6 bullets; marketTrendKo and doohTrendKo: 3–5 bullets each
 - verticalStrategies: 3–5 verticals (fashion, auto, F&B, etc.) with labelKo, labelEn, bulletsKo, bulletsEn
 - optional thumbnailUrl (omit or null if none)`;
+  const user = `${baseUser}${buildContextSection(context)}`;
 
   const promptStored = `SYSTEM:\n${system}\n\nUSER:\n${user}`;
 
@@ -610,6 +653,8 @@ export async function generateTrendReport(month: string): Promise<TrendReport> {
       publishedAt: null,
       generationMethod: "manual",
       aiModel: model,
+      sources: (context?.webSources ?? []) as unknown as TrendReport["sources"],
+      internalDataUsed: (context?.internalInsights ?? []).map((i) => i.title),
       ...newRowTimestamps(),
     };
 
