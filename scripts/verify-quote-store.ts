@@ -59,6 +59,14 @@ import {
   deriveLegacyPeriodMonths,
   LEGACY_PERIOD_DAYS,
 } from "@/lib/quote/period-derive";
+import {
+  isValidKoreanBusinessNumber,
+  formatKoreanBusinessNumber,
+} from "@/lib/quote/customer-schema";
+import {
+  defaultQuoteExpiresAt,
+  parseQuoteNumber,
+} from "@/lib/quote/quote-number";
 
 let failures = 0;
 
@@ -428,9 +436,33 @@ section("store action: setSelectedMediaIds cleanup + cap", () => {
   );
 });
 
-section("customer schema: 사업자등록번호 체크섬", async () => {
-  const { isValidKoreanBusinessNumber, formatKoreanBusinessNumber } =
-    await import("@/lib/quote/customer-schema");
+section("quote-number 헬퍼", () => {
+  check("정상 형식 파싱", parseQuoteNumber("Q-20260425-0001"), {
+    dateKey: "20260425",
+    seq: 1,
+  });
+  check(
+    "lowercase 도 허용",
+    parseQuoteNumber("q-20260425-9999"),
+    { dateKey: "20260425", seq: 9999 },
+  );
+  check("잘못된 prefix → null", parseQuoteNumber("Z-20260425-0001"), null);
+  check(
+    "잘못된 자릿수 → null",
+    parseQuoteNumber("Q-2026425-0001"),
+    null,
+  );
+
+  const now = new Date("2026-04-25T00:00:00Z");
+  const exp = defaultQuoteExpiresAt(now);
+  check(
+    "14일 TTL — 정확히 +14일",
+    exp.toISOString().slice(0, 10),
+    "2026-05-09",
+  );
+});
+
+section("customer schema: 사업자등록번호 체크섬", () => {
   // NAVER 220-81-62517 — 공개된 정상 번호
   check("220-81-62517 valid", isValidKoreanBusinessNumber("220-81-62517"), true);
   check("2208162517 valid (no dash)", isValidKoreanBusinessNumber("2208162517"), true);
