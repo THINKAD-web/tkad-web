@@ -43,6 +43,7 @@ import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
+import { TrafficCharts } from "@/components/media-detail/traffic-charts";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
@@ -605,6 +606,16 @@ export default async function MediaDetailPage({ params }: Props) {
           </dl>
 
           <MediaDetailPerformance metrics={performanceMetrics} />
+
+          <div className="mt-8">
+            <TrafficCharts
+              mediaType={media.type}
+              region={media.region}
+              stored={media.trafficPattern ?? null}
+              dailyFootfall={media.dailyFootTraffic ?? null}
+              isKo={isKo}
+            />
+          </div>
 
           <section
             aria-labelledby="media-detail-description-heading"

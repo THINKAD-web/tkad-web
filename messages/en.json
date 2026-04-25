@@ -1973,5 +1973,21 @@
     "ctaSubtitle": "Share budget and timing—we’ll respond quickly with direction and next steps.",
     "ctaButton": "Request a quote",
     "ctaSecondary": "Browse media"
+  },
+  "mediaDetail": {
+    "traffic": {
+      "title": "Hourly · Weekday · Monthly footfall",
+      "desc": "Key patterns driving exposure. Media without measured data show region/type-based estimates.",
+      "estimatedBadge": "Estimated",
+      "tabHourly": "Hourly",
+      "tabWeekly": "Weekday",
+      "tabMonthly": "Monthly",
+      "axisHourly": "Avg footfall / hr",
+      "axisWeekly": "Weekly footfall",
+      "axisMonthly": "Monthly footfall",
+      "insightHour": "Peak hours",
+      "insightWeekday": "Peak weekday",
+      "insightMonth": "Peak month"
+    }
   }
 }

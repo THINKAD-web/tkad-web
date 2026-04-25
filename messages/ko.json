@@ -1956,5 +1956,21 @@
     "ctaSubtitle": "예산과 일정만 알려 주셔도 맞춤 미디어 플랜과 견적 방향을 빠르게 안내해 드립니다.",
     "ctaButton": "견적 요청하기",
     "ctaSecondary": "매체 둘러보기"
+  },
+  "mediaDetail": {
+    "traffic": {
+      "title": "시간대 · 요일 · 월별 유동인구",
+      "desc": "노출 효율을 좌우하는 핵심 패턴입니다. 데이터가 없는 매체는 지역·유형 기반 추정치로 표시됩니다.",
+      "estimatedBadge": "추정치",
+      "tabHourly": "시간대",
+      "tabWeekly": "요일",
+      "tabMonthly": "월",
+      "axisHourly": "시간당 평균 유동",
+      "axisWeekly": "요일별 누적 유동",
+      "axisMonthly": "월별 누적 유동",
+      "insightHour": "피크 시간대",
+      "insightWeekday": "피크 요일",
+      "insightMonth": "피크 월"
+    }
   }
 }
