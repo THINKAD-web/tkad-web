@@ -21,9 +21,15 @@ import {
   buildCaseStudyGalleryItems,
   getAllMediaIds,
   getMediaDetailGalleryUrls,
+  getPrimaryMediaImageUrl,
   getSimilarMediaFromCatalog,
   typeLabels,
 } from "@/lib/media-data";
+import { pageAlternates } from "@/lib/seo";
+import {
+  buildMediaBreadcrumbJsonLd,
+  buildMediaPlaceJsonLd,
+} from "@/lib/structured-data";
 import {
   getAllKeywordFilterMediaIds,
   getSimilarKeywordFilterMediaItems,
@@ -74,21 +80,51 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const media = await resolveMediaForDetail(id);
   if (!media) return { title: "Media" };
-  const title =
-    locale === "ko" ? `${media.name} | THINKAD` : `${media.nameEn} | THINKAD`;
+  const isKo = locale === "ko";
+  const name = isKo ? media.name : media.nameEn || media.name;
+  const loc = isKo ? media.location : media.locationEn || media.location;
+  const title = isKo ? `${name} - ${loc} | THINKAD` : `${name} - ${loc} | THINKAD`;
   const won = media.keywordFilter
     ? Math.round(
         (media.keywordFilter.budgetMin + media.keywordFilter.budgetMax) / 2,
       )
     : media.price * 10_000;
+  const dailyFootfall = media.dailyFootTraffic;
   const description = media.keywordFilter
-    ? locale === "ko"
-      ? `${media.location} · ${media.keywordFilter.priceText}`
-      : `${media.locationEn} · ${media.keywordFilter.priceText}`
-    : locale === "ko"
-      ? `${media.location} · ${won.toLocaleString()}원`
-      : `${media.locationEn} · ₩${won.toLocaleString()}`;
-  return { title, description };
+    ? isKo
+      ? `${loc} · ${media.keywordFilter.priceText} · 일 유동 ${dailyFootfall.toLocaleString()}명`
+      : `${loc} · ${media.keywordFilter.priceText} · ${dailyFootfall.toLocaleString()} daily footfall`
+    : isKo
+      ? `${loc} 일 유동 ${dailyFootfall.toLocaleString()}명, 가시성 ${media.visibilityScore ?? 0}점. 검증된 OOH 매체로 캠페인을 시뮬레이션해 보세요. ₩${won.toLocaleString()}`
+      : `${loc} — ${dailyFootfall.toLocaleString()} daily footfall, visibility ${media.visibilityScore ?? 0}. Simulate your campaign on this verified OOH media. ₩${won.toLocaleString()}`;
+
+  const heroImage = getPrimaryMediaImageUrl(media);
+  return {
+    title,
+    description,
+    alternates: pageAlternates(locale, `/media/${media.id}`),
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: heroImage
+        ? [
+            {
+              url: heroImage,
+              width: 1200,
+              height: 630,
+              alt: name,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: heroImage ? [heroImage] : undefined,
+    },
+  };
 }
 
 export default async function MediaDetailPage({ params }: Props) {
@@ -170,9 +206,20 @@ export default async function MediaDetailPage({ params }: Props) {
     return desc ?? "";
   })();
 
+  const placeJsonLd = buildMediaPlaceJsonLd(media, locale);
+  const breadcrumbJsonLd = buildMediaBreadcrumbJsonLd(media, locale);
+
   return (
     <>
       <TrackMediaView mediaId={media.id} />
+      <script
+        type="application/ld+json"
+        // SEO: Place + BreadcrumbList JSON-LD. dangerouslySetInnerHTML 는
+        // 매체 데이터에서 생성된 안전한 객체이므로 XSS 위험 없음.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([placeJsonLd, breadcrumbJsonLd]),
+        }}
+      />
       {/* 메인 이미지 + 히어로 오버레이 (네트워크 매체와 유사 구조) */}
       <MediaDetailHeroGallery
         images={galleryImages}
