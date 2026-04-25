@@ -1,8 +1,9 @@
+/* Wanted Sans Variable — 2024-2025 한국 트렌드 폰트 (모던·세련된 sans, jsDelivr) */
+@import url("https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfontvariable/variable/WantedSansVariable.css");
+/* Pretendard 폴백 — Wanted Sans 미로드 시 백업 (jsDelivr CDN, subset woff2) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
-
-/* Pretendard — 한글·영문 공통 본문 (jsDelivr CDN, subset woff2) */
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
 /* THINKAD 2025 — Primary #0D1B2E · Accent #C8913C · Silver #B0B8C4 · Page #D6D9E6 · CTA #9B3C31 */
 @theme inline {
@@ -79,10 +80,10 @@
   --color-info: #3b82f6;
   --color-info-soft: #eff6ff;
 
-  /* Font — Pretendard Variable → Geist 폴백 → 시스템 */
-  --font-sans: "Pretendard Variable", var(--font-geist-sans),
-    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard,
-    "Malgun Gothic", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Font — Wanted Sans Variable → Pretendard Variable → Geist 폴백 → 시스템 (2025 트렌드) */
+  --font-sans: "Wanted Sans Variable", "WantedSans Variable", "Pretendard Variable",
+    var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    Pretendard, "Malgun Gothic", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
     monospace;
 
@@ -141,15 +142,38 @@
   --border: #262c39;
   --input: #262c39;
   --ring: #e0a85f;
+
+  /* Dark mode 가독성 보정 — 하드코딩된 navy/gold 색상이 어두운 배경에서 안 보이지 않도록 토큰 재매핑 */
+  --color-navy: #f5f6fa;
+  --color-navy-700: #f5f6fa;
+  --color-navy-800: #f5f6fa;
+  --color-navy-900: #ffffff;
+  --color-navy-light: #c1c7d4;
+  --color-navy-dark: #f5f6fa;
+  --color-gold-dark: #f0cd85;
+  --color-gold-700: #f0cd85;
+  --color-gold-800: #e5b35a;
+}
+
+/* Hero 섹션 등 항상 어두운 배경(.bg-navy)에는 흰 글씨가 의도된 색이므로
+ * dark mode 에서도 navy 토큰 재매핑을 우회한다. */
+.dark .bg-navy,
+.dark .section-navy,
+.dark [class*="bg-navy"] {
+  --color-navy: #0d1b2e;
+  --color-navy-700: #0d1b2e;
+  --color-navy-800: #0a1420;
+  --color-navy-900: #050a14;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  /* Pretendard Variable 이 선두 — 한글·영문 모두 동일 톤 */
+  /* Wanted Sans Variable 이 선두 — Pretendard·Geist 폴백 */
   font-family: var(--font-sans);
-  font-feature-settings: "ss06", "tnum"; /* Pretendard 공식 권장 */
-  line-height: 1.7;
+  font-feature-settings: "ss06", "tnum", "cv11";
+  letter-spacing: -0.01em;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

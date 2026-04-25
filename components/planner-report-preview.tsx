@@ -85,7 +85,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
     <div
       ref={ref}
       id="planner-report-content"
-      className="box-border w-full max-w-[210mm] space-y-8 bg-white text-slate-900 antialiased"
+      className="box-border w-full max-w-[240mm] space-y-8 rounded-xl bg-white p-2 text-slate-900 antialiased shadow-lg ring-1 ring-navy/5 sm:p-4"
     >
       <div className="overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-br from-navy via-navy to-[#152a5c] p-6 text-white shadow-lg sm:p-8">
         <p className="text-xs font-medium uppercase tracking-wider text-gold/90">

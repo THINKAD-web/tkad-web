@@ -17,7 +17,7 @@ import {
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
-import { RotateCcw } from "lucide-react";
+import { Clock, MapPin, RotateCcw } from "lucide-react";
 
 const DISPLAY_MAX = RECENTLY_VIEWED_MAX;
 
@@ -70,25 +70,36 @@ export default function RecentlyViewedMedia({ locale }: Props) {
 
   return (
     <section
-      className="relative mt-10 md:mt-12"
+      className="relative mt-12 md:mt-16"
       aria-label={isKo ? "최근 본 매체" : "Recently viewed media"}
     >
-      {/* 모바일: 하단 fixed 아님 — 페이지 스크롤에 포함 */}
-      <div className="overflow-hidden rounded-xl bg-muted p-4 md:p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-xs font-semibold tracking-wide text-muted-foreground">
-            {isKo ? "최근 본 매체" : "Recently viewed"}
-          </h3>
+      <div className="overflow-hidden rounded-2xl border border-navy/8 bg-gradient-to-br from-slate-50 via-white to-gold/5 p-5 shadow-sm md:p-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-8 items-center justify-center rounded-full bg-navy text-gold shadow-sm">
+              <Clock className="size-4" aria-hidden />
+            </span>
+            <div>
+              <h3 className="text-sm font-bold leading-tight text-navy sm:text-base">
+                {isKo ? "최근 본 매체" : "Recently viewed"}
+              </h3>
+              <p className="text-[11px] leading-tight text-muted-foreground">
+                {isKo
+                  ? `최근 ${items.length}개의 매체를 다시 확인해 보세요`
+                  : `${items.length} media you recently checked`}
+              </p>
+            </div>
+          </div>
           <button
             type="button"
             onClick={() => {
               clearRecentlyViewed();
               setItems([]);
             }}
-            className="inline-flex items-center gap-1 rounded-full border border-border bg-background/80 px-2.5 py-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-navy/15 bg-white/80 px-3 py-1.5 text-[11px] font-semibold text-navy/80 shadow-sm transition-colors hover:border-navy/30 hover:bg-white hover:text-navy"
             aria-label={isKo ? "최근 본 매체 초기화" : "Reset recently viewed"}
           >
-            <RotateCcw className="h-3 w-3" />
+            <RotateCcw className="size-3" />
             {isKo ? "초기화" : "Reset"}
           </button>
         </div>
@@ -96,13 +107,12 @@ export default function RecentlyViewedMedia({ locale }: Props) {
         <div
           role="list"
           className={cn(
-            "flex min-w-0 flex-nowrap gap-2.5 overflow-x-auto overflow-y-hidden scroll-smooth",
-            "pb-2 pt-0.5 [-ms-overflow-style:none] [scrollbar-width:thin]",
-            "[-webkit-overflow-scrolling:touch] touch-pan-x overscroll-x-contain",
-            "max-sm:snap-x max-sm:snap-mandatory",
+            "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
           )}
         >
           {items.slice(0, DISPLAY_MAX).map((media) => {
+            const locationShort =
+              media.district || media.city || media.region || media.location;
             return (
               <Link
                 key={media.id}
@@ -110,28 +120,37 @@ export default function RecentlyViewedMedia({ locale }: Props) {
                 href={`/media/${media.id}`}
                 title={hoverLabel}
                 className={cn(
-                  "group flex min-w-[min(100%,200px)] max-w-[220px] shrink-0 max-sm:snap-start max-sm:snap-always",
-                  "overflow-hidden rounded-lg border border-transparent bg-background shadow-sm",
-                  "transition-all duration-200",
-                  "hover:border-navy/20 hover:shadow-md hover:ring-1 hover:ring-navy/10",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/30",
+                  "group relative flex flex-col overflow-hidden rounded-xl border border-navy/10 bg-white shadow-sm",
+                  "transition-all duration-200 motion-safe:hover:-translate-y-0.5",
+                  "hover:border-gold/40 hover:shadow-lg hover:ring-1 hover:ring-gold/15",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40",
                 )}
               >
-                <MediaCatalogThumbnail
-                  media={media}
-                  placeholderLabel={tMedia("imagePreparing")}
-                  className="relative h-[60px] w-[80px] shrink-0"
-                  imgClassName="transition-transform duration-200 group-hover:scale-[1.03]"
-                  bottomGradientClassName={null}
-                  placeholderSize="xs"
-                />
-                <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-1.5 pr-2.5 pl-2">
-                  <span className="truncate text-[11px] font-semibold leading-tight text-foreground group-hover:text-navy">
+                <div className="relative aspect-[4/3] w-full">
+                  <MediaCatalogThumbnail
+                    media={media}
+                    placeholderLabel={tMedia("imagePreparing")}
+                    className="absolute inset-0 size-full"
+                    imgClassName="transition-transform duration-300 group-hover:scale-[1.04]"
+                    bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/65 via-navy/10 to-transparent"
+                    placeholderSize="sm"
+                  />
+                  <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-navy shadow-sm backdrop-blur-sm">
+                    <Clock className="size-2.5" aria-hidden />
+                    {isKo ? "최근" : "Recent"}
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col gap-1 px-3 py-2.5">
+                  <span className="line-clamp-2 text-[12.5px] font-semibold leading-snug text-navy group-hover:text-navy">
                     {isKo ? media.name : (media.nameEn || media.name)}
                   </span>
-                  <span className="text-[10px] font-bold tabular-nums leading-tight text-navy group-hover:text-navy">
+                  <span className="flex items-center gap-1 text-[10.5px] text-muted-foreground">
+                    <MapPin className="size-2.5 shrink-0" aria-hidden />
+                    <span className="truncate">{locationShort}</span>
+                  </span>
+                  <span className="mt-auto text-[12px] font-bold tabular-nums leading-tight text-gold-dark">
                     {formatMediaPriceWonWithSymbol(media.price)}
-                    <span className="ml-0.5 text-[9px] font-medium text-muted-foreground">
+                    <span className="ml-0.5 text-[10px] font-medium text-muted-foreground">
                       · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
                     </span>
                   </span>
@@ -139,8 +158,6 @@ export default function RecentlyViewedMedia({ locale }: Props) {
               </Link>
             );
           })}
-          {/* 마지막 카드 뒤 여백 (가로 슬라이드 끝까지 스크롤 시 잘림 방지) */}
-          <div className="h-1 w-2 shrink-0 sm:w-0" aria-hidden />
         </div>
       </div>
     </section>

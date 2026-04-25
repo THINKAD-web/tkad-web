@@ -103,12 +103,12 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       <MediaCatalogThumbnail
         media={media}
         placeholderLabel={imagePreparingLabel}
-        className="flex h-[7.25rem] items-center justify-center sm:h-36"
+        className="flex h-44 items-center justify-center sm:h-52 lg:h-60"
         bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/10 to-transparent"
       >
         {thumbnailOverlays}
       </MediaCatalogThumbnail>
-      <CardHeader className="relative z-0 min-w-0 space-y-1 px-3 pb-1.5 pt-2 sm:px-4 sm:pb-2 sm:pt-2">
+      <CardHeader className="relative z-0 min-w-0 space-y-1.5 px-4 pb-2 pt-3 sm:px-5 sm:pb-2.5 sm:pt-3.5">
         <div className="flex items-center justify-between gap-2">
           <Badge
             variant="secondary"
@@ -117,18 +117,18 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
             {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
           </Badge>
         </div>
-        <CardTitle className="line-clamp-2 min-w-0 break-words text-[13px] leading-snug sm:text-sm">
+        <CardTitle className="line-clamp-2 min-w-0 break-words text-sm leading-snug sm:text-[15px]">
           {isKo ? media.name : (media.nameEn || media.name)}
         </CardTitle>
       </CardHeader>
-      <CardContent className="relative z-0 min-w-0 space-y-1.5 px-3 pb-2.5 pt-0 sm:px-4 sm:pb-3">
-        <div className="flex min-w-0 items-start gap-1 text-[11px] leading-snug text-muted-foreground sm:text-xs">
-          <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+      <CardContent className="relative z-0 min-w-0 space-y-2 px-4 pb-3.5 pt-0 sm:px-5 sm:pb-4">
+        <div className="flex min-w-0 items-start gap-1 text-[12px] leading-snug text-muted-foreground sm:text-[13px]">
+          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span className="min-w-0 line-clamp-2 sm:line-clamp-2">
             {formatMediaLocationShort(media, isKo)}
           </span>
         </div>
-        <div className="min-w-0 break-words text-[15px] font-bold tabular-nums leading-tight text-navy sm:text-base sm:leading-normal">
+        <div className="min-w-0 break-words text-base font-bold tabular-nums leading-tight text-navy sm:text-lg sm:leading-normal">
           {formatMediaPriceWonWithSymbol(priceNum)}
           {showPricePeriod ? (
             <span className="text-xs font-normal text-muted-foreground">

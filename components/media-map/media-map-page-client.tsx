@@ -84,6 +84,7 @@ export default function MediaMapPageClient() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [cartIds, setCartIds] = useState<string[]>([]);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const itemsRef = useRef<Item[]>([]);
 
   useEffect(() => {
@@ -215,58 +216,86 @@ export default function MediaMapPageClient() {
               className="w-full h-12 pl-11 pr-4 bg-background border border-border/80 rounded-full text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary focus:shadow-md transition-all"
             />
           </div>
-          <div className="flex gap-2">
-            <select
-              value={filter.type}
-              onChange={(e) => setFilter((f) => ({ ...f, type: e.target.value }))}
-              className="flex-1 h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setFiltersExpanded((v) => !v)}
+              aria-expanded={filtersExpanded}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
             >
-              <option value="">유형 전체</option>
-              {facets.types.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <select
-              value={filter.region}
-              onChange={(e) => setFilter((f) => ({ ...f, region: e.target.value }))}
-              className="flex-1 h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-            >
-              <option value="">지역 전체</option>
-              {facets.regions.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className={`h-3.5 w-3.5 transition-transform ${filtersExpanded ? "rotate-180" : ""}`}
+                aria-hidden
+              >
+                <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" />
+              </svg>
+              {filtersExpanded ? "필터 접기" : "필터 더보기"}
+              {(filter.type || filter.region || filter.priceMin || filter.priceMax) && (
+                <span className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
+                  {[filter.type, filter.region, filter.priceMin, filter.priceMax].filter(Boolean).length}
+                </span>
+              )}
+            </button>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              {loading ? (
+                <Spinner size="sm" label="불러오는 중…" />
+              ) : (
+                <span>{`${items.length}개 매체`}</span>
+              )}
+              {cartIds.length > 0 && (
+                <span className="font-medium text-primary">담김 {cartIds.length}</span>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              placeholder="최소 가격"
-              value={filter.priceMin}
-              onChange={(e) => setFilter((f) => ({ ...f, priceMin: e.target.value }))}
-              className="flex-1 h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-            />
-            <input
-              type="number"
-              placeholder="최대 가격"
-              value={filter.priceMax}
-              onChange={(e) => setFilter((f) => ({ ...f, priceMax: e.target.value }))}
-              className="flex-1 h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-            />
-          </div>
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            {loading ? (
-              <Spinner size="sm" label="불러오는 중…" />
-            ) : (
-              <span>{`${items.length}개 매체`}</span>
-            )}
-            {cartIds.length > 0 && (
-              <span className="text-primary font-medium">장바구니 {cartIds.length}</span>
-            )}
-          </div>
+
+          {filtersExpanded && (
+            <div className="space-y-2 rounded-lg border border-dashed border-border/70 bg-muted/40 p-2.5">
+              <div className="flex gap-2">
+                <select
+                  value={filter.type}
+                  onChange={(e) => setFilter((f) => ({ ...f, type: e.target.value }))}
+                  className="flex-1 h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                >
+                  <option value="">유형 전체</option>
+                  {facets.types.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={filter.region}
+                  onChange={(e) => setFilter((f) => ({ ...f, region: e.target.value }))}
+                  className="flex-1 h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                >
+                  <option value="">지역 전체</option>
+                  {facets.regions.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="최소 가격"
+                  value={filter.priceMin}
+                  onChange={(e) => setFilter((f) => ({ ...f, priceMin: e.target.value }))}
+                  className="flex-1 h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                />
+                <input
+                  type="number"
+                  placeholder="최대 가격"
+                  value={filter.priceMax}
+                  onChange={(e) => setFilter((f) => ({ ...f, priceMax: e.target.value }))}
+                  className="flex-1 h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <ul className="grid grid-cols-2 gap-3 p-3">

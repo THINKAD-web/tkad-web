@@ -287,6 +287,7 @@
     "pageSummary": "{from}–{to} of {total}",
     "sortLabel": "Sort",
     "sortDefault": "Default",
+    "sortNewest": "Newest first",
     "sortPriceAsc": "Price · low to high",
     "sortPriceDesc": "Price · high to low",
     "sortTrafficDesc": "Foot traffic · high to low",
@@ -2013,9 +2014,13 @@
       "title": "Street roadview",
       "desc": "View the surroundings via Kakao roadview.",
       "loadCta": "Load roadview",
+      "loading": "Loading roadview…",
       "openExternal": "Open in new tab",
       "externalAria": "Open Kakao roadview in a new window",
-      "iframeTitle": "{name} roadview"
+      "iframeTitle": "{name} roadview",
+      "missingKey": "Kakao Maps key is not configured. Please open in a new tab.",
+      "noPanoNearby": "No roadview data near this location. Open Kakao Map in a new tab to check.",
+      "loadFailed": "Failed to load roadview. Please open in a new tab."
     },
     "cta": {
       "planner": "Simulate in Planner",

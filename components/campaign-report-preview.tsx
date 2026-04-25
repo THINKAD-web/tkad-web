@@ -74,6 +74,71 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
     };
   })();
 
+  /** Planner 스타일 추정 KPI — 도달·빈도·CPM·ROI */
+  const totalAmount2 = data.financialDocs?.reduce((s, f) => s + (f.amountKrw ?? 0), 0) ?? 0;
+  const plannerKpis = (() => {
+    if (!stats) return null;
+    /** 노출 추정 (impressions 미설정 시 일유동 × 인지율 0.4 폴백) */
+    const totalImp =
+      stats.totalImpressions > 0
+        ? stats.totalImpressions
+        : Math.round(stats.totalExposure * 0.4);
+    /** 평균 빈도 추정: 6 (월 단위 OOH 통계 평균) */
+    const avgFrequency = 6;
+    /** 도달인 = 총 노출 / 빈도 */
+    const reach = totalImp > 0 ? Math.round(totalImp / avgFrequency) : 0;
+    /** 코어 도달률 — 인구 5,000만 기준 */
+    const corePopulation = 50_000_000;
+    const reachCorePct = Math.min(
+      100,
+      Math.round((reach / corePopulation) * 100 * 10) / 10,
+    );
+    const reachExtendedPct = Math.min(100, Math.round(reachCorePct * 1.6 * 10) / 10);
+    /** Blended CPM (원/1000노출) */
+    const blendedCpm =
+      totalAmount2 > 0 && totalImp > 0
+        ? Math.round((totalAmount2 / totalImp) * 1000)
+        : null;
+    /** ROI 추정: 1억당 환산 노출가치 (단순 가이드 — 실측치 아님) */
+    const roiExpected =
+      totalAmount2 > 0 ? Math.round((totalImp / totalAmount2) * 100_000_000) : null;
+    /** 일 평균 노출 */
+    const dailyImpressionsAvg =
+      stats.totalDays > 0 ? Math.round(totalImp / stats.totalDays) : 0;
+    return {
+      totalImp,
+      avgFrequency,
+      reach,
+      reachCorePct,
+      reachExtendedPct,
+      blendedCpm,
+      roiExpected,
+      dailyImpressionsAvg,
+    };
+  })();
+
+  /** 매체별 효율 (단가 vs 유동인구·CPM) */
+  const mediaEfficiency = (() => {
+    if (!data.mediaBookings?.length || !data.financialDocs?.length) return null;
+    const totalDays = stats?.totalDays ?? 0;
+    const total = totalAmount2;
+    if (total <= 0 || totalDays <= 0) return null;
+    return data.mediaBookings.slice(0, 8).map((b) => {
+      const days = diffDays(b.startsAt, b.endsAt);
+      const exposure = (b.dailyFootTraffic ?? 0) * days;
+      const allocAmount = total * (days / totalDays / data.mediaBookings!.length);
+      const cpm = exposure > 0 ? Math.round((allocAmount / exposure) * 1000) : null;
+      return {
+        name: b.mediaName,
+        location: b.location,
+        days,
+        dailyFootTraffic: b.dailyFootTraffic ?? 0,
+        cpm,
+        type: b.type ?? null,
+      };
+    });
+  })();
+
   /** 유형·지역 분포 */
   const distribution = (() => {
     if (!data.mediaBookings?.length) return null;
@@ -266,7 +331,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
 
           {/* 부가 KPI (일평균·최장 기간·평균 검증·예상 임프레션) */}
           {stats && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "32px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "24px" }}>
               <div style={{ background: "#ffffff", borderRadius: "10px", padding: "14px", border: "1px solid #e2e8f0" }}>
                 <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>일평균 유동</p>
                 <p style={{ margin: "2px 0 0", fontSize: "18px", fontWeight: 800, color: "#0d1b2e" }}>
@@ -293,6 +358,124 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
                     : "—"}
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Planner 스타일 효과 분석 (도달·빈도·CPM·ROI) */}
+          {plannerKpis && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
+                ✨ 미디어 효과 분석 (Planner 추정)
+              </h2>
+              <p style={{ margin: "0 0 12px", fontSize: "11px", color: "#64748b", lineHeight: 1.6 }}>
+                실측 노출 데이터와 OOH 평균 빈도(주 6회) 가정을 결합한 추정 지표입니다. 캠페인 종료 후 실측 보정 권장.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
+                <div style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)", borderRadius: "12px", padding: "14px", border: "1px solid #fcd34d" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#92400e", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>코어 도달률</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#92400e" }}>
+                    {plannerKpis.reachCorePct}<span style={{ fontSize: "12px", marginLeft: "1px" }}>%</span>
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#92400e", opacity: 0.85 }}>전국 5천만 인구 기준</p>
+                </div>
+                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>확장 도달률</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                    {plannerKpis.reachExtendedPct}<span style={{ fontSize: "12px", marginLeft: "1px" }}>%</span>
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>SNS·온라인 부가 도달 포함</p>
+                </div>
+                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>평균 빈도</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                    {plannerKpis.avgFrequency}<span style={{ fontSize: "12px", marginLeft: "1px" }}>회/주</span>
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>OOH 평균 노출 빈도</p>
+                </div>
+                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>일평균 노출</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                    {plannerKpis.dailyImpressionsAvg > 0
+                      ? `${(plannerKpis.dailyImpressionsAvg / 10000).toFixed(1)}만`
+                      : "—"}
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>예상 일일 노출 합산</p>
+                </div>
+                <div style={{ background: "#0d1b2e", borderRadius: "12px", padding: "14px", border: "1px solid #0d1b2e" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#c8913c", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Blended CPM</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#ffffff" }}>
+                    {plannerKpis.blendedCpm != null
+                      ? `₩${plannerKpis.blendedCpm.toLocaleString()}`
+                      : "—"}
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "rgba(255,255,255,0.55)" }}>1,000회 노출 단가</p>
+                </div>
+                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>도달인 추정</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                    {plannerKpis.reach > 0
+                      ? `${(plannerKpis.reach / 10000).toFixed(1)}만`
+                      : "—"}
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>총 노출 ÷ 빈도</p>
+                </div>
+                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>총 추정 노출</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                    {plannerKpis.totalImp > 0
+                      ? `${(plannerKpis.totalImp / 10000).toLocaleString()}만`
+                      : "—"}
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>실측+추정 합산</p>
+                </div>
+                <div style={{ background: "#fff7ed", borderRadius: "12px", padding: "14px", border: "1px solid #fed7aa" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#9a3412", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>ROI 효율</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#9a3412" }}>
+                    {plannerKpis.roiExpected != null
+                      ? `${(plannerKpis.roiExpected / 10000).toFixed(0)}만`
+                      : "—"}
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#9a3412", opacity: 0.85 }}>1억당 노출 환산</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 매체별 효율 표 (CPM 비교) */}
+          {mediaEfficiency && mediaEfficiency.length > 0 && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
+                💡 매체별 효율 분석
+              </h2>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px" }}>
+                <thead>
+                  <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                    {["매체", "유형", "기간", "일유동", "추정 CPM"].map((h) => (
+                      <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {mediaEfficiency.map((m, i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", background: i % 2 === 0 ? "#ffffff" : "#fafbff" }}>
+                      <td style={{ padding: "10px 12px", fontWeight: 600, color: "#0d1b2e" }}>{m.name}</td>
+                      <td style={{ padding: "10px 12px", color: "#475569" }}>{m.type ?? "—"}</td>
+                      <td style={{ padding: "10px 12px", color: "#475569" }}>{m.days}일</td>
+                      <td style={{ padding: "10px 12px", color: "#0d1b2e", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                        {m.dailyFootTraffic > 0 ? `${m.dailyFootTraffic.toLocaleString()}명` : "—"}
+                      </td>
+                      <td style={{ padding: "10px 12px", color: "#c8913c", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
+                        {m.cpm != null ? `₩${m.cpm.toLocaleString()}` : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ margin: "8px 0 0", fontSize: "9px", color: "#94a3b8", textAlign: "right" }}>
+                * 매체별 비용은 일수 비율로 안분 추정. 정확한 단가는 견적서 참고.
+              </p>
             </div>
           )}
 
@@ -467,6 +650,48 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
               <p style={{ background: "#f8faff", borderRadius: "8px", padding: "14px 16px", fontSize: "12px", color: "#334155", margin: 0, whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
                 {data.notes}
               </p>
+            </div>
+          )}
+
+          {/* 핵심 인사이트 (Planner 스타일) */}
+          {plannerKpis && stats && (
+            <div style={{
+              marginBottom: "28px",
+              background: "linear-gradient(135deg, rgba(200,145,60,0.08), rgba(13,27,46,0.04))",
+              borderRadius: "14px",
+              border: "1px solid rgba(200,145,60,0.25)",
+              padding: "20px 24px",
+            }}>
+              <h2 style={{ fontSize: "12px", fontWeight: 700, color: "#0d1b2e", margin: "0 0 14px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ background: "#c8913c", color: "#0d1b2e", borderRadius: "6px", padding: "2px 8px", fontSize: "10px", fontWeight: 800 }}>KEY INSIGHT</span>
+                캠페인 종합 평가
+              </h2>
+              <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <li style={{ fontSize: "12px", color: "#0d1b2e", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
+                  <span style={{ position: "absolute", left: 0, color: "#c8913c", fontWeight: 800 }}>·</span>
+                  총 <strong>{stats.mediaCount}개 매체</strong>를 <strong>{stats.totalDays}일간</strong> 집행하여 <strong>{(plannerKpis.totalImp / 10000).toLocaleString()}만회</strong>의 노출이 발생할 것으로 추정됩니다.
+                </li>
+                <li style={{ fontSize: "12px", color: "#0d1b2e", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
+                  <span style={{ position: "absolute", left: 0, color: "#c8913c", fontWeight: 800 }}>·</span>
+                  <strong>코어 도달률 {plannerKpis.reachCorePct}%</strong>로 약 <strong>{(plannerKpis.reach / 10000).toFixed(1)}만 명</strong>의 잠재 고객에게 메시지가 전달될 것으로 보입니다.
+                </li>
+                {plannerKpis.blendedCpm != null && (
+                  <li style={{ fontSize: "12px", color: "#0d1b2e", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, color: "#c8913c", fontWeight: 800 }}>·</span>
+                    Blended CPM은 <strong>₩{plannerKpis.blendedCpm.toLocaleString()}</strong>로 OOH 평균 대비 {plannerKpis.blendedCpm < 8000 ? "효율적인" : plannerKpis.blendedCpm < 15000 ? "양호한" : "프리미엄"} 수준입니다.
+                  </li>
+                )}
+                {avgVisibility != null && (
+                  <li style={{ fontSize: "12px", color: "#0d1b2e", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
+                    <span style={{ position: "absolute", left: 0, color: "#c8913c", fontWeight: 800 }}>·</span>
+                    평균 매체 검증 점수 <strong>{avgVisibility} / 4</strong>로 가시성·노출 품질이 검증된 우수 매체 위주로 구성되었습니다.
+                  </li>
+                )}
+                <li style={{ fontSize: "11px", color: "#64748b", lineHeight: 1.6, paddingLeft: "20px", position: "relative", marginTop: "4px" }}>
+                  <span style={{ position: "absolute", left: 0, color: "#94a3b8" }}>※</span>
+                  본 추정치는 OOH 평균 빈도·인지율을 기반으로 한 가이드 지표이며, 실제 효과는 집행 현장·시기에 따라 달라질 수 있습니다.
+                </li>
+              </ul>
             </div>
           )}
 
