@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 // HeroKenBurns 는 아래 ScrollAnimate 정의 이후에 const 로 선언됨
 import { type MediaItem } from "@/lib/media-data";
 import {
@@ -22,12 +21,9 @@ import {
   BarChart3,
   BadgeCheck,
   CheckCircle,
-  MapPin,
   ChevronDown,
   Eye,
   FileCheck,
-  Star,
-  Quote,
   Search,
   Camera,
   Database,
@@ -36,16 +32,9 @@ import {
   PhoneCall,
 } from "lucide-react";
 
-import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { ProcessStepImage } from "@/components/process-step-image";
-import {
-  VisibilityGauge,
-  FootTrafficBadge,
-  ImpressionsCompact,
-  VerifiedBadge,
-  MediaTypeBadge,
-} from "@/components/media-metric-viz";
 import { TestimonialsCarousel } from "@/components/testimonials-carousel";
+import { HomeMediaCarousel } from "@/components/home-media-carousel";
 import { testimonials } from "@/data/testimonials";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
@@ -65,13 +54,6 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-const typeLabels: Record<string, { ko: string; en: string }> = {
-  digital: { ko: "디지털", en: "Digital" },
-  static: { ko: "고정형", en: "Static" },
-  mobile: { ko: "이동형", en: "Mobile" },
-  network: { ko: "네트워크/패키지", en: "Network / package" },
-};
-
 export default async function HomePage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
@@ -80,9 +62,10 @@ export default async function HomePage({ params }: Props) {
    * 추천 매체: Prisma `isFeatured`·`featuredOrder` (관리자에서 지정).
    * 인기 매체: Prisma `isPopular`·`popularOrder` (관리자에서 별도 지정).
    */
+  /** 캐러셀로 좌우 스크롤 — 충분한 아이템 확보 */
   const [featuredCatalog, popularCatalog] = await Promise.all([
-    fetchHomeFeaturedMedia(6),
-    fetchHomePopularMedia(8),
+    fetchHomeFeaturedMedia(8),
+    fetchHomePopularMedia(12),
   ]);
 
   return (
@@ -107,11 +90,12 @@ function HomeContent({
   popularCatalog: MediaItem[];
 }) {
   const isKo = locale === "ko";
-  const topThreeFeatured = featuredCatalog.slice(0, 3);
+  /** 캐러셀 — 추천 매체 전체 활용 (TOP3 라벨은 첫 3개에만) */
+  const featuredItems = featuredCatalog.slice(0, 8);
   /** 추천과 겹치는 항목은 인기 섹션에서 제외해 중복 노출 방지 */
   const popularItems = popularCatalog
-    .filter((m) => !topThreeFeatured.some((f) => f.id === m.id))
-    .slice(0, 6);
+    .filter((m) => !featuredItems.some((f) => f.id === m.id))
+    .slice(0, 12);
 
   return (
     <>
@@ -326,114 +310,22 @@ function HomeContent({
             </div>
           </ScrollAnimate>
 
-          {topThreeFeatured.length === 0 ? (
+          {featuredItems.length === 0 ? (
             <p className="mt-8 text-center text-sm text-muted-foreground">
               {isKo
                 ? "추천 매체를 불러오는 중입니다. 잠시 후 다시 확인해 주세요."
                 : "Featured media will appear here once available."}
             </p>
           ) : (
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-            {topThreeFeatured.map((media, i) => {
-              const rank = i + 1;
-              const typeLabel = isKo
-                ? (typeLabels[media.type]?.ko ?? media.type)
-                : (typeLabels[media.type]?.en ?? media.type);
-              /**
-               * 전국 상위 백분위 — 간단 휴리스틱:
-               *   일 유동 100,000+ → top 5%
-               *   50,000+ → top 10%
-               *   20,000+ → top 25%
-               *   10,000+ → top 50%
-               *   그 외 → null (표시 생략)
-               */
-              const daily = media.dailyFootTraffic ?? 0;
-              const topPercentile =
-                daily >= 100_000 ? 5
-                  : daily >= 50_000 ? 10
-                  : daily >= 20_000 ? 25
-                  : daily >= 10_000 ? 50
-                  : null;
-              return (
-                <ScrollAnimate key={media.id} delay={i * 100}>
-                  <Card className="group relative overflow-hidden border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl">
-                    <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-gold to-gold-light" />
-                    <MediaCatalogThumbnail
-                      media={media}
-                      fallbackUrl={`https://picsum.photos/id/${[1031, 366, 260][i]}/800/600`}
-                      placeholderLabel={t("media.imagePreparing")}
-                      className="group relative flex h-48 items-center justify-center"
-                      imgClassName="opacity-90 transition duration-300 group-hover:scale-105"
-                      bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/45 via-transparent to-transparent"
-                      placeholderSize="sm"
-                      alt={isKo ? media.name : (media.nameEn || media.name)}
-                      priority={true}
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    >
-                      <div className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-light text-lg font-bold text-navy shadow-md">
-                        {rank}
-                      </div>
-                      <div className="absolute top-4 right-4 z-10">
-                        <VerifiedBadge className="bg-emerald-500/95 border-emerald-400 text-white shadow-sm" />
-                      </div>
-                    </MediaCatalogThumbnail>
-                    <CardHeader className="pb-3">
-                      <MediaTypeBadge type={media.type} label={typeLabel} />
-                      <CardTitle className="text-lg font-bold text-navy">
-                        {isKo ? media.name : (media.nameEn || media.name)}
-                      </CardTitle>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5" />
-                        {isKo ? media.location : (media.locationEn || media.location)}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3 rounded-xl bg-slate-50 p-3">
-                        <FootTrafficBadge
-                          daily={media.dailyFootTraffic}
-                          topPercentile={topPercentile}
-                        />
-                        <VisibilityGauge score={media.visibilityScore ?? 0} />
-                        <div className="flex items-center justify-between pt-1 border-t border-slate-200/80">
-                          <ImpressionsCompact
-                            value={media.monthlyFootTraffic ?? null}
-                            label={isKo ? "월 노출" : "Mo. impr."}
-                          />
-                          {media.dailyFootTraffic > 0 && (
-                            <ImpressionsCompact
-                              value={media.dailyFootTraffic * 30}
-                              label={isKo ? "누적/월" : "Monthly"}
-                              suffix={isKo ? "명" : ""}
-                            />
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mt-5 flex gap-2">
-                        <Link href={`/media/${media.id}`} className="flex-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="btn-navy-outline w-full rounded-lg text-xs font-semibold"
-                          >
-                            {isKo ? "상세 보기" : "View Details"}
-                          </Button>
-                        </Link>
-                        <Link href="/contact" className="flex-1">
-                          <Button
-                            size="sm"
-                            className="btn-gold w-full rounded-lg text-xs font-bold"
-                          >
-                            {isKo ? "문의하기" : "Inquire"}
-                          </Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </ScrollAnimate>
-              );
-            })}
-          </div>
+            <div className="mt-8">
+              <HomeMediaCarousel
+                items={featuredItems}
+                isKo={isKo}
+                variant="featured"
+                showRankBadge
+                imagePreparingLabel={t("media.imagePreparing")}
+              />
+            </div>
           )}
         </div>
       </section>
@@ -467,37 +359,13 @@ function HomeContent({
                 </Link>
               </div>
             </ScrollAnimate>
-            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {popularItems.slice(0, 6).map((media, i) => (
-                <ScrollAnimate key={media.id} delay={i * 60}>
-                  <Link href={`/media/${media.id}`} className="block touch-manipulation">
-                    <Card className="group overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-1">
-                      <MediaCatalogThumbnail
-                        media={media}
-                        placeholderLabel={t("media.imagePreparing")}
-                        className="relative flex h-44 items-center justify-center"
-                        imgClassName="transition-transform duration-300 group-hover:scale-105"
-                        bottomGradientClassName={null}
-                        placeholderSize="xs"
-                      />
-                      <CardHeader className="space-y-1 p-3 pb-1.5">
-                        <Badge variant="secondary" className="w-fit bg-rose-50 text-rose-700 text-[10px] font-semibold">
-                          {isKo ? "인기" : "Popular"}
-                        </Badge>
-                        <CardTitle className="truncate text-sm font-bold leading-snug text-navy">
-                          {isKo ? media.name : (media.nameEn || media.name)}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="px-3 pb-3">
-                        <div className="flex items-center gap-1 text-xs leading-snug text-muted-foreground truncate">
-                          <MapPin className="h-3 w-3 shrink-0" />
-                          {isKo ? media.location : (media.locationEn || media.location)}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </ScrollAnimate>
-              ))}
+            <div className="mt-8">
+              <HomeMediaCarousel
+                items={popularItems}
+                isKo={isKo}
+                variant="popular"
+                imagePreparingLabel={t("media.imagePreparing")}
+              />
             </div>
           </div>
         </section>

@@ -79,7 +79,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
                   <span
                     aria-hidden
                     className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-sm font-extrabold text-white shadow-sm ${
-                      t.avatarGradient ?? "from-navy to-navy-light"
+                      t.avatarGradient ?? "from-[#0d1b2e] to-[#1e3a5f] dark:from-[#1e3a5f] dark:to-[#0d1b2e]"
                     }`}
                   >
                     {t.initials}

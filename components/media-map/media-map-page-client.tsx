@@ -302,7 +302,7 @@ export default function MediaMapPageClient() {
           {items.map((it) => (
             <li
               key={it.id}
-              className={`group rounded-xl border bg-white overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+              className={`group rounded-xl border bg-card text-card-foreground overflow-hidden cursor-pointer transition-all hover:shadow-md ${
                 selectedId === it.id
                   ? "border-primary ring-2 ring-primary/20 shadow-md"
                   : "border-border/70 hover:border-primary/40"
@@ -318,12 +318,12 @@ export default function MediaMapPageClient() {
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform"
                   />
                 ) : null}
-                <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-foreground/80 shadow-sm">
+                <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-card/90 text-card-foreground/85 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold shadow-sm">
                   {it.type}
                 </span>
               </div>
               <div className="p-2.5 space-y-1">
-                <div className="text-[13px] font-semibold text-foreground line-clamp-1 leading-snug">
+                <div className="text-[13px] font-semibold text-card-foreground line-clamp-1 leading-snug">
                   {it.name}
                 </div>
                 <div className="text-[11px] text-muted-foreground line-clamp-1">
@@ -341,8 +341,8 @@ export default function MediaMapPageClient() {
                     }}
                     className={`text-[10px] font-semibold px-2 py-1 rounded-full border transition-colors ${
                       inCart(it.id)
-                        ? "bg-primary text-white border-primary"
-                        : "bg-white text-primary border-primary hover:bg-primary/5"
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-primary border-primary hover:bg-primary/5"
                     }`}
                   >
                     {inCart(it.id) ? "담김" : "담기"}
@@ -380,7 +380,7 @@ export default function MediaMapPageClient() {
         {selected && (
           <div
             style={{ zIndex: 100000 }}
-            className="absolute left-3 bottom-3 right-3 md:left-auto md:right-3 md:w-[320px] md:bottom-4 bg-white rounded-xl shadow-2xl border p-3"
+            className="absolute left-3 bottom-3 right-3 md:left-auto md:right-3 md:w-[320px] md:bottom-4 bg-card text-card-foreground rounded-xl shadow-2xl border border-border p-3"
           >
             <button
               type="button"
@@ -388,7 +388,7 @@ export default function MediaMapPageClient() {
                 setSelectedId(null);
                 setSelectedItem(null);
               }}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-sm"
+              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground text-sm"
               aria-label="닫기"
             >
               ✕
@@ -403,9 +403,9 @@ export default function MediaMapPageClient() {
                 />
               )}
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold pr-6">{selected.name}</div>
-                <div className="text-xs text-gray-500">{selected.location}</div>
-                <div className="text-xs text-gray-400 mt-0.5">
+                <div className="text-sm font-semibold text-card-foreground pr-6">{selected.name}</div>
+                <div className="text-xs text-muted-foreground">{selected.location}</div>
+                <div className="text-xs text-muted-foreground/80 mt-0.5">
                   {selected.type}
                   {selected.subCategory ? ` · ${selected.subCategory}` : ""}
                 </div>
@@ -420,17 +420,17 @@ export default function MediaMapPageClient() {
               </div>
               <a
                 href={`/media/${selected.id}`}
-                className="flex-1 inline-flex items-center justify-center text-xs py-2 border rounded-md hover:bg-gray-50"
+                className="flex-1 inline-flex items-center justify-center text-xs py-2 border border-border rounded-md text-foreground hover:bg-secondary/60"
               >
                 상세 보기
               </a>
               <button
                 type="button"
                 onClick={() => toggleCart(selected.id)}
-                className={`flex-1 text-xs py-2 rounded-md ${
+                className={`flex-1 text-xs py-2 rounded-md transition-colors ${
                   inCart(selected.id)
-                    ? "bg-primary text-white"
-                    : "bg-white text-primary border border-primary"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card text-primary border border-primary hover:bg-primary/5"
                 }`}
               >
                 {inCart(selected.id) ? "장바구니에 담김" : "견적서에 담기"}

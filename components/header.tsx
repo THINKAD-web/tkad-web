@@ -194,7 +194,7 @@ export default function Header() {
       className={`sticky top-0 z-50 transition-[background,box-shadow,backdrop-filter] duration-500 ${
         scrolled
           ? "header-scrolled border-b border-primary/10 supports-[backdrop-filter]:bg-transparent"
-          : "bg-transparent backdrop-blur-0"
+          : "bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/55"
       }`}
     >
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">

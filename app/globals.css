@@ -612,6 +612,14 @@ body {
   color: #ffffff;
 }
 
+/* Dark mode: section 배경을 다크 토큰으로 — text-navy 가 light 로 매핑된 것과 짝 */
+.dark .section-white {
+  background: var(--background);
+}
+.dark .section-light {
+  background: color-mix(in srgb, var(--card) 90%, var(--background) 10%);
+}
+
 /* ── Smooth scrolling ── */
 html {
   scroll-behavior: smooth;
@@ -811,9 +819,11 @@ select:focus-visible {
    prefers-reduced-motion 시 모두 비활성
    ───────────────────────────────────────────────────────────── */
 
-/* 모바일 가로 스크롤 방지 — 루트에서 보장 */
+/* 모바일 가로 스크롤 방지 — 루트에서 보장.
+ * `overflow-x: hidden` 은 자동으로 `overflow-y: auto` 가 되어 자식의 `position: sticky` 를 무력화한다.
+ * `overflow-x: clip` 은 스크롤 컨테이너를 만들지 않아 sticky 를 보존한다. 모든 모던 브라우저 지원. */
 html, body {
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
 }
 
