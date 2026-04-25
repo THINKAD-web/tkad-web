@@ -624,7 +624,8 @@ model AdminUser {
 
 model TrendReport {
   id                 String    @id @default(cuid())
-  month              String    @unique
+  month              String?   @unique
+  slug               String?   @unique
   status             String    @default("draft")
   titleKo            String    @map("title_ko")
   titleEn            String?   @map("title_en")
@@ -637,6 +638,8 @@ model TrendReport {
   publishedAt        DateTime? @map("published_at")
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
+  generationMethod   String    @default("manual") @map("generation_method")
+  aiModel            String?   @map("ai_model")
 
   @@map("trend_reports")
 }
