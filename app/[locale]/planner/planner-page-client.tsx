@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Check,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -25,14 +24,9 @@ import {
   CalendarRange,
   ArrowRight,
   MessageCircle,
-  Upload,
 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import {
-  type PlannerCampaignGoal,
-  type PlannerCategory,
-  type PlannerMapRegion,
-  PLANNER_MAP_REGIONS,
   filterPlannerMediaMulti,
   countPlannerMediaByRegion,
   computePlannerMetrics,
@@ -66,10 +60,25 @@ import PlannerReportStep, {
   PlannerReportPdfCompact,
 } from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-
-const BUDGET_MIN = 500;
-const BUDGET_MAX = 100_000;
-const STORAGE_KEY = "tkad-planner-plan-v2";
+import { PlannerStepper } from "@/components/planner/stepper";
+import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
+import {
+  CompositePreview,
+  DEFAULT_LOGO_PLACEMENT,
+} from "@/components/planner/composite-preview";
+import { getPrimaryMediaImageUrl } from "@/lib/media-data";
+import {
+  PLANNER_AGE_KEYS,
+  PLANNER_BUDGET_MAX,
+  PLANNER_BUDGET_MIN,
+  PLANNER_INDUSTRY_KEYS,
+  PLANNER_LAST_INPUT_STEP,
+  type PlannerCampaignGoal,
+  type PlannerCategory,
+  type PlannerMapRegion,
+} from "@/lib/planner/types";
+import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
+import { canProceedFromStep } from "@/lib/planner/validation";
 
 const GOALS: {
   key: PlannerCampaignGoal;
@@ -92,41 +101,6 @@ const CATEGORIES: {
   { key: "mobile", labelKey: "catMobile" },
 ];
 
-const DEFAULT_CATEGORIES: PlannerCategory[] = [
-  "digital",
-  "static",
-  "mobile",
-];
-
-function normalizePlannerCategoriesFromStorage(raw: unknown): Set<PlannerCategory> {
-  const allowed = new Set<string>(["digital", "static", "mobile"]);
-  const legacy: Record<string, PlannerCategory> = {
-    billboard: "static",
-    bus: "mobile",
-    subway: "mobile",
-  };
-  if (!Array.isArray(raw)) return new Set(DEFAULT_CATEGORIES);
-  const next = new Set<PlannerCategory>();
-  for (const c of raw) {
-    if (typeof c !== "string") continue;
-    const mapped = legacy[c] ?? (allowed.has(c) ? (c as PlannerCategory) : null);
-    if (mapped === "digital" || mapped === "static" || mapped === "mobile") {
-      next.add(mapped);
-    }
-  }
-  return next.size > 0 ? next : new Set(DEFAULT_CATEGORIES);
-}
-
-const AGE_KEYS = ["ageAll", "age20s", "age30s", "age40s", "age50plus"] as const;
-const INDUSTRY_KEYS = [
-  "indFb",
-  "indRetail",
-  "indTech",
-  "indFinance",
-  "indEnt",
-  "indOther",
-] as const;
-
 type Props = {
   catalog: MediaItem[];
   databaseEmpty: boolean;
@@ -142,49 +116,47 @@ export default function PlannerPageClient({
   const isKo = locale === "ko";
   const { toast } = useToast();
 
-  const [wizardStep, setWizardStep] = useState(1);
-  const [campaignGoal, setCampaignGoal] = useState<PlannerCampaignGoal | null>(
-    null,
-  );
-  const [selectedRegions, setSelectedRegions] = useState<Set<string>>(
-    () => new Set<string>(["seoul"]),
-  );
-  const [categories, setCategories] = useState<Set<PlannerCategory>>(
-    () => new Set<PlannerCategory>(DEFAULT_CATEGORIES),
-  );
-  const [budget, setBudget] = useState<string>("5000");
-  const [months, setMonths] = useState<number>(3);
-  const [ageKey, setAgeKey] = useState<(typeof AGE_KEYS)[number]>("ageAll");
-  const [industryKey, setIndustryKey] =
-    useState<(typeof INDUSTRY_KEYS)[number]>("indOther");
-  const [campaignMediaIds, setCampaignMediaIds] = useState<string[]>([]);
-  const [creativeObjectUrl, setCreativeObjectUrl] = useState<string | null>(null);
+  const wizardStep = usePlannerStore((s) => s.wizardStep);
+  const campaignGoal = usePlannerStore((s) => s.campaignGoal);
+  const regions = usePlannerStore((s) => s.regions);
+  const categoriesArr = usePlannerStore((s) => s.categories);
+  const budget = usePlannerStore((s) => s.budget);
+  const budgetNum = usePlannerStore(selectBudgetNum);
+  const months = usePlannerStore((s) => s.months);
+  const ageKey = usePlannerStore((s) => s.ageKey);
+  const industryKey = usePlannerStore((s) => s.industryKey);
+  const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
+  const creativeObjectUrl = usePlannerStore((s) => s.creativeObjectUrl);
+  const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
+  const mediaPlacements = usePlannerStore((s) => s.mediaPlacements);
 
-  const toggleCategory = (key: PlannerCategory) => {
-    setCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        if (next.size <= 1) return prev;
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
-  };
+  const setWizardStep = usePlannerStore((s) => s.setWizardStep);
+  const goNextStepAction = usePlannerStore((s) => s.goNextStep);
+  const goPrevStepAction = usePlannerStore((s) => s.goPrevStep);
+  const setCampaignGoal = usePlannerStore((s) => s.setCampaignGoal);
+  const toggleRegion = usePlannerStore((s) => s.toggleRegion);
+  const toggleCategoryAction = usePlannerStore((s) => s.toggleCategory);
+  const setBudget = usePlannerStore((s) => s.setBudget);
+  const setMonths = usePlannerStore((s) => s.setMonths);
+  const setAgeKey = usePlannerStore((s) => s.setAgeKey);
+  const setIndustryKey = usePlannerStore((s) => s.setIndustryKey);
+  const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
+  const setCreativeObjectUrl = usePlannerStore((s) => s.setCreativeObjectUrl);
+  const setCreativeUploadedUrl = usePlannerStore(
+    (s) => s.setCreativeUploadedUrl,
+  );
+  const applyPresetAction = usePlannerStore((s) => s.applyPreset);
 
-  const toggleRegion = useCallback((r: PlannerMapRegion) => {
-    setSelectedRegions((prev) => {
-      const next = new Set(prev);
-      if (next.has(r)) {
-        if (next.size <= 1) return prev;
-        next.delete(r);
-      } else {
-        next.add(r);
-      }
-      return next;
-    });
-  }, []);
+  const selectedRegions = useMemo(() => new Set(regions), [regions]);
+  const categories = useMemo(
+    () => new Set<PlannerCategory>(categoriesArr),
+    [categoriesArr],
+  );
+
+  const toggleCategory = useCallback(
+    (key: PlannerCategory) => toggleCategoryAction(key),
+    [toggleCategoryAction],
+  );
 
   const regionCounts = useMemo(
     () => countPlannerMediaByRegion(catalog, categories),
@@ -219,21 +191,15 @@ export default function PlannerPageClient({
     return ordered;
   }, [campaignMediaIds, catalog, filtered]);
 
-  const budgetNum = useMemo(() => {
-    const n = Number.parseInt(budget.replace(/,/g, ""), 10);
-    if (!Number.isFinite(n)) return BUDGET_MIN;
-    return Math.min(BUDGET_MAX, Math.max(BUDGET_MIN, n));
-  }, [budget]);
-
   const metrics = useMemo(() => {
-    if (filtered.length === 0 || budgetNum < BUDGET_MIN) return null;
+    if (filtered.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return null;
     return computePlannerMetrics(filtered, budgetNum, months, {
       campaignGoal,
     });
   }, [filtered, budgetNum, months, campaignGoal]);
 
   const portfolio = useMemo(() => {
-    if (filtered.length === 0 || budgetNum < BUDGET_MIN) return [];
+    if (filtered.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return [];
     if (manualIntersectedPortfolio.length > 0) {
       return portfolioFromManualSelection(
         manualIntersectedPortfolio,
@@ -302,119 +268,67 @@ export default function PlannerPageClient({
       ? `/quote?media=${portfolio.map((m) => m.id).join(",")}`
       : "/quote";
 
-  const applyPreset = (id: "premium" | "national" | "value") => {
-    if (id === "premium") {
-      setSelectedRegions(new Set<PlannerMapRegion>(["seoul"]));
-      setCategories(new Set<PlannerCategory>(["digital", "static"]));
-    } else if (id === "national") {
-      setSelectedRegions(
-        new Set<PlannerMapRegion>(["seoul", "busan", "jeju"]),
-      );
-      setCategories(new Set<PlannerCategory>(DEFAULT_CATEGORIES));
-    } else {
-      setSelectedRegions(
-        new Set<PlannerMapRegion>(["seoul", "busan", "national"]),
-      );
-      setCategories(new Set<PlannerCategory>(DEFAULT_CATEGORIES));
-    }
-    toast("success", isKo ? "프리셋이 적용되었습니다." : "Preset applied.");
-  };
+  const applyPreset = useCallback(
+    (id: "premium" | "national" | "value") => {
+      applyPresetAction(id);
+      toast("success", isKo ? "프리셋이 적용되었습니다." : "Preset applied.");
+    },
+    [applyPresetAction, toast, isKo],
+  );
 
-  const savePlan = useCallback(() => {
+  const [saving, setSaving] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
+
+  /**
+   * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
+   * 기존 localStorage persist 는 유지 — DB 저장은 "공유/이메일 발송" 시점에만.
+   */
+  const savePlan = useCallback(async () => {
+    if (saving) return;
+    setSaving(true);
     try {
-      const payload = {
-        version: 3 as const,
-        savedAt: new Date().toISOString(),
-        wizardStep,
-        campaignGoal,
-        regions: [...selectedRegions],
-        categories: [...categories],
-        budget: budgetNum,
-        months,
-        ageKey,
-        industryKey,
-        mediaIds: portfolio.map((m) => m.id),
-        campaignMediaIds,
+      const state = usePlannerStore.getState();
+      const planJson = {
+        campaignGoal: state.campaignGoal,
+        regions: state.regions,
+        categories: state.categories,
+        budget: state.budget,
+        months: state.months,
+        ageKey: state.ageKey,
+        industryKey: state.industryKey,
+        campaignMediaIds: state.campaignMediaIds,
+        creativeUploadedUrl: state.creativeUploadedUrl,
+        mediaPlacements: state.mediaPlacements,
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      const res = await fetch("/api/planner/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planJson }),
+      });
+      if (!res.ok) {
+        throw new Error(`save failed: ${res.status}`);
+      }
+      const data = (await res.json()) as { id: string; expiresAt: string };
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const url = `${origin}/${locale}/planner/shared/${data.id}`;
+      setShareUrl(url);
+      setSavedPlanId(data.id);
+      // 링크를 즉시 클립보드에도 복사
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(url).catch(() => {});
+      }
       toast("success", t("savedToast"));
     } catch {
-      toast("error", isKo ? "저장에 실패했습니다." : "Could not save plan.");
+      toast(
+        "error",
+        isKo ? "저장에 실패했습니다." : "Could not save plan.",
+      );
+    } finally {
+      setSaving(false);
     }
-  }, [
-    wizardStep,
-    campaignGoal,
-    selectedRegions,
-    categories,
-    budgetNum,
-    months,
-    ageKey,
-    industryKey,
-    portfolio,
-    campaignMediaIds,
-    toast,
-    t,
-    isKo,
-  ]);
-
-  const loadPlan = useCallback(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        toast("error", t("loadNoneToast"));
-        return;
-      }
-      const p = JSON.parse(raw) as Record<string, unknown>;
-      if (p.version === 3 || p.version === 2) {
-        if (Array.isArray(p.regions))
-          setSelectedRegions(new Set(p.regions as string[]));
-        setCategories(normalizePlannerCategoriesFromStorage(p.categories));
-        if (typeof p.budget === "number")
-          setBudget(String(Math.max(BUDGET_MIN, Math.min(BUDGET_MAX, p.budget))));
-        if (typeof p.months === "number") setMonths(p.months);
-        if (typeof p.campaignGoal === "string")
-          setCampaignGoal(p.campaignGoal as PlannerCampaignGoal);
-        if (
-          typeof p.ageKey === "string" &&
-          (AGE_KEYS as readonly string[]).includes(p.ageKey)
-        ) {
-          setAgeKey(p.ageKey as (typeof AGE_KEYS)[number]);
-        }
-        if (
-          typeof p.industryKey === "string" &&
-          (INDUSTRY_KEYS as readonly string[]).includes(p.industryKey)
-        ) {
-          setIndustryKey(p.industryKey as (typeof INDUSTRY_KEYS)[number]);
-        }
-        if (typeof p.wizardStep === "number") {
-          let w = p.wizardStep as number;
-          if (p.version === 2 && w === 6) w = 7;
-          if (w > 7) w = 7;
-          setWizardStep(w);
-        }
-        if (Array.isArray(p.campaignMediaIds))
-          setCampaignMediaIds(p.campaignMediaIds as string[]);
-        toast("success", t("loadedToast"));
-        return;
-      }
-      if (p.version === 1) {
-        const r = p.region as string;
-        if (r === "all")
-          setSelectedRegions(new Set(PLANNER_MAP_REGIONS));
-        else setSelectedRegions(new Set([r]));
-        setCategories(normalizePlannerCategoriesFromStorage(p.categories));
-        if (typeof p.budget === "number")
-          setBudget(String(Math.max(BUDGET_MIN, Math.min(BUDGET_MAX, p.budget))));
-        if (typeof p.months === "number") setMonths(p.months);
-        setWizardStep(7);
-        toast("success", t("loadedToast"));
-        return;
-      }
-      toast("error", t("loadNoneToast"));
-    } catch {
-      toast("error", t("loadNoneToast"));
-    }
-  }, [toast, t]);
+  }, [saving, toast, t, isKo, locale]);
 
   const mapLabel = useCallback(
     (r: PlannerMapRegion) =>
@@ -446,31 +360,23 @@ export default function PlannerPageClient({
     [categories, t],
   );
 
-  const goNext = () => {
-    if (wizardStep === 1 && !campaignGoal) {
-      toast("error", t("selectGoal"));
+  const goNext = useCallback(() => {
+    const check = canProceedFromStep(
+      usePlannerStore.getState(),
+      wizardStep,
+    );
+    if (!check.ok) {
+      toast("error", t(check.errorKey));
       return;
     }
-    if (wizardStep === 2 && campaignMediaIds.length === 0) {
-      toast("error", t("needMediaPick"));
-      return;
-    }
-    if (wizardStep === 4 && budgetNum < BUDGET_MIN) {
-      toast("error", t("needBudget"));
-      return;
-    }
-    if (wizardStep === 5 && selectedRegions.size === 0) {
-      toast("error", t("selectRegion"));
-      return;
-    }
-    setWizardStep((s) => Math.min(7, s + 1));
+    goNextStepAction();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, [goNextStepAction, wizardStep, toast, t]);
 
-  const goBack = () => {
-    setWizardStep((s) => Math.max(1, s - 1));
+  const goBack = useCallback(() => {
+    goPrevStepAction();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, [goPrevStepAction]);
 
   if (databaseEmpty && catalog.length === 0) {
     return (
@@ -526,63 +432,27 @@ export default function PlannerPageClient({
           <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
             {t("subtitle")}
           </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
-              onClick={loadPlan}
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              {t("loadPlan")}
-            </Button>
-          </div>
         </div>
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        {wizardStep < 7 ? (
-          <div className="mb-8 flex flex-col items-center gap-3">
-            <p className="text-sm font-semibold text-navy">
-              {t("stepOf", { current: wizardStep, total: 6 })}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-              {[1, 2, 3, 4, 5, 6].map((s) => (
-                <div key={s} className="flex items-center gap-2 sm:gap-4">
-                  <div
-                    className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors",
-                      wizardStep === s
-                        ? "bg-gold text-navy shadow-md"
-                        : wizardStep > s
-                          ? "bg-navy/15 text-navy ring-2 ring-gold/50"
-                          : "bg-slate-200 text-muted-foreground",
-                    )}
-                  >
-                    {wizardStep > s ? <Check className="h-4 w-4" /> : s}
-                  </div>
-                  {s < 6 ? (
-                    <div
-                      className={cn(
-                        "hidden h-0.5 w-8 sm:block sm:w-10",
-                        wizardStep > s ? "bg-gold/70" : "bg-slate-200",
-                      )}
-                    />
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </div>
+        {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
+          <PlannerStepper
+            currentStep={wizardStep}
+            stepOfLabel={t("stepOf", {
+              current: wizardStep,
+              total: PLANNER_LAST_INPUT_STEP,
+            })}
+            onStepClick={(s) => setWizardStep(s)}
+          />
         ) : null}
 
-        {wizardStep < 7 ? (
+        {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
           <div
             className={cn(
               "mx-auto space-y-8",
-              wizardStep === 2 ||
-                wizardStep === 3 ||
-                wizardStep === 6
+              // 매체 선택·소재 업로드·보고서 단계는 넓은 캔버스 필요
+              wizardStep === 4 || wizardStep === 5 || wizardStep === 6
                 ? "max-w-6xl"
                 : "max-w-3xl",
             )}
@@ -594,6 +464,8 @@ export default function PlannerPageClient({
               hasCreative={Boolean(creativeObjectUrl)}
               budgetNum={budgetNum}
             />
+
+            {/* Step 1 — 캠페인 목표 */}
             {wizardStep === 1 ? (
               <PlannerCampaignStep1
                 campaignGoal={campaignGoal}
@@ -602,121 +474,18 @@ export default function PlannerPageClient({
               />
             ) : null}
 
+            {/* Step 2 — 타깃 · 지역 */}
             {wizardStep === 2 ? (
-              <>
+              <div className="space-y-6">
                 <div className="space-y-2 text-center sm:text-left">
                   <h2 className="text-lg font-bold text-navy sm:text-xl">
-                    {t("stepMediaTitle")}
+                    {t("stepRegionTitle")}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    {t("stepMediaDesc")}
+                    {t("stepRegionDesc")}
                   </p>
                 </div>
-                <PlannerMediaSelector
-                  catalog={catalog}
-                  campaignMediaIds={campaignMediaIds}
-                  setCampaignMediaIds={setCampaignMediaIds}
-                  isKo={isKo}
-                  regionLabel={mediaRegionLabel}
-                />
-              </>
-            ) : null}
 
-            {wizardStep === 3 ? (
-              <PlannerSimulationStep3
-                selectedMedia={selectedMediaForSimulation}
-                creativeObjectUrl={creativeObjectUrl}
-                setCreativeObjectUrl={setCreativeObjectUrl}
-              />
-            ) : null}
-
-            {wizardStep === 4 ? (
-              <Card className="border-navy/10 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-navy">
-                    <Wallet className="h-5 w-5 text-gold" />
-                    {t("stepBudgetTitle")}
-                  </CardTitle>
-                  <CardDescription>{t("stepBudgetDesc")}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <div className="mb-2 flex justify-between text-xs font-medium text-muted-foreground">
-                      <span>{t("budgetSliderMin")}</span>
-                      <span>{t("budgetSliderMax")}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={BUDGET_MIN}
-                      max={BUDGET_MAX}
-                      step={500}
-                      value={budgetNum}
-                      onChange={(e) => setBudget(e.target.value)}
-                      className="h-2 w-full cursor-pointer accent-gold"
-                      aria-label={t("budget")}
-                    />
-                    <div className="mt-3 flex flex-wrap items-end gap-3">
-                      <div className="flex-1 min-w-[8rem]">
-                        <label className="text-xs font-semibold text-navy">
-                          {t("budget")}
-                        </label>
-                        <Input
-                          inputMode="numeric"
-                          value={budget}
-                          onChange={(e) =>
-                            setBudget(e.target.value.replace(/[^\d]/g, ""))
-                          }
-                          className="mt-1 h-11 border-navy/15 font-semibold"
-                        />
-                      </div>
-                      <p className="text-sm text-muted-foreground pb-1">
-                        {t("budgetPerMonthSummary", {
-                          amount: Math.round(budgetNum / Math.max(months, 1)),
-                        })}
-                      </p>
-                    </div>
-                    {blurbParts ? (
-                      <p className="mt-3 rounded-xl border border-gold/25 bg-gold/5 px-3 py-2 text-xs leading-relaxed text-navy">
-                        {t("budgetBlurb", {
-                          name: blurbParts.sampleName.slice(0, 32),
-                          price: blurbParts.samplePrice,
-                          slots: blurbParts.slotsAtMonth,
-                        })}
-                      </p>
-                    ) : null}
-                  </div>
-                  <div>
-                    <p className="mb-2 flex items-center gap-2 text-sm font-bold text-navy">
-                      <CalendarRange className="h-4 w-4 text-gold" />
-                      {t("period")}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {PLANNER_PERIOD_OPTIONS.map((opt) => {
-                        const selected = Math.abs(months - opt.months) < 0.04;
-                        return (
-                          <Button
-                            key={opt.id}
-                            type="button"
-                            variant={selected ? "default" : "outline"}
-                            size="sm"
-                            className={cn(
-                              "rounded-full",
-                              selected && "btn-gold border-0",
-                            )}
-                            onClick={() => setMonths(opt.months)}
-                          >
-                            {t(opt.labelKey)}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null}
-
-            {wizardStep === 5 ? (
-              <div className="space-y-6">
                 <Card className="border-navy/10 shadow-lg">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-navy">
@@ -789,7 +558,7 @@ export default function PlannerPageClient({
                       {t("ageLabel")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      {AGE_KEYS.map((k) => (
+                      {PLANNER_AGE_KEYS.map((k) => (
                         <Button
                           key={k}
                           type="button"
@@ -811,7 +580,7 @@ export default function PlannerPageClient({
                       {t("industryLabel")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      {INDUSTRY_KEYS.map((k) => (
+                      {PLANNER_INDUSTRY_KEYS.map((k) => (
                         <Button
                           key={k}
                           type="button"
@@ -832,6 +601,139 @@ export default function PlannerPageClient({
               </div>
             ) : null}
 
+            {/* Step 3 — 예산 · 기간 */}
+            {wizardStep === 3 ? (
+              <Card className="border-navy/10 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-navy">
+                    <Wallet className="h-5 w-5 text-gold" />
+                    {t("stepBudgetTitle")}
+                  </CardTitle>
+                  <CardDescription>{t("stepBudgetDesc")}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <div className="mb-2 flex justify-between text-xs font-medium text-muted-foreground">
+                      <span>{t("budgetSliderMin")}</span>
+                      <span>{t("budgetSliderMax")}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={PLANNER_BUDGET_MIN}
+                      max={PLANNER_BUDGET_MAX}
+                      step={500}
+                      value={budgetNum}
+                      onChange={(e) => setBudget(e.target.value)}
+                      className="h-2 w-full cursor-pointer accent-gold"
+                      aria-label={t("budget")}
+                    />
+                    <div className="mt-3 flex flex-wrap items-end gap-3">
+                      <div className="flex-1 min-w-[8rem]">
+                        <label className="text-xs font-semibold text-navy">
+                          {t("budget")}
+                        </label>
+                        <Input
+                          inputMode="numeric"
+                          value={budget}
+                          onChange={(e) =>
+                            setBudget(e.target.value.replace(/[^\d]/g, ""))
+                          }
+                          className="mt-1 h-11 border-navy/15 font-semibold"
+                        />
+                      </div>
+                      <p className="text-sm text-muted-foreground pb-1">
+                        {t("budgetPerMonthSummary", {
+                          amount: Math.round(budgetNum / Math.max(months, 1)),
+                        })}
+                      </p>
+                    </div>
+                    {blurbParts ? (
+                      <p className="mt-3 rounded-xl border border-gold/25 bg-gold/5 px-3 py-2 text-xs leading-relaxed text-navy">
+                        {t("budgetBlurb", {
+                          name: blurbParts.sampleName.slice(0, 32),
+                          price: blurbParts.samplePrice,
+                          slots: blurbParts.slotsAtMonth,
+                        })}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div>
+                    <p className="mb-2 flex items-center gap-2 text-sm font-bold text-navy">
+                      <CalendarRange className="h-4 w-4 text-gold" />
+                      {t("period")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {PLANNER_PERIOD_OPTIONS.map((opt) => {
+                        const selected = Math.abs(months - opt.months) < 0.04;
+                        return (
+                          <Button
+                            key={opt.id}
+                            type="button"
+                            variant={selected ? "default" : "outline"}
+                            size="sm"
+                            className={cn(
+                              "rounded-full",
+                              selected && "btn-gold border-0",
+                            )}
+                            onClick={() => setMonths(opt.months)}
+                          >
+                            {t(opt.labelKey)}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {/* Step 4 — 매체 선택 (AI 추천 + 직접 탐색) */}
+            {wizardStep === 4 ? (
+              <div className="space-y-6">
+                <div className="space-y-2 text-center sm:text-left">
+                  <h2 className="text-lg font-bold text-navy sm:text-xl">
+                    {t("stepMediaTitle")}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {t("stepMediaDesc")}
+                  </p>
+                </div>
+
+                <PlannerRecommendationPanel
+                  catalog={catalog}
+                  isKo={isKo}
+                  regionLabel={mediaRegionLabel}
+                />
+
+                <div className="space-y-2 pt-4">
+                  <h3 className="text-base font-bold text-navy">
+                    {t("recommendBrowseTitle")}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {t("recommendBrowseDesc")}
+                  </p>
+                </div>
+                <PlannerMediaSelector
+                  catalog={catalog}
+                  campaignMediaIds={campaignMediaIds}
+                  setCampaignMediaIds={setCampaignMediaIds}
+                  isKo={isKo}
+                  regionLabel={mediaRegionLabel}
+                />
+              </div>
+            ) : null}
+
+            {/* Step 5 — 로고 업로드 + 합성 미리보기 */}
+            {wizardStep === 5 ? (
+              <PlannerSimulationStep3
+                selectedMedia={selectedMediaForSimulation}
+                creativeObjectUrl={creativeObjectUrl}
+                setCreativeObjectUrl={setCreativeObjectUrl}
+                creativeUploadedUrl={creativeUploadedUrl}
+                setCreativeUploadedUrl={setCreativeUploadedUrl}
+              />
+            ) : null}
+
             {wizardStep === 6 ? (
               <PlannerReportStep
                 isKo={isKo}
@@ -847,6 +749,8 @@ export default function PlannerPageClient({
                 metrics={metrics}
                 reachCorePct={reachSplit.corePct}
                 reachExtendedPct={reachSplit.extendedPct}
+                logoUrl={creativeUploadedUrl || creativeObjectUrl}
+                mediaPlacements={mediaPlacements}
               />
             ) : null}
 
@@ -866,12 +770,7 @@ export default function PlannerPageClient({
                 className="btn-gold rounded-full px-8 font-semibold"
                 onClick={goNext}
               >
-                {wizardStep === 5 ? (
-                  <>
-                    {t("stepRegionNext")}
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </>
-                ) : wizardStep === 6 ? (
+                {wizardStep === 6 ? (
                   <>
                     {t("viewEffectDashboard")}
                     <ChevronRight className="ml-1 h-4 w-4" />
@@ -899,7 +798,7 @@ export default function PlannerPageClient({
                 type="button"
                 variant="outline"
                 className="w-full rounded-full border-navy/20 sm:w-auto"
-                onClick={() => setWizardStep(5)}
+                onClick={() => setWizardStep(2)}
               >
                 <ChevronLeft className="mr-1 h-4 w-4" />
                 {t("editInputs")}
@@ -910,9 +809,10 @@ export default function PlannerPageClient({
                   variant="outline"
                   className="rounded-full border-navy/20"
                   onClick={savePlan}
+                  disabled={saving}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  {t("ctaSave")}
+                  {saving ? t("savingInProgress") : t("ctaSave")}
                 </Button>
                 <Button className="btn-gold rounded-full font-semibold" asChild>
                   <Link href={quoteHref}>
@@ -923,6 +823,47 @@ export default function PlannerPageClient({
               </div>
             </div>
 
+            {shareUrl ? (
+              <div
+                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950 shadow-sm"
+                role="status"
+              >
+                <p className="font-semibold">{t("shareBannerTitle")}</p>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <input
+                    readOnly
+                    value={shareUrl}
+                    onFocus={(e) => e.currentTarget.select()}
+                    className="min-w-0 flex-1 rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-mono text-xs"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full border-emerald-300"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(shareUrl);
+                        toast("success", t("shareCopied"));
+                      } catch {
+                        toast(
+                          "error",
+                          isKo
+                            ? "복사에 실패했습니다."
+                            : "Copy failed.",
+                        );
+                      }
+                    }}
+                  >
+                    {t("shareCopy")}
+                  </Button>
+                </div>
+                <p className="mt-1 text-[11px] text-emerald-950/80">
+                  {t("shareBannerExpiry")}
+                </p>
+              </div>
+            ) : null}
+
             {filtered.length === 0 ? (
               <Card className="border-dashed border-navy/20 bg-slate-50/80">
                 <CardContent className="py-12 text-center">
@@ -931,13 +872,13 @@ export default function PlannerPageClient({
                     type="button"
                     className="mt-4 rounded-full"
                     variant="outline"
-                    onClick={() => setWizardStep(5)}
+                    onClick={() => setWizardStep(2)}
                   >
                     {t("editInputs")}
                   </Button>
                 </CardContent>
               </Card>
-            ) : budgetNum < BUDGET_MIN ? (
+            ) : budgetNum < PLANNER_BUDGET_MIN ? (
               <Card className="border-dashed border-gold/30 bg-gold/5">
                 <CardContent className="py-10 text-center text-navy">
                   {t("needBudget")}
@@ -973,6 +914,71 @@ export default function PlannerPageClient({
                   {t(industryKey)}
                 </p>
 
+                {/* PR-7: 핵심 KPI 4장 — Impressions / Reach / CPM / ROI(기대) */}
+                {(() => {
+                  const budgetKrw = budgetNum * 10_000;
+                  const estReach = Math.round(
+                    metrics.estimatedTotalImpressions * 0.75,
+                  );
+                  const estCpm =
+                    metrics.estimatedTotalImpressions > 0
+                      ? Math.round(
+                          (budgetKrw /
+                            metrics.estimatedTotalImpressions) *
+                            1000,
+                        )
+                      : 0;
+                  return (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="rounded-xl border border-navy/10 bg-white p-4 shadow-sm">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t("kpiImpressions")}
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-gold-dark">
+                          {metrics.estimatedTotalImpressions.toLocaleString()}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {t("kpiImpressionsHint")}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-navy/10 bg-white p-4 shadow-sm">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t("kpiReach")}
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-navy">
+                          {estReach.toLocaleString()}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {t("kpiReachHint")}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-navy/10 bg-white p-4 shadow-sm">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t("kpiCpm")}
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-navy">
+                          ₩{estCpm.toLocaleString()}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {t("kpiCpmHint")}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 shadow-sm">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {t("kpiRoi")}
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-gold-dark">
+                          {metrics.roiExpected}
+                          {t("roiUnit")}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {t("kpiRoiHint")}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <Card className="border-navy/10 shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-navy">{t("comboTitle")}</CardTitle>
@@ -987,23 +993,37 @@ export default function PlannerPageClient({
                       <Link
                         key={m.id}
                         href={mediaItemDetailPath(m.id)}
-                        className="rounded-xl border border-navy/10 bg-white p-3 shadow-sm transition hover:border-gold/40 hover:shadow-md"
+                        className="group flex flex-col gap-2 rounded-xl border border-navy/10 bg-white p-3 shadow-sm transition hover:border-gold/40 hover:shadow-md"
                       >
-                        <p className="line-clamp-2 text-sm font-bold text-navy">
-                          {isKo ? m.name : (m.nameEn || m.name) || m.name}
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {tm(`regions.${m.region}`)} ·{" "}
-                          {isKo
-                            ? m.location.slice(0, 40)
-                            : (m.locationEn || m.location).slice(0, 40)}
-                        </p>
-                        <p className="mt-2 text-sm font-bold text-gold-dark">
-                          ₩{m.price.toLocaleString()}
-                          <span className="text-xs font-medium text-navy/60">
-                            {isKo ? "만/월" : " ₩10K/mo"}
-                          </span>
-                        </p>
+                        <CompositePreview
+                          mediaImageUrl={getPrimaryMediaImageUrl(m)}
+                          mediaName={isKo ? m.name : m.nameEn || m.name}
+                          logoUrl={
+                            creativeUploadedUrl || creativeObjectUrl
+                          }
+                          placement={
+                            mediaPlacements[m.id] ?? DEFAULT_LOGO_PLACEMENT
+                          }
+                          compact
+                          missingLabel={t("mediaPhotoMissing")}
+                        />
+                        <div>
+                          <p className="line-clamp-2 text-sm font-bold text-navy">
+                            {isKo ? m.name : (m.nameEn || m.name) || m.name}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {tm(`regions.${m.region}`)} ·{" "}
+                            {isKo
+                              ? m.location.slice(0, 40)
+                              : (m.locationEn || m.location).slice(0, 40)}
+                          </p>
+                          <p className="mt-2 text-sm font-bold text-gold-dark">
+                            ₩{m.price.toLocaleString()}
+                            <span className="text-xs font-medium text-navy/60">
+                              {isKo ? "만/월" : " ₩10K/mo"}
+                            </span>
+                          </p>
+                        </div>
                       </Link>
                     ))}
                   </CardContent>
@@ -1041,14 +1061,8 @@ export default function PlannerPageClient({
                         <p className="text-xs font-medium text-muted-foreground">
                           {t("estMonthlyImp")}
                         </p>
-                        <p className="mt-1 text-2xl font-extrabold text-gold-dark">
-                          {metrics.estimatedMonthlyImpressions.toLocaleString()}
-                        </p>
-                        <p className="mt-3 text-xs font-medium text-muted-foreground">
-                          {t("estTotalImp")}
-                        </p>
                         <p className="mt-1 text-xl font-bold text-navy">
-                          {metrics.estimatedTotalImpressions.toLocaleString()}
+                          {metrics.estimatedMonthlyImpressions.toLocaleString()}
                         </p>
                       </div>
                     </CardContent>
@@ -1227,7 +1241,14 @@ export default function PlannerPageClient({
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                       </Button>
-                      <Link href="/contact" className="w-full">
+                      <Link
+                        href={
+                          savedPlanId
+                            ? `/contact?plan=${savedPlanId}`
+                            : "/contact"
+                        }
+                        className="w-full"
+                      >
                         <Button
                           size="lg"
                           variant="outline"
@@ -1255,6 +1276,8 @@ export default function PlannerPageClient({
                   metrics={metrics}
                   reachCorePct={reachSplit.corePct}
                   reachExtendedPct={reachSplit.extendedPct}
+                  logoUrl={creativeUploadedUrl || creativeObjectUrl}
+                  mediaPlacements={mediaPlacements}
                 />
               </>
             ) : null}

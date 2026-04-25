@@ -22,28 +22,31 @@ export default function PlannerTips({
 }: Props) {
   const t = useTranslations("planner");
 
+  // 6단계 재배치: 1=목표, 2=타깃·지역, 3=예산·기간, 4=매체선택, 5=로고, 6=보고서, 7=결과 대시보드
   const tipKey =
     wizardStep === 1 && !campaignGoal
       ? "tipStep1"
       : wizardStep === 1
         ? "tipStep1Done"
-        : wizardStep === 2 && campaignMediaCount === 0
-          ? "tipStep2"
-          : wizardStep === 2
-            ? "tipStep2Done"
-            : wizardStep === 3 && !hasCreative
-              ? "tipStep3"
-              : wizardStep === 3
-                ? "tipStep3Done"
-        : wizardStep === 4 && budgetNum < 500
-          ? "tipStep4Budget"
-                  : wizardStep === 5
-                    ? "tipStep5"
-                    : wizardStep === 6
-                    ? "tipStep6"
-                    : wizardStep === 7
-                      ? "tipStep7"
-                      : "tipDefault";
+        : wizardStep === 2
+          ? "tipStep5"
+          : wizardStep === 3 && budgetNum < 500
+            ? "tipStep4Budget"
+            : wizardStep === 3
+              ? "tipStep4Budget"
+              : wizardStep === 4 && campaignMediaCount === 0
+                ? "tipStep2"
+                : wizardStep === 4
+                  ? "tipStep2Done"
+                  : wizardStep === 5 && !hasCreative
+                    ? "tipStep3"
+                    : wizardStep === 5
+                      ? "tipStep3Done"
+                      : wizardStep === 6
+                        ? "tipStep6"
+                        : wizardStep === 7
+                          ? "tipStep7"
+                          : "tipDefault";
 
   return (
     <div

@@ -6,6 +6,8 @@ import { Target, Wallet, CalendarRange, MapPin, Layers, Users, Briefcase } from 
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
 import type { PlannerMetrics } from "@/lib/planner-logic";
+import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
+import { DEFAULT_LOGO_PLACEMENT } from "@/components/planner/composite-preview";
 
 export type PlannerReportPreviewBudgetSlice = {
   label: string;
@@ -30,6 +32,9 @@ type Props = {
   blendedCpmKrw: number | null;
   effectSummaryLines: string[];
   generatedAt: string;
+  /** PR-9: PDF에 합성 로고 이미지 포함 */
+  logoUrl?: string | null;
+  mediaPlacements?: Record<string, CompositeLogoPlacement>;
 };
 
 function thumbUrl(m: MediaItem): string | null {
@@ -55,6 +60,8 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
   blendedCpmKrw,
   effectSummaryLines,
   generatedAt,
+  logoUrl,
+  mediaPlacements,
 }: Props,
   ref,
 ) {
@@ -169,7 +176,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                       <img
                         src={src}
                         alt=""
-                        className="h-full w-full object-cover"
+                        className="absolute inset-0 h-full w-full object-cover"
                         loading="lazy"
                         decoding="async"
                       />
@@ -178,6 +185,28 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                         {t("reportPreviewNoImage")}
                       </div>
                     )}
+                    {logoUrl && src ? (() => {
+                      const p =
+                        mediaPlacements?.[m.id] ?? DEFAULT_LOGO_PLACEMENT;
+                      return (
+                        <div
+                          className="pointer-events-none absolute flex items-start justify-center"
+                          style={{
+                            left: `${p.xPct}%`,
+                            top: `${p.yPct}%`,
+                            width: `${p.widthPct}%`,
+                            transform: `translate(-50%, -50%) rotate(${p.rotationDeg ?? 0}deg)`,
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={logoUrl}
+                            alt=""
+                            className="w-full object-contain"
+                          />
+                        </div>
+                      );
+                    })() : null}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="line-clamp-2 text-sm font-bold text-navy">{name}</p>

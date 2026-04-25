@@ -16,17 +16,23 @@ function ensureConfig() {
   });
 }
 
-export function signUploadParams(): {
+export type SignedUploadParams = {
   timestamp: number;
   signature: string;
   folder: string;
   cloudName: string;
   apiKey: string;
-} | null {
+};
+
+export function signUploadParams(
+  overrideFolder?: string,
+): SignedUploadParams | null {
   if (!isCloudinaryConfigured()) return null;
   ensureConfig();
   const folder =
-    process.env.CLOUDINARY_UPLOAD_FOLDER?.trim() || "tkad/media";
+    overrideFolder?.trim() ||
+    process.env.CLOUDINARY_UPLOAD_FOLDER?.trim() ||
+    "tkad/media";
   const timestamp = Math.round(Date.now() / 1000);
   const c = getCloudinaryCredentials()!;
   const signature = cloudinary.utils.api_sign_request(

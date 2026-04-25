@@ -34,6 +34,8 @@ function isPdfTimeoutError(e: unknown): boolean {
 import { useToast } from "@/components/toast-provider";
 import PlannerReportPreview from "@/components/planner-report-preview";
 
+import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
+
 export type PlannerReportSharedProps = {
   isKo: boolean;
   campaignGoal: PlannerCampaignGoal | null;
@@ -48,6 +50,9 @@ export type PlannerReportSharedProps = {
   metrics: PlannerMetrics | null;
   reachCorePct: number;
   reachExtendedPct: number;
+  /** PR-9: PDF 내 합성 로고 이미지용 */
+  logoUrl?: string | null;
+  mediaPlacements?: Record<string, CompositeLogoPlacement>;
 };
 
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
@@ -404,6 +409,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         blendedCpmKrw={derived.blendedCpmKrw}
         effectSummaryLines={derived.effectSummaryLines}
         generatedAt={snapshotAt}
+        logoUrl={props.logoUrl}
+        mediaPlacements={props.mediaPlacements}
       />
 
       <Card className="border-navy/10 shadow-lg">
@@ -680,6 +687,8 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           blendedCpmKrw={derived.blendedCpmKrw}
           effectSummaryLines={derived.effectSummaryLines}
           generatedAt={snapshotAt}
+          logoUrl={props.logoUrl}
+          mediaPlacements={props.mediaPlacements}
         />
         <div className="flex flex-wrap gap-2 border-t border-navy/10 pt-6">
           {/* PDF/이메일 기능 준비 중 - 화면 캡처로 저장 안내 */}

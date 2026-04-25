@@ -750,6 +750,22 @@ model UserSession {
   @@map("user_sessions")
 }
 
+/// 공개 플래너 저장·공유 플랜. 30일 후 자동 만료.
+model SavedPlannerPlan {
+  id        String   @id @default(cuid())
+  expiresAt DateTime @map("expires_at")
+  /** 저장 시 선택적으로 입력. 재편집·이메일 재전송 플로우에 활용 */
+  userEmail String?  @map("user_email")
+  /** PlannerStore partialize 결과 그대로 직렬화된 입력 상태 전체 */
+  planJson  Json     @map("plan_json")
+  viewCount Int      @default(0) @map("view_count")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([expiresAt])
+  @@map("saved_planner_plans")
+}
+
 model UserFavoriteMedia {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
