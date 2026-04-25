@@ -129,6 +129,8 @@ export interface MediaItem {
     monthly?: number[];
     updatedAt?: string;
   } | null;
+  /** 등록일(ISO) — `신규 등록순` 정렬용. DB Media.createdAt. */
+  createdAt?: string;
 }
 
 export function getMediaById(id: string | number): MediaItem | undefined {

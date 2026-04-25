@@ -149,7 +149,7 @@ export default function MediaBrowseClient({
   const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
   const [sortBy, setSortBy] = useState<
-    "default" | "priceAsc" | "priceDesc" | "trafficDesc"
+    "default" | "newest" | "priceAsc" | "priceDesc" | "trafficDesc"
   >("default");
 
   /**
@@ -336,6 +336,12 @@ export default function MediaBrowseClient({
           (a, b) =>
             (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0),
         );
+      case "newest":
+        return arr.sort((a, b) => {
+          const at = a.createdAt ? Date.parse(a.createdAt) : 0;
+          const bt = b.createdAt ? Date.parse(b.createdAt) : 0;
+          return bt - at;
+        });
       default:
         return arr;
     }
@@ -671,6 +677,9 @@ export default function MediaBrowseClient({
                       >
                         <option value="default">
                           {t("media.sortDefault")}
+                        </option>
+                        <option value="newest">
+                          {t("media.sortNewest")}
                         </option>
                         <option value="priceAsc">
                           {t("media.sortPriceAsc")}

@@ -31,6 +31,9 @@ import {
   Save,
   Eye,
   Download,
+  Plus,
+  Trash2,
+  Sparkles,
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 
@@ -84,6 +87,10 @@ export default function AdminQuoteNewClient() {
 
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+
+  /** 커스텀 라인(제작비·디자인비·운영비 등 수기 입력) */
+  type CustomLine = { id: string; name: string; quantity: number; unitPriceWon: number };
+  const [customLines, setCustomLines] = useState<CustomLine[]>([]);
 
   const [startDate, setStartDate] = useState(todayISODate);
   const [endDate, setEndDate] = useState(() => addMonthsISODate(todayISODate(), 1));
@@ -176,8 +183,12 @@ export default function AdminQuoteNewClient() {
       const qty = quantities[id] ?? 1;
       out.push(lineSupplyWon(m.price, monthFactor, qty));
     }
+    for (const c of customLines) {
+      const amount = Math.max(0, Math.round(c.unitPriceWon * Math.max(1, c.quantity)));
+      if (amount > 0) out.push(amount);
+    }
     return out;
-  }, [selected, medias, quantities, monthFactor]);
+  }, [selected, medias, quantities, monthFactor, customLines]);
 
   const dpct = Math.min(100, Math.max(0, parseFloat(discountPercent) || 0));
   const dwon = Math.max(0, parseFloat(discountWon.replace(/,/g, "")) || 0);
@@ -273,6 +284,21 @@ export default function AdminQuoteNewClient() {
         amount: lineSupplyWon(m.price, monthFactor, qty),
       });
     }
+    for (const c of customLines) {
+      const qty = Math.max(1, c.quantity);
+      const unit = Math.max(0, Math.round(c.unitPriceWon));
+      const amount = Math.round(unit * qty);
+      if (amount <= 0 && !c.name.trim()) continue;
+      list.push({
+        mediaId: `custom-${c.id}`,
+        mediaName: c.name.trim() || (isKo ? "기타 비용" : "Other cost"),
+        spec: "—",
+        period: campaignPeriodLabel,
+        unitPrice: unit,
+        quantity: qty,
+        amount,
+      });
+    }
     return list;
   }, [
     selected,
@@ -281,6 +307,7 @@ export default function AdminQuoteNewClient() {
     monthFactor,
     campaignPeriodLabel,
     isKo,
+    customLines,
   ]);
 
   const pdfPostRows = useMemo(
@@ -298,7 +325,7 @@ export default function AdminQuoteNewClient() {
 
   const saveQuote = useCallback(async () => {
     setPdfError(null);
-    if (selected.size === 0) {
+    if (selected.size === 0 && customLines.length === 0) {
       setPdfError(t("pdfNeedMedia"));
       return;
     }
@@ -361,6 +388,7 @@ export default function AdminQuoteNewClient() {
     }
   }, [
     selected.size,
+    customLines.length,
     days,
     clientCompany,
     clientName,
@@ -377,7 +405,7 @@ export default function AdminQuoteNewClient() {
 
   const downloadPdf = useCallback(async () => {
     setPdfError(null);
-    if (selected.size === 0) {
+    if (selected.size === 0 && customLines.length === 0) {
       setPdfError(t("pdfNeedMedia"));
       return;
     }
@@ -477,6 +505,7 @@ export default function AdminQuoteNewClient() {
     }
   }, [
     selected.size,
+    customLines.length,
     days,
     clientCompany,
     clientName,
@@ -706,6 +735,161 @@ export default function AdminQuoteNewClient() {
 
       <Card>
         <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg text-navy">
+            <Sparkles className="h-5 w-5 text-gold" />
+            추가 비용 항목 (제작비·디자인비·운영비 등)
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            매체 광고비 외에 견적서에 포함할 비용을 자유롭게 추가하세요.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {customLines.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-muted-foreground">
+              아직 추가된 항목이 없습니다. 아래 ‘항목 추가’를 눌러 입력하세요.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {customLines.map((line) => (
+                <div
+                  key={line.id}
+                  className="grid items-center gap-2 rounded-lg border border-slate-200 bg-white p-2 sm:grid-cols-[1fr_120px_140px_auto] sm:p-3"
+                >
+                  <Input
+                    value={line.name}
+                    onChange={(e) =>
+                      setCustomLines((arr) =>
+                        arr.map((c) =>
+                          c.id === line.id ? { ...c, name: e.target.value } : c,
+                        ),
+                      )
+                    }
+                    placeholder="예) 제작비, 디자인 시안비, 운영 관리비"
+                    className="text-sm"
+                  />
+                  <div>
+                    <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                      수량
+                    </label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={String(line.quantity)}
+                      onChange={(e) => {
+                        const n = Math.max(1, parseInt(e.target.value, 10) || 1);
+                        setCustomLines((arr) =>
+                          arr.map((c) =>
+                            c.id === line.id ? { ...c, quantity: n } : c,
+                          ),
+                        );
+                      }}
+                      className="h-9 text-right text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                      단가 (원)
+                    </label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={String(line.unitPriceWon)}
+                      onChange={(e) => {
+                        const n = Math.max(0, parseInt(e.target.value, 10) || 0);
+                        setCustomLines((arr) =>
+                          arr.map((c) =>
+                            c.id === line.id ? { ...c, unitPriceWon: n } : c,
+                          ),
+                        );
+                      }}
+                      placeholder="0"
+                      className="h-9 text-right text-sm tabular-nums"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-2 sm:flex-col sm:items-end">
+                    <span className="text-sm font-bold tabular-nums text-navy">
+                      {formatWon(
+                        Math.round(
+                          Math.max(0, line.unitPriceWon) *
+                            Math.max(1, line.quantity),
+                        ),
+                      )}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-red-600"
+                      onClick={() =>
+                        setCustomLines((arr) =>
+                          arr.filter((c) => c.id !== line.id),
+                        )
+                      }
+                      aria-label="항목 삭제"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="border-dashed border-navy/30 text-navy hover:bg-navy/5"
+              onClick={() =>
+                setCustomLines((arr) => [
+                  ...arr,
+                  {
+                    id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                    name: "",
+                    quantity: 1,
+                    unitPriceWon: 0,
+                  },
+                ])
+              }
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" />
+              항목 추가
+            </Button>
+            {[
+              { name: "제작비", price: 500000 },
+              { name: "디자인 시안비", price: 300000 },
+              { name: "운영·관리비", price: 200000 },
+              { name: "출력·시공비", price: 800000 },
+            ].map((preset) => (
+              <Button
+                key={preset.name}
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground hover:text-navy"
+                onClick={() =>
+                  setCustomLines((arr) => [
+                    ...arr,
+                    {
+                      id: `c-${Date.now()}-${Math.random()
+                        .toString(36)
+                        .slice(2, 6)}`,
+                      name: preset.name,
+                      quantity: 1,
+                      unitPriceWon: preset.price,
+                    },
+                  ])
+                }
+              >
+                + {preset.name}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
           <CardTitle className="text-lg text-navy">{t("pdfSectionTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -791,13 +975,15 @@ export default function AdminQuoteNewClient() {
               disabled={
                 saveLoading ||
                 pdfLoading ||
-                selected.size === 0 ||
+                (selected.size === 0 && customLines.length === 0) ||
                 days <= 0 ||
                 !clientCompany.trim() ||
                 !clientName.trim() ||
                 !clientPhone.trim()
               }
-              onClick={() => void saveQuote()}
+              onClick={() => {
+                void saveQuote();
+              }}
             >
               {saveLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -811,7 +997,7 @@ export default function AdminQuoteNewClient() {
               variant="outline"
               className="border-navy/20 text-navy hover:bg-navy/5"
               disabled={
-                selected.size === 0 ||
+                (selected.size === 0 && customLines.length === 0) ||
                 days <= 0 ||
                 !clientCompany.trim() ||
                 !clientName.trim() ||
@@ -828,7 +1014,7 @@ export default function AdminQuoteNewClient() {
               disabled={
                 pdfLoading ||
                 saveLoading ||
-                selected.size === 0 ||
+                (selected.size === 0 && customLines.length === 0) ||
                 days <= 0 ||
                 !clientCompany.trim() ||
                 !clientName.trim() ||
@@ -858,7 +1044,7 @@ export default function AdminQuoteNewClient() {
           <CardTitle className="text-lg text-navy">{t("summaryTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
-          {selected.size === 0 ? (
+          {selected.size === 0 && customLines.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("pickMedia")}</p>
           ) : days <= 0 ? (
             <p className="text-sm text-amber-700">{t("invalidPeriod")}</p>
@@ -907,7 +1093,7 @@ export default function AdminQuoteNewClient() {
         </CardContent>
       </Card>
 
-      {showPreview && selected.size > 0 && days > 0 && (
+      {showPreview && (selected.size > 0 || customLines.length > 0) && days > 0 && (
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">

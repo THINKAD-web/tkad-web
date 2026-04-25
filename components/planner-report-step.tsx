@@ -383,35 +383,37 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-8">
       <div className="space-y-2 text-center">
-        <h2 className="text-lg font-bold text-navy sm:text-xl">
+        <h2 className="text-xl font-bold text-navy sm:text-2xl">
           {t("stepReportTitle")}
         </h2>
         <p className="text-sm text-muted-foreground">{t("stepReportDesc")}</p>
       </div>
 
-      <PlannerReportPreview
-        ref={previewRef}
-        isKo={props.isKo}
-        goalTitle={props.goalTitle}
-        budgetNum={props.budgetNum}
-        periodDisplay={derived.periodDisplay}
-        regionsText={props.regionsText}
-        categoriesText={props.categoriesText}
-        ageText={props.ageText}
-        industryText={props.industryText}
-        portfolio={props.portfolio}
-        metrics={props.metrics}
-        reachCorePct={props.reachCorePct}
-        reachExtendedPct={props.reachExtendedPct}
-        budgetAllocation={derived.budgetAllocation}
-        blendedCpmKrw={derived.blendedCpmKrw}
-        effectSummaryLines={derived.effectSummaryLines}
-        generatedAt={snapshotAt}
-        logoUrl={props.logoUrl}
-        mediaPlacements={props.mediaPlacements}
-      />
+      <div className="mx-auto flex w-full justify-center rounded-2xl border border-navy/10 bg-slate-50/60 p-4 shadow-inner sm:p-6 lg:p-8">
+        <PlannerReportPreview
+          ref={previewRef}
+          isKo={props.isKo}
+          goalTitle={props.goalTitle}
+          budgetNum={props.budgetNum}
+          periodDisplay={derived.periodDisplay}
+          regionsText={props.regionsText}
+          categoriesText={props.categoriesText}
+          ageText={props.ageText}
+          industryText={props.industryText}
+          portfolio={props.portfolio}
+          metrics={props.metrics}
+          reachCorePct={props.reachCorePct}
+          reachExtendedPct={props.reachExtendedPct}
+          budgetAllocation={derived.budgetAllocation}
+          blendedCpmKrw={derived.blendedCpmKrw}
+          effectSummaryLines={derived.effectSummaryLines}
+          generatedAt={snapshotAt}
+          logoUrl={props.logoUrl}
+          mediaPlacements={props.mediaPlacements}
+        />
+      </div>
 
       <Card className="border-navy/10 shadow-lg">
         <CardHeader className="flex flex-col gap-4 border-b border-navy/8 bg-slate-50/50 sm:flex-row sm:items-start sm:justify-between">
@@ -420,12 +422,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             <CardDescription>{t("reportPreviewDesc")}</CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {/* PDF/이메일 기능 준비 중 - 화면 캡처로 저장 안내 */}
-            <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
-              <span>💡</span>
-              <span>{props.isKo ? "화면을 캡처하여 저장하세요 (Cmd+Shift+4 또는 Win+Shift+S)" : "Take a screenshot to save (Cmd+Shift+4 or Win+Shift+S)"}</span>
-            </div>
-            {/* TODO: PDF/이메일 기능 복원 예정
             <Button
               type="button"
               variant="outline"
@@ -478,7 +474,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
               </Button>
             </div>
-            */}
             {error ? (
               <Button
                 type="button"
@@ -512,7 +507,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             <iframe
               title={t("reportPdfDocumentTitle")}
               src={`${pdfUrl}#toolbar=1`}
-              className="h-[min(65vh,720px)] w-full rounded-2xl border border-navy/10 bg-white shadow-inner"
+              className="mx-auto h-[min(85vh,1100px)] w-full rounded-2xl border border-navy/10 bg-white shadow-inner"
             />
           ) : null}
         </CardContent>
@@ -669,38 +664,34 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
         <CardDescription>{t("reportCompactDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        <PlannerReportPreview
-          ref={compactPreviewRef}
-          isKo={props.isKo}
-          goalTitle={props.goalTitle}
-          budgetNum={props.budgetNum}
-          periodDisplay={derived.periodDisplay}
-          regionsText={props.regionsText}
-          categoriesText={props.categoriesText}
-          ageText={props.ageText}
-          industryText={props.industryText}
-          portfolio={props.portfolio}
-          metrics={props.metrics}
-          reachCorePct={props.reachCorePct}
-          reachExtendedPct={props.reachExtendedPct}
-          budgetAllocation={derived.budgetAllocation}
-          blendedCpmKrw={derived.blendedCpmKrw}
-          effectSummaryLines={derived.effectSummaryLines}
-          generatedAt={snapshotAt}
-          logoUrl={props.logoUrl}
-          mediaPlacements={props.mediaPlacements}
-        />
+        <div className="flex justify-center rounded-xl bg-slate-50/40 p-3 sm:p-5">
+          <PlannerReportPreview
+            ref={compactPreviewRef}
+            isKo={props.isKo}
+            goalTitle={props.goalTitle}
+            budgetNum={props.budgetNum}
+            periodDisplay={derived.periodDisplay}
+            regionsText={props.regionsText}
+            categoriesText={props.categoriesText}
+            ageText={props.ageText}
+            industryText={props.industryText}
+            portfolio={props.portfolio}
+            metrics={props.metrics}
+            reachCorePct={props.reachCorePct}
+            reachExtendedPct={props.reachExtendedPct}
+            budgetAllocation={derived.budgetAllocation}
+            blendedCpmKrw={derived.blendedCpmKrw}
+            effectSummaryLines={derived.effectSummaryLines}
+            generatedAt={snapshotAt}
+            logoUrl={props.logoUrl}
+            mediaPlacements={props.mediaPlacements}
+          />
+        </div>
         <div className="flex flex-wrap gap-2 border-t border-navy/10 pt-6">
-          {/* PDF/이메일 기능 준비 중 - 화면 캡처로 저장 안내 */}
-          <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
-            <span>💡</span>
-            <span>{props.isKo ? "화면을 캡처하여 저장하세요 (Cmd+Shift+4 또는 Win+Shift+S)" : "Take a screenshot to save (Cmd+Shift+4 or Win+Shift+S)"}</span>
-          </div>
-          {/* TODO: PDF/이메일 기능 복원 예정
           <Button
             type="button"
             className="btn-gold rounded-full font-semibold"
-            onClick={downloadPdf}
+            onClick={() => void downloadPdf()}
             disabled={downloading}
           >
             {downloading ? (
@@ -736,7 +727,6 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
               {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
             </Button>
           </div>
-          */}
         </div>
       </CardContent>
     </Card>

@@ -206,6 +206,9 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     caseStudyPhotos: undefined,
     pricePeriod: normalizePricePeriod(m.pricePeriod),
     priceOptions,
+    createdAt: m.createdAt instanceof Date
+      ? m.createdAt.toISOString()
+      : (typeof m.createdAt === "string" ? m.createdAt : undefined),
   };
 }
 

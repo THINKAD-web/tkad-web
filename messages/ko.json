@@ -287,6 +287,7 @@
     "pageSummary": "{from}–{to} / 전체 {total}건",
     "sortLabel": "정렬",
     "sortDefault": "기본",
+    "sortNewest": "신규 등록순",
     "sortPriceAsc": "가격 낮은순",
     "sortPriceDesc": "가격 높은순",
     "sortTrafficDesc": "유동인구 많은순",
@@ -1996,9 +1997,13 @@
       "title": "현장 로드뷰",
       "desc": "Kakao 로드뷰로 매체 인근 풍경을 확인하실 수 있습니다.",
       "loadCta": "로드뷰 불러오기",
+      "loading": "로드뷰를 불러오는 중…",
       "openExternal": "새 창에서 열기",
       "externalAria": "Kakao 로드뷰를 새 창으로 열기",
-      "iframeTitle": "{name} 로드뷰"
+      "iframeTitle": "{name} 로드뷰",
+      "missingKey": "Kakao 지도 키가 설정되지 않았습니다. 새 창에서 열어주세요.",
+      "noPanoNearby": "이 위치 주변에 로드뷰 데이터가 없습니다. 새 창에서 카카오맵으로 확인해 주세요.",
+      "loadFailed": "로드뷰를 불러오지 못했습니다. 새 창에서 열어주세요."
     },
     "cta": {
       "planner": "Planner로 시뮬레이션",

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ExternalLink, Eye } from "lucide-react";
+import { ExternalLink, Eye, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -17,22 +17,131 @@ type Props = {
   mediaName: string;
 };
 
+type KakaoLatLng = { equals: (other: KakaoLatLng) => boolean };
+type KakaoRoadview = {
+  setPanoId: (panoId: number, position: KakaoLatLng) => void;
+};
+type KakaoRoadviewClient = {
+  getNearestPanoId: (
+    position: KakaoLatLng,
+    radius: number,
+    callback: (panoId: number | null) => void,
+  ) => void;
+};
+type KakaoMaps = {
+  load: (cb: () => void) => void;
+  LatLng: new (lat: number, lng: number) => KakaoLatLng;
+  Roadview: new (container: HTMLElement) => KakaoRoadview;
+  RoadviewClient: new () => KakaoRoadviewClient;
+};
+
+declare global {
+  interface Window {
+    kakao?: { maps?: KakaoMaps };
+  }
+}
+
+function loadKakaoSdkForRoadview(appkey: string): Promise<KakaoMaps> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") {
+      reject(new Error("SSR"));
+      return;
+    }
+    if (window.kakao?.maps) {
+      window.kakao.maps.load(() => {
+        if (window.kakao?.maps) resolve(window.kakao.maps);
+        else reject(new Error("kakao.maps undefined after load"));
+      });
+      return;
+    }
+    const existing = document.querySelector<HTMLScriptElement>(
+      `script[data-kakao-sdk="1"]`,
+    );
+    const onReady = () => {
+      window.kakao?.maps?.load(() => {
+        if (window.kakao?.maps) resolve(window.kakao.maps);
+        else reject(new Error("kakao.maps undefined after load"));
+      });
+    };
+    if (existing) {
+      existing.addEventListener("load", onReady);
+      existing.addEventListener("error", () =>
+        reject(new Error("Kakao SDK load failed")),
+      );
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false&libraries=clusterer`;
+    s.async = true;
+    s.dataset.kakaoSdk = "1";
+    s.onload = onReady;
+    s.onerror = () => reject(new Error("Kakao SDK load failed"));
+    document.head.appendChild(s);
+  });
+}
+
 /**
- * Kakao 로드뷰 임베드 카드.
- * 좌표 없으면 컴포넌트는 null 반환.
- * 사용자가 "로드뷰 열기" 버튼을 누를 때까지 iframe 미로드 (성능·과금 절감).
+ * Kakao 로드뷰 카드.
+ * - 좌표 없으면 null 반환.
+ * - 사용자가 "로드뷰 보기" 클릭 시 Kakao Maps SDK 로드 + Roadview 인스턴스 생성.
+ * - 좌표 근처(50m) 파노라마가 없으면 외부 링크 안내.
  */
 export function RoadviewCard({ lat, lng, mediaName }: Props) {
   const t = useTranslations("mediaDetail.roadview");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const externalHref =
+    lat != null && lng != null
+      ? `https://map.kakao.com/link/roadview/${encodeURIComponent(
+          mediaName,
+        )},${lat},${lng}`
+      : "";
+
+  useEffect(() => {
+    if (!open || lat == null || lng == null) return;
+    const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
+    if (!appkey) {
+      setErrorMsg(t("missingKey"));
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setErrorMsg(null);
+    (async () => {
+      try {
+        const maps = await loadKakaoSdkForRoadview(appkey);
+        if (cancelled) return;
+        const el = containerRef.current;
+        if (!el) return;
+        const position = new maps.LatLng(lat, lng);
+        const roadview = new maps.Roadview(el);
+        const client = new maps.RoadviewClient();
+        client.getNearestPanoId(position, 50, (panoId) => {
+          if (cancelled) return;
+          if (panoId == null) {
+            setErrorMsg(t("noPanoNearby"));
+            setLoading(false);
+            return;
+          }
+          roadview.setPanoId(panoId, position);
+          setLoading(false);
+        });
+      } catch (e) {
+        if (cancelled) return;
+        console.error("[RoadviewCard] Kakao SDK load failed", e);
+        setErrorMsg(t("loadFailed"));
+        setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, lat, lng, t]);
 
   if (lat == null || lng == null) return null;
-
-  // Kakao 로드뷰 공식 임베드 URL (앱 키 없이 동작)
-  const src = `https://map.kakao.com/?from=roughmap&srcid=&urlX=${lng}&urlY=${lat}&urlLevel=3&urlText=${encodeURIComponent(
-    mediaName,
-  )}&map_type=ROADVIEW`;
-  const externalHref = `https://map.kakao.com/link/roadview/${mediaName},${lat},${lng}`;
 
   return (
     <Card className="border-navy/10 shadow-sm">
@@ -64,14 +173,29 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
       </CardHeader>
       <CardContent>
         {open ? (
-          <div className="aspect-video w-full overflow-hidden rounded-xl border border-navy/10">
-            <iframe
-              src={src}
-              title={t("iframeTitle", { name: mediaName })}
-              loading="lazy"
-              className="h-full w-full"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+          <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-navy/10 bg-slate-100">
+            <div ref={containerRef} className="h-full w-full" />
+            {loading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-100/85 text-sm font-semibold text-navy">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin text-gold" aria-hidden />
+                {t("loading")}
+              </div>
+            ) : null}
+            {errorMsg ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/95 px-6 text-center text-sm text-navy">
+                <p className="font-semibold">{errorMsg}</p>
+                <Button asChild size="sm" variant="outline" className="rounded-full">
+                  <a
+                    href={externalHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="mr-1 h-3.5 w-3.5" aria-hidden />
+                    {t("openExternal")}
+                  </a>
+                </Button>
+              </div>
+            ) : null}
           </div>
         ) : (
           <button
