@@ -908,6 +908,74 @@
       "restore": "Resume",
       "discard": "Start fresh"
     },
+    "pdfOptionsTitle": "Advanced: Quote PDF options (template & logo)",
+    "creative": {
+      "desc": "How would you like to prepare your creative? You can change this after the quote is issued.",
+      "modes": {
+        "upload": {
+          "title": "Upload existing assets",
+          "desc": "Upload images, logos or videos you already have."
+        },
+        "composite": {
+          "title": "Use Planner composite",
+          "desc": "Reuse the per-media composite preview you built in Planner."
+        },
+        "design_request": {
+          "title": "Request design",
+          "desc": "Have the THINKAD design team produce assets sized for each media (added to quote)."
+        },
+        "later": {
+          "title": "Decide later",
+          "desc": "Skip creative for now and continue with the quote.",
+          "notice": "You can decide on creative after the quote is confirmed; our team will follow up."
+        }
+      },
+      "upload": {
+        "title": "Upload creative files",
+        "hint": "PNG, JPG, SVG, MP4 supported, up to {mb}MB.",
+        "choose": "Choose file",
+        "uploading": "Uploading… {pct}%",
+        "remove": "Remove",
+        "empty": "No files uploaded yet.",
+        "guides": {
+          "digital": {
+            "label": "Digital signage",
+            "spec": "16:9 (1920×1080), 9:16 (1080×1920) or 1:1 recommended. Check legibility."
+          },
+          "static": {
+            "label": "Outdoor / print",
+            "spec": "300dpi CMYK recommended, 5% safe-area margin."
+          }
+        },
+        "errors": {
+          "type": "Unsupported file type (PNG, JPG, SVG, MP4 only).",
+          "size": "File is too large.",
+          "empty": "Empty file cannot be uploaded.",
+          "network": "Upload failed due to a network error.",
+          "serverDisabled": "Upload server is not configured. Please contact our team."
+        }
+      },
+      "composite": {
+        "missingTitle": "No Planner composite found",
+        "missingBody": "This mode requires a logo uploaded and per-media placements set in Planner first.",
+        "goPlanner": "Open Planner",
+        "foundTitle": "Planner composites for {count} media",
+        "foundBody": "These composites will appear as the media thumbnails in the quote PDF."
+      },
+      "brief": {
+        "title": "Design brief",
+        "hint": "Give us the key info our designers need to create your assets.",
+        "brand": "Brand name",
+        "deadline": "Desired deadline",
+        "message": "Message to convey",
+        "messagePlaceholder": "e.g. New product launch, spring promotion, etc.",
+        "tone": "Tone & manner",
+        "tonePlaceholder": "e.g. Modern & minimal, warm, premium",
+        "refs": "Reference URLs (one per line)",
+        "refsPlaceholder": "https://...\nhttps://...",
+        "feeNotice": "Design fees are roughly ₩300,000–₩500,000 per media and will be added to the quote after team review."
+      }
+    },
     "period2": {
       "desc": "Pick your campaign start and end dates. Start date must be at least one week out to allow setup.",
       "presetTitle": "Quick presets",

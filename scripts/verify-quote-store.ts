@@ -229,6 +229,35 @@ section("Step 3 (소재) 검증", () => {
     "needDesignBrief",
     "design_request + 브리프 없음 → needDesignBrief",
   );
+  expectErr(
+    withState({
+      creativeMode: "design_request",
+      designBrief: {
+        brand: "",
+        message: "",
+        toneAndManner: "",
+        referenceUrls: [],
+        deadlineIso: null,
+      },
+    }),
+    3,
+    "needDesignBrief",
+    "design_request + 빈 brand/message → needDesignBrief",
+  );
+  expectOk(
+    withState({
+      creativeMode: "design_request",
+      designBrief: {
+        brand: "Acme",
+        message: "신제품 출시",
+        toneAndManner: "",
+        referenceUrls: [],
+        deadlineIso: null,
+      },
+    }),
+    3,
+    "design_request + brand+message → ok",
+  );
 });
 
 section("Step 4 (고객 정보) 검증", () => {

@@ -67,11 +67,14 @@ function checkStep3(state: QuoteStoreState): QuoteStepCheck {
         return { ok: false, errorKey: "needCreativeAsset" };
       }
       return { ok: true };
-    case "design_request":
-      if (!state.designBrief) {
+    case "design_request": {
+      const b = state.designBrief;
+      // 브랜드명 + 메시지 둘 다 필수 — 빈 객체나 공백만 있는 경우는 미입력으로 간주.
+      if (!b || !b.brand.trim() || !b.message.trim()) {
         return { ok: false, errorKey: "needDesignBrief" };
       }
       return { ok: true };
+    }
     case "composite":
     case "later":
       return { ok: true };

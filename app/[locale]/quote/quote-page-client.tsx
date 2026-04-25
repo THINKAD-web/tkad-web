@@ -88,6 +88,7 @@ import { QUOTE_MAX_MEDIA, type QuoteSource } from "@/lib/quote/types";
 import { QuoteSourceBanner } from "@/components/quote/source-banner";
 import { QuoteRestoreModal } from "@/components/quote/restore-modal";
 import { QuotePeriodStep } from "@/components/quote/period-step";
+import { QuoteCreativeStep } from "@/components/quote/creative-step";
 import {
   computeQuoteTotals,
   inclusiveCampaignDays,
@@ -692,6 +693,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     if (step === 2) {
       return canProceedFromStep(useQuoteStore.getState(), 2).ok;
     }
+    if (step === 3) {
+      return canProceedFromStep(useQuoteStore.getState(), 3).ok;
+    }
     return true;
   }, [step, selectedMedia.length]);
 
@@ -719,6 +723,22 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         campaignTooLong: {
           ko: "최대 365일까지 선택할 수 있습니다.",
           en: "Maximum campaign length is 365 days.",
+        },
+      };
+      const m = map[r.errorKey];
+      return m ? (isKo ? m.ko : m.en) : null;
+    }
+    if (step === 3) {
+      const r = canProceedFromStep(useQuoteStore.getState(), 3);
+      if (r.ok) return null;
+      const map: Record<string, { ko: string; en: string }> = {
+        needCreativeAsset: {
+          ko: "최소 1개의 소재 파일을 업로드해 주세요.",
+          en: "Please upload at least one creative file.",
+        },
+        needDesignBrief: {
+          ko: "디자인 브리프(브랜드명·메시지)를 입력해 주세요.",
+          en: "Please fill in your design brief (brand name and message).",
         },
       };
       const m = map[r.errorKey];
@@ -1572,91 +1592,101 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   )}
 
                   {step === 3 && (
-                    <div className="space-y-6">
-                      <div>
-                        <p className="mb-3 text-sm text-muted-foreground">
-                          {t("quote.templateDesc")}
-                        </p>
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <button
-                            type="button"
-                            onClick={() => setTemplate("default")}
-                            className={cn(
-                              "rounded-xl border-2 p-4 text-left transition-all",
-                              template === "default"
-                                ? "border-gold bg-gold/5 ring-2 ring-gold/20"
-                                : "border-navy/10 hover:border-navy/25",
-                            )}
-                          >
-                            <LayoutTemplate className="mb-2 h-8 w-8 text-navy" />
-                            <p className="font-bold text-navy">
-                              {t("quote.templateDefault")}
+                    <div className="space-y-8">
+                      <QuoteCreativeStep selectedMedia={selectedMedia} />
+
+                      {/* PDF 견적서 옵션 — 템플릿 + 헤더 로고. 추후 별도 PR 에서 step 4 로 이전 가능. */}
+                      <details className="group rounded-xl border border-navy/10 bg-slate-50/60 p-4">
+                        <summary className="cursor-pointer text-sm font-semibold text-navy">
+                          {t("quote.pdfOptionsTitle")}
+                        </summary>
+                        <div className="mt-4 space-y-6">
+                          <div>
+                            <p className="mb-3 text-sm text-muted-foreground">
+                              {t("quote.templateDesc")}
                             </p>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              {t("quote.templateDefaultDesc")}
-                            </p>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setTemplate("premium")}
-                            className={cn(
-                              "rounded-xl border-2 p-4 text-left transition-all",
-                              template === "premium"
-                                ? "border-gold bg-gold/5 ring-2 ring-gold/20"
-                                : "border-navy/10 hover:border-navy/25",
-                            )}
-                          >
-                            <Sparkles className="mb-2 h-8 w-8 text-gold-dark" />
-                            <p className="font-bold text-navy">
-                              {t("quote.templatePremium")}
-                            </p>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              {t("quote.templatePremiumDesc")}
-                            </p>
-                          </button>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm font-semibold text-navy">
-                          {t("quote.logoLabel")}
-                        </label>
-                        <p className="mb-2 text-xs text-muted-foreground">
-                          {t("quote.logoHint")}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-3">
-                          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-navy/15 bg-white px-4 py-2 text-sm font-medium text-navy shadow-sm hover:bg-slate-50">
-                            <ImagePlus className="h-4 w-4 text-gold" />
-                            {isKo ? "파일 선택" : "Choose file"}
-                            <input
-                              type="file"
-                              accept="image/png,image/jpeg"
-                              className="hidden"
-                              onChange={onLogoChange}
-                            />
-                          </label>
-                          {logoDataUrl ? (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setLogoDataUrl(null)}
-                            >
-                              <Trash2 className="mr-1.5 h-4 w-4" />
-                              {t("quote.logoRemove")}
-                            </Button>
-                          ) : null}
-                        </div>
-                        {logoDataUrl ? (
-                          <div className="mt-4 inline-block rounded-lg border border-navy/10 bg-slate-50 p-3">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={logoDataUrl}
-                              alt={t("quote.logoPreviewAlt")}
-                              className="max-h-24 max-w-[200px] object-contain"
-                            />
+                            <div className="grid gap-4 sm:grid-cols-2">
+                              <button
+                                type="button"
+                                onClick={() => setTemplate("default")}
+                                className={cn(
+                                  "rounded-xl border-2 p-4 text-left transition-all",
+                                  template === "default"
+                                    ? "border-gold bg-gold/5 ring-2 ring-gold/20"
+                                    : "border-navy/10 hover:border-navy/25",
+                                )}
+                              >
+                                <LayoutTemplate className="mb-2 h-8 w-8 text-navy" />
+                                <p className="font-bold text-navy">
+                                  {t("quote.templateDefault")}
+                                </p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  {t("quote.templateDefaultDesc")}
+                                </p>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setTemplate("premium")}
+                                className={cn(
+                                  "rounded-xl border-2 p-4 text-left transition-all",
+                                  template === "premium"
+                                    ? "border-gold bg-gold/5 ring-2 ring-gold/20"
+                                    : "border-navy/10 hover:border-navy/25",
+                                )}
+                              >
+                                <Sparkles className="mb-2 h-8 w-8 text-gold-dark" />
+                                <p className="font-bold text-navy">
+                                  {t("quote.templatePremium")}
+                                </p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  {t("quote.templatePremiumDesc")}
+                                </p>
+                              </button>
+                            </div>
                           </div>
-                        ) : null}
-                      </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-semibold text-navy">
+                              {t("quote.logoLabel")}
+                            </label>
+                            <p className="mb-2 text-xs text-muted-foreground">
+                              {t("quote.logoHint")}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-3">
+                              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-navy/15 bg-white px-4 py-2 text-sm font-medium text-navy shadow-sm hover:bg-slate-50">
+                                <ImagePlus className="h-4 w-4 text-gold" />
+                                {isKo ? "파일 선택" : "Choose file"}
+                                <input
+                                  type="file"
+                                  accept="image/png,image/jpeg"
+                                  className="hidden"
+                                  onChange={onLogoChange}
+                                />
+                              </label>
+                              {logoDataUrl ? (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setLogoDataUrl(null)}
+                                >
+                                  <Trash2 className="mr-1.5 h-4 w-4" />
+                                  {t("quote.logoRemove")}
+                                </Button>
+                              ) : null}
+                            </div>
+                            {logoDataUrl ? (
+                              <div className="mt-4 inline-block rounded-lg border border-navy/10 bg-slate-50 p-3">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={logoDataUrl}
+                                  alt={t("quote.logoPreviewAlt")}
+                                  className="max-h-24 max-w-[200px] object-contain"
+                                />
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                      </details>
                     </div>
                   )}
 

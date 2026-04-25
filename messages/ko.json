@@ -908,6 +908,74 @@
       "restore": "이어서 작성",
       "discard": "새로 시작"
     },
+    "pdfOptionsTitle": "고급: 견적서 PDF 옵션 (템플릿·로고)",
+    "creative": {
+      "desc": "광고 소재를 어떻게 준비하시겠어요? 모드는 견적 후에도 변경 가능합니다.",
+      "modes": {
+        "upload": {
+          "title": "기존 소재 업로드",
+          "desc": "이미지·로고·영상을 직접 업로드합니다."
+        },
+        "composite": {
+          "title": "Planner 합성 사용",
+          "desc": "Planner 에서 만든 매체별 합성 미리보기를 그대로 견적서에 포함합니다."
+        },
+        "design_request": {
+          "title": "디자인 의뢰",
+          "desc": "싱커드 디자인팀이 매체 규격에 맞춰 제작합니다(견적에 비용 추가)."
+        },
+        "later": {
+          "title": "견적 확정 후 결정",
+          "desc": "지금은 결정하지 않고 견적만 진행합니다.",
+          "notice": "소재는 견적 확정 후 영업팀과 협의해 진행하시면 됩니다."
+        }
+      },
+      "upload": {
+        "title": "소재 파일 업로드",
+        "hint": "PNG·JPG·SVG·MP4 지원, 최대 {mb}MB.",
+        "choose": "파일 선택",
+        "uploading": "업로드 중… {pct}%",
+        "remove": "제거",
+        "empty": "아직 업로드된 자료가 없습니다.",
+        "guides": {
+          "digital": {
+            "label": "디지털 사이니지",
+            "spec": "권장 16:9 (1920×1080), 9:16 (1080×1920) 또는 1:1. 자막 가독성 확인."
+          },
+          "static": {
+            "label": "옥외/인쇄",
+            "spec": "인쇄용 300dpi, CMYK 권장. 안전 영역 5% 여백."
+          }
+        },
+        "errors": {
+          "type": "지원하지 않는 파일 형식입니다 (PNG·JPG·SVG·MP4 만 가능).",
+          "size": "파일 크기가 너무 큽니다.",
+          "empty": "빈 파일은 업로드할 수 없습니다.",
+          "network": "네트워크 오류로 업로드에 실패했습니다.",
+          "serverDisabled": "업로드 서버가 설정되지 않았습니다. 영업팀에 문의해 주세요."
+        }
+      },
+      "composite": {
+        "missingTitle": "Planner 합성 결과를 찾을 수 없습니다",
+        "missingBody": "이 모드는 Planner 에서 로고를 업로드하고 매체별 위치를 잡아둔 경우에만 사용 가능합니다.",
+        "goPlanner": "Planner 로 이동",
+        "foundTitle": "Planner 합성 {count}개 매체 미리보기",
+        "foundBody": "아래 합성 결과가 견적서 PDF 의 매체 썸네일에 그대로 적용됩니다."
+      },
+      "brief": {
+        "title": "디자인 브리프",
+        "hint": "팀이 디자인을 제작할 때 참고할 핵심 정보를 입력해 주세요.",
+        "brand": "브랜드명",
+        "deadline": "마감 희망일",
+        "message": "전달하고 싶은 메시지",
+        "messagePlaceholder": "예: 신제품 출시 알림, 봄 시즌 프로모션 등",
+        "tone": "톤앤매너",
+        "tonePlaceholder": "예: 모던·미니멀, 따뜻한 친근감, 프리미엄",
+        "refs": "참고 이미지 URL (한 줄당 하나)",
+        "refsPlaceholder": "https://...\nhttps://...",
+        "feeNotice": "디자인 제작비는 매체당 약 ₩300,000~₩500,000 이며 영업팀 협의 후 견적 합계에 합산됩니다."
+      }
+    },
     "period2": {
       "desc": "캠페인 시작·종료일을 선택하세요. 매체 준비 기간을 고려해 시작일은 최소 일주일 후부터 가능합니다.",
       "presetTitle": "빠른 선택",
