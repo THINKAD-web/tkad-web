@@ -486,7 +486,18 @@
       "quoteModalPriceOptionLabel": "Option for your quote",
       "quoteModalSelectedPriceLine": "Selected price",
       "similarCarouselPrev": "Previous similar placements",
-      "similarCarouselNext": "Next similar placements"
+      "similarCarouselNext": "Next similar placements",
+      "similarSortLabel": "Sort recommendations",
+      "similarSortScore": "Similarity",
+      "similarSortDistance": "Nearest",
+      "similarSortPrice": "Price match",
+      "similarSortVisibility": "Visibility",
+      "similarDistance": "~{km}km away",
+      "availability": {
+        "available": "Available",
+        "reserved": "Booking in progress",
+        "maintenance": "Maintenance"
+      }
     },
     "ai": {
       "tabSearch": "Media search",
@@ -1992,6 +2003,14 @@
     "relatedCases": {
       "title": "Campaigns run on this media",
       "desc": "Real cases (with public consent). Click to view full case study."
+    },
+    "roadview": {
+      "title": "Street roadview",
+      "desc": "View the surroundings via Kakao roadview.",
+      "loadCta": "Load roadview",
+      "openExternal": "Open in new tab",
+      "externalAria": "Open Kakao roadview in a new window",
+      "iframeTitle": "{name} roadview"
     }
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -8,23 +8,48 @@ import { Button } from "@/components/ui/button";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
-import { typeLabels } from "@/lib/media-data";
+import {
+  getSimilarMediaFromCatalog,
+  haversineKm,
+  type SimilarSortKey,
+  typeLabels,
+} from "@/lib/media-data";
 import {
   formatMediaPriceWonWithSymbol,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 
+type SortableContext = {
+  catalog: readonly MediaItem[];
+  currentMedia: MediaItem;
+  limit?: number;
+};
+
 export default function MediaSimilarCarousel({
   items,
   isKo,
   title,
+  sortable,
 }: {
   items: readonly MediaItem[];
   isKo: boolean;
   title: string;
+  /** 옵션. 제공 시 정렬 토글 노출 + 내부에서 재정렬. */
+  sortable?: SortableContext;
 }) {
   const t = useTranslations("media.detail");
   const tMedia = useTranslations("media");
+  const [sortBy, setSortBy] = useState<SimilarSortKey>("score");
+
+  const displayItems = useMemo<readonly MediaItem[]>(() => {
+    if (!sortable) return items;
+    return getSimilarMediaFromCatalog(
+      [...sortable.catalog],
+      sortable.currentMedia,
+      sortable.limit ?? items.length ?? 4,
+      sortBy,
+    );
+  }, [items, sortable, sortBy]);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
@@ -58,7 +83,7 @@ export default function MediaSimilarCarousel({
     el.scrollBy({ left: dir * delta, behavior: "smooth" });
   }, []);
 
-  if (items.length === 0) return null;
+  if (displayItems.length === 0) return null;
 
   return (
     <section
@@ -72,8 +97,36 @@ export default function MediaSimilarCarousel({
         >
           {title}
         </h2>
-        {items.length > 1 ? (
-          <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {sortable ? (
+            <div role="group" aria-label={t("similarSortLabel")} className="flex rounded-full border border-navy/10 bg-slate-50 p-0.5">
+              {(
+                [
+                  ["score", t("similarSortScore")],
+                  ["distance", t("similarSortDistance")],
+                  ["price", t("similarSortPrice")],
+                  ["visibility", t("similarSortVisibility")],
+                ] as const
+              ).map(([key, label]) => (
+                <Button
+                  key={key}
+                  type="button"
+                  size="sm"
+                  variant={sortBy === key ? "default" : "ghost"}
+                  className={cn(
+                    "h-7 rounded-full px-2.5 text-[11px]",
+                    sortBy === key && "btn-gold border-0",
+                  )}
+                  aria-pressed={sortBy === key}
+                  onClick={() => setSortBy(key)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          ) : null}
+          {displayItems.length > 1 ? (
+            <div className="flex gap-2">
             <Button
               type="button"
               variant="outline"
@@ -98,6 +151,7 @@ export default function MediaSimilarCarousel({
             </Button>
           </div>
         ) : null}
+        </div>
       </div>
 
       <div
@@ -108,9 +162,13 @@ export default function MediaSimilarCarousel({
           "[&::-webkit-scrollbar]:hidden",
         )}
       >
-        {items.map((m) => {
+        {displayItems.map((m) => {
           const typeLabel =
             (isKo ? typeLabels[m.type]?.ko : typeLabels[m.type]?.en) ?? "";
+          const distanceKm =
+            sortable && sortBy === "distance"
+              ? haversineKm(sortable.currentMedia, m)
+              : null;
           return (
             <Link
               key={m.id}
@@ -146,6 +204,13 @@ export default function MediaSimilarCarousel({
                     · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
                   </span>
                 </p>
+                {distanceKm != null && Number.isFinite(distanceKm) ? (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {t("similarDistance", {
+                      km: distanceKm < 1 ? distanceKm.toFixed(2) : distanceKm.toFixed(1),
+                    })}
+                  </p>
+                ) : null}
               </div>
             </Link>
           );

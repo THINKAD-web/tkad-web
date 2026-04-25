@@ -43,6 +43,7 @@ import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
+import { RoadviewCard } from "@/components/media-detail/roadview-card";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { TrafficCharts } from "@/components/media-detail/traffic-charts";
@@ -205,15 +206,36 @@ export default async function MediaDetailPage({ params }: Props) {
                 <h1 className="break-words text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
                   {isKo ? media.name : (media.nameEn || media.name)}
                 </h1>
-                <Badge
-                  variant="secondary"
-                  className="shrink-0 border border-white/25 bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm sm:text-sm"
-                >
-                  <Eye className="mr-1 h-3.5 w-3.5 opacity-90" aria-hidden />
-                  {t("visibilityBadge", {
-                    score: performanceMetrics.visibilityScore,
-                  })}
-                </Badge>
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  {media.availability && media.availability !== "available" ? (
+                    <Badge
+                      variant="secondary"
+                      className={
+                        media.availability === "reserved"
+                          ? "border border-amber-300/40 bg-amber-300/15 px-2.5 py-1 text-[11px] font-bold text-amber-100 backdrop-blur-sm sm:text-xs"
+                          : "border border-rose-300/40 bg-rose-300/15 px-2.5 py-1 text-[11px] font-bold text-rose-100 backdrop-blur-sm sm:text-xs"
+                      }
+                    >
+                      {t(`availability.${media.availability}`)}
+                    </Badge>
+                  ) : media.availability === "available" ? (
+                    <Badge
+                      variant="secondary"
+                      className="border border-emerald-300/40 bg-emerald-300/15 px-2.5 py-1 text-[11px] font-bold text-emerald-100 backdrop-blur-sm sm:text-xs"
+                    >
+                      {t("availability.available")}
+                    </Badge>
+                  ) : null}
+                  <Badge
+                    variant="secondary"
+                    className="border border-white/25 bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm sm:text-sm"
+                  >
+                    <Eye className="mr-1 h-3.5 w-3.5 opacity-90" aria-hidden />
+                    {t("visibilityBadge", {
+                      score: performanceMetrics.visibilityScore,
+                    })}
+                  </Badge>
+                </div>
               </div>
               {heroTags.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
@@ -368,6 +390,14 @@ export default async function MediaDetailPage({ params }: Props) {
               kakaoMapEmbedBadge: t("kakaoMapEmbedBadge"),
             }}
           />
+
+          <div className="mt-6">
+            <RoadviewCard
+              lat={media.lat}
+              lng={media.lng}
+              mediaName={isKo ? media.name : media.nameEn || media.name}
+            />
+          </div>
 
           {media.keywordFilter ? (
             <MediaDetailPremiumPoints
@@ -730,7 +760,16 @@ export default async function MediaDetailPage({ params }: Props) {
             </>
           ) : null}
 
-          <MediaSimilarCarousel items={similar} isKo={isKo} title={t("similarTitle")} />
+          <MediaSimilarCarousel
+            items={similar}
+            isKo={isKo}
+            title={t("similarTitle")}
+            sortable={
+              media.keywordFilter
+                ? undefined
+                : { catalog, currentMedia: media, limit: 6 }
+            }
+          />
         </div>
       </section>
 

@@ -486,7 +486,18 @@
       "quoteModalPriceOptionLabel": "견적에 반영할 옵션",
       "quoteModalSelectedPriceLine": "선택 금액",
       "similarCarouselPrev": "이전 유사 매체",
-      "similarCarouselNext": "다음 유사 매체"
+      "similarCarouselNext": "다음 유사 매체",
+      "similarSortLabel": "추천 정렬",
+      "similarSortScore": "유사도",
+      "similarSortDistance": "가까운 순",
+      "similarSortPrice": "가격 유사",
+      "similarSortVisibility": "가시성 높은 순",
+      "similarDistance": "거리 약 {km}km",
+      "availability": {
+        "available": "예약 가능",
+        "reserved": "예약 진행 중",
+        "maintenance": "점검 중"
+      }
     },
     "ai": {
       "tabSearch": "매체 검색",
@@ -1975,6 +1986,14 @@
     "relatedCases": {
       "title": "이 매체로 진행한 캠페인",
       "desc": "공개 동의를 받은 실 사례입니다. 카드 클릭 시 사례 상세로 이동합니다."
+    },
+    "roadview": {
+      "title": "현장 로드뷰",
+      "desc": "Kakao 로드뷰로 매체 인근 풍경을 확인하실 수 있습니다.",
+      "loadCta": "로드뷰 불러오기",
+      "openExternal": "새 창에서 열기",
+      "externalAria": "Kakao 로드뷰를 새 창으로 열기",
+      "iframeTitle": "{name} 로드뷰"
     }
   }
 }
