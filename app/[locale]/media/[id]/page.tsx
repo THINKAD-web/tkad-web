@@ -409,10 +409,13 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </MediaDetailHeroGallery>
 
-      <div className="bg-card border-b border-border/60 sticky top-[72px] z-30 backdrop-blur-md bg-card/90 sm:static sm:bg-card sm:backdrop-blur-0">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground truncate">
+      <div className="bg-card/95 border-b border-border/60 sticky top-[72px] z-30 backdrop-blur-md supports-[backdrop-filter]:bg-card/75 sm:static sm:bg-card sm:backdrop-blur-0">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0 flex items-center gap-2">
+            <span className="hidden sm:inline-flex h-7 w-7 items-center justify-center rounded-full bg-gold/15 text-gold-dark text-xs font-bold">
+              ✓
+            </span>
+            <p className="text-xs sm:text-sm font-medium text-foreground/80 truncate">
               관심 가는 매체라면 견적서에 담아보세요
             </p>
           </div>
@@ -426,8 +429,8 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <section className="bg-white py-12 pb-28 sm:pb-32">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <section className="bg-background py-10 pb-28 sm:py-14 sm:pb-32">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <MediaDetailExtras
             media={media}
             locale={locale}
@@ -487,10 +490,11 @@ export default async function MediaDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
+          <h2 className="mb-4 mt-12 flex items-center gap-2 text-lg font-bold text-navy sm:text-xl">
+            <span className="inline-block h-5 w-1 rounded-full bg-gradient-to-b from-gold to-gold-dark" aria-hidden />
             {t("coreInfoTitle")}
           </h2>
-          <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-lg shadow-navy/5 sm:p-8">
+          <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-md shadow-navy/5 sm:p-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
               <CoreFact
                 icon={Ruler}
@@ -654,10 +658,11 @@ export default async function MediaDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          <h2 className="mb-4 mt-12 text-lg font-bold text-navy">
+          <h2 className="mb-4 mt-12 flex items-center gap-2 text-lg font-bold text-navy sm:text-xl">
+            <span className="inline-block h-5 w-1 rounded-full bg-gradient-to-b from-gold to-gold-dark" aria-hidden />
             {t("specsTitle")}
           </h2>
-          <dl className="grid gap-3 rounded-xl border bg-white p-6 sm:grid-cols-2">
+          <dl className="grid gap-3 rounded-2xl border border-border/70 bg-card p-6 shadow-sm sm:grid-cols-2">
             {media.keywordFilter ? (
               <>
                 <SpecRow
@@ -800,7 +805,8 @@ export default async function MediaDetailPage({ params }: Props) {
 
           {caseStudyItems.length > 0 ? (
             <>
-              <h2 className="mb-3 mt-12 text-lg font-bold text-navy">
+              <h2 className="mb-3 mt-12 flex items-center gap-2 text-lg font-bold text-navy sm:text-xl">
+                <span className="inline-block h-5 w-1 rounded-full bg-gradient-to-b from-gold to-gold-dark" aria-hidden />
                 {t("caseStudiesTitle")}
               </h2>
               <MediaCaseStudyGallery

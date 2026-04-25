@@ -513,7 +513,7 @@ export default function MediaBrowseClient({
         </div>
       </section>
 
-      <section className="border-t border-slate-200/90 bg-white py-10">
+      <section className="border-t border-border/70 bg-background py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {mainTab === "search" ? (
             <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/80">
