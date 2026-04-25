@@ -7,6 +7,8 @@ import {
 import { json } from "@/lib/admin-guard";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { seoulTargetYmd, seoulWeekdayShort } from "@/lib/seoul-calendar";
+import { fetchOOHWebSources } from "@/lib/insights/sources/tavily";
+import { fetchInternalMediaInsights } from "@/lib/insights/sources/internal";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // Anthropic + DB 작업 여유
@@ -73,7 +75,20 @@ export async function GET(request: NextRequest) {
 
   const startedAt = Date.now();
   try {
-    const g = await generateTrendReport(month);
+    // PR-2: 외부 웹 출처 + 자체 매체 DB 인사이트 병렬 수집.
+    // 한 소스 실패해도 다른 소스로 진행 (각 fetcher 가 try/catch + [] 폴백).
+    const [tavily, internalInsights] = await Promise.all([
+      fetchOOHWebSources(),
+      fetchInternalMediaInsights(),
+    ]);
+
+    const g = await generateTrendReport(month, {
+      webSources: tavily.sources,
+      internalInsights: internalInsights.map((i) => ({
+        title: i.title,
+        summary: i.summary,
+      })),
+    });
 
     const saved = await db.trendReport.create({
       data: {
@@ -96,6 +111,8 @@ export async function GET(request: NextRequest) {
         publishedAt: null,
         generationMethod: "auto",
         aiModel: resolveModel(),
+        sources: tavily.sources as unknown as Prisma.InputJsonValue,
+        internalDataUsed: internalInsights.map((i) => i.title),
       },
     });
 
@@ -108,6 +125,9 @@ export async function GET(request: NextRequest) {
         status: saved.status,
         elapsedMs,
         aiModel: saved.aiModel,
+        sourcesCount: tavily.sources.length,
+        internalInsightsCount: internalInsights.length,
+        keywordsUsed: tavily.keywordsUsed,
       },
       201,
     );
