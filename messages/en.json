@@ -895,6 +895,19 @@
     "prevStep": "Back",
     "floatingSelectedCount": "{count} selected",
     "floatingClearSelection": "Clear selection",
+    "sourceBanner": {
+      "planner": "Starting your quote with {count} media selected in your Planner simulation.",
+      "media": "Starting your quote with the media you opened. Feel free to add more.",
+      "compare": "Starting your quote with the {count} media you compared.",
+      "dismiss": "Dismiss banner"
+    },
+    "restore": {
+      "title": "Resume your previous draft?",
+      "body": "We saved {count} selected media and your inputs. Continue where you left off?",
+      "savedAt": "Last edit: {relative}",
+      "restore": "Resume",
+      "discard": "Start fresh"
+    },
     "templateTitle": "Quote template",
     "templateDesc": "Default is clean; Premium adds a gold header and accents.",
     "templateDefault": "Default",

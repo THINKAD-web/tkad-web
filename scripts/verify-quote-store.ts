@@ -1,10 +1,44 @@
 /**
  * 수동 검증 스크립트 — `npx tsx scripts/verify-quote-store.ts`.
  *
- * lib/quote/ 의 순수 함수(validation, selector, ISO 헬퍼)를 직접 어설트한다.
- * Zustand store 는 localStorage 의존이라 Node 에서 인스턴스화하지 않고, plain
- * state 객체를 만들어 selector / validator 에 주입한다.
+ * lib/quote/ 의 순수 함수(validation, selector, ISO 헬퍼)와 store action 의 cleanup
+ * 동작을 어설트한다. store action 을 실제 호출하기 위해 localStorage 인메모리 목업을
+ * 설치한 뒤 모듈을 import 한다.
  */
+
+class MemoryStorage {
+  private store = new Map<string, string>();
+  getItem(k: string): string | null {
+    return this.store.get(k) ?? null;
+  }
+  setItem(k: string, v: string): void {
+    this.store.set(k, v);
+  }
+  removeItem(k: string): void {
+    this.store.delete(k);
+  }
+  clear(): void {
+    this.store.clear();
+  }
+  get length(): number {
+    return this.store.size;
+  }
+  key(i: number): string | null {
+    return [...this.store.keys()][i] ?? null;
+  }
+}
+// localStorage 목업 — zustand persist 가 import 시 storage factory 를 호출하기 전에 설치.
+// ES module hoisting 으로 import 가 본 라인보다 먼저 평가되지만, persist 의 첫 setItem 호출은
+// 첫 setState 시점이므로 본 시점 설치만으로도 충분하다. import 전 출력되는 cosmetic 경고는
+// console.warn 패치로 억제(아래).
+(globalThis as { localStorage?: Storage }).localStorage =
+  new MemoryStorage() as unknown as Storage;
+const _origWarn = console.warn.bind(console);
+console.warn = (...args: unknown[]) => {
+  const first = typeof args[0] === "string" ? args[0] : "";
+  if (first.includes("[zustand persist middleware]")) return;
+  _origWarn(...args);
+};
 
 import {
   canProceedFromStep,
@@ -16,6 +50,7 @@ import {
   isoToDate,
   selectHasDraftContent,
   selectIsDraftExpired,
+  useQuoteStore,
   type QuoteStoreState,
 } from "@/lib/quote/store";
 import { QUOTE_DRAFT_TTL_MS } from "@/lib/quote/types";
@@ -290,6 +325,90 @@ section("draft selectors", () => {
     ),
     false,
   );
+});
+
+section("store action: toggleMedia 한도/cleanup", () => {
+  const store = useQuoteStore;
+  // 사전 셋업
+  store.getState().resetAll();
+  store.getState().toggleMedia("m1");
+  store.getState().setNetworkOption("m1", { units: 5, regionScope: "all" });
+  store.getState().setPriceOptionIndex("m1", 2);
+  check("초기 선택 1개", store.getState().selectedMediaIds, ["m1"]);
+  check("network 옵션 set", !!store.getState().networkOptions["m1"], true);
+  check("price 옵션 set", store.getState().priceOptionIndices["m1"], 2);
+
+  // 토글로 해제 → 의존 맵도 같이 제거
+  store.getState().toggleMedia("m1");
+  check("해제 후 빈 selection", store.getState().selectedMediaIds, []);
+  check(
+    "해제 후 networkOptions 키 제거",
+    "m1" in store.getState().networkOptions,
+    false,
+  );
+  check(
+    "해제 후 priceOptionIndices 키 제거",
+    "m1" in store.getState().priceOptionIndices,
+    false,
+  );
+
+  // QUOTE_MAX_MEDIA 한도
+  store.getState().resetAll();
+  for (let i = 1; i <= 10; i += 1) store.getState().toggleMedia(`m${i}`);
+  check("10개 선택", store.getState().selectedMediaIds.length, 10);
+  store.getState().toggleMedia("m11"); // 한도 초과
+  check("11번째 선택 시도 → 무시", store.getState().selectedMediaIds.length, 10);
+});
+
+section("store action: setSelectedMediaIds cleanup + cap", () => {
+  const store = useQuoteStore;
+  store.getState().resetAll();
+  // 옵션 미리 세팅
+  store.getState().toggleMedia("a");
+  store.getState().toggleMedia("b");
+  store.getState().setNetworkOption("a", { units: 3, regionScope: "all" });
+  store.getState().setNetworkOption("b", { units: 7, regionScope: "all" });
+  // a 만 남기고 c 추가 → b 의 옵션은 정리되어야 함
+  store.getState().setSelectedMediaIds(["a", "c"]);
+  check("선택 ['a','c']", store.getState().selectedMediaIds, ["a", "c"]);
+  check(
+    "b 의 networkOption 제거",
+    "b" in store.getState().networkOptions,
+    false,
+  );
+  check(
+    "a 의 networkOption 유지",
+    "a" in store.getState().networkOptions,
+    true,
+  );
+
+  // cap 적용
+  store.getState().resetAll();
+  store
+    .getState()
+    .setSelectedMediaIds(Array.from({ length: 15 }, (_, i) => `x${i}`));
+  check(
+    "15개 입력 → 10개로 cap",
+    store.getState().selectedMediaIds.length,
+    10,
+  );
+});
+
+section("store action: clearDraftIfExpired", () => {
+  const store = useQuoteStore;
+  store.getState().resetAll();
+  store.getState().toggleMedia("m1");
+  // 25시간 전으로 강제 변경
+  useQuoteStore.setState({ draftSavedAt: Date.now() - QUOTE_DRAFT_TTL_MS - 1 });
+  const wasExpired = store.getState().clearDraftIfExpired();
+  check("만료 감지 → true", wasExpired, true);
+  check("만료 시 selection 초기화", store.getState().selectedMediaIds, []);
+
+  // 만료되지 않은 경우
+  store.getState().toggleMedia("m1");
+  const wasExpired2 = store.getState().clearDraftIfExpired();
+  check("정상 → false", wasExpired2, false);
+  check("정상 시 selection 유지", store.getState().selectedMediaIds, ["m1"]);
 });
 
 if (failures > 0) {

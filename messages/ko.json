@@ -895,6 +895,19 @@
     "prevStep": "이전",
     "floatingSelectedCount": "{count}개 선택됨",
     "floatingClearSelection": "선택해제",
+    "sourceBanner": {
+      "planner": "Planner 시뮬레이션에서 선택하신 {count}개 매체로 견적을 시작합니다.",
+      "media": "매체 상세에서 선택하신 매체로 견적을 시작합니다. 다른 매체를 추가해보세요.",
+      "compare": "비교 페이지에서 선택하신 {count}개 매체로 견적을 시작합니다.",
+      "dismiss": "배너 닫기"
+    },
+    "restore": {
+      "title": "이전 작성 내용을 불러올까요?",
+      "body": "선택한 매체 {count}개와 입력 내용이 남아 있습니다. 이어서 작성하시겠어요?",
+      "savedAt": "마지막 작성: {relative}",
+      "restore": "이어서 작성",
+      "discard": "새로 시작"
+    },
     "templateTitle": "견적서 템플릿",
     "templateDesc": "기본은 심플 레이아웃, 프리미엄은 골드 헤더와 강조 스타일입니다.",
     "templateDefault": "기본",

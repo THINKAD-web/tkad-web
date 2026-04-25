@@ -79,6 +79,14 @@ import {
   quoteElementToPdfBase64,
 } from "@/lib/quote-html-pdf";
 import { captureElementAsPng } from "@/lib/html-to-pdf";
+import {
+  selectHasDraftContent,
+  selectIsDraftExpired,
+  useQuoteStore,
+} from "@/lib/quote/store";
+import { QUOTE_MAX_MEDIA, type QuoteSource } from "@/lib/quote/types";
+import { QuoteSourceBanner } from "@/components/quote/source-banner";
+import { QuoteRestoreModal } from "@/components/quote/restore-modal";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -114,9 +122,35 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const locale = useLocale();
   const isKo = locale === "ko";
 
-  const [step, setStep] = useState<WizardStep>(1);
+  // 견적 마법사 상태는 lib/quote/store 단일 진실. step / 매체 선택 / 네트워크·가격 옵션
+  // 모두 store 가 보유하며 24시간 자동 만료 + draft 복원을 지원한다. period / form / template
+  // 등은 PR-4~6 에서 단계별로 이전된다.
+  const storeStep = useQuoteStore((s) => s.step);
+  const setStoreStep = useQuoteStore((s) => s.setStep);
+  const selectedMediaIds = useQuoteStore((s) => s.selectedMediaIds);
+  const networkOptionsStore = useQuoteStore((s) => s.networkOptions);
+  const priceOptionIndicesStore = useQuoteStore((s) => s.priceOptionIndices);
+  const storeToggleMedia = useQuoteStore((s) => s.toggleMedia);
+  const storeSetSelectedMediaIds = useQuoteStore(
+    (s) => s.setSelectedMediaIds,
+  );
+  const storeClearSelectedMedia = useQuoteStore((s) => s.clearSelectedMedia);
+  const storeSetNetworkOption = useQuoteStore((s) => s.setNetworkOption);
+  const storeSetPriceOptionIndex = useQuoteStore(
+    (s) => s.setPriceOptionIndex,
+  );
+  const storeSetSource = useQuoteStore((s) => s.setSource);
+  const sourceFromStore = useQuoteStore((s) => s.source);
+  const storeResetAll = useQuoteStore((s) => s.resetAll);
+
+  // 입력 단계는 1~4 만 사용 — store 의 5(컨펌) 는 본 컴포넌트에서 submitted boolean 로 대체.
+  const step = (Math.min(storeStep, 4) as WizardStep);
+  const setStep = useCallback(
+    (s: WizardStep) => setStoreStep(s),
+    [setStoreStep],
+  );
+
   const [period, setPeriod] = useState<PeriodKey>("1month");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [mediaLayout, setMediaLayout] = useState<"grid" | "compact">("grid");
   const [mediaPage, setMediaPage] = useState(1);
   const [mediaPageSize, setMediaPageSize] = useState(12);
@@ -124,14 +158,85 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
   const [mediaRegionFilter, setMediaRegionFilter] = useState("all");
   const [quoteSearchFieldKey, setQuoteSearchFieldKey] = useState(0);
-  const [networkQuoteOptions, setNetworkQuoteOptions] = useState<
-    Record<string, { units: number; regionScope: string }>
-  >({});
-  /** 매체별 `priceOptions` 선택 인덱스 (견적 월 단가 반영) */
-  const [mediaPriceOptionIndex, setMediaPriceOptionIndex] = useState<
-    Record<string, number>
-  >({});
   const mediaQueryApplied = useRef(false);
+
+  // ── 호환 어댑터 ──────────────────────────────────────────────────────────
+  // 기존 컴포넌트가 Set<string> / 객체 setter 를 가정하고 있어 로컬 어댑터로 감싼다.
+  const selectedIds = useMemo(
+    () => new Set(selectedMediaIds),
+    [selectedMediaIds],
+  );
+  const setSelectedIds = useCallback(
+    (next: Set<string> | ((prev: Set<string>) => Set<string>)) => {
+      const value =
+        typeof next === "function" ? next(new Set(selectedMediaIds)) : next;
+      storeSetSelectedMediaIds([...value]);
+    },
+    [selectedMediaIds, storeSetSelectedMediaIds],
+  );
+  const networkQuoteOptions = networkOptionsStore;
+  const setNetworkQuoteOptions = useCallback(
+    (
+      next:
+        | Record<string, { units: number; regionScope: string }>
+        | ((
+            prev: Record<string, { units: number; regionScope: string }>,
+          ) => Record<string, { units: number; regionScope: string }>),
+    ) => {
+      const value =
+        typeof next === "function" ? next(networkOptionsStore) : next;
+      // 키 단위로 업데이트 — store 가 단일 매체 setter 를 노출하므로 diff 적용.
+      const prevKeys = new Set(Object.keys(networkOptionsStore));
+      for (const [k, v] of Object.entries(value)) {
+        storeSetNetworkOption(k, v);
+        prevKeys.delete(k);
+      }
+      // 사라진 키는 selection cleanup 에서 자동 제거되므로 별도 작업 불필요.
+    },
+    [networkOptionsStore, storeSetNetworkOption],
+  );
+  const mediaPriceOptionIndex = priceOptionIndicesStore;
+  const setMediaPriceOptionIndex = useCallback(
+    (
+      next:
+        | Record<string, number>
+        | ((prev: Record<string, number>) => Record<string, number>),
+    ) => {
+      const value =
+        typeof next === "function" ? next(priceOptionIndicesStore) : next;
+      for (const [k, v] of Object.entries(value)) {
+        storeSetPriceOptionIndex(k, v);
+      }
+    },
+    [priceOptionIndicesStore, storeSetPriceOptionIndex],
+  );
+
+  // ── Draft 복원 모달 ──────────────────────────────────────────────────────
+  const [restoreModalOpen, setRestoreModalOpen] = useState(false);
+  const restoreCheckedRef = useRef(false);
+  const draftSavedAt = useQuoteStore((s) => s.draftSavedAt);
+  useEffect(() => {
+    if (restoreCheckedRef.current) return;
+    restoreCheckedRef.current = true;
+    const state = useQuoteStore.getState();
+    if (selectIsDraftExpired(state)) {
+      storeResetAll();
+      return;
+    }
+    if (!selectHasDraftContent(state)) return;
+    // URL 쿼리 사전 데이터가 있으면 사용자 의도가 명확하므로 모달 생략.
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const hasIntent =
+        params.has("source") ||
+        params.has("planId") ||
+        params.has("mediaId") ||
+        params.has("media") ||
+        params.has("compareIds");
+      if (hasIntent) return;
+    }
+    setRestoreModalOpen(true);
+  }, [storeResetAll]);
   const [template, setTemplate] = useState<QuoteTemplateId>("default");
   const [sortBy, setSortBy] = useState<
     "default" | "priceAsc" | "priceDesc" | "trafficDesc"
@@ -139,68 +244,94 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [emailHoneypot, setEmailHoneypot] = useState("");
 
+  // 다중 진입 경로 파싱 — 한 번만 적용. 우선순위: compareIds > mediaId > media (legacy).
+  // source 가 명시되지 않아도 어떤 파라미터가 채워졌는지로 자동 분류.
   useEffect(() => {
     if (mediaQueryApplied.current) return;
     if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const raw = params.get("media");
-    if (!raw) return;
     mediaQueryApplied.current = true;
-    const ids = raw
-      .split(",")
+    const params = new URLSearchParams(window.location.search);
+
+    const sourceRaw = params.get("source");
+    const allowed: QuoteSource[] = ["planner", "media", "compare", "direct"];
+    let detectedSource: QuoteSource | null = allowed.includes(
+      sourceRaw as QuoteSource,
+    )
+      ? (sourceRaw as QuoteSource)
+      : null;
+    const planId = params.get("planId");
+    const mediaIdSingle = params.get("mediaId");
+    const compareIdsRaw = params.get("compareIds");
+    const mediaListRaw = params.get("media");
+
+    let collected: string[] = [];
+    if (compareIdsRaw) {
+      collected = compareIdsRaw.split(",");
+      detectedSource ??= "compare";
+    } else if (mediaIdSingle) {
+      collected = [mediaIdSingle];
+      detectedSource ??= "media";
+    } else if (mediaListRaw) {
+      collected = mediaListRaw.split(",");
+      // legacy `?media=...` 은 source 추정 불가 → planId 가 있으면 planner.
+      detectedSource ??= planId ? "planner" : "direct";
+    }
+
+    const validIds = collected
       .map((x) => x.trim())
-      .filter((id) => catalog.some((m) => m.id === id));
-    if (ids.length === 0) return;
-    setSelectedIds(new Set(ids));
+      .filter((id) => id.length > 0 && catalog.some((m) => m.id === id))
+      .slice(0, QUOTE_MAX_MEDIA);
+
+    if (detectedSource && detectedSource !== "direct") {
+      const sid = planId ?? mediaIdSingle ?? null;
+      storeSetSource(detectedSource, sid);
+    }
+    if (validIds.length > 0) {
+      storeSetSelectedMediaIds(validIds);
+    }
+
     const poRaw = params.get("po");
     const po = poRaw != null ? parseInt(poRaw, 10) : NaN;
-    if (ids.length === 1 && Number.isFinite(po) && po >= 0) {
-      const m = catalog.find((x) => x.id === ids[0]);
+    if (validIds.length === 1 && Number.isFinite(po) && po >= 0) {
+      const m = catalog.find((x) => x.id === validIds[0]);
       const n = m?.priceOptions?.length ?? 0;
       if (n > 0) {
-        setMediaPriceOptionIndex({ [ids[0]]: Math.min(po, n - 1) });
+        storeSetPriceOptionIndex(validIds[0], Math.min(po, n - 1));
       }
     }
-  }, [catalog]);
+  }, [catalog, storeSetSelectedMediaIds, storeSetSource, storeSetPriceOptionIndex]);
 
+  // 신규로 선택된 네트워크 매체에 기본 옵션 주입. unselect 시 제거는 store 가 자동.
   useEffect(() => {
-    setNetworkQuoteOptions((prev) => {
-      const next = { ...prev };
-      for (const id of selectedIds) {
-        const m = catalog.find((x) => x.id === id);
-        if (m?.catalogSource === "network" && !next[id]) {
-          next[id] = {
-            units: Math.max(m.networkMinUnits ?? 1, 1),
-            regionScope: "all",
-          };
-        }
-      }
-      for (const k of Object.keys(next)) {
-        if (!selectedIds.has(k)) delete next[k];
-      }
-      return next;
-    });
-  }, [selectedIds, catalog]);
+    for (const id of selectedMediaIds) {
+      if (networkOptionsStore[id]) continue;
+      const m = catalog.find((x) => x.id === id);
+      if (m?.catalogSource !== "network") continue;
+      storeSetNetworkOption(id, {
+        units: Math.max(m.networkMinUnits ?? 1, 1),
+        regionScope: "all",
+      });
+    }
+  }, [selectedMediaIds, networkOptionsStore, catalog, storeSetNetworkOption]);
 
+  // priceOptions 가 있는 매체의 인덱스를 유효 범위로 클램프.
   useEffect(() => {
-    setMediaPriceOptionIndex((prev) => {
-      const next = { ...prev };
-      for (const id of selectedIds) {
-        const m = catalog.find((x) => x.id === id);
-        const len = m?.priceOptions?.length ?? 0;
-        if (len === 0) {
-          delete next[id];
-          continue;
-        }
-        const cur = next[id] ?? 0;
-        next[id] = Math.min(Math.max(0, cur), len - 1);
+    for (const id of selectedMediaIds) {
+      const m = catalog.find((x) => x.id === id);
+      const len = m?.priceOptions?.length ?? 0;
+      if (len === 0) continue;
+      const cur = priceOptionIndicesStore[id] ?? 0;
+      const clamped = Math.min(Math.max(0, cur), len - 1);
+      if (clamped !== cur || priceOptionIndicesStore[id] == null) {
+        storeSetPriceOptionIndex(id, clamped);
       }
-      for (const k of Object.keys(next)) {
-        if (!selectedIds.has(k)) delete next[k];
-      }
-      return next;
-    });
-  }, [selectedIds, catalog]);
+    }
+  }, [
+    selectedMediaIds,
+    priceOptionIndicesStore,
+    catalog,
+    storeSetPriceOptionIndex,
+  ]);
 
   const [form, setForm] = useState<FormState>({
     company: "",
@@ -399,18 +530,29 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     [totalCost, pdfVatMan],
   );
 
-  const toggleMedia = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  const toggleMedia = useCallback(
+    (id: string) => {
+      // store 가 QUOTE_MAX_MEDIA 한도를 자체 enforce. 한도 초과 시 사용자에게 토스트.
+      const willExceed =
+        !selectedMediaIds.includes(id) &&
+        selectedMediaIds.length >= QUOTE_MAX_MEDIA;
+      if (willExceed) {
+        toast(
+          "warning",
+          isKo
+            ? `매체는 최대 ${QUOTE_MAX_MEDIA}개까지 선택할 수 있습니다.`
+            : `You can select up to ${QUOTE_MAX_MEDIA} media.`,
+        );
+        return;
+      }
+      storeToggleMedia(id);
+    },
+    [selectedMediaIds, storeToggleMedia, toast, isKo],
+  );
 
   const clearAllMediaSelection = useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
+    storeClearSelectedMedia();
+  }, [storeClearSelectedMedia]);
 
   const popularIds = useMemo(
     () => new Set(["1", "2", "3", "8", "9"]),
@@ -470,12 +612,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       setErrors((prev) => ({ ...prev, media: t("quote.noMediaSelected") }));
       return;
     }
-    setStep((s) => (s < 4 ? ((s + 1) as WizardStep) : s));
+    if (step < 4) setStep((step + 1) as WizardStep);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const goPrev = () => {
-    setStep((s) => (s > 1 ? ((s - 1) as WizardStep) : s));
+    if (step > 1) setStep((step - 1) as WizardStep);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -777,6 +919,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                 <CardContent>
                   {step === 1 && (
                     <>
+                      <QuoteSourceBanner
+                        source={sourceFromStore}
+                        prefilledMediaCount={selectedMediaIds.length}
+                        onDismiss={() => storeSetSource("direct", null)}
+                      />
                       {touched.media && errors.media ? (
                         <p className="mb-4 text-sm font-medium text-red-500">
                           {errors.media}
@@ -1853,6 +2000,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       {quoteBarOpen ? (
         <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
       ) : null}
+
+      <QuoteRestoreModal
+        open={restoreModalOpen}
+        selectedMediaCount={selectedMediaIds.length}
+        draftSavedAt={draftSavedAt}
+        onRestore={() => setRestoreModalOpen(false)}
+        onDiscard={() => {
+          storeResetAll();
+          setRestoreModalOpen(false);
+        }}
+      />
     </>
   );
 }

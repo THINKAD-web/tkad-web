@@ -160,10 +160,17 @@ export const useQuoteStore = create<QuoteStore>()(
         set((s) => {
           const has = s.selectedMediaIds.includes(mediaId);
           if (has) {
+            // 선택 해제 시 의존 맵(networkOptions, priceOptionIndices)에서도 같이 제거.
+            const { [mediaId]: _no, ...nextNetwork } = s.networkOptions;
+            const { [mediaId]: _po, ...nextPrice } = s.priceOptionIndices;
+            void _no;
+            void _po;
             return withActivity({
               selectedMediaIds: s.selectedMediaIds.filter(
                 (id) => id !== mediaId,
               ),
+              networkOptions: nextNetwork,
+              priceOptionIndices: nextPrice,
             });
           }
           if (s.selectedMediaIds.length >= QUOTE_MAX_MEDIA) {
@@ -175,11 +182,24 @@ export const useQuoteStore = create<QuoteStore>()(
         }),
 
       setSelectedMediaIds: (ids) =>
-        set(
-          withActivity({
-            selectedMediaIds: ids.slice(0, QUOTE_MAX_MEDIA),
-          }),
-        ),
+        set((s) => {
+          const allowed = ids.slice(0, QUOTE_MAX_MEDIA);
+          const allowedSet = new Set(allowed);
+          const filterByAllowed = <V,>(
+            map: Record<string, V>,
+          ): Record<string, V> => {
+            const next: Record<string, V> = {};
+            for (const k of Object.keys(map)) {
+              if (allowedSet.has(k)) next[k] = map[k];
+            }
+            return next;
+          };
+          return withActivity({
+            selectedMediaIds: allowed,
+            networkOptions: filterByAllowed(s.networkOptions),
+            priceOptionIndices: filterByAllowed(s.priceOptionIndices),
+          });
+        }),
 
       clearSelectedMedia: () =>
         set(
