@@ -596,7 +596,12 @@
         "top3Subtitle": "스와이프 반응을 반영해 골랐어요. 전체 추천 목록에서 더 살펴볼 수 있어요.",
         "viewAllRecommendations": "전체 추천 보기"
       }
-    }
+    },
+    "compareRowAvailability": "예약 가용성",
+    "compareAvailabilityAvailable": "✅ 가능",
+    "compareAvailabilityReserved": "🟡 예약중",
+    "compareAvailabilityMaintenance": "🔴 점검중",
+    "compareStartPlanner": "Planner 시작"
   },
   "recommend": {
     "form": {

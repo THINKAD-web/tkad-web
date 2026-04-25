@@ -596,7 +596,12 @@
         "top3Subtitle": "Ranked from your swipes. Open the full list to see every recommendation.",
         "viewAllRecommendations": "View full list"
       }
-    }
+    },
+    "compareRowAvailability": "Availability",
+    "compareAvailabilityAvailable": "✅ Available",
+    "compareAvailabilityReserved": "🟡 Booked",
+    "compareAvailabilityMaintenance": "🔴 Maintenance",
+    "compareStartPlanner": "Start Planner"
   },
   "recommend": {
     "form": {
