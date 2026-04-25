@@ -35,10 +35,11 @@ type KakaoMaps = {
   RoadviewClient: new () => KakaoRoadviewClient;
 };
 
-declare global {
-  interface Window {
-    kakao?: { maps?: KakaoMaps };
-  }
+/** Window.kakao 는 lib/media-map/kakao-map-view.tsx 에서도 선언되어 있어
+ * 전역 augment 충돌을 피하려 매번 unknown 캐스팅으로 접근한다. */
+function getKakaoMaps(): KakaoMaps | undefined {
+  if (typeof window === "undefined") return undefined;
+  return (window as unknown as { kakao?: { maps?: KakaoMaps } }).kakao?.maps;
 }
 
 function loadKakaoSdkForRoadview(appkey: string): Promise<KakaoMaps> {
@@ -47,9 +48,11 @@ function loadKakaoSdkForRoadview(appkey: string): Promise<KakaoMaps> {
       reject(new Error("SSR"));
       return;
     }
-    if (window.kakao?.maps) {
-      window.kakao.maps.load(() => {
-        if (window.kakao?.maps) resolve(window.kakao.maps);
+    const existingMaps = getKakaoMaps();
+    if (existingMaps) {
+      existingMaps.load(() => {
+        const m = getKakaoMaps();
+        if (m) resolve(m);
         else reject(new Error("kakao.maps undefined after load"));
       });
       return;
@@ -58,8 +61,14 @@ function loadKakaoSdkForRoadview(appkey: string): Promise<KakaoMaps> {
       `script[data-kakao-sdk="1"]`,
     );
     const onReady = () => {
-      window.kakao?.maps?.load(() => {
-        if (window.kakao?.maps) resolve(window.kakao.maps);
+      const m = getKakaoMaps();
+      if (!m) {
+        reject(new Error("kakao.maps undefined after load"));
+        return;
+      }
+      m.load(() => {
+        const ready = getKakaoMaps();
+        if (ready) resolve(ready);
         else reject(new Error("kakao.maps undefined after load"));
       });
     };
