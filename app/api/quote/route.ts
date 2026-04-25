@@ -19,6 +19,8 @@ import {
   adminOohQuoteUrl,
   sendTelegramMessage,
 } from "@/lib/telegram-notify";
+import { sendQuoteSalesSlack } from "@/lib/quote/notifiers/sales-slack";
+import { sendQuoteSalesEmail } from "@/lib/quote/notifiers/sales-email";
 
 export const dynamic = "force-dynamic";
 
@@ -260,6 +262,23 @@ export async function POST(request: NextRequest) {
       `<b>새 견적 요청</b>\n${String(name).trim()} · ${String(company ?? "").trim() || "-"}\n매체 ${ids.length}건 · ₩${totalAmount.toLocaleString("ko-KR")}만 · ${periodHuman}`,
       { buttons: [{ text: "확인하기", url: adminUrl }] },
     ).catch(() => {});
+
+    // PR-8: 영업팀 Slack #sales-leads + 이메일 알림 — fire-and-forget.
+    // 실패해도 사용자 응답 흐름에 영향 없음(catch 무음).
+    const salesPayload = {
+      quoteId: ooh.id,
+      clientName: String(name).trim(),
+      clientCompany: String(company ?? "").trim() || null,
+      clientEmail: emailNorm,
+      clientPhone: String(phone).trim() || null,
+      mediaCount: ids.length,
+      periodLabel: periodHuman,
+      totalAmountMan: totalAmount,
+      adminUrl,
+      message: String(message ?? "").trim() || null,
+    };
+    void sendQuoteSalesSlack(salesPayload).catch(() => {});
+    void sendQuoteSalesEmail(salesPayload).catch(() => {});
 
     await autoLinkQuoteRequestToCampaign(db, created.id, emailNorm);
 
