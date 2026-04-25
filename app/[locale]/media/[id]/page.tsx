@@ -38,6 +38,8 @@ import {
   mediaDetailPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
+import { RelatedCases } from "@/components/media-detail/related-cases";
+import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
@@ -95,6 +97,7 @@ export default async function MediaDetailPage({ params }: Props) {
   if (!media) notFound();
 
   const catalog = await fetchPublicMediaCatalog();
+  const relatedCases = await getSuccessCasesForMedia(media.id);
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const isKo = locale === "ko";
   const periodLabel = t(
@@ -701,6 +704,12 @@ export default async function MediaDetailPage({ params }: Props) {
               ) : null}
             </div>
           </section>
+
+          {relatedCases.length > 0 ? (
+            <div className="mt-12">
+              <RelatedCases cases={relatedCases} isKo={isKo} />
+            </div>
+          ) : null}
 
           {caseStudyItems.length > 0 ? (
             <>

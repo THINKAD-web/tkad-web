@@ -1971,6 +1971,10 @@
       "insightHour": "피크 시간대",
       "insightWeekday": "피크 요일",
       "insightMonth": "피크 월"
+    },
+    "relatedCases": {
+      "title": "이 매체로 진행한 캠페인",
+      "desc": "공개 동의를 받은 실 사례입니다. 카드 클릭 시 사례 상세로 이동합니다."
     }
   }
 }

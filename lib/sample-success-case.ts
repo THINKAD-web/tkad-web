@@ -63,6 +63,7 @@ function buildSampleListItem(
     summaryKo: sample.description,
     thumbnailUrl: null,
     mediaUsed: [...sample.mediaUsed],
+    mediaIds: [],
     publishedAtIso: meta.publishedAt.toISOString(),
   };
 }
@@ -137,6 +138,7 @@ export function allSampleSuccessCaseSeedData(): Prisma.SuccessCaseCreateInput[] 
         sample.stats.map((s) => [s.label, s.value]),
       ),
       mediaUsed: [...sample.mediaUsed],
+      mediaIds: [],
       periodStart: meta.periodStart,
       periodEnd: meta.periodEnd,
       thumbnailUrl: null,

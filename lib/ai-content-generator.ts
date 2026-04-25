@@ -491,6 +491,7 @@ function successCaseFromToolInput(
     resultsKo: normalizeStringArray(raw.resultsKo),
     metricsJson: mergeMetricsJson(opts.metricsBaseline, raw.metricsJson ?? null),
     mediaUsed,
+    mediaIds: [],
     periodStart: parseOptionalIsoDate(raw.periodStart),
     periodEnd: parseOptionalIsoDate(raw.periodEnd),
     thumbnailUrl: raw.thumbnailUrl?.trim() || null,

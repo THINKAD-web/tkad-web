@@ -151,6 +151,7 @@ export function successCaseToPublicListItem(
     summaryKo: row.summaryKo,
     thumbnailUrl: row.thumbnailUrl,
     mediaUsed: row.mediaUsed,
+    mediaIds: row.mediaIds ?? [],
     publishedAtIso: row.publishedAt ? row.publishedAt.toISOString() : null,
   };
 }

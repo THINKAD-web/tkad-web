@@ -1988,6 +1988,10 @@
       "insightHour": "Peak hours",
       "insightWeekday": "Peak weekday",
       "insightMonth": "Peak month"
+    },
+    "relatedCases": {
+      "title": "Campaigns run on this media",
+      "desc": "Real cases (with public consent). Click to view full case study."
     }
   }
 }

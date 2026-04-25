@@ -655,7 +655,10 @@ model SuccessCase {
   solutionKo     String    @map("solution_ko") @db.Text
   resultsKo      String[]  @map("results_ko")
   metricsJson    Json?     @map("metrics_json")
+  /// 카테고리 텍스트 (예: "빌보드", "디지털 사이니지"). 운영팀 입력 라벨.
   mediaUsed      String[]  @map("media_used")
+  /// 실제 매체 ID(`Media.id`) 배열. 매체 상세 ↔ 사례 양방향 연결용. 빈배열이면 양방향 연결 없음.
+  mediaIds       String[]  @default([]) @map("media_ids")
   periodStart    DateTime? @map("period_start")
   periodEnd      DateTime? @map("period_end")
   thumbnailUrl   String?   @map("thumbnail_url")
