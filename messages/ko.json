@@ -1994,6 +1994,20 @@
       "openExternal": "새 창에서 열기",
       "externalAria": "Kakao 로드뷰를 새 창으로 열기",
       "iframeTitle": "{name} 로드뷰"
+    },
+    "cta": {
+      "planner": "Planner로 시뮬레이션",
+      "plannerShort": "Planner",
+      "compare": "비교 담기",
+      "compareShort": "비교",
+      "compareIn": "담김 ({count})",
+      "compareInShort": "담김",
+      "compareAdded": "비교함에 담았습니다.",
+      "compareRemoved": "비교함에서 제거했습니다.",
+      "compareRemove": "비교함에서 제거",
+      "compareFull": "비교함은 최대 {max}개입니다.",
+      "quote": "즉시 견적",
+      "quoteShort": "견적"
     }
   }
 }

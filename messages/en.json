@@ -2011,6 +2011,20 @@
       "openExternal": "Open in new tab",
       "externalAria": "Open Kakao roadview in a new window",
       "iframeTitle": "{name} roadview"
+    },
+    "cta": {
+      "planner": "Simulate in Planner",
+      "plannerShort": "Planner",
+      "compare": "Add to compare",
+      "compareShort": "Compare",
+      "compareIn": "In compare ({count})",
+      "compareInShort": "In compare",
+      "compareAdded": "Added to compare.",
+      "compareRemoved": "Removed from compare.",
+      "compareRemove": "Remove from compare",
+      "compareFull": "Compare is limited to {max} items.",
+      "quote": "Request quote",
+      "quoteShort": "Quote"
     }
   }
 }

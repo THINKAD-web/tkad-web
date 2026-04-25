@@ -39,6 +39,7 @@ import {
 } from "@/lib/media-price-format";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { RelatedCases } from "@/components/media-detail/related-cases";
+import { MediaStickyCta } from "@/components/media-detail/sticky-cta";
 import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
@@ -345,6 +346,15 @@ export default async function MediaDetailPage({ params }: Props) {
                       {monthly.toLocaleString()}
                     </span>
                   }
+                />
+              </div>
+
+              <div className="mt-5">
+                <MediaStickyCta
+                  mediaId={media.id}
+                  mediaName={media.name}
+                  mediaNameEn={media.nameEn || media.name}
+                  isKo={isKo}
                 />
               </div>
             </aside>

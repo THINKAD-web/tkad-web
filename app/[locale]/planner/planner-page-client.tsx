@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -279,6 +280,43 @@ export default function PlannerPageClient({
   const [saving, setSaving] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
+
+  // PR-D: 매체 상세에서 ?addMedia=<id> 로 진입 시 Step 4 사전 선택
+  const searchParams = useSearchParams();
+  const addMediaId = searchParams.get("addMedia");
+  const handledAddMediaRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!addMediaId) return;
+    if (handledAddMediaRef.current === addMediaId) return;
+    handledAddMediaRef.current = addMediaId;
+
+    const exists = catalog.some((m) => m.id === addMediaId);
+    if (!exists) {
+      toast(
+        "error",
+        isKo
+          ? "선택한 매체를 찾을 수 없습니다."
+          : "Selected media not found.",
+      );
+      return;
+    }
+    setCampaignMediaIds((prev) =>
+      prev.includes(addMediaId) ? prev : [...prev, addMediaId],
+    );
+    setWizardStep(4);
+    toast(
+      "success",
+      isKo
+        ? "매체가 캠페인에 추가되었습니다."
+        : "Media added to your campaign.",
+    );
+    // URL 정리 — addMedia query 제거 (history 보존)
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("addMedia");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [addMediaId, catalog, setCampaignMediaIds, setWizardStep, toast, isKo]);
 
   /**
    * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
