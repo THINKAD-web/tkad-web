@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Download, Loader2 } from "lucide-react";
 import { captureElementAsPng, downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
+import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
 
 export type CampaignReportData = {
   campaignName: string;
@@ -31,6 +32,12 @@ export type CampaignReportData = {
     visibilityScore?: number | null;
     operatingHours?: string | null;
     impressions?: number | null;
+    /** Media.trafficPattern (있으면 실측·없으면 추정) */
+    trafficPattern?: {
+      hourly?: number[];
+      weekly?: number[];
+      monthly?: number[];
+    } | null;
   }[];
   financialDocs?: { kind: string; title: string; amountKrw?: number | null; status: string }[];
 };
@@ -441,6 +448,11 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
             </div>
           )}
 
+          {/* 노출 패턴 — 시간대 · 요일 · 월별 (매체 상세와 동일 데이터 소스) */}
+          {data.mediaBookings && data.mediaBookings.length > 0 && (
+            <CampaignTrafficSection bookings={data.mediaBookings} />
+          )}
+
           {/* 매체별 효율 표 (CPM 비교) */}
           {mediaEfficiency && mediaEfficiency.length > 0 && (
             <div style={{ marginBottom: "32px" }}>
@@ -705,6 +717,117 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
           </div>
 
         </div>
+      </div>
+    </div>
+  );
+}
+
+
+const CAMP_HOUR_LABELS = ["0", "3", "6", "9", "12", "15", "18", "21"];
+const CAMP_WEEKDAY_KO = ["월", "화", "수", "목", "금", "토", "일"];
+const CAMP_MONTH_LABELS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+
+function indexOfMaxArr(arr: number[]): number {
+  let idx = 0;
+  for (let i = 1; i < arr.length; i++) if (arr[i] > arr[idx]) idx = i;
+  return idx;
+}
+
+/** 캠페인 보고서용 시간대·요일·월별 노출 패턴 — html2canvas 호환 div 막대 */
+function CampaignTrafficSection({
+  bookings,
+}: {
+  bookings: NonNullable<CampaignReportData["mediaBookings"]>;
+}) {
+  const agg = aggregatePortfolioTraffic(
+    bookings.map((b) => ({
+      type: b.type ?? "digital",
+      region: b.region ?? "national",
+      dailyFootTraffic: b.dailyFootTraffic ?? 0,
+      trafficPattern: b.trafficPattern ?? null,
+    })),
+  );
+  const peakHour = indexOfMaxArr(agg.hourly);
+  const peakDay = indexOfMaxArr(agg.weekly);
+  const peakMonth = indexOfMaxArr(agg.monthly);
+
+  return (
+    <div style={{ marginBottom: "32px" }}>
+      <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 6px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <span>📊 노출 패턴 (시간대 · 요일 · 월별)</span>
+        {!agg.allReal && (
+          <span style={{ background: "#fef3c7", color: "#92400e", borderRadius: "999px", padding: "2px 8px", fontSize: "10px", fontWeight: 700, textTransform: "none", letterSpacing: 0 }}>
+            일부 추정치
+          </span>
+        )}
+      </h2>
+      <p style={{ margin: "0 0 12px", fontSize: "11px", color: "#64748b", lineHeight: 1.6 }}>
+        매체 상세의 일유동 데이터(또는 매체유형·지역 기반 추정)를 가중평균한 캠페인 전체의 노출 패턴.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+        <CampaignTrafficBlock
+          title="시간대 (24h)"
+          values={agg.hourly}
+          labels={Array.from({ length: 24 }, (_, i) => (CAMP_HOUR_LABELS.includes(String(i)) ? String(i) : ""))}
+          peakIdx={peakHour}
+          peakLabel={`피크 ${peakHour}시`}
+        />
+        <CampaignTrafficBlock
+          title="요일"
+          values={agg.weekly}
+          labels={[...CAMP_WEEKDAY_KO]}
+          peakIdx={peakDay}
+          peakLabel={`피크 ${CAMP_WEEKDAY_KO[peakDay]}요일`}
+        />
+        <CampaignTrafficBlock
+          title="월별 (1~12월)"
+          values={agg.monthly}
+          labels={[...CAMP_MONTH_LABELS]}
+          peakIdx={peakMonth}
+          peakLabel={`피크 ${CAMP_MONTH_LABELS[peakMonth]}월`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function CampaignTrafficBlock({
+  title,
+  values,
+  labels,
+  peakIdx,
+  peakLabel,
+}: {
+  title: string;
+  values: number[];
+  labels: string[];
+  peakIdx: number;
+  peakLabel: string;
+}) {
+  const max = Math.max(...values, 0.0001);
+  return (
+    <div style={{ background: "#ffffff", borderRadius: "10px", padding: "10px 12px", border: "1px solid #e2e8f0" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
+        <p style={{ margin: 0, fontSize: "11px", fontWeight: 700, color: "#0d1b2e" }}>{title}</p>
+        <span style={{ background: "rgba(200,145,60,0.15)", color: "#7e5818", borderRadius: "999px", padding: "1px 8px", fontSize: "10px", fontWeight: 700 }}>
+          {peakLabel}
+        </span>
+      </div>
+      <div style={{ display: "flex", height: "60px", alignItems: "flex-end", gap: "2px" }}>
+        {values.map((v, i) => {
+          const h = (v / max) * 100;
+          const isPeak = i === peakIdx;
+          return (
+            <div key={i} style={{ flex: 1, height: `${Math.max(2, h)}%`, position: "relative" }}>
+              <div style={{ position: "absolute", inset: 0, borderRadius: "2px", background: isPeak ? "#c8913c" : "rgba(13,27,46,0.35)" }} />
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", height: "12px", marginTop: "2px", gap: "2px" }}>
+        {labels.map((label, i) => (
+          <div key={i} style={{ flex: 1, textAlign: "center", fontSize: "8px", fontWeight: 500, color: "#94a3b8" }}>{label}</div>
+        ))}
       </div>
     </div>
   );

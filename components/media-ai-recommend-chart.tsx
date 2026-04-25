@@ -62,7 +62,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
       x: s.score,
       y: estimatedMonthlyImpressions(s.item),
       z: s.score,
-      name: isKo ? s.item.name : s.item.nameEn,
+      name: isKo ? s.item.name : (s.item.nameEn || s.item.name),
       id: s.item.id,
     }));
   }, [scored, isKo]);

@@ -8,6 +8,7 @@ import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
 import type { PlannerMetrics } from "@/lib/planner-logic";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import { DEFAULT_LOGO_PLACEMENT } from "@/components/planner/composite-preview";
+import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
 
 export type PlannerReportPreviewBudgetSlice = {
   label: string;
@@ -289,6 +290,10 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
         </section>
       ) : null}
 
+      {portfolio.length > 0 ? (
+        <PortfolioTrafficSection portfolio={portfolio} isKo={isKo} />
+      ) : null}
+
       <section>
         <h4 className="mb-4 text-sm font-bold uppercase tracking-wide text-navy">
           {t("reportSectionBudgetAllocation")}
@@ -337,3 +342,160 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
 );
 
 export default PlannerReportPreview;
+
+const HOUR_LABELS = ["0", "3", "6", "9", "12", "15", "18", "21"];
+const WEEKDAY_KO = ["월", "화", "수", "목", "금", "토", "일"];
+const WEEKDAY_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const MONTH_LABELS = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+];
+
+/** 포트폴리오 합산 시간대·요일·월별 유동 패턴 — 매체 상세와 동일 데이터 소스(추정·실측 혼합) */
+function PortfolioTrafficSection({
+  portfolio,
+  isKo,
+}: {
+  portfolio: MediaItem[];
+  isKo: boolean;
+}) {
+  const agg = aggregatePortfolioTraffic(
+    portfolio.map((m) => ({
+      type: m.type,
+      region: m.region,
+      dailyFootTraffic: m.dailyFootTraffic,
+      trafficPattern: m.trafficPattern ?? null,
+    })),
+  );
+
+  const peakHour = indexOfMax(agg.hourly);
+  const peakDay = indexOfMax(agg.weekly);
+  const peakMonth = indexOfMax(agg.monthly);
+
+  return (
+    <section>
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+        <h4 className="text-sm font-bold uppercase tracking-wide text-navy">
+          {isKo ? "노출 패턴 (시간대 · 요일 · 월별)" : "Exposure pattern (hourly · weekday · monthly)"}
+        </h4>
+        {!agg.allReal ? (
+          <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+            {isKo ? "일부 추정치" : "partly estimated"}
+          </span>
+        ) : null}
+      </div>
+      <p className="mb-4 text-xs text-muted-foreground">
+        {isKo
+          ? "매체 상세의 일유동 데이터(또는 매체유형·지역 기반 추정)를 가중평균한 캠페인 전체의 노출 패턴입니다."
+          : "Aggregated exposure pattern across the campaign, weighted by daily footfall."}
+      </p>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <TrafficBarBlock
+          title={isKo ? "시간대 (24h)" : "Hourly"}
+          values={agg.hourly}
+          labels={Array.from({ length: 24 }, (_, i) =>
+            HOUR_LABELS.includes(String(i)) ? String(i) : "",
+          )}
+          peakIdx={peakHour}
+          peakLabel={
+            isKo ? `피크 ${peakHour}시` : `Peak ${peakHour}:00`
+          }
+        />
+        <TrafficBarBlock
+          title={isKo ? "요일" : "Weekday"}
+          values={agg.weekly}
+          labels={isKo ? [...WEEKDAY_KO] : [...WEEKDAY_EN]}
+          peakIdx={peakDay}
+          peakLabel={
+            isKo
+              ? `피크 ${WEEKDAY_KO[peakDay]}요일`
+              : `Peak ${WEEKDAY_EN[peakDay]}`
+          }
+        />
+        <TrafficBarBlock
+          title={isKo ? "월별 (1~12월)" : "Monthly"}
+          values={agg.monthly}
+          labels={MONTH_LABELS}
+          peakIdx={peakMonth}
+          peakLabel={
+            isKo
+              ? `피크 ${MONTH_LABELS[peakMonth]}월`
+              : `Peak ${MONTH_LABELS[peakMonth]}`
+          }
+        />
+      </div>
+    </section>
+  );
+}
+
+function indexOfMax(arr: number[]): number {
+  let idx = 0;
+  for (let i = 1; i < arr.length; i++) if (arr[i] > arr[idx]) idx = i;
+  return idx;
+}
+
+/** html2canvas 호환 — SVG 대신 div 높이로 막대 표시 */
+function TrafficBarBlock({
+  title,
+  values,
+  labels,
+  peakIdx,
+  peakLabel,
+}: {
+  title: string;
+  values: number[];
+  labels: string[];
+  peakIdx: number;
+  peakLabel: string;
+}) {
+  const max = Math.max(...values, 0.0001);
+  return (
+    <div className="rounded-xl border border-navy/10 bg-white p-3 shadow-sm">
+      <div className="mb-1 flex items-baseline justify-between gap-2">
+        <p className="text-xs font-semibold text-navy">{title}</p>
+        <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold text-gold-dark">
+          {peakLabel}
+        </span>
+      </div>
+      <div className="flex h-20 items-end gap-[2px]">
+        {values.map((v, i) => {
+          const h = (v / max) * 100;
+          const isPeak = i === peakIdx;
+          return (
+            <div
+              key={i}
+              className="relative flex-1"
+              style={{ height: `${Math.max(2, h)}%` }}
+            >
+              <div
+                className={`absolute inset-0 rounded-sm ${
+                  isPeak ? "bg-gold" : "bg-navy/35"
+                }`}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-1 flex h-3 gap-[2px]">
+        {labels.map((label, i) => (
+          <div
+            key={i}
+            className="flex-1 text-center text-[8px] font-medium leading-tight text-muted-foreground/85"
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

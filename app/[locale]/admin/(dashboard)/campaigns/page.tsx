@@ -1098,6 +1098,9 @@ export default function AdminCampaignsPage() {
                           visibilityScore: b.media?.visibilityScore ?? null,
                           operatingHours: b.media?.operatingHours ?? null,
                           impressions: b.media?.impressions ?? null,
+                          trafficPattern:
+                            (b.media as { trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null } | null | undefined)
+                              ?.trafficPattern ?? null,
                         })),
                         financialDocs: docs?.map((f: { kind: string; title: string; amountKrw?: number | null; status: string }) => ({
                           kind: f.kind,
