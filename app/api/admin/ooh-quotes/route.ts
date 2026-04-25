@@ -39,6 +39,21 @@ export async function GET(request: NextRequest) {
       cancelReason: r.cancelReason,
       campaignId: r.campaignId,
       updatedAt: r.updatedAt.toISOString(),
+      // PR-9 — 마법사 확장 필드 노출 (admin 목록 + 상세 모두)
+      quoteNumber: r.quoteNumber,
+      customerBusinessNumber: r.customerBusinessNumber,
+      customerAddress: r.customerAddress,
+      customerPosition: r.customerPosition,
+      customerMessage: r.customerMessage,
+      creativeMode: r.creativeMode,
+      creativeAssets: r.creativeAssets,
+      compositeLogoUrl: r.compositeLogoUrl,
+      designBrief: r.designBrief,
+      needsDesignService: r.needsDesignService,
+      timeSlot: r.timeSlot,
+      expiresAt: r.expiresAt?.toISOString() ?? null,
+      quoteSource: r.quoteSource,
+      quoteSourceId: r.quoteSourceId,
     })),
   });
 }

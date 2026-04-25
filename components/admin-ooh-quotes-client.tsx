@@ -28,6 +28,8 @@ const OOH_STATUSES = [
 
 type OohRow = {
   id: string;
+  /** PR-9 — 사람이 읽기 좋은 견적 번호. 마법사 경유 견적만 보유 (legacy 는 null). */
+  quoteNumber: string | null;
   status: string;
   clientName: string;
   clientEmail: string;
@@ -283,6 +285,7 @@ export default function AdminOohQuotesClient() {
               <table className="w-full text-sm">
                 <thead className="border-b bg-slate-50 text-left text-xs text-muted-foreground">
                   <tr>
+                    <th className="px-3 py-2 font-medium">No.</th>
                     <th className="px-3 py-2 font-medium">{t("colClient")}</th>
                     <th className="px-3 py-2 font-medium">{t("colEmail")}</th>
                     <th className="px-3 py-2 font-medium">{t("colAmount")}</th>
@@ -301,6 +304,9 @@ export default function AdminOohQuotesClient() {
                       }}
                       className="border-b border-slate-100 transition-colors"
                     >
+                      <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                        {row.quoteNumber ?? "—"}
+                      </td>
                       <td className="px-3 py-2 font-medium text-navy">
                         {row.clientName}
                       </td>

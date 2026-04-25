@@ -21,6 +21,10 @@ import {
 } from "@/lib/telegram-notify";
 import { sendQuoteSalesSlack } from "@/lib/quote/notifiers/sales-slack";
 import { sendQuoteSalesEmail } from "@/lib/quote/notifiers/sales-email";
+import {
+  defaultQuoteExpiresAt,
+  issueQuoteNumberInTx,
+} from "@/lib/quote/quote-number";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +82,18 @@ export async function POST(request: NextRequest) {
     pdfTemplate,
     locale: localeBody,
     networkSelections: networkSelectionsRaw,
+    // PR-9 — 마법사 확장 필드(모두 선택)
+    customerBusinessNumber,
+    customerAddress,
+    customerPosition,
+    creativeMode,
+    creativeAssets,
+    compositeLogoUrl,
+    designBrief,
+    needsDesignService,
+    timeSlot,
+    quoteSource,
+    quoteSourceId,
   } = body as Record<string, unknown>;
 
   const ids = Array.isArray(mediaIds)
@@ -174,6 +190,37 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      // PR-9: 같은 트랜잭션 안에서 advisory lock 으로 견적 번호 발급 → 동시성 안전.
+      const quoteNumber = await issueQuoteNumberInTx(tx);
+
+      const allowedSources = ["planner", "media", "compare", "direct"];
+      const sourceClean =
+        typeof quoteSource === "string" && allowedSources.includes(quoteSource)
+          ? (quoteSource as "planner" | "media" | "compare" | "direct")
+          : null;
+      const allowedCreativeModes = [
+        "upload",
+        "composite",
+        "design_request",
+        "later",
+      ];
+      const creativeModeClean =
+        typeof creativeMode === "string" &&
+        allowedCreativeModes.includes(creativeMode)
+          ? creativeMode
+          : null;
+      const allowedTimeSlots = [
+        "all_day",
+        "rush_hour",
+        "lunch_evening",
+        "night",
+        "custom",
+      ];
+      const timeSlotClean =
+        typeof timeSlot === "string" && allowedTimeSlots.includes(timeSlot)
+          ? timeSlot
+          : null;
+
       const ooh = await tx.ooHQuote.create({
         data: {
           status: OoHQuoteStatus.draft,
@@ -193,6 +240,42 @@ export async function POST(request: NextRequest) {
           locale: localeStr,
           quoteRequestId: created.id,
           networkSelections: networkSelectionsJson ?? undefined,
+          // PR-9 신규 필드
+          quoteNumber,
+          customerBusinessNumber:
+            typeof customerBusinessNumber === "string"
+              ? customerBusinessNumber.trim() || null
+              : null,
+          customerAddress:
+            typeof customerAddress === "string"
+              ? customerAddress.trim() || null
+              : null,
+          customerPosition:
+            typeof customerPosition === "string"
+              ? customerPosition.trim() || null
+              : null,
+          customerMessage: String(message ?? "").trim() || null,
+          creativeMode: creativeModeClean,
+          creativeAssets:
+            Array.isArray(creativeAssets) && creativeAssets.length > 0
+              ? (creativeAssets as unknown as object)
+              : undefined,
+          compositeLogoUrl:
+            typeof compositeLogoUrl === "string" && compositeLogoUrl.trim()
+              ? compositeLogoUrl.trim()
+              : null,
+          designBrief:
+            designBrief && typeof designBrief === "object"
+              ? (designBrief as object)
+              : undefined,
+          needsDesignService: Boolean(needsDesignService),
+          timeSlot: timeSlotClean,
+          expiresAt: defaultQuoteExpiresAt(),
+          quoteSource: sourceClean,
+          quoteSourceId:
+            typeof quoteSourceId === "string"
+              ? quoteSourceId.trim() || null
+              : null,
         },
       });
 
@@ -282,7 +365,14 @@ export async function POST(request: NextRequest) {
 
     await autoLinkQuoteRequestToCampaign(db, created.id, emailNorm);
 
-    return json({ success: true, quoteId: ooh.id }, { status: 201 });
+    return json(
+      {
+        success: true,
+        quoteId: ooh.id,
+        quoteNumber: ooh.quoteNumber,
+      },
+      { status: 201 },
+    );
   } catch (err) {
     console.error("[quote] DB error:", err);
     return json({ error: "Failed to save quote request" }, { status: 500 });

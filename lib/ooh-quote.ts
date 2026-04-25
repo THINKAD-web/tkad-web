@@ -40,6 +40,8 @@ export function estimateEndDate(
 
 export type OoHQuotePublicJson = {
   id: string;
+  /** PR-9 — 사람이 읽기 좋은 견적 번호 (마법사 경유 견적만 보유). */
+  quoteNumber: string | null;
   status: OoHQuoteStatus;
   clientName: string;
   clientCompany: string | null;
@@ -57,11 +59,14 @@ export type OoHQuotePublicJson = {
   contractConfirmedAt: string | null;
   contractDocUrl: string | null;
   invoiceDocUrl: string | null;
+  /** 견적 유효 기한 (Q7: 14일 TTL). */
+  expiresAt: string | null;
 };
 
 export function serializeOoHQuotePublic(row: OoHQuote): OoHQuotePublicJson {
   return {
     id: row.id,
+    quoteNumber: row.quoteNumber,
     status: row.status,
     clientName: row.clientName,
     clientCompany: row.clientCompany,
@@ -79,6 +84,7 @@ export function serializeOoHQuotePublic(row: OoHQuote): OoHQuotePublicJson {
     contractConfirmedAt: row.contractConfirmedAt?.toISOString() ?? null,
     contractDocUrl: row.contractDocUrl,
     invoiceDocUrl: row.invoiceDocUrl,
+    expiresAt: row.expiresAt?.toISOString() ?? null,
   };
 }
 

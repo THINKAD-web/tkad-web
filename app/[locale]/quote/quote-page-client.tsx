@@ -772,6 +772,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
     setLoading(true);
     try {
+      // PR-9 — 마법사가 수집한 모든 확장 필드를 함께 전송 (서버에서 OoHQuote 에 영속화).
+      const storeSnapshot = useQuoteStore.getState();
       const res = await fetch("/api/quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -803,10 +805,37 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                 lineTotal: computeNetworkMonthlyFromMediaItem(m, opt.units),
               };
             }),
+          // PR-9 확장 필드 — 모두 선택 (서버가 sanitization)
+          customerBusinessNumber: payload.businessNumber,
+          customerAddress: payload.address,
+          customerPosition: payload.position,
+          creativeMode: storeSnapshot.creativeMode,
+          creativeAssets:
+            storeSnapshot.uploadedAssets.length > 0
+              ? storeSnapshot.uploadedAssets
+              : undefined,
+          compositeLogoUrl:
+            storeSnapshot.creativeMode === "composite"
+              ? plannerLogoUrl ?? undefined
+              : undefined,
+          designBrief:
+            storeSnapshot.creativeMode === "design_request"
+              ? storeSnapshot.designBrief
+              : undefined,
+          needsDesignService: storeSnapshot.needsDesignService,
+          timeSlot: storeSnapshot.timeSlot,
+          quoteSource: storeSnapshot.source,
+          quoteSourceId: storeSnapshot.sourceId,
         }),
       });
       if (!res.ok) throw new Error("submit failed");
-      const body = (await res.json()) as { quoteId?: string };
+      const body = (await res.json()) as {
+        quoteId?: string;
+        quoteNumber?: string;
+      };
+      if (body.quoteNumber) {
+        useQuoteStore.getState().markSubmitted(body.quoteNumber);
+      }
       if (body.quoteId) {
         toast(
           "success",

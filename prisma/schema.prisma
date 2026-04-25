@@ -468,8 +468,37 @@ model OoHQuote {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  /// 견적 마법사 PR-9 — 사람이 읽기 좋은 견적 번호 (예: Q-20260425-0001).
+  /// nullable: 어드민 직접 생성 견적 / legacy 데이터에는 부재할 수 있음.
+  quoteNumber String? @unique @map("quote_number")
+
+  /// 고객 확장 정보 (모두 선택)
+  customerBusinessNumber String? @map("customer_business_number")
+  customerAddress        String? @map("customer_address")
+  customerPosition       String? @map("customer_position")
+  customerMessage        String? @map("customer_message")
+
+  /// 광고 소재 정보 — PR-3~6 마법사 수집값
+  creativeMode       String? @map("creative_mode")        // 'upload'|'composite'|'design_request'|'later'
+  creativeAssets     Json?   @map("creative_assets")      // [{id,url,filename,size,mimeType}]
+  compositeLogoUrl   String? @map("composite_logo_url")
+  designBrief        Json?   @map("design_brief")
+  needsDesignService Boolean @default(false) @map("needs_design_service")
+
+  /// 디지털 사이니지 송출 시간대 (PR-4 — 'all_day'|'rush_hour'|'lunch_evening'|'night')
+  timeSlot String? @map("time_slot")
+
+  /// 견적 유효 기한 (Q7: 14일 TTL).
+  expiresAt DateTime? @map("expires_at")
+
+  /// 진입 경로 추적 (분석용 — 'planner'|'media'|'compare'|'direct')
+  quoteSource   String? @map("quote_source")
+  quoteSourceId String? @map("quote_source_id")
+
   @@index([status])
   @@index([createdAt])
+  @@index([expiresAt])
+  @@index([quoteSource])
   @@map("ooh_quotes")
 }
 
