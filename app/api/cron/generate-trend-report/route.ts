@@ -13,6 +13,10 @@ import {
   validateTrendReport,
   type ValidationResult,
 } from "@/lib/insights/validators/auto-validator";
+import {
+  notifyValidationOutcome,
+  notifyPipelineError,
+} from "@/lib/insights/notifiers/slack";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // Anthropic + DB 작업 여유
@@ -95,15 +99,15 @@ export async function GET(request: NextRequest) {
     });
 
     // PR-3: 검증 레이어. Anthropic 호출 실패해도 cron 흐름은 진행 — 단,
-    // 검증 결과 없으므로 status="draft" 유지. PR-4 에서 시스템 에러도 Slack 알림.
+    // 검증 결과 없으므로 status="draft" 유지. PR-4: 시스템 에러도 Slack 알림.
     let validation: ValidationResult | null = null;
     try {
       validation = await validateTrendReport(g, tavily.sources);
     } catch (vErr) {
-      console.error(
-        "[cron/generate-trend-report] validation failed:",
-        vErr instanceof Error ? vErr.message : vErr,
-      );
+      const vMsg = vErr instanceof Error ? vErr.message : String(vErr);
+      console.error("[cron/generate-trend-report] validation failed:", vMsg);
+      // PR-4: 검증 단계 실패는 시스템 에러로 알림 (DB 저장은 계속 진행).
+      void notifyPipelineError("validation", vMsg, { slug, month });
     }
 
     const verdict = validation?.verdict ?? "fail"; // 검증 자체 실패 = 보류
@@ -142,6 +146,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // PR-4: verdict 별 Slack 라우팅. void 로 fire-and-forget — Slack 응답
+    // 지연이 cron 응답을 막지 않게.
+    if (validation) {
+      void notifyValidationOutcome(saved, validation);
+    }
+
     const elapsedMs = Date.now() - startedAt;
     return json(
       {
@@ -179,6 +189,8 @@ export async function GET(request: NextRequest) {
       return json({ error: "AI 미설정: ANTHROPIC_API_KEY" }, 503);
     }
     console.error("[cron/generate-trend-report]", msg);
+    // PR-4: cron 흐름 자체가 깨지면 운영자 즉시 알림.
+    void notifyPipelineError("generate-or-save", msg, { slug, month });
     return json({ error: msg, slug }, 500);
   }
 }

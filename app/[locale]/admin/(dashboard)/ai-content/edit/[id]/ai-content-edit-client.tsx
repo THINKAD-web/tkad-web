@@ -30,6 +30,24 @@ export default function AdminAiContentEditClient() {
   const [err, setErr] = useState<string | null>(null);
   const [status, setStatus] = useState("");
 
+  // PR-3/4: TrendReport 자동 검증 결과 (있으면 패널 노출).
+  type ValidationIssue = {
+    category: "factual" | "legal" | "tone" | "seo";
+    severity: "critical" | "warning" | "minor";
+    location: string;
+    explanation: string;
+    suggestion: string;
+  };
+  type ValidationDisplay = {
+    totalScore: number;
+    verdict: "pass" | "warning" | "fail";
+    scores: { factual: number; legal: number; tone: number; seo: number };
+    issues: ValidationIssue[];
+    validatedAt: string;
+  };
+  const [validation, setValidation] = useState<ValidationDisplay | null>(null);
+  const [revalidateBusy, setRevalidateBusy] = useState(false);
+
   const [titleKo, setTitleKo] = useState("");
   const [contentKo, setContentKo] = useState("");
   const [descriptionKo, setDescriptionKo] = useState("");
@@ -81,6 +99,16 @@ export default function AdminAiContentEditClient() {
         setStatus(r.status);
         setTitleKo(r.titleKo ?? "");
         setContentKo(r.contentKo ?? "");
+        // PR-3/4: 검증 결과가 row 에 있으면 패널 노출
+        if (
+          r.validationResult &&
+          typeof r.validationResult === "object" &&
+          "totalScore" in r.validationResult
+        ) {
+          setValidation(r.validationResult as ValidationDisplay);
+        } else {
+          setValidation(null);
+        }
       } else if (kind === "academy_lesson") {
         const r = data.academyLesson;
         setStatus(r.status);
@@ -264,6 +292,46 @@ export default function AdminAiContentEditClient() {
     }
   };
 
+  // PR-4: TrendReport 만 지원 (다른 kind 는 검증 레이어 미적용).
+  const revalidate = async () => {
+    if (kind !== "trend_report") return;
+    setActionMsg(null);
+    setRevalidateBusy(true);
+    try {
+      const res = await fetch("/api/admin/ai/validate-trend-report", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setActionMsg(data.error ?? "재검증 실패");
+        return;
+      }
+      // 재검증 후 row 다시 fetch — 표시되는 점수·이슈 갱신
+      const refetch = await fetch(`/api/admin/trend-reports/${id}`, {
+        credentials: "include",
+      });
+      const refetched = await refetch.json().catch(() => ({}));
+      const r = refetched.trendReport;
+      if (
+        r?.validationResult &&
+        typeof r.validationResult === "object" &&
+        "totalScore" in r.validationResult
+      ) {
+        setValidation(r.validationResult as ValidationDisplay);
+      }
+      setActionMsg(
+        `재검증 완료: ${data.verdict?.toUpperCase()} (${data.validationScore}/100)`,
+      );
+    } catch {
+      setActionMsg("네트워크 오류");
+    } finally {
+      setRevalidateBusy(false);
+    }
+  };
+
   if (!kind && !loading) {
     return (
       <div className="p-6">
@@ -297,6 +365,120 @@ export default function AdminAiContentEditClient() {
         <>
           {actionMsg ? (
             <p className="text-sm text-emerald-700">{actionMsg}</p>
+          ) : null}
+
+          {kind === "trend_report" && validation ? (
+            <Card
+              className={
+                validation.verdict === "fail"
+                  ? "border-red-300 bg-red-50"
+                  : validation.verdict === "warning"
+                    ? "border-amber-300 bg-amber-50"
+                    : "border-emerald-300 bg-emerald-50"
+              }
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center justify-between text-base">
+                  <span>
+                    자동 검증{" "}
+                    <span className="ml-2 font-mono text-sm">
+                      {validation.totalScore}/100 ·{" "}
+                      {validation.verdict.toUpperCase()}
+                    </span>
+                  </span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={revalidateBusy}
+                    onClick={() => void revalidate()}
+                  >
+                    {revalidateBusy ? (
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                    ) : null}
+                    재검증
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs sm:grid-cols-4">
+                  <div>
+                    팩트{" "}
+                    <span className="font-mono">
+                      {validation.scores.factual}/25
+                    </span>
+                  </div>
+                  <div>
+                    법적{" "}
+                    <span className="font-mono">
+                      {validation.scores.legal}/25
+                    </span>
+                  </div>
+                  <div>
+                    톤{" "}
+                    <span className="font-mono">
+                      {validation.scores.tone}/25
+                    </span>
+                  </div>
+                  <div>
+                    SEO{" "}
+                    <span className="font-mono">
+                      {validation.scores.seo}/25
+                    </span>
+                  </div>
+                </div>
+                {validation.issues.length > 0 ? (
+                  <ul className="mt-2 space-y-1">
+                    {validation.issues.slice(0, 8).map((iss, idx) => (
+                      <li
+                        key={idx}
+                        className="rounded border border-black/10 bg-white/60 p-2 text-xs"
+                      >
+                        <div className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                          {iss.category} · {iss.severity}
+                        </div>
+                        <div className="mt-1 font-medium">
+                          {iss.explanation}
+                        </div>
+                        {iss.suggestion ? (
+                          <div className="mt-1 text-muted-foreground">
+                            제안: {iss.suggestion}
+                          </div>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    감지된 이슈 없음.
+                  </p>
+                )}
+                <p className="text-[10px] text-muted-foreground">
+                  검증 시각:{" "}
+                  {new Date(validation.validatedAt).toLocaleString("ko-KR")}
+                </p>
+              </CardContent>
+            </Card>
+          ) : kind === "trend_report" && !validation ? (
+            <Card className="border-slate-200">
+              <CardContent className="flex items-center justify-between py-3 text-sm">
+                <span className="text-muted-foreground">
+                  자동 검증 결과 없음 (수동 검증 가능)
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={revalidateBusy}
+                  onClick={() => void revalidate()}
+                >
+                  {revalidateBusy ? (
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  ) : null}
+                  검증 실행
+                </Button>
+              </CardContent>
+            </Card>
           ) : null}
 
           <div className="flex flex-wrap gap-2">
