@@ -428,6 +428,33 @@ section("store action: setSelectedMediaIds cleanup + cap", () => {
   );
 });
 
+section("customer schema: 사업자등록번호 체크섬", async () => {
+  const { isValidKoreanBusinessNumber, formatKoreanBusinessNumber } =
+    await import("@/lib/quote/customer-schema");
+  // NAVER 220-81-62517 — 공개된 정상 번호
+  check("220-81-62517 valid", isValidKoreanBusinessNumber("220-81-62517"), true);
+  check("2208162517 valid (no dash)", isValidKoreanBusinessNumber("2208162517"), true);
+  // Samsung Electronics 124-81-00998 — 공개된 정상 번호
+  check("124-81-00998 valid", isValidKoreanBusinessNumber("124-81-00998"), true);
+  // 1자리 변형 → invalid
+  check("220-81-62518 invalid", isValidKoreanBusinessNumber("220-81-62518"), false);
+  check("길이 9자리 invalid", isValidKoreanBusinessNumber("220816251"), false);
+  check("길이 11자리 invalid", isValidKoreanBusinessNumber("22081625170"), false);
+  check("빈 문자열 invalid", isValidKoreanBusinessNumber(""), false);
+  check("문자 포함은 숫자만 추출 후 검증", isValidKoreanBusinessNumber("abc220-81-62517def"), true);
+
+  check(
+    "format: 2208162517 → 220-81-62517",
+    formatKoreanBusinessNumber("2208162517"),
+    "220-81-62517",
+  );
+  check(
+    "format: 잘못된 길이는 그대로 반환",
+    formatKoreanBusinessNumber("123"),
+    "123",
+  );
+});
+
 section("period-derive (legacy 호환)", () => {
   check("음수/0 → 1month", deriveLegacyPeriodKey(0), "1month");
   check("7일 → 1month", deriveLegacyPeriodKey(7), "1month");

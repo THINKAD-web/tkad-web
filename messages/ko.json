@@ -909,6 +909,26 @@
       "discard": "새로 시작"
     },
     "pdfOptionsTitle": "고급: 견적서 PDF 옵션 (템플릿·로고)",
+    "customer": {
+      "businessNumber": "사업자등록번호 (선택)",
+      "businessNumberHint": "10자리 숫자 또는 123-45-67890 형식. 입력 시 체크섬 자동 검증.",
+      "address": "주소 (선택)",
+      "position": "부서/직책 (선택)",
+      "errors": {
+        "needCompany": "회사명을 입력해 주세요.",
+        "tooLongCompany": "회사명이 너무 깁니다 (200자 이하).",
+        "needName": "담당자명을 입력해 주세요.",
+        "tooLongName": "담당자명이 너무 깁니다 (80자 이하).",
+        "needEmail": "이메일을 입력해 주세요.",
+        "needValidEmail": "올바른 이메일 형식이 아닙니다.",
+        "needPhone": "연락처를 입력해 주세요.",
+        "needValidPhone": "올바른 연락처 형식이 아닙니다.",
+        "needValidBusinessNumber": "사업자등록번호 형식이 올바르지 않습니다.",
+        "tooLongAddress": "주소가 너무 깁니다.",
+        "tooLongPosition": "부서/직책이 너무 깁니다.",
+        "tooLongMessage": "메시지가 너무 깁니다 (2000자 이하)."
+      }
+    },
     "creative": {
       "desc": "광고 소재를 어떻게 준비하시겠어요? 모드는 견적 후에도 변경 가능합니다.",
       "modes": {

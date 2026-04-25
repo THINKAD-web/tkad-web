@@ -909,6 +909,26 @@
       "discard": "Start fresh"
     },
     "pdfOptionsTitle": "Advanced: Quote PDF options (template & logo)",
+    "customer": {
+      "businessNumber": "Business registration number (optional)",
+      "businessNumberHint": "10 digits or 123-45-67890 format. Checksum is verified automatically.",
+      "address": "Address (optional)",
+      "position": "Department / position (optional)",
+      "errors": {
+        "needCompany": "Please enter your company name.",
+        "tooLongCompany": "Company name is too long (max 200 characters).",
+        "needName": "Please enter your name.",
+        "tooLongName": "Name is too long (max 80 characters).",
+        "needEmail": "Please enter your email.",
+        "needValidEmail": "Please enter a valid email address.",
+        "needPhone": "Please enter your phone number.",
+        "needValidPhone": "Please enter a valid phone number.",
+        "needValidBusinessNumber": "Invalid business registration number format.",
+        "tooLongAddress": "Address is too long.",
+        "tooLongPosition": "Department/position is too long.",
+        "tooLongMessage": "Message is too long (max 2000 characters)."
+      }
+    },
     "creative": {
       "desc": "How would you like to prepare your creative? You can change this after the quote is issued.",
       "modes": {

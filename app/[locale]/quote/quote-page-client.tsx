@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -89,6 +88,8 @@ import { QuoteSourceBanner } from "@/components/quote/source-banner";
 import { QuoteRestoreModal } from "@/components/quote/restore-modal";
 import { QuotePeriodStep } from "@/components/quote/period-step";
 import { QuoteCreativeStep } from "@/components/quote/creative-step";
+import { QuoteCustomerForm } from "@/components/quote/customer-form";
+import type { QuoteCustomerInfo } from "@/lib/quote/types";
 import {
   computeQuoteTotals,
   inclusiveCampaignDays,
@@ -102,7 +103,6 @@ import {
   deriveLegacyPeriodMonths,
 } from "@/lib/quote/period-derive";
 
-const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LOGO_MAX_BYTES = 600 * 1024;
 
@@ -114,19 +114,6 @@ const PERIOD_MONTHS: Record<PeriodKey, number> = {
   "6months": 6,
   "12months": 12,
 };
-
-type FormState = {
-  company: string;
-  name: string;
-  phone: string;
-  email: string;
-  message: string;
-  website: string;
-  budgetMin: string;
-  budgetMax: string;
-};
-
-type FormErrors = Partial<Record<"name" | "phone" | "media", string>>;
 
 type WizardStep = 1 | 2 | 3 | 4;
 
@@ -348,20 +335,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     storeSetPriceOptionIndex,
   ]);
 
-  const [form, setForm] = useState<FormState>({
-    company: "",
-    name: "",
-    phone: "",
-    email: "",
-    message: "",
-    website: "",
-    budgetMin: "",
-    budgetMax: "",
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof FormState | "media", boolean>>
-  >({});
+  // 4단계 고객 정보는 store.customer 가 진실. 폼은 components/quote/customer-form 의 RHF.
+  const customer = useQuoteStore((s) => s.customer);
+  const [mediaError, setMediaError] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
   const [submitted, setSubmitted] = useState(false);
@@ -532,14 +508,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     `quote.periods.${derivedPeriodKey}` as `quote.periods.${PeriodKey}`,
   );
 
-  const budgetMinN = useMemo(() => {
-    const n = parseInt(form.budgetMin, 10);
-    return Number.isFinite(n) && n >= 0 ? n : null;
-  }, [form.budgetMin]);
-  const budgetMaxN = useMemo(() => {
-    const n = parseInt(form.budgetMax, 10);
-    return Number.isFinite(n) && n >= 0 ? n : null;
-  }, [form.budgetMax]);
+  // 예산 범위 — Step 2 에서 단일 budgetKrw 로 입력했으므로 min=max=budgetKrw 로 동일.
+  const budgetKrwForApi = useQuoteStore((s) => s.budgetKrw);
+  const budgetMinN = budgetKrwForApi;
+  const budgetMaxN = budgetKrwForApi;
 
   const pdfPreviewRef = useRef<HTMLDivElement>(null);
   const quoteFloatingStashRef = useRef<MediaItem[]>([]);
@@ -647,32 +619,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     [],
   );
 
-  const updateField = useCallback((field: keyof FormState, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  }, []);
-
-  const validate = useCallback(
-    (f: FormState, mediaCount: number): FormErrors => {
-      const e: FormErrors = {};
-      if (!f.name.trim()) {
-        e.name = isKo ? "이름을 입력해 주세요." : "Please enter your name.";
-      }
-      if (!f.phone.trim()) {
-        e.phone = isKo
-          ? "연락처를 입력해 주세요."
-          : "Please enter your phone number.";
-      } else if (!PHONE_RE.test(f.phone)) {
-        e.phone = isKo
-          ? "올바른 연락처 형식이 아닙니다."
-          : "Please enter a valid phone number.";
-      }
-      if (mediaCount < 1) {
-        e.media = t("quote.noMediaSelected");
-      }
-      return e;
-    },
-    [isKo, t],
-  );
+  // 4단계 고객 정보 검증은 components/quote/customer-form 의 zodResolver 가 담당.
+  // 여기에서는 step 1 의 매체 미선택 인라인 에러만 보존.
 
   const stepLabels = useMemo(
     () => [
@@ -751,12 +699,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     if (!canGoNext()) {
       const msg = stepBlockerMessage() ?? t("quote.noMediaSelected");
       toast("warning", msg);
-      if (step === 1) {
-        setTouched((prev) => ({ ...prev, media: true }));
-        setErrors((prev) => ({ ...prev, media: t("quote.noMediaSelected") }));
-      }
+      if (step === 1) setMediaError(t("quote.noMediaSelected"));
       return;
     }
+    if (step === 1) setMediaError(null);
     if (step < 4) setStep((step + 1) as WizardStep);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -783,33 +729,19 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     r.readAsDataURL(f);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const allTouched: Partial<Record<keyof FormState | "media", boolean>> = {
-      name: true,
-      phone: true,
-      email: true,
-      company: true,
-      message: true,
-      website: true,
-      budgetMin: true,
-      budgetMax: true,
-      media: true,
-    };
-    setTouched(allTouched);
-
-    const validationErrors = validate(form, selectedMedia.length);
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) {
-      toast(
-        "warning",
-        isKo ? "필수 항목을 모두 입력해 주세요." : "Please fill in all required fields.",
-      );
+  /**
+   * QuoteCustomerForm 가 zodResolver 통과 후 호출. 매체 미선택 등 부수 검증은 여기서 처리.
+   */
+  const handleQuoteSubmit = async (
+    payload: QuoteCustomerInfo,
+  ): Promise<void> => {
+    if (selectedMedia.length === 0) {
+      toast("warning", t("quote.noMediaSelected"));
       return;
     }
 
-    if (form.website.trim()) {
+    // honeypot 트랩 — 값이 채워져 있으면 봇으로 간주, 무음 success.
+    if (emailHoneypot.trim()) {
       setSubmitted(true);
       return;
     }
@@ -820,17 +752,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          company: form.company,
-          name: form.name,
-          phone: form.phone,
-          email: form.email,
+          company: payload.company,
+          name: payload.name,
+          phone: payload.phone,
+          email: payload.email,
           mediaIds: selectedMedia.map((m) => m.id),
           period,
-          budgetMin: form.budgetMin,
-          budgetMax: form.budgetMax,
+          budgetMin: budgetMinN,
+          budgetMax: budgetMaxN,
           estimatedCost: totalCost,
-          message: form.message,
-          website: form.website,
+          message: payload.message ?? "",
+          website: emailHoneypot,
           pdfTemplate: template,
           locale: isKo ? "ko" : "en",
           networkSelections: selectedMedia
@@ -850,39 +782,35 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         }),
       });
       if (!res.ok) throw new Error("submit failed");
-      const payload = (await res.json()) as { quoteId?: string };
-      if (payload.quoteId) {
+      const body = (await res.json()) as { quoteId?: string };
+      if (body.quoteId) {
         toast(
           "success",
-          isKo ? "견적이 접수되었습니다. 견적서 페이지로 이동합니다." : "Quote saved. Opening your quote page.",
+          isKo
+            ? "견적이 접수되었습니다. 견적서 페이지로 이동합니다."
+            : "Quote saved. Opening your quote page.",
         );
-        router.push(`/quote/${payload.quoteId}`);
+        router.push(`/quote/${body.quoteId}`);
         return;
       }
       setSubmitted(true);
       toast(
         "success",
-        isKo ? "견적 요청이 접수되었습니다." : "Your quote request has been submitted.",
+        isKo
+          ? "견적 요청이 접수되었습니다."
+          : "Your quote request has been submitted.",
       );
     } catch {
       toast(
         "error",
-        isKo ? "일시적 오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.",
+        isKo
+          ? "일시적 오류가 발생했습니다. 다시 시도해 주세요."
+          : "An error occurred. Please try again.",
       );
     } finally {
       setLoading(false);
     }
   };
-
-  const fieldError = (field: keyof FormErrors) =>
-    touched[field] && errors[field] ? (
-      <p className="mt-1 text-xs font-medium text-red-500">{errors[field]}</p>
-    ) : null;
-
-  const inputErrorClass = (field: keyof FormErrors) =>
-    touched[field] && errors[field]
-      ? "border-red-400 focus:border-red-500 focus:ring-red-200"
-      : "";
 
   const handleDownloadPdf = async () => {
     if (selectedMedia.length === 0) {
@@ -934,7 +862,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       toast("warning", t("quote.noMediaSelected"));
       return;
     }
-    if (!form.email.trim() || !EMAIL_RE.test(form.email.trim())) {
+    if (!customer.email.trim() || !EMAIL_RE.test(customer.email.trim())) {
       toast("warning", t("quote.emailRequiredForPdf"));
       return;
     }
@@ -953,7 +881,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: form.email.trim(),
+          email: customer.email.trim(),
           pdfBase64,
           locale: isKo ? "ko" : "en",
           website: emailHoneypot,
@@ -1069,9 +997,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         prefilledMediaCount={selectedMediaIds.length}
                         onDismiss={() => storeSetSource("direct", null)}
                       />
-                      {touched.media && errors.media ? (
+                      {mediaError ? (
                         <p className="mb-4 text-sm font-medium text-red-500">
-                          {errors.media}
+                          {mediaError}
                         </p>
                       ) : null}
                       <p className="mb-4 text-sm text-muted-foreground">
@@ -1706,10 +1634,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 ref={pdfPreviewRef}
                                 template={template}
                                 customerLogoSrc={logoDataUrl}
-                                company={form.company}
-                                contactName={form.name}
-                                contactPhone={form.phone}
-                                contactEmail={form.email}
+                                company={customer.company}
+                                contactName={customer.name}
+                                contactPhone={customer.phone}
+                                contactEmail={customer.email}
                                 periodLabel={periodLabel}
                                 periodMonths={periodMonths}
                                 rows={pdfPreviewRows}
@@ -1839,9 +1767,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               id="quote-pdf-email"
                               type="email"
                               placeholder={t("quote.emailPlaceholder")}
-                              value={form.email}
+                              value={customer.email}
                               onChange={(e) =>
-                                updateField("email", e.target.value)
+                                useQuoteStore
+                                  .getState()
+                                  .updateCustomer({ email: e.target.value })
                               }
                             />
                           </div>
@@ -1871,121 +1801,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         <h3 className="mb-4 text-lg font-bold text-navy">
                           {t("quote.getQuote")}
                         </h3>
-                        <form
-                          className="relative space-y-5"
-                          onSubmit={handleSubmit}
-                          noValidate
-                        >
-                          <div
-                            className="absolute -left-[9999px]"
-                            aria-hidden="true"
-                            tabIndex={-1}
-                          >
-                            <label htmlFor="quote-website">Website</label>
-                            <input
-                              type="text"
-                              id="quote-website"
-                              name="website"
-                              value={form.website}
-                              onChange={(e) =>
-                                updateField("website", e.target.value)
-                              }
-                              tabIndex={-1}
-                              autoComplete="off"
-                            />
-                          </div>
-
-                          <div className="grid gap-5 sm:grid-cols-2">
-                            <div>
-                              <label className="mb-1.5 block text-sm font-medium text-navy">
-                                {t("quote.company")}
-                              </label>
-                              <Input
-                                placeholder={t("quote.companyPlaceholder")}
-                                value={form.company}
-                                onChange={(e) =>
-                                  updateField("company", e.target.value)
-                                }
-                              />
-                            </div>
-                            <div>
-                              <label className="mb-1.5 block text-sm font-medium text-navy">
-                                {t("quote.name")}{" "}
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <Input
-                                placeholder={t("quote.namePlaceholder")}
-                                value={form.name}
-                                onChange={(e) =>
-                                  updateField("name", e.target.value)
-                                }
-                                className={inputErrorClass("name")}
-                              />
-                              {fieldError("name")}
-                            </div>
-                            <div>
-                              <label className="mb-1.5 block text-sm font-medium text-navy">
-                                {t("quote.phone")}{" "}
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <Input
-                                placeholder={t("quote.phonePlaceholder")}
-                                value={form.phone}
-                                onChange={(e) =>
-                                  updateField("phone", e.target.value)
-                                }
-                                className={inputErrorClass("phone")}
-                              />
-                              {fieldError("phone")}
-                            </div>
-                            <div>
-                              <label className="mb-1.5 block text-sm font-medium text-navy">
-                                {t("quote.email")}
-                              </label>
-                              <Input
-                                type="email"
-                                placeholder={t("quote.emailPlaceholder")}
-                                value={form.email}
-                                onChange={(e) =>
-                                  updateField("email", e.target.value)
-                                }
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="mb-1.5 block text-sm font-medium text-navy">
-                              {t("quote.message")}
-                            </label>
-                            <Textarea
-                              rows={4}
-                              placeholder={t("quote.messagePlaceholder")}
-                              value={form.message}
-                              onChange={(e) =>
-                                updateField("message", e.target.value)
-                              }
-                            />
-                          </div>
-
-                          <Button
-                            type="submit"
-                            className="w-full bg-gold font-semibold text-navy hover:bg-gold-dark"
-                            size="lg"
-                            disabled={loading}
-                          >
-                            {loading ? (
-                              <>
-                                <Spinner className="mr-2" />
-                                {t("quote.submitting")}
-                              </>
-                            ) : (
-                              <>
-                                <Send className="mr-2 h-4 w-4" />
-                                {t("quote.submit")}
-                              </>
-                            )}
-                          </Button>
-                        </form>
+                        <QuoteCustomerForm
+                          onSubmit={handleQuoteSubmit}
+                          loading={loading}
+                          honeypot={emailHoneypot}
+                          setHoneypot={setEmailHoneypot}
+                        />
                       </div>
                     </div>
                   )}
