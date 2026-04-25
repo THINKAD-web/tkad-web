@@ -655,6 +655,8 @@ export async function generateTrendReport(
       aiModel: model,
       sources: (context?.webSources ?? []) as unknown as TrendReport["sources"],
       internalDataUsed: (context?.internalInsights ?? []).map((i) => i.title),
+      validationScore: null,
+      validationResult: null,
       ...newRowTimestamps(),
     };
 

@@ -644,6 +644,10 @@ model TrendReport {
   sources            Json?     @default("[]")
   /// generator 가 참고한 자체 매체 DB 인사이트 라벨 ("지역별 매체 분포 TOP 5" 등)
   internalDataUsed   String[]  @default([]) @map("internal_data_used")
+  /// PR-3 자동 검증 점수 (0~100). null = 미검증
+  validationScore    Int?      @map("validation_score")
+  /// PR-3 자동 검증 결과 ({verdict, scores, issues[], shouldPublish, requiresHumanReview, validatedAt, modelUsed})
+  validationResult   Json?     @map("validation_result")
 
   @@map("trend_reports")
 }

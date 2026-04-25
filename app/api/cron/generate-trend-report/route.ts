@@ -9,6 +9,10 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { seoulTargetYmd, seoulWeekdayShort } from "@/lib/seoul-calendar";
 import { fetchOOHWebSources } from "@/lib/insights/sources/tavily";
 import { fetchInternalMediaInsights } from "@/lib/insights/sources/internal";
+import {
+  validateTrendReport,
+  type ValidationResult,
+} from "@/lib/insights/validators/auto-validator";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // Anthropic + DB 작업 여유
@@ -90,13 +94,31 @@ export async function GET(request: NextRequest) {
       })),
     });
 
+    // PR-3: 검증 레이어. Anthropic 호출 실패해도 cron 흐름은 진행 — 단,
+    // 검증 결과 없으므로 status="draft" 유지. PR-4 에서 시스템 에러도 Slack 알림.
+    let validation: ValidationResult | null = null;
+    try {
+      validation = await validateTrendReport(g, tavily.sources);
+    } catch (vErr) {
+      console.error(
+        "[cron/generate-trend-report] validation failed:",
+        vErr instanceof Error ? vErr.message : vErr,
+      );
+    }
+
+    const verdict = validation?.verdict ?? "fail"; // 검증 자체 실패 = 보류
+    // pass / warning → 자동 발행, fail → draft 유지 (운영 검토 후 수동 발행)
+    const willPublish = verdict === "pass" || verdict === "warning";
+    const finalStatus = willPublish ? "published" : "draft";
+    const finalPublishedAt = willPublish ? new Date() : null;
+
     const saved = await db.trendReport.create({
       data: {
         slug,
         // 자동 발행 row 는 month 의 unique 충돌을 피하기 위해 null.
         // 어드민이 수동 생성하는 월간 리포트만 month 사용.
         month: null,
-        status: "draft",
+        status: finalStatus,
         titleKo: g.titleKo,
         titleEn: g.titleEn,
         contentKo: g.contentKo,
@@ -108,11 +130,15 @@ export async function GET(request: NextRequest) {
             ? undefined
             : (g.verticalStrategies as Prisma.InputJsonValue),
         thumbnailUrl: g.thumbnailUrl,
-        publishedAt: null,
+        publishedAt: finalPublishedAt,
         generationMethod: "auto",
         aiModel: resolveModel(),
         sources: tavily.sources as unknown as Prisma.InputJsonValue,
         internalDataUsed: internalInsights.map((i) => i.title),
+        validationScore: validation?.totalScore ?? null,
+        validationResult: validation
+          ? (validation as unknown as Prisma.InputJsonValue)
+          : Prisma.JsonNull,
       },
     });
 
@@ -128,6 +154,16 @@ export async function GET(request: NextRequest) {
         sourcesCount: tavily.sources.length,
         internalInsightsCount: internalInsights.length,
         keywordsUsed: tavily.keywordsUsed,
+        validation: validation
+          ? {
+              score: validation.totalScore,
+              verdict: validation.verdict,
+              issuesCount: validation.issues.length,
+              criticalCount: validation.issues.filter(
+                (i) => i.severity === "critical",
+              ).length,
+            }
+          : { score: null, verdict: "skipped" },
       },
       201,
     );
