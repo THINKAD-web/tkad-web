@@ -194,3 +194,76 @@ export function buildMediaBreadcrumbJsonLd(
     ],
   };
 }
+
+
+/**
+ * 트렌드 리포트 (자동 발행) 상세 페이지용 Article JSON-LD.
+ * Google Rich Results Article schema 호환.
+ */
+export function buildInsightArticleJsonLd(
+  report: {
+    titleKo: string;
+    summaryKo: string[];
+    publishedIso: string;
+    slug: string;
+    sources?: { url: string; title: string }[];
+  },
+  locale: string,
+): Record<string, unknown> {
+  const url = `${siteUrl}/${locale}/insights/${report.slug}`;
+  const description =
+    report.summaryKo[0]?.slice(0, 280) ?? report.titleKo;
+  const data: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${url}#article`,
+    headline: report.titleKo.slice(0, 110),
+    description,
+    url,
+    datePublished: report.publishedIso,
+    dateModified: report.publishedIso,
+    inLanguage: locale === "ko" ? "ko-KR" : "en-US",
+    author: { "@id": ORG_ID },
+    publisher: { "@id": ORG_ID },
+    mainEntityOfPage: url,
+  };
+  if (report.sources && report.sources.length > 0) {
+    data.citation = report.sources.slice(0, 10).map((s) => ({
+      "@type": "CreativeWork",
+      name: s.title,
+      url: s.url,
+    }));
+  }
+  return data;
+}
+
+export function buildInsightBreadcrumbJsonLd(
+  report: { titleKo: string; slug: string },
+  locale: string,
+): Record<string, unknown> {
+  const isKo = locale === "ko";
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: isKo ? "홈" : "Home",
+        item: `${siteUrl}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: isKo ? "OOH 인사이트" : "OOH Insights",
+        item: `${siteUrl}/${locale}/insights`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: report.titleKo.slice(0, 110),
+        item: `${siteUrl}/${locale}/insights/${report.slug}`,
+      },
+    ],
+  };
+}

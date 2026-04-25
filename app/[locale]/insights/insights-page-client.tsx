@@ -554,15 +554,29 @@ function ReportCard({
             )}
             {t("downloadPdf")}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 border-navy/25 font-semibold text-navy"
-            onClick={onView}
-          >
-            <BookOpen className="mr-2 h-4 w-4" />
-            {t("viewOnline")}
-          </Button>
+          {report.slug ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 border-navy/25 font-semibold text-navy"
+              asChild
+            >
+              <Link href={`/insights/${report.slug}`}>
+                <BookOpen className="mr-2 h-4 w-4" />
+                {t("viewOnline")}
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 border-navy/25 font-semibold text-navy"
+              onClick={onView}
+            >
+              <BookOpen className="mr-2 h-4 w-4" />
+              {t("viewOnline")}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
