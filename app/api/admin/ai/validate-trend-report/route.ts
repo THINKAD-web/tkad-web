@@ -4,6 +4,7 @@ import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { validateTrendReport } from "@/lib/insights/validators/auto-validator";
 import type { WebSource } from "@/lib/insights/types";
+import { notifyValidationOutcome } from "@/lib/insights/notifiers/slack";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -47,6 +48,8 @@ export async function POST(request: NextRequest) {
         validationResult: result as unknown as Prisma.InputJsonValue,
       },
     });
+    // 어드민이 수동 트리거한 재검증도 Slack 라우팅 (운영팀이 결과 공유 가능).
+    void notifyValidationOutcome(updated, result);
     return json(
       {
         ok: true,
