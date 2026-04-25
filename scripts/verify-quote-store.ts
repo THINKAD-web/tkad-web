@@ -54,6 +54,11 @@ import {
   type QuoteStoreState,
 } from "@/lib/quote/store";
 import { QUOTE_DRAFT_TTL_MS } from "@/lib/quote/types";
+import {
+  deriveLegacyPeriodKey,
+  deriveLegacyPeriodMonths,
+  LEGACY_PERIOD_DAYS,
+} from "@/lib/quote/period-derive";
 
 let failures = 0;
 
@@ -391,6 +396,30 @@ section("store action: setSelectedMediaIds cleanup + cap", () => {
     "15개 입력 → 10개로 cap",
     store.getState().selectedMediaIds.length,
     10,
+  );
+});
+
+section("period-derive (legacy 호환)", () => {
+  check("음수/0 → 1month", deriveLegacyPeriodKey(0), "1month");
+  check("7일 → 1month", deriveLegacyPeriodKey(7), "1month");
+  check("30일 → 1month", deriveLegacyPeriodKey(30), "1month");
+  check("45일 → 1month (경계)", deriveLegacyPeriodKey(45), "1month");
+  check("46일 → 3months", deriveLegacyPeriodKey(46), "3months");
+  check("90일 → 3months", deriveLegacyPeriodKey(90), "3months");
+  check("136일 → 6months", deriveLegacyPeriodKey(136), "6months");
+  check("180일 → 6months", deriveLegacyPeriodKey(180), "6months");
+  check("271일 → 12months", deriveLegacyPeriodKey(271), "12months");
+  check("365일 → 12months", deriveLegacyPeriodKey(365), "12months");
+
+  check("월수: 7일 → 1", deriveLegacyPeriodMonths(7), 1);
+  check("월수: 60일 → 2", deriveLegacyPeriodMonths(60), 2);
+  check("월수: 90일 → 3", deriveLegacyPeriodMonths(90), 3);
+  check(
+    "정확 매핑: legacy 30/90/180/365 → 키 일치",
+    Object.entries(LEGACY_PERIOD_DAYS).every(
+      ([k, d]) => deriveLegacyPeriodKey(d) === k,
+    ),
+    true,
   );
 });
 

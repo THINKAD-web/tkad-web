@@ -87,6 +87,19 @@ import {
 import { QUOTE_MAX_MEDIA, type QuoteSource } from "@/lib/quote/types";
 import { QuoteSourceBanner } from "@/components/quote/source-banner";
 import { QuoteRestoreModal } from "@/components/quote/restore-modal";
+import { QuotePeriodStep } from "@/components/quote/period-step";
+import {
+  computeQuoteTotals,
+  inclusiveCampaignDays,
+  type LineInput,
+  type QuoteTotals,
+} from "@/lib/pricing";
+import { canProceedFromStep } from "@/lib/quote/validation";
+import { isoToDate } from "@/lib/quote/store";
+import {
+  deriveLegacyPeriodKey,
+  deriveLegacyPeriodMonths,
+} from "@/lib/quote/period-derive";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -150,7 +163,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     [setStoreStep],
   );
 
-  const [period, setPeriod] = useState<PeriodKey>("1month");
+  // dates 미입력 시 PDF/제출 폴백용 — Step 2 가 dates 를 채우면 quoteTotals 가 우선.
+  const period: PeriodKey = "1month";
   const [mediaLayout, setMediaLayout] = useState<"grid" | "compact">("grid");
   const [mediaPage, setMediaPage] = useState(1);
   const [mediaPageSize, setMediaPageSize] = useState(12);
@@ -466,10 +480,56 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex],
   );
 
-  const periodMonths = PERIOD_MONTHS[period];
-  const totalCost = monthlyCost * periodMonths;
+  // ── PR-4 가격 계산: store 의 startDate/endDate 가 진실. 비어 있으면 legacy period 폴백.
+  // computeQuoteTotals 가 lib/pricing 단일 진실로 모든 매체/할인/VAT 를 한 번에 계산.
+  const startDateIso = useQuoteStore((s) => s.startDateIso);
+  const endDateIso = useQuoteStore((s) => s.endDateIso);
+  const timeSlot = useQuoteStore((s) => s.timeSlot);
+  const startDateObj = useMemo(() => isoToDate(startDateIso), [startDateIso]);
+  const endDateObj = useMemo(() => isoToDate(endDateIso), [endDateIso]);
+  const campaignDays = useMemo(() => {
+    if (!startDateObj || !endDateObj) return 0;
+    return inclusiveCampaignDays(startDateObj, endDateObj);
+  }, [startDateObj, endDateObj]);
 
-  const periodLabel = t(`quote.periods.${period}` as `quote.periods.${PeriodKey}`);
+  const quoteTotals: QuoteTotals | null = useMemo(() => {
+    if (!startDateObj || !endDateObj || campaignDays < 1) return null;
+    const lines: LineInput[] = selectedMedia.map((m) => ({
+      media: m,
+      priceOptionIndex: priceOptionIndicesStore[m.id],
+      networkUnits: networkOptionsStore[m.id]?.units,
+    }));
+    return computeQuoteTotals({
+      lines,
+      start: startDateObj,
+      end: endDateObj,
+      hint: "auto",
+      multiplierCtx: { timeSlot },
+    });
+  }, [
+    startDateObj,
+    endDateObj,
+    campaignDays,
+    selectedMedia,
+    priceOptionIndicesStore,
+    networkOptionsStore,
+    timeSlot,
+  ]);
+
+  // legacy `period`/`periodMonths` 는 PDF/제출 호환을 위해 유지 — 일수에서 가까운 키 추정.
+  const periodMonths = quoteTotals
+    ? deriveLegacyPeriodMonths(campaignDays)
+    : PERIOD_MONTHS[period];
+  const derivedPeriodKey: PeriodKey = quoteTotals
+    ? deriveLegacyPeriodKey(campaignDays)
+    : period;
+  const totalCost = quoteTotals
+    ? quoteTotals.discountedKrw / 10_000 // PDF 표시용 만원 환산
+    : monthlyCost * PERIOD_MONTHS[period];
+
+  const periodLabel = t(
+    `quote.periods.${derivedPeriodKey}` as `quote.periods.${PeriodKey}`,
+  );
 
   const budgetMinN = useMemo(() => {
     const n = parseInt(form.budgetMin, 10);
@@ -484,6 +544,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const quoteFloatingStashRef = useRef<MediaItem[]>([]);
 
   const pdfPreviewRows = useMemo(() => {
+    // quoteTotals 가 있으면 라인별 lineKrw 를 만원 환산해 사용 → 합계와 100% 일치.
+    // 없으면 legacy `monthly × periodMonths` 폴백.
+    const totalsLineMap = new Map<string, number>(
+      quoteTotals?.lines.map((l) => [l.mediaId, l.lineKrw]) ?? [],
+    );
     return selectedMedia.map((m) => {
       const isNw = m.catalogSource === "network";
       const opt = networkQuoteOptions[m.id];
@@ -495,6 +560,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         : priceOpt
           ? catalogPriceFieldToPriceMan(priceOpt.price)
           : catalogPriceFieldToPriceMan(m.price);
+      const lineKrwFromTotals = totalsLineMap.get(m.id);
+      const lineTotalMan =
+        lineKrwFromTotals != null
+          ? Math.round(lineKrwFromTotals / 10_000)
+          : Math.round(lineMonthly * periodMonths);
       const baseName = (isKo ? m.name : (m.nameEn || m.name)) || m.name;
       let name = baseName;
       if (isNw && units) {
@@ -516,18 +586,35 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         name,
         location,
         unitPriceMan: Math.round(lineMonthly),
-        lineTotalMan: Math.round(lineMonthly * periodMonths),
+        lineTotalMan,
         size: m.size ?? undefined,
         dailyFootTraffic: m.dailyFootTraffic ?? undefined,
         operatingHours: m.operatingHours ?? undefined,
       };
     });
-  }, [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex, isKo, periodMonths]);
+  }, [
+    selectedMedia,
+    networkQuoteOptions,
+    mediaPriceOptionIndex,
+    isKo,
+    periodMonths,
+    quoteTotals,
+  ]);
 
-  const pdfVatMan = useMemo(() => Math.round(totalCost * 0.1), [totalCost]);
+  // PDF 출력은 만원 단위. dates 가 있으면 quoteTotals 의 vat/total 을 환산, 없으면 legacy 식.
+  const pdfVatMan = useMemo(
+    () =>
+      quoteTotals
+        ? Math.round(quoteTotals.vatKrw / 10_000)
+        : Math.round(totalCost * 0.1),
+    [quoteTotals, totalCost],
+  );
   const pdfGrandTotalMan = useMemo(
-    () => totalCost + pdfVatMan,
-    [totalCost, pdfVatMan],
+    () =>
+      quoteTotals
+        ? Math.round(quoteTotals.totalKrw / 10_000)
+        : totalCost + pdfVatMan,
+    [quoteTotals, totalCost, pdfVatMan],
   );
 
   const toggleMedia = useCallback(
@@ -602,14 +689,52 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const canGoNext = useCallback(() => {
     if (step === 1) return selectedMedia.length > 0;
+    if (step === 2) {
+      return canProceedFromStep(useQuoteStore.getState(), 2).ok;
+    }
     return true;
   }, [step, selectedMedia.length]);
 
+  const stepBlockerMessage = useCallback((): string | null => {
+    if (step === 1 && selectedMedia.length === 0) {
+      return t("quote.noMediaSelected");
+    }
+    if (step === 2) {
+      const r = canProceedFromStep(useQuoteStore.getState(), 2);
+      if (r.ok) return null;
+      // 키별 한국어/영어 메시지 — i18n 풀 매핑은 PR-6 에서 일괄.
+      const map: Record<string, { ko: string; en: string }> = {
+        needDates: {
+          ko: "시작일과 종료일을 선택해 주세요.",
+          en: "Please pick start and end dates.",
+        },
+        endBeforeStart: {
+          ko: "종료일은 시작일 이후여야 합니다.",
+          en: "End date must be after start date.",
+        },
+        campaignTooShort: {
+          ko: "최소 7일 이상 운영해야 합니다.",
+          en: "Minimum campaign length is 7 days.",
+        },
+        campaignTooLong: {
+          ko: "최대 365일까지 선택할 수 있습니다.",
+          en: "Maximum campaign length is 365 days.",
+        },
+      };
+      const m = map[r.errorKey];
+      return m ? (isKo ? m.ko : m.en) : null;
+    }
+    return null;
+  }, [step, selectedMedia.length, isKo, t]);
+
   const goNext = () => {
     if (!canGoNext()) {
-      toast("warning", t("quote.noMediaSelected"));
-      setTouched((prev) => ({ ...prev, media: true }));
-      setErrors((prev) => ({ ...prev, media: t("quote.noMediaSelected") }));
+      const msg = stepBlockerMessage() ?? t("quote.noMediaSelected");
+      toast("warning", msg);
+      if (step === 1) {
+        setTouched((prev) => ({ ...prev, media: true }));
+        setErrors((prev) => ({ ...prev, media: t("quote.noMediaSelected") }));
+      }
       return;
     }
     if (step < 4) setStep((step + 1) as WizardStep);
@@ -1439,30 +1564,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   )}
 
                   {step === 2 && (
-                    <div className="space-y-6">
-                      <p className="text-xs text-muted-foreground">
-                        {t("quote.periodBudgetPdfHint")}
-                      </p>
-                      <div>
-                        <label className="mb-2 block text-sm font-semibold text-navy">
-                          {t("quote.period")}
-                        </label>
-                        <select
-                          value={period}
-                          onChange={(e) =>
-                            setPeriod(e.target.value as PeriodKey)
-                          }
-                          className="w-full rounded-md border px-3 py-2 text-sm"
-                          aria-label={t("quote.period")}
-                        >
-                          <option value="1month">{t("quote.periods.1month")}</option>
-                          <option value="3months">{t("quote.periods.3months")}</option>
-                          <option value="6months">{t("quote.periods.6months")}</option>
-                          <option value="12months">{t("quote.periods.12months")}</option>
-                        </select>
-                      </div>
-                      {/* 예산 입력 제거 — 매체를 이미 선택했으므로 불필요 */}
-                    </div>
+                    <QuotePeriodStep
+                      selectedMedia={selectedMedia}
+                      priceOptionIndices={priceOptionIndicesStore}
+                      networkOptions={networkOptionsStore}
+                    />
                   )}
 
                   {step === 3 && (
