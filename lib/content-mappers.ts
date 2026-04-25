@@ -57,18 +57,29 @@ function defaultVerticalBlock(summaryKo: string[]): VerticalStrategyBlock {
   };
 }
 
-/** Maps a DB row to the public InsightReport shape (PDF·카드 UI용). */
+/**
+ * Maps a DB row to the public InsightReport shape (PDF·카드 UI용).
+ *
+ * `month` 는 자동 발행 row 에서 NULL 일 수 있음 (PR-1, slug 기반).
+ * 그 경우 `publishedAt → createdAt` 순으로 폴백해 라벨/파일명 생성.
+ */
 export function trendReportToInsightReport(row: TrendReport): InsightReport {
   let blocks = parseVerticalStrategyBlocks(row.verticalStrategies);
   if (blocks.length === 0) {
     blocks = [defaultVerticalBlock(row.summaryKo)];
   }
   const verticalTags = inferVerticalTags(blocks);
-  const [yStr, mStr] = row.month.split("-");
+
+  const fallbackDate = row.publishedAt ?? row.createdAt;
+  const monthKey =
+    row.month ??
+    `${fallbackDate.getUTCFullYear()}-${String(fallbackDate.getUTCMonth() + 1).padStart(2, "0")}`;
+
+  const [yStr, mStr] = monthKey.split("-");
   const y = Number(yStr);
   const m = Number(mStr);
   const labelKo =
-    Number.isFinite(y) && Number.isFinite(m) ? `${y}년 ${m}월` : row.month;
+    Number.isFinite(y) && Number.isFinite(m) ? `${y}년 ${m}월` : monthKey;
   const labelEn =
     Number.isFinite(y) && Number.isFinite(m)
       ? new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("en-US", {
@@ -76,10 +87,10 @@ export function trendReportToInsightReport(row: TrendReport): InsightReport {
           year: "numeric",
           timeZone: "UTC",
         })
-      : row.month;
+      : monthKey;
   const publishedIso = row.publishedAt
     ? row.publishedAt.toISOString().slice(0, 10)
-    : `${row.month}-28`;
+    : `${monthKey}-28`;
   const titleEn = row.titleEn?.trim() || row.titleKo;
   const enSummary = row.summaryKo;
   return {
@@ -97,7 +108,7 @@ export function trendReportToInsightReport(row: TrendReport): InsightReport {
     doohKo: row.doohTrendKo,
     doohEn: row.doohTrendKo,
     verticalBlocks: blocks,
-    pdfBaseName: `thinkad-ooh-insight-${row.month.replace(/-/g, "")}`,
+    pdfBaseName: `thinkad-ooh-insight-${monthKey.replace(/-/g, "")}`,
     verticalTags,
   };
 }

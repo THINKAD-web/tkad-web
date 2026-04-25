@@ -597,6 +597,7 @@ export async function generateTrendReport(month: string): Promise<TrendReport> {
     const row: TrendReport = {
       id: newId(),
       month,
+      slug: null,
       status: "draft",
       titleKo: raw.titleKo.trim(),
       titleEn: raw.titleEn?.trim() || null,
@@ -607,6 +608,8 @@ export async function generateTrendReport(month: string): Promise<TrendReport> {
       verticalStrategies,
       thumbnailUrl: raw.thumbnailUrl?.trim() || null,
       publishedAt: null,
+      generationMethod: "manual",
+      aiModel: model,
       ...newRowTimestamps(),
     };
 
