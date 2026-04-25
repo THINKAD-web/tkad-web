@@ -21,9 +21,15 @@ import {
   buildCaseStudyGalleryItems,
   getAllMediaIds,
   getMediaDetailGalleryUrls,
+  getPrimaryMediaImageUrl,
   getSimilarMediaFromCatalog,
   typeLabels,
 } from "@/lib/media-data";
+import { pageAlternates } from "@/lib/seo";
+import {
+  buildMediaBreadcrumbJsonLd,
+  buildMediaPlaceJsonLd,
+} from "@/lib/structured-data";
 import {
   getAllKeywordFilterMediaIds,
   getSimilarKeywordFilterMediaItems,
@@ -38,11 +44,16 @@ import {
   mediaDetailPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
+import { RelatedCases } from "@/components/media-detail/related-cases";
+import { MediaStickyCta } from "@/components/media-detail/sticky-cta";
+import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
+import { RoadviewCard } from "@/components/media-detail/roadview-card";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
+import { TrafficCharts } from "@/components/media-detail/traffic-charts";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
@@ -69,21 +80,51 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const media = await resolveMediaForDetail(id);
   if (!media) return { title: "Media" };
-  const title =
-    locale === "ko" ? `${media.name} | THINKAD` : `${media.nameEn} | THINKAD`;
+  const isKo = locale === "ko";
+  const name = isKo ? media.name : media.nameEn || media.name;
+  const loc = isKo ? media.location : media.locationEn || media.location;
+  const title = isKo ? `${name} - ${loc} | THINKAD` : `${name} - ${loc} | THINKAD`;
   const won = media.keywordFilter
     ? Math.round(
         (media.keywordFilter.budgetMin + media.keywordFilter.budgetMax) / 2,
       )
     : media.price * 10_000;
+  const dailyFootfall = media.dailyFootTraffic;
   const description = media.keywordFilter
-    ? locale === "ko"
-      ? `${media.location} · ${media.keywordFilter.priceText}`
-      : `${media.locationEn} · ${media.keywordFilter.priceText}`
-    : locale === "ko"
-      ? `${media.location} · ${won.toLocaleString()}원`
-      : `${media.locationEn} · ₩${won.toLocaleString()}`;
-  return { title, description };
+    ? isKo
+      ? `${loc} · ${media.keywordFilter.priceText} · 일 유동 ${dailyFootfall.toLocaleString()}명`
+      : `${loc} · ${media.keywordFilter.priceText} · ${dailyFootfall.toLocaleString()} daily footfall`
+    : isKo
+      ? `${loc} 일 유동 ${dailyFootfall.toLocaleString()}명, 가시성 ${media.visibilityScore ?? 0}점. 검증된 OOH 매체로 캠페인을 시뮬레이션해 보세요. ₩${won.toLocaleString()}`
+      : `${loc} — ${dailyFootfall.toLocaleString()} daily footfall, visibility ${media.visibilityScore ?? 0}. Simulate your campaign on this verified OOH media. ₩${won.toLocaleString()}`;
+
+  const heroImage = getPrimaryMediaImageUrl(media);
+  return {
+    title,
+    description,
+    alternates: pageAlternates(locale, `/media/${media.id}`),
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: heroImage
+        ? [
+            {
+              url: heroImage,
+              width: 1200,
+              height: 630,
+              alt: name,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: heroImage ? [heroImage] : undefined,
+    },
+  };
 }
 
 export default async function MediaDetailPage({ params }: Props) {
@@ -94,6 +135,7 @@ export default async function MediaDetailPage({ params }: Props) {
   if (!media) notFound();
 
   const catalog = await fetchPublicMediaCatalog();
+  const relatedCases = await getSuccessCasesForMedia(media.id);
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const isKo = locale === "ko";
   const periodLabel = t(
@@ -164,9 +206,20 @@ export default async function MediaDetailPage({ params }: Props) {
     return desc ?? "";
   })();
 
+  const placeJsonLd = buildMediaPlaceJsonLd(media, locale);
+  const breadcrumbJsonLd = buildMediaBreadcrumbJsonLd(media, locale);
+
   return (
     <>
       <TrackMediaView mediaId={media.id} />
+      <script
+        type="application/ld+json"
+        // SEO: Place + BreadcrumbList JSON-LD. dangerouslySetInnerHTML 는
+        // 매체 데이터에서 생성된 안전한 객체이므로 XSS 위험 없음.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([placeJsonLd, breadcrumbJsonLd]),
+        }}
+      />
       {/* 메인 이미지 + 히어로 오버레이 (네트워크 매체와 유사 구조) */}
       <MediaDetailHeroGallery
         images={galleryImages}
@@ -201,15 +254,36 @@ export default async function MediaDetailPage({ params }: Props) {
                 <h1 className="break-words text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
                   {isKo ? media.name : (media.nameEn || media.name)}
                 </h1>
-                <Badge
-                  variant="secondary"
-                  className="shrink-0 border border-white/25 bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm sm:text-sm"
-                >
-                  <Eye className="mr-1 h-3.5 w-3.5 opacity-90" aria-hidden />
-                  {t("visibilityBadge", {
-                    score: performanceMetrics.visibilityScore,
-                  })}
-                </Badge>
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  {media.availability && media.availability !== "available" ? (
+                    <Badge
+                      variant="secondary"
+                      className={
+                        media.availability === "reserved"
+                          ? "border border-amber-300/40 bg-amber-300/15 px-2.5 py-1 text-[11px] font-bold text-amber-100 backdrop-blur-sm sm:text-xs"
+                          : "border border-rose-300/40 bg-rose-300/15 px-2.5 py-1 text-[11px] font-bold text-rose-100 backdrop-blur-sm sm:text-xs"
+                      }
+                    >
+                      {t(`availability.${media.availability}`)}
+                    </Badge>
+                  ) : media.availability === "available" ? (
+                    <Badge
+                      variant="secondary"
+                      className="border border-emerald-300/40 bg-emerald-300/15 px-2.5 py-1 text-[11px] font-bold text-emerald-100 backdrop-blur-sm sm:text-xs"
+                    >
+                      {t("availability.available")}
+                    </Badge>
+                  ) : null}
+                  <Badge
+                    variant="secondary"
+                    className="border border-white/25 bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm sm:text-sm"
+                  >
+                    <Eye className="mr-1 h-3.5 w-3.5 opacity-90" aria-hidden />
+                    {t("visibilityBadge", {
+                      score: performanceMetrics.visibilityScore,
+                    })}
+                  </Badge>
+                </div>
               </div>
               {heroTags.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
@@ -321,6 +395,15 @@ export default async function MediaDetailPage({ params }: Props) {
                   }
                 />
               </div>
+
+              <div className="mt-5">
+                <MediaStickyCta
+                  mediaId={media.id}
+                  mediaName={media.name}
+                  mediaNameEn={media.nameEn || media.name}
+                  isKo={isKo}
+                />
+              </div>
             </aside>
           </div>
         </div>
@@ -364,6 +447,14 @@ export default async function MediaDetailPage({ params }: Props) {
               kakaoMapEmbedBadge: t("kakaoMapEmbedBadge"),
             }}
           />
+
+          <div className="mt-6">
+            <RoadviewCard
+              lat={media.lat}
+              lng={media.lng}
+              mediaName={isKo ? media.name : media.nameEn || media.name}
+            />
+          </div>
 
           {media.keywordFilter ? (
             <MediaDetailPremiumPoints
@@ -606,6 +697,16 @@ export default async function MediaDetailPage({ params }: Props) {
 
           <MediaDetailPerformance metrics={performanceMetrics} />
 
+          <div className="mt-8">
+            <TrafficCharts
+              mediaType={media.type}
+              region={media.region}
+              stored={media.trafficPattern ?? null}
+              dailyFootfall={media.dailyFootTraffic ?? null}
+              isKo={isKo}
+            />
+          </div>
+
           <section
             aria-labelledby="media-detail-description-heading"
             className="mt-10 border-t border-navy/10 py-12"
@@ -691,6 +792,12 @@ export default async function MediaDetailPage({ params }: Props) {
             </div>
           </section>
 
+          {relatedCases.length > 0 ? (
+            <div className="mt-12">
+              <RelatedCases cases={relatedCases} isKo={isKo} />
+            </div>
+          ) : null}
+
           {caseStudyItems.length > 0 ? (
             <>
               <h2 className="mb-3 mt-12 text-lg font-bold text-navy">
@@ -710,7 +817,16 @@ export default async function MediaDetailPage({ params }: Props) {
             </>
           ) : null}
 
-          <MediaSimilarCarousel items={similar} isKo={isKo} title={t("similarTitle")} />
+          <MediaSimilarCarousel
+            items={similar}
+            isKo={isKo}
+            title={t("similarTitle")}
+            sortable={
+              media.keywordFilter
+                ? undefined
+                : { catalog, currentMedia: media, limit: 6 }
+            }
+          />
         </div>
       </section>
 

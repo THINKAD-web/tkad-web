@@ -486,7 +486,18 @@
       "quoteModalPriceOptionLabel": "견적에 반영할 옵션",
       "quoteModalSelectedPriceLine": "선택 금액",
       "similarCarouselPrev": "이전 유사 매체",
-      "similarCarouselNext": "다음 유사 매체"
+      "similarCarouselNext": "다음 유사 매체",
+      "similarSortLabel": "추천 정렬",
+      "similarSortScore": "유사도",
+      "similarSortDistance": "가까운 순",
+      "similarSortPrice": "가격 유사",
+      "similarSortVisibility": "가시성 높은 순",
+      "similarDistance": "거리 약 {km}km",
+      "availability": {
+        "available": "예약 가능",
+        "reserved": "예약 진행 중",
+        "maintenance": "점검 중"
+      }
     },
     "ai": {
       "tabSearch": "매체 검색",
@@ -585,7 +596,12 @@
         "top3Subtitle": "스와이프 반응을 반영해 골랐어요. 전체 추천 목록에서 더 살펴볼 수 있어요.",
         "viewAllRecommendations": "전체 추천 보기"
       }
-    }
+    },
+    "compareRowAvailability": "예약 가용성",
+    "compareAvailabilityAvailable": "✅ 가능",
+    "compareAvailabilityReserved": "🟡 예약중",
+    "compareAvailabilityMaintenance": "🔴 점검중",
+    "compareStartPlanner": "Planner 시작"
   },
   "recommend": {
     "form": {
@@ -1956,5 +1972,47 @@
     "ctaSubtitle": "예산과 일정만 알려 주셔도 맞춤 미디어 플랜과 견적 방향을 빠르게 안내해 드립니다.",
     "ctaButton": "견적 요청하기",
     "ctaSecondary": "매체 둘러보기"
+  },
+  "mediaDetail": {
+    "traffic": {
+      "title": "시간대 · 요일 · 월별 유동인구",
+      "desc": "노출 효율을 좌우하는 핵심 패턴입니다. 데이터가 없는 매체는 지역·유형 기반 추정치로 표시됩니다.",
+      "estimatedBadge": "추정치",
+      "tabHourly": "시간대",
+      "tabWeekly": "요일",
+      "tabMonthly": "월",
+      "axisHourly": "시간당 평균 유동",
+      "axisWeekly": "요일별 누적 유동",
+      "axisMonthly": "월별 누적 유동",
+      "insightHour": "피크 시간대",
+      "insightWeekday": "피크 요일",
+      "insightMonth": "피크 월"
+    },
+    "relatedCases": {
+      "title": "이 매체로 진행한 캠페인",
+      "desc": "공개 동의를 받은 실 사례입니다. 카드 클릭 시 사례 상세로 이동합니다."
+    },
+    "roadview": {
+      "title": "현장 로드뷰",
+      "desc": "Kakao 로드뷰로 매체 인근 풍경을 확인하실 수 있습니다.",
+      "loadCta": "로드뷰 불러오기",
+      "openExternal": "새 창에서 열기",
+      "externalAria": "Kakao 로드뷰를 새 창으로 열기",
+      "iframeTitle": "{name} 로드뷰"
+    },
+    "cta": {
+      "planner": "Planner로 시뮬레이션",
+      "plannerShort": "Planner",
+      "compare": "비교 담기",
+      "compareShort": "비교",
+      "compareIn": "담김 ({count})",
+      "compareInShort": "담김",
+      "compareAdded": "비교함에 담았습니다.",
+      "compareRemoved": "비교함에서 제거했습니다.",
+      "compareRemove": "비교함에서 제거",
+      "compareFull": "비교함은 최대 {max}개입니다.",
+      "quote": "즉시 견적",
+      "quoteShort": "견적"
+    }
   }
 }

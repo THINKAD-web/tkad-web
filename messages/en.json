@@ -486,7 +486,18 @@
       "quoteModalPriceOptionLabel": "Option for your quote",
       "quoteModalSelectedPriceLine": "Selected price",
       "similarCarouselPrev": "Previous similar placements",
-      "similarCarouselNext": "Next similar placements"
+      "similarCarouselNext": "Next similar placements",
+      "similarSortLabel": "Sort recommendations",
+      "similarSortScore": "Similarity",
+      "similarSortDistance": "Nearest",
+      "similarSortPrice": "Price match",
+      "similarSortVisibility": "Visibility",
+      "similarDistance": "~{km}km away",
+      "availability": {
+        "available": "Available",
+        "reserved": "Booking in progress",
+        "maintenance": "Maintenance"
+      }
     },
     "ai": {
       "tabSearch": "Media search",
@@ -585,7 +596,12 @@
         "top3Subtitle": "Ranked from your swipes. Open the full list to see every recommendation.",
         "viewAllRecommendations": "View full list"
       }
-    }
+    },
+    "compareRowAvailability": "Availability",
+    "compareAvailabilityAvailable": "✅ Available",
+    "compareAvailabilityReserved": "🟡 Booked",
+    "compareAvailabilityMaintenance": "🔴 Maintenance",
+    "compareStartPlanner": "Start Planner"
   },
   "recommend": {
     "form": {
@@ -1973,5 +1989,47 @@
     "ctaSubtitle": "Share budget and timing—we’ll respond quickly with direction and next steps.",
     "ctaButton": "Request a quote",
     "ctaSecondary": "Browse media"
+  },
+  "mediaDetail": {
+    "traffic": {
+      "title": "Hourly · Weekday · Monthly footfall",
+      "desc": "Key patterns driving exposure. Media without measured data show region/type-based estimates.",
+      "estimatedBadge": "Estimated",
+      "tabHourly": "Hourly",
+      "tabWeekly": "Weekday",
+      "tabMonthly": "Monthly",
+      "axisHourly": "Avg footfall / hr",
+      "axisWeekly": "Weekly footfall",
+      "axisMonthly": "Monthly footfall",
+      "insightHour": "Peak hours",
+      "insightWeekday": "Peak weekday",
+      "insightMonth": "Peak month"
+    },
+    "relatedCases": {
+      "title": "Campaigns run on this media",
+      "desc": "Real cases (with public consent). Click to view full case study."
+    },
+    "roadview": {
+      "title": "Street roadview",
+      "desc": "View the surroundings via Kakao roadview.",
+      "loadCta": "Load roadview",
+      "openExternal": "Open in new tab",
+      "externalAria": "Open Kakao roadview in a new window",
+      "iframeTitle": "{name} roadview"
+    },
+    "cta": {
+      "planner": "Simulate in Planner",
+      "plannerShort": "Planner",
+      "compare": "Add to compare",
+      "compareShort": "Compare",
+      "compareIn": "In compare ({count})",
+      "compareInShort": "In compare",
+      "compareAdded": "Added to compare.",
+      "compareRemoved": "Removed from compare.",
+      "compareRemove": "Remove from compare",
+      "compareFull": "Compare is limited to {max} items.",
+      "quote": "Request quote",
+      "quoteShort": "Quote"
+    }
   }
 }

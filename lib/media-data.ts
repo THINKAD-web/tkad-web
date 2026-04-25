@@ -122,6 +122,13 @@ export interface MediaItem {
   /** DB `description` 원문 — catalog·long이 비었을 때 매체 소개 최종 폴백 */
   description?: string;
   descriptionEn?: string;
+  /** 시간대(24)·요일(7)·월(12) 유동인구 패턴 — DB `traffic_pattern`. nullable, 미입력 시 추정. */
+  trafficPattern?: {
+    hourly?: number[];
+    weekly?: number[];
+    monthly?: number[];
+    updatedAt?: string;
+  } | null;
 }
 
 export function getMediaById(id: string | number): MediaItem | undefined {
@@ -132,6 +139,31 @@ export function getMediaById(id: string | number): MediaItem | undefined {
 export function getAllMediaIds(): string[] {
   return mediaData.map((m) => m.id);
 }
+
+/**
+ * 두 좌표 사이 거리(km). lat/lng 누락 시 Number.POSITIVE_INFINITY.
+ * 정렬용으로 충분한 정확도 (Earth radius 6371km 사용).
+ */
+export function haversineKm(
+  a: { lat?: number | null; lng?: number | null },
+  b: { lat?: number | null; lng?: number | null },
+): number {
+  if (a.lat == null || a.lng == null || b.lat == null || b.lng == null) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const R = 6371;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+export type SimilarSortKey = "score" | "distance" | "price" | "visibility";
 
 function scoreSimilarPair(item: MediaItem, m: MediaItem): number {
   let s = 0;
@@ -152,8 +184,31 @@ export function getSimilarMediaFromCatalog(
   catalog: MediaItem[],
   item: MediaItem,
   limit = 4,
+  sortBy: SimilarSortKey = "score",
 ): MediaItem[] {
   const others = catalog.filter((m) => m.id !== item.id);
+  if (sortBy === "distance") {
+    const sameRegion = others.filter((m) => m.region === item.region);
+    return sameRegion
+      .map((m) => ({ m, d: haversineKm(item, m) }))
+      .sort((a, b) => a.d - b.d)
+      .slice(0, limit)
+      .map((x) => x.m);
+  }
+  if (sortBy === "price") {
+    return others
+      .slice()
+      .sort((a, b) => Math.abs(a.price - item.price) - Math.abs(b.price - item.price))
+      .slice(0, limit);
+  }
+  if (sortBy === "visibility") {
+    return others
+      .slice()
+      .sort(
+        (a, b) => (b.visibilityScore ?? 0) - (a.visibilityScore ?? 0),
+      )
+      .slice(0, limit);
+  }
   const scored = others.map((m) => ({ m, s: scoreSimilarPair(item, m) }));
   scored.sort(
     (a, b) =>

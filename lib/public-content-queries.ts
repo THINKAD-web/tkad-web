@@ -53,6 +53,31 @@ export async function getPublishedAcademyLessonsForUi(): Promise<AcademyLesson[]
   }
 }
 
+/**
+ * 특정 매체에서 진행된 공개 사례 목록 (mediaIds 배열 contains 검색).
+ * 비활성·미입력 사례는 제외. 결과 0건이면 매체 상세에서 섹션 자체 숨김.
+ */
+export async function getSuccessCasesForMedia(
+  mediaId: string,
+  limit = 6,
+): Promise<PublicSuccessCaseListItem[]> {
+  if (!isDatabaseConfigured()) return [];
+  try {
+    const rows = await prisma.successCase.findMany({
+      where: {
+        status: "published",
+        mediaIds: { has: mediaId },
+      },
+      orderBy: [{ publishedAt: "desc" }, { updatedAt: "desc" }],
+      take: limit,
+    });
+    return rows.map(successCaseToPublicListItem);
+  } catch (e) {
+    if (isMissingContentTableError(e)) return [];
+    throw e;
+  }
+}
+
 export async function getPublishedSuccessCases(): Promise<
   PublicSuccessCaseListItem[]
 > {

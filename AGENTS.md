@@ -27,3 +27,19 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - PDF: 기존 `lib/html-to-pdf.ts` 패턴 유지(html2canvas + jsPDF, onclone 색상 정규화).
   `PlannerReportPreview` 에 logoUrl + mediaPlacements 전달되어 썸네일에 합성 로고 포함.
 - 단계별 Tips: `components/planner-tips.tsx` wizardStep → tipKey 매핑 — 단계 순서 변경 시 동기화 필요.
+
+## 매체 상세 (`/[locale]/media/[id]`) 아키텍처
+
+- 페이지: `app/[locale]/media/[id]/page.tsx` (Server Component, 800+줄)
+  서버에서 `resolveMediaForDetail(id)` + `fetchPublicMediaCatalog()` + `getSuccessCasesForMedia(id)` 병렬 fetch.
+- 핵심 KPI 위젯: `components/media-detail-performance.tsx`
+- 시간대/요일/월별 트래픽: `components/media-detail/traffic-charts.tsx`
+  `lib/media-traffic-estimate.ts` 의 추정 헬퍼 사용. DB `Media.trafficPattern` (JSONB) 미입력 시 자동 폴백 + "추정치" 뱃지.
+- 합성 로드뷰: `components/media-detail/roadview-card.tsx` — Kakao 로드뷰 임베드, 사용자 클릭 후 iframe 로드 (성능).
+- 사례 연결: `SuccessCase.mediaIds: String[]` ↔ `getSuccessCasesForMedia()` 양방향. `mediaUsed` (카테고리 텍스트) 와 별도 운영.
+- Sticky CTA: `components/media-detail/sticky-cta.tsx` (desktop) + `components/media-detail-sticky-cta.tsx` (mobile).
+  3종: Planner / 비교 / 견적. Planner 진입은 `/planner?addMedia=<id>`.
+- 추천 매체: `MediaSimilarCarousel` 의 `sortable` prop — 정렬 토글(score/distance/price/visibility).
+  거리 계산은 `haversineKm` (lib/media-data.ts).
+- SEO: `lib/structured-data.ts` 의 `buildMediaPlaceJsonLd` + `buildMediaBreadcrumbJsonLd`. `app/sitemap.ts` 에서 모든 활성 매체 ID 동적 포함.
+- 비교 페이지: `app/[locale]/compare/page.tsx` + `compare-spec-table.tsx`. localStorage `tkad-compare-cart-v1`. 차이점 자동 하이라이팅(getBestIdx) + 매체별 "Planner 시작" 칩.

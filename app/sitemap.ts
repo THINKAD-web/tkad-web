@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPublishedSuccessCases } from "@/lib/public-content-queries";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
 
 const lastModified = new Date();
@@ -29,5 +30,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPart = sitemapPaths.map((p) => sitemapEntry(p));
   const cases = await getPublishedSuccessCases();
   const casePart = cases.map((c) => sitemapEntry(`/cases/${c.id}`));
-  return [...staticPart, ...casePart];
+  let mediaPart: MetadataRoute.Sitemap = [];
+  try {
+    const mediaCatalog = await fetchPublicMediaCatalog();
+    mediaPart = mediaCatalog.map((m) => sitemapEntry(`/media/${m.id}`));
+  } catch {
+    // 카탈로그 fetch 실패 시 정적/사례 부분만 반환 (sitemap 자체는 살림)
+  }
+  return [...staticPart, ...casePart, ...mediaPart];
 }

@@ -1,5 +1,7 @@
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { siteUrl } from "@/lib/seo";
+import type { MediaItem } from "@/lib/media-data";
+import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 
 const ORG_ID = `${siteUrl}/#organization`;
 const LOCAL_ID = `${siteUrl}/#localbusiness`;
@@ -96,6 +98,98 @@ export function buildStructuredDataGraph() {
           },
           "query-input": "required name=search_term_string",
         },
+      },
+    ],
+  };
+}
+
+/**
+ * 매체 상세 페이지용 Place JSON-LD.
+ * Google Rich Results 의 LocalBusiness/Place 호환 형식.
+ * `aggregateRating` 은 visibilityScore 0–100 → 1–5 스케일로 변환.
+ */
+export function buildMediaPlaceJsonLd(
+  media: MediaItem,
+  locale: string,
+): Record<string, unknown> {
+  const isKo = locale === "ko";
+  const name = isKo ? media.name : media.nameEn || media.name;
+  const description = isKo
+    ? media.description ||
+      media.catalogDescription ||
+      `${media.location} 위치의 검증 OOH 매체 — 일 유동인구 ${media.dailyFootTraffic.toLocaleString()}명, 가시성 ${media.visibilityScore ?? 0}점.`
+    : media.descriptionEn ||
+      media.catalogDescriptionEn ||
+      `Verified OOH media in ${media.locationEn || media.location}. Daily footfall ${media.dailyFootTraffic.toLocaleString()}, visibility score ${media.visibilityScore ?? 0}.`;
+  const image = getPrimaryMediaImageUrl(media);
+  const url = `${siteUrl}/${locale}/media/${media.id}`;
+
+  const data: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    "@id": `${url}#place`,
+    name,
+    description,
+    url,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: isKo ? media.location : media.locationEn || media.location,
+      addressCountry: "KR",
+    },
+  };
+
+  if (image) data.image = image;
+  if (media.lat != null && media.lng != null) {
+    data.geo = {
+      "@type": "GeoCoordinates",
+      latitude: media.lat,
+      longitude: media.lng,
+    };
+  }
+  if (typeof media.visibilityScore === "number" && media.visibilityScore > 0) {
+    const ratingValue = Math.max(
+      1,
+      Math.min(5, Number((media.visibilityScore / 20).toFixed(1))),
+    );
+    data.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue,
+      bestRating: 5,
+      worstRating: 1,
+      ratingCount: Math.max(1, media.visibilityScore),
+    };
+  }
+
+  return data;
+}
+
+export function buildMediaBreadcrumbJsonLd(
+  media: MediaItem,
+  locale: string,
+): Record<string, unknown> {
+  const isKo = locale === "ko";
+  const name = isKo ? media.name : media.nameEn || media.name;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: isKo ? "홈" : "Home",
+        item: `${siteUrl}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: isKo ? "옥외광고 매체" : "OOH media",
+        item: `${siteUrl}/${locale}/media`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name,
+        item: `${siteUrl}/${locale}/media/${media.id}`,
       },
     ],
   };

@@ -142,6 +142,16 @@ export function CompareSpecTable({
         label: t("compareRowRegion"),
         cell: (m) => regionLabel(m, t),
       },
+      {
+        key: "availability",
+        label: t("compareRowAvailability"),
+        cell: (m) => {
+          if (m.availability === "available") return t("compareAvailabilityAvailable");
+          if (m.availability === "reserved") return t("compareAvailabilityReserved");
+          if (m.availability === "maintenance") return t("compareAvailabilityMaintenance");
+          return "—";
+        },
+      },
     ];
 
   // 모든 열이 "—" 인 행은 숨겨서 의미 없는 줄과 빈 공간을 줄입니다.
@@ -203,6 +213,13 @@ export function CompareSpecTable({
                     className="line-clamp-2 text-left text-xs font-bold leading-snug text-navy underline-offset-2 hover:text-gold-dark hover:underline sm:text-sm"
                   >
                     {isKo ? m.name : (m.nameEn || m.name)}
+                  </Link>
+                  <Link
+                    href={`/planner?addMedia=${encodeURIComponent(m.id)}`}
+                    className="mt-2 inline-flex items-center gap-1 rounded-full bg-gold/10 px-2 py-0.5 text-[10px] font-bold text-gold-dark transition hover:bg-gold/20"
+                    aria-label={t("compareStartPlanner")}
+                  >
+                    <span aria-hidden>▸</span> {t("compareStartPlanner")}
                   </Link>
                 </th>
               ))}

@@ -9,6 +9,8 @@ export type PublicSuccessCaseListItem = {
   summaryKo: string;
   thumbnailUrl: string | null;
   mediaUsed: string[];
+  /** 매체 ↔ 사례 양방향 연결용 Media.id 배열. */
+  mediaIds: string[];
   publishedAtIso: string | null;
 };
 

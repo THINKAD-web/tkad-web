@@ -112,6 +112,9 @@ model Media {
   /// 설치 연도 (옵션, 공개 검색 고급 필터)
   installYear      Int?     @map("install_year")
   effectMemo       String?  @map("effect_memo")
+  /// 시간대(24)·요일(7)·월(12) 유동인구 패턴. nullable — 미입력 시 추정 사용.
+  /// shape: { hourly: number[24], weekly: number[7], monthly: number[12], updatedAt?: ISO }
+  trafficPattern   Json?    @map("traffic_pattern")
   extractedImages  String[] @default([]) @map("extracted_images")
   /** 광고주 이력 (쉼표 구분). 비어 있으면 집행 이력(MediaAdvertiserExecution)에서 요약 */
   pastAdvertisers  String?  @map("past_advertisers")
@@ -652,7 +655,10 @@ model SuccessCase {
   solutionKo     String    @map("solution_ko") @db.Text
   resultsKo      String[]  @map("results_ko")
   metricsJson    Json?     @map("metrics_json")
+  /// 카테고리 텍스트 (예: "빌보드", "디지털 사이니지"). 운영팀 입력 라벨.
   mediaUsed      String[]  @map("media_used")
+  /// 실제 매체 ID(`Media.id`) 배열. 매체 상세 ↔ 사례 양방향 연결용. 빈배열이면 양방향 연결 없음.
+  mediaIds       String[]  @default([]) @map("media_ids")
   periodStart    DateTime? @map("period_start")
   periodEnd      DateTime? @map("period_end")
   thumbnailUrl   String?   @map("thumbnail_url")

@@ -182,6 +182,10 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     catalogDescriptionEn: m.description?.trim() || undefined,
     description: m.description?.trim() || undefined,
     descriptionEn: m.description?.trim() || undefined,
+    trafficPattern:
+      m.trafficPattern && typeof m.trafficPattern === "object"
+        ? (m.trafficPattern as MediaItem["trafficPattern"])
+        : null,
     dailyExposure:
       m.impressions != null ? String(m.impressions) : undefined,
     sampleImages: imgs.length > 0 ? imgs : [],
