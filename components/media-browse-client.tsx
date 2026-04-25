@@ -50,7 +50,6 @@ const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
 });
 import {
   matchesMediaTextQuery,
-  mediaData,
   type MediaItem,
 } from "@/lib/media-data";
 import {
@@ -153,10 +152,14 @@ export default function MediaBrowseClient({
     "default" | "priceAsc" | "priceDesc" | "trafficDesc"
   >("default");
 
-  /** 서버 카탈로그가 비었을 때 목업 `mediaData`로 폴백. 초기 1회만 셔플. */
+  /**
+   * 서버 카탈로그를 그대로 사용. 초기 1회만 셔플.
+   * CLAUDE.md: 공개 카탈로그는 DB-backed 가 진실. 서버가 빈 배열을
+   * 반환하면 빈 상태 UI 가 노출되어야지, 클라이언트가 마음대로 목업으로
+   * 덮으면 안 됨 (운영 사고 은폐).
+   */
   const effectiveCatalog = useMemo(() => {
-    const base = catalog.length > 0 ? catalog : mediaData;
-    const arr = [...base];
+    const arr = [...catalog];
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
