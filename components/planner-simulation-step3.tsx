@@ -19,14 +19,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { BtnBlock } from "@/components/brutalist";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
@@ -199,37 +192,48 @@ export default function PlannerSimulationStep3({
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center sm:text-left">
-        <h2 className="text-lg font-bold text-navy sm:text-xl">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ STEP 5 / LOGO + SIMULATION ]
+        </p>
+        <h2 className="text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
           {t("stepSimTitle")}
         </h2>
-        <p className="text-sm text-muted-foreground">{t("stepSimDesc")}</p>
+        <p className="text-sm leading-relaxed text-bx-gray-dim">
+          {t("stepSimDesc")}
+        </p>
       </div>
 
-      <Card className="border-navy/10 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-navy">{t("creativeUploadTitle")}</CardTitle>
-          <CardDescription>{t("creativeUploadDesc")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-start">
+      <div className="border-2 border-bx-black bg-bx-white">
+        <div className="border-b-2 border-bx-black p-5">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ CREATIVE UPLOAD ]
+          </p>
+          <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+            {t("creativeUploadTitle")}
+          </h3>
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            {t("creativeUploadDesc")}
+          </p>
+        </div>
+        <div className="p-5">
+          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-stretch">
             <div
               className={cn(
-                "group relative overflow-hidden rounded-2xl border-2 border-dashed p-5 transition-colors",
+                "relative border-2 p-6 transition-colors",
                 creativeObjectUrl
-                  ? "border-gold/40 bg-gold/5"
-                  : "border-navy/15 bg-slate-50/60 hover:border-navy/25",
+                  ? "border-bx-accent bg-bx-off"
+                  : "border-bx-black bg-bx-off hover:bg-bx-white",
               )}
             >
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(232,213,181,0.14),transparent_55%)] opacity-0 transition group-hover:opacity-100" />
-              <div className="relative flex flex-col items-center justify-center gap-2 text-center">
-                <ImageUp className="h-7 w-7 text-gold" aria-hidden />
-                <p className="text-sm font-semibold text-navy">
-                  {t("creativeUploadCta")}
+              <div className="flex flex-col items-center justify-center gap-2 text-center">
+                <ImageUp className="h-8 w-8 text-bx-accent" aria-hidden />
+                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
+                  [ {t("creativeUploadCta")} ]
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
                   {t("creativeUploadHint")}
                 </p>
-                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                   <input
                     ref={inputRef}
                     type="file"
@@ -237,109 +241,115 @@ export default function PlannerSimulationStep3({
                     className="sr-only"
                     onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
                   />
-                  <Button
-                    type="button"
-                    className="btn-gold rounded-full px-5 font-semibold"
+                  <BtnBlock
+                    variant="accent"
+                    size="md"
                     onClick={() => inputRef.current?.click()}
                     disabled={upload.status === "uploading"}
                   >
                     {upload.status === "uploading" ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                     ) : null}
                     {t("creativeUploadButton")}
-                  </Button>
+                  </BtnBlock>
                   {creativeObjectUrl || creativeUploadedUrl ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="rounded-full border-navy/20"
+                    <BtnBlock
+                      variant="secondary"
+                      size="md"
                       onClick={clearCreative}
                     >
-                      <Trash2 className="mr-2 h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                       {t("creativeRemove")}
-                    </Button>
+                    </BtnBlock>
                   ) : null}
                 </div>
 
                 {upload.status === "uploading" ? (
                   <div
-                    className="mt-3 w-full max-w-xs"
+                    className="mt-4 w-full max-w-xs"
                     role="progressbar"
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={upload.pct}
                   >
-                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
+                    <div className="h-2 w-full border-2 border-bx-black bg-bx-white">
                       <div
-                        className="h-full rounded-full bg-gold transition-all"
+                        className="h-full bg-bx-accent transition-all"
                         style={{ width: `${upload.pct}%` }}
                       />
                     </div>
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      {t("creativeUploadProgress", { pct: upload.pct })}
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                      {`// `}{t("creativeUploadProgress", { pct: upload.pct })}
                     </p>
                   </div>
                 ) : upload.status === "done" ? (
-                  <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
-                    <Check className="h-3.5 w-3.5" aria-hidden />
+                  <p className="mt-3 inline-flex items-center gap-1 border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                    <Check className="h-3 w-3" aria-hidden />
                     {t("creativeUploadSuccess")}
                   </p>
                 ) : null}
               </div>
             </div>
 
-            <div className="space-y-2 rounded-2xl border border-navy/10 bg-white p-4">
-              <p className="text-sm font-bold text-navy">
-                {t("creativeSpecTitle")}
+            <div className="-ml-[2px] -mt-[2px] space-y-2 border-2 border-bx-black bg-bx-white p-5 lg:mt-0">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ {t("creativeSpecTitle")} ]
               </p>
-              <ul className="space-y-1 text-xs text-muted-foreground">
-                <li>{t("creativeSpecTypes")}</li>
-                <li>{t("creativeSpecRatio")}</li>
-                <li>{t("creativeSpecTip")}</li>
+              <ul className="space-y-1.5 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                <li>· {t("creativeSpecTypes")}</li>
+                <li>· {t("creativeSpecRatio")}</li>
+                <li>· {t("creativeSpecTip")}</li>
               </ul>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="border-navy/10 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-navy">{t("simViewTitle")}</CardTitle>
-          <CardDescription>{t("simViewDesc")}</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <div className="border-2 border-bx-black bg-bx-white">
+        <div className="border-b-2 border-bx-black p-5">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ SIMULATION ]
+          </p>
+          <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+            {t("simViewTitle")}
+          </h3>
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            {t("simViewDesc")}
+          </p>
+        </div>
+        <div className="p-5">
           {creativeObjectUrl || creativeUploadedUrl ? (
-            <div className="mb-4 rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-sm text-navy shadow-sm">
-              <p className="font-semibold text-navy">
-                {t("simCompositeApproxTitle")}
+            <div className="mb-4 border-2 border-bx-accent bg-bx-white px-4 py-3">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ {t("simCompositeApproxTitle")} ]
               </p>
-              <p className="mt-1 text-xs leading-relaxed text-navy/80">
+              <p className="mt-1 text-sm leading-relaxed text-bx-black">
                 {t("simCompositeApproxBody")}
               </p>
             </div>
           ) : null}
           {mediaCards.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-navy/15 bg-slate-50/60 py-12 text-center text-sm text-muted-foreground">
-              {t("simEmpty")}
+            <div className="border-2 border-bx-black bg-bx-off py-12 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              {`// `}{t("simEmpty")}
             </div>
           ) : (
             <div className="space-y-6">
               {/* 썸네일 그리드 — 3개 이상일 때 한눈에 비교 */}
               {mediaCards.length >= 2 ? (
                 <div>
-                  <p className="mb-2 text-xs font-semibold text-muted-foreground">
-                    {t("simGridLabel")}
+                  <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                    [ {t("simGridLabel")} ]
                   </p>
-                  <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                  <ul className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4">
                     {mediaCards.map((m, i) => (
-                      <li key={m.id}>
+                      <li key={m.id} className="-mt-[2px] -ml-[2px]">
                         <button
                           type="button"
                           className={cn(
-                            "w-full overflow-hidden rounded-lg border-2 transition",
+                            "block w-full overflow-hidden border-2 transition-colors",
                             i === slideIndex
-                              ? "border-gold shadow-md"
-                              : "border-transparent hover:border-gold/40",
+                              ? "border-bx-accent"
+                              : "border-bx-black hover:border-bx-accent",
                           )}
                           onClick={() => {
                             setSlideDir((i > slideIndex ? 1 : -1) as 1 | -1);
@@ -368,40 +378,33 @@ export default function PlannerSimulationStep3({
               ) : null}
 
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs font-semibold text-muted-foreground">
-                  {t("simPerMediaLabel")}
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  [ {t("simPerMediaLabel")} ]
                 </p>
                 <div className="flex items-center gap-2">
                   {(creativeObjectUrl || creativeUploadedUrl) && current ? (
                     <>
-                      <Button
-                        type="button"
+                      <BtnBlock
+                        variant={editing ? "accent" : "secondary"}
                         size="sm"
-                        variant={editing ? "default" : "outline"}
-                        className={cn(
-                          "h-7 rounded-full px-3 text-[11px]",
-                          editing && "btn-gold border-0",
-                        )}
                         onClick={() => setEditing((v) => !v)}
                       >
-                        <Move className="mr-1 h-3 w-3" aria-hidden />
+                        <Move className="h-3 w-3" aria-hidden />
                         {editing ? t("editLogoDone") : t("editLogo")}
-                      </Button>
+                      </BtnBlock>
                       {editing && mediaPlacements[current.id] ? (
-                        <Button
-                          type="button"
+                        <BtnBlock
+                          variant="secondary"
                           size="sm"
-                          variant="outline"
-                          className="h-7 rounded-full px-2 text-[11px] border-navy/20"
                           onClick={() => clearMediaPlacement(current.id)}
                           aria-label={t("editLogoReset")}
                         >
                           <RotateCcw className="h-3 w-3" aria-hidden />
-                        </Button>
+                        </BtnBlock>
                       ) : null}
                     </>
                   ) : null}
-                  <p className="text-xs font-bold text-navy">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black">
                     {t("simCounter", {
                       current: slideIndex + 1,
                       total: mediaCards.length,
@@ -411,30 +414,26 @@ export default function PlannerSimulationStep3({
               </div>
 
               <div className="relative">
-                <Button
+                <button
                   type="button"
-                  variant="outline"
-                  size="icon"
-                  className="absolute left-1 top-1/2 z-20 h-10 w-10 -translate-y-1/2 rounded-full border-white/40 bg-black/35 text-white shadow-md backdrop-blur-sm hover:bg-black/45 disabled:opacity-30"
                   onClick={goPrev}
                   disabled={slideIndex <= 0}
                   aria-label={t("simPrev")}
+                  className="absolute left-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-30"
                 >
                   <ChevronLeft className="h-5 w-5" />
-                </Button>
-                <Button
+                </button>
+                <button
                   type="button"
-                  variant="outline"
-                  size="icon"
-                  className="absolute right-1 top-1/2 z-20 h-10 w-10 -translate-y-1/2 rounded-full border-white/40 bg-black/35 text-white shadow-md backdrop-blur-sm hover:bg-black/45 disabled:opacity-30"
                   onClick={goNext}
                   disabled={slideIndex >= maxIdx}
                   aria-label={t("simNext")}
+                  className="absolute right-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-30"
                 >
                   <ChevronRight className="h-5 w-5" />
-                </Button>
+                </button>
 
-                <div className="overflow-hidden rounded-2xl border border-navy/10 bg-slate-100 shadow-inner">
+                <div className="overflow-hidden border-2 border-bx-black bg-bx-off">
                   <AnimatePresence
                     initial={false}
                     custom={slideDir === 0 ? 1 : slideDir}
@@ -492,11 +491,11 @@ export default function PlannerSimulationStep3({
                 </div>
               </div>
 
-              <p className="text-center text-xs text-muted-foreground">
-                {t("simSwipeHint")}
+              <p className="text-center font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                {`// `}{t("simSwipeHint")}
               </p>
 
-              <div className="flex flex-wrap justify-center gap-2">
+              <div className="flex flex-wrap justify-center gap-1">
                 {mediaCards.map((m, i) => (
                   <button
                     key={m.id}
@@ -506,10 +505,10 @@ export default function PlannerSimulationStep3({
                       setSlideIndex(i);
                     }}
                     className={cn(
-                      "h-2.5 rounded-full transition-all",
+                      "h-3 border-2 border-bx-black transition-all",
                       i === slideIndex
-                        ? "w-8 bg-gold"
-                        : "w-2.5 bg-navy/20 hover:bg-navy/35",
+                        ? "w-8 bg-bx-accent"
+                        : "w-3 bg-bx-white hover:bg-bx-off",
                     )}
                     aria-label={t("simDotLabel", { n: i + 1 })}
                   />
@@ -517,8 +516,8 @@ export default function PlannerSimulationStep3({
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

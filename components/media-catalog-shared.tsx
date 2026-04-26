@@ -3,17 +3,18 @@
 import { LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** 매체 카탈로그 그리드 카드 — 매체검색·견적·비교 공통. 데스크톱은 3열 고정 (카드 크기 확대). */
+/** 매체 카탈로그 그리드 카드 — 매체검색·견적·비교 공통. 데스크톱은 3열 고정. */
 export const MEDIA_CATALOG_GRID_CLASS =
-  "grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6";
+  "grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-3";
 
 /** 컴팩트 행 그리드 — 매체검색·견적·비교 공통 */
 export const MEDIA_CATALOG_COMPACT_GRID_CLASS =
-  "grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3";
+  "grid grid-cols-1 gap-0 sm:grid-cols-2";
 
-/** 컴팩트 행(링크/선택) 외곽 — 시각 통일 */
+/** 컴팩트 행(링크/선택) 외곽 — 시각 통일.
+ *  Phase 3: 2px 검정 보더 + 사각, 호버 시 off bg. 그리드 컨테이너에서 -mt/-ml 로 보더 겹침 처리. */
 export const MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS =
-  "relative flex min-w-0 items-center rounded-lg border border-navy/10 bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md sm:gap-4 sm:rounded-xl sm:p-3.5";
+  "relative -mt-[2px] -ml-[2px] flex min-w-0 items-center gap-3 border-2 border-bx-black bg-bx-white p-3 transition-colors hover:bg-bx-off sm:gap-4 sm:p-4";
 
 export function MediaCatalogStickyAside({
   children,
@@ -22,7 +23,7 @@ export function MediaCatalogStickyAside({
 }) {
   return (
     <aside className="w-full shrink-0 lg:w-64">
-      <div className="sticky top-24 space-y-4 rounded-xl border bg-white p-6 shadow-sm">
+      <div className="sticky top-24 space-y-4 border-2 border-bx-black bg-bx-white p-6">
         {children}
       </div>
     </aside>
@@ -47,7 +48,7 @@ export function MediaCatalogGridCompactToggle({
   return (
     <div
       className={cn(
-        "inline-flex rounded-full border border-navy/15 bg-slate-50 p-0.5",
+        "inline-flex border-2 border-bx-black bg-bx-white",
         className,
       )}
     >
@@ -55,10 +56,10 @@ export function MediaCatalogGridCompactToggle({
         type="button"
         onClick={() => onLayoutChange("grid")}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+          "inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
           layout === "grid"
-            ? "bg-white text-navy shadow-sm"
-            : "text-muted-foreground hover:text-navy",
+            ? "bg-bx-black text-bx-white"
+            : "text-bx-black hover:bg-bx-off",
         )}
       >
         <LayoutGrid className="h-3.5 w-3.5" />
@@ -68,10 +69,10 @@ export function MediaCatalogGridCompactToggle({
         type="button"
         onClick={() => onLayoutChange("compact")}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+          "inline-flex items-center gap-1.5 border-l-2 border-bx-black px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
           layout === "compact"
-            ? "bg-white text-navy shadow-sm"
-            : "text-muted-foreground hover:text-navy",
+            ? "bg-bx-black text-bx-white"
+            : "text-bx-black hover:bg-bx-off",
         )}
       >
         <Rows3 className="h-3.5 w-3.5" />

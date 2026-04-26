@@ -64,34 +64,35 @@ export function RecentlyViewedSection() {
   if (!loaded || items.length === 0) return null;
 
   return (
-    <section className="mb-6">
-      <div className="flex items-center gap-2 mb-3">
-        <Clock className="w-4 h-4 text-gray-500" />
-        <h2 className="text-sm font-semibold text-gray-700">최근 본 매체</h2>
-        <span className="text-xs text-gray-400">{items.length}</span>
+    <section className="mb-8">
+      <div className="mb-4 flex items-center gap-2">
+        <Clock className="h-4 w-4 text-bx-accent" />
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ RECENTLY VIEWED / {items.length} ]
+        </p>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory">
+      <div className="-mx-4 flex snap-x snap-mandatory gap-0 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
         {items.map((m) => (
           <Link
             key={m.id}
             href={`/media/${m.id}`}
-            className="flex-shrink-0 w-40 snap-start group"
+            className="group -ml-[2px] w-40 flex-shrink-0 snap-start border-2 border-bx-black bg-bx-white p-2 transition-colors hover:bg-bx-off"
           >
-            <div className="aspect-[4/3] bg-secondary rounded-lg overflow-hidden mb-2 ring-1 ring-border/60 group-hover:ring-primary/40 transition-all">
+            <div className="mb-2 aspect-[4/3] overflow-hidden border-2 border-bx-black bg-bx-off">
               {m.image ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={m.image}
                   alt=""
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
                 />
               ) : null}
             </div>
-            <div className="text-xs font-medium text-gray-900 truncate group-hover:text-primary">
+            <div className="truncate text-xs font-bold tracking-tight text-bx-black group-hover:text-bx-accent">
               {m.name}
             </div>
-            <div className="text-[10px] text-gray-500 truncate">
-              {m.region} · {m.type}
+            <div className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              {`// `}{m.region} · {m.type}
             </div>
           </Link>
         ))}

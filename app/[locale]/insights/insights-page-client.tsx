@@ -3,18 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
+
+const inputCls =
+  "h-10 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+const textareaCls =
+  "min-h-[100px] w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+const labelCls =
+  "block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent";
 import {
   BarChart3,
   BookOpen,
@@ -165,137 +162,156 @@ export default function InsightsPageClient({
 
   return (
     <>
-      <section className="bg-navy py-24 sm:py-28">
+      <section className="bg-bx-black py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mb-4 inline-flex flex-wrap items-center justify-center gap-2">
-            <Badge className="border-0 bg-white/15 text-xs font-semibold text-gold">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            {`// 09 / Insights`}
+          </p>
+          <div className="mt-3 inline-flex flex-wrap items-center justify-center gap-2">
+            <span className="border-2 border-bx-white bg-transparent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
               {t("filterMonthly")} · {t("filterQuarterly")}
-            </Badge>
-            <Badge className="border-0 bg-emerald-500/25 text-xs font-semibold text-emerald-100">
+            </span>
+            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
               OOH
-            </Badge>
-            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
+            </span>
+            <span className="border-2 border-bx-white bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-black">
               BETA
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">{t("heroTitle")}</h1>
-          <p className="mx-auto mt-3 max-w-2xl text-slate-300">{t("heroSubtitle")}</p>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+            {t("heroTitle")}
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+            {t("heroSubtitle")}
+          </p>
         </div>
       </section>
 
-      <section className="border-b border-navy/8 bg-white py-10">
-        <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
+      <section className="bg-bx-white py-10">
+        <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
           <a
             href="#reports"
-            className="group flex gap-4 rounded-2xl border border-navy/10 bg-slate-50/80 p-5 shadow-sm transition-all hover:border-gold/40 hover:shadow-md"
+            className="group -ml-[2px] flex gap-4 border-2 border-bx-black bg-bx-off p-5 transition-colors hover:bg-bx-black hover:text-bx-white"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
               <CalendarRange className="h-6 w-6" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-navy">{t("valueStripTrends")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("valueStripTrendsDesc")}</p>
+              <p className="font-bold tracking-tight">{t("valueStripTrends")}</p>
+              <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                {`// `}{t("valueStripTrendsDesc")}
+              </p>
             </div>
           </a>
           <a
             href="#reports"
-            className="group flex gap-4 rounded-2xl border border-navy/10 bg-slate-50/80 p-5 shadow-sm transition-all hover:border-gold/40 hover:shadow-md"
+            className="group -ml-[2px] flex gap-4 border-2 border-bx-black bg-bx-off p-5 transition-colors hover:bg-bx-black hover:text-bx-white"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/20 text-navy group-hover:bg-gold group-hover:text-navy">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
               <Download className="h-6 w-6" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-navy">{t("valueStripPdf")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("valueStripPdfDesc")}</p>
+              <p className="font-bold tracking-tight">{t("valueStripPdf")}</p>
+              <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                {`// `}{t("valueStripPdfDesc")}
+              </p>
             </div>
           </a>
           <a
             href="#custom-report"
-            className="group flex gap-4 rounded-2xl border border-navy/10 bg-slate-50/80 p-5 shadow-sm transition-all hover:border-gold/40 hover:shadow-md"
+            className="group -ml-[2px] flex gap-4 border-2 border-bx-black bg-bx-off p-5 transition-colors hover:bg-bx-black hover:text-bx-white"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
               <Send className="h-6 w-6" />
             </div>
             <div className="text-left">
-              <p className="font-bold text-navy">{t("valueStripCustom")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("valueStripCustomDesc")}</p>
+              <p className="font-bold tracking-tight">{t("valueStripCustom")}</p>
+              <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                {`// `}{t("valueStripCustomDesc")}
+              </p>
             </div>
           </a>
         </div>
       </section>
 
-      <section className="py-10">
+      <section className="bg-bx-off py-16 sm:py-20">
         <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
           <div id="reports" className="scroll-mt-24 space-y-2">
-            <h2 className="text-xl font-extrabold text-navy sm:text-2xl">{t("reportsSectionTitle")}</h2>
-            <p className="max-w-2xl text-sm text-muted-foreground">{t("reportsSectionDesc")}</p>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ REPORTS ]
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+              {t("reportsSectionTitle")}
+            </h2>
+            <p className="max-w-2xl font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+              {`// `}{t("reportsSectionDesc")}
+            </p>
           </div>
 
           {!hasLibrary ? (
-            <Card className="border-navy/15 bg-slate-50/80 py-12 text-center shadow-sm">
-              <CardContent>
-                <p className="text-base font-semibold text-navy">{t("preparingContent")}</p>
-                <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                  {t("preparingContentDesc")}
-                </p>
-              </CardContent>
-            </Card>
+            <div className="border-2 border-bx-black bg-bx-white py-12 text-center">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ PREPARING ]
+              </p>
+              <p className="mt-3 text-base font-bold text-bx-black">{t("preparingContent")}</p>
+              <p className="mx-auto mt-3 max-w-md font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                {t("preparingContentDesc")}
+              </p>
+            </div>
           ) : (
             <>
               <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-navy/45">
-                  {t("periodLabel")}
+                <p className={labelCls}>
+                  [ {t("periodLabel")} ]
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-0">
                   {periodTabs.map((tab) => (
-                    <Button
+                    <button
                       key={tab.value}
                       type="button"
-                      size="sm"
-                      variant={period === tab.value ? "default" : "outline"}
                       onClick={() => setPeriod(tab.value)}
                       className={cn(
+                        "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                         period === tab.value
-                          ? "bg-navy text-white"
-                          : "border-navy/20 text-navy",
+                          ? "border-bx-accent bg-bx-accent text-bx-white"
+                          : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
                       )}
                     >
-                      <CalendarRange className="mr-1.5 h-3.5 w-3.5" />
+                      <CalendarRange className="h-3.5 w-3.5" />
                       {tab.label}
-                    </Button>
+                    </button>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-navy/45">
-                  {t("verticalLabel")}
+                <p className={labelCls}>
+                  [ {t("verticalLabel")} ]
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-0">
                   {verticalTabs.map((tab) => (
-                    <Button
+                    <button
                       key={tab.value}
                       type="button"
-                      size="sm"
-                      variant={vertical === tab.value ? "default" : "outline"}
                       onClick={() => setVertical(tab.value)}
                       className={cn(
+                        "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                         vertical === tab.value
-                          ? "bg-gold text-navy"
-                          : "border-navy/20 text-navy",
+                          ? "border-bx-accent bg-bx-accent text-bx-white"
+                          : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
                       )}
                     >
                       {tab.label}
-                    </Button>
+                    </button>
                   ))}
                 </div>
               </div>
 
-              <p className="text-sm text-muted-foreground">
-                {t("resultsCount", { count: filtered.length })}
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                {`// `}{t("resultsCount", { count: filtered.length })}
               </p>
 
-              <div className="grid gap-6 md:grid-cols-2">
+              <div className="grid gap-0 md:grid-cols-2">
                 {filtered.map((report) => (
                   <ReportCard
                     key={report.id}
@@ -309,66 +325,70 @@ export default function InsightsPageClient({
               </div>
 
               {filtered.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                  {t("empty")}
+                <p className="py-8 text-center font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                  {`// `}{t("empty")}
                 </p>
               ) : null}
             </>
           )}
 
-          <Card
-            className="border-navy/10 shadow-md scroll-mt-24"
+          <div
+            className="scroll-mt-24 border-2 border-bx-black bg-bx-white"
             id="custom-report"
           >
-            <CardHeader>
+            <div className="border-b-2 border-bx-black p-5">
               <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gold/15 text-navy">
+                <div className="flex h-11 w-11 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
                   <Send className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-gold-dark">
-                    {t("customSectionEyebrow")}
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ {t("customSectionEyebrow")} ]
                   </p>
-                  <CardTitle className="mt-1 text-navy">{t("formTitle")}</CardTitle>
-                  <CardDescription>{t("formDesc")}</CardDescription>
+                  <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+                    {t("formTitle")}
+                  </h3>
+                  <p className="mt-1 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                    {`// `}{t("formDesc")}
+                  </p>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="p-5">
               <form className="grid gap-4 sm:grid-cols-2" onSubmit={submitCustomRequest}>
                 <div className="sm:col-span-1">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-company">
-                    {t("formCompany")}
+                  <label className={labelCls} htmlFor="ins-company">
+                    [ {t("formCompany")} ]
                   </label>
-                  <Input
+                  <input
                     id="ins-company"
                     value={formCompany}
                     onChange={(e) => setFormCompany(e.target.value)}
-                    className="mt-1"
+                    className={cn(inputCls, "mt-2")}
                     placeholder={t("formCompanyPh")}
                   />
                 </div>
                 <div className="sm:col-span-1">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-email">
-                    {t("formEmail")} *
+                  <label className={labelCls} htmlFor="ins-email">
+                    [ {t("formEmail")} ] <span className="text-bx-accent">*</span>
                   </label>
-                  <Input
+                  <input
                     id="ins-email"
                     type="email"
                     required
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
-                    className="mt-1"
+                    className={cn(inputCls, "mt-2")}
                     placeholder="name@company.com"
                   />
                 </div>
                 <div className="sm:col-span-1">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-industry">
-                    {t("formIndustry")}
+                  <label className={labelCls} htmlFor="ins-industry">
+                    [ {t("formIndustry")} ]
                   </label>
                   <select
                     id="ins-industry"
-                    className="mt-1 flex h-10 w-full rounded-md border border-navy/15 bg-white px-3 text-sm text-navy shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+                    className={cn(inputCls, "mt-2")}
                     value={formIndustry}
                     onChange={(e) => setFormIndustry(e.target.value)}
                   >
@@ -380,12 +400,12 @@ export default function InsightsPageClient({
                   </select>
                 </div>
                 <div className="sm:col-span-1">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-pref">
-                    {t("formPeriodPref")}
+                  <label className={labelCls} htmlFor="ins-pref">
+                    [ {t("formPeriodPref")} ]
                   </label>
                   <select
                     id="ins-pref"
-                    className="mt-1 flex h-10 w-full rounded-md border border-navy/15 bg-white px-3 text-sm text-navy shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+                    className={cn(inputCls, "mt-2")}
                     value={formPeriodPref}
                     onChange={(e) =>
                       setFormPeriodPref(e.target.value as "monthly" | "quarterly" | "both")
@@ -397,37 +417,38 @@ export default function InsightsPageClient({
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-notes">
-                    {t("formNotes")}
+                  <label className={labelCls} htmlFor="ins-notes">
+                    [ {t("formNotes")} ]
                   </label>
-                  <Textarea
+                  <textarea
                     id="ins-notes"
                     value={formNotes}
                     onChange={(e) => setFormNotes(e.target.value)}
-                    className="mt-1 min-h-[100px]"
+                    className={cn(textareaCls, "mt-2")}
                     placeholder={t("formNotesPh")}
                   />
                 </div>
-                <div className="sm:col-span-2 flex flex-wrap gap-3">
-                  <Button
+                <div className="sm:col-span-2 flex flex-wrap gap-2">
+                  <BtnBlock
                     type="submit"
-                    className="bg-navy text-white hover:bg-navy/90"
+                    variant="dark"
+                    size="md"
                     disabled={formSubmitting}
                   >
                     {formSubmitting ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Mail className="mr-2 h-4 w-4" />
+                      <Mail className="h-4 w-4" />
                     )}
                     {t("formSubmit")}
-                  </Button>
-                  <Button type="button" variant="outline" asChild>
-                    <Link href="/contact">{t("formContactInstead")}</Link>
-                  </Button>
+                  </BtnBlock>
+                  <BtnBlock href="/contact" variant="secondary" size="md">
+                    {t("formContactInstead")}
+                  </BtnBlock>
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -438,16 +459,21 @@ export default function InsightsPageClient({
         ariaLabel={t("viewerTitle")}
         ariaLabelledBy="insights-viewer-title"
       >
-        <div className="p-6 pt-12">
-          <h2 id="insights-viewer-title" className="pr-8 text-lg font-bold text-navy">
+        <div className="border-2 border-bx-black bg-bx-white p-6 pt-12">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ VIEWER ]
+          </p>
+          <h2 id="insights-viewer-title" className="mt-2 pr-8 text-lg font-bold tracking-tight text-bx-black">
             {viewerTitle}
           </h2>
-          <p className="mt-1 text-xs text-muted-foreground">{t("viewerHint")}</p>
-          <div className="mt-4 min-h-[60vh] overflow-hidden rounded-xl border border-navy/10 bg-slate-100">
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            {`// `}{t("viewerHint")}
+          </p>
+          <div className="mt-4 min-h-[60vh] overflow-hidden border-2 border-bx-black bg-bx-off">
             {viewerLoading ? (
-              <div className="flex min-h-[60vh] items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-6 w-6 animate-spin text-gold" />
-                {t("viewerLoading")}
+              <div className="flex min-h-[60vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                <Loader2 className="h-6 w-6 animate-spin text-bx-accent" />
+                {`// `}{t("viewerLoading")}
               </div>
             ) : viewerUrl ? (
               <iframe
@@ -482,103 +508,107 @@ function ReportCard({
   const tags = report.verticalTags.filter((x) => x !== "general") as InsightVerticalTag[];
 
   return (
-    <Card className="flex flex-col border-navy/10 shadow-md transition-shadow hover:shadow-lg">
-      <CardHeader className="pb-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge className="bg-navy/90 text-white">{periodBadge}</Badge>
-          <Badge variant="outline" className="border-navy/20 text-xs text-navy/70">
+    <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white">
+      <header className="border-b-2 border-bx-black p-5">
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="border-2 border-bx-black bg-bx-black px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+            [ {periodBadge} ]
+          </span>
+          <span className="border-2 border-bx-black bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
             {isKo ? report.labelKo : report.labelEn}
-          </Badge>
+          </span>
           {tags.map((tag) => (
-            <Badge key={tag} className="bg-gold/20 text-navy">
+            <span
+              key={tag}
+              className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white"
+            >
               {tag === "fashion"
                 ? t("verticalFashion")
                 : tag === "auto"
                   ? t("verticalAuto")
                   : t("verticalFb")}
-            </Badge>
+            </span>
           ))}
         </div>
-        <CardTitle className="text-lg text-navy">
+        <h3 className="mt-3 text-lg font-bold tracking-tight text-bx-black">
           {isKo ? report.titleKo : report.titleEn}
-        </CardTitle>
-        <CardDescription className="flex items-center gap-1.5 text-xs">
+        </h3>
+        <p className="mt-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
           <FileText className="h-3.5 w-3.5" />
           {report.publishedIso}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="mt-auto flex flex-1 flex-col gap-4">
-        <ul className="space-y-2 text-sm text-navy/80">
+        </p>
+      </header>
+      <div className="mt-auto flex flex-1 flex-col gap-4 p-5">
+        <ul className="space-y-2 text-sm text-bx-black">
           {(isKo ? report.summaryKo : report.summaryEn).map((line, i) => (
             <li key={i} className="flex gap-2 leading-relaxed">
-              <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+              <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-bx-accent" />
               <span>{line}</span>
             </li>
           ))}
         </ul>
 
-        <div className="rounded-xl border border-navy/8 bg-slate-50/90 p-3 text-xs">
-          <p className="mb-2 flex items-center gap-1.5 font-bold text-navy">
-            <MonitorPlay className="h-3.5 w-3.5 text-gold-dark" />
-            {t("previewDooh")}
+        <div className="border-2 border-bx-black bg-bx-off p-3 text-xs">
+          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <MonitorPlay className="h-3.5 w-3.5" />
+            [ {t("previewDooh")} ]
           </p>
-          <p className="leading-relaxed text-navy/75">
+          <p className="mt-2 leading-relaxed text-bx-black">
             {(isKo ? report.doohKo : report.doohEn)[0]}
           </p>
         </div>
 
-        <div className="rounded-xl border border-navy/8 bg-navy/[0.03] p-3 text-xs">
-          <p className="mb-2 flex items-center gap-1.5 font-bold text-navy">
-            <BookOpen className="h-3.5 w-3.5 text-gold-dark" />
-            {t("previewVertical")}
+        <div className="border-2 border-bx-black bg-bx-off p-3 text-xs">
+          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <BookOpen className="h-3.5 w-3.5" />
+            [ {t("previewVertical")} ]
           </p>
-          <p className="font-medium text-navy">
+          <p className="mt-2 font-bold text-bx-black">
             {isKo ? report.verticalBlocks[0]?.labelKo : report.verticalBlocks[0]?.labelEn}
           </p>
-          <p className="mt-1 text-navy/70">
+          <p className="mt-1 text-bx-black/75">
             {(isKo ? report.verticalBlocks[0]?.bulletsKo : report.verticalBlocks[0]?.bulletsEn)?.[0]}
           </p>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            type="button"
-            className="flex-1 btn-gold font-bold text-navy hover:bg-gold-dark"
+          <BtnBlock
+            variant="accent"
+            size="md"
             onClick={onDownload}
             disabled={downloading}
+            className="flex-1"
           >
             {downloading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="h-4 w-4" />
             )}
             {t("downloadPdf")}
-          </Button>
+          </BtnBlock>
           {report.slug ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1 border-navy/25 font-semibold text-navy"
-              asChild
+            <BtnBlock
+              href={`/insights/${report.slug}`}
+              variant="secondary"
+              size="md"
+              className="flex-1"
             >
-              <Link href={`/insights/${report.slug}`}>
-                <BookOpen className="mr-2 h-4 w-4" />
-                {t("viewOnline")}
-              </Link>
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1 border-navy/25 font-semibold text-navy"
-              onClick={onView}
-            >
-              <BookOpen className="mr-2 h-4 w-4" />
+              <BookOpen className="h-4 w-4" />
               {t("viewOnline")}
-            </Button>
+            </BtnBlock>
+          ) : (
+            <BtnBlock
+              variant="secondary"
+              size="md"
+              onClick={onView}
+              className="flex-1"
+            >
+              <BookOpen className="h-4 w-4" />
+              {t("viewOnline")}
+            </BtnBlock>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </article>
   );
 }

@@ -1,3 +1,5 @@
+/* === Brutalist redesign Phase 1 — Google Fonts (Space Grotesk + JetBrains Mono) === */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
 /* Wanted Sans Variable — 2024-2025 한국 트렌드 폰트 (모던·세련된 sans, jsDelivr) */
 @import url("https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfontvariable/variable/WantedSansVariable.css");
 /* Pretendard 폴백 — Wanted Sans 미로드 시 백업 (jsDelivr CDN, subset woff2) */
@@ -80,19 +82,35 @@
   --color-info: #3b82f6;
   --color-info-soft: #eff6ff;
 
-  /* Font — Wanted Sans Variable → Pretendard Variable → Geist 폴백 → 시스템 (2025 트렌드) */
-  --font-sans: "Wanted Sans Variable", "WantedSans Variable", "Pretendard Variable",
-    var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-    Pretendard, "Malgun Gothic", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
-    monospace;
+  /* === Brutalist palette (Phase 1) ===
+   * Phase 2/3 컴포넌트·페이지에서 사용.
+   * 유틸리티 예: bg-bx-off · text-bx-accent · border-bx-black · text-bx-gray-dim
+   * 기존 navy/gold 토큰은 Phase 3 까지 유지 (페이지 전환 안전성).
+   */
+  --color-bx-black: #000000;
+  --color-bx-white: #ffffff;
+  --color-bx-off: #f5f5f5;
+  --color-bx-gray: #d4d4d4;
+  --color-bx-gray-dim: #737373;
+  --color-bx-accent: #ff4d00;
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 12px);
-  --radius-full: 9999px;
+  /* Font — Phase 1: Space Grotesk(영문) + Pretendard(한글) 우선.
+   * Wanted Sans·Geist 는 폴백으로 유지. JetBrains Mono 는 메타·라벨 전용. */
+  --font-sans: "Space Grotesk", "Pretendard Variable", "Wanted Sans Variable",
+    "WantedSans Variable", var(--font-geist-sans), -apple-system,
+    BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard, "Malgun Gothic",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", var(--font-geist-mono), ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+
+  /* Phase 1: 둥근 모서리 0 강제 — 기존 radius-* 유틸은 모두 0 으로 무력화.
+   * radius-full 도 0 으로 강제 (avatars/pills 까지 사각). */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-full: 0;
 
   /* Elevation 스케일 (일관된 그림자) */
   --shadow-xs: 0 1px 2px rgba(13, 27, 46, 0.04);
@@ -103,7 +121,8 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  /* Phase 1: --radius 도 0. 일부 컴포넌트가 var(--radius) 를 직접 참조해도 사각이 되도록. */
+  --radius: 0;
   --background: #ffffff;
   --foreground: #0a1420;
   --card: #ffffff;
@@ -169,13 +188,29 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  /* Wanted Sans Variable 이 선두 — Pretendard·Geist 폴백 */
+  /* Phase 1: Space Grotesk(영문) + Pretendard(한글) 우선 (--font-sans) */
   font-family: var(--font-sans);
   font-feature-settings: "ss06", "tnum", "cv11";
   letter-spacing: -0.01em;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* === Brutalist Phase 2 — 인라인 강조 유틸 ===
+ * 헤드라인 안에서 단어 단위로 강조할 때.
+ * <h1>생각하는 <span class="bx-invert">광고</span> 회사</h1>
+ * <h1>생각하는 <span class="bx-accent">광고</span> 회사</h1>
+ * Tailwind 의 `invert` 필터 유틸과 충돌 안 나도록 `bx-` 네임스페이스. */
+.bx-invert {
+  background: var(--color-bx-black);
+  color: var(--color-bx-white);
+  padding: 0 0.25em;
+  display: inline-block;
+  line-height: 1.05;
+}
+.bx-accent {
+  color: var(--color-bx-accent);
 }
 
 @layer base {

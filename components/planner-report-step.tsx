@@ -4,15 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import { useTranslations } from "next-intl";
 import { ExternalLink, FileDown, Loader2, Mail, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
   budgetSplitByCategory,
@@ -385,13 +377,18 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold text-navy sm:text-2xl">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ STEP 6 / REPORT ]
+        </p>
+        <h2 className="text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
           {t("stepReportTitle")}
         </h2>
-        <p className="text-sm text-muted-foreground">{t("stepReportDesc")}</p>
+        <p className="text-sm leading-relaxed text-bx-gray-dim">
+          {t("stepReportDesc")}
+        </p>
       </div>
 
-      <div className="mx-auto flex w-full justify-center rounded-2xl border border-navy/10 bg-slate-50/60 p-4 shadow-inner sm:p-6 lg:p-8">
+      <div className="mx-auto flex w-full justify-center border-2 border-bx-black bg-bx-off p-4 sm:p-6 lg:p-8">
         <PlannerReportPreview
           ref={previewRef}
           isKo={props.isKo}
@@ -415,42 +412,46 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         />
       </div>
 
-      <Card className="border-navy/10 shadow-lg">
-        <CardHeader className="flex flex-col gap-4 border-b border-navy/8 bg-slate-50/50 sm:flex-row sm:items-start sm:justify-between">
+      <div className="border-2 border-bx-black bg-bx-white">
+        <div className="flex flex-col gap-4 border-b-2 border-bx-black p-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle className="text-navy">{t("reportPdfDocumentTitle")}</CardTitle>
-            <CardDescription>{t("reportPreviewDesc")}</CardDescription>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ PDF DOCUMENT ]
+            </p>
+            <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+              {t("reportPdfDocumentTitle")}
+            </h3>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+              {t("reportPreviewDesc")}
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full border-navy/20"
+            <BtnBlock
+              variant="secondary"
+              size="md"
               onClick={downloadPdf}
               disabled={loading || downloading}
             >
               {downloading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <FileDown className="mr-2 h-4 w-4" />
+                <FileDown className="h-4 w-4" />
               )}
               {t("reportDownloadPdf")}
-            </Button>
+            </BtnBlock>
             {pdfUrl && !loading ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-navy/20"
-                asChild
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
               >
-                <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  {t("reportOpenPdfNewTab")}
-                </a>
-              </Button>
+                <ExternalLink className="h-4 w-4" />
+                {t("reportOpenPdfNewTab")}
+              </a>
             ) : null}
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Input
+              <input
                 type="email"
                 placeholder={props.isKo ? "이메일 주소" : "Email address"}
                 value={userEmail}
@@ -458,48 +459,50 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                   setUserEmail(e.target.value);
                   setEmailSent(false);
                 }}
-                className="h-10 w-full min-w-[14rem] sm:w-56"
+                className="h-10 w-full min-w-[14rem] border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none sm:w-56"
               />
-              <Button
-                type="button"
-                className="btn-gold rounded-full font-semibold"
+              <BtnBlock
+                variant="accent"
+                size="md"
                 onClick={() => void sendEmailReport()}
                 disabled={emailSending}
               >
                 {emailSending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Mail className="mr-2 h-4 w-4" />
+                  <Mail className="h-4 w-4" />
                 )}
                 {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
-              </Button>
+              </BtnBlock>
             </div>
             {error ? (
-              <Button
-                type="button"
-                variant="secondary"
-                className="rounded-full"
+              <BtnBlock
+                variant="primary"
+                size="md"
                 onClick={() => {
                   setError(null);
                   setRetryKey((k) => k + 1);
                 }}
               >
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="h-4 w-4" />
                 {t("reportRetryPdf")}
-              </Button>
+              </BtnBlock>
             ) : null}
           </div>
-        </CardHeader>
-        <CardContent className="pt-6">
+        </div>
+        <div className="p-6">
           {loading ? (
-            <div className="flex min-h-[20rem] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-navy/15 bg-slate-50/60 py-16 text-sm text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin text-gold" />
-              {t("reportGenerating")}
+            <div className="flex min-h-[20rem] flex-col items-center justify-center gap-3 border-2 border-bx-black bg-bx-off py-16 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              <Loader2 className="h-8 w-8 animate-spin text-bx-accent" />
+              {`// `}{t("reportGenerating")}
             </div>
           ) : error ? (
-            <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-10 text-center text-sm text-destructive">
-              <p>{error}</p>
-              <p className="mt-2 text-xs text-destructive/80">
+            <div className="border-2 border-bx-accent bg-bx-white px-4 py-10 text-center text-sm text-bx-black">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ ERROR ]
+              </p>
+              <p className="mt-3 font-bold">{error}</p>
+              <p className="mt-2 font-mono text-[11px] tracking-tight text-bx-gray-dim">
                 {t("reportPdfErrorHint")}
               </p>
             </div>
@@ -507,11 +510,11 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             <iframe
               title={t("reportPdfDocumentTitle")}
               src={`${pdfUrl}#toolbar=1`}
-              className="mx-auto h-[min(85vh,1100px)] w-full rounded-2xl border border-navy/10 bg-white shadow-inner"
+              className="mx-auto h-[min(85vh,1100px)] w-full border-2 border-bx-black bg-bx-white"
             />
           ) : null}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
@@ -658,13 +661,20 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <Card className="border-navy/10 shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-navy">{t("reportPreviewTitle")}</CardTitle>
-        <CardDescription>{t("reportCompactDesc")}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <div className="flex justify-center rounded-xl bg-slate-50/40 p-3 sm:p-5">
+    <div className="border-2 border-bx-black bg-bx-white">
+      <div className="border-b-2 border-bx-black p-5">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ REPORT PREVIEW ]
+        </p>
+        <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+          {t("reportPreviewTitle")}
+        </h3>
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          {t("reportCompactDesc")}
+        </p>
+      </div>
+      <div className="space-y-6 p-5">
+        <div className="flex justify-center border-2 border-bx-black bg-bx-off p-3 sm:p-5">
           <PlannerReportPreview
             ref={compactPreviewRef}
             isKo={props.isKo}
@@ -687,22 +697,22 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             mediaPlacements={props.mediaPlacements}
           />
         </div>
-        <div className="flex flex-wrap gap-2 border-t border-navy/10 pt-6">
-          <Button
-            type="button"
-            className="btn-gold rounded-full font-semibold"
+        <div className="flex flex-wrap gap-2 border-t-2 border-bx-black pt-6">
+          <BtnBlock
+            variant="accent"
+            size="md"
             onClick={() => void downloadPdf()}
             disabled={downloading}
           >
             {downloading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <FileDown className="mr-2 h-4 w-4" />
+              <FileDown className="h-4 w-4" />
             )}
             {t("reportDownloadPdf")}
-          </Button>
+          </BtnBlock>
           <div className="flex flex-wrap items-center gap-2">
-            <Input
+            <input
               type="email"
               placeholder={props.isKo ? "이메일 주소" : "Email address"}
               value={userEmail}
@@ -710,25 +720,24 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                 setUserEmail(e.target.value);
                 setEmailSent(false);
               }}
-              className="h-10 w-full min-w-[12rem] sm:w-52"
+              className="h-10 w-full min-w-[12rem] border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none sm:w-52"
             />
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full border-navy/20"
+            <BtnBlock
+              variant="secondary"
+              size="md"
               onClick={() => void sendEmailReport()}
               disabled={emailSending}
             >
               {emailSending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Mail className="mr-2 h-4 w-4" />
+                <Mail className="h-4 w-4" />
               )}
               {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
-            </Button>
+            </BtnBlock>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

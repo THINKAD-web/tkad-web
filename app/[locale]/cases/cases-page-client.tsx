@@ -3,16 +3,7 @@
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import {
   ArrowRight,
   Layers,
@@ -20,6 +11,7 @@ import {
   Search,
   TrendingUp,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
 
 type Props = { initialCases: PublicSuccessCaseListItem[] };
@@ -75,202 +67,194 @@ export default function CasesPageClient({ initialCases }: Props) {
 
   return (
     <>
-      <section className="bg-navy py-24 sm:py-28">
+      <section className="bg-bx-black py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mb-3 flex items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold text-white sm:text-4xl">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            {`// 08 / Cases`}
+          </p>
+          <div className="mt-3 inline-flex flex-wrap items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
               {empty ? t("cases.reportHeroTitle") : t("cases.title")}
             </h1>
-            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">BETA</span>
+            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-bx-white">
+              BETA
+            </span>
           </div>
-          <p className="mt-2 text-slate-300 sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
             {empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
           </p>
         </div>
       </section>
 
-      <section className="py-28">
+      <section className="bg-bx-off py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {empty ? (
-            <div className="space-y-16">
-              <p className="mx-auto max-w-3xl text-center text-lg font-medium leading-relaxed text-navy sm:text-xl">
+            <div className="space-y-14">
+              <p className="mx-auto max-w-3xl text-center text-lg font-bold leading-relaxed text-bx-black sm:text-xl">
                 {t("cases.reportLead")}
               </p>
 
-              <div className="grid gap-6 md:grid-cols-3">
+              <div className="grid gap-0 md:grid-cols-3">
                 {featureCards.map((card) => (
-                  <Card
+                  <div
                     key={card.titleKey}
-                    className="border-navy/10 bg-white shadow-md shadow-navy/5"
+                    className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-5"
                   >
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base leading-snug text-navy">
-                        {t(card.titleKey)}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm leading-relaxed text-navy/70">
-                        {t(card.descKey)}
-                      </p>
-                    </CardContent>
-                  </Card>
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      [ {t(card.titleKey)} ]
+                    </p>
+                    <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                      {t(card.descKey)}
+                    </p>
+                  </div>
                 ))}
               </div>
 
               <div>
-                <div className="mx-auto max-w-2xl rounded-2xl border-2 border-dashed border-navy/15 bg-gradient-to-br from-slate-50 to-gold/5 p-6 sm:p-8">
+                <div className="mx-auto max-w-2xl border-2 border-bx-black bg-bx-white p-6 sm:p-8">
                   <div className="mb-4 flex items-center justify-between gap-2">
-                    <Badge
-                      variant="secondary"
-                      className="bg-navy/10 text-xs font-semibold text-navy"
-                    >
-                      {t("cases.reportSampleBadge")}
-                    </Badge>
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-navy/40">
+                    <span className="border-2 border-bx-black bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                      [ {t("cases.reportSampleBadge")} ]
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-bx-gray-dim">
                       {t("cases.reportSampleLabel")}
                     </span>
                   </div>
-                  <div className="space-y-3 rounded-xl border border-navy/8 bg-white p-4 shadow-sm">
-                    <div className="h-2.5 w-3/4 rounded bg-navy/10" />
-                    <div className="h-2 w-1/2 rounded bg-navy/[0.07]" />
-                    <div className="mt-4 space-y-2 border-t border-navy/8 pt-4">
-                      <p className="text-xs font-semibold text-navy">
-                        {t("cases.reportSampleLine1")}
+                  <div className="space-y-3 border-2 border-bx-black bg-bx-off p-4">
+                    <div className="h-2.5 w-3/4 bg-bx-black" />
+                    <div className="h-2 w-1/2 bg-bx-black/40" />
+                    <div className="mt-4 space-y-2 border-t-2 border-bx-black pt-4">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ {t("cases.reportSampleLine1")} ]
                       </p>
-                      <div className="h-16 rounded-lg bg-navy/[0.04]" />
-                      <p className="text-xs font-semibold text-navy">
-                        {t("cases.reportSampleLine2")}
+                      <div className="h-16 border-2 border-bx-black bg-bx-white" />
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ {t("cases.reportSampleLine2")} ]
                       </p>
-                      <div className="flex gap-2">
-                        <div className="h-12 flex-1 rounded-md bg-gold/15" />
-                        <div className="h-12 flex-1 rounded-md bg-navy/[0.06]" />
-                        <div className="h-12 flex-1 rounded-md bg-navy/[0.06]" />
+                      <div className="flex gap-0">
+                        <div className="-ml-[2px] h-12 flex-1 border-2 border-bx-accent bg-bx-accent" />
+                        <div className="-ml-[2px] h-12 flex-1 border-2 border-bx-black bg-bx-white" />
+                        <div className="-ml-[2px] h-12 flex-1 border-2 border-bx-black bg-bx-white" />
                       </div>
-                      <p className="pt-1 text-xs font-semibold text-navy">
-                        {t("cases.reportSampleLine3")}
+                      <p className="pt-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ {t("cases.reportSampleLine3")} ]
                       </p>
-                      <div className="h-2 w-full rounded bg-navy/[0.06]" />
-                      <div className="h-2 w-5/6 rounded bg-navy/[0.05]" />
+                      <div className="h-2 w-full bg-bx-black/30" />
+                      <div className="h-2 w-5/6 bg-bx-black/20" />
                     </div>
                   </div>
                 </div>
-                <p className="mt-4 text-center text-sm text-navy/65">
-                  {t("cases.reportSampleCaption")}
+                <p className="mt-4 text-center font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                  {`// `}{t("cases.reportSampleCaption")}
                 </p>
               </div>
 
               <div className="flex flex-col items-center justify-center">
-                <Link href="/quote" className="w-full sm:w-auto">
-                  <Button
-                    size="lg"
-                    className="w-full bg-gold font-bold text-navy hover:bg-gold-dark sm:min-w-[220px]"
-                  >
-                    {t("cases.reportCtaQuote")}
-                  </Button>
-                </Link>
+                <BtnBlock href="/quote" variant="accent" size="lg">
+                  {t("cases.reportCtaQuote")}
+                </BtnBlock>
               </div>
             </div>
           ) : (
             <>
-              <p className="mb-8 text-center text-base text-navy/75 sm:text-lg">
-                {t("cases.listIntro")}
+              <p className="mb-10 text-center font-mono text-[12px] tracking-tight text-bx-gray-dim sm:text-sm">
+                {`// `}{t("cases.listIntro")}
               </p>
 
-              <div className="mb-6 space-y-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-navy/50">
-                  {t("cases.filterIndustry")}
+              <div className="mb-8 space-y-4">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  [ {t("cases.filterIndustry")} ]
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-0">
                   {industries.map((key) => (
-                    <Button
+                    <button
                       key={key}
-                      variant={industry === key ? "default" : "outline"}
-                      size="sm"
+                      type="button"
                       onClick={() => setIndustry(key)}
-                      className={
+                      className={cn(
+                        "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                         industry === key
-                          ? "bg-navy text-white"
-                          : "border-navy/20 text-navy"
-                      }
+                          ? "border-bx-accent bg-bx-accent text-bx-white"
+                          : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                      )}
                     >
                       {key === "all" ? t("cases.all") : key}
-                    </Button>
+                    </button>
                   ))}
                 </div>
 
-                <div className="flex flex-col gap-3 rounded-xl border border-navy/10 bg-slate-50/80 p-4 sm:flex-row sm:flex-wrap sm:items-end">
+                <div className="flex flex-col gap-3 border-2 border-bx-black bg-bx-white p-4 sm:flex-row sm:flex-wrap sm:items-stretch">
                   <div className="relative min-w-[200px] flex-1">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy/35" />
-                    <Input
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-bx-gray-dim" />
+                    <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder={t("cases.searchPlaceholder")}
-                      className="h-10 border-navy/15 pl-9"
+                      className="h-11 w-full border-2 border-bx-black bg-bx-white pl-10 pr-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
                       aria-label={t("cases.searchPlaceholder")}
                     />
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-10 shrink-0 border-navy/20"
+                  <BtnBlock
+                    variant="secondary"
+                    size="md"
                     onClick={() => {
                       setIndustry("all");
                       setQuery("");
                     }}
                   >
-                    <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                    <RotateCcw className="h-3.5 w-3.5" />
                     {t("cases.resetFilters")}
-                  </Button>
+                  </BtnBlock>
                 </div>
 
-                <p className="text-sm text-navy/60">
-                  {t("cases.resultsCount", { count: filtered.length })}
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                  {`// `}{t("cases.resultsCount", { count: filtered.length })}
                 </p>
               </div>
 
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
                 {filtered.map((cs) => (
-                  <Card
+                  <article
                     key={cs.id}
-                    className="group overflow-hidden border-0 shadow-md transition-all hover:-translate-y-1 hover:shadow-xl"
+                    className="group -mt-[2px] -ml-[2px] flex flex-col overflow-hidden border-2 border-bx-black bg-bx-white"
                   >
-                    <div className="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-gold/10 to-navy/10">
+                    <div className="relative flex h-48 items-center justify-center overflow-hidden border-b-2 border-bx-black bg-bx-off">
                       {cs.thumbnailUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={cs.thumbnailUrl}
                           alt=""
-                          className="absolute inset-0 h-full w-full object-cover"
+                          className="absolute inset-0 h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
                         />
                       ) : (
-                        <TrendingUp className="h-12 w-12 text-gold/40 transition-transform group-hover:scale-110" />
+                        <TrendingUp className="h-12 w-12 text-bx-gray-dim transition-transform group-hover:scale-110" />
                       )}
-                      <Badge className="absolute right-3 top-3 bg-gold text-navy">
-                        {cs.industry}
-                      </Badge>
+                      <span className="absolute right-3 top-3 border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                        [ {cs.industry} ]
+                      </span>
                     </div>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base">
+                    <div className="flex flex-1 flex-col p-5">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ CASE / {cs.id.slice(0, 6).toUpperCase()} ]
+                      </p>
+                      <h3 className="mt-2 text-base font-bold tracking-tight text-bx-black">
                         {isKo ? cs.titleKo : cs.titleEn ?? cs.titleKo}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <CardDescription className="text-sm leading-relaxed">
+                      </h3>
+                      <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
                         {cs.summaryKo}
-                      </CardDescription>
-                      <div className="space-y-2 rounded-xl border border-navy/8 bg-white p-3">
-                        <div className="flex items-start gap-2 text-xs text-navy/85">
-                          <Layers className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-dark" />
-                          <div>
-                            <span className="font-semibold text-navy">
-                              {t("cases.mediaLabel")}
-                            </span>
-                            <div className="mt-1.5 flex flex-wrap gap-1">
+                      </p>
+                      <div className="mt-4 border-2 border-bx-black bg-bx-off p-3">
+                        <div className="flex items-start gap-2">
+                          <Layers className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bx-accent" />
+                          <div className="min-w-0">
+                            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                              [ {t("cases.mediaLabel")} ]
+                            </p>
+                            <div className="mt-2 flex flex-wrap gap-1">
                               {cs.mediaUsed.map((m) => (
                                 <span
                                   key={m}
-                                  className="rounded-md bg-navy/[0.06] px-2 py-0.5 text-[11px] font-medium text-navy"
+                                  className="border-2 border-bx-black bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black"
                                 >
                                   {m}
                                 </span>
@@ -279,45 +263,45 @@ export default function CasesPageClient({ initialCases }: Props) {
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2">
-                        <Link href={`/cases/${cs.id}`}>
-                          <Button
-                            size="sm"
-                            className="w-full bg-gold text-xs font-bold text-navy hover:bg-gold-dark"
-                          >
-                            {t("cases.viewDetails")}
-                            <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                          </Button>
-                        </Link>
-                        <Link
-                          href={`/contact?case=${encodeURIComponent(cs.id)}`}
+                      <div className="mt-auto flex flex-col gap-2 pt-4">
+                        <BtnBlock
+                          href={`/cases/${cs.id}`}
+                          variant="accent"
+                          size="sm"
+                          className="w-full"
                         >
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full border-navy/25 text-xs font-bold text-navy hover:bg-navy/5"
-                          >
-                            {t("cases.ctaSimilar")}
-                          </Button>
-                        </Link>
+                          {t("cases.viewDetails")}
+                          <ArrowRight className="h-3.5 w-3.5" />
+                        </BtnBlock>
+                        <BtnBlock
+                          href={`/contact?case=${encodeURIComponent(cs.id)}`}
+                          variant="secondary"
+                          size="sm"
+                          className="w-full"
+                        >
+                          {t("cases.ctaSimilar")}
+                        </BtnBlock>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </article>
                 ))}
               </div>
 
-              <div className="mt-16 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/[0.04] to-gold/10 px-6 py-10 text-center">
-                <h2 className="text-xl font-bold text-navy sm:text-2xl">
+              <div className="mt-16 border-2 border-bx-accent bg-bx-black px-6 py-10 text-center">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  [ NEXT STEP ]
+                </p>
+                <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-white sm:text-2xl">
                   {t("cases.sectionCtaTitle")}
                 </h2>
-                <p className="mx-auto mt-2 max-w-xl text-sm text-navy/65">
-                  {t("cases.sectionCtaDesc")}
+                <p className="mx-auto mt-3 max-w-xl font-mono text-[12px] tracking-tight text-bx-white/75">
+                  {`// `}{t("cases.sectionCtaDesc")}
                 </p>
-                <Link href="/contact" className="mt-6 inline-block">
-                  <Button className="bg-navy px-8 text-white hover:bg-navy/90">
+                <div className="mt-6 inline-flex">
+                  <BtnBlock href="/contact" variant="accent" size="lg">
                     {t("cases.sectionCtaButton")}
-                  </Button>
-                </Link>
+                  </BtnBlock>
+                </div>
               </div>
             </>
           )}

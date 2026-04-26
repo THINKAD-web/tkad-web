@@ -1,16 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import {
   CheckCircle,
   Images,
@@ -61,7 +52,6 @@ import {
   computeCatalogBounds,
   defaultAdvancedFilterState,
   passesMediaAdvancedFilters,
-  type TargetAgeBucket,
 } from "@/lib/media-filter-advanced";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
@@ -696,30 +686,37 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   return (
     <>
-      <section className="bg-navy py-28">
+      <section className="bg-bx-black py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mb-3 flex items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold text-white sm:text-4xl">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            {`// 07 / Quote`}
+          </p>
+          <div className="mt-3 inline-flex flex-wrap items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
               {t("quote.title")}
             </h1>
-            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">BETA</span>
+            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-bx-white">
+              BETA
+            </span>
           </div>
-          <p className="mt-2 text-slate-300">{t("quote.subtitle")}</p>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
-            {t("quote.wizardSubtitle")}
+          <p className="mt-5 font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+            {t("quote.subtitle")}
+          </p>
+          <p className="mx-auto mt-3 max-w-xl font-mono text-[11px] uppercase tracking-[0.18em] text-bx-white/55">
+            {`// `}{t("quote.wizardSubtitle")}
           </p>
         </div>
       </section>
 
-      <section className="bg-white py-10">
+      <section className="bg-bx-off py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-navy/50">
-              {t("quote.wizardTitle")}
+          <div className="mb-10">
+            <p className="mb-4 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ {t("quote.wizardTitle")} ]
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
               {([1, 2, 3, 4] as const).map((n) => (
-                <div key={n} className="flex items-center gap-2 sm:gap-3">
+                <div key={n} className="flex items-center gap-1.5 sm:gap-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -736,45 +733,48 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-colors",
+                      "flex h-10 w-10 items-center justify-center border-2 font-mono text-sm font-bold transition-colors",
                       step === n
-                        ? "bg-gold text-navy ring-2 ring-gold/40"
+                        ? "border-bx-accent bg-bx-accent text-bx-white"
                         : step > n
-                          ? "bg-navy text-white"
-                          : "bg-slate-200 text-slate-500",
+                          ? "border-bx-black bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                          : "border-bx-black bg-bx-off text-bx-gray-dim",
                     )}
                   >
                     {step > n ? "✓" : n}
                   </button>
                   <span
                     className={cn(
-                      "hidden max-w-[100px] text-xs font-medium sm:block",
-                      step === n ? "text-navy" : "text-muted-foreground",
+                      "hidden max-w-[100px] font-mono text-[10px] font-bold uppercase tracking-[0.18em] sm:block",
+                      step === n ? "text-bx-accent" : "text-bx-gray-dim",
                     )}
                   >
                     {stepLabels[n - 1]}
                   </span>
                   {n < 4 ? (
-                    <ChevronRight className="hidden h-4 w-4 text-slate-300 sm:block" />
+                    <ChevronRight className="hidden h-4 w-4 text-bx-gray-dim sm:block" />
                   ) : null}
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              {t("quote.stepOf", { current: step, total: 4 })}
+            <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              {`// `}{t("quote.stepOf", { current: step, total: 4 })}
             </p>
           </div>
 
           <div className="flex flex-col gap-6">
             <div className="order-2">
-              <Card className="min-h-[320px] shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-xl text-navy">
-                    <StepHeaderIcon className="h-5 w-5 text-gold" aria-hidden />
+              <div className="min-h-[320px] border-2 border-bx-black bg-bx-white">
+                <div className="border-b-2 border-bx-black p-5">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ STEP {step} / 4 ]
+                  </p>
+                  <h3 className="mt-2 flex items-center gap-2 text-xl font-bold tracking-tight text-bx-black">
+                    <StepHeaderIcon className="h-5 w-5 text-bx-accent" aria-hidden />
                     {stepLabels[step - 1]}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </h3>
+                </div>
+                <div className="p-5">
                   {step === 1 && (
                     <>
                       {touched.media && errors.media ? (
@@ -782,13 +782,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           {errors.media}
                         </p>
                       ) : null}
-                      <p className="mb-4 text-sm text-muted-foreground">
-                        {t("quote.selectMediaDesc")}
+                      <p className="mb-4 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                        {`// `}{t("quote.selectMediaDesc")}
                       </p>
                       <div className="flex flex-col gap-6">
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-navy">
-                            {t("common.search")}
+                          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                            [ {t("common.search")} ]
                           </label>
                           <MediaSearchAutocomplete
                             key={quoteSearchFieldKey}
@@ -828,12 +828,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               {t("media.results")}: {sortedCatalog.length}
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <label className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-white px-3 py-1.5 text-xs font-medium text-navy">
-                                <span className="text-muted-foreground">
+                              <label className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black">
+                                <span className="text-bx-gray-dim">
                                   {t("media.sortLabel")}
                                 </span>
                                 <select
-                                  className="max-w-[10rem] rounded-md border border-navy/15 bg-slate-50 px-2 py-0.5 text-xs font-semibold"
+                                  className="max-w-[10rem] border-l-2 border-bx-black bg-bx-off px-2 py-0.5 font-mono text-[11px] font-bold focus:border-bx-accent focus:outline-none"
                                   value={sortBy}
                                   onChange={(e) =>
                                     setSortBy(
@@ -868,16 +868,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   setMediaPage(1);
                                 }}
                               />
-                              <div className="inline-flex rounded-full border border-navy/15 bg-slate-50 p-0.5">
-                                <Button
+                              <div className="inline-flex border-2 border-bx-black bg-bx-white">
+                                <button
                                   type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                                    selectedIds.size > 0
-                                      ? "text-navy"
-                                      : "text-muted-foreground"
-                                  }`}
+                                  className={cn(
+                                    "inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors disabled:opacity-40",
+                                    selectedIds.size > 0 ? "text-bx-black hover:bg-bx-off" : "text-bx-gray-dim",
+                                  )}
                                   onClick={() => {
                                     const ids = pagedCatalog.map((m) => m.id);
                                     setSelectedIds(new Set(ids));
@@ -885,19 +882,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   disabled={pagedCatalog.length === 0}
                                 >
                                   {isKo ? "전체선택" : "Select all"}
-                                </Button>
-                                <Button
+                                </button>
+                                <button
                                   type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground"
+                                  className="inline-flex items-center gap-1.5 border-l-2 border-bx-black px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim transition-colors hover:bg-bx-off disabled:opacity-40"
                                   onClick={() => setSelectedIds(new Set())}
                                   disabled={selectedIds.size === 0}
                                 >
                                   {isKo ? "전체삭제" : "Clear all"}
-                                </Button>
+                                </button>
                               </div>
-                              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
+                              <div className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-white px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-accent">
                                 <ShieldCheck className="h-4 w-4" aria-hidden />
                                 <span>
                                   {tMedia("browseCatalogVerifiedBadge")}
@@ -907,7 +902,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           </div>
 
                       {filteredCatalog.length === 0 ? (
-                        <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-navy/15 text-sm text-muted-foreground">
+                        <div className="flex h-64 items-center justify-center border-2 border-bx-black bg-bx-off font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
                           {isKo ? "조건에 맞는 매체가 없습니다." : "No media matches your filters."}
                         </div>
                       ) : mediaLayout === "grid" ? (
@@ -946,12 +941,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 priceMan={displayPrice}
                               />
                               {checked && isNw ? (
-                                <div className="space-y-2 rounded-lg border border-navy/10 bg-slate-50 p-3 text-sm">
+                                <div className="space-y-3 border-2 border-bx-black bg-bx-off p-3 text-sm">
                                   <div>
-                                    <label className="mb-1 block text-xs font-semibold text-navy">
-                                      {t("quote.networkUnits")}
+                                    <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                                      [ {t("quote.networkUnits")} ]
                                     </label>
-                                    <Input
+                                    <input
                                       type="number"
                                       min={media.networkMinUnits ?? 1}
                                       max={media.networkTotalLocations ?? 99999}
@@ -973,15 +968,15 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                           },
                                         }));
                                       }}
-                                      className="h-9"
+                                      className="h-9 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black focus:border-bx-accent focus:outline-none"
                                     />
                                   </div>
                                   <div>
-                                    <label className="mb-1 block text-xs font-semibold text-navy">
-                                      {t("quote.networkRegion")}
+                                    <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                                      [ {t("quote.networkRegion")} ]
                                     </label>
                                     <select
-                                      className="w-full rounded-md border border-navy/15 bg-white px-2 py-1.5 text-sm"
+                                      className="w-full border-2 border-bx-black bg-bx-white px-2 py-1.5 font-mono text-sm text-bx-black focus:border-bx-accent focus:outline-none"
                                       value={nwOpt?.regionScope ?? "all"}
                                       onChange={(e) =>
                                         setNetworkQuoteOptions((p) => ({
@@ -1013,12 +1008,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               {checked &&
                               !isNw &&
                               (media.priceOptions?.length ?? 0) > 0 ? (
-                                <div className="space-y-2 rounded-lg border border-navy/10 bg-slate-50 p-3 text-sm">
-                                  <label className="mb-1 block text-xs font-semibold text-navy">
-                                    {t("quote.priceOptionLabel")}
+                                <div className="space-y-3 border-2 border-bx-black bg-bx-off p-3 text-sm">
+                                  <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                                    [ {t("quote.priceOptionLabel")} ]
                                   </label>
                                   <select
-                                    className="w-full rounded-md border border-navy/15 bg-white px-2 py-1.5 text-sm"
+                                    className="w-full border-2 border-bx-black bg-bx-white px-2 py-1.5 font-mono text-sm text-bx-black focus:border-bx-accent focus:outline-none"
                                     value={poIdx}
                                     onChange={(e) => {
                                       const v = parseInt(e.target.value, 10);
@@ -1076,7 +1071,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   <div
                                     className={cn(
                                       MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
-                                      "hover:shadow-md peer-checked:border-gold peer-checked:ring-2 peer-checked:ring-gold/20",
+                                      "peer-checked:border-bx-accent",
                                     )}
                                   >
                                     <MediaCatalogThumbnail
@@ -1089,10 +1084,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     >
                                       <span
                                         className={cn(
-                                          "absolute right-1 top-1 z-20 flex size-7 items-center justify-center rounded-full border-2 bg-white/95 text-[10px] font-bold shadow-sm",
+                                          "absolute right-1 top-1 z-20 flex size-7 items-center justify-center border-2 text-[10px] font-bold",
                                           checked
-                                            ? "border-gold bg-gold text-navy"
-                                            : "border-navy/20",
+                                            ? "border-bx-accent bg-bx-accent text-bx-white"
+                                            : "border-bx-black bg-bx-white text-bx-black",
                                         )}
                                         aria-hidden
                                       >
@@ -1101,34 +1096,30 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     </MediaCatalogThumbnail>
                                     <div className="relative z-0 flex min-w-0 flex-1 flex-col justify-center gap-1 overflow-hidden sm:gap-1.5">
                                       <div className="flex min-w-0 flex-wrap items-center gap-1 sm:gap-1.5">
-                                        <Badge
-                                          variant="secondary"
-                                          className="max-w-full shrink bg-navy/5 px-1.5 py-0 text-[9px] text-navy sm:text-[10px]"
-                                        >
+                                        <span className="max-w-full shrink border-2 border-bx-black bg-bx-white px-1.5 py-0 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-bx-black sm:text-[10px]">
                                           {isKo
                                             ? (typeLabel?.ko ?? media.type)
                                             : (typeLabel?.en ?? media.type)}
-                                        </Badge>
+                                        </span>
                                         {popularIds.has(media.id) ? (
-                                          <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gold/90 px-1.5 py-0 text-[8px] font-bold text-navy sm:text-[9px]">
+                                          <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-bx-accent bg-bx-accent px-1.5 py-0 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-bx-white">
                                             <Flame className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
                                             {isKo ? "인기" : "Hot"}
                                           </span>
                                         ) : null}
                                       </div>
-                                      <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug text-navy sm:line-clamp-1 sm:text-sm sm:leading-relaxed">
+                                      <p className="line-clamp-2 min-w-0 break-words text-[13px] font-bold leading-snug tracking-tight text-bx-black sm:line-clamp-1 sm:text-sm">
                                         {isKo ? media.name : (media.nameEn || media.name)}
                                       </p>
-                                      <p className="flex min-w-0 items-start gap-0.5 text-[10px] leading-snug text-muted-foreground sm:items-center sm:text-[11px] sm:leading-relaxed">
+                                      <p className="flex min-w-0 items-start gap-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim sm:items-center sm:text-[11px]">
                                         <MapPin className="mt-0.5 h-2.5 w-2.5 shrink-0 sm:mt-0 sm:h-3 sm:w-3" />
                                         <span className="min-w-0 line-clamp-2 sm:line-clamp-1">
                                           {formatMediaLocationShort(media, isKo)}
                                         </span>
                                       </p>
-                                      <p className="min-w-0 break-words text-[13px] font-bold tabular-nums leading-tight text-navy sm:text-sm sm:leading-none">
+                                      <p className="min-w-0 break-words font-mono text-[13px] font-bold tabular-nums leading-tight text-bx-accent sm:text-sm sm:leading-none">
                                         {formatMediaPriceWonWithSymbol(displayPrice)}
-                                        <span className="text-[9px] font-normal text-muted-foreground sm:text-[10px]">
-                                          {" "}
+                                        <span className="ml-1 font-normal text-[9px] uppercase tracking-[0.18em] text-bx-gray-dim sm:text-[10px]">
                                           ·{" "}
                                           {tMedia(
                                             mediaPricePeriodTranslationKey(
@@ -1141,12 +1132,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   </div>
                                 </label>
                                 {checked && isNw ? (
-                                  <div className="space-y-2 rounded-lg border border-navy/10 bg-slate-50 p-3 text-sm">
+                                  <div className="space-y-3 border-2 border-bx-black bg-bx-off p-3 text-sm">
                                     <div>
-                                      <label className="mb-1 block text-xs font-semibold text-navy">
-                                        {t("quote.networkUnits")}
+                                      <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                                        [ {t("quote.networkUnits")} ]
                                       </label>
-                                      <Input
+                                      <input
                                         type="number"
                                         min={media.networkMinUnits ?? 1}
                                         max={media.networkTotalLocations ?? 99999}
@@ -1172,11 +1163,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                       />
                                     </div>
                                     <div>
-                                      <label className="mb-1 block text-xs font-semibold text-navy">
+                                      <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
                                         {t("quote.networkRegion")}
                                       </label>
                                       <select
-                                        className="w-full rounded-md border border-navy/15 bg-white px-2 py-1.5 text-sm"
+                                        className="w-full border-2 border-bx-black bg-bx-white px-2 py-1.5 font-mono text-sm text-bx-black focus:border-bx-accent focus:outline-none"
                                         value={nwOpt?.regionScope ?? "all"}
                                         onChange={(e) =>
                                           setNetworkQuoteOptions((p) => ({
@@ -1206,12 +1197,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 {checked &&
                                 !isNw &&
                                 (media.priceOptions?.length ?? 0) > 0 ? (
-                                  <div className="space-y-2 rounded-lg border border-navy/10 bg-slate-50 p-3 text-sm">
-                                    <label className="mb-1 block text-xs font-semibold text-navy">
-                                      {t("quote.priceOptionLabel")}
+                                  <div className="space-y-3 border-2 border-bx-black bg-bx-off p-3 text-sm">
+                                    <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                                      [ {t("quote.priceOptionLabel")} ]
                                     </label>
                                     <select
-                                      className="w-full rounded-md border border-navy/15 bg-white px-2 py-1.5 text-sm"
+                                      className="w-full border-2 border-bx-black bg-bx-white px-2 py-1.5 font-mono text-sm text-bx-black focus:border-bx-accent focus:outline-none"
                                       value={poIdxC}
                                       onChange={(e) => {
                                         const v = parseInt(e.target.value, 10);
@@ -1242,21 +1233,20 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       )}
 
                       {filteredCatalog.length > 0 && (
-                        <div className="mt-4 flex flex-col gap-2 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="mt-4 flex flex-col gap-2 border-t-2 border-bx-black pt-4 sm:flex-row sm:items-center sm:justify-between">
                           <div className="flex items-center justify-center gap-3">
-                            <Button
-                              type="button"
-                              variant="outline"
+                            <BtnBlock
+                              variant="secondary"
                               size="sm"
                               disabled={mediaPage <= 1}
                               onClick={() =>
                                 setMediaPage((p) => Math.max(1, p - 1))
                               }
                             >
-                              <ChevronLeft className="mr-1 h-3.5 w-3.5" />
+                              <ChevronLeft className="h-3.5 w-3.5" />
                               {t("media.pagePrev")}
-                            </Button>
-                            <span className="text-xs text-muted-foreground">
+                            </BtnBlock>
+                            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
                               {t("media.pageSummary", {
                                 from:
                                   filteredCatalog.length === 0
@@ -1269,9 +1259,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 total: filteredCatalog.length,
                               })}
                             </span>
-                            <Button
-                              type="button"
-                              variant="outline"
+                            <BtnBlock
+                              variant="secondary"
                               size="sm"
                               disabled={mediaPage >= mediaPageCount}
                               onClick={() =>
@@ -1281,8 +1270,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               }
                             >
                               {t("media.pageNext")}
-                              <ChevronRight className="ml-1 h-3.5 w-3.5" />
-                            </Button>
+                              <ChevronRight className="h-3.5 w-3.5" />
+                            </BtnBlock>
                           </div>
                         </div>
                       )}
@@ -1293,19 +1282,19 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
                   {step === 2 && (
                     <div className="space-y-6">
-                      <p className="text-xs text-muted-foreground">
-                        {t("quote.periodBudgetPdfHint")}
+                      <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                        {`// `}{t("quote.periodBudgetPdfHint")}
                       </p>
                       <div>
-                        <label className="mb-2 block text-sm font-semibold text-navy">
-                          {t("quote.period")}
+                        <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                          [ {t("quote.period")} ]
                         </label>
                         <select
                           value={period}
                           onChange={(e) =>
                             setPeriod(e.target.value as PeriodKey)
                           }
-                          className="w-full rounded-md border px-3 py-2 text-sm"
+                          className="h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black focus:border-bx-accent focus:outline-none"
                           aria-label={t("quote.period")}
                         >
                           <option value="1month">{t("quote.periods.1month")}</option>
@@ -1321,25 +1310,38 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   {step === 3 && (
                     <div className="space-y-6">
                       <div>
-                        <p className="mb-3 text-sm text-muted-foreground">
-                          {t("quote.templateDesc")}
+                        <p className="mb-4 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                          {`// `}{t("quote.templateDesc")}
                         </p>
-                        <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid gap-0 sm:grid-cols-2">
                           <button
                             type="button"
                             onClick={() => setTemplate("default")}
                             className={cn(
-                              "rounded-xl border-2 p-4 text-left transition-all",
+                              "-mt-[2px] -ml-[2px] border-2 p-5 text-left transition-colors",
                               template === "default"
-                                ? "border-gold bg-gold/5 ring-2 ring-gold/20"
-                                : "border-navy/10 hover:border-navy/25",
+                                ? "border-bx-accent bg-bx-accent text-bx-white"
+                                : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
                             )}
                           >
-                            <LayoutTemplate className="mb-2 h-8 w-8 text-navy" />
-                            <p className="font-bold text-navy">
+                            <LayoutTemplate
+                              className={cn(
+                                "mb-3 h-8 w-8",
+                                template === "default" ? "text-bx-white" : "text-bx-accent",
+                              )}
+                            />
+                            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em]">
+                              [ DEFAULT ]
+                            </p>
+                            <p className="mt-1 font-bold tracking-tight">
                               {t("quote.templateDefault")}
                             </p>
-                            <p className="mt-1 text-xs text-muted-foreground">
+                            <p
+                              className={cn(
+                                "mt-2 font-mono text-[11px] tracking-tight",
+                                template === "default" ? "text-bx-white/85" : "text-bx-gray-dim",
+                              )}
+                            >
                               {t("quote.templateDefaultDesc")}
                             </p>
                           </button>
@@ -1347,32 +1349,45 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             type="button"
                             onClick={() => setTemplate("premium")}
                             className={cn(
-                              "rounded-xl border-2 p-4 text-left transition-all",
+                              "-mt-[2px] -ml-[2px] border-2 p-5 text-left transition-colors",
                               template === "premium"
-                                ? "border-gold bg-gold/5 ring-2 ring-gold/20"
-                                : "border-navy/10 hover:border-navy/25",
+                                ? "border-bx-accent bg-bx-accent text-bx-white"
+                                : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
                             )}
                           >
-                            <Sparkles className="mb-2 h-8 w-8 text-gold-dark" />
-                            <p className="font-bold text-navy">
+                            <Sparkles
+                              className={cn(
+                                "mb-3 h-8 w-8",
+                                template === "premium" ? "text-bx-white" : "text-bx-accent",
+                              )}
+                            />
+                            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em]">
+                              [ PREMIUM ]
+                            </p>
+                            <p className="mt-1 font-bold tracking-tight">
                               {t("quote.templatePremium")}
                             </p>
-                            <p className="mt-1 text-xs text-muted-foreground">
+                            <p
+                              className={cn(
+                                "mt-2 font-mono text-[11px] tracking-tight",
+                                template === "premium" ? "text-bx-white/85" : "text-bx-gray-dim",
+                              )}
+                            >
                               {t("quote.templatePremiumDesc")}
                             </p>
                           </button>
                         </div>
                       </div>
                       <div>
-                        <label className="mb-2 block text-sm font-semibold text-navy">
-                          {t("quote.logoLabel")}
+                        <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                          [ {t("quote.logoLabel")} ]
                         </label>
-                        <p className="mb-2 text-xs text-muted-foreground">
-                          {t("quote.logoHint")}
+                        <p className="mb-3 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                          {`// `}{t("quote.logoHint")}
                         </p>
-                        <div className="flex flex-wrap items-center gap-3">
-                          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-navy/15 bg-white px-4 py-2 text-sm font-medium text-navy shadow-sm hover:bg-slate-50">
-                            <ImagePlus className="h-4 w-4 text-gold" />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <label className="inline-flex cursor-pointer items-center gap-2 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white">
+                            <ImagePlus className="h-4 w-4" />
                             {isKo ? "파일 선택" : "Choose file"}
                             <input
                               type="file"
@@ -1382,19 +1397,18 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             />
                           </label>
                           {logoDataUrl ? (
-                            <Button
-                              type="button"
-                              variant="outline"
+                            <BtnBlock
+                              variant="secondary"
                               size="sm"
                               onClick={() => setLogoDataUrl(null)}
                             >
-                              <Trash2 className="mr-1.5 h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                               {t("quote.logoRemove")}
-                            </Button>
+                            </BtnBlock>
                           ) : null}
                         </div>
                         {logoDataUrl ? (
-                          <div className="mt-4 inline-block rounded-lg border border-navy/10 bg-slate-50 p-3">
+                          <div className="mt-4 inline-block border-2 border-bx-black bg-bx-off p-3">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={logoDataUrl}
@@ -1410,14 +1424,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   {step === 4 && !submitted && (
                     <div className="space-y-6">
                       {selectedMedia.length > 0 ? (
-                        <div className="space-y-2">
-                          <h3 className="text-sm font-semibold text-navy">
+                        <div className="space-y-3">
+                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                            [ PDF PREVIEW ]
+                          </p>
+                          <h3 className="text-sm font-bold tracking-tight text-bx-black">
                             {t("quote.pdfPreviewTitle")}
                           </h3>
-                          <p className="text-xs text-muted-foreground">
-                            {t("quote.pdfPreviewHint")}
+                          <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                            {`// `}{t("quote.pdfPreviewHint")}
                           </p>
-                          <div className="overflow-x-auto rounded-xl border border-navy/10 bg-slate-100/90 p-4 md:p-6">
+                          <div className="overflow-x-auto border-2 border-bx-black bg-bx-off p-4 md:p-6">
                             <div className="mx-auto w-fit max-w-full">
                               <QuotePdfPreview
                                 ref={pdfPreviewRef}
@@ -1440,26 +1457,26 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </div>
                       ) : null}
 
-                      <div className="rounded-xl border border-navy/10 bg-slate-50/80 p-4 text-sm">
-                        <p className="font-semibold text-navy">
+                      <div className="border-2 border-bx-black bg-bx-off p-5 text-sm">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
                           {t("quote.reviewTitle")}
                         </p>
                         <ul className="mt-3 space-y-2 text-muted-foreground">
                           <li>
-                            <span className="font-medium text-navy">
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
                               {t("quote.reviewMediaCount")}:{" "}
                             </span>
                             {selectedMedia.length}
                             {isKo ? "건" : ""}
                           </li>
                           <li>
-                            <span className="font-medium text-navy">
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
                               {t("quote.period")}:{" "}
                             </span>
                             {periodLabel}
                           </li>
                           <li>
-                            <span className="font-medium text-navy">
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
                               {t("quote.budgetRange")}:{" "}
                             </span>
                             {budgetMinN != null || budgetMaxN != null ? (
@@ -1478,7 +1495,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             )}
                           </li>
                           <li>
-                            <span className="font-medium text-navy">
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
                               {t("quote.reviewTemplate")}:{" "}
                             </span>
                             {template === "premium"
@@ -1486,7 +1503,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               : t("quote.templateDefault")}
                           </li>
                           <li>
-                            <span className="font-medium text-navy">
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
                               {t("quote.reviewLogo")}:{" "}
                             </span>
                             {logoDataUrl
@@ -1497,47 +1514,48 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       </div>
 
                       <div className="flex flex-col gap-3 sm:flex-row">
-                        <Button
-                          type="button"
+                        <BtnBlock
+                          variant="dark"
+                          size="md"
                           onClick={handleDownloadPdf}
                           disabled={downloading || selectedMedia.length === 0}
-                          className="flex-1 bg-navy text-white hover:bg-navy/90"
+                          className="flex-1"
                         >
                           {downloading ? (
                             <>
-                              <Spinner className="mr-2 h-4 w-4" />
+                              <Spinner className="h-4 w-4" />
                               {t("quote.generatingPdf")}
                             </>
                           ) : (
                             <>
-                              <Download className="mr-2 h-4 w-4" />
+                              <Download className="h-4 w-4" />
                               {t("quote.downloadPdf")}
                             </>
                           )}
-                        </Button>
-                        <Button
-                          type="button"
+                        </BtnBlock>
+                        <BtnBlock
+                          variant="secondary"
+                          size="md"
                           onClick={handleCapture}
                           disabled={capturing || selectedMedia.length === 0}
-                          variant="outline"
-                          className="flex-1 border-navy/30 text-navy hover:bg-navy/5"
+                          className="flex-1"
                         >
                           {capturing ? (
-                            <Spinner className="mr-2 h-4 w-4" />
+                            <Spinner className="h-4 w-4" />
                           ) : (
-                            <Camera className="mr-2 h-4 w-4" />
+                            <Camera className="h-4 w-4" />
                           )}
                           {isKo ? "이미지 저장" : "Save as Image"}
-                        </Button>
+                        </BtnBlock>
                       </div>
 
-                      <div className="relative rounded-xl border border-gold/30 bg-gold/5 p-4">
-                        <div className="mb-2 flex items-center gap-2 font-semibold text-navy">
-                          <Mail className="h-4 w-4 text-gold-dark" />
-                          {t("quote.emailPdfTitle")}
+                      <div className="relative border-2 border-bx-accent bg-bx-white p-5">
+                        <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                          <Mail className="h-4 w-4" />
+                          [ {t("quote.emailPdfTitle")} ]
                         </div>
-                        <p className="mb-3 text-xs text-muted-foreground">
-                          {t("quote.emailPdfDesc")}
+                        <p className="mt-2 mb-3 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                          {`// `}{t("quote.emailPdfDesc")}
                         </p>
                         <div className="absolute -left-[9999px]" aria-hidden>
                           <input
@@ -1547,12 +1565,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             autoComplete="off"
                           />
                         </div>
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
                           <div className="flex-1">
                             <label className="sr-only" htmlFor="quote-pdf-email">
                               {t("quote.email")}
                             </label>
-                            <Input
+                            <input
                               id="quote-pdf-email"
                               type="email"
                               placeholder={t("quote.emailPlaceholder")}
@@ -1560,32 +1578,35 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               onChange={(e) =>
                                 updateField("email", e.target.value)
                               }
+                              className="h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
                             />
                           </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="border-navy/25 font-semibold text-navy"
+                          <BtnBlock
+                            variant="accent"
+                            size="md"
                             onClick={handleEmailPdf}
                             disabled={emailPdfLoading || selectedMedia.length === 0}
                           >
                             {emailPdfLoading ? (
                               <>
-                                <Spinner className="mr-2 h-4 w-4" />
+                                <Spinner className="h-4 w-4" />
                                 {t("quote.sendingPdf")}
                               </>
                             ) : (
                               <>
-                                <Send className="mr-2 h-4 w-4" />
+                                <Send className="h-4 w-4" />
                                 {t("quote.sendPdfEmail")}
                               </>
                             )}
-                          </Button>
+                          </BtnBlock>
                         </div>
                       </div>
 
-                      <div className="border-t border-navy/10 pt-6">
-                        <h3 className="mb-4 text-lg font-bold text-navy">
+                      <div className="border-t-2 border-bx-black pt-6">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                          [ GET QUOTE ]
+                        </p>
+                        <h3 className="mt-2 mb-5 text-lg font-bold tracking-tight text-bx-black">
                           {t("quote.getQuote")}
                         </h3>
                         <form
@@ -1614,81 +1635,89 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
                           <div className="grid gap-5 sm:grid-cols-2">
                             <div>
-                              <label className="mb-1.5 block text-sm font-medium text-navy">
-                                {t("quote.company")}
+                              <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                                [ {t("quote.company")} ]
                               </label>
-                              <Input
+                              <input
                                 placeholder={t("quote.companyPlaceholder")}
                                 value={form.company}
                                 onChange={(e) =>
                                   updateField("company", e.target.value)
                                 }
+                                className="h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
                               />
                             </div>
                             <div>
-                              <label className="mb-1.5 block text-sm font-medium text-navy">
-                                {t("quote.name")}{" "}
-                                <span className="text-red-500">*</span>
+                              <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                                [ {t("quote.name")} ] <span className="text-bx-accent">*</span>
                               </label>
-                              <Input
+                              <input
                                 placeholder={t("quote.namePlaceholder")}
                                 value={form.name}
                                 onChange={(e) =>
                                   updateField("name", e.target.value)
                                 }
-                                className={inputErrorClass("name")}
+                                className={cn(
+                                  "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none",
+                                  inputErrorClass("name"),
+                                )}
                               />
                               {fieldError("name")}
                             </div>
                             <div>
-                              <label className="mb-1.5 block text-sm font-medium text-navy">
-                                {t("quote.phone")}{" "}
-                                <span className="text-red-500">*</span>
+                              <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                                [ {t("quote.phone")} ] <span className="text-bx-accent">*</span>
                               </label>
-                              <Input
+                              <input
                                 placeholder={t("quote.phonePlaceholder")}
                                 value={form.phone}
                                 onChange={(e) =>
                                   updateField("phone", e.target.value)
                                 }
-                                className={inputErrorClass("phone")}
+                                className={cn(
+                                  "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none",
+                                  inputErrorClass("phone"),
+                                )}
                               />
                               {fieldError("phone")}
                             </div>
                             <div>
-                              <label className="mb-1.5 block text-sm font-medium text-navy">
-                                {t("quote.email")}
+                              <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                                [ {t("quote.email")} ]
                               </label>
-                              <Input
+                              <input
                                 type="email"
                                 placeholder={t("quote.emailPlaceholder")}
                                 value={form.email}
                                 onChange={(e) =>
                                   updateField("email", e.target.value)
                                 }
+                                className="h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
                               />
                             </div>
                           </div>
 
                           <div>
-                            <label className="mb-1.5 block text-sm font-medium text-navy">
-                              {t("quote.message")}
+                            <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                              [ {t("quote.message")} ]
                             </label>
-                            <Textarea
+                            <textarea
                               rows={4}
                               placeholder={t("quote.messagePlaceholder")}
                               value={form.message}
                               onChange={(e) =>
                                 updateField("message", e.target.value)
                               }
+                              className="w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
                             />
                           </div>
 
-                          <Button
+                          <BtnBlock
                             type="submit"
-                            className="w-full bg-gold font-semibold text-navy hover:bg-gold-dark"
+                            variant="accent"
                             size="lg"
                             disabled={loading}
+                            className="w-full"
                           >
                             {loading ? (
                               <>
@@ -1697,11 +1726,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               </>
                             ) : (
                               <>
-                                <Send className="mr-2 h-4 w-4" />
+                                <Send className="h-4 w-4" />
                                 {t("quote.submit")}
                               </>
                             )}
-                          </Button>
+                          </BtnBlock>
                         </form>
                       </div>
                     </div>
@@ -1709,78 +1738,82 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
                   {step === 4 && submitted ? (
                     <div className="flex flex-col items-center gap-4 py-12 text-center">
-                      <CheckCircle className="h-12 w-12 text-green-500" />
-                      <p className="text-lg font-semibold text-navy">
+                      <div className="flex h-14 w-14 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white">
+                        <CheckCircle className="h-8 w-8" />
+                      </div>
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ SUCCESS ]
+                      </p>
+                      <p className="text-lg font-bold tracking-tight text-bx-black">
                         {t("quote.successTitle")}
                       </p>
-                      <p className="max-w-md text-muted-foreground">
-                        {t("quote.successDesc")}
+                      <p className="max-w-md font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                        {`// `}{t("quote.successDesc")}
                       </p>
                     </div>
                   ) : null}
 
                   {step < 4 || (step === 4 && !submitted) ? (
                     !(step === 1 && selectedMedia.length > 0) ? (
-                      <div className="mt-8 flex flex-wrap justify-between gap-3 border-t border-navy/10 pt-6">
-                        <Button
-                          type="button"
-                          variant="floatingSecondary"
-                          size="floating"
+                      <div className="mt-8 flex flex-wrap justify-between gap-3 border-t-2 border-bx-black pt-6">
+                        <BtnBlock
+                          variant="secondary"
+                          size="md"
                           onClick={goPrev}
                           disabled={step === 1}
-                          className="h-11 rounded-xl border-0 md:h-11"
                         >
-                          <ChevronLeft className="mr-1 h-4 w-4" />
+                          <ChevronLeft className="h-4 w-4" />
                           {t("quote.prevStep")}
-                        </Button>
+                        </BtnBlock>
                         {step < 4 ? (
-                          <Button
-                            type="button"
-                            variant="floatingPrimary"
-                            size="floating"
+                          <BtnBlock
+                            variant="accent"
+                            size="md"
                             onClick={goNext}
-                            className="h-11 rounded-xl md:h-11"
                           >
                             {t("quote.nextStep")}
-                            <ChevronRight className="ml-1 h-4 w-4" />
-                          </Button>
+                            <ChevronRight className="h-4 w-4" />
+                          </BtnBlock>
                         ) : null}
                       </div>
                     ) : null
                   ) : null}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
             <div className="order-1">
-              <div className="space-y-6">
-                <Card className="border-gold/30 shadow-md">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2 text-base text-navy">
-                      <Calculator className="h-4 w-4 text-gold" />
-                      {t("quote.estimatedCost")}
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      {t("quote.estimatedCostDesc")}
+              <div className="space-y-0">
+                <div className="border-2 border-bx-accent bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      [ ESTIMATE ]
                     </p>
-                  </CardHeader>
-                  <CardContent className="space-y-4 text-sm">
+                    <h3 className="mt-2 flex items-center gap-2 text-base font-bold tracking-tight text-bx-black">
+                      <Calculator className="h-4 w-4 text-bx-accent" />
+                      {t("quote.estimatedCost")}
+                    </h3>
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                      {`// `}{t("quote.estimatedCostDesc")}
+                    </p>
+                  </div>
+                  <div className="space-y-4 p-5 text-sm">
                     <div>
-                      <div className="text-lg font-bold text-navy">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                        [ {t("quote.perMonth")} ]
+                      </p>
+                      <p className="mt-2 font-mono text-lg font-bold tabular-nums text-bx-black">
                         {isKo
                           ? `${monthlyCost.toLocaleString()}만원`
                           : `₩${(monthlyCost * 10_000).toLocaleString()}`}
-                        <span className="text-xs font-normal text-muted-foreground">
-                          {" "}{t("quote.perMonth")}
-                        </span>
-                      </div>
+                      </p>
                     </div>
-                    <div className="border-t pt-3">
+                    <div className="border-t-2 border-bx-black pt-3">
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <span className="font-semibold text-navy">
-                          {t("quote.total")}
+                        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                          [ {t("quote.total")} ]
                         </span>
-                        <span className="text-xl font-bold text-navy">
+                        <span className="font-mono text-xl font-bold tabular-nums text-bx-accent">
                           {isKo
                             ? `${totalCost.toLocaleString()}만원`
                             : `₩${(totalCost * 10_000).toLocaleString()}`}
@@ -1788,8 +1821,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       </div>
                     </div>
                     {step >= 3 ? (
-                      <p className="text-xs text-muted-foreground">
-                        {template === "premium"
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                        {`// `}{template === "premium"
                           ? t("quote.templatePremium")
                           : t("quote.templateDefault")}
                         {logoDataUrl
@@ -1797,8 +1830,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           : ""}
                       </p>
                     ) : null}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1816,36 +1849,32 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
             aria-atomic="true"
           >
             <span
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-base font-bold leading-none text-emerald-700"
+              className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-bx-accent bg-bx-accent text-base font-bold leading-none text-bx-white"
               aria-hidden
             >
               ✓
             </span>
-            <span className="min-w-0 truncate text-sm font-semibold tabular-nums text-navy sm:text-base">
+            <span className="min-w-0 truncate font-mono text-sm font-bold tabular-nums text-bx-black sm:text-base">
               {t("quote.floatingSelectedCount", {
                 count: displaySelectedForBar.length,
               })}
             </span>
           </div>
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:justify-end sm:gap-3">
-            <Button
-              type="button"
-              variant="floatingSecondary"
-              size="floating"
+            <BtnBlock
+              variant="secondary"
+              size="md"
               onClick={clearAllMediaSelection}
-              className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
             >
               {t("quote.floatingClearSelection")}
-            </Button>
-            <Button
-              type="button"
-              variant="floatingPrimary"
-              size="floating"
+            </BtnBlock>
+            <BtnBlock
+              variant="accent"
+              size="md"
               onClick={goNext}
-              className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
             >
               {t("quote.nextStep")}
-            </Button>
+            </BtnBlock>
           </div>
         </div>
       </FloatingSelectionBar>

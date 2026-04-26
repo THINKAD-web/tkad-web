@@ -38,25 +38,21 @@ export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Pro
       <button
         type="button"
         onClick={handleClick}
-        className={`
-          inline-flex items-center justify-center gap-2 h-11 px-5 rounded-lg
-          text-sm font-semibold transition-all duration-200
-          hover:-translate-y-px active:translate-y-0 active:scale-[0.98]
-          ${inCart
-            ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:shadow-sm"
-            : "bg-primary text-white hover:opacity-90 shadow-sm hover:shadow-md"
-          }
-        `}
+        className={`inline-flex h-11 items-center justify-center gap-2 border-2 px-5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors ${
+          inCart
+            ? "border-bx-accent bg-bx-accent text-bx-white hover:bg-bx-black hover:border-bx-black"
+            : "border-bx-black bg-bx-black text-bx-white hover:bg-bx-accent hover:border-bx-accent"
+        }`}
         aria-pressed={inCart}
       >
         {inCart ? (
           <>
-            <Check className="w-4 h-4" />
+            <Check className="h-4 w-4" />
             장바구니에 담김
           </>
         ) : (
           <>
-            <Plus className="w-4 h-4" />
+            <Plus className="h-4 w-4" />
             견적서에 담기
           </>
         )}
@@ -64,11 +60,11 @@ export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Pro
       {ids.length > 0 && (
         <Link
           href="/cart"
-          className="inline-flex items-center gap-1.5 h-11 px-3 sm:px-4 border border-border bg-card rounded-lg text-xs sm:text-sm font-medium text-foreground hover:bg-secondary/60 transition-colors"
+          className="inline-flex h-11 items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-off sm:px-4"
         >
-          <ShoppingCart className="w-4 h-4" />
+          <ShoppingCart className="h-4 w-4" />
           <span className="hidden sm:inline">장바구니</span>
-          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[10px] font-bold">
+          <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center bg-bx-accent px-1 text-[10px] font-bold text-bx-white">
             {ids.length}
           </span>
         </Link>

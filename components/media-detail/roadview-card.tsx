@@ -3,13 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ExternalLink, Eye, Loader2 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 type Props = {
   lat?: number | null;
@@ -153,56 +146,53 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
   if (lat == null || lng == null) return null;
 
   return (
-    <Card className="border-navy/10 shadow-sm">
-      <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
-        <div className="space-y-1">
-          <CardTitle className="flex items-center gap-2 text-navy">
-            <Eye className="h-5 w-5 text-gold" aria-hidden />
+    <section className="border-2 border-bx-black bg-bx-white">
+      <header className="flex flex-row items-start justify-between gap-3 border-b-2 border-bx-black px-5 py-4 sm:px-6">
+        <div className="min-w-0 space-y-1">
+          <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <Eye className="h-3.5 w-3.5" aria-hidden />
+            [ ROADVIEW ]
+          </p>
+          <h3 className="text-lg font-bold tracking-tight text-bx-black">
             {t("title")}
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">{t("desc")}</p>
+          </h3>
+          <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            {t("desc")}
+          </p>
         </div>
-        <Button
-          type="button"
-          asChild
-          variant="outline"
-          size="sm"
-          className="rounded-full border-navy/20"
+        <a
+          href={externalHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t("externalAria")}
+          className="inline-flex shrink-0 items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
         >
-          <a
-            href={externalHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={t("externalAria")}
-          >
-            <ExternalLink className="mr-1 h-3.5 w-3.5" aria-hidden />
-            {t("openExternal")}
-          </a>
-        </Button>
-      </CardHeader>
-      <CardContent>
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+          {t("openExternal")}
+        </a>
+      </header>
+      <div className="p-5 sm:p-6">
         {open ? (
-          <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-navy/10 bg-slate-100">
+          <div className="relative aspect-video w-full overflow-hidden border-2 border-bx-black bg-bx-off">
             <div ref={containerRef} className="h-full w-full" />
             {loading ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-100/85 text-sm font-semibold text-navy">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin text-gold" aria-hidden />
+              <div className="absolute inset-0 flex items-center justify-center bg-bx-off/90 font-mono text-sm font-bold uppercase tracking-[0.18em] text-bx-black">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin text-bx-accent" aria-hidden />
                 {t("loading")}
               </div>
             ) : null}
             {errorMsg ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/95 px-6 text-center text-sm text-navy">
-                <p className="font-semibold">{errorMsg}</p>
-                <Button asChild size="sm" variant="outline" className="rounded-full">
-                  <a
-                    href={externalHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="mr-1 h-3.5 w-3.5" aria-hidden />
-                    {t("openExternal")}
-                  </a>
-                </Button>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-bx-white px-6 text-center text-sm text-bx-black">
+                <p className="font-bold">{errorMsg}</p>
+                <a
+                  href={externalHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  {t("openExternal")}
+                </a>
               </div>
             ) : null}
           </div>
@@ -210,13 +200,13 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="flex aspect-video w-full items-center justify-center rounded-xl border-2 border-dashed border-navy/15 bg-slate-50 text-sm font-semibold text-navy transition hover:border-gold/40 hover:bg-gold/5"
+            className="flex aspect-video w-full items-center justify-center border-2 border-bx-black bg-bx-off font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
           >
-            <Eye className="mr-2 h-4 w-4 text-gold" aria-hidden />
+            <Eye className="mr-2 h-4 w-4" aria-hidden />
             {t("loadCta")}
           </button>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

@@ -78,15 +78,15 @@ export function MediaFavoriteButton({ mediaId, mediaName }: Props) {
       type="button"
       onClick={toggle}
       disabled={pending || loggedIn === null}
-      className={`inline-flex items-center justify-center w-11 h-11 rounded-lg border transition-all hover:-translate-y-px active:translate-y-0 active:scale-95 ${
+      className={`inline-flex h-11 w-11 items-center justify-center border-2 border-bx-black transition-colors disabled:opacity-50 ${
         favorited
-          ? "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
-          : "bg-card border-border text-muted-foreground hover:text-rose-500 hover:border-rose-200"
+          ? "bg-bx-accent text-bx-white"
+          : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
       }`}
       aria-label={favorited ? "관심 매체에서 제거" : "관심 매체에 담기"}
       aria-pressed={favorited ?? false}
     >
-      <Heart className="w-4 h-4" fill={favorited ? "currentColor" : "none"} />
+      <Heart className="h-4 w-4" fill={favorited ? "currentColor" : "none"} />
     </button>
   );
 }

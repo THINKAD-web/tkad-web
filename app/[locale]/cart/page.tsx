@@ -134,10 +134,24 @@ export default function CartPage() {
     toast.warning(name ? `${name}이(가) 장바구니에서 제거되었습니다.` : "장바구니에서 제거되었습니다.");
   }
 
+  const inputCls =
+    "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+  const labelCls =
+    "mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent";
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
-      <h1 className="text-xl sm:text-2xl font-bold text-primary mb-1">견적서 요청</h1>
-      <p className="text-sm text-muted-foreground mb-6">선택한 매체로 30분 안에 PDF 견적서를 받아보세요</p>
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <header className="mb-6 border-b-2 border-bx-black pb-5">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ CART / QUOTE REQUEST ]
+        </p>
+        <h1 className="mt-2 text-xl font-bold tracking-tight text-bx-black sm:text-3xl">
+          견적서 요청
+        </h1>
+        <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+          {`// `}선택한 매체로 30분 안에 PDF 견적서를 받아보세요
+        </p>
+      </header>
 
       {ids.length === 0 ? (
         <EmptyState
@@ -147,155 +161,160 @@ export default function CartPage() {
           action={
             <Link
               href="/media/map"
-              className="inline-block px-4 py-2 bg-primary text-white rounded-lg text-sm"
+              className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
             >
               매체 탐색하러 가기
             </Link>
           }
         />
       ) : (
-        <div className="grid md:grid-cols-[1fr_360px] gap-6">
+        <div className="grid gap-6 md:grid-cols-[1fr_360px]">
           <div className="space-y-3">
-            <h2 className="text-sm font-medium text-gray-500">
-              선택한 매체 · {items.length}개
-            </h2>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ SELECTED / {items.length} ]
+            </p>
             {loading && <Spinner size="sm" label="불러오는 중…" />}
-            <ul className="space-y-2">
+            <ul className="space-y-0">
               {items.map((it) => (
                 <li
                   key={it.id}
-                  className="flex items-center gap-3 bg-card border border-border/60 rounded-xl p-3 shadow-sm"
+                  className="-mt-[2px] flex items-center gap-3 border-2 border-bx-black bg-bx-white p-3"
                 >
                   {it.image ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={it.image}
                       alt={it.name}
-                      className="w-16 h-16 object-cover rounded-md flex-shrink-0"
+                      className="h-16 w-16 flex-shrink-0 border-2 border-bx-black object-cover"
                     />
                   ) : (
-                    <div className="w-16 h-16 bg-secondary rounded-md flex-shrink-0" />
+                    <div className="h-16 w-16 flex-shrink-0 border-2 border-bx-black bg-bx-off" />
                   )}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{it.name}</div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {it.region} · {it.type}
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold tracking-tight text-bx-black">{it.name}</div>
+                    <div className="mt-1 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                      {`// `}{it.region} · {it.type}
                     </div>
-                    <div className="text-sm font-semibold text-primary mt-0.5">
+                    <div className="mt-1 font-mono text-sm font-bold tabular-nums text-bx-accent">
                       {formatKRW(it.price)}
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemove(it.id, it.name)}
-                    className="text-xs text-red-500 hover:underline px-2"
+                    className="border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-accent hover:text-bx-white hover:border-bx-accent"
                   >
                     제거
                   </button>
                 </li>
               ))}
             </ul>
-            <div className="flex justify-between items-center pt-4 border-t border-border/60">
-              <span className="text-sm text-muted-foreground">합계</span>
-              <span className="text-lg font-bold text-primary tabular-nums">{formatKRW(total)}</span>
+            <div className="flex items-center justify-between border-t-2 border-bx-black pt-4">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ TOTAL ]
+              </span>
+              <span className="font-mono text-lg font-bold tabular-nums text-bx-accent">{formatKRW(total)}</span>
             </div>
           </div>
 
-          <aside className="bg-card border border-border/60 rounded-2xl shadow-sm p-5 h-fit md:sticky md:top-24">
-            <h2 className="text-base font-semibold mb-4 text-foreground">캠페인 정보</h2>
-            <form onSubmit={handleSubmit} className="space-y-3">
+          <aside className="h-fit border-2 border-bx-accent bg-bx-white p-5 md:sticky md:top-24">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ CAMPAIGN INFO ]
+            </p>
+            <h2 className="mt-2 mb-5 text-base font-bold tracking-tight text-bx-black">캠페인 정보</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium mb-1">담당자 이름 *</label>
+                <label className={labelCls}>[ 담당자 이름 * ]</label>
                 <input
                   type="text"
                   required
                   maxLength={40}
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
-                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1">이메일 *</label>
+                <label className={labelCls}>[ 이메일 * ]</label>
                 <input
                   type="email"
                   required
                   value={clientEmail}
                   onChange={(e) => setClientEmail(e.target.value)}
-                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1">회사 (선택)</label>
+                <label className={labelCls}>[ 회사 (선택) ]</label>
                 <input
                   type="text"
                   maxLength={80}
                   value={clientCompany}
                   onChange={(e) => setClientCompany(e.target.value)}
-                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1">연락처 (선택)</label>
+                <label className={labelCls}>[ 연락처 (선택) ]</label>
                 <input
                   type="tel"
                   maxLength={20}
                   value={clientPhone}
                   onChange={(e) => setClientPhone(e.target.value)}
-                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1">희망 기간 *</label>
+                <label className={labelCls}>[ 희망 기간 * ]</label>
                 <input
                   type="text"
                   required
                   value={period}
                   onChange={(e) => setPeriod(e.target.value)}
-                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  className={inputCls}
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium mb-1">시작일</label>
+                  <label className={labelCls}>[ 시작일 ]</label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    className={inputCls}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium mb-1">종료일</label>
+                  <label className={labelCls}>[ 종료일 ]</label>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    className={inputCls}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1">예산 (원)</label>
+                <label className={labelCls}>[ 예산 (원) ]</label>
                 <input
                   type="number"
                   min="0"
                   value={budgetMax}
                   onChange={(e) => setBudgetMax(e.target.value)}
-                  className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  className={inputCls}
                 />
               </div>
 
               {error && (
-                <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-md p-2">
-                  {error}
+                <div className="border-2 border-bx-accent bg-bx-white p-3 font-mono text-[11px] tracking-tight text-bx-accent">
+                  {`// `}{error}
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={submitting || items.length === 0}
-                className="w-full py-2.5 bg-primary text-white rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex w-full items-center justify-center gap-2 border-2 border-bx-accent bg-bx-accent px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:opacity-50"
               >
                 {submitting && <Spinner size="sm" />}
                 {submitting ? "생성 중…" : "견적서 생성"}

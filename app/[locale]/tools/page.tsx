@@ -3,16 +3,7 @@
 import { useLocale } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import {
   ArrowRight,
   BadgeCheck,
@@ -76,24 +67,17 @@ const REGION_BAR_VALUES: { key: RegionKey; valueK: number }[] = [
 ];
 
 const TYPE_DISTRIBUTION = [
-  { typeKey: "digital" as const, pct: 38, color: "from-sky-500 to-blue-600" },
-  { typeKey: "billboard" as const, pct: 28, color: "from-amber-500 to-orange-600" },
-  { typeKey: "subway" as const, pct: 22, color: "from-violet-500 to-purple-600" },
-  { typeKey: "bus" as const, pct: 12, color: "from-emerald-500 to-teal-600" },
-];
-
-const CARD_GRADIENTS = [
-  "from-indigo-500/15 via-purple-500/10 to-fuchsia-500/15",
-  "from-cyan-500/15 via-sky-500/10 to-blue-500/15",
-  "from-amber-500/15 via-orange-500/10 to-rose-500/10",
-  "from-emerald-500/15 via-teal-500/10 to-cyan-500/10",
-  "from-violet-500/15 via-indigo-500/10 to-blue-500/15",
+  { typeKey: "digital" as const, pct: 38, color: "bg-bx-accent" },
+  { typeKey: "billboard" as const, pct: 28, color: "bg-bx-black" },
+  { typeKey: "subway" as const, pct: 22, color: "bg-bx-gray-dim" },
+  { typeKey: "bus" as const, pct: 12, color: "bg-bx-off" },
 ];
 
 function conicGradientForDonut(): string {
   let acc = 0;
   const stops: string[] = [];
-  const colors = ["#0ea5e9", "#f59e0b", "#8b5cf6", "#10b981"];
+  // bx-accent (#ff4d00), bx-black (#000), gray-dim (#6b6b6b), bx-off (#f5f5f0)
+  const colors = ["#ff4d00", "#000000", "#6b6b6b", "#f5f5f0"];
   TYPE_DISTRIBUTION.forEach((seg, i) => {
     const start = acc;
     acc += seg.pct;
@@ -101,6 +85,9 @@ function conicGradientForDonut(): string {
   });
   return `conic-gradient(${stops.join(", ")})`;
 }
+
+const inputCls =
+  "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
 
 export default function ToolsPage() {
   const locale = useLocale();
@@ -157,65 +144,62 @@ export default function ToolsPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-navy py-28">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gold/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl" />
+      <section className="relative overflow-hidden bg-bx-black py-24">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-bold text-gold backdrop-blur">
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+                {`// 18 / Tools`}
+              </p>
+              <div className="mt-3 inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
                 <Zap className="h-3.5 w-3.5" />
-                {isKo ? "프리뷰" : "Preview"}
-                <Lock className="h-3 w-3 text-white/60" />
+                {isKo ? "PREVIEW" : "PREVIEW"}
+                <Lock className="h-3 w-3" />
               </div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+              <h1 className="mt-4 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
                 {isKo ? "미디어 플래닝 툴" : "Media Planning Tool"}
               </h1>
-              <p className="mt-4 text-lg text-slate-300">
+              <p className="mt-5 font-mono text-sm leading-relaxed tracking-tight text-bx-white/75 sm:text-base">
                 {isKo
                   ? "지역·매체 유형·노출 규모를 한 화면에서 비교하고, 캠페인에 맞는 추천 조합을 빠르게 탐색하세요. 전체 분석·예약 연동은 정식 버전에서 제공됩니다."
                   : "Compare region, format, and reach in one view and explore recommended mixes for your campaign. Full analytics and booking connect in the production release."}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button
-                type="button"
-                onClick={openModal}
-                className="rounded-full bg-gold px-8 font-bold text-navy shadow-lg shadow-gold/25 hover:bg-gold-dark"
-              >
+              <BtnBlock variant="accent" size="lg" onClick={openModal}>
                 {isKo ? "전체 기능 이용하기" : "Use full features"}
                 <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Link href="/media">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full border-white/25 bg-white/5 text-white hover:bg-white/10 hover:text-white"
-                >
-                  <Monitor className="h-4 w-4" />
-                  {isKo ? "매체 카탈로그" : "Media catalog"}
-                </Button>
+              </BtnBlock>
+              <Link
+                href="/media"
+                className="inline-flex items-center gap-2 border-2 border-bx-white bg-transparent px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-white transition-colors hover:bg-bx-white hover:text-bx-black"
+              >
+                <Monitor className="h-4 w-4" />
+                {isKo ? "매체 카탈로그" : "Media catalog"}
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-b bg-gradient-to-b from-slate-50 to-white py-28">
+      <section className="bg-bx-white py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-navy sm:text-3xl">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ SIMULATION ]
+              </p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
                 {isKo ? "추천 매체 시뮬레이션" : "Recommended media simulation"}
               </h2>
-              <p className="mt-2 max-w-xl text-muted-foreground">
-                {isKo
+              <p className="mt-2 max-w-xl font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                {`// `}{isKo
                   ? "지역을 선택하면 해당 권역 기준 샘플 추천이 표시됩니다."
                   : "Pick a region to see sample recommendations for that area."}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-gold-dark" />
+              <MapPin className="h-5 w-5 text-bx-accent" />
               <label htmlFor="tools-region" className="sr-only">
                 {isKo ? "지역" : "Region"}
               </label>
@@ -223,7 +207,7 @@ export default function ToolsPage() {
                 id="tools-region"
                 value={region}
                 onChange={(e) => setRegion(e.target.value as RegionKey)}
-                className="min-w-[180px] rounded-xl border border-navy/10 bg-white px-4 py-2.5 text-sm font-semibold text-navy shadow-sm outline-none ring-gold/30 focus:ring-2"
+                className="min-w-[180px] border-2 border-bx-black bg-bx-white px-4 py-2.5 font-mono text-sm font-bold text-bx-black focus:border-bx-accent focus:outline-none"
               >
                 {regionOptions.map((r) => (
                   <option key={r.value} value={r.value}>
@@ -234,171 +218,169 @@ export default function ToolsPage() {
             </div>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            {items.map((item, i) => (
-              <Card
+          <div className="grid gap-0 sm:grid-cols-2 xl:grid-cols-4">
+            {items.map((item) => (
+              <article
                 key={`${region}-${item.nameKo}`}
-                className={`border-0 bg-gradient-to-br ${CARD_GRADIENTS[i % CARD_GRADIENTS.length]} shadow-lg`}
+                className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white"
               >
-                <CardHeader className="pb-2">
+                <header className="border-b-2 border-bx-black p-5">
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-lg leading-snug text-navy">
+                    <h3 className="text-lg font-bold leading-snug tracking-tight text-bx-black">
                       {isKo ? item.nameKo : item.nameEn}
-                    </CardTitle>
-                    <div className="flex shrink-0 items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                    </h3>
+                    <div className="flex shrink-0 items-center gap-1 border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
                       <BadgeCheck className="h-3 w-3" />
                       Verified
                     </div>
                   </div>
-                  <CardDescription className="text-navy/60">
-                    <Badge
-                      variant="secondary"
-                      className="mt-1 border-0 bg-navy/10 font-semibold text-navy"
-                    >
-                      {TYPE_LABELS[item.typeKey][isKo ? "ko" : "en"]}
-                    </Badge>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-0">
-                  <div className="grid grid-cols-2 gap-3 rounded-xl bg-white/60 p-3 backdrop-blur-sm">
+                  <span className="mt-3 inline-flex border-2 border-bx-black bg-bx-off px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
+                    {TYPE_LABELS[item.typeKey][isKo ? "ko" : "en"]}
+                  </span>
+                </header>
+                <div className="space-y-4 p-5">
+                  <div className="grid grid-cols-2 gap-3 border-2 border-bx-black bg-bx-off p-3">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-navy/50">
-                        {isKo ? "일 노출" : "Daily reach"}
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ {isKo ? "일 노출" : "DAILY"} ]
                       </p>
-                      <p className="text-lg font-extrabold text-navy">
+                      <p className="mt-1 font-mono text-lg font-bold tabular-nums text-bx-black">
                         {item.exposureK}K
-                        <span className="text-xs font-semibold text-navy/50">
+                        <span className="ml-1 text-[10px] font-bold tracking-tight text-bx-gray-dim">
                           {isKo ? "/일" : "/day"}
                         </span>
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-navy/50">
-                        ROI
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ ROI ]
                       </p>
-                      <p className="flex items-center gap-1 text-lg font-extrabold text-gold-dark">
+                      <p className="mt-1 flex items-center gap-1 font-mono text-lg font-bold tabular-nums text-bx-accent">
                         <TrendingUp className="h-4 w-4" />
                         {item.roi}x
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-navy py-28">
+      <section className="bg-bx-black py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold/20 text-gold">
+            <div className="flex h-12 w-12 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white">
               <BarChart3 className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ DASHBOARD ]
+              </p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-bx-white sm:text-3xl">
                 {isKo ? "인사이트 대시보드 (샘플)" : "Insight dashboard (sample)"}
               </h2>
-              <p className="text-slate-400">
-                {isKo ? "정식 툴에서는 실데이터와 필터가 연결됩니다." : "Production ties live data and filters here."}
+              <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-white/65">
+                {`// `}{isKo ? "정식 툴에서는 실데이터와 필터가 연결됩니다." : "Production ties live data and filters here."}
               </p>
             </div>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-5">
-            <Card className="border-0 bg-white/5 shadow-lg shadow-black/20 backdrop-blur lg:col-span-3">
-              <CardHeader>
-                <CardTitle className="text-white">
+          <div className="grid gap-0 lg:grid-cols-5">
+            <article className="-ml-[2px] border-2 border-bx-accent bg-bx-black lg:col-span-3">
+              <header className="border-b-2 border-bx-accent p-5">
+                <h3 className="font-bold tracking-tight text-bx-white">
                   {isKo ? "지역별 일일 노출수" : "Regional daily exposures"}
-                </CardTitle>
-                <CardDescription className="text-slate-400">
-                  {isKo ? "추정 일간 임프레션 (천 단위)" : "Estimated daily impressions (thousands)"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex h-56 items-end justify-between gap-3 border-b border-white/10 pb-2 pt-4 sm:gap-6">
+                </h3>
+                <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-white/65">
+                  {`// `}{isKo ? "추정 일간 임프레션 (천 단위)" : "Estimated daily impressions (thousands)"}
+                </p>
+              </header>
+              <div className="p-5">
+                <div className="flex h-56 items-end justify-between gap-3 border-b-2 border-bx-accent pb-2 pt-4 sm:gap-6">
                   {REGION_BAR_VALUES.map((row) => {
                     const px = Math.max(28, Math.round((row.valueK / maxBar) * barMaxPx));
                     const label = regionOptions.find((o) => o.value === row.key);
                     return (
                       <div key={row.key} className="flex flex-1 flex-col items-center gap-3">
                         <div
-                          className="w-full max-w-[4.5rem] rounded-t-xl bg-gradient-to-t from-gold-dark via-gold to-amber-200 shadow-lg shadow-gold/20 transition-all"
+                          className="w-full max-w-[4.5rem] border-2 border-bx-accent bg-bx-accent"
                           style={{ height: `${px}px` }}
                           title={`${row.valueK}K`}
                         />
-                        <span className="text-center text-xs font-semibold text-slate-300">
+                        <span className="text-center font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
                           {isKo ? label?.labelKo : label?.labelEn}
                         </span>
-                        <span className="text-sm font-bold text-gold">{row.valueK}K</span>
+                        <span className="font-mono text-sm font-bold tabular-nums text-bx-accent">{row.valueK}K</span>
                       </div>
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </article>
 
-            <Card className="border-0 bg-white/5 shadow-lg shadow-black/20 backdrop-blur lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-white">
+            <article className="-ml-[2px] border-2 border-bx-accent bg-bx-black lg:col-span-2">
+              <header className="border-b-2 border-bx-accent p-5">
+                <h3 className="font-bold tracking-tight text-bx-white">
                   {isKo ? "매체 유형 비중" : "Format mix"}
-                </CardTitle>
-                <CardDescription className="text-slate-400">
-                  {isKo ? "캠페인 샘플 분포" : "Sample campaign split"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center gap-8 sm:flex-row sm:justify-center">
+                </h3>
+                <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-white/65">
+                  {`// `}{isKo ? "캠페인 샘플 분포" : "Sample campaign split"}
+                </p>
+              </header>
+              <div className="flex flex-col items-center gap-6 p-5 sm:flex-row sm:justify-center">
                 <div
-                  className="relative h-44 w-44 shrink-0 rounded-full p-1 shadow-2xl shadow-black/40"
+                  className="relative h-44 w-44 shrink-0 border-2 border-bx-accent p-1"
                   style={{ background: conicGradientForDonut() }}
                 >
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-navy">
+                  <div className="flex h-full w-full items-center justify-center bg-bx-black">
                     <div className="text-center">
-                      <p className="text-2xl font-black text-white">100%</p>
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-                        {isKo ? "믹스" : "Mix"}
+                      <p className="font-mono text-2xl font-bold tabular-nums text-bx-accent">100%</p>
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white/65">
+                        {isKo ? "MIX" : "MIX"}
                       </p>
                     </div>
                   </div>
                 </div>
                 <ul className="w-full max-w-xs space-y-3">
                   {TYPE_DISTRIBUTION.map((seg) => (
-                    <li key={seg.typeKey} className="flex items-center justify-between gap-3 text-sm">
-                      <span className="flex items-center gap-2 text-slate-300">
+                    <li key={seg.typeKey} className="flex items-center justify-between gap-3 font-mono text-sm">
+                      <span className="flex items-center gap-2 text-bx-white">
                         <span
-                          className={`h-2.5 w-2.5 rounded-full bg-gradient-to-r ${seg.color}`}
+                          className={`h-3 w-3 border-2 border-bx-accent ${seg.color}`}
                         />
                         {TYPE_LABELS[seg.typeKey][isKo ? "ko" : "en"]}
                       </span>
-                      <span className="font-bold text-gold">{seg.pct}%</span>
+                      <span className="font-bold tabular-nums text-bx-accent">{seg.pct}%</span>
                     </li>
                   ))}
                 </ul>
-              </CardContent>
-            </Card>
+              </div>
+            </article>
           </div>
         </div>
       </section>
 
-      <section className="py-28">
+      <section className="bg-bx-off py-20 sm:py-24">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-navy sm:text-3xl">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ NEXT STEP ]
+          </p>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
             {isKo ? "캠페인에 맞는 플랜이 필요하신가요?" : "Need a plan that fits your campaign?"}
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            {isKo
+          <p className="mt-3 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+            {`// `}{isKo
               ? "담당 컨설턴트가 미디어 믹스와 견적을 정리해 드립니다."
               : "Our team will help structure your media mix and estimates."}
           </p>
-          <Button
-            type="button"
-            onClick={openModal}
-            size="lg"
-            className="mt-8 rounded-full bg-gold px-10 font-bold text-navy shadow-lg shadow-gold/25 hover:bg-gold-dark"
-          >
-            {isKo ? "전체 기능 이용하기" : "Use full features"}
-            <ArrowRight className="h-5 w-5" />
-          </Button>
+          <div className="mt-8 inline-flex">
+            <BtnBlock variant="accent" size="lg" onClick={openModal}>
+              {isKo ? "전체 기능 이용하기" : "Use full features"}
+              <ArrowRight className="h-5 w-5" />
+            </BtnBlock>
+          </div>
         </div>
       </section>
 
@@ -409,72 +391,77 @@ export default function ToolsPage() {
         ariaLabel={isKo ? "도입 상담 요청" : "Request a consultation"}
         className="max-w-md"
       >
-        <div className="p-6">
+        <div className="border-2 border-bx-black bg-bx-white p-6">
           {!leadSubmitted ? (
             <>
-              <h3 className="pr-10 text-xl font-bold text-navy">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ CONSULTATION ]
+              </p>
+              <h3 className="mt-2 pr-10 text-xl font-bold tracking-tight text-bx-black">
                 {isKo ? "도입 상담 요청" : "Request a consultation"}
               </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {isKo
+              <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                {`// `}{isKo
                   ? "아래 정보를 남겨 주시면 연락드리겠습니다."
                   : "Leave your details and we will reach out."}
               </p>
               <form onSubmit={handleLeadSubmit} className="mt-6 space-y-4">
                 <div>
-                  <label htmlFor="lead-company" className="mb-1.5 block text-xs font-bold text-navy">
-                    {isKo ? "회사명" : "Company"}
+                  <label htmlFor="lead-company" className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ {isKo ? "회사명" : "Company"} ]
                   </label>
-                  <Input
+                  <input
                     id="lead-company"
                     required
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    className="rounded-xl border-navy/15"
+                    className={inputCls}
                   />
                 </div>
                 <div>
-                  <label htmlFor="lead-name" className="mb-1.5 block text-xs font-bold text-navy">
-                    {isKo ? "이름" : "Name"}
+                  <label htmlFor="lead-name" className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ {isKo ? "이름" : "Name"} ]
                   </label>
-                  <Input
+                  <input
                     id="lead-name"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="rounded-xl border-navy/15"
+                    className={inputCls}
                   />
                 </div>
                 <div>
-                  <label htmlFor="lead-email" className="mb-1.5 block text-xs font-bold text-navy">
-                    {isKo ? "이메일" : "Email"}
+                  <label htmlFor="lead-email" className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ {isKo ? "이메일" : "Email"} ]
                   </label>
-                  <Input
+                  <input
                     id="lead-email"
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-xl border-navy/15"
+                    className={inputCls}
                   />
                 </div>
                 <div>
-                  <label htmlFor="lead-phone" className="mb-1.5 block text-xs font-bold text-navy">
-                    {isKo ? "전화번호" : "Phone"}
+                  <label htmlFor="lead-phone" className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ {isKo ? "전화번호" : "Phone"} ]
                   </label>
-                  <Input
+                  <input
                     id="lead-phone"
                     type="tel"
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="rounded-xl border-navy/15"
+                    className={inputCls}
                   />
                 </div>
-                <Button
+                <BtnBlock
                   type="submit"
+                  variant="accent"
+                  size="lg"
                   disabled={leadLoading}
-                  className="mt-2 w-full rounded-xl bg-gold font-bold text-navy hover:bg-gold-dark"
+                  className="mt-2 w-full"
                 >
                   {leadLoading ? (
                     <>
@@ -487,25 +474,25 @@ export default function ToolsPage() {
                       {isKo ? "제출하기" : "Submit"}
                     </>
                   )}
-                </Button>
+                </BtnBlock>
               </form>
             </>
           ) : (
             <div className="py-8 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gold/15 ring-2 ring-gold/30">
-                <CheckCircle className="h-8 w-8 text-gold-dark" />
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white">
+                <CheckCircle className="h-8 w-8" />
               </div>
-              <p className="text-lg font-bold text-navy">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ SUBMITTED ]
+              </p>
+              <p className="mt-2 text-lg font-bold tracking-tight text-bx-black">
                 {isKo ? "담당자가 24시간 내 연락드립니다" : "We will contact you within 24 hours"}
               </p>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-6 rounded-xl border-navy/20 text-navy"
-                onClick={closeModal}
-              >
-                {isKo ? "닫기" : "Close"}
-              </Button>
+              <div className="mt-6 inline-flex">
+                <BtnBlock variant="secondary" size="md" onClick={closeModal}>
+                  {isKo ? "닫기" : "Close"}
+                </BtnBlock>
+              </div>
             </div>
           )}
         </div>

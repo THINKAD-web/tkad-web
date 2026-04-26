@@ -1,16 +1,6 @@
 import dynamic from "next/dynamic";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-// HeroKenBurns 는 아래 ScrollAnimate 정의 이후에 const 로 선언됨
 import { type MediaItem } from "@/lib/media-data";
 import {
   fetchHomeFeaturedMedia,
@@ -19,8 +9,6 @@ import {
 import {
   ArrowRight,
   BarChart3,
-  BadgeCheck,
-  CheckCircle,
   ChevronDown,
   Eye,
   FileCheck,
@@ -28,14 +16,14 @@ import {
   Camera,
   Database,
   ClipboardCheck,
-  Trophy,
-  PhoneCall,
 } from "lucide-react";
 
 import { ProcessStepImage } from "@/components/process-step-image";
 import { TestimonialsCarousel } from "@/components/testimonials-carousel";
 import { HomeMediaCarousel } from "@/components/home-media-carousel";
 import { testimonials } from "@/data/testimonials";
+import { Link } from "@/i18n/navigation";
+import { BtnBlock, SectionHead } from "@/components/brutalist";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 /**
@@ -46,7 +34,7 @@ const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
  */
 const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
   loading: () => (
-    <div aria-hidden className="absolute inset-0 z-0 bg-navy" />
+    <div aria-hidden className="absolute inset-0 z-0 bg-bx-black" />
   ),
 });
 
@@ -62,7 +50,6 @@ export default async function HomePage({ params }: Props) {
    * 추천 매체: Prisma `isFeatured`·`featuredOrder` (관리자에서 지정).
    * 인기 매체: Prisma `isPopular`·`popularOrder` (관리자에서 별도 지정).
    */
-  /** 캐러셀로 좌우 스크롤 — 충분한 아이템 확보 */
   const [featuredCatalog, popularCatalog] = await Promise.all([
     fetchHomeFeaturedMedia(8),
     fetchHomePopularMedia(12),
@@ -100,23 +87,23 @@ function HomeContent({
   return (
     <>
       {/* Hero */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bx-black">
         {/* Ken Burns 배경 — 내부에서 가독성 그라디언트/accent 오버레이까지 함께 적용 */}
         <HeroKenBurns />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
-          <div className="hero-fade-in hero-fade-in-seq-0 mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
+          <div className="hero-fade-in hero-fade-in-seq-0 mb-8 inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-black/60 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent backdrop-blur-sm">
+            <span className="h-1.5 w-1.5 bg-bx-accent" />
             {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
           </div>
 
-          <h1 className="text-5xl leading-[1.1] font-extrabold tracking-tight text-white lg:text-7xl">
+          <h1 className="text-5xl leading-[1.05] font-extrabold tracking-tight text-bx-white lg:text-7xl">
             {isKo ? (
               <>
                 <span className="hero-fade-in hero-fade-in-seq-1 block">
                   생각하는 광고회사
                 </span>
-                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">
+                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block text-bx-accent">
                   싱커드
                 </span>
               </>
@@ -125,64 +112,51 @@ function HomeContent({
                 <span className="hero-fade-in hero-fade-in-seq-1 block">
                   The Thinking Ad Agency
                 </span>
-                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">
+                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block text-bx-accent">
                   THINKAD
                 </span>
               </>
             )}
           </h1>
 
-          <p className="hero-fade-in hero-fade-in-seq-3 mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300/90 sm:text-lg lg:text-xl">
+          <p className="hero-fade-in hero-fade-in-seq-3 mx-auto mt-8 max-w-2xl text-base leading-relaxed text-bx-white/85 sm:text-lg">
             {t("hero.subtitle")}
           </p>
 
-          <p className="hero-fade-in hero-fade-in-seq-4 mx-auto mt-3 flex items-center justify-center gap-2 text-base text-gold/80 font-medium">
-            <BadgeCheck className="h-5 w-5 text-gold" />
+          <p className="hero-fade-in hero-fade-in-seq-4 mx-auto mt-4 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            {`// `}
             {isKo
               ? "싱커드가 직접 검증하고 관리하는 매체만"
-              : "Only media personally verified and managed by THINKAD"}
+              : "Only media verified and managed by THINKAD"}
           </p>
 
           <div className="hero-fade-in hero-fade-in-seq-5 mx-auto mt-10 flex w-full max-w-md flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
-            <Link href="/contact" className="w-full sm:w-auto">
-              <Button
-                variant="cta"
-                size="lg"
-                className="btn-gold h-12 w-full min-h-11 rounded-full px-8 text-base font-semibold shadow-lg shadow-cta/25 sm:h-14 sm:w-auto sm:min-w-[11.5rem] sm:px-10 touch-manipulation"
-              >
-                <PhoneCall className="mr-2 h-5 w-5" />
-                {isKo ? "무료 상담 신청" : "Free Consultation"}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/media" className="w-full sm:w-auto">
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-12 w-full min-h-11 rounded-full border-2 border-white/35 bg-white/5 px-8 text-base font-semibold text-white shadow-sm backdrop-blur-sm hover:bg-white/12 hover:border-white/55 sm:h-14 sm:w-auto sm:min-w-[11.5rem] sm:px-10 touch-manipulation"
-              >
-                {t("hero.cta")}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            <BtnBlock href="/contact" variant="accent" size="lg">
+              {isKo ? "무료 상담 신청" : "Free Consultation"}
+              <ArrowRight className="h-4 w-4" />
+            </BtnBlock>
+            <BtnBlock href="/media" variant="secondary" size="lg">
+              {t("hero.cta")}
+              <ArrowRight className="h-4 w-4" />
+            </BtnBlock>
           </div>
-          <p className="hero-fade-in hero-fade-in-seq-6 mt-5 text-sm text-slate-400">
+          <p className="hero-fade-in hero-fade-in-seq-6 mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-white/50">
             {isKo
-              ? "30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
-              : "Apply in 30 seconds · Expert consultant contacts within 24h"}
+              ? "// 30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
+              : "// Apply in 30 seconds · Consultant contacts within 24h"}
           </p>
 
-          <div className="hero-fade-in hero-fade-in-seq-7 mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-white/75">
+          <div className="hero-fade-in hero-fade-in-seq-7 mt-12 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-bx-white/80">
             {[
               { value: "500+", label: isKo ? "검증 매체" : "Verified media" },
               { value: "15년", label: isKo ? "OOH 경력" : "Years of OOH" },
               { value: "100+", label: isKo ? "대기업 파트너" : "Enterprise partners" },
             ].map((s) => (
               <div key={s.label} className="flex items-baseline gap-2">
-                <span className="text-2xl font-extrabold text-gold sm:text-3xl">
+                <span className="text-2xl font-extrabold text-bx-accent sm:text-3xl">
                   {s.value}
                 </span>
-                <span className="text-xs font-medium tracking-wide uppercase text-white/50">
+                <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-bx-white/55">
                   {s.label}
                 </span>
               </div>
@@ -194,31 +168,37 @@ function HomeContent({
           className="hero-fade-in hero-fade-in-seq-7 absolute bottom-8 left-1/2 -translate-x-1/2 motion-reduce:animate-none"
           aria-hidden
         >
-          <ChevronDown className="hero-chevron-bounce h-6 w-6 text-white/50 motion-reduce:animate-none" />
+          <ChevronDown className="hero-chevron-bounce h-6 w-6 text-bx-white/50 motion-reduce:animate-none" />
         </div>
       </section>
 
       {/* Verification Process */}
-      <section className="section-white relative py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,213,181,0.06)_0%,_transparent_70%)]" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="bg-bx-white py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
-            <div className="text-center">
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "검증 프로세스" : "Verification Process"}
-              </p>
-              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {isKo ? "싱커드만의 4단계 매체 검증" : "THINKAD's 4-Step Media Verification"}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {isKo
-                  ? "모든 매체는 엄격한 검증 프로세스를 거쳐야만 등록됩니다"
-                  : "Every media must pass our rigorous verification process before registration"}
-              </p>
-            </div>
+            <SectionHead
+              number="01"
+              category={isKo ? "Verification" : "Verification"}
+              title={
+                isKo ? (
+                  <>
+                    싱커드만의 <span className="bx-accent">4단계</span> 매체 검증
+                  </>
+                ) : (
+                  <>
+                    THINKAD&apos;s <span className="bx-accent">4-Step</span> Media Verification
+                  </>
+                )
+              }
+              meta={
+                isKo
+                  ? "every media verified before registration"
+                  : "every media verified before registration"
+              }
+            />
           </ScrollAnimate>
 
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-8">
+          <div className="mt-12 grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4 lg:divide-x-2 lg:divide-bx-black">
             {[
               {
                 icon: Search,
@@ -258,32 +238,26 @@ function HomeContent({
               },
             ].map((item, index) => (
               <ScrollAnimate key={item.step} delay={index * 120}>
-              <div className="verification-step group relative">
-                {/* 단계 연결선 — 데스크톱 수평 타임라인 */}
-                {index < 3 && (
-                  <div className="absolute top-[44%] right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
-                )}
-                <div className="relative h-full flex flex-col overflow-hidden rounded-2xl border border-navy/8 bg-white shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
-                  {/* 현장 사진 영역 (placeholder 가 자동) */}
-                  <div className="relative aspect-[16/9] bg-gradient-to-br from-navy/8 via-navy/3 to-gold/5">
+                <div className="group relative h-full border-2 border-bx-black bg-bx-white lg:border-0 lg:border-t-2">
+                  {/* 현장 사진 영역 */}
+                  <div className="relative aspect-[16/10] overflow-hidden border-b-2 border-bx-black bg-bx-off">
                     <ProcessStepImage src={item.image} alt="" />
-                    {/* 번호 뱃지 */}
-                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-navy px-2.5 py-1 text-[10px] font-bold text-gold-light shadow-sm">
+                    <span className="absolute left-0 top-0 inline-flex items-center gap-1 border-b-2 border-r-2 border-bx-black bg-bx-accent px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
                       STEP {item.step}
                     </span>
-                    {/* 아이콘 — 이미지 우측 하단에 오버레이 */}
-                    <span className="absolute right-3 bottom-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/92 backdrop-blur-sm ring-1 ring-gold/25 shadow-sm">
-                      <item.icon className="h-5 w-5 text-gold-dark" strokeWidth={1.75} />
+                    <span className="absolute right-0 bottom-0 inline-flex h-10 w-10 items-center justify-center border-l-2 border-t-2 border-bx-black bg-bx-white">
+                      <item.icon className="h-5 w-5 text-bx-black" strokeWidth={1.75} />
                     </span>
                   </div>
-                  <div className="flex flex-1 flex-col px-5 py-5">
-                    <h3 className="text-base font-bold text-navy sm:text-lg">{item.title}</h3>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                  <div className="flex flex-col gap-2 p-6">
+                    <h3 className="text-lg font-bold tracking-tight text-bx-black sm:text-xl">
+                      {item.title}
+                    </h3>
+                    <p className="font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
                       {item.desc}
                     </p>
                   </div>
                 </div>
-              </div>
               </ScrollAnimate>
             ))}
           </div>
@@ -291,33 +265,39 @@ function HomeContent({
       </section>
 
       {/* TOP 3 Recommended Media */}
-      <section className="section-light py-16">
+      <section className="bg-bx-off py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
-            <div className="text-center">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-sm font-bold text-gold-dark">
-                <Trophy className="h-4 w-4" />
-                TOP 3
-              </div>
-              <h2 className="section-title mt-1 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {isKo ? "싱커드 추천 매체 TOP 3" : "THINKAD Recommended Media TOP 3"}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {isKo
-                  ? "검증 데이터 기반, 가장 효과적인 매체를 엄선했습니다"
-                  : "Curated selection of the most effective media based on verified data"}
-              </p>
-            </div>
+            <SectionHead
+              number="02"
+              category="Top 3"
+              title={
+                isKo ? (
+                  <>
+                    싱커드 <span className="bx-accent">추천</span> 매체 TOP 3
+                  </>
+                ) : (
+                  <>
+                    THINKAD <span className="bx-accent">Recommended</span> TOP 3
+                  </>
+                )
+              }
+              meta={
+                isKo
+                  ? "curated from verified data"
+                  : "curated from verified data"
+              }
+            />
           </ScrollAnimate>
 
           {featuredItems.length === 0 ? (
-            <p className="mt-8 text-center text-sm text-muted-foreground">
+            <p className="mt-8 text-center font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
               {isKo
-                ? "추천 매체를 불러오는 중입니다. 잠시 후 다시 확인해 주세요."
-                : "Featured media will appear here once available."}
+                ? "// 추천 매체 준비 중"
+                : "// featured media coming soon"}
             </p>
           ) : (
-            <div className="mt-8">
+            <div className="mt-10">
               <HomeMediaCarousel
                 items={featuredItems}
                 isKo={isKo}
@@ -332,34 +312,37 @@ function HomeContent({
 
       {/* 인기 매체 — 추천과 별개로 관리 (isPopular / popularOrder) */}
       {popularItems.length > 0 && (
-        <section className="section-white py-16">
+        <section className="bg-bx-white py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <ScrollAnimate>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-4 py-1.5 text-sm font-bold text-rose-600">
-                    <span>🔥</span>
-                    {isKo ? "인기 매체" : "Popular"}
-                  </div>
-                  <h2 className="section-title mt-1 text-3xl font-bold text-navy sm:text-4xl">
-                    {isKo ? "지금 가장 주목받는 매체" : "Trending Right Now"}
-                  </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {isKo
-                      ? "최근 집행·관심도 기준으로 관리자가 선별한 매체"
-                      : "Hand-picked by our team based on recent bookings and demand"}
-                  </p>
-                </div>
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+                <SectionHead
+                  number="03"
+                  category="Popular"
+                  title={
+                    isKo ? (
+                      <>
+                        지금 가장 <span className="bx-accent">주목</span>받는 매체
+                      </>
+                    ) : (
+                      <>
+                        <span className="bx-accent">Trending</span> Right Now
+                      </>
+                    )
+                  }
+                  meta={isKo ? "hand-picked by our team" : "hand-picked by our team"}
+                  className="mb-0 flex-1"
+                />
                 <Link
                   href="/media"
-                  className="inline-flex items-center gap-1 text-sm font-semibold text-gold hover:text-gold-dark"
+                  className="group inline-flex items-center gap-2 self-end border-b-2 border-bx-black pb-1 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent"
                 >
                   {isKo ? "전체 매체" : "View all"}
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
             </ScrollAnimate>
-            <div className="mt-8">
+            <div className="mt-10">
               <HomeMediaCarousel
                 items={popularItems}
                 isKo={isKo}
@@ -372,24 +355,31 @@ function HomeContent({
       )}
 
       {/* Why THINKAD */}
-      <section className="section-white py-16">
+      <section className="bg-bx-off py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
-            <div className="text-center">
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "차별점" : "Why Us"}
-              </p>
-              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {isKo ? "왜 싱커드인가?" : "Why THINKAD?"}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {isKo
-                  ? "검증되지 않은 매체에 광고비를 낭비하지 마세요"
-                  : "Don't waste your ad budget on unverified media"}
-              </p>
-            </div>
+            <SectionHead
+              number="04"
+              category={isKo ? "Why us" : "Why us"}
+              title={
+                isKo ? (
+                  <>
+                    왜 <span className="bx-accent">싱커드</span>인가?
+                  </>
+                ) : (
+                  <>
+                    Why <span className="bx-accent">THINKAD</span>?
+                  </>
+                )
+              }
+              meta={
+                isKo
+                  ? "don't waste budget on unverified media"
+                  : "don't waste budget on unverified media"
+              }
+            />
           </ScrollAnimate>
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="mt-12 grid grid-cols-1 gap-0 lg:grid-cols-3">
             {[
               {
                 icon: Eye,
@@ -417,28 +407,23 @@ function HomeContent({
               },
             ].map((item, i) => (
               <ScrollAnimate key={item.title} delay={i * 100}>
-              <Card
-                className="group relative overflow-hidden border-0 bg-gradient-to-b from-white to-slate-50/50 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
-              >
-                <div className="absolute top-0 left-0 h-[3px] w-full bg-gradient-to-r from-gold to-gold-light" />
-                <CardHeader className="pb-4">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10 ring-1 ring-gold/20 transition-all duration-300 group-hover:scale-110 group-hover:bg-gold/20">
-                    <item.icon className="h-7 w-7 text-gold" />
+                <div className="group relative h-full border-2 border-bx-black bg-bx-white p-8 transition-colors hover:bg-bx-black hover:text-bx-white lg:border-r-0 lg:last:border-r-2">
+                  <div className="mb-6 flex items-center justify-between">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim group-hover:text-bx-white/60">
+                      [{String(i + 1).padStart(2, "0")}]
+                    </span>
+                    <item.icon className="h-7 w-7 text-bx-black transition-colors group-hover:text-bx-accent" strokeWidth={1.75} />
                   </div>
-                  <CardTitle className="text-xl font-bold text-navy">
+                  <h3 className="text-xl font-bold tracking-tight text-bx-black group-hover:text-bx-white">
                     {item.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-sm leading-relaxed">
+                  </h3>
+                  <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim group-hover:text-bx-white/80">
                     {item.desc}
-                  </CardDescription>
-                  <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold/10 px-3 py-1 text-xs font-bold text-gold-dark">
-                    <CheckCircle className="h-3.5 w-3.5" />
+                  </p>
+                  <div className="mt-6 inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
                     {item.highlight}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
               </ScrollAnimate>
             ))}
           </div>
@@ -446,22 +431,29 @@ function HomeContent({
       </section>
 
       {/* Testimonials (캐러셀 — data/testimonials.ts 에서 관리) */}
-      <section className="section-white py-16">
+      <section className="bg-bx-white py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
-            <div className="text-center">
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "고객 후기" : "Testimonials"}
-              </p>
-              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {isKo ? "광고주가 직접 전하는 이야기" : "What Our Clients Say"}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {isKo
-                  ? "싱커드와 함께 성장한 파트너사의 실제 이야기"
-                  : "Real stories from partners who grew with THINKAD"}
-              </p>
-            </div>
+            <SectionHead
+              number="05"
+              category={isKo ? "Testimonials" : "Testimonials"}
+              title={
+                isKo ? (
+                  <>
+                    광고주가 직접 전하는 <span className="bx-accent">이야기</span>
+                  </>
+                ) : (
+                  <>
+                    What Our <span className="bx-accent">Clients</span> Say
+                  </>
+                )
+              }
+              meta={
+                isKo
+                  ? "real stories from partners"
+                  : "real stories from partners"
+              }
+            />
           </ScrollAnimate>
           <div className="mt-10">
             <TestimonialsCarousel items={testimonials} isKo={isKo} />
@@ -470,25 +462,23 @@ function HomeContent({
       </section>
 
       {/* CTA Banner */}
-      <section className="hero-bg relative overflow-hidden py-16">
-        <div className="absolute inset-0 hero-pattern opacity-30" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,213,181,0.07)_0%,_transparent_70%)]" />
+      <section className="bg-bx-black py-20 text-bx-white">
         <ScrollAnimate className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="section-title text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            {`// ${isKo ? "지금 시작하세요" : "Get started now"}`}
+          </p>
+          <h2 className="mt-4 text-3xl font-bold leading-[1.05] tracking-tight text-bx-white sm:text-4xl lg:text-6xl">
             {t("ctaBanner.title")}
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-300/90">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-bx-white/75 sm:text-lg">
             {t("ctaBanner.description")}
           </p>
-          <Link href="/contact" className="mx-auto block w-full max-w-xs sm:max-w-none touch-manipulation">
-            <Button
-              size="lg"
-              className="btn-gold mt-10 h-12 w-full min-h-11 rounded-full px-10 text-base font-bold shadow-lg shadow-gold/20 sm:h-14 sm:w-auto"
-            >
+          <div className="mt-10 flex justify-center">
+            <BtnBlock href="/contact" variant="accent" size="lg">
               {t("ctaBanner.cta")}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+              <ArrowRight className="h-4 w-4" />
+            </BtnBlock>
+          </div>
         </ScrollAnimate>
       </section>
     </>

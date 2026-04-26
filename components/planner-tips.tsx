@@ -51,15 +51,20 @@ export default function PlannerTips({
   return (
     <div
       className={cn(
-        "flex gap-3 rounded-2xl border border-gold/25 bg-gradient-to-r from-gold/10 to-transparent px-4 py-3 text-sm text-navy shadow-sm",
+        "flex gap-3 border-2 border-bx-accent bg-bx-white px-4 py-3 text-sm text-bx-black",
       )}
       role="status"
     >
       <Lightbulb
-        className="mt-0.5 h-5 w-5 shrink-0 text-gold"
+        className="mt-0.5 h-4 w-4 shrink-0 text-bx-accent"
         aria-hidden
       />
-      <p className="leading-relaxed">{t(tipKey)}</p>
+      <div className="min-w-0">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ TIP ]
+        </p>
+        <p className="mt-1 leading-relaxed">{t(tipKey)}</p>
+      </div>
     </div>
   );
 }
