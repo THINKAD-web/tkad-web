@@ -4,7 +4,7 @@
  *   import { BrutalNav, BrutalFooter, SectionHead, BtnBlock, MediaCard } from "@/components/brutalist";
  */
 export { BtnBlock } from "./btn-block";
-export type { BtnBlockVariant, BtnBlockSize } from "./btn-block";
+export type { BtnBlockVariant } from "./btn-block";
 export { SectionHead } from "./section-head";
 export type { SectionHeadProps } from "./section-head";
 export { MediaCard } from "./media-card";
