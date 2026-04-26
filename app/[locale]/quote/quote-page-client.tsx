@@ -132,23 +132,37 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   useEffect(() => {
     if (mediaQueryApplied.current) return;
     if (typeof window === "undefined") return;
+    // catalog 가 아직 비어 있으면 다음 렌더에 다시 시도 (사용자 견적이 매체 일부만 받는 회귀 방지).
+    if (catalog.length === 0) return;
     const params = new URLSearchParams(window.location.search);
     const raw = params.get("media");
     if (!raw) return;
     mediaQueryApplied.current = true;
-    const ids = raw
+    const requestedIds = raw
       .split(",")
       .map((x) => x.trim())
-      .filter((id) => catalog.some((m) => m.id === id));
-    if (ids.length === 0) return;
-    setSelectedIds(new Set(ids));
+      .filter(Boolean);
+    const matchedIds = requestedIds.filter((id) =>
+      catalog.some((m) => m.id === id),
+    );
+    const missingIds = requestedIds.filter(
+      (id) => !catalog.some((m) => m.id === id),
+    );
+    if (missingIds.length > 0) {
+      console.warn(
+        "[quote] requested media IDs not found in catalog",
+        missingIds,
+      );
+    }
+    if (matchedIds.length === 0) return;
+    setSelectedIds(new Set(matchedIds));
     const poRaw = params.get("po");
     const po = poRaw != null ? parseInt(poRaw, 10) : NaN;
-    if (ids.length === 1 && Number.isFinite(po) && po >= 0) {
-      const m = catalog.find((x) => x.id === ids[0]);
+    if (matchedIds.length === 1 && Number.isFinite(po) && po >= 0) {
+      const m = catalog.find((x) => x.id === matchedIds[0]);
       const n = m?.priceOptions?.length ?? 0;
       if (n > 0) {
-        setMediaPriceOptionIndex({ [ids[0]]: Math.min(po, n - 1) });
+        setMediaPriceOptionIndex({ [matchedIds[0]]: Math.min(po, n - 1) });
       }
     }
   }, [catalog]);
@@ -374,8 +388,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         thumbUrl: getPrimaryMediaImageUrl(m),
         name,
         location,
-        unitPriceMan: Math.round(lineMonthly),
-        lineTotalMan: Math.round(lineMonthly * periodMonths),
+        unitPriceWon: Math.round(lineMonthly * 10_000),
+        lineTotalWon: Math.round(lineMonthly * periodMonths * 10_000),
         size: m.size ?? undefined,
         dailyFootTraffic: m.dailyFootTraffic ?? undefined,
         operatingHours: m.operatingHours ?? undefined,
@@ -383,10 +397,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     });
   }, [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex, isKo, periodMonths]);
 
-  const pdfVatMan = useMemo(() => Math.round(totalCost * 0.1), [totalCost]);
-  const pdfGrandTotalMan = useMemo(
-    () => totalCost + pdfVatMan,
-    [totalCost, pdfVatMan],
+  /** 사용자 견적 PDF 미리보기는 원 단위로 모든 금액 전달 (만원 round 누적 손실 방지). */
+  const pdfSubtotalWon = useMemo(() => Math.round(totalCost * 10_000), [totalCost]);
+  const pdfVatWon = useMemo(() => Math.round(pdfSubtotalWon * 0.1), [pdfSubtotalWon]);
+  const pdfGrandTotalWon = useMemo(
+    () => pdfSubtotalWon + pdfVatWon,
+    [pdfSubtotalWon, pdfVatWon],
   );
 
   const toggleMedia = useCallback((id: string) => {
@@ -1447,9 +1463,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 periodLabel={periodLabel}
                                 periodMonths={periodMonths}
                                 rows={pdfPreviewRows}
-                                subtotalMan={Math.round(totalCost)}
-                                vatMan={Math.round(pdfVatMan)}
-                                grandTotalMan={Math.round(pdfGrandTotalMan)}
+                                subtotalWon={pdfSubtotalWon}
+                                vatWon={pdfVatWon}
+                                grandTotalWon={pdfGrandTotalWon}
                                 issuedAt={quoteIssuedAt}
                               />
                             </div>

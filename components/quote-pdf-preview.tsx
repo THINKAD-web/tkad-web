@@ -10,8 +10,10 @@ export type QuotePdfPreviewRow = {
   thumbUrl: string | null;
   name: string;
   location: string;
-  unitPriceMan: number;
-  lineTotalMan: number;
+  /** 단가 (원). 만원 단위로 표시될 때만 round 적용. */
+  unitPriceWon: number;
+  /** 라인 합계 (원). */
+  lineTotalWon: number;
   /** 추가 스펙 */
   size?: string | null;
   dailyFootTraffic?: number | null;
@@ -30,14 +32,17 @@ type Props = {
   /** 집행 기간 표기에 사용 (예: × 3개월) */
   periodMonths: number;
   rows: QuotePdfPreviewRow[];
-  subtotalMan: number;
-  vatMan: number;
-  grandTotalMan: number;
+  /** 공급가/부가세/총계 (원). 표시 직전 한 번만 만원 변환 → round 누적 손실 방지. */
+  subtotalWon: number;
+  vatWon: number;
+  grandTotalWon: number;
   issuedAt: Date;
 };
 
-function formatManWon(n: number, locale: string): string {
-  const num = Math.round(n).toLocaleString(locale);
+/** 원 단위 입력을 받아 "₩{만원}만원" / "₩{10K} (10K KRW)" 표기로 변환. */
+function formatManWon(won: number, locale: string): string {
+  const man = Math.round(won / 10_000);
+  const num = man.toLocaleString(locale);
   if (locale === "ko") return `₩${num}만원`;
   return `₩${num} (10K KRW)`;
 }
@@ -54,9 +59,9 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
       periodLabel,
       periodMonths,
       rows,
-      subtotalMan,
-      vatMan,
-      grandTotalMan,
+      subtotalWon,
+      vatWon,
+      grandTotalWon,
       issuedAt,
     },
     ref,
@@ -237,10 +242,10 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                     <td className="px-1.5 py-2 text-navy">{row.location}</td>
                     <td className="px-1.5 py-2 font-mono text-navy">{periodLabel}</td>
                     <td className="px-1.5 py-2 text-right font-mono tabular-nums">
-                      {formatManWon(row.unitPriceMan, locale)}
+                      {formatManWon(row.unitPriceWon, locale)}
                     </td>
                     <td className="px-1.5 py-2 text-right font-mono font-bold tabular-nums text-navy">
-                      {formatManWon(row.lineTotalMan, locale)}
+                      {formatManWon(row.lineTotalWon, locale)}
                     </td>
                   </tr>
                 ))}
@@ -254,13 +259,13 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             <div className="flex justify-between gap-4 border-2 border-navy bg-white px-3 py-2">
               <span className="font-mono text-slate-500">{t("pdfSupply")}</span>
               <span className="font-mono tabular-nums font-bold text-navy">
-                {formatManWon(subtotalMan, locale)}
+                {formatManWon(subtotalWon, locale)}
               </span>
             </div>
             <div className="-mt-[2px] flex justify-between gap-4 border-2 border-navy bg-white px-3 py-2">
               <span className="font-mono text-slate-500">{t("pdfVat")}</span>
               <span className="font-mono tabular-nums text-navy">
-                {formatManWon(vatMan, locale)}
+                {formatManWon(vatWon, locale)}
               </span>
             </div>
             <div className="-mt-[2px] flex justify-between gap-4 border-2 border-gold bg-navy px-3 py-3">
@@ -268,7 +273,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 [ {t("pdfTotal")} ]
               </span>
               <span className="font-mono text-base font-bold tabular-nums text-gold-dark">
-                {formatManWon(grandTotalMan, locale)}
+                {formatManWon(grandTotalWon, locale)}
               </span>
             </div>
           </div>

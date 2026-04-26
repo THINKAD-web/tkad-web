@@ -64,8 +64,27 @@ function flattenModernColorsToInline(clonedDoc: Document, cloned: HTMLElement) {
     for (const prop of COLOR_PROPS) {
       const val = cs.getPropertyValue(prop);
       if (!val) continue;
-      if (/(^|\s)(lab|oklch|lch|oklab)\(/.test(val)) {
-        el.style.setProperty(prop, "rgb(0,0,0)");
+      // lab() / oklch() / lch() / oklab() / color-mix() / color() 등
+      // 모던 CSS 색 함수가 그대로 남아있으면 html2canvas 가 파싱 실패한다.
+      // computed 값에서도 일부 함수형이 잔존하는 환경이 있어 inline 으로 강제 변환.
+      if (/(^|\s|,)(lab|oklch|lch|oklab|color-mix|color)\(/.test(val)) {
+        // 가능한 한 RGB 로 변환을 시도 (Canvas 컨텍스트 fillStyle 활용).
+        let rgb = "rgb(0,0,0)";
+        try {
+          if (typeof document !== "undefined") {
+            const probe = document.createElement("canvas").getContext("2d");
+            if (probe) {
+              probe.fillStyle = val;
+              const computed = probe.fillStyle;
+              if (computed && /^(#[0-9a-f]{3,8}|rgba?\()/i.test(computed)) {
+                rgb = computed;
+              }
+            }
+          }
+        } catch {
+          /* ignore — fallback to black */
+        }
+        el.style.setProperty(prop, rgb);
       } else {
         el.style.setProperty(prop, val);
       }
@@ -79,10 +98,13 @@ function replaceUntrustedImagesInClone(clonedDoc: Document, cloned: HTMLElement)
     // inline style에 남은 잔존 color 함수 치환
     cloned.querySelectorAll<HTMLElement>("*").forEach((el) => {
       const s = el.getAttribute("style");
-      if (s && /(lab|oklch|lch|oklab)\(/.test(s)) {
+      if (s && /(lab|oklch|lch|oklab|color-mix|color)\(/.test(s)) {
         el.setAttribute(
           "style",
-          s.replace(/(lab|oklch|lch|oklab)\([^)]+\)/g, "rgb(0,0,0)"),
+          s.replace(
+            /(lab|oklch|lch|oklab|color-mix|color)\([^)]+\)/g,
+            "rgb(0,0,0)",
+          ),
         );
       }
     });
