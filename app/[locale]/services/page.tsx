@@ -451,17 +451,204 @@ function Deliverables({ isKo }: { isKo: boolean }) {
     </section>
   );
 }
+/* ────────────────────────────────────────────────────────────────
+ * 6. WHY US — 2x2 그리드 (4가지 차별점)
+ *   셀 hover 색감: 1·4 검정, 2·3 주황 (대비)
+ * ──────────────────────────────────────────────────────────────── */
 function WhyUs({ isKo }: { isKo: boolean }) {
+  const items: {
+    no: string;
+    titleKo: string;
+    titleEn: string;
+    descKo: string;
+    descEn: string;
+    statKo: string;
+    statEn: string;
+    statValue: string;
+    hover: "black" | "accent";
+  }[] = [
+    {
+      no: "01",
+      titleKo: "검증된 매체 네트워크",
+      titleEn: "Verified network",
+      descKo:
+        "모든 매체를 담당자가 직접 방문해 시인성·환경·유동인구를 확인. 검증을 통과한 매체만 등록됩니다.",
+      descEn:
+        "Every media is personally verified for visibility, environment, and traffic. Only verified ones are listed.",
+      statKo: "Verified Network",
+      statEn: "Verified Network",
+      statValue: "500+",
+      hover: "black",
+    },
+    {
+      no: "02",
+      titleKo: "투명한 운영 데이터",
+      titleEn: "Transparent ops",
+      descKo:
+        "송출 인증·설치 사진·실시간 모니터링까지 — 광고주가 모든 단계를 직접 확인할 수 있습니다.",
+      descEn:
+        "Broadcast logs, install photos, live monitoring — every step is visible to the advertiser.",
+      statKo: "Transparency",
+      statEn: "Transparency",
+      statValue: "5/5",
+      hover: "accent",
+    },
+    {
+      no: "03",
+      titleKo: "1년+ 축적된 효과 데이터",
+      titleEn: "1+ year of data",
+      descKo:
+        "단기 캠페인이 아닌 1년 이상 누적된 매체별 효과 데이터로 ROI 검증된 매체만 추천합니다.",
+      descEn:
+        "Recommendations come from 1+ years of compounded performance — ROI-verified media only.",
+      statKo: "Data-Driven",
+      statEn: "Data-Driven",
+      statValue: "1Y+",
+      hover: "accent",
+    },
+    {
+      no: "04",
+      titleKo: "AI 플래너 결합",
+      titleEn: "AI-augmented planning",
+      descKo:
+        "AI 미디어 믹스 추천 + 효과 시뮬레이션으로 캠페인 설계 시간을 절반 이하로 단축.",
+      descEn:
+        "AI media-mix recommendation + effect simulation cut campaign design time in half.",
+      statKo: "AI-Augmented",
+      statEn: "AI-Augmented",
+      statValue: "AI",
+      hover: "black",
+    },
+  ];
+
   return (
-    <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
-      // chunk c — WHY US TODO ({isKo ? "ko" : "en"})
-    </p>
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="04"
+        category="Differentiation"
+        title={
+          isKo ? (
+            <>
+              싱커드만의 <span className="bx-accent">[4가지]</span> 차별점.
+            </>
+          ) : (
+            <>
+              The <span className="bx-accent">[four]</span> differentiators.
+            </>
+          )
+        }
+        meta={isKo ? "Why we win\nlong-term" : "Why we win\nlong-term"}
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-2">
+        {items.map((it, i) => {
+          const hoverCls =
+            it.hover === "accent"
+              ? "hover:bg-bx-accent hover:text-bx-white"
+              : "hover:bg-bx-black hover:text-bx-white";
+          return (
+            <article
+              key={it.no}
+              className={[
+                "group flex flex-col bg-bx-white p-8 transition-colors duration-150 sm:p-10 lg:p-12",
+                hoverCls,
+                "border-bx-black",
+                i > 0 ? "border-t-2 lg:border-t-0" : "",
+                i % 2 === 1 ? "lg:border-l-2" : "",
+                i >= 2 ? "lg:border-t-2" : "",
+              ].join(" ")}
+            >
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim transition-colors group-hover:text-bx-gray">
+                [{it.no}] / Why
+              </p>
+              <h3 className="mt-6 font-extrabold leading-[0.96] tracking-[-0.02em] [font-size:clamp(1.75rem,3vw,2.5rem)]">
+                {isKo ? it.titleKo : it.titleEn}
+              </h3>
+              <p className="mt-5 max-w-md text-sm leading-relaxed text-bx-gray-dim transition-colors group-hover:text-bx-gray sm:text-base">
+                {isKo ? it.descKo : it.descEn}
+              </p>
+              <div className="mt-auto flex items-baseline justify-between border-t-2 border-bx-black pt-6 transition-colors group-hover:border-bx-white">
+                <span className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim transition-colors group-hover:text-bx-gray">
+                  / {isKo ? it.statKo : it.statEn}
+                </span>
+                <span className="font-extrabold tracking-tight text-bx-accent [font-size:clamp(1.75rem,3vw,2.5rem)]">
+                  {it.statValue}
+                </span>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
   );
 }
+
+/* ────────────────────────────────────────────────────────────────
+ * 8. FINAL CTA — 검정 2:1
+ * ──────────────────────────────────────────────────────────────── */
 function FinalCta({ isKo }: { isKo: boolean }) {
   return (
-    <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
-      // chunk c — FINAL CTA TODO ({isKo ? "ko" : "en"})
-    </p>
+    <section className="border-b-2 border-bx-black bg-bx-black text-bx-white">
+      <div className="grid grid-cols-1 lg:grid-cols-3">
+        <div className="border-bx-white px-6 py-14 sm:px-10 sm:py-20 lg:col-span-2 lg:border-r-2 lg:px-12 lg:py-24">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray">
+            <span className="text-bx-accent">[ → ]</span>
+            <span className="ml-2"> / Get Quote</span>
+          </p>
+          <h2 className="mt-8 font-extrabold leading-[0.92] tracking-[-0.03em] [font-size:clamp(2.25rem,5.5vw,5rem)]">
+            {isKo ? (
+              <>
+                <span className="block">지금 견적을</span>
+                <span className="block">
+                  <span className="bx-accent">[요청하세요.]</span>
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="block">Request a</span>
+                <span className="block">
+                  <span className="bx-accent">[quote now.]</span>
+                </span>
+              </>
+            )}
+          </h2>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-bx-gray sm:text-lg">
+            {isKo
+              ? "예산·목표·타깃을 알려주시면 24시간 내 전문 컨설턴트가 큐레이션 추천을 보내드립니다. 첫 미팅·시뮬레이션은 모두 무료입니다."
+              : "Tell us your budget, goal, and target — our consultant returns a curated proposal within 24 hours. First meeting and simulation are free."}
+          </p>
+        </div>
+        <aside className="flex flex-col gap-6 border-t-2 border-bx-white px-6 py-12 sm:px-10 lg:border-t-0 lg:px-10 lg:py-24">
+          <div>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray">
+              / Response Time
+            </p>
+            <p className="mt-3 text-5xl font-extrabold leading-none tracking-tight text-bx-accent">
+              24h
+            </p>
+            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray">
+              // {isKo ? "최대 회신 시간" : "Max reply window"}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <BtnBlock
+              href="/contact"
+              variant="accent"
+              stack
+              className="w-full justify-between"
+            >
+              {isKo ? "견적 요청" : "Request quote"}
+            </BtnBlock>
+            <BtnBlock
+              href="/media"
+              variant="secondary"
+              icon={false}
+              className="w-full justify-between border-bx-white bg-bx-black text-bx-white hover:bg-bx-white hover:text-bx-black"
+            >
+              {isKo ? "📎 매체 카탈로그" : "📎 Media catalog"}
+            </BtnBlock>
+          </div>
+        </aside>
+      </div>
+    </section>
   );
 }
