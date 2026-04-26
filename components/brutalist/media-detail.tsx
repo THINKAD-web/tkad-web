@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
 import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
 import { BtnBlock, SectionHead } from "@/components/brutalist";
+import { MediaPatternSection } from "@/components/brutalist/media-pattern";
 
 type Props = {
   media: MediaItem;
@@ -236,10 +237,17 @@ export function BrutalMediaDetail({
         visibility={visibility}
         isKo={isKo}
       />
+      <MediaPatternSection
+        isKo={isKo}
+        mediaType={media.type}
+        region={media.region}
+        trafficPattern={media.trafficPattern ?? null}
+        dailyFootfall={dailyTraffic}
+      />
 
-      {/* TODO chunk 3~5 — PATTERN / MAP / DESCRIPTION / RELATED / FINAL CTA */}
+      {/* TODO chunk 4~5 — MAP / DESCRIPTION / RELATED / FINAL CTA */}
       <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
-        // chunk 3 — PATTERN TODO
+        // chunk 4 — MAP TODO
       </p>
 
       {/* dummy — keep priceWon ref to avoid unused var */}
