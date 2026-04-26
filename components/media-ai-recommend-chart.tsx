@@ -40,14 +40,14 @@ function ChartTooltip({
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (
-    <div className="rounded-lg border border-navy/15 bg-white px-3 py-2 text-xs shadow-lg">
-      <p className="max-w-[220px] font-semibold text-navy">{p.name}</p>
-      <p className="mt-1 tabular-nums text-navy/70">
-        {isKo ? "적합도" : "Fit"}: {p.x}
+    <div className="border-2 border-bx-black bg-bx-white px-3 py-2 text-xs">
+      <p className="max-w-[220px] font-bold tracking-tight text-bx-black">{p.name}</p>
+      <p className="mt-1 font-mono text-[11px] tabular-nums text-bx-gray-dim">
+        {isKo ? "적합도" : "Fit"}: <span className="text-bx-black">{p.x}</span>
       </p>
-      <p className="tabular-nums text-navy/70">
+      <p className="font-mono text-[11px] tabular-nums text-bx-gray-dim">
         {isKo ? "월 추정 노출" : "Est. monthly reach"}:{" "}
-        {p.y.toLocaleString()}
+        <span className="text-bx-black">{p.y.toLocaleString()}</span>
       </p>
     </div>
   );
@@ -72,45 +72,48 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
   if (!data.length || !hasReach) {
     return (
       <div
-        className="flex min-h-[280px] items-center justify-center rounded-2xl border border-navy/10 bg-slate-50 px-4 text-center text-sm text-slate-500"
+        className="flex min-h-[280px] items-center justify-center border-2 border-bx-black bg-bx-off px-4 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim"
         role="img"
         aria-label={tr("resultChartAria")}
       >
-        {tr("resultChartEmpty")}
+        {`// `}{tr("resultChartEmpty")}
       </div>
     );
   }
 
   return (
     <div
-      className="h-[min(360px,55vw)] w-full rounded-2xl border border-navy/10 bg-slate-50 p-2 sm:p-4"
+      className="h-[min(360px,55vw)] w-full border-2 border-bx-black bg-bx-white p-3 sm:p-4"
       role="img"
       aria-label={tr("resultChartAria")}
     >
-      <p className="mb-2 px-1 text-[11px] text-slate-500">{tr("resultChartHint")}</p>
+      <p className="mb-2 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+        [ {tr("resultChartHint")} ]
+      </p>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(26,42,108,0.1)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" />
           <XAxis
             type="number"
             dataKey="x"
             name="fit"
             domain={[0, 100]}
-            tick={{ fill: "#0d1b2e", fontSize: 11 }}
-            stroke="rgba(26,42,108,0.3)"
+            tick={{ fill: "#000000", fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
+            stroke="#000000"
             label={{
               value: isKo ? "AI 적합도" : "AI fit (0–100)",
               position: "bottom",
-              fill: "#0d1b2e",
+              fill: "#000000",
               fontSize: 11,
+              fontFamily: "JetBrains Mono, monospace",
             }}
           />
           <YAxis
             type="number"
             dataKey="y"
             name="reach"
-            tick={{ fill: "#0d1b2e", fontSize: 11 }}
-            stroke="rgba(26,42,108,0.3)"
+            tick={{ fill: "#000000", fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
+            stroke="#000000"
             tickFormatter={(v) =>
               v >= 1_000_000
                 ? `${(v / 1_000_000).toFixed(1)}M`
@@ -121,8 +124,9 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
               value: isKo ? "월 추정 노출" : "Est. monthly reach",
               angle: -90,
               position: "insideLeft",
-              fill: "#0d1b2e",
+              fill: "#000000",
               fontSize: 11,
+              fontFamily: "JetBrains Mono, monospace",
             }}
           />
           <ZAxis type="number" dataKey="z" range={[40, 400]} />
@@ -130,7 +134,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
             cursor={{ strokeDasharray: "3 3" }}
             content={<ChartTooltip isKo={isKo} />}
           />
-          <Scatter data={data} fill="#c9a227" fillOpacity={0.85} />
+          <Scatter data={data} fill="#ff4d00" fillOpacity={0.9} />
         </ScatterChart>
       </ResponsiveContainer>
     </div>

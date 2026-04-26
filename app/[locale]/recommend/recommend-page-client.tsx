@@ -2,12 +2,11 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations, useLocale } from "next-intl";
-import { Sparkles } from "lucide-react";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useToast } from "@/components/toast-provider";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { BtnBlock } from "@/components/brutalist";
 import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
 } from "@/components/media-ai-recommend-form";
@@ -126,29 +125,28 @@ export default function RecommendPageClient({
 
   if (catalog.length === 0) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center text-sm text-muted-foreground">
-        {t("media.ai.emptyCatalog")}
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
+        {`// `}{t("media.ai.emptyCatalog")}
       </div>
     );
   }
 
   return (
     <>
-      <section className="bg-navy py-28">
+      <section className="bg-bx-black py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mb-4 inline-flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-gold" />
-            <span className="text-sm font-semibold text-gold">
-              {isKo ? "AI 매체 탐험가" : "AI Media Explorer"}
-            </span>
-            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            {`// 04 / AI Media Explorer`}
+          </p>
+          <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+              {isKo ? "TKAD Bot과 함께 매체 탐험 시작!" : tr("heroTitle")}
+            </h1>
+            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-bx-white">
               BETA
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">
-            {isKo ? "TKAD Bot과 함께 매체 탐험 시작! ✨" : tr("heroTitle")}
-          </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-slate-300">
+          <p className="mx-auto mt-6 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
             {isKo
               ? "몇 가지 정보만 알려주시면, TKAD Bot이 캠페인에 꼭 맞는 매체들을 찾아드려요."
               : tr("heroSubtitle")}
@@ -156,7 +154,7 @@ export default function RecommendPageClient({
         </div>
       </section>
 
-      <section className="bg-gradient-to-b from-navy/95 via-[#070e18] to-[#060d1a] py-16 sm:py-24">
+      <section className="bg-bx-off py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {phase === "form" && (
             <MediaAiRecommendForm
@@ -166,7 +164,7 @@ export default function RecommendPageClient({
           )}
 
           {phase === "loading" && (
-            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-white/90 backdrop-blur-md">
+            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-bx-white/95 backdrop-blur-md">
               <LoadingOverlay isKo={isKo} />
             </div>
           )}
@@ -187,78 +185,87 @@ export default function RecommendPageClient({
           )}
 
           {phase === "noResults" && (
-            <div className="mx-auto max-w-lg rounded-2xl border border-amber-200 bg-amber-50/90 p-8 text-center shadow-lg">
-              <p className="text-sm font-medium text-amber-950">
+            <div className="mx-auto max-w-lg border-2 border-bx-black bg-bx-white p-8 text-center">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ NO RESULTS ]
+              </p>
+              <p className="mt-4 text-sm font-medium leading-relaxed text-bx-black">
                 {t("media.ai.emptyResult")}
               </p>
-              <Button
-                type="button"
-                className="mt-6 rounded-full border border-gold/40 bg-gold/10 text-gold hover:bg-gold/20"
-                onClick={() => {
-                  setPhase("form");
-                  setFullList(null);
-                }}
-              >
-                {tr("backToForm")}
-              </Button>
+              <div className="mt-6 flex justify-center">
+                <BtnBlock
+                  variant="primary"
+                  size="md"
+                  onClick={() => {
+                    setPhase("form");
+                    setFullList(null);
+                  }}
+                >
+                  {tr("backToForm")}
+                </BtnBlock>
+              </div>
             </div>
           )}
 
           {phase === "list" && fullList && fullList.length > 0 && (
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-navy">
-                  {t("media.ai.results")}{" "}
-                  <span className="text-muted-foreground">({fullList.length})</span>
-                </h2>
+                <div>
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ FULL LIST ]
+                  </p>
+                  <h2 className="mt-1 text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+                    {t("media.ai.results")}{" "}
+                    <span className="font-mono text-bx-gray-dim">({fullList.length})</span>
+                  </h2>
+                </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
+                  <BtnBlock
+                    variant="secondary"
                     size="sm"
-                    className="rounded-full border-navy/15 bg-white text-navy hover:bg-slate-100"
                     onClick={() => setPhase("dashboard")}
                   >
                     {tr("backToDashboard")}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
+                  </BtnBlock>
+                  <BtnBlock
+                    variant="primary"
                     size="sm"
-                    className="rounded-full"
                     onClick={() => {
                       setPhase("form");
                       setFullList(null);
                     }}
                   >
                     {tr("backToForm")}
-                  </Button>
+                  </BtnBlock>
                 </div>
               </div>
 
               {top3.length > 0 && (
-                <div className="rounded-2xl border border-emerald-300/30 bg-emerald-50/70 px-4 py-3 text-xs text-navy shadow-sm">
-                  <p className="mb-2 font-semibold text-emerald-900">
+                <div className="border-2 border-bx-accent bg-bx-white px-5 py-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ TOP 3 PICKS ]
+                  </p>
+                  <p className="mt-1 text-sm font-bold tracking-tight text-bx-black">
                     {isKo
                       ? "TKAD bot의 TOP 3 강추 발견"
-                      : "TKAD bot’s TOP 3 picks"}
+                      : "TKAD bot's TOP 3 picks"}
                   </p>
-                  <ol className="space-y-1.5">
+                  <ol className="mt-3 space-y-2">
                     {top3.map((s, i) => (
                       <li
                         key={s.item.id}
-                        className="flex items-center justify-between gap-2"
+                        className="flex items-center justify-between gap-2 border-t-2 border-bx-black pt-2"
                       >
-                        <span className="inline-flex items-center gap-1.5">
-                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-[10px] font-bold text-emerald-700">
+                        <span className="inline-flex min-w-0 items-center gap-2">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent font-mono text-[10px] font-bold text-bx-white">
                             {i + 1}
                           </span>
-                          <span className="line-clamp-1 text-[11px] font-semibold">
+                          <span className="line-clamp-1 text-sm font-bold tracking-tight text-bx-black">
                             {isKo ? s.item.name : s.item.nameEn}
                           </span>
                         </span>
-                        <span className="shrink-0 text-[10px] font-medium text-emerald-800/90">
-                          {isKo ? `${s.score}점 궁합` : `Match ${s.score}`}
+                        <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-accent">
+                          {isKo ? `${s.score}점 궁합` : `MATCH ${s.score}`}
                         </span>
                       </li>
                     ))}
@@ -266,26 +273,26 @@ export default function RecommendPageClient({
                 </div>
               )}
 
-              <ul className="grid gap-4 sm:grid-cols-2">
+              <ul className="grid grid-cols-1 gap-0 sm:grid-cols-2">
                 {fullList.map((s) => (
                   <li
                     key={s.item.id}
-                    className="rounded-xl border border-navy/10 bg-white p-4 text-center shadow-sm sm:text-left"
+                    className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-5 transition-colors hover:bg-bx-off"
                   >
-                    <p className="font-bold text-navy">
+                    <p className="text-base font-bold leading-tight tracking-tight text-bx-black">
                       {isKo ? s.item.name : s.item.nameEn}
                     </p>
-                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                      {isKo ? s.item.location : s.item.locationEn}
+                    <p className="mt-2 line-clamp-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                      {`// `}{isKo ? s.item.location : s.item.locationEn}
                     </p>
-                    <ul className="mt-2 space-y-1 text-[11px] text-muted-foreground">
+                    <ul className="mt-3 space-y-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
                       {s.reasons.slice(0, 3).map((r, i) => (
                         <li key={i}>· {isKo ? r.ko : r.en}</li>
                       ))}
                     </ul>
                     <Link
                       href={mediaItemDetailPath(s.item.id)}
-                      className="mt-3 inline-block text-sm font-semibold text-gold hover:text-gold/90"
+                      className="mt-4 inline-flex items-center gap-1 border-b-2 border-bx-black pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent"
                     >
                       {isKo ? "상세 보기" : "Details"} →
                     </Link>
@@ -345,26 +352,31 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
   }, [messages.length]);
 
   return (
-    <div className="w-full max-w-sm space-y-6 px-6">
+    <div className="w-full max-w-md space-y-6 px-6">
       <div className="flex flex-col items-center gap-3">
-        <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-gold to-amber-500 shadow-[0_0_40px_rgba(251,191,36,0.8)] ring-2 ring-gold/80">
-          <span className="text-2xl" aria-hidden>
+        <div className="relative flex h-20 w-20 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+          <span className="text-3xl" aria-hidden>
             🤖
           </span>
-          <span className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-slate-900/95 px-2.5 py-0.5 text-[10px] font-semibold text-gold shadow">
+          <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-bx-black bg-bx-black px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-bx-accent">
             TKAD bot
           </span>
         </div>
-        <p className="mt-6 text-center text-sm font-semibold text-navy">
+        <p className="mt-6 text-center font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
+          [ {isKo
+            ? "EXPLORING MEDIA UNIVERSE"
+            : "EXPLORING MEDIA UNIVERSE"} ]
+        </p>
+        <p className="text-center text-sm font-bold leading-snug tracking-tight text-bx-black">
           {isKo
             ? "TKAD bot이 매체 탐험을 진행 중입니다..."
             : "TKAD bot is exploring the media universe for you..."}
         </p>
       </div>
-      <div className="space-y-3 rounded-2xl border border-navy/10 bg-gradient-to-b from-slate-900/5 via-white to-slate-100 p-6 shadow-lg">
-        <div className="h-3 overflow-hidden rounded-full bg-slate-200/80">
+      <div className="space-y-3 border-2 border-bx-black bg-bx-white p-6">
+        <div className="h-3 w-full overflow-hidden border-2 border-bx-black bg-bx-white">
           <motion.div
-            className="h-full w-2/5 rounded-full bg-gradient-to-r from-emerald-300 via-gold to-amber-500 shadow-[0_0_18px_rgba(16,185,129,0.8)]"
+            className="h-full w-2/5 bg-bx-accent"
             animate={{ x: ["-30%", "220%"] }}
             transition={{
               duration: 1.35,
@@ -374,13 +386,13 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           />
         </div>
         <div className="space-y-2">
-          <div className="h-3 rounded bg-slate-200/90" />
-          <div className="h-3 w-4/5 rounded bg-slate-200/80" />
-          <div className="h-3 w-3/5 rounded bg-slate-200/70" />
+          <div className="h-3 bg-bx-off" />
+          <div className="h-3 w-4/5 bg-bx-off" />
+          <div className="h-3 w-3/5 bg-bx-off" />
         </div>
       </div>
-      <p className="text-center text-xs text-muted-foreground">
-        {messages[step]}
+      <p className="text-center font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+        {`// `}{messages[step]}
       </p>
     </div>
   );
