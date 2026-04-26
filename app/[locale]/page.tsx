@@ -5,8 +5,8 @@ import {
   fetchHomePopularMedia,
 } from "@/lib/public-media-catalog";
 import { type MediaItem } from "@/lib/media-data";
-import { ArrowRight, ArrowDown } from "lucide-react";
-import { BtnBlock } from "@/components/brutalist";
+import { ArrowRight, ArrowDown, Search, Camera, Database, ClipboardCheck } from "lucide-react";
+import { BtnBlock, SectionHead } from "@/components/brutalist";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -51,6 +51,8 @@ function HomeContent({
       <Hero isKo={isKo} t={t} />
       <Ticker isKo={isKo} />
       <Stats isKo={isKo} />
+      <Process isKo={isKo} />
+      <Regional isKo={isKo} />
     </>
   );
 }
@@ -238,6 +240,202 @@ function Stats({ isKo }: { isKo: boolean }) {
               // {s.meta}
             </p>
           </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * (b) PROCESS — 4단계 매체 검증 프로세스
+ * 4컬 그리드 (모바일 1열, sm 2열, lg 4열). 각 셀에 [STEP NN] / 아이콘 /
+ * 타이틀 / 설명. 셀 사이 2px 보더 + grayscale 아이콘.
+ * ──────────────────────────────────────────────────────────────── */
+function Process({ isKo }: { isKo: boolean }) {
+  const steps = [
+    {
+      no: "01",
+      icon: Search,
+      title: isKo ? "현장 방문" : "Site Visit",
+      desc: isKo
+        ? "담당자가 직접 매체 현장을 방문해 설치 환경·주변 유동인구를 확인합니다."
+        : "Our team personally visits each site to check installation conditions and foot traffic.",
+    },
+    {
+      no: "02",
+      icon: Camera,
+      title: isKo ? "촬영 · 실측" : "Photo · Measurement",
+      desc: isKo
+        ? "매체 크기·시인성·조도를 정밀 측정하고 다각도로 촬영해 기록합니다."
+        : "We precisely measure size, visibility, and illumination with multi-angle photography.",
+    },
+    {
+      no: "03",
+      icon: Database,
+      title: isKo ? "데이터 검증" : "Data Verification",
+      desc: isKo
+        ? "유동인구·차량 통행량·노출 빈도를 분석해 매체 효과를 검증합니다."
+        : "We analyze foot traffic, vehicle flow, and exposure frequency to verify effectiveness.",
+    },
+    {
+      no: "04",
+      icon: ClipboardCheck,
+      title: isKo ? "매체 등록" : "Registration",
+      desc: isKo
+        ? "검증을 통과한 매체만 싱커드 플랫폼에 등록되어 광고주에게 제안됩니다."
+        : "Only verified media are registered and proposed to advertisers.",
+    },
+  ];
+
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-16 sm:px-10">
+        <SectionHead
+          number="01"
+          category={isKo ? "Verification" : "Verification"}
+          title={
+            isKo ? (
+              <>
+                싱커드만의 <span className="bx-accent">4단계 매체 검증</span>
+              </>
+            ) : (
+              <>
+                THINKAD&apos;s <span className="bx-accent">4-step verification</span>
+              </>
+            )
+          }
+          meta={
+            isKo
+              ? "엄격한 검증 프로세스를 통과한 매체만 등록됩니다"
+              : "Every media must pass our rigorous verification before listing"
+          }
+        />
+      </div>
+      <div className="grid grid-cols-1 border-t-2 border-bx-black sm:grid-cols-2 lg:grid-cols-4">
+        {steps.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <article
+              key={s.no}
+              className={[
+                "group relative border-bx-black p-6 transition-colors hover:bg-bx-off sm:p-8",
+                i % 2 === 1 ? "sm:border-l-2" : "",
+                i >= 2 ? "sm:border-t-2 lg:border-t-0" : "",
+                "lg:border-l-2",
+                i === 0 ? "lg:border-l-0" : "",
+              ].join(" ")}
+            >
+              <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+                [STEP {s.no}]
+              </div>
+              <div className="mt-6 inline-flex h-12 w-12 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors group-hover:bg-bx-black group-hover:text-bx-white">
+                <Icon className="h-5 w-5" strokeWidth={1.6} />
+              </div>
+              <h3 className="mt-5 text-2xl font-bold leading-tight tracking-tight text-bx-black">
+                {s.title}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-bx-gray-dim">
+                {s.desc}
+              </p>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * (b) REGIONAL — 지역 셀렉션 (서울·부산·제주·전국)
+ * 4컬 큰 타일. 각 타일 → /media?region=… 진입 (광고주 의도 빠른 분기).
+ * 사각 / 2px 보더 / hover 시 검정 invert.
+ * ──────────────────────────────────────────────────────────────── */
+function Regional({ isKo }: { isKo: boolean }) {
+  const regions = [
+    {
+      no: "01",
+      key: "seoul",
+      name: isKo ? "서울" : "Seoul",
+      sub: isKo ? "강남·성수·홍대 등 200+" : "Gangnam · Seongsu · Hongdae 200+",
+      meta: isKo ? "도심 OOH 핵심" : "Urban OOH core",
+    },
+    {
+      no: "02",
+      key: "busan",
+      name: isKo ? "부산" : "Busan",
+      sub: isKo ? "해운대·서면·부산역 60+" : "Haeundae · Seomyeon · Busan Stn 60+",
+      meta: isKo ? "남부 거점" : "Southern hub",
+    },
+    {
+      no: "03",
+      key: "jeju",
+      name: isKo ? "제주" : "Jeju",
+      sub: isKo ? "공항·중문·관광 30+" : "Airport · Jungmun · Resort 30+",
+      meta: isKo ? "관광 마켓" : "Tourism market",
+    },
+    {
+      no: "04",
+      key: "national",
+      name: isKo ? "전국" : "Nationwide",
+      sub: isKo ? "주요 도시 광역 패키지" : "Multi-city campaign packages",
+      meta: isKo ? "전국 도달" : "Nationwide reach",
+    },
+  ];
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-off">
+      <div className="mx-auto max-w-[1400px] px-6 pt-16 sm:px-10">
+        <SectionHead
+          number="02"
+          category="Regional"
+          title={
+            isKo ? (
+              <>
+                지역별 <span className="bx-invert">매체 인벤토리</span>
+              </>
+            ) : (
+              <>
+                Regional <span className="bx-invert">inventory</span>
+              </>
+            )
+          }
+          meta={
+            isKo
+              ? "관심 지역을 클릭해 즉시 매체 목록을 확인하세요"
+              : "Click a region to jump straight into media listings"
+          }
+        />
+      </div>
+      <div className="grid grid-cols-1 border-t-2 border-bx-black sm:grid-cols-2 lg:grid-cols-4">
+        {regions.map((r, i) => (
+          <a
+            key={r.key}
+            href={`/${isKo ? "ko" : "en"}/media?region=${r.key}`}
+            className={[
+              "group relative flex flex-col justify-between border-bx-black bg-bx-white p-8 transition-colors hover:bg-bx-black hover:text-bx-white sm:p-10",
+              i % 2 === 1 ? "sm:border-l-2" : "",
+              i >= 2 ? "sm:border-t-2 lg:border-t-0" : "",
+              "lg:border-l-2",
+              i === 0 ? "lg:border-l-0" : "",
+            ].join(" ")}
+          >
+            <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim group-hover:text-bx-gray">
+              [{r.no}] / {r.name}
+            </div>
+            <div className="mt-12">
+              <p className="text-4xl font-bold leading-none tracking-tight sm:text-5xl">
+                {r.name}
+              </p>
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim group-hover:text-bx-gray">
+                // {r.sub}
+              </p>
+            </div>
+            <div className="mt-12 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.22em]">
+              <span className="text-bx-gray-dim group-hover:text-bx-accent">
+                {r.meta}
+              </span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </div>
+          </a>
         ))}
       </div>
     </section>
