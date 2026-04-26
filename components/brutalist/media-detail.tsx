@@ -244,10 +244,11 @@ export function BrutalMediaDetail({
         trafficPattern={media.trafficPattern ?? null}
         dailyFootfall={dailyTraffic}
       />
+      <MapSection media={media} isKo={isKo} />
 
-      {/* TODO chunk 4~5 — MAP / DESCRIPTION / RELATED / FINAL CTA */}
+      {/* TODO chunk 5 — DESCRIPTION + RELATED + FINAL CTA */}
       <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
-        // chunk 4 — MAP TODO
+        // chunk 5 — DESCRIPTION + RELATED + FINAL CTA TODO
       </p>
 
       {/* dummy — keep priceWon ref to avoid unused var */}
@@ -531,4 +532,137 @@ function fmtBig(n: number | null | undefined): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
   return n.toLocaleString();
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 5. MAP — 1:1 그리드
+ *   좌: 지도 placeholder (40x40 그리드 패턴 + 중앙 주황 핀 + ring 애니메이션)
+ *   우: [04] / Location + 주소 + 주변 시설 태그들 + 카카오/로드뷰 버튼
+ * ──────────────────────────────────────────────────────────────── */
+function MapSection({ media, isKo }: { media: MediaItem; isKo: boolean }) {
+  const location = isKo ? media.location : media.locationEn || media.location;
+  const nearbyText =
+    media.nearbyFacilities ??
+    media.nearbyStations ??
+    media.nearbyLandmarks ??
+    "";
+  // 콤마/슬래시/중점 등으로 분리해 태그화
+  const nearbyTags = nearbyText
+    .split(/[,/·•|]+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+
+  const kakaoHref =
+    media.lat && media.lng
+      ? `https://map.kakao.com/link/map/${encodeURIComponent(media.name)},${media.lat},${media.lng}`
+      : `https://map.kakao.com/?q=${encodeURIComponent(media.name)}`;
+  const roadviewHref =
+    media.lat && media.lng
+      ? `https://map.kakao.com/link/roadview/${encodeURIComponent(media.name)},${media.lat},${media.lng}`
+      : kakaoHref;
+
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
+        {/* 좌측 — 지도 placeholder */}
+        <div className="relative border-bx-black lg:border-r-2">
+          <div
+            className="relative aspect-[4/3] w-full overflow-hidden bg-bx-off"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(0,0,0,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.08) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+              backgroundPosition: "center center",
+            }}
+          >
+            {/* 중앙 핀 + ring 애니메이션 */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="relative">
+                <span
+                  aria-hidden
+                  className="bx-pulse absolute inset-0 -m-4 inline-block border-2 border-bx-accent"
+                />
+                <span className="relative inline-flex h-6 w-6 items-center justify-center border-2 border-bx-black bg-bx-accent">
+                  <span className="block h-1.5 w-1.5 bg-bx-white" aria-hidden />
+                </span>
+              </div>
+            </div>
+
+            {/* 좌하단 흰배경 박스 */}
+            <div className="absolute bottom-0 left-0 max-w-[80%] border-r-2 border-t-2 border-bx-black bg-bx-white px-4 py-3">
+              <p className="text-sm font-bold text-bx-black">
+                {media.district || media.city || media.region || location}
+              </p>
+              <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                {isKo
+                  ? "// 차량·보행자 교차 노출"
+                  : "// Vehicle + pedestrian crossover"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 우측 — 정보 */}
+        <div className="flex flex-col px-6 py-10 sm:px-10 sm:py-12 lg:px-10 lg:py-14">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+            <span className="text-bx-black">[04]</span>
+            <span className="ml-2"> / Location</span>
+          </p>
+          <h3 className="mt-4 font-extrabold leading-[0.96] tracking-[-0.02em] text-bx-black [font-size:clamp(2.25rem,4vw,3rem)]">
+            {isKo ? (
+              <>
+                위치 <span className="bx-accent">[정보]</span>.
+              </>
+            ) : (
+              <>
+                Location <span className="bx-accent">[info]</span>.
+              </>
+            )}
+          </h3>
+          <p className="mt-6 text-base leading-relaxed text-bx-black sm:text-lg">
+            {location}
+          </p>
+
+          {nearbyTags.length > 0 ? (
+            <>
+              <p className="mt-10 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {isKo ? "주변 시설 / Nearby" : "Nearby"} ]
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {nearbyTags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[11px] font-semibold tracking-tight text-bx-black"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </>
+          ) : null}
+
+          {/* 하단 1:1 버튼 */}
+          <div className="mt-auto grid grid-cols-2 border-2 border-bx-black">
+            <a
+              href={kakaoHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-r-2 border-bx-black bg-bx-white px-4 py-4 text-center font-mono text-[12px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+            >
+              {isKo ? "카카오맵 →" : "Kakao Map →"}
+            </a>
+            <a
+              href={roadviewHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-bx-white px-4 py-4 text-center font-mono text-[12px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-accent hover:text-bx-white"
+            >
+              {isKo ? "로드뷰 →" : "Roadview →"}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
