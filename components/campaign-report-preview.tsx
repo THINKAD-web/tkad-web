@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { BtnBlock } from "@/components/brutalist";
 import { Camera, Download, Loader2 } from "lucide-react";
 import { captureElementAsPng, downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
@@ -223,15 +223,34 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={handleCapture} disabled={busy} className="gap-1.5">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+      <div className="flex gap-0">
+        <BtnBlock
+          variant="secondary"
+          size="sm"
+          onClick={handleCapture}
+          disabled={busy}
+        >
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Camera className="h-4 w-4" />
+          )}
           이미지 저장
-        </Button>
-        <Button variant="outline" size="sm" onClick={handlePdf} disabled={busy} className="gap-1.5">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+        </BtnBlock>
+        <BtnBlock
+          variant="secondary"
+          size="sm"
+          onClick={handlePdf}
+          disabled={busy}
+          className="-ml-[2px]"
+        >
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
           PDF 다운로드
-        </Button>
+        </BtnBlock>
       </div>
 
       {/* ───── 보고서 본문 ───── */}
