@@ -197,6 +197,22 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* === Brutalist Phase 2 — 인라인 강조 유틸 ===
+ * 헤드라인 안에서 단어 단위로 강조할 때.
+ * <h1>생각하는 <span class="bx-invert">광고</span> 회사</h1>
+ * <h1>생각하는 <span class="bx-accent">광고</span> 회사</h1>
+ * Tailwind 의 `invert` 필터 유틸과 충돌 안 나도록 `bx-` 네임스페이스. */
+.bx-invert {
+  background: var(--color-bx-black);
+  color: var(--color-bx-white);
+  padding: 0 0.25em;
+  display: inline-block;
+  line-height: 1.05;
+}
+.bx-accent {
+  color: var(--color-bx-accent);
+}
+
 @layer base {
   * {
     border-color: var(--border);
