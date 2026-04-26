@@ -24,7 +24,7 @@ export function BrutalMediaDetail({
   media,
   locale,
   shortId,
-  similar: _similar,
+  similar = [],
 }: Props) {
   const isKo = locale === "ko";
   const id = shortId ?? media.id;
@@ -245,11 +245,9 @@ export function BrutalMediaDetail({
         dailyFootfall={dailyTraffic}
       />
       <MapSection media={media} isKo={isKo} />
-
-      {/* TODO chunk 5 — DESCRIPTION + RELATED + FINAL CTA */}
-      <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
-        // chunk 5 — DESCRIPTION + RELATED + FINAL CTA TODO
-      </p>
+      <Description media={media} isKo={isKo} />
+      <Related similar={similar} isKo={isKo} />
+      <FinalCta mediaName={name} mediaId={media.id} isKo={isKo} />
 
       {/* dummy — keep priceWon ref to avoid unused var */}
       <span className="sr-only" data-price-won={priceWon} />
@@ -662,6 +660,261 @@ function MapSection({ media, isKo }: { media: MediaItem; isKo: boolean }) {
             </a>
           </div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 6. DESCRIPTION — 1:2 그리드, padding 60px
+ *   좌: 메타 사이드 (Pretendard 800 24px 매체 소개 + 모노 메타)
+ *   우: 본문 (16px line-height 1.7) + 첫글자 드롭캡 + 광고주 이력 박스
+ * ──────────────────────────────────────────────────────────────── */
+function Description({ media, isKo }: { media: MediaItem; isKo: boolean }) {
+  const desc =
+    (isKo
+      ? media.catalogDescription || media.description
+      : media.catalogDescriptionEn || media.descriptionEn) ||
+    media.description ||
+    "";
+  if (!desc.trim()) return null;
+
+  /** 단락 분리 — \n\n 또는 \n 단위 */
+  const paragraphs = desc
+    .split(/\n{2,}|\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .slice(0, 3);
+  const first = paragraphs[0] ?? "";
+  const dropCap = first ? first.charAt(0) : "";
+  const firstRest = first.slice(dropCap.length);
+  const others = paragraphs.slice(1);
+
+  const advertisers = isKo
+    ? media.advertiserHistory
+    : media.advertiserHistoryEn || media.advertiserHistory;
+
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <div className="grid grid-cols-1 lg:grid-cols-3">
+        {/* 좌측 메타 */}
+        <aside className="border-bx-black bg-bx-white px-6 py-12 sm:px-10 sm:py-14 lg:col-span-1 lg:border-r-2 lg:px-10 lg:py-[60px]">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+            [05] / About
+          </p>
+          <h3 className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-bx-black">
+            {isKo ? "매체 소개" : "About this media"}
+          </h3>
+          <ul className="mt-8 space-y-3 font-mono text-[11px] uppercase tracking-[0.22em]">
+            <li className="flex items-baseline justify-between border-b-2 border-bx-black pb-2">
+              <span className="text-bx-gray-dim">/ Region</span>
+              <span className="text-bx-black">{media.region}</span>
+            </li>
+            <li className="flex items-baseline justify-between border-b-2 border-bx-black pb-2">
+              <span className="text-bx-gray-dim">/ Install</span>
+              <span className="text-bx-black">{media.installYear ?? "—"}</span>
+            </li>
+            <li className="flex items-baseline justify-between border-b-2 border-bx-black pb-2">
+              <span className="text-bx-gray-dim">/ Hours</span>
+              <span className="text-bx-black">{media.operatingHours ?? "—"}</span>
+            </li>
+          </ul>
+        </aside>
+
+        {/* 우측 본문 */}
+        <div className="px-6 py-12 sm:px-10 sm:py-14 lg:col-span-2 lg:px-10 lg:py-[60px]">
+          {first ? (
+            <p className="text-base leading-[1.7] text-bx-black sm:text-[17px]">
+              <span className="float-left mr-3 font-extrabold text-bx-accent leading-[0.9] [font-size:80px]">
+                {dropCap}
+              </span>
+              {firstRest}
+            </p>
+          ) : null}
+          {others.map((p, i) => (
+            <p
+              key={i}
+              className="mt-5 text-base leading-[1.7] text-bx-black sm:text-[17px]"
+            >
+              {p}
+            </p>
+          ))}
+
+          {advertisers ? (
+            <div className="mt-10 border-2 border-bx-black bg-bx-off p-6">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {isKo ? "광고주 이력 / Past Advertisers" : "Past Advertisers"} ]
+              </p>
+              <p className="mt-3 text-lg font-bold leading-snug text-bx-black sm:text-xl">
+                {advertisers}
+              </p>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 7. RELATED — SectionHead [06] / Related + 3컬 작은 MediaCard 변형
+ * ──────────────────────────────────────────────────────────────── */
+function Related({
+  similar,
+  isKo,
+}: {
+  similar: MediaItem[];
+  isKo: boolean;
+}) {
+  if (similar.length === 0) return null;
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="06"
+        category="Related"
+        title={
+          isKo ? (
+            <>
+              이 매체 <span className="bx-accent">[어때?]</span>
+            </>
+          ) : (
+            <>
+              You may <span className="bx-accent">[also like]</span>
+            </>
+          )
+        }
+        meta={isKo ? "Curated similar" : "Curated similar"}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {similar.slice(0, 3).map((m, i) => {
+          const img = getPrimaryMediaImageUrl(m);
+          const price = formatMediaPriceWonWithSymbol(m.price);
+          const name = isKo ? m.name : m.nameEn || m.name;
+          const loc = isKo ? m.location : m.locationEn || m.location;
+          return (
+            <Link
+              key={m.id}
+              href={`/media/${m.id}`}
+              className={[
+                "group flex flex-col bg-bx-white transition-colors hover:bg-bx-off",
+                "border-bx-black",
+                i > 0 ? "border-t-2 sm:border-t-0" : "",
+                i % 2 === 1 ? "sm:border-l-2" : "",
+                i >= 2 ? "sm:border-t-2 lg:border-t-0" : "",
+                "lg:border-l-2",
+                i === 0 ? "lg:border-l-0" : "",
+              ].join(" ")}
+            >
+              <div className="relative aspect-[4/3] overflow-hidden border-b-2 border-bx-black bg-bx-off">
+                {img ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={img}
+                    alt={name}
+                    className="h-full w-full object-cover grayscale transition-[filter,transform] duration-500 group-hover:grayscale-0 group-hover:scale-[1.04]"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+                    [ no image ]
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-2 p-5 sm:p-6">
+                <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+                  // {loc}
+                </p>
+                <h3 className="text-lg font-bold leading-tight tracking-tight text-bx-black sm:text-xl">
+                  {name}
+                </h3>
+                <p className="mt-2 font-mono text-base font-bold text-bx-accent">
+                  {price}
+                </p>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 8. FINAL CTA — 검정 배경 2:1 그리드
+ *   좌(2): 이 매체로 [시작하세요.] + 안내문
+ *   우(1): Booking 2주~ + 버튼 (accent 즉시 견적 / secondary 전화 상담)
+ * ──────────────────────────────────────────────────────────────── */
+function FinalCta({
+  mediaName,
+  mediaId,
+  isKo,
+}: {
+  mediaName: string;
+  mediaId: string;
+  isKo: boolean;
+}) {
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-black text-bx-white">
+      <div className="grid grid-cols-1 lg:grid-cols-3">
+        <div className="border-bx-white px-6 py-14 sm:px-10 sm:py-20 lg:col-span-2 lg:border-r-2 lg:px-12 lg:py-24">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray">
+            <span className="text-bx-accent">[ → ]</span>
+            <span className="ml-2"> / Get Started</span>
+          </p>
+          <h2 className="mt-8 font-extrabold leading-[0.92] tracking-[-0.03em] [font-size:clamp(2.25rem,5vw,4.5rem)]">
+            {isKo ? (
+              <>
+                <span className="block">이 매체로</span>
+                <span className="block">
+                  <span className="bx-accent">[시작하세요.]</span>
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="block">Start with</span>
+                <span className="block">
+                  <span className="bx-accent">[this media.]</span>
+                </span>
+              </>
+            )}
+          </h2>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-bx-gray sm:text-lg">
+            {isKo
+              ? `${mediaName} 의 즉시 견적·예약 가능 여부를 24시간 내 회신해 드립니다.`
+              : `Live availability and a quote for ${mediaName} within 24 hours.`}
+          </p>
+        </div>
+        <aside className="flex flex-col gap-6 border-t-2 border-bx-white px-6 py-12 sm:px-10 lg:border-t-0 lg:px-10 lg:py-24">
+          <div>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray">
+              / Booking
+            </p>
+            <p className="mt-3 text-5xl font-extrabold leading-none tracking-tight text-bx-accent">
+              {isKo ? "2주~" : "2w+"}
+            </p>
+            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray">
+              // {isKo ? "최소 집행 기간" : "Min. period"}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <BtnBlock
+              href={`/quote?media=${mediaId}`}
+              variant="accent"
+              stack
+              className="w-full justify-between"
+            >
+              {isKo ? "즉시 견적 요청" : "Get a quote"}
+            </BtnBlock>
+            <BtnBlock
+              href="/contact"
+              variant="secondary"
+              icon={false}
+              className="w-full justify-between border-bx-white bg-bx-black text-bx-white hover:bg-bx-white hover:text-bx-black"
+            >
+              {isKo ? "📞 전화 상담" : "📞 Call us"}
+            </BtnBlock>
+          </div>
+        </aside>
       </div>
     </section>
   );
