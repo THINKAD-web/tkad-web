@@ -11,7 +11,7 @@
  * 데스크톱: 3컬 그리드 (로고 | 링크 + 드롭다운 | CTA), 2px 검정 보더.
  * 모바일: 햄버거 → 패널. 그룹은 펼침 형태로 모든 leaf 노출.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist/btn-block";
@@ -32,10 +32,12 @@ export type BrutalNavProps = {
   links: BrutalNavEntry[];
   /** 우측 CTA */
   cta?: { href: string; label: string };
+  /** CTA 좌측에 노출할 보조 슬롯 (언어/테마/유저 토글 등). b930b10 의 부가 기능 보존용. */
+  extras?: ReactNode;
   className?: string;
 };
 
-export function BrutalNav({ logo, links, cta, className }: BrutalNavProps) {
+export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const Logo = (
@@ -79,7 +81,10 @@ export function BrutalNav({ logo, links, cta, className }: BrutalNavProps) {
             ),
           )}
         </ul>
-        <div className="flex items-center justify-end border-l-2 border-bx-black px-4 py-2.5">
+        <div className="flex items-center justify-end gap-2 border-l-2 border-bx-black px-4 py-2.5">
+          {extras ? (
+            <div className="flex items-center gap-1">{extras}</div>
+          ) : null}
           {cta ? (
             <BtnBlock href={cta.href} variant="primary" size="sm">
               {cta.label}
@@ -88,18 +93,21 @@ export function BrutalNav({ logo, links, cta, className }: BrutalNavProps) {
         </div>
       </div>
 
-      {/* 모바일: 로고 + 햄버거 */}
-      <div className="flex items-center justify-between px-5 py-4 md:hidden">
+      {/* 모바일: 로고 + extras + 햄버거 */}
+      <div className="flex items-center justify-between gap-2 px-5 py-4 md:hidden">
         {Logo}
-        <button
-          type="button"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen((v) => !v)}
-          className="inline-flex h-10 w-10 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
-        >
-          {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </button>
+        <div className="flex items-center gap-1.5">
+          {extras ? <div className="flex items-center gap-1">{extras}</div> : null}
+          <button
+            type="button"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+            className="inline-flex h-10 w-10 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+          >
+            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
 
       {/* 모바일 패널 — 그룹은 모든 leaf 펼침 */}

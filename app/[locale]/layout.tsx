@@ -7,8 +7,8 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
 import { defaultOgImages, pageAlternates, siteUrl } from "@/lib/seo";
 import { buildStructuredDataGraph } from "@/lib/structured-data";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import { HeaderBrutal } from "@/components/public-chrome/header-brutal";
+import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
 import DeferredPublicWidgets from "@/components/deferred-public-widgets";
 import TopLoader from "@/components/top-loader";
 import PageTransition from "@/components/page-transition";
@@ -151,13 +151,13 @@ export default async function LocaleLayout({ children, params }: Props) {
               </a>
               <ConditionalPublicChrome>
                 <TopLoader />
-                <Header />
+                <HeaderBrutal />
               </ConditionalPublicChrome>
               <main id="main-content" className="flex-1">
                 <PageTransition>{children}</PageTransition>
               </main>
               <ConditionalPublicChrome>
-                <Footer />
+                <FooterBrutal />
                 <DeferredPublicWidgets />
               </ConditionalPublicChrome>
             </ToastProvider>
