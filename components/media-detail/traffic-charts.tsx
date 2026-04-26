@@ -23,7 +23,7 @@ import {
 
 /** Brutalist 차트 색상 팔레트 — 다색 유지 + bx-* 톤. */
 const CHART_PRIMARY = "#000000"; // bx-black
-const CHART_ACCENT = "#ff4d00"; // bx-accent (주황) — peak/강조
+const CHART_ACCENT = "#FF6600"; // bx-accent (주황) — peak/강조
 const CHART_NEUTRAL = "#737373"; // bx-gray-dim (주말)
 const CHART_GRID = "rgba(0,0,0,0.12)";
 

@@ -76,8 +76,8 @@ const TYPE_DISTRIBUTION = [
 function conicGradientForDonut(): string {
   let acc = 0;
   const stops: string[] = [];
-  // bx-accent (#ff4d00), bx-black (#000), gray-dim (#6b6b6b), bx-off (#f5f5f0)
-  const colors = ["#ff4d00", "#000000", "#6b6b6b", "#f5f5f0"];
+  // bx-accent (#FF6600), bx-black (#000), gray-dim (#6b6b6b), bx-off (#f5f5f0)
+  const colors = ["#FF6600", "#000000", "#6b6b6b", "#f5f5f0"];
   TYPE_DISTRIBUTION.forEach((seg, i) => {
     const start = acc;
     acc += seg.pct;

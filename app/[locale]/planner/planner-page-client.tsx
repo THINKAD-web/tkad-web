@@ -704,7 +704,7 @@ export default function PlannerPageClient({
                       value={budgetNum}
                       onChange={(e) => setBudget(e.target.value)}
                       className="h-3 w-full cursor-pointer appearance-none border-2 border-bx-black bg-bx-white"
-                      style={{ accentColor: "#ff4d00" }}
+                      style={{ accentColor: "#FF6600" }}
                       aria-label={t("budget")}
                     />
                     <div className="mt-4 flex flex-wrap items-end gap-3">

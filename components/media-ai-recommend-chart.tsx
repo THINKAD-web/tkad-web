@@ -134,7 +134,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
             cursor={{ strokeDasharray: "3 3" }}
             content={<ChartTooltip isKo={isKo} />}
           />
-          <Scatter data={data} fill="#ff4d00" fillOpacity={0.9} />
+          <Scatter data={data} fill="#FF6600" fillOpacity={0.9} />
         </ScatterChart>
       </ResponsiveContainer>
     </div>
