@@ -74,28 +74,28 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
       <div
         ref={ref}
         className={cn(
-          "relative box-border border-2 border-bx-black bg-bx-white text-bx-black antialiased",
+          "relative box-border border-2 border-navy bg-white text-navy antialiased",
           "w-[210mm] max-w-[210mm] min-h-[297mm] px-10 py-9 text-[11px] leading-snug",
         )}
         style={{ fontFamily: "system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" }}
       >
         {isPremium ? (
-          <div className="pointer-events-none absolute left-0 right-0 top-0 h-3 bg-bx-accent" />
+          <div className="pointer-events-none absolute left-0 right-0 top-0 h-3 bg-gold" />
         ) : null}
 
         <header
           className={cn(
-            "flex items-start justify-between gap-4 border-b-2 border-bx-black pb-5",
+            "flex items-start justify-between gap-4 border-b-2 border-navy pb-5",
           )}
         >
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-gold-dark">
               [ {t("pdfIssuerLine")} ]
             </p>
-            <h1 className="mt-3 text-2xl font-bold tracking-tight text-bx-black">
+            <h1 className="mt-3 text-2xl font-bold tracking-tight text-navy">
               {t("pdfDocHeading")}
             </h1>
-            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
               {`// `}{t("pdfIssueDate")}: {dateStr}
             </p>
           </div>
@@ -112,8 +112,8 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 className={cn(
                   "flex h-12 w-28 items-center justify-center border-2 font-mono text-xs font-bold uppercase tracking-[0.22em]",
                   isPremium
-                    ? "border-bx-accent bg-bx-accent text-bx-white"
-                    : "border-bx-black bg-bx-white text-bx-black",
+                    ? "border-gold bg-gold text-white"
+                    : "border-navy bg-white text-navy",
                 )}
               >
                 THINKAD
@@ -123,47 +123,47 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
         </header>
 
         <section className="mt-6 grid gap-0 sm:grid-cols-2">
-          <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black p-4">
-            <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <div className="-mt-[2px] -ml-[2px] border-2 border-navy p-4">
+            <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-gold-dark">
               [ {t("pdfClientSection")} ]
             </h2>
             <dl className="mt-3 space-y-1.5 text-[11px]">
               <div className="flex gap-2">
-                <dt className="w-16 shrink-0 font-mono text-bx-gray-dim">{t("company")}</dt>
-                <dd className="min-w-0 font-bold text-bx-black">
+                <dt className="w-16 shrink-0 font-mono text-slate-500">{t("company")}</dt>
+                <dd className="min-w-0 font-bold text-navy">
                   {company.trim() || "—"}
                 </dd>
               </div>
               <div className="flex gap-2">
-                <dt className="w-16 shrink-0 font-mono text-bx-gray-dim">{t("name")}</dt>
-                <dd className="min-w-0 font-bold text-bx-black">
+                <dt className="w-16 shrink-0 font-mono text-slate-500">{t("name")}</dt>
+                <dd className="min-w-0 font-bold text-navy">
                   {contactName.trim() || "—"}
                 </dd>
               </div>
               <div className="flex gap-2">
-                <dt className="w-16 shrink-0 font-mono text-bx-gray-dim">{t("phone")}</dt>
+                <dt className="w-16 shrink-0 font-mono text-slate-500">{t("phone")}</dt>
                 <dd className="min-w-0 font-mono">{contactPhone.trim() || "—"}</dd>
               </div>
               {contactEmail.trim() ? (
                 <div className="flex gap-2">
-                  <dt className="w-16 shrink-0 font-mono text-bx-gray-dim">{t("email")}</dt>
+                  <dt className="w-16 shrink-0 font-mono text-slate-500">{t("email")}</dt>
                   <dd className="min-w-0 break-all font-mono">{contactEmail.trim()}</dd>
                 </div>
               ) : null}
             </dl>
           </div>
-          <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black p-4">
-            <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <div className="-mt-[2px] -ml-[2px] border-2 border-navy p-4">
+            <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-gold-dark">
               [ {t("pdfCampaignSection")} ]
             </h2>
             <dl className="mt-3 space-y-1.5 text-[11px]">
               <div className="flex gap-2">
-                <dt className="w-20 shrink-0 font-mono text-bx-gray-dim">{t("period")}</dt>
-                <dd className="font-bold text-bx-black">
+                <dt className="w-20 shrink-0 font-mono text-slate-500">{t("period")}</dt>
+                <dd className="font-bold text-navy">
                   {periodLabel} · {t("pdfMonthsUnit", { n: periodMonths })}
                 </dd>
               </div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                 {`// `}{t("pdfAmountUnitNote")}
               </p>
             </dl>
@@ -171,29 +171,29 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
         </section>
 
         <section className="mt-8">
-          <h2 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <h2 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-gold-dark">
             [ {t("pdfMediaSection")} ]
           </h2>
-          <div className="overflow-hidden border-2 border-bx-black">
+          <div className="overflow-hidden border-2 border-navy">
             <table className="w-full border-collapse text-left text-[10px]">
               <thead>
-                <tr className="bg-bx-black font-mono text-[9px] uppercase tracking-[0.18em] text-bx-accent">
-                  <th className="w-14 border-b-2 border-bx-black px-1.5 py-2 font-bold">
+                <tr className="bg-navy font-mono text-[9px] uppercase tracking-[0.18em] text-gold-dark">
+                  <th className="w-14 border-b-2 border-navy px-1.5 py-2 font-bold">
                     {t("pdfColThumb")}
                   </th>
-                  <th className="border-b-2 border-bx-black px-1.5 py-2 font-bold">
+                  <th className="border-b-2 border-navy px-1.5 py-2 font-bold">
                     {t("pdfColName")}
                   </th>
-                  <th className="border-b-2 border-bx-black px-1.5 py-2 font-bold">
+                  <th className="border-b-2 border-navy px-1.5 py-2 font-bold">
                     {t("pdfColLocation")}
                   </th>
-                  <th className="w-24 border-b-2 border-bx-black px-1.5 py-2 font-bold">
+                  <th className="w-24 border-b-2 border-navy px-1.5 py-2 font-bold">
                     {t("pdfColPeriod")}
                   </th>
-                  <th className="w-20 border-b-2 border-bx-black px-1.5 py-2 text-right font-bold">
+                  <th className="w-20 border-b-2 border-navy px-1.5 py-2 text-right font-bold">
                     {t("pdfColUnit")}
                   </th>
-                  <th className="w-24 border-b-2 border-bx-black px-1.5 py-2 text-right font-bold">
+                  <th className="w-24 border-b-2 border-navy px-1.5 py-2 text-right font-bold">
                     {t("pdfColAmount")}
                   </th>
                 </tr>
@@ -203,12 +203,12 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   <tr
                     key={row.id}
                     className={cn(
-                      "border-b border-bx-black align-top",
-                      idx % 2 === 0 ? "bg-bx-white" : "bg-bx-off",
+                      "border-b border-navy align-top",
+                      idx % 2 === 0 ? "bg-white" : "bg-slate-50",
                     )}
                   >
                     <td className="px-1.5 py-2">
-                      <div className="h-12 w-12 overflow-hidden border-2 border-bx-black bg-bx-off">
+                      <div className="h-12 w-12 overflow-hidden border-2 border-navy bg-slate-50">
                         {row.thumbUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -218,15 +218,15 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center font-mono text-[8px] text-bx-gray-dim">
+                          <div className="flex h-full w-full items-center justify-center font-mono text-[8px] text-slate-500">
                             —
                           </div>
                         )}
                       </div>
                     </td>
-                    <td className="px-1.5 py-2 font-bold text-bx-black">
+                    <td className="px-1.5 py-2 font-bold text-navy">
                       <p className="font-bold">{row.name}</p>
-                      <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                      <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 font-mono text-[10px] tracking-tight text-slate-500">
                         {row.size && <span>사이즈: {row.size}</span>}
                         {row.dailyFootTraffic != null && (
                           <span>일 유동: {row.dailyFootTraffic.toLocaleString()}명</span>
@@ -234,12 +234,12 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                         {row.operatingHours && <span>운영: {row.operatingHours}</span>}
                       </div>
                     </td>
-                    <td className="px-1.5 py-2 text-bx-black">{row.location}</td>
-                    <td className="px-1.5 py-2 font-mono text-bx-black">{periodLabel}</td>
+                    <td className="px-1.5 py-2 text-navy">{row.location}</td>
+                    <td className="px-1.5 py-2 font-mono text-navy">{periodLabel}</td>
                     <td className="px-1.5 py-2 text-right font-mono tabular-nums">
                       {formatManWon(row.unitPriceMan, locale)}
                     </td>
-                    <td className="px-1.5 py-2 text-right font-mono font-bold tabular-nums text-bx-black">
+                    <td className="px-1.5 py-2 text-right font-mono font-bold tabular-nums text-navy">
                       {formatManWon(row.lineTotalMan, locale)}
                     </td>
                   </tr>
@@ -251,45 +251,45 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
 
         <section className="mt-8 flex justify-end">
           <div className="w-full max-w-[280px] space-y-0 text-[11px]">
-            <div className="flex justify-between gap-4 border-2 border-bx-black bg-bx-white px-3 py-2">
-              <span className="font-mono text-bx-gray-dim">{t("pdfSupply")}</span>
-              <span className="font-mono tabular-nums font-bold text-bx-black">
+            <div className="flex justify-between gap-4 border-2 border-navy bg-white px-3 py-2">
+              <span className="font-mono text-slate-500">{t("pdfSupply")}</span>
+              <span className="font-mono tabular-nums font-bold text-navy">
                 {formatManWon(subtotalMan, locale)}
               </span>
             </div>
-            <div className="-mt-[2px] flex justify-between gap-4 border-2 border-bx-black bg-bx-white px-3 py-2">
-              <span className="font-mono text-bx-gray-dim">{t("pdfVat")}</span>
-              <span className="font-mono tabular-nums text-bx-black">
+            <div className="-mt-[2px] flex justify-between gap-4 border-2 border-navy bg-white px-3 py-2">
+              <span className="font-mono text-slate-500">{t("pdfVat")}</span>
+              <span className="font-mono tabular-nums text-navy">
                 {formatManWon(vatMan, locale)}
               </span>
             </div>
-            <div className="-mt-[2px] flex justify-between gap-4 border-2 border-bx-accent bg-bx-black px-3 py-3">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <div className="-mt-[2px] flex justify-between gap-4 border-2 border-gold bg-navy px-3 py-3">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-gold-dark">
                 [ {t("pdfTotal")} ]
               </span>
-              <span className="font-mono text-base font-bold tabular-nums text-bx-accent">
+              <span className="font-mono text-base font-bold tabular-nums text-gold-dark">
                 {formatManWon(grandTotalMan, locale)}
               </span>
             </div>
           </div>
         </section>
 
-        <footer className="mt-10 border-t-2 border-bx-black pt-6 text-[9px] text-bx-gray-dim">
+        <footer className="mt-10 border-t-2 border-navy pt-6 text-[9px] text-slate-500">
           <p className="font-mono">{`// `}{t("pdfValidity")}</p>
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-gold-dark">
                 [ {t("pdfSignature")} ]
               </p>
-              <div className="mt-8 border-b-2 border-bx-black" />
+              <div className="mt-8 border-b-2 border-navy" />
             </div>
             <div className="text-right sm:text-left">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-gold-dark">
                 [ {t("pdfFooterCompany")} ]
               </p>
-              <p className="mt-2 font-mono text-bx-black">{t("pdfFooterTel")}</p>
-              <p className="mt-0.5 font-mono text-bx-black">{t("pdfFooterEmail")}</p>
-              <p className="mt-3 font-mono text-bx-gray-dim">{t("pdfFooterNote")}</p>
+              <p className="mt-2 font-mono text-navy">{t("pdfFooterTel")}</p>
+              <p className="mt-0.5 font-mono text-navy">{t("pdfFooterEmail")}</p>
+              <p className="mt-3 font-mono text-slate-500">{t("pdfFooterNote")}</p>
             </div>
           </div>
         </footer>
