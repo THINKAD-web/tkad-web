@@ -28,6 +28,30 @@ export function formatMediaPriceWonWithSymbol(
   return `₩${wonUnits.toLocaleString(locale)}`;
 }
 
+/**
+ * 카탈로그 `price` 필드를 한국식 압축 표기로 변환.
+ *   ≥ 1억:   ₩2억 / ₩2.5억
+ *   ≥ 1만:   ₩200만 / ₩5,000만
+ *   < 1만:   ₩9,500
+ * (8자리 숫자가 모바일 카드에서 줄바꿈 깨지는 문제 방지)
+ */
+export function formatMediaPriceCompactKrw(
+  catalogValue: number,
+): string {
+  const won = catalogPriceFieldToWon(catalogValue);
+  if (!Number.isFinite(won) || won <= 0) return "—";
+  if (won >= 100_000_000) {
+    const eok = won / 100_000_000;
+    const num = eok % 1 === 0 ? String(eok) : eok.toFixed(1);
+    return `₩${num}억`;
+  }
+  if (won >= 10_000) {
+    const man = Math.round(won / 10_000);
+    return `₩${man.toLocaleString("ko-KR")}만`;
+  }
+  return `₩${won.toLocaleString("ko-KR")}`;
+}
+
 export function formatCatalogPriceFieldWon(
   value: number,
   locale = "ko-KR",

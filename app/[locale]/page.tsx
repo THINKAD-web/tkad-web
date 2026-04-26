@@ -5,7 +5,7 @@ import {
   fetchHomePopularMedia,
 } from "@/lib/public-media-catalog";
 import { type MediaItem, getPrimaryMediaImageUrl } from "@/lib/media-data";
-import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
+import { formatMediaPriceCompactKrw } from "@/lib/media-price-format";
 import { ArrowRight, ArrowDown } from "lucide-react";
 import { BtnBlock, SectionHead, MediaCard } from "@/components/brutalist";
 import { testimonials } from "@/data/testimonials";
@@ -62,6 +62,7 @@ function HomeContent({
   return (
     <>
       <Hero isKo={isKo} t={t} heroMedia={heroMedia} />
+      <MobileMetaBar isKo={isKo} />
       <Ticker isKo={isKo} />
       <Stats isKo={isKo} />
       <Process isKo={isKo} />
@@ -105,8 +106,8 @@ function Hero({
   return (
     <section className="relative border-b-2 border-bx-black bg-bx-white">
       <div className="grid grid-cols-1 lg:grid-cols-12">
-        {/* 좌측 메타 사이드바 — lg cols 1-3 */}
-        <aside className="border-bx-black bg-bx-off px-6 py-10 sm:px-8 sm:py-12 lg:col-span-3 lg:border-r-2 lg:py-16">
+        {/* 좌측 메타 사이드바 — lg cols 1-3 (모바일 숨김; 하단 가로 스크롤 바로 대체) */}
+        <aside className="hidden border-bx-black bg-bx-off px-8 py-12 lg:col-span-3 lg:flex lg:flex-col lg:border-r-2 lg:py-16">
           <div className="space-y-8">
             <MetaRow label="Index" value="2026 / Ver. 015" />
             <MetaRow
@@ -121,11 +122,7 @@ function Hero({
             />
             <MetaRow
               label="Service"
-              value={
-                isKo
-                  ? "Out-of-Home Advertising Agency"
-                  : "Out-of-Home Advertising Agency"
-              }
+              value="Out-of-Home Advertising Agency"
             />
             <MetaRow
               label="Status"
@@ -141,8 +138,8 @@ function Hero({
           </div>
         </aside>
 
-        {/* 중앙 메인 영역 — lg cols 4-10 (7컬) */}
-        <div className="border-t-2 border-bx-black px-6 py-10 sm:px-10 sm:py-14 lg:col-span-7 lg:border-t-0 lg:border-r-2 lg:px-12 lg:py-20">
+        {/* 중앙 메인 영역 — lg cols 4-10 (7컬) — 모바일 첫 영역 */}
+        <div className="px-6 py-10 sm:px-10 sm:py-14 lg:col-span-7 lg:border-r-2 lg:px-12 lg:py-20">
           {/* 상단 라벨 */}
           <p className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
             <span
@@ -210,13 +207,13 @@ function Hero({
 
         {/* 우측 이미지 — lg cols 11-13 (3컬) */}
         <div className="relative border-t-2 border-bx-black lg:col-span-2 lg:border-t-0">
-          <div className="relative h-64 w-full overflow-hidden bg-bx-off lg:h-full lg:min-h-[600px]">
+          <div className="group relative aspect-[4/3] w-full overflow-hidden bg-bx-off sm:aspect-[16/10] lg:aspect-auto lg:h-full lg:min-h-[600px]">
             {heroImg ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={heroImg}
                 alt={heroName ?? ""}
-                className="h-full w-full object-cover grayscale"
+                className="h-full w-full object-cover grayscale transition-[filter] duration-500 ease-out group-hover:grayscale-0"
                 loading="eager"
               />
             ) : (
@@ -271,6 +268,36 @@ function MetaRow({
   );
 }
 
+/** 모바일 전용 가로 스크롤 메타 바 — HERO 사이드바를 lg 이상에서만 노출하고
+ * <lg 에서 동일 정보를 가로로 압축해 보여준다 (Index/Coordinates/Service/Status). */
+function MobileMetaBar({ isKo: _isKo }: { isKo: boolean }) {
+  const items = [
+    { k: "Index", v: "2026 / Ver. 015" },
+    { k: "Coordinates", v: "37.5004°N / 127.0270°E · Seoul" },
+    { k: "Service", v: "Out-of-Home Advertising Agency" },
+    { k: "Status", v: "▮▮▮▮▮▮▮▮▮▮ Operational" },
+  ];
+  return (
+    <div className="border-b-2 border-bx-black bg-bx-off lg:hidden">
+      <div className="flex divide-x-2 divide-bx-black overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {items.map((it) => (
+          <div
+            key={it.k}
+            className="shrink-0 whitespace-nowrap px-5 py-4"
+          >
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+              / {it.k}
+            </p>
+            <p className="mt-1.5 font-mono text-[12px] leading-snug text-bx-black">
+              {it.v}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ────────────────────────────────────────────────────────────────
  * 2. TICKER — 검정 배경 가로 무한 스크롤
  *   "500+ Verified Media ● 15 Years ● 100+ Partners ●
@@ -303,13 +330,13 @@ function Ticker({ isKo }: { isKo: boolean }) {
   return (
     <section
       aria-label={isKo ? "운영 지표 마퀴" : "Operations marquee"}
-      className="relative overflow-hidden border-b-2 border-bx-black bg-bx-black"
+      className="relative isolate min-h-[3.5rem] overflow-hidden border-b-2 border-bx-black bg-bx-black"
     >
-      <div className="bx-marquee flex items-center gap-10 whitespace-nowrap py-5 will-change-transform">
+      <div className="bx-marquee flex items-center gap-10 whitespace-nowrap py-4 sm:py-5 will-change-transform">
         {track.map((phrase, i) => (
           <span
             key={`${phrase}-${i}`}
-            className="inline-flex items-center gap-10 font-mono text-sm font-semibold uppercase tracking-[0.28em] text-bx-white"
+            className="inline-flex items-center gap-10 font-mono text-[12px] font-semibold uppercase tracking-[0.24em] text-bx-white sm:text-sm sm:tracking-[0.28em]"
           >
             <span>{phrase}</span>
             <span className="text-bx-accent" aria-hidden>
@@ -483,7 +510,7 @@ function Process({ isKo }: { isKo: boolean }) {
             ].join(" ")}
           >
             {/* 64×64 번호 박스 — hover 시 주황 invert */}
-            <span className="inline-flex h-16 w-16 items-center justify-center border-2 border-bx-black bg-bx-white font-mono text-base font-bold text-bx-black transition-colors duration-150 group-hover:border-bx-accent group-hover:bg-bx-accent group-hover:text-bx-white">
+            <span className="inline-flex h-16 w-16 items-center justify-center border-2 border-bx-black bg-bx-white font-mono text-2xl font-extrabold tracking-tight text-bx-black transition-colors duration-150 group-hover:border-bx-accent group-hover:bg-bx-accent group-hover:text-bx-white sm:text-3xl">
               {s.no}
             </span>
 
@@ -714,7 +741,7 @@ function MediaTop6({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {items.slice(0, 6).map((m, i) => {
           const img = getPrimaryMediaImageUrl(m);
-          const price = formatMediaPriceWonWithSymbol(m.price);
+          const price = formatMediaPriceCompactKrw(m.price);
           return (
             <div
               key={m.id}
@@ -999,8 +1026,7 @@ function WhyUs({ isKo }: { isKo: boolean }) {
                 {isKo ? p.descKo : p.descEn}
               </p>
               <span
-                className={`mt-auto inline-flex w-fit items-center border-2 px-3 py-1.5 pt-10 font-mono text-[11px] font-bold uppercase tracking-[0.22em] ${tagBg}`}
-                style={{ paddingTop: "6px" }}
+                className={`mt-10 inline-flex w-fit items-center border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] ${tagBg}`}
               >
                 {p.tag}
               </span>
@@ -1013,12 +1039,12 @@ function WhyUs({ isKo }: { isKo: boolean }) {
 }
 
 /* ────────────────────────────────────────────────────────────────
- * 9. TESTIMONIALS — SectionHead [06] / Voices + 3컬
+ * 9. TESTIMONIALS — SectionHead [06] / Voices + 2x2 (lg) / 1열 (모바일)
  *   각 셀: 상단 메타바(카테고리 + 주황 결과 박스) → 큰 인용문 → 작성자/회사
- *   data/testimonials.ts 의 상위 3건 사용.
+ *   data/testimonials.ts 의 상위 4건 사용.
  * ──────────────────────────────────────────────────────────────── */
 function Testimonials({ isKo }: { isKo: boolean }) {
-  const list = testimonials.slice(0, 3);
+  const list = testimonials.slice(0, 4);
   if (list.length === 0) return null;
 
   return (
@@ -1039,7 +1065,7 @@ function Testimonials({ isKo }: { isKo: boolean }) {
         }
         meta={isKo ? "Real voices" : "Real voices"}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2">
         {list.map((t, i) => (
           <article
             key={t.id}
@@ -1048,9 +1074,7 @@ function Testimonials({ isKo }: { isKo: boolean }) {
               "border-bx-black",
               i > 0 ? "border-t-2 sm:border-t-0" : "",
               i % 2 === 1 ? "sm:border-l-2" : "",
-              i >= 2 ? "sm:border-t-2 lg:border-t-0" : "",
-              "lg:border-l-2",
-              i === 0 ? "lg:border-l-0" : "",
+              i >= 2 ? "sm:border-t-2" : "",
             ].join(" ")}
           >
             {/* 상단 메타바 — 카테고리 + 주황 결과 박스 */}

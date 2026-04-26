@@ -7,7 +7,7 @@
  */
 import { Link } from "@/i18n/navigation";
 import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
-import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
+import { formatMediaPriceCompactKrw } from "@/lib/media-price-format";
 import { BtnBlock, SectionHead } from "@/components/brutalist";
 import { MediaPatternSection } from "@/components/brutalist/media-pattern";
 
@@ -66,7 +66,7 @@ export function BrutalMediaDetail({
             : "Inquire";
 
   const priceWon = media.price < 1_000_000 ? media.price * 10_000 : media.price;
-  const priceLabel = formatMediaPriceWonWithSymbol(media.price);
+  const priceLabel = formatMediaPriceCompactKrw(media.price);
 
   return (
     <>
@@ -788,7 +788,7 @@ function Related({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {similar.slice(0, 3).map((m, i) => {
           const img = getPrimaryMediaImageUrl(m);
-          const price = formatMediaPriceWonWithSymbol(m.price);
+          const price = formatMediaPriceCompactKrw(m.price);
           const name = isKo ? m.name : m.nameEn || m.name;
           const loc = isKo ? m.location : m.locationEn || m.location;
           return (

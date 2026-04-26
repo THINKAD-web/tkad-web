@@ -12,7 +12,7 @@ import { Search } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { matchesMediaTextQuery } from "@/lib/media-data";
 import { KEYWORD_FILTER_SEARCH_DEBOUNCE_MS } from "@/lib/media-keyword-filter-logic";
-import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
+import { formatMediaPriceCompactKrw } from "@/lib/media-price-format";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 import {
   getCompareCartEntries,
@@ -348,7 +348,7 @@ export default function BrutalMediaBrowse({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {paged.map((m, i) => {
               const img = getPrimaryMediaImageUrl(m);
-              const price = formatMediaPriceWonWithSymbol(m.price);
+              const price = formatMediaPriceCompactKrw(m.price);
               const inCart = isInCompare(m.id);
               return (
                 <div
