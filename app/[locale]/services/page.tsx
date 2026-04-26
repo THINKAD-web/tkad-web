@@ -1,271 +1,271 @@
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Award,
-  BarChart3,
-  ClipboardList,
-  HeadphonesIcon,
-  Lightbulb,
-  MapPinned,
-  Radio,
-  ShieldCheck,
-  TrendingUp,
-  type LucideIcon,
+  ArrowDown,
+  Compass,
+  PlaySquare,
+  LineChart,
+  Plus,
 } from "lucide-react";
-import { SectionHeading } from "@/components/section-heading";
-import { AnimatedCard } from "@/components/animated-card";
-import { Timeline } from "@/components/timeline";
-import { ServicesFaq } from "@/components/services-faq";
+import { BtnBlock, SectionHead } from "@/components/brutalist";
+import { ServicesFaq } from "@/components/brutalist/services-faq";
 
-type Props = {
-  params: Promise<{ locale: string }>;
-};
+type Props = { params: Promise<{ locale: string }> };
+
+export const revalidate = 3600;
 
 export default async function ServicesPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "servicesPage" });
+  const isKo = locale === "ko";
 
-  const pillars = [
-    {
-      icon: Lightbulb,
-      title: t("pillar1Title"),
-      body: t("pillar1Body"),
-    },
-    {
-      icon: MapPinned,
-      title: t("pillar2Title"),
-      body: t("pillar2Body"),
-    },
-    {
-      icon: Radio,
-      title: t("pillar3Title"),
-      body: t("pillar3Body"),
-    },
-  ] as const;
+  return (
+    <>
+      <BreadcrumbBar isKo={isKo} />
+      <Header isKo={isKo} />
+      <CoreServices isKo={isKo} />
+      <ProcessTimeline isKo={isKo} />
+      <Deliverables isKo={isKo} />
+      <WhyUs isKo={isKo} />
+      <ServicesFaq isKo={isKo} />
+      <FinalCta isKo={isKo} />
+    </>
+  );
+}
 
-  const steps = [
-    { label: "1", title: t("step1Title"), body: t("step1Body") },
-    { label: "2", title: t("step2Title"), body: t("step2Body") },
-    { label: "3", title: t("step3Title"), body: t("step3Body") },
-    { label: "4", title: t("step4Title"), body: t("step4Body") },
-    { label: "5", title: t("step5Title"), body: t("step5Body") },
+function BreadcrumbBar({ isKo }: { isKo: boolean }) {
+  return (
+    <div className="border-b-2 border-bx-black bg-bx-white">
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-3 sm:px-10">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em]">
+          <Link
+            href="/"
+            className="text-bx-gray-dim transition-colors hover:text-bx-accent"
+          >
+            Home
+          </Link>
+          <span className="mx-2 text-bx-gray-dim">/</span>
+          <span className="text-bx-black">Services</span>
+        </p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+          [01 / 04]
+        </p>
+        {/* sr-only for isKo to silence unused */}
+        <span className="sr-only">{isKo ? "ko" : "en"}</span>
+      </div>
+    </div>
+  );
+}
+
+function Header({ isKo }: { isKo: boolean }) {
+  const metas = [
+    { label: "Page", value: "Services Overview" },
+    {
+      label: "Service Type",
+      value: "OOH Planning / Media Operations / Data Analytics",
+    },
+    {
+      label: "Delivery",
+      value: "End-to-end / One-stop",
+    },
+    {
+      label: "Lead Time",
+      value: "24h Response / 2-4wk Launch",
+    },
   ];
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <div className="mx-auto grid max-w-[1400px] grid-cols-1 lg:grid-cols-12">
+        <aside className="border-bx-black bg-bx-off px-6 py-10 sm:px-8 sm:py-12 lg:col-span-4 lg:border-r-2 lg:px-10 lg:py-16">
+          <div className="space-y-8">
+            {metas.map((m) => (
+              <div key={m.label}>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  {m.label}
+                </p>
+                <p className="mt-2 font-mono text-[12px] leading-snug text-bx-black">
+                  {m.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </aside>
 
-  const differentiators: { icon: LucideIcon; text: string }[] = [
-    { icon: ShieldCheck, text: t("diff1") },
-    { icon: TrendingUp, text: t("diff2") },
-    { icon: Award, text: t("diff3") },
-    { icon: HeadphonesIcon, text: t("diff4") },
-  ];
+        <div className="px-6 py-12 sm:px-10 sm:py-16 lg:col-span-8 lg:px-12 lg:py-20">
+          <span className="inline-block bg-bx-accent px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white">
+            [ Services / 서비스 ]
+          </span>
+          <h1 className="mt-8 font-extrabold leading-[0.96] tracking-[-0.02em] text-bx-black [font-size:clamp(2.5rem,6vw,5.5rem)]">
+            {isKo ? (
+              <>
+                데이터로 <span className="bx-accent">[설계]</span>하고,
+                <br />
+                현장에서 <span className="bx-invert">완성</span>한다.
+              </>
+            ) : (
+              <>
+                <span className="bx-accent">[Designed]</span> by data,
+                <br />
+                <span className="bx-invert">delivered</span> on site.
+              </>
+            )}
+          </h1>
+          <p className="mt-8 max-w-2xl text-base leading-relaxed text-bx-gray-dim sm:text-lg">
+            {isKo
+              ? "OOH 매체 기획부터 운영·데이터 분석까지 — 싱커드는 캠페인의 모든 단계를 직접 책임집니다. 검증된 매체, 투명한 데이터, 검증된 ROI."
+              : "From media planning through operations to data analytics — THINKAD owns every step of your campaign. Verified media, transparent data, measurable ROI."}
+          </p>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <BtnBlock
+              href="/contact"
+              variant="primary"
+              className="!w-full sm:!w-auto"
+            >
+              {isKo ? "견적 요청" : "Request quote"}
+            </BtnBlock>
+            <BtnBlock
+              href="/media"
+              variant="secondary"
+              icon={false}
+              className="!w-full justify-between sm:!w-auto"
+            >
+              <span>{isKo ? "매체 보기" : "Browse media"}</span>
+              <ArrowDown className="h-4 w-4" aria-hidden />
+            </BtnBlock>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-  const faqItems = [
-    { question: t("faq1Q"), answer: t("faq1A") },
-    { question: t("faq2Q"), answer: t("faq2A") },
-    { question: t("faq3Q"), answer: t("faq3A") },
-    { question: t("faq4Q"), answer: t("faq4A") },
+function CoreServices({ isKo }: { isKo: boolean }) {
+  const services = [
+    {
+      no: "01",
+      Icon: Compass,
+      titleKo: "매체 기획",
+      titleEn: "Media Planning",
+      descKo:
+        "타깃·예산·집행 기간을 입력하면 데이터 기반으로 최적의 매체 믹스를 설계합니다.",
+      descEn:
+        "We design the optimal media mix from your target, budget, and timeline using compounded data.",
+      itemsKo: ["타깃 분석", "상권 데이터 매핑", "매체 믹스 설계", "예산 시뮬레이션"],
+      itemsEn: ["Target analysis", "Market data mapping", "Media mix design", "Budget simulation"],
+    },
+    {
+      no: "02",
+      Icon: PlaySquare,
+      titleKo: "매체 운영",
+      titleEn: "Media Operations",
+      descKo:
+        "매체 선정·계약·설치·송출·모니터링까지 모든 운영 단계를 한 팀이 책임집니다.",
+      descEn:
+        "Selection, contract, install, broadcast, and monitoring — owned end-to-end by one team.",
+      itemsKo: ["선정·계약", "크리에이티브 검수", "설치·송출", "실시간 모니터링"],
+      itemsEn: ["Selection · contract", "Creative QA", "Install · broadcast", "Real-time monitoring"],
+    },
+    {
+      no: "03",
+      Icon: LineChart,
+      titleKo: "데이터 분석",
+      titleEn: "Data Analytics",
+      descKo:
+        "주간·월간 리포트 + 유동인구 분석 + ROI 측정 + AI 플래너로 다음 캠페인을 설계합니다.",
+      descEn:
+        "Weekly · monthly reports, footfall analysis, ROI measurement, and AI-assisted planning for the next round.",
+      itemsKo: ["주간·월간 리포트", "유동인구 분석", "ROI 측정", "AI 플래너"],
+      itemsEn: ["Weekly · monthly reports", "Footfall analysis", "ROI measurement", "AI Planner"],
+    },
   ];
 
   return (
-    <div className="relative overflow-hidden">
-      <section className="relative border-b border-navy/20 bg-gradient-to-br from-navy via-navy to-[#0c1024]">
-        <div
-          className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.12]"
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 sm:py-24 lg:px-8 lg:py-28">
-          <Badge
-            variant="secondary"
-            className="mb-5 border-gold/40 bg-gold/15 text-xs font-semibold tracking-wide text-gold-light"
-          >
-            {t("heroBadge")}
-          </Badge>
-          <h1 className="mx-auto max-w-4xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
-            {t("heroTitle")}
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
-            {t("heroSubtitle")}
-          </p>
-          <div className="mt-12 flex flex-wrap justify-center gap-3">
-            <Button variant="cta" className="btn-gold rounded-full px-8" asChild>
-              <Link href="/quote">{t("ctaButton")}</Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-full border-white/25 bg-white/5 text-white hover:bg-white/10"
-              asChild
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="01"
+        category="Core"
+        title={
+          isKo ? (
+            <>
+              3가지 <span className="bx-accent">[핵심]</span> 서비스.
+            </>
+          ) : (
+            <>
+              Three <span className="bx-accent">[core]</span> services.
+            </>
+          )
+        }
+        meta={
+          isKo ? "Planning · Operations\nAnalytics" : "Planning · Operations\nAnalytics"
+        }
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-3">
+        {services.map((s, i) => {
+          const Icon = s.Icon;
+          return (
+            <article
+              key={s.no}
+              className={[
+                "group relative flex flex-col bg-bx-white p-8 transition-colors duration-150 hover:bg-bx-off sm:p-10 lg:min-h-[480px]",
+                "border-bx-black",
+                i > 0 ? "border-t-2 lg:border-l-2 lg:border-t-0" : "",
+              ].join(" ")}
             >
-              <Link href="/media">{t("ctaSecondary")}</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+              <span className="inline-flex h-20 w-20 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors duration-150 group-hover:border-bx-accent group-hover:bg-bx-accent group-hover:text-bx-white">
+                <Icon className="h-9 w-9" strokeWidth={1.6} />
+              </span>
+              <p className="mt-8 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                / Service {s.no}
+              </p>
+              <h3 className="mt-3 font-extrabold leading-[0.96] tracking-[-0.02em] text-bx-black [font-size:clamp(1.75rem,2.5vw,2.25rem)]">
+                {isKo ? s.titleKo : s.titleEn}
+              </h3>
+              <p className="mt-5 text-sm leading-relaxed text-bx-gray-dim sm:text-base">
+                {isKo ? s.descKo : s.descEn}
+              </p>
+              <ul className="mt-auto space-y-2.5 pt-8 border-t-2 border-bx-black">
+                {(isKo ? s.itemsKo : s.itemsEn).map((it) => (
+                  <li key={it} className="flex items-baseline gap-2 font-mono text-[12px] tracking-tight text-bx-black">
+                    <Plus className="h-3 w-3 shrink-0 text-bx-accent" aria-hidden strokeWidth={3} />
+                    <span>{it}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
-      <section className="relative bg-white py-24 sm:py-28 lg:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            eyebrow="Services"
-            title={t("pillarsTitle")}
-            className="mb-14"
-          />
-          <div className="grid gap-8 md:grid-cols-3">
-            {pillars.map((p, i) => {
-              const Icon = p.icon;
-              return (
-                <AnimatedCard key={p.title} delay={i * 100}>
-                  <Card className="group h-full rounded-2xl border border-navy/8 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-gold/[0.06] hover:shadow-md">
-                    <CardHeader className="space-y-4 pb-4">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/12 text-navy transition-colors duration-300 group-hover:bg-gold/20">
-                        <Icon className="h-8 w-8" aria-hidden />
-                      </div>
-                      <CardTitle className="text-xl text-navy">{p.title}</CardTitle>
-                      <CardDescription className="text-sm leading-relaxed sm:text-[15px]">
-                        {p.body}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                </AnimatedCard>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="relative border-t border-navy/8 bg-slate-50 py-24 sm:py-28 lg:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-4 flex items-center gap-2 text-gold">
-            <BarChart3 className="h-5 w-5" aria-hidden />
-            <span className="text-xs font-semibold uppercase tracking-[0.2em]">
-              {t("processBadge")}
-            </span>
-          </div>
-          <SectionHeading
-            title={t("processTitle")}
-            subtitle={t("processIntro")}
-            align="left"
-            className="mb-12 max-w-2xl"
-          />
-
-          <div className="md:hidden flex w-full min-w-0 max-w-full flex-col gap-4 overflow-x-hidden">
-            {steps.map((step, i) => (
-              <AnimatedCard
-                key={step.label}
-                delay={i * 60}
-                className="w-full min-w-0"
-              >
-                <Card className="h-full rounded-2xl border border-navy/8 bg-white shadow-sm">
-                  <CardHeader className="pb-2">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy text-sm font-bold text-gold-light shadow-sm">
-                      {step.label}
-                    </span>
-                    <CardTitle className="pt-2 text-base text-navy">
-                      {step.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-sm leading-relaxed text-muted-foreground break-words">
-                      {step.body}
-                    </p>
-                  </CardContent>
-                </Card>
-              </AnimatedCard>
-            ))}
-          </div>
-
-          <div className="hidden md:block">
-            <Timeline
-              items={steps.map((s) => ({
-                label: s.label,
-                title: s.title,
-                description: s.body,
-              }))}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="relative bg-white py-24 sm:py-28 lg:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl border border-navy/8 bg-slate-50/80 px-6 py-12 shadow-sm sm:px-10 sm:py-14 lg:px-14">
-            <SectionHeading
-              eyebrow="Why us"
-              title={t("diffTitle")}
-              align="left"
-              className="mb-10"
-            />
-            <ul className="grid gap-5 sm:grid-cols-2">
-              {differentiators.map(({ icon: Icon, text }) => (
-                <li
-                  key={text}
-                  className="flex gap-3 text-sm leading-relaxed sm:text-base"
-                >
-                  <span
-                    className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold/18 to-gold/6 text-gold-dark ring-1 ring-gold/25"
-                    aria-hidden
-                  >
-                    <Icon className="h-4 w-4" strokeWidth={1.75} />
-                  </span>
-                  <span className="pt-1 text-muted-foreground">{text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative border-t border-navy/8 bg-white py-24 sm:py-28 lg:py-32">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <ServicesFaq title={t("faqTitle")} items={faqItems} />
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden border-t border-navy/10 py-24 sm:py-28">
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-navy via-navy to-[#0c1024]"
-          aria-hidden
-        />
-        <div
-          className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.12]"
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <ClipboardList className="mx-auto h-10 w-10 text-gold" aria-hidden />
-          <h2 className="mt-6 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-            {t("ctaTitle")}
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
-            {t("ctaSubtitle")}
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Button
-              size="lg"
-              variant="cta"
-              className="btn-gold rounded-full px-10 shadow-lg shadow-cta/30"
-              asChild
-            >
-              <Link href="/quote">{t("ctaButton")}</Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-full border-white/25 bg-white/5 text-white hover:bg-white/10"
-              asChild
-            >
-              <Link href="/media">{t("ctaSecondary")}</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-    </div>
+/* ─── chunk b/c stubs ─── */
+function ProcessTimeline({ isKo }: { isKo: boolean }) {
+  return (
+    <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
+      // chunk b — PROCESS TIMELINE TODO ({isKo ? "ko" : "en"})
+    </p>
+  );
+}
+function Deliverables({ isKo }: { isKo: boolean }) {
+  return (
+    <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
+      // chunk b — DELIVERABLES TODO ({isKo ? "ko" : "en"})
+    </p>
+  );
+}
+function WhyUs({ isKo }: { isKo: boolean }) {
+  return (
+    <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
+      // chunk c — WHY US TODO ({isKo ? "ko" : "en"})
+    </p>
+  );
+}
+function FinalCta({ isKo }: { isKo: boolean }) {
+  return (
+    <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
+      // chunk c — FINAL CTA TODO ({isKo ? "ko" : "en"})
+    </p>
   );
 }
