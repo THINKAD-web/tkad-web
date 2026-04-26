@@ -388,8 +388,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         thumbUrl: getPrimaryMediaImageUrl(m),
         name,
         location,
-        unitPriceMan: Math.round(lineMonthly),
-        lineTotalMan: Math.round(lineMonthly * periodMonths),
+        unitPriceWon: Math.round(lineMonthly * 10_000),
+        lineTotalWon: Math.round(lineMonthly * periodMonths * 10_000),
         size: m.size ?? undefined,
         dailyFootTraffic: m.dailyFootTraffic ?? undefined,
         operatingHours: m.operatingHours ?? undefined,
@@ -397,10 +397,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     });
   }, [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex, isKo, periodMonths]);
 
-  const pdfVatMan = useMemo(() => Math.round(totalCost * 0.1), [totalCost]);
-  const pdfGrandTotalMan = useMemo(
-    () => totalCost + pdfVatMan,
-    [totalCost, pdfVatMan],
+  /** 사용자 견적 PDF 미리보기는 원 단위로 모든 금액 전달 (만원 round 누적 손실 방지). */
+  const pdfSubtotalWon = useMemo(() => Math.round(totalCost * 10_000), [totalCost]);
+  const pdfVatWon = useMemo(() => Math.round(pdfSubtotalWon * 0.1), [pdfSubtotalWon]);
+  const pdfGrandTotalWon = useMemo(
+    () => pdfSubtotalWon + pdfVatWon,
+    [pdfSubtotalWon, pdfVatWon],
   );
 
   const toggleMedia = useCallback((id: string) => {
@@ -1461,9 +1463,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 periodLabel={periodLabel}
                                 periodMonths={periodMonths}
                                 rows={pdfPreviewRows}
-                                subtotalMan={Math.round(totalCost)}
-                                vatMan={Math.round(pdfVatMan)}
-                                grandTotalMan={Math.round(pdfGrandTotalMan)}
+                                subtotalWon={pdfSubtotalWon}
+                                vatWon={pdfVatWon}
+                                grandTotalWon={pdfGrandTotalWon}
                                 issuedAt={quoteIssuedAt}
                               />
                             </div>

@@ -1177,17 +1177,17 @@ export default function AdminQuoteNewClient() {
                         thumbUrl: thumb,
                         name: it.mediaName,
                         location: m?.location ?? "—",
-                        unitPriceMan: Math.round(it.unitPrice / 10_000),
-                        lineTotalMan: Math.round(it.amount / 10_000),
+                        unitPriceWon: it.unitPrice,
+                        lineTotalWon: it.amount,
                         size,
                         dailyFootTraffic: m?.dailyFootfall ?? null,
                         visibilityScore: m?.visibilityScore ?? null,
                         operatingHours: m?.operatingHours ?? null,
                       };
                     })}
-                    subtotalMan={Math.round(totals.supplyWon / 10_000)}
-                    vatMan={Math.round(totals.vatWon / 10_000)}
-                    grandTotalMan={Math.round(totals.totalWon / 10_000)}
+                    subtotalWon={totals.supplyWon}
+                    vatWon={totals.vatWon}
+                    grandTotalWon={totals.totalWon}
                     issuedAt={new Date(issueDatePdf)}
                   />
                 </div>
