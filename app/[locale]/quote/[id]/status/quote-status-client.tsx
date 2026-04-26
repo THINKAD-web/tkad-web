@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BtnBlock } from "@/components/brutalist";
 import { Loader2, Check, Circle } from "lucide-react";
 
 type QuotePublic = {
@@ -71,25 +69,36 @@ export default function QuoteStatusClient({
 
   if (loading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-muted-foreground">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="flex min-h-[40vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
+        <Loader2 className="h-6 w-6 animate-spin text-bx-accent" />
+        {`// LOADING`}
       </div>
     );
   }
 
   if (!quote) {
     return (
-      <p className="py-16 text-center text-sm text-red-600">{t("loadError")}</p>
+      <div className="mx-auto max-w-lg border-2 border-bx-accent bg-bx-white py-10 text-center">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ ERROR ]
+        </p>
+        <p className="mt-3 px-4 text-sm text-bx-black">{t("loadError")}</p>
+      </div>
     );
   }
 
   if (quote.status === "cancelled") {
     return (
-      <div className="mx-auto max-w-lg py-10 text-center">
-        <p className="text-sm text-muted-foreground">{t("milestone_cancelled")}</p>
-        <Button type="button" variant="outline" className="mt-4" asChild>
-          <Link href="/quote">{t("backToQuote")}</Link>
-        </Button>
+      <div className="mx-auto max-w-lg border-2 border-bx-black bg-bx-off px-4 py-10 text-center">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ CANCELLED ]
+        </p>
+        <p className="mt-3 text-sm text-bx-black">{t("milestone_cancelled")}</p>
+        <div className="mt-6 flex justify-center">
+          <BtnBlock href="/quote" variant="secondary" size="md">
+            {t("backToQuote")}
+          </BtnBlock>
+        </div>
       </div>
     );
   }
@@ -109,15 +118,27 @@ export default function QuoteStatusClient({
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-10 sm:px-6">
       <div>
-        <h1 className="text-2xl font-bold text-navy">{t("statusTitle")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("statusSubtitle")}</p>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ QUOTE STATUS ]
+        </p>
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+          {t("statusTitle")}
+        </h1>
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          {`// `}{t("statusSubtitle")}
+        </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base text-navy">{t("timeline")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="border-2 border-bx-black bg-bx-white">
+        <div className="border-b-2 border-bx-black p-5">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ TIMELINE ]
+          </p>
+          <h2 className="mt-2 text-base font-bold tracking-tight text-bx-black">
+            {t("timeline")}
+          </h2>
+        </div>
+        <div className="space-y-4 p-5">
           {milestoneLabels.map((label, i) => {
             const min = MILESTONE_MIN_LEVEL[i];
             const done = safeLevel >= min;
@@ -126,8 +147,8 @@ export default function QuoteStatusClient({
                 <div
                   className={
                     done
-                      ? "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-navy text-white"
-                      : "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-slate-200 text-slate-300"
+                      ? "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white"
+                      : "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-gray-dim"
                   }
                 >
                   {done ? (
@@ -137,30 +158,40 @@ export default function QuoteStatusClient({
                   )}
                 </div>
                 <div>
-                  <p className={"font-medium " + (done ? "text-navy" : "text-muted-foreground")}>
+                  <p
+                    className={
+                      "text-sm font-bold " +
+                      (done ? "text-bx-black" : "text-bx-gray-dim")
+                    }
+                  >
                     {label}
                   </p>
                 </div>
               </div>
             );
           })}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {quote.invoiceSentAt || quote.invoiceDocUrl ? (
-        <Card className="border-gold/30 bg-amber-50/40">
-          <CardContent className="p-4 text-sm text-navy">
-            <p>{t("invoiceEmailed")}</p>
-            <p className="mt-2 text-xs text-muted-foreground">{t("bankHint")}</p>
-          </CardContent>
-        </Card>
+        <div className="border-2 border-bx-accent bg-bx-white p-4 text-sm text-bx-black">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ INVOICE SENT ]
+          </p>
+          <p className="mt-2 font-bold">{t("invoiceEmailed")}</p>
+          <p className="mt-2 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            {`// `}{t("bankHint")}
+          </p>
+        </div>
       ) : (
-        <p className="text-xs text-muted-foreground">{t("bankHint")}</p>
+        <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          {`// `}{t("bankHint")}
+        </p>
       )}
 
-      <Button type="button" variant="outline" asChild>
-        <Link href={`/quote/${quoteId}`}>{t("backToDetail")}</Link>
-      </Button>
+      <BtnBlock href={`/quote/${quoteId}`} variant="secondary" size="md">
+        {t("backToDetail")}
+      </BtnBlock>
     </div>
   );
 }
