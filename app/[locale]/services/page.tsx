@@ -240,19 +240,215 @@ function CoreServices({ isKo }: { isKo: boolean }) {
   );
 }
 
-/* ─── chunk b/c stubs ─── */
+/* ────────────────────────────────────────────────────────────────
+ * 4. PROCESS TIMELINE — 5단계 가로 행
+ *   80px | 1fr | 1fr 그리드, hover 시 #f5f5f5 배경 + 번호 박스 주황
+ * ──────────────────────────────────────────────────────────────── */
 function ProcessTimeline({ isKo }: { isKo: boolean }) {
+  const steps = [
+    {
+      no: "01",
+      stepEn: "Briefing",
+      titleKo: "브리핑 & 목표 설정",
+      titleEn: "Briefing & goal-setting",
+      descKo: "캠페인 목적·타깃·예산을 함께 정의하며 KPI 까지 합의합니다.",
+      descEn: "We align on campaign goal, target, budget, and KPIs together.",
+    },
+    {
+      no: "02",
+      stepEn: "Strategy",
+      titleKo: "전략 & 미디어플랜",
+      titleEn: "Strategy & media plan",
+      descKo: "검증된 매체 데이터와 상권 분석으로 최적의 매체 믹스를 제안합니다.",
+      descEn: "Verified media data + market analysis → optimal media mix proposal.",
+    },
+    {
+      no: "03",
+      stepEn: "Contract",
+      titleKo: "매체 확정 & 계약",
+      titleEn: "Media lock-in & contract",
+      descKo: "선정된 매체와의 직접 계약·일정 확정·필요 시 우선권 협상까지.",
+      descEn: "Direct contract, schedule lock-in, and priority negotiation if needed.",
+    },
+    {
+      no: "04",
+      stepEn: "Production",
+      titleKo: "제작 · 설치 · 송출",
+      titleEn: "Produce · install · broadcast",
+      descKo: "크리에이티브 검수·설치 인증·송출 시작까지 한 팀이 책임집니다.",
+      descEn: "One team handles creative QA, install verification, and broadcast.",
+    },
+    {
+      no: "05",
+      stepEn: "Reporting",
+      titleKo: "모니터링 & 리포트",
+      titleEn: "Monitoring & reports",
+      descKo: "실시간 모니터링 + 주간·월간 리포트 + 다음 캠페인 제안까지.",
+      descEn: "Real-time monitoring + weekly · monthly reports + next-step proposal.",
+    },
+  ];
+
   return (
-    <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
-      // chunk b — PROCESS TIMELINE TODO ({isKo ? "ko" : "en"})
-    </p>
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="02"
+        category="Workflow"
+        title={
+          isKo ? (
+            <>
+              진행 <span className="bx-accent">[5단계.]</span>
+            </>
+          ) : (
+            <>
+              <span className="bx-accent">[5 steps]</span> to launch.
+            </>
+          )
+        }
+        meta={isKo ? "Briefing → Reports" : "Briefing → Reports"}
+      />
+      <ul className="divide-y-2 divide-bx-black border-t-0">
+        {steps.map((s) => (
+          <li
+            key={s.no}
+            className="group grid grid-cols-[64px_1fr] items-stretch transition-colors duration-150 hover:bg-bx-off lg:grid-cols-[80px_1fr_1.5fr]"
+          >
+            {/* 번호 박스 */}
+            <div className="flex items-center justify-center border-r-2 border-bx-black bg-bx-black text-bx-white transition-colors duration-150 group-hover:bg-bx-accent">
+              <span className="font-mono text-2xl font-extrabold tracking-tight sm:text-3xl">
+                {s.no}
+              </span>
+            </div>
+            {/* 단계명 */}
+            <div className="flex flex-col justify-center border-bx-black px-5 py-6 sm:px-8 lg:border-r-2 lg:py-8">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                Step {s.no} / {s.stepEn}
+              </p>
+              <p className="mt-2 text-lg font-bold leading-tight tracking-tight text-bx-black sm:text-xl">
+                {isKo ? s.titleKo : s.titleEn}
+              </p>
+            </div>
+            {/* 설명 */}
+            <div className="col-span-2 border-t-2 border-bx-black px-5 py-5 sm:px-8 lg:col-span-1 lg:border-t-0 lg:px-10 lg:py-8">
+              <p className="text-sm leading-relaxed text-bx-gray-dim sm:text-base">
+                {isKo ? s.descKo : s.descEn}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
+
+/* ────────────────────────────────────────────────────────────────
+ * 5. DELIVERABLES — 4x2 그리드 (8개)
+ * ──────────────────────────────────────────────────────────────── */
 function Deliverables({ isKo }: { isKo: boolean }) {
+  const items = [
+    {
+      no: "01",
+      titleKo: "현장 검증 리포트",
+      titleEn: "On-site verification report",
+      descKo: "방문 사진·시인성·환경·유동인구 측정 결과를 문서화.",
+      descEn: "Site photos, visibility, environment, and footfall — documented.",
+    },
+    {
+      no: "02",
+      titleKo: "미디어 플랜",
+      titleEn: "Media plan",
+      descKo: "예산 분배·매체 조합·기간 시뮬레이션을 한 장에.",
+      descEn: "Budget split · media mix · period simulation in one sheet.",
+    },
+    {
+      no: "03",
+      titleKo: "유동인구 분석",
+      titleEn: "Footfall analysis",
+      descKo: "시간대·요일·월별 패턴을 시각화한 분석 자료.",
+      descEn: "Hourly · weekly · monthly patterns visualised.",
+    },
+    {
+      no: "04",
+      titleKo: "크리에이티브 가이드",
+      titleEn: "Creative guideline",
+      descKo: "각 매체 사양·해상도·노출 환경에 맞춘 가이드라인 문서.",
+      descEn: "Guideline doc tailored to each media's spec and exposure.",
+    },
+    {
+      no: "05",
+      titleKo: "설치 인증 문서",
+      titleEn: "Install certification",
+      descKo: "설치 완료 사진·시간·체크리스트를 기록한 인증서.",
+      descEn: "Photo, timestamp, checklist — install certified document.",
+    },
+    {
+      no: "06",
+      titleKo: "중간 모니터링",
+      titleEn: "Mid-flight monitoring",
+      descKo: "주간 단위 송출 상태·이슈·노출 데이터 리포트.",
+      descEn: "Weekly broadcast status · issues · exposure data report.",
+    },
+    {
+      no: "07",
+      titleKo: "최종 성과 리포트",
+      titleEn: "Final performance report",
+      descKo: "노출·도달·CPM·ROI 최종 정리 리포트.",
+      descEn: "Final report on impressions, reach, CPM, and ROI.",
+    },
+    {
+      no: "08",
+      titleKo: "다음 캠페인 제안",
+      titleEn: "Next-round proposal",
+      descKo: "데이터 학습 결과로 다음 라운드 매체 큐레이션 제안.",
+      descEn: "Curated proposal for the next round, based on learnings.",
+    },
+  ];
+
   return (
-    <p className="border-b-2 border-bx-black bg-bx-off px-6 py-16 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:px-10">
-      // chunk b — DELIVERABLES TODO ({isKo ? "ko" : "en"})
-    </p>
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="03"
+        category="Output"
+        title={
+          isKo ? (
+            <>
+              제공되는 <span className="bx-accent">[결과물.]</span>
+            </>
+          ) : (
+            <>
+              The <span className="bx-accent">[deliverables.]</span>
+            </>
+          )
+        }
+        meta={isKo ? "8 documents\ndelivered" : "8 documents\ndelivered"}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((it, i) => (
+          <article
+            key={it.no}
+            className={[
+              "group flex flex-col bg-bx-white p-6 transition-colors duration-150 hover:bg-bx-black hover:text-bx-white sm:p-8",
+              "border-bx-black",
+              i > 0 ? "border-t-2 sm:border-t-0" : "",
+              i % 2 === 1 ? "sm:border-l-2" : "",
+              i >= 2 ? "sm:border-t-2 lg:border-t-0" : "",
+              "lg:border-l-2",
+              i % 4 === 0 ? "lg:border-l-0" : "",
+              i >= 4 ? "lg:border-t-2" : "",
+            ].join(" ")}
+          >
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              // {it.no}
+            </p>
+            <h3 className="mt-4 text-lg font-bold leading-tight tracking-tight sm:text-[22px]">
+              {isKo ? it.titleKo : it.titleEn}
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-bx-gray-dim transition-colors group-hover:text-bx-gray sm:text-[13.5px]">
+              {isKo ? it.descKo : it.descEn}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 function WhyUs({ isKo }: { isKo: boolean }) {
