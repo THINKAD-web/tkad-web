@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import localFont from "next/font/local";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
 import { defaultOgImages, pageAlternates, siteUrl } from "@/lib/seo";
 import { buildStructuredDataGraph } from "@/lib/structured-data";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import { BrutalNav, BrutalFooter } from "@/components/brutalist";
 import DeferredPublicWidgets from "@/components/deferred-public-widgets";
 import TopLoader from "@/components/top-loader";
 import PageTransition from "@/components/page-transition";
@@ -129,6 +128,57 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const t = await getTranslations();
+
+  /**
+   * 브루탈리스트 Phase 3 — 전면 교체.
+   * 기존 그룹형 nav 를 평면 6개 링크 + 우측 CTA 로 단순화.
+   * 라벨은 next-intl 키 그대로 사용해 i18n 유지.
+   */
+  const brutalNavLinks = [
+    { href: "/", label: t("nav.home") },
+    { href: "/services", label: t("nav.services") },
+    { href: "/media", label: t("nav.media") },
+    { href: "/planner", label: t("nav.planner") },
+    { href: "/cases", label: t("nav.cases") },
+    { href: "/insights", label: t("nav.insights") },
+  ];
+
+  const brutalFooterColumns = [
+    {
+      title: "Company",
+      items: [
+        { label: t("footer.companyName") },
+        { label: t("footer.bizNumber") },
+        { label: "mannote@tkad.co.kr", href: "mailto:mannote@tkad.co.kr", external: true },
+      ],
+    },
+    {
+      title: "Service",
+      items: [
+        { label: t("footer.domesticOOH"), href: "/media" },
+        { label: t("footer.crossBorderOOH"), href: "/planner" },
+        { label: t("footer.dataConsulting"), href: "/contact" },
+        { label: t("footer.planningTool"), href: "/tools" },
+      ],
+    },
+    {
+      title: "Sitemap",
+      items: [
+        { label: t("nav.cases"), href: "/cases" },
+        { label: t("nav.insights"), href: "/insights" },
+        { label: t("nav.contact"), href: "/contact" },
+        { label: t("footer.privacy"), href: "/privacy" },
+      ],
+    },
+    {
+      title: "Connect",
+      items: [
+        { label: "+82 02-515-2772" },
+        { label: "Seoul, Republic of Korea" },
+      ],
+    },
+  ];
 
   return (
     <html
@@ -151,13 +201,20 @@ export default async function LocaleLayout({ children, params }: Props) {
               </a>
               <ConditionalPublicChrome>
                 <TopLoader />
-                <Header />
+                <BrutalNav
+                  links={brutalNavLinks}
+                  cta={{ href: "/contact", label: t("nav.contact") }}
+                />
               </ConditionalPublicChrome>
               <main id="main-content" className="flex-1">
                 <PageTransition>{children}</PageTransition>
               </main>
               <ConditionalPublicChrome>
-                <Footer />
+                <BrutalFooter
+                  columns={brutalFooterColumns}
+                  copyright={`© 2026 ${t("footer.companyName")}`}
+                  legal={t("footer.bizNumber")}
+                />
                 <DeferredPublicWidgets />
               </ConditionalPublicChrome>
             </ToastProvider>
