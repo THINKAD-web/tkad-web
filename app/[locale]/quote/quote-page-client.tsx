@@ -132,23 +132,37 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   useEffect(() => {
     if (mediaQueryApplied.current) return;
     if (typeof window === "undefined") return;
+    // catalog 가 아직 비어 있으면 다음 렌더에 다시 시도 (사용자 견적이 매체 일부만 받는 회귀 방지).
+    if (catalog.length === 0) return;
     const params = new URLSearchParams(window.location.search);
     const raw = params.get("media");
     if (!raw) return;
     mediaQueryApplied.current = true;
-    const ids = raw
+    const requestedIds = raw
       .split(",")
       .map((x) => x.trim())
-      .filter((id) => catalog.some((m) => m.id === id));
-    if (ids.length === 0) return;
-    setSelectedIds(new Set(ids));
+      .filter(Boolean);
+    const matchedIds = requestedIds.filter((id) =>
+      catalog.some((m) => m.id === id),
+    );
+    const missingIds = requestedIds.filter(
+      (id) => !catalog.some((m) => m.id === id),
+    );
+    if (missingIds.length > 0) {
+      console.warn(
+        "[quote] requested media IDs not found in catalog",
+        missingIds,
+      );
+    }
+    if (matchedIds.length === 0) return;
+    setSelectedIds(new Set(matchedIds));
     const poRaw = params.get("po");
     const po = poRaw != null ? parseInt(poRaw, 10) : NaN;
-    if (ids.length === 1 && Number.isFinite(po) && po >= 0) {
-      const m = catalog.find((x) => x.id === ids[0]);
+    if (matchedIds.length === 1 && Number.isFinite(po) && po >= 0) {
+      const m = catalog.find((x) => x.id === matchedIds[0]);
       const n = m?.priceOptions?.length ?? 0;
       if (n > 0) {
-        setMediaPriceOptionIndex({ [ids[0]]: Math.min(po, n - 1) });
+        setMediaPriceOptionIndex({ [matchedIds[0]]: Math.min(po, n - 1) });
       }
     }
   }, [catalog]);
