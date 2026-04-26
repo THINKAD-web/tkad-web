@@ -317,28 +317,53 @@ export default function PlannerPageClient({
     if (saving) return;
     setSaving(true);
     try {
+      // PlannerStore 의 Set 등 직렬화 불가 타입은 JSON 변환 시 손실됨 → 안전한 형태로 평탄화.
       const state = usePlannerStore.getState();
       const planJson = {
         campaignGoal: state.campaignGoal,
-        regions: state.regions,
-        categories: state.categories,
+        regions: Array.from(state.regions),
+        categories: Array.from(state.categories),
         budget: state.budget,
         months: state.months,
         ageKey: state.ageKey,
         industryKey: state.industryKey,
-        campaignMediaIds: state.campaignMediaIds,
+        campaignMediaIds: Array.from(state.campaignMediaIds),
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
       };
+
       const res = await fetch("/api/planner/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planJson }),
       });
+
       if (!res.ok) {
-        throw new Error(`save failed: ${res.status}`);
+        // 서버 에러 응답을 가능한 만큼 읽어 콘솔에 남김 (사용자 모를 디테일 로깅).
+        let detail = "";
+        try {
+          const errBody = (await res.json()) as { error?: string; detail?: string };
+          detail = errBody?.detail || errBody?.error || "";
+        } catch {
+          try {
+            detail = await res.text();
+          } catch {
+            /* ignore */
+          }
+        }
+        console.error("[planner.save] failed", {
+          status: res.status,
+          detail,
+        });
+        throw new Error(`save failed: ${res.status}${detail ? ` — ${detail}` : ""}`);
       }
-      const data = (await res.json()) as { id: string; expiresAt: string };
+
+      const data = (await res.json()) as { id?: string; expiresAt?: string };
+      if (!data.id) {
+        console.error("[planner.save] missing id in response", data);
+        throw new Error("Invalid response: missing id");
+      }
+
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
       const url = `${origin}/${locale}/planner/shared/${data.id}`;
@@ -349,7 +374,8 @@ export default function PlannerPageClient({
         await navigator.clipboard.writeText(url).catch(() => {});
       }
       toast("success", t("savedToast"));
-    } catch {
+    } catch (e) {
+      console.error("[planner.save] error", e);
       toast(
         "error",
         isKo ? "저장에 실패했습니다." : "Could not save plan.",
