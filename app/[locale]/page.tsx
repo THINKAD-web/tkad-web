@@ -6,8 +6,9 @@ import {
 } from "@/lib/public-media-catalog";
 import { type MediaItem, getPrimaryMediaImageUrl } from "@/lib/media-data";
 import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
-import { ArrowRight, ArrowDown, Search, Camera, Database, ClipboardCheck } from "lucide-react";
+import { ArrowRight, ArrowDown, Search, Camera, Database, ClipboardCheck, Eye, BarChart3, FileCheck } from "lucide-react";
 import { BtnBlock, SectionHead, MediaCard } from "@/components/brutalist";
+import { testimonials } from "@/data/testimonials";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -64,6 +65,9 @@ function HomeContent({
       <Regional isKo={isKo} />
       <MediaTop6 isKo={isKo} items={top6} />
       <CaseStudies isKo={isKo} />
+      <WhyUs isKo={isKo} />
+      <Testimonials isKo={isKo} />
+      <FinalCta isKo={isKo} t={t} />
     </>
   );
 }
@@ -658,6 +662,231 @@ function CaseStudies({ isKo }: { isKo: boolean }) {
             </div>
           </article>
         ))}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * (d) WHY US
+ * 3컬 차별점 그리드. 큰 번호 + 아이콘 + 카피 + 강조.
+ * ──────────────────────────────────────────────────────────────── */
+function WhyUs({ isKo }: { isKo: boolean }) {
+  const items = [
+    {
+      no: "01",
+      icon: Eye,
+      title: isKo ? "직접 현장 검증" : "On-site Verification",
+      desc: isKo
+        ? "모든 매체를 담당자가 직접 방문해 실제 노출 환경·시인성·유동인구를 확인합니다."
+        : "Every media is personally verified on site for actual exposure, visibility, and foot traffic.",
+      stat: isKo ? "100%" : "100%",
+      statLabel: isKo ? "현장 방문" : "Site visits",
+    },
+    {
+      no: "02",
+      icon: BarChart3,
+      title: isKo ? "1년+ 효과 데이터" : "1+ Year Performance Data",
+      desc: isKo
+        ? "단기 캠페인이 아닌, 1년 이상 축적된 매체별 효과 데이터로 ROI 검증된 매체만 추천합니다."
+        : "We recommend only media verified by 1+ years of compounded performance data, not short-term tests.",
+      stat: "1Y+",
+      statLabel: isKo ? "데이터 축적" : "Data depth",
+    },
+    {
+      no: "03",
+      icon: FileCheck,
+      title: isKo ? "원스톱 운영" : "One-stop Operations",
+      desc: isKo
+        ? "계약, 설치, 집행, 모니터링, 리포팅, 사후관리까지 전 과정을 싱커드가 책임집니다."
+        : "Contract, install, run, monitor, report, post-care — all under one roof.",
+      stat: "24/7",
+      statLabel: isKo ? "운영 지원" : "Ops support",
+    },
+  ];
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-16 sm:px-10">
+        <SectionHead
+          number="05"
+          category="Why us"
+          title={
+            isKo ? (
+              <>
+                왜 <span className="bx-accent">싱커드</span>인가?
+              </>
+            ) : (
+              <>
+                Why <span className="bx-accent">THINKAD</span>?
+              </>
+            )
+          }
+          meta={
+            isKo
+              ? "검증되지 않은 매체에 광고비를 낭비하지 마세요"
+              : "Don't waste ad budget on unverified media"
+          }
+        />
+      </div>
+      <div className="grid grid-cols-1 border-t-2 border-bx-black lg:grid-cols-3">
+        {items.map((it, i) => {
+          const Icon = it.icon;
+          return (
+            <article
+              key={it.no}
+              className={[
+                "group relative flex flex-col bg-bx-white p-8 transition-colors hover:bg-bx-off sm:p-10",
+                i > 0 ? "border-t-2 border-bx-black lg:border-l-2 lg:border-t-0" : "",
+              ].join(" ")}
+            >
+              <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+                [{it.no}] / Why
+              </div>
+              <div className="mt-8 inline-flex h-14 w-14 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors group-hover:bg-bx-accent group-hover:border-bx-accent group-hover:text-bx-white">
+                <Icon className="h-6 w-6" strokeWidth={1.6} />
+              </div>
+              <h3 className="mt-6 text-2xl font-bold leading-tight tracking-tight text-bx-black sm:text-3xl">
+                {it.title}
+              </h3>
+              <p className="mt-4 flex-1 text-sm leading-relaxed text-bx-gray-dim">
+                {it.desc}
+              </p>
+              <div className="mt-8 flex items-baseline gap-3 border-t-2 border-bx-black pt-6">
+                <span className="text-4xl font-bold tracking-tight text-bx-black">
+                  {it.stat}
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+                  // {it.statLabel}
+                </span>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * (d) TESTIMONIALS
+ * 4건 정적 그리드 (캐러셀 대신). 각 카드 = 따옴표·본문·이름·회사·KPI.
+ * ──────────────────────────────────────────────────────────────── */
+function Testimonials({ isKo }: { isKo: boolean }) {
+  const list = testimonials.slice(0, 4);
+  if (list.length === 0) return null;
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-off">
+      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-16 sm:px-10">
+        <SectionHead
+          number="06"
+          category="Testimonials"
+          title={
+            isKo ? (
+              <>
+                광고주가 <span className="bx-invert">직접 전하는</span> 이야기
+              </>
+            ) : (
+              <>
+                <span className="bx-invert">What our clients</span> say
+              </>
+            )
+          }
+          meta={
+            isKo
+              ? "싱커드와 함께 성장한 파트너의 실제 목소리"
+              : "Real voices from partners who grew with THINKAD"
+          }
+        />
+      </div>
+      <div className="grid grid-cols-1 border-t-2 border-bx-black sm:grid-cols-2">
+        {list.map((t, i) => (
+          <article
+            key={t.id}
+            className={[
+              "group flex flex-col bg-bx-white p-6 transition-colors sm:p-10",
+              i % 2 === 1 ? "sm:border-l-2 sm:border-bx-black" : "",
+              i >= 2 ? "border-t-2 border-bx-black" : "",
+            ].join(" ")}
+          >
+            <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+              <span className="text-bx-black">[{String(i + 1).padStart(2, "0")}]</span>
+              <span className="ml-2">/ {isKo ? t.industryKo : t.industryEn}</span>
+            </div>
+            <p className="mt-8 text-xl font-medium leading-snug text-bx-black sm:text-2xl">
+              <span className="text-bx-accent">&ldquo;</span>
+              {isKo ? t.bodyKo : t.bodyEn}
+              <span className="text-bx-accent">&rdquo;</span>
+            </p>
+            <div className="mt-auto pt-8">
+              <div className="flex items-center justify-between border-t-2 border-bx-black pt-6">
+                <div>
+                  <p className="text-sm font-bold text-bx-black">
+                    {isKo ? t.nameKo : t.nameEn}
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                    // {isKo ? t.companyKo : t.companyEn}
+                  </p>
+                </div>
+                <span className="bg-bx-black px-2.5 py-1 font-mono text-[11px] font-bold text-bx-white">
+                  {isKo ? t.metricKo : t.metricEn}
+                </span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * (d) FINAL CTA
+ * 풀-블리드 검정 배너. 좌측 거대 카피 + 우측 CTA accent 변형.
+ * ──────────────────────────────────────────────────────────────── */
+function FinalCta({
+  isKo,
+  t,
+}: {
+  isKo: boolean;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-black text-bx-white">
+      <div className="mx-auto grid max-w-[1400px] grid-cols-1 lg:grid-cols-12">
+        <div className="col-span-1 border-bx-white px-6 py-14 sm:px-10 sm:py-20 lg:col-span-8 lg:border-r-2">
+          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray">
+            <span className="text-bx-accent">[07]</span>
+            <span className="ml-2">/ Final</span>
+            <span className="ml-2">— {isKo ? "지금 시작하세요" : "Start now"}</span>
+          </div>
+          <h2 className="mt-6 text-[clamp(2rem,5.5vw,5.5rem)] font-bold leading-[0.96] tracking-[-0.03em]">
+            {isKo ? (
+              <>
+                <span className="block">{t("ctaBanner.title")}</span>
+              </>
+            ) : (
+              <span className="block">{t("ctaBanner.title")}</span>
+            )}
+          </h2>
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-bx-gray sm:text-lg">
+            {t("ctaBanner.description")}
+          </p>
+        </div>
+        <aside className="col-span-1 flex flex-col justify-center gap-4 border-t-2 border-bx-white bg-bx-black px-6 py-12 sm:px-10 lg:col-span-4 lg:border-t-0 lg:py-20">
+          <BtnBlock href="/contact" variant="accent" size="lg" className="w-full justify-between">
+            <span>{t("ctaBanner.cta")}</span>
+            <ArrowRight className="h-5 w-5" />
+          </BtnBlock>
+          <BtnBlock href="/media" variant="dark" size="lg" className="w-full justify-between border-bx-white">
+            <span>{isKo ? "매체 살펴보기" : "Browse media"}</span>
+            <ArrowRight className="h-5 w-5" />
+          </BtnBlock>
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray">
+            // {isKo
+              ? "30초 신청 · 24시간 내 컨설턴트 연락"
+              : "30s apply · expert contact within 24h"}
+          </p>
+        </aside>
       </div>
     </section>
   );
