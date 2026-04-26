@@ -43,7 +43,7 @@ export default function MediaDetailAdminActions({
   return (
     <Link
       href="/admin/medias"
-      className={`inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur transition hover:bg-white/20 ${className}`}
+      className={`inline-flex items-center gap-1.5 border-2 border-bx-white bg-bx-black/40 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-white backdrop-blur transition-colors hover:bg-bx-white hover:text-bx-black ${className}`}
     >
       <Pencil className="h-3.5 w-3.5" />
       {t("adminEdit")}

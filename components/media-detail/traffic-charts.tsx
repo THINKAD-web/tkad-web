@@ -14,15 +14,18 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   buildInsights,
   resolveTrafficPattern,
   type StoredTrafficPattern,
 } from "@/lib/media-traffic-estimate";
+
+/** Brutalist 차트 색상 팔레트 — 다색 유지 + bx-* 톤. */
+const CHART_PRIMARY = "#000000"; // bx-black
+const CHART_ACCENT = "#ff4d00"; // bx-accent (주황) — peak/강조
+const CHART_NEUTRAL = "#737373"; // bx-gray-dim (주말)
+const CHART_GRID = "rgba(0,0,0,0.12)";
 
 type Tab = "hourly" | "weekly" | "monthly";
 
@@ -116,49 +119,54 @@ export function TrafficCharts({
   const weeklyPeak = peakIndex(pattern.weekly);
 
   return (
-    <Card className="border-navy/10 shadow-sm">
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <section className="border-2 border-bx-black bg-bx-white">
+      <header className="flex flex-col gap-3 border-b-2 border-bx-black px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
         <div className="space-y-1">
-          <CardTitle className="text-navy">{t("title")}</CardTitle>
-          <p className="text-xs text-muted-foreground">{t("desc")}</p>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ TRAFFIC PATTERN ]
+          </p>
+          <h3 className="text-lg font-bold tracking-tight text-bx-black sm:text-xl">
+            {t("title")}
+          </h3>
+          <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            {t("desc")}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {isEstimated ? (
-            <Badge
-              variant="outline"
-              className="border-amber-300/80 bg-amber-50 text-[10px] font-semibold text-amber-900"
-            >
+            <span className="border-2 border-bx-accent bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
               {t("estimatedBadge")}
-            </Badge>
+            </span>
           ) : null}
-          <div role="tablist" className="flex rounded-full border border-navy/10 bg-slate-50 p-0.5">
+          <div role="tablist" className="inline-flex border-2 border-bx-black bg-bx-white">
             {(
               [
                 ["hourly", t("tabHourly")],
                 ["weekly", t("tabWeekly")],
                 ["monthly", t("tabMonthly")],
               ] as const
-            ).map(([k, label]) => (
-              <Button
+            ).map(([k, label], i) => (
+              <button
                 key={k}
                 role="tab"
                 aria-selected={tab === k}
                 type="button"
-                size="sm"
-                variant={tab === k ? "default" : "ghost"}
-                className={cn(
-                  "h-7 rounded-full px-3 text-[11px]",
-                  tab === k && "btn-gold border-0",
-                )}
                 onClick={() => setTab(k)}
+                className={cn(
+                  "px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
+                  i > 0 && "border-l-2 border-bx-black",
+                  tab === k
+                    ? "bg-bx-black text-bx-white"
+                    : "text-bx-black hover:bg-bx-off",
+                )}
               >
                 {label}
-              </Button>
+              </button>
             ))}
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </header>
+      <div className="space-y-4 p-5 sm:p-6">
         <div
           role="tabpanel"
           className="h-56 w-full"
@@ -173,14 +181,14 @@ export function TrafficCharts({
           <ResponsiveContainer width="100%" height="100%">
             {tab === "hourly" ? (
               <LineChart data={hourlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
                 <XAxis
                   dataKey="hour"
                   ticks={HOUR_TICKS}
                   tickFormatter={(h: number) => `${h}h`}
-                  tick={{ fontSize: 11 }}
+                  tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
                 />
-                <YAxis tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }} />
                 <Tooltip
                   formatter={(v: number) => [v.toLocaleString(), t("axisHourly")]}
                   labelFormatter={(h) => `${h}:00`}
@@ -188,7 +196,7 @@ export function TrafficCharts({
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="hsl(var(--gold-dark, 38 38% 35%))"
+                  stroke={CHART_ACCENT}
                   strokeWidth={2}
                   dot={(props) => {
                     const { cx, cy, index } = props as {
@@ -200,14 +208,15 @@ export function TrafficCharts({
                       return <g key={index ?? 0} />;
                     }
                     return (
-                      <circle
+                      <rect
                         key={index}
-                        cx={cx}
-                        cy={cy}
-                        r={4}
-                        fill="#d4af37"
-                        stroke="#1a1f3a"
-                        strokeWidth={1.5}
+                        x={cx - 5}
+                        y={cy - 5}
+                        width={10}
+                        height={10}
+                        fill={CHART_ACCENT}
+                        stroke={CHART_PRIMARY}
+                        strokeWidth={2}
                       />
                     );
                   }}
@@ -215,22 +224,22 @@ export function TrafficCharts({
               </LineChart>
             ) : tab === "weekly" ? (
               <BarChart data={weeklyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }} />
                 <Tooltip
                   formatter={(v: number) => [v.toLocaleString(), t("axisWeekly")]}
                 />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="value" radius={[0, 0, 0, 0]}>
                   {weeklyData.map((d, i) => (
                     <Cell
                       key={i}
                       fill={
                         i === weeklyPeak
-                          ? "#d4af37"
+                          ? CHART_ACCENT
                           : i >= 5
-                            ? "#94a3b8"
-                            : "#1a1f3a"
+                            ? CHART_NEUTRAL
+                            : CHART_PRIMARY
                       }
                     />
                   ))}
@@ -238,34 +247,34 @@ export function TrafficCharts({
               </BarChart>
             ) : (
               <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }} />
                 <Tooltip
                   formatter={(v: number) => [v.toLocaleString(), t("axisMonthly")]}
                   labelFormatter={(m) => `${m}${isKo ? "월" : ""}`}
                 />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="#1a1f3a" />
+                <Bar dataKey="value" radius={[0, 0, 0, 0]} fill={CHART_PRIMARY} />
               </BarChart>
             )}
           </ResponsiveContainer>
         </div>
 
-        <ul className="grid gap-1.5 text-xs text-navy/85 sm:grid-cols-3">
-          <li>
-            <span className="text-muted-foreground">{t("insightHour")}: </span>
-            <span className="font-semibold">{insights.peakHourLabel}</span>
+        <ul className="grid gap-2 border-t-2 border-bx-black pt-4 sm:grid-cols-3">
+          <li className="font-mono text-[11px] tracking-tight">
+            <span className="text-bx-gray-dim">{t("insightHour")}: </span>
+            <span className="font-bold text-bx-black">{insights.peakHourLabel}</span>
           </li>
-          <li>
-            <span className="text-muted-foreground">{t("insightWeekday")}: </span>
-            <span className="font-semibold">{insights.peakWeekdayLabel}</span>
+          <li className="font-mono text-[11px] tracking-tight">
+            <span className="text-bx-gray-dim">{t("insightWeekday")}: </span>
+            <span className="font-bold text-bx-black">{insights.peakWeekdayLabel}</span>
           </li>
-          <li>
-            <span className="text-muted-foreground">{t("insightMonth")}: </span>
-            <span className="font-semibold">{insights.peakMonthLabel}</span>
+          <li className="font-mono text-[11px] tracking-tight">
+            <span className="text-bx-gray-dim">{t("insightMonth")}: </span>
+            <span className="font-bold text-bx-black">{insights.peakMonthLabel}</span>
           </li>
         </ul>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

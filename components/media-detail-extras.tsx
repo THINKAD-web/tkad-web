@@ -3,12 +3,10 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import { getCampaignMonitoringMapProvider } from "@/components/campaign-monitoring-map";
 import type { MediaItem } from "@/lib/media-data";
-import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 import { MapPin, MessageCircle } from "lucide-react";
+import { BtnBlock } from "@/components/brutalist";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
@@ -62,63 +60,63 @@ export default function MediaDetailExtras({
 
   return (
     <>
-      <div className="mb-4 flex flex-wrap gap-3">
+      <div className="mb-6 flex flex-wrap gap-3">
         <MediaQuoteCtaButton media={media} variant="inline" />
-        <Link href={`/contact?media=${media.id}`}>
-          <Button
-            variant="outline"
-            className="h-12 border-2 border-navy/25 px-5 font-semibold sm:h-14"
-          >
-            <MessageCircle className="mr-2 h-5 w-5 shrink-0" />
-            {labels.inquiry}
-          </Button>
-        </Link>
+        <BtnBlock href={`/contact?media=${media.id}`} variant="secondary" size="md">
+          <MessageCircle className="h-4 w-4 shrink-0" />
+          {labels.inquiry}
+        </BtnBlock>
       </div>
 
-      <h2 className="mb-4 text-lg font-bold text-navy">{labels.locationMap}</h2>
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:gap-10">
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-7 lg:max-w-md">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+        [ LOCATION MAP ]
+      </p>
+      <h2 className="mt-2 mb-6 text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+        {labels.locationMap}
+      </h2>
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-8">
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-6 border-2 border-bx-black bg-bx-white p-6 lg:max-w-md">
           <div>
-            <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-gold-dark" aria-hidden />
+            <p className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {labels.locationAddressLabel}
             </p>
-            <p className="text-base font-medium leading-relaxed text-navy">
+            <p className="text-base font-medium leading-relaxed text-bx-black">
               {isKo ? media.location : (media.locationEn || media.location)}
             </p>
           </div>
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {labels.locationRegionLabel}
+            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+              [ {labels.locationRegionLabel} ]
             </p>
-            <p className="text-base font-semibold text-navy">{regionDisplay}</p>
+            <p className="text-base font-bold text-bx-black">{regionDisplay}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-navy/10 pt-5">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t-2 border-bx-black pt-5">
             <a
               href={kakaoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-navy underline decoration-navy/30 underline-offset-[3px] transition-colors hover:text-navy-light hover:decoration-navy/50"
+              className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black underline underline-offset-4 transition-colors hover:text-bx-accent"
             >
               {labels.openKakao}
             </a>
-            <span className="text-sm text-navy/35 select-none" aria-hidden>
+            <span className="font-mono text-bx-gray-dim/40 select-none" aria-hidden>
               ·
             </span>
             <a
               href={googleUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-navy underline decoration-navy/30 underline-offset-[3px] transition-colors hover:text-navy-light hover:decoration-navy/50"
+              className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black underline underline-offset-4 transition-colors hover:text-bx-accent"
             >
               {labels.openGoogle}
             </a>
           </div>
         </div>
-        <div className="min-w-0 flex-1 lg:min-w-0 lg:flex-[1.15]">
+        <div className="min-w-0 flex-1 border-2 border-bx-black bg-bx-white lg:min-w-0 lg:flex-[1.15]">
           {mapProvider === "kakao" ? (
-            <p className="mb-2 text-xs font-medium text-muted-foreground">
-              {labels.kakaoMapEmbedBadge}
+            <p className="border-b-2 border-bx-black px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+              [ {labels.kakaoMapEmbedBadge} ]
             </p>
           ) : null}
           <MediaBrowseMap

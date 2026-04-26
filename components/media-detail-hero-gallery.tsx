@@ -55,9 +55,9 @@ export default function MediaDetailHeroGallery({
 
   if (!hasImage) {
     return (
-      <section className="relative w-full overflow-hidden bg-navy">
-        <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-12">
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-black/40">
+      <section className="relative w-full overflow-hidden bg-bx-black">
+        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-12">
+          <div className="relative aspect-[16/9] w-full overflow-hidden border-2 border-bx-white bg-bx-black">
             <MediaImagePlaceholder
               label={tMedia("imagePreparing")}
               size="lg"
@@ -65,38 +65,37 @@ export default function MediaDetailHeroGallery({
             />
           </div>
         </div>
-        <div className="border-t border-white/10" />
       </section>
     );
   }
 
   return (
-    <section className="relative w-full overflow-hidden bg-navy">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-stretch px-4 py-4 sm:px-6 lg:px-12">
-        <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-black/40">
+    <section className="relative w-full overflow-hidden bg-bx-black">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-stretch px-4 py-6 sm:px-6 lg:px-12">
+        <div className="group relative aspect-[16/9] w-full overflow-hidden border-2 border-bx-white bg-bx-black">
           <button
             type="button"
             onClick={() => openAt(0)}
-            className="absolute inset-0 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-gold/70"
+            className="absolute inset-0 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-bx-accent"
             aria-label={labels.expand}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={mainSrc}
               alt={altBase}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover transition-[filter] duration-300 group-hover:contrast-[1.05]"
               fetchPriority="high"
             />
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100"
+              className="pointer-events-none absolute right-3 top-3 flex h-9 w-9 items-center justify-center border-2 border-bx-white bg-bx-black text-bx-white opacity-0 transition-opacity duration-200 group-hover:opacity-100"
             >
               <ZoomIn className="h-4 w-4" />
             </span>
           </button>
         </div>
 
-        <div className="mt-4 flex flex-col gap-4 pb-2 text-white">
+        <div className="mt-6 flex flex-col gap-4 pb-2 text-bx-white">
           {children}
         </div>
       </div>
