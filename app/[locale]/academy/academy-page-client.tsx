@@ -3,16 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
 import {
   Calendar,
@@ -39,6 +30,11 @@ import {
 } from "@/lib/build-academy-pdf";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
+
+const inputCls =
+  "h-10 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+const labelCls =
+  "block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent";
 
 export default function AcademyPageClient({
   dbLessons,
@@ -136,272 +132,286 @@ export default function AcademyPageClient({
 
   return (
     <>
-      <section className="bg-navy py-28">
+      <section className="bg-bx-black py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mx-auto mb-4 flex items-center justify-center gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            {`// 10 / Academy`}
+          </p>
+          <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
               <GraduationCap className="h-4 w-4" />
               {t("heroBadge")}
             </span>
-            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
+            <span className="border-2 border-bx-white bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-black">
               BETA
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">{t("heroTitle")}</h1>
-          <p className="mx-auto mt-3 max-w-2xl text-slate-300">{t("heroSubtitle")}</p>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+            {t("heroTitle")}
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+            {t("heroSubtitle")}
+          </p>
         </div>
       </section>
 
-      <section className="border-b border-navy/8 bg-white py-8">
-        <div className="mx-auto grid max-w-7xl gap-3 px-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-6 lg:px-8">
-          <a
-            href="#academy-basics"
-            className="group flex gap-3 rounded-2xl border border-navy/10 bg-slate-50/90 p-4 shadow-sm transition-all hover:border-gold/35 hover:shadow-md"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
-              <Video className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 text-left">
-              <p className="text-sm font-bold text-navy">{t("valueStripBasics")}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                {t("valueStripBasicsDesc")}
-              </p>
-            </div>
-          </a>
-          <a
-            href="#academy-webinars"
-            className="group flex gap-3 rounded-2xl border border-navy/10 bg-slate-50/90 p-4 shadow-sm transition-all hover:border-gold/35 hover:shadow-md"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/20 text-navy group-hover:bg-gold">
-              <Calendar className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 text-left">
-              <p className="text-sm font-bold text-navy">{t("valueStripWebinars")}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                {t("valueStripWebinarsDesc")}
-              </p>
-            </div>
-          </a>
-          <a
-            href="#academy-downloads"
-            className="group flex gap-3 rounded-2xl border border-navy/10 bg-slate-50/90 p-4 shadow-sm transition-all hover:border-gold/35 hover:shadow-md"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
-              <Download className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 text-left">
-              <p className="text-sm font-bold text-navy">{t("valueStripDownloads")}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                {t("valueStripDownloadsDesc")}
-              </p>
-            </div>
-          </a>
-          <a
-            href="#academy-consult"
-            className="group flex gap-3 rounded-2xl border border-navy/10 bg-slate-50/90 p-4 shadow-sm transition-all hover:border-gold/35 hover:shadow-md"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white">
-              <MessageCircle className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 text-left">
-              <p className="text-sm font-bold text-navy">{t("valueStripConsult")}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                {t("valueStripConsultDesc")}
-              </p>
-            </div>
-          </a>
+      <section className="bg-bx-white py-8">
+        <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-6 lg:px-8">
+          {[
+            { href: "#academy-basics", icon: Video, t: "valueStripBasics", d: "valueStripBasicsDesc" },
+            { href: "#academy-webinars", icon: Calendar, t: "valueStripWebinars", d: "valueStripWebinarsDesc" },
+            { href: "#academy-downloads", icon: Download, t: "valueStripDownloads", d: "valueStripDownloadsDesc" },
+            { href: "#academy-consult", icon: MessageCircle, t: "valueStripConsult", d: "valueStripConsultDesc" },
+          ].map(({ href, icon: Icon, t: titleKey, d: descKey }) => (
+            <a
+              key={href}
+              href={href}
+              className="group -ml-[2px] flex gap-3 border-2 border-bx-black bg-bx-off p-4 transition-colors hover:bg-bx-black hover:text-bx-white"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+                <Icon className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 text-left">
+                <p className="text-sm font-bold tracking-tight">{t(titleKey as "valueStripBasics")}</p>
+                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                  {`// `}{t(descKey as "valueStripBasicsDesc")}
+                </p>
+              </div>
+            </a>
+          ))}
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl space-y-16 px-4 py-14 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-16 bg-bx-off px-4 py-14 sm:px-6 lg:px-8">
         <section id="academy-basics" className="scroll-mt-24">
           <div className="mb-8 text-center">
-            <h2 className="text-2xl font-bold text-navy">{t("sectionBasics")}</h2>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
-              {t("sectionBasicsDesc")}
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ BASICS ]
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+              {t("sectionBasics")}
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-bx-gray-dim">
+              {`// `}{t("sectionBasicsDesc")}
             </p>
           </div>
           {dbLessons.length === 0 ? (
-            <div className="rounded-2xl border border-navy/10 bg-slate-50/90 py-14 text-center">
-              <p className="text-base font-semibold text-navy">{t("preparingLessons")}</p>
-              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+            <div className="border-2 border-bx-black bg-bx-white py-12 text-center">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ PREPARING ]
+              </p>
+              <p className="mt-3 text-base font-bold text-bx-black">
+                {t("preparingLessons")}
+              </p>
+              <p className="mx-auto mt-2 max-w-md font-mono text-[12px] tracking-tight text-bx-gray-dim">
                 {t("preparingLessonsDesc")}
               </p>
             </div>
           ) : (
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-0 lg:grid-cols-3">
               {dbLessons.map((lesson) => (
-                <Card
+                <article
                   key={lesson.id}
-                  className="flex flex-col border-navy/10 shadow-md transition-shadow hover:shadow-lg"
+                  className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white"
                 >
-                  <CardHeader>
-                    <Badge
-                      variant="outline"
-                      className="mb-2 w-fit border-gold/40 text-gold-dark"
-                    >
-                      {t("minutes", { n: lesson.durationMin })}
-                    </Badge>
-                    <CardTitle className="text-lg text-navy">
+                  <header className="border-b-2 border-bx-black p-5">
+                    <span className="inline-flex w-fit border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+                      [ {t("minutes", { n: lesson.durationMin })} ]
+                    </span>
+                    <h3 className="mt-3 text-lg font-bold tracking-tight text-bx-black">
                       {isKo ? lesson.titleKo : lesson.titleEn}
-                    </CardTitle>
-                    <CardDescription className="text-sm leading-relaxed">
-                      {isKo ? lesson.descKo : lesson.descEn}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="mt-auto flex flex-col gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full border-navy/20"
+                    </h3>
+                    <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                      {`// `}{isKo ? lesson.descKo : lesson.descEn}
+                    </p>
+                  </header>
+                  <div className="mt-auto flex flex-col gap-2 p-5">
+                    <BtnBlock
+                      variant="secondary"
+                      size="md"
                       onClick={() => openLessonVideo(lesson)}
+                      className="w-full"
                     >
-                      <Video className="mr-2 h-4 w-4 text-gold" />
+                      <Video className="h-4 w-4" />
                       {t("watchVideo")}
-                    </Button>
-                    <Button
-                      type="button"
-                      className="w-full bg-gold font-bold text-navy hover:bg-gold-dark"
+                    </BtnBlock>
+                    <BtnBlock
+                      variant="accent"
+                      size="md"
                       onClick={() => handleOutline(lesson)}
                       disabled={downloading === `outline-${lesson.id}`}
+                      className="w-full"
                     >
                       {downloading === `outline-${lesson.id}` ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className="h-4 w-4" />
                       )}
                       {t("downloadOutline")}
-                    </Button>
-                  </CardContent>
-                </Card>
+                    </BtnBlock>
+                  </div>
+                </article>
               ))}
             </div>
           )}
         </section>
 
-        <section>
+        <section id="academy-webinars" className="scroll-mt-24">
           <div className="mb-8 text-center">
-            <h2 className="text-2xl font-bold text-navy">{t("sectionWebinars")}</h2>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
-              {t("sectionWebinarsDesc")}
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ WEBINARS ]
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+              {t("sectionWebinars")}
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-bx-gray-dim">
+              {`// `}{t("sectionWebinarsDesc")}
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-0 md:grid-cols-2">
             {academyWebinars.map((w) => (
-              <Card key={w.id} className="border-navy/10 shadow-md">
-                <CardHeader>
-                  <Badge className="w-fit bg-navy text-white">{t("badgeLive")}</Badge>
-                  <CardTitle className="text-lg text-navy">
+              <article
+                key={w.id}
+                className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white"
+              >
+                <header className="border-b-2 border-bx-black p-5">
+                  <span className="inline-flex w-fit border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+                    [ {t("badgeLive")} ]
+                  </span>
+                  <h3 className="mt-3 text-lg font-bold tracking-tight text-bx-black">
                     {isKo ? w.titleKo : w.titleEn}
-                  </CardTitle>
-                  <CardDescription>{isKo ? w.descKo : w.descEn}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <div className="flex flex-wrap gap-4 text-xs">
-                    <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-                      <Calendar className="h-4 w-4 text-gold" />
-                      <span className="font-semibold text-navy">{t("webinarWhen")}: </span>
+                  </h3>
+                  <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                    {`// `}{isKo ? w.descKo : w.descEn}
+                  </p>
+                </header>
+                <div className="space-y-3 p-5 text-sm">
+                  <div className="flex flex-wrap gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar className="h-4 w-4 text-bx-accent" />
+                      <span className="font-bold text-bx-black">{t("webinarWhen")}: </span>
                       {formatWebinarWhen(w.datetimeIso)}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-                      <Users className="h-4 w-4 text-gold" />
-                      <span className="font-semibold text-navy">{t("webinarSeats")}: </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Users className="h-4 w-4 text-bx-accent" />
+                      <span className="font-bold text-bx-black">{t("webinarSeats")}: </span>
                       {t("seatsCount", { n: w.seatsLeft })}
                     </span>
                     <span className="inline-flex items-center gap-1.5">
-                      <span className="font-semibold text-navy">{t("webinarLevel")}: </span>
+                      <span className="font-bold text-bx-black">{t("webinarLevel")}: </span>
                       {isKo ? w.levelKo : w.levelEn}
                     </span>
                   </div>
-                  <Button
-                    type="button"
-                    className="w-full bg-navy text-white hover:bg-navy/90"
+                  <BtnBlock
+                    variant="dark"
+                    size="md"
                     onClick={() => scrollToRegister(w.id)}
+                    className="w-full"
                   >
                     {t("scrollToRegister")}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </BtnBlock>
+                </div>
+              </article>
             ))}
           </div>
         </section>
 
         <section id="academy-downloads" className="scroll-mt-24">
           <div className="mb-8 text-center">
-            <h2 className="text-2xl font-bold text-navy">{t("sectionDownloads")}</h2>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
-              {t("sectionDownloadsDesc")}
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ DOWNLOADS ]
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+              {t("sectionDownloads")}
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-bx-gray-dim">
+              {`// `}{t("sectionDownloadsDesc")}
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
             {academyDownloads.map((asset) => (
-              <Card key={asset.id} className="border-navy/10 shadow-sm">
-                <CardHeader className="pb-2">
-                  <FileSpreadsheet className="h-8 w-8 text-gold" />
-                  <CardTitle className="text-base text-navy">
+              <article
+                key={asset.id}
+                className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white"
+              >
+                <div className="flex flex-1 flex-col p-5">
+                  <FileSpreadsheet className="h-8 w-8 text-bx-accent" />
+                  <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ ASSET / PDF ]
+                  </p>
+                  <h3 className="mt-1 text-base font-bold tracking-tight text-bx-black">
                     {isKo ? asset.titleKo : asset.titleEn}
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    {isKo ? asset.descKo : asset.descEn}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full border-navy/20 font-semibold"
+                  </h3>
+                  <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                    {`// `}{isKo ? asset.descKo : asset.descEn}
+                  </p>
+                  <BtnBlock
+                    variant="secondary"
+                    size="md"
                     onClick={() => handleAssetPdf(asset)}
                     disabled={downloading === `asset-${asset.id}`}
+                    className="mt-4 w-full"
                   >
                     {downloading === `asset-${asset.id}` ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Download className="mr-2 h-4 w-4" />
+                      <Download className="h-4 w-4" />
                     )}
                     {t("downloadPdf")}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </BtnBlock>
+                </div>
+              </article>
             ))}
-            <Card className="border-navy/10 shadow-sm">
-              <CardHeader className="pb-2">
-                <Presentation className="h-8 w-8 text-gold" />
-                <CardTitle className="text-base text-navy">{t("pptTitle")}</CardTitle>
-                <CardDescription className="text-xs">{t("pptDesc")}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full border-navy/20 font-semibold"
+            <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white">
+              <div className="flex flex-1 flex-col p-5">
+                <Presentation className="h-8 w-8 text-bx-accent" />
+                <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  [ PPT ]
+                </p>
+                <h3 className="mt-1 text-base font-bold tracking-tight text-bx-black">
+                  {t("pptTitle")}
+                </h3>
+                <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                  {`// `}{t("pptDesc")}
+                </p>
+                <BtnBlock
+                  variant="secondary"
+                  size="md"
                   onClick={handlePpt}
+                  className="mt-4 w-full"
                 >
-                  <Presentation className="mr-2 h-4 w-4" />
+                  <Presentation className="h-4 w-4" />
                   {t("downloadPpt")}
-                </Button>
-              </CardContent>
-            </Card>
-            <Card className="border-navy/10 shadow-sm">
-              <CardHeader className="pb-2">
-                <MonitorPlay className="h-8 w-8 text-gold" />
-                <CardTitle className="text-base text-navy">{t("videoAssetTitle")}</CardTitle>
-                <CardDescription className="text-xs">{t("videoAssetDesc")}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  type="button"
-                  className="w-full bg-gold font-bold text-navy hover:bg-gold-dark"
+                </BtnBlock>
+              </div>
+            </article>
+            <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white">
+              <div className="flex flex-1 flex-col p-5">
+                <MonitorPlay className="h-8 w-8 text-bx-accent" />
+                <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  [ VIDEO ]
+                </p>
+                <h3 className="mt-1 text-base font-bold tracking-tight text-bx-black">
+                  {t("videoAssetTitle")}
+                </h3>
+                <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                  {`// `}{t("videoAssetDesc")}
+                </p>
+                <BtnBlock
+                  variant="accent"
+                  size="md"
                   onClick={() => {
                     setVideoEmbed(DEMO_VIDEO_EMBED);
                     setVideoTitle(t("videoAssetTitle"));
                     setVideoOpen(true);
                   }}
+                  className="mt-4 w-full"
                 >
-                  <Video className="mr-2 h-4 w-4" />
+                  <Video className="h-4 w-4" />
                   {t("openVideo")}
-                </Button>
-              </CardContent>
-            </Card>
+                </BtnBlock>
+              </div>
+            </article>
           </div>
         </section>
 
@@ -410,21 +420,28 @@ export default function AcademyPageClient({
           id="academy-register"
           className="scroll-mt-24"
         >
-          <Card className="border-navy/10 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl text-navy">{t("sectionRegister")}</CardTitle>
-              <CardDescription>{t("sectionRegisterDesc")}</CardDescription>
-            </CardHeader>
-            <CardContent>
+          <div className="border-2 border-bx-black bg-bx-white">
+            <header className="border-b-2 border-bx-black p-5">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ REGISTER ]
+              </p>
+              <h3 className="mt-2 text-xl font-bold tracking-tight text-bx-black">
+                {t("sectionRegister")}
+              </h3>
+              <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                {`// `}{t("sectionRegisterDesc")}
+              </p>
+            </header>
+            <div className="p-5">
               <form className="grid gap-4 sm:grid-cols-2" onSubmit={submitRegistration}>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ac-webinar">
-                    {t("registerSelect")}
+                  <label className={labelCls} htmlFor="ac-webinar">
+                    [ {t("registerSelect")} ]
                   </label>
                   <select
                     id="ac-webinar"
                     required
-                    className="mt-1 flex h-10 w-full rounded-md border border-navy/15 bg-white px-3 text-sm text-navy shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+                    className={cn(inputCls, "mt-2")}
                     value={regWebinar}
                     onChange={(e) => setRegWebinar(e.target.value)}
                   >
@@ -437,79 +454,81 @@ export default function AcademyPageClient({
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ac-name">
-                    {t("registerName")}
+                  <label className={labelCls} htmlFor="ac-name">
+                    [ {t("registerName")} ]
                   </label>
-                  <Input
+                  <input
                     id="ac-name"
-                    className="mt-1"
+                    className={cn(inputCls, "mt-2")}
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ac-email">
-                    {t("registerEmail")}
+                  <label className={labelCls} htmlFor="ac-email">
+                    [ {t("registerEmail")} ]
                   </label>
-                  <Input
+                  <input
                     id="ac-email"
                     type="email"
-                    className="mt-1"
+                    className={cn(inputCls, "mt-2")}
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     required
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ac-co">
-                    {t("registerCompany")}
+                  <label className={labelCls} htmlFor="ac-co">
+                    [ {t("registerCompany")} ]
                   </label>
-                  <Input
+                  <input
                     id="ac-co"
-                    className="mt-1"
+                    className={cn(inputCls, "mt-2")}
                     value={regCompany}
                     onChange={(e) => setRegCompany(e.target.value)}
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <Button
+                  <BtnBlock
                     type="submit"
-                    className="bg-navy text-white hover:bg-navy/90"
+                    variant="dark"
+                    size="md"
                     disabled={regSubmitting}
                   >
                     {regSubmitting ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : null}
                     {t("registerSubmit")}
-                  </Button>
+                  </BtnBlock>
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </section>
 
         <section
           id="academy-consult"
-          className={cn(
-            "scroll-mt-24 rounded-2xl border border-navy/10 bg-gradient-to-br from-navy/[0.04] to-gold/10 px-6 py-12 text-center",
-          )}
+          className="scroll-mt-24 border-2 border-bx-accent bg-bx-black px-6 py-12 text-center"
         >
-          <p className="text-xs font-bold uppercase tracking-wide text-gold-dark">
-            {t("consultSectionTitle")}
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ {t("consultSectionTitle")} ]
           </p>
-          <h2 className="mt-2 text-xl font-bold text-navy sm:text-2xl">
+          <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-white sm:text-2xl">
             {t("ctaTitle")}
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-navy/70">
-            {t("consultSectionDesc")}
+          <p className="mx-auto mt-3 max-w-xl font-mono text-[12px] tracking-tight text-bx-white/75">
+            {`// `}{t("consultSectionDesc")}
           </p>
-          <Button
-            asChild
-            className="mt-6 bg-gold px-8 font-bold text-navy hover:bg-gold-dark"
-          >
-            <Link href="/contact?topic=academy">{t("ctaButton")}</Link>
-          </Button>
+          <div className="mt-6 inline-flex">
+            <BtnBlock
+              href="/contact?topic=academy"
+              variant="accent"
+              size="lg"
+            >
+              {t("ctaButton")}
+            </BtnBlock>
+          </div>
         </section>
       </div>
 
@@ -519,9 +538,14 @@ export default function AcademyPageClient({
         className="max-w-4xl"
         ariaLabel={t("videoModalTitle")}
       >
-        <div className="p-4 pt-12 sm:p-6">
-          <h3 className="pr-10 text-lg font-bold text-navy">{videoTitle}</h3>
-          <div className="mt-4 aspect-video w-full overflow-hidden rounded-xl bg-black">
+        <div className="border-2 border-bx-black bg-bx-white p-4 pt-12 sm:p-6">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ VIDEO ]
+          </p>
+          <h3 className="mt-2 pr-10 text-lg font-bold tracking-tight text-bx-black">
+            {videoTitle}
+          </h3>
+          <div className="mt-4 aspect-video w-full overflow-hidden border-2 border-bx-black bg-bx-black">
             <iframe
               title={videoTitle}
               src={videoEmbed}
