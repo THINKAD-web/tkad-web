@@ -144,33 +144,34 @@ function Hero({
 
 /* ────────────────────────────────────────────────────────────────
  * (a) TICKER
- * 무한 가로 스크롤 마퀴. 광고주·파트너 브랜드를 모노스페이스로.
+ * 무한 가로 스크롤 마퀴. 광고주를 직접 노출하지 않고 산업군 라벨을 사용.
+ * (실제 브랜드명을 마음대로 노출하면 부정경쟁방지법·표시광고법 리스크.)
  * CSS animation 으로 GPU 만 사용. prefers-reduced-motion 시 정지.
  * ──────────────────────────────────────────────────────────────── */
 const TICKER_BRANDS = [
-  "SAMSUNG",
-  "LG",
-  "HYUNDAI",
-  "KAKAO",
-  "NAVER",
-  "COUPANG",
-  "CJ ENM",
-  "SK TELECOM",
-  "STARBUCKS",
-  "EMART",
-  "SHINSEGAE",
-  "LOTTE",
-  "ASIANA",
-  "OLIVE YOUNG",
-  "MUSINSA",
-  "29CM",
+  "GLOBAL BEAUTY",
+  "TECH / IT",
+  "MOBILITY",
+  "FOOD & BEVERAGE",
+  "FASHION",
+  "RETAIL",
+  "TELECOM",
+  "MEDIA & ENT",
+  "FINANCE",
+  "PHARMA · HEALTH",
+  "EDUCATION",
+  "TRAVEL · TOURISM",
+  "GAMING",
+  "LIFESTYLE",
+  "LUXURY",
+  "F&B · DELIVERY",
 ] as const;
 
 function Ticker({ isKo }: { isKo: boolean }) {
   const items = [...TICKER_BRANDS, ...TICKER_BRANDS]; // duplicated for seamless loop
   return (
     <section
-      aria-label={isKo ? "주요 파트너 마퀴" : "Featured partners marquee"}
+      aria-label={isKo ? "집행 산업군 마퀴" : "Industries we serve"}
       className="relative overflow-hidden border-b-2 border-bx-black bg-bx-black"
     >
       <div className="bx-marquee flex gap-12 whitespace-nowrap py-5 will-change-transform">
