@@ -264,21 +264,21 @@ function HomeContent({
         </div>
       </section>
 
-      {/* TOP 3 Recommended Media */}
+      {/* 싱커드 추천 매체 — 표시 개수와 무관하게 'TOP 3' 표기 제거 */}
       <section className="bg-bx-off py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <SectionHead
               number="02"
-              category="Top 3"
+              category="Recommended"
               title={
                 isKo ? (
                   <>
-                    싱커드 <span className="bx-accent">추천</span> 매체 TOP 3
+                    싱커드 <span className="bx-accent">추천</span> 매체
                   </>
                 ) : (
                   <>
-                    THINKAD <span className="bx-accent">Recommended</span> TOP 3
+                    THINKAD <span className="bx-accent">Recommended</span> Media
                   </>
                 )
               }
@@ -303,7 +303,6 @@ function HomeContent({
                 isKo={isKo}
                 variant="featured"
                 showRankBadge
-                imagePreparingLabel={t("media.imagePreparing")}
               />
             </div>
           )}
@@ -347,7 +346,6 @@ function HomeContent({
                 items={popularItems}
                 isKo={isKo}
                 variant="popular"
-                imagePreparingLabel={t("media.imagePreparing")}
               />
             </div>
           </div>
