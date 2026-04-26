@@ -67,7 +67,9 @@ function HomeContent({
       <Process isKo={isKo} />
       <Regional isKo={isKo} />
       <MediaTop6 isKo={isKo} items={top6} />
-      {/* TODO: CaseStudies / WhyUs / Testimonials / FinalCta */}
+      <CaseStudies isKo={isKo} />
+      <WhyUs isKo={isKo} />
+      {/* TODO: Testimonials / FinalCta */}
     </>
   );
 }
@@ -758,6 +760,253 @@ function MediaTop6({
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </span>
       </a>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 7. CASE STUDIES — 3컬 (Beauty · SaaS·Fintech · K-POP)
+ *   각 셀: 16:10 grayscale 이미지 (hover 컬러) + 좌상단 카테고리 태그
+ *   + 좌하단 주황 결과 박스 + 하단 메타 + 제목 + 설명
+ * ──────────────────────────────────────────────────────────────── */
+function CaseStudies({ isKo }: { isKo: boolean }) {
+  const cases = [
+    {
+      no: "01",
+      category: "Beauty",
+      result: "+300%",
+      brand: "Global Beauty Brand A",
+      year: "2025",
+      titleKo: "강남 10개 빌보드 동시 집행",
+      titleEn: "10 simultaneous Gangnam billboards",
+      descKo:
+        "검증 데이터 기반으로 매체 10개를 한 번에 집행, 브랜드 인지도 +300% 달성.",
+      descEn:
+        "10 media run simultaneously based on verified data — brand awareness +300%.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1519222970733-f546218fa6d7?w=1200&q=80&auto=format&fit=crop",
+    },
+    {
+      no: "02",
+      category: "SaaS · Fintech",
+      result: "2주 / 150만",
+      brand: "Fintech Startup B",
+      year: "2025",
+      titleKo: "지하철 2호선 단기 런칭 캠페인",
+      titleEn: "Subway Line 2 launch sprint",
+      descKo:
+        "2주 단기 캠페인으로 150만 노출 확보, 전환율 4.2배 개선.",
+      descEn:
+        "2-week sprint hit 1.5M impressions and 4.2x conversion uplift.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1517022812141-23620dba5c23?w=1200&q=80&auto=format&fit=crop",
+    },
+    {
+      no: "03",
+      category: "K-POP",
+      result: "+200%",
+      brand: "Entertainment C",
+      year: "2024",
+      titleKo: "성수·홍대 K-POP 컴백 캠페인",
+      titleEn: "Seongsu · Hongdae comeback push",
+      descKo:
+        "10대·20대 도달률 78% 달성, 팬덤 인게이지먼트 +200%.",
+      descEn:
+        "78% reach on Gen Z + +200% fandom engagement.",
+      imageUrl:
+        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80&auto=format&fit=crop",
+    },
+  ];
+
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="04"
+        category="Case Studies"
+        title={
+          isKo ? (
+            <>
+              실제로 <span className="bx-accent">[달라진]</span> 결과.
+            </>
+          ) : (
+            <>
+              Real, <span className="bx-accent">[measured]</span> outcomes.
+            </>
+          )
+        }
+        meta={
+          isKo
+            ? "Featured Cases\n2024–2026"
+            : "Featured Cases\n2024–2026"
+        }
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {cases.map((c, i) => (
+          <article
+            key={c.no}
+            className={[
+              "group flex flex-col bg-bx-white",
+              "border-bx-black",
+              i > 0 ? "border-t-2 sm:border-t-0" : "",
+              i % 2 === 1 ? "sm:border-l-2" : "",
+              i >= 2 ? "sm:border-t-2 lg:border-t-0" : "",
+              "lg:border-l-2",
+              i === 0 ? "lg:border-l-0" : "",
+            ].join(" ")}
+          >
+            {/* 16:10 이미지 */}
+            <div className="relative aspect-[16/10] overflow-hidden border-b-2 border-bx-black bg-bx-off">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={c.imageUrl}
+                alt=""
+                className="h-full w-full object-cover grayscale transition-[filter,transform] duration-500 ease-out group-hover:grayscale-0 group-hover:scale-[1.04]"
+                loading="lazy"
+              />
+
+              {/* 좌상단 카테고리 태그 (흰배경 + 검정보더) */}
+              <span className="absolute left-0 top-0 border-b-2 border-r-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
+                [ {c.category} ]
+              </span>
+
+              {/* 좌하단 주황 결과 박스 (주황 배경 + 검정 보더) */}
+              <span className="absolute left-0 bottom-0 border-r-2 border-t-2 border-bx-black bg-bx-accent px-3 py-1.5 font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-bx-white">
+                {c.result}
+              </span>
+            </div>
+
+            {/* 하단 정보 */}
+            <div className="flex flex-1 flex-col p-6 sm:p-8">
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+                <span className="text-bx-black">[{c.no}]</span>
+                <span className="ml-2"> / {c.brand}</span>
+                <span className="ml-2"> · {c.year}</span>
+              </p>
+              <h3 className="mt-4 text-xl font-bold leading-tight tracking-tight text-bx-black sm:text-2xl">
+                {isKo ? c.titleKo : c.titleEn}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-bx-gray-dim">
+                {isKo ? c.descKo : c.descEn}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 8. WHY US — 3컬 (셀 사이 2px 흰 보더)
+ *   셀1 검정 / 셀2 주황 / 셀3 흰 — 색감으로 위계 표현
+ * ──────────────────────────────────────────────────────────────── */
+function WhyUs({ isKo }: { isKo: boolean }) {
+  const pillars = [
+    {
+      no: "01",
+      titleKo: "직접 현장 검증",
+      titleEn: "On-site verification",
+      descKo:
+        "모든 매체를 담당자가 직접 방문하여 시인성·노출 환경·유동인구를 확인합니다. 사진과 리포트로 기록된 검증 데이터 제공.",
+      descEn:
+        "Every media is personally verified on site for visibility, exposure, and traffic. Documented with photos and reports.",
+      tag: "100% SITE VISITS",
+      tone: "black" as const,
+    },
+    {
+      no: "02",
+      titleKo: "1년+ 축적 데이터",
+      titleEn: "1+ year of data",
+      descKo:
+        "단기 캠페인이 아닌 1년 이상 축적된 매체별 효과 데이터로 ROI 검증된 매체만 추천합니다.",
+      descEn:
+        "Recommendations come from 1+ year of compounded performance data, not short-term tests.",
+      tag: "DATA-DRIVEN",
+      tone: "accent" as const,
+    },
+    {
+      no: "03",
+      titleKo: "계약~사후 책임 관리",
+      titleEn: "End-to-end ownership",
+      descKo:
+        "계약·설치·집행·모니터링·리포팅·사후관리까지 전 과정을 싱커드가 책임집니다.",
+      descEn:
+        "Contract, install, run, monitor, report, post-care — all under one roof.",
+      tag: "ONE-STOP",
+      tone: "white" as const,
+    },
+  ];
+
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="05"
+        category="Why Us"
+        title={
+          isKo ? (
+            <>
+              왜 <span className="bx-accent">[싱커드]</span>인가.
+            </>
+          ) : (
+            <>
+              Why <span className="bx-accent">[THINKAD]</span>.
+            </>
+          )
+        }
+        meta={isKo ? "Three Pillars" : "Three Pillars"}
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-3">
+        {pillars.map((p, i) => {
+          const toneCls =
+            p.tone === "black"
+              ? "bg-bx-black text-bx-white"
+              : p.tone === "accent"
+                ? "bg-bx-accent text-bx-white"
+                : "bg-bx-white text-bx-black";
+          const labelCls =
+            p.tone === "white"
+              ? "text-bx-gray-dim"
+              : p.tone === "accent"
+                ? "text-bx-black"
+                : "text-bx-gray";
+          const tagBg =
+            p.tone === "white"
+              ? "border-bx-black bg-bx-white text-bx-black"
+              : p.tone === "accent"
+                ? "border-bx-black bg-bx-black text-bx-white"
+                : "border-bx-white bg-bx-black text-bx-accent";
+          return (
+            <article
+              key={p.no}
+              className={[
+                "flex flex-col p-8 sm:p-10 lg:p-12",
+                toneCls,
+                // 셀 사이 — lg에서는 2px 흰 보더로 분할 (검정/주황 위 흰 라인)
+                i > 0 ? "border-t-2 lg:border-l-2 lg:border-t-0" : "",
+                p.tone === "white" ? "border-bx-black" : "border-bx-white",
+              ].join(" ")}
+            >
+              <p
+                className={`font-mono text-[12px] font-bold uppercase tracking-[0.22em] ${labelCls}`}
+              >
+                {p.no} / {isKo ? p.titleKo : p.titleEn}
+              </p>
+              <h3 className="mt-8 font-extrabold leading-[0.96] tracking-[-0.02em] [font-size:clamp(2rem,3.5vw,2.5rem)]">
+                {isKo ? p.titleKo : p.titleEn}
+              </h3>
+              <p className="mt-6 text-sm leading-relaxed sm:text-base">
+                {isKo ? p.descKo : p.descEn}
+              </p>
+              <span
+                className={`mt-auto inline-flex w-fit items-center border-2 px-3 py-1.5 pt-10 font-mono text-[11px] font-bold uppercase tracking-[0.22em] ${tagBg}`}
+                style={{ paddingTop: "6px" }}
+              >
+                {p.tag}
+              </span>
+            </article>
+          );
+        })}
+      </div>
     </section>
   );
 }
