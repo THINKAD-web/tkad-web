@@ -127,11 +127,10 @@ function Hero({
             </p>
           </div>
           <div className="mt-10 flex flex-col gap-3">
-            <BtnBlock href="/contact" variant="primary" size="lg" className="w-full justify-between">
+            <BtnBlock href="/contact" variant="primary" className="w-full justify-between">
               <span>{isKo ? "무료 상담 신청" : "Free Consultation"}</span>
-              <ArrowRight className="h-4 w-4" />
             </BtnBlock>
-            <BtnBlock href="/media" variant="secondary" size="lg" className="w-full justify-between">
+            <BtnBlock href="/media" variant="secondary" icon={false} className="w-full justify-between">
               <span>{t("hero.cta")}</span>
               <ArrowDown className="h-4 w-4" />
             </BtnBlock>
@@ -482,47 +481,36 @@ function MediaTop6({
   };
   return (
     <section className="border-b-2 border-bx-black bg-bx-white">
-      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-16 sm:px-10">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <SectionHead
-            number="03"
-            category="Inventory"
-            title={
-              isKo ? (
-                <>
-                  싱커드 <span className="bx-accent">추천 매체</span> TOP 6
-                </>
-              ) : (
-                <>
-                  Curated <span className="bx-accent">media</span> TOP 6
-                </>
-              )
-            }
-            meta={
-              isKo
-                ? "검증 데이터 기반, 가장 효과적인 매체"
-                : "Most effective media, ranked by verified performance data"
-            }
-            divider={false}
-            className="mb-0 sm:flex-1"
-          />
-          <BtnBlock href="/media" variant="secondary" size="md">
-            <span>{isKo ? "전체 매체 →" : "Browse all →"}</span>
-          </BtnBlock>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 border-t-2 border-bx-black sm:grid-cols-2 lg:grid-cols-3">
+      <SectionHead
+        number="03"
+        category="Inventory"
+        title={
+          isKo ? (
+            <>
+              싱커드 <span className="bx-accent">추천 매체</span> TOP 6
+            </>
+          ) : (
+            <>
+              Curated <span className="bx-accent">media</span> TOP 6
+            </>
+          )
+        }
+        meta={
+          isKo
+            ? "검증 데이터 기반\n가장 효과적인 매체"
+            : "Most effective media,\nranked by verified data"
+        }
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {items.slice(0, 6).map((m, i) => {
           const img = getPrimaryMediaImageUrl(m);
           const price = formatMediaPriceWonWithSymbol(m.price);
-          // MediaCard 가 자체 2px 보더를 가지므로, 그리드 셀 사이가 4px 이중보더가
-          // 되지 않도록 셀 컨테이너에서는 하나만 그려준다 (top, left만).
           return (
             <div
               key={m.id}
               className={[
                 "border-bx-black",
-                // 모바일/sm에서는 위 보더 (i>0), lg에서는 좌측 보더 (col 시작 아닌 셀)
+                // 셀 사이 보더 — MediaCard 자체 2px 보더와 겹쳐 4px 안되게 셀에선 하나만
                 i > 0 ? "border-t-2 sm:border-t-0" : "",
                 i % 2 === 1 ? "sm:border-l-2" : "",
                 i >= 2 ? "sm:border-t-2" : "",
@@ -535,17 +523,25 @@ function MediaTop6({
                 href={`/media/${m.id}`}
                 imageSrc={img}
                 imageAlt={isKo ? m.name : m.nameEn || m.name}
-                index={i + 1}
+                rank={i + 1}
                 type={typeLabelOf(m)}
                 name={isKo ? m.name : m.nameEn || m.name}
                 location={isKo ? m.location : m.locationEn || m.location}
+                visibility={m.visibilityScore ?? null}
+                dailyTraffic={m.dailyFootTraffic ?? null}
+                monthlyImpression={m.monthlyFootTraffic ?? null}
                 price={price}
-                topRight="Verified"
+                isVerified
                 className="h-full border-0"
               />
             </div>
           );
         })}
+      </div>
+      <div className="flex justify-end border-t-2 border-bx-black px-6 py-6 sm:px-10">
+        <BtnBlock href="/media" variant="secondary">
+          {isKo ? "전체 매체" : "Browse all"}
+        </BtnBlock>
       </div>
     </section>
   );
@@ -601,36 +597,27 @@ function CaseStudies({ isKo }: { isKo: boolean }) {
   ];
   return (
     <section className="border-b-2 border-bx-black bg-bx-off">
-      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-16 sm:px-10">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <SectionHead
-            number="04"
-            category="Case studies"
-            title={
-              isKo ? (
-                <>
-                  <span className="bx-invert">집행 사례</span>
-                </>
-              ) : (
-                <>
-                  <span className="bx-invert">Case studies</span>
-                </>
-              )
-            }
-            meta={
-              isKo
-                ? "선택받은 광고주·실측 성과 — 검증된 캠페인 결과"
-                : "Selected advertisers · measured outcomes — verified campaign results"
-            }
-            divider={false}
-            className="mb-0 sm:flex-1"
-          />
-          <BtnBlock href="/cases" variant="primary" size="md">
-            <span>{isKo ? "전체 사례 →" : "All cases →"}</span>
-          </BtnBlock>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 border-t-2 border-bx-black sm:grid-cols-2">
+      <SectionHead
+        number="04"
+        category="Case studies"
+        title={
+          isKo ? (
+            <>
+              <span className="bx-invert">집행 사례</span>
+            </>
+          ) : (
+            <>
+              <span className="bx-invert">Case studies</span>
+            </>
+          )
+        }
+        meta={
+          isKo
+            ? "선택받은 광고주\n실측 성과 결과"
+            : "Selected advertisers\nMeasured outcomes"
+        }
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2">
         {cases.map((c, i) => (
           <article
             key={c.no}
@@ -663,6 +650,11 @@ function CaseStudies({ isKo }: { isKo: boolean }) {
             </div>
           </article>
         ))}
+      </div>
+      <div className="flex justify-end border-t-2 border-bx-black px-6 py-6 sm:px-10">
+        <BtnBlock href="/cases" variant="primary">
+          {isKo ? "전체 사례" : "All cases"}
+        </BtnBlock>
       </div>
     </section>
   );
@@ -874,13 +866,11 @@ function FinalCta({
           </p>
         </div>
         <aside className="col-span-1 flex flex-col justify-center gap-4 border-t-2 border-bx-white bg-bx-black px-6 py-12 sm:px-10 lg:col-span-4 lg:border-t-0 lg:py-20">
-          <BtnBlock href="/contact" variant="accent" size="lg" className="w-full justify-between">
-            <span>{t("ctaBanner.cta")}</span>
-            <ArrowRight className="h-5 w-5" />
+          <BtnBlock href="/contact" variant="accent" stack className="w-full justify-between">
+            {t("ctaBanner.cta")}
           </BtnBlock>
-          <BtnBlock href="/media" variant="dark" size="lg" className="w-full justify-between border-bx-white">
-            <span>{isKo ? "매체 살펴보기" : "Browse media"}</span>
-            <ArrowRight className="h-5 w-5" />
+          <BtnBlock href="/media" variant="dark" className="w-full justify-between border-bx-white">
+            {isKo ? "매체 살펴보기" : "Browse media"}
           </BtnBlock>
           <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray">
             // {isKo

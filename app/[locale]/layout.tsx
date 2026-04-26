@@ -144,15 +144,8 @@ export default async function LocaleLayout({ children, params }: Props) {
     { href: "/insights", label: t("nav.insights") },
   ];
 
+  /** Footer v2 — 첫 컬럼은 자동 로고+설명, 나머지 3개를 columns 로 전달 */
   const brutalFooterColumns = [
-    {
-      title: "Company",
-      items: [
-        { label: t("footer.companyName") },
-        { label: t("footer.bizNumber") },
-        { label: "mannote@tkad.co.kr", href: "mailto:mannote@tkad.co.kr", external: true },
-      ],
-    },
     {
       title: "Service",
       items: [
@@ -163,7 +156,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       ],
     },
     {
-      title: "Sitemap",
+      title: "Company",
       items: [
         { label: t("nav.cases"), href: "/cases" },
         { label: t("nav.insights"), href: "/insights" },
@@ -172,9 +165,14 @@ export default async function LocaleLayout({ children, params }: Props) {
       ],
     },
     {
-      title: "Connect",
+      title: "Contact",
       items: [
         { label: "+82 02-515-2772" },
+        {
+          label: "mannote@tkad.co.kr",
+          href: "mailto:mannote@tkad.co.kr",
+          external: true,
+        },
         { label: "Seoul, Republic of Korea" },
       ],
     },
@@ -211,6 +209,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               </main>
               <ConditionalPublicChrome>
                 <BrutalFooter
+                  description={t("footer.description")}
                   columns={brutalFooterColumns}
                   copyright={`© 2026 ${t("footer.companyName")}`}
                   legal={t("footer.bizNumber")}

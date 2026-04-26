@@ -1,43 +1,42 @@
 /**
  * BtnBlock — 브루탈리스트 사각 버튼.
- * 모노스페이스 UPPERCASE 라벨, 2px 보더, 둥근모서리 0, 호버 시 색 반전 또는 강조.
  *
- * Variants:
- *   primary   — 검정 → 호버 주황
- *   secondary — 흰색 → 호버 검정
- *   dark      — 검정 → 호버 회색
- *   accent    — 주황 → 호버 검정
- *
- * Sizes: sm / md / lg
+ * 스펙(v2):
+ *   - padding 18px 24px 고정 (단일 사이즈)
+ *   - 2px 보더, 모노 13px 600 대문자
+ *   - 4 variants:
+ *       primary   — 검정 → 호버 주황
+ *       secondary — 흰 → 호버 검정+흰글자
+ *       dark      — 검정 → 호버 주황
+ *       accent    — 주황 → 호버 검정
+ *   - 우측 ArrowRight 아이콘 (lucide-react). icon=false 로 숨길 수 있음.
+ *   - 스택 사용 시: `stack` prop true → margin-bottom: -2px (보더 겹침)
  *
  * `href` 가 주어지면 next-intl Link, 아니면 button.
  */
 import { Link } from "@/i18n/navigation";
+import { ArrowRight } from "lucide-react";
 import type { ReactNode, ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export type BtnBlockVariant = "primary" | "secondary" | "dark" | "accent";
-export type BtnBlockSize = "sm" | "md" | "lg";
 
 const variantClass: Record<BtnBlockVariant, string> = {
   primary:
     "bg-bx-black text-bx-white border-bx-black hover:bg-bx-accent hover:border-bx-accent",
   secondary:
     "bg-bx-white text-bx-black border-bx-black hover:bg-bx-black hover:text-bx-white",
-  dark: "bg-bx-black text-bx-white border-bx-black hover:bg-bx-gray-dim hover:border-bx-gray-dim",
+  dark: "bg-bx-black text-bx-white border-bx-black hover:bg-bx-accent hover:border-bx-accent",
   accent:
     "bg-bx-accent text-bx-white border-bx-accent hover:bg-bx-black hover:border-bx-black",
 };
 
-const sizeClass: Record<BtnBlockSize, string> = {
-  sm: "px-4 py-2 text-[11px]",
-  md: "px-6 py-3 text-xs",
-  lg: "px-8 py-4 text-sm",
-};
-
 type BaseProps = {
   variant?: BtnBlockVariant;
-  size?: BtnBlockSize;
+  /** 우측 ArrowRight 아이콘 표시 (기본 true) */
+  icon?: boolean;
+  /** 스택형 사용 시 다음 버튼과 보더 겹치게 (기본 false) */
+  stack?: boolean;
   className?: string;
   children: ReactNode;
 };
@@ -59,21 +58,29 @@ type ButtonProps = BaseProps & {
 export function BtnBlock(props: LinkProps | ButtonProps) {
   const {
     variant = "primary",
-    size = "md",
+    icon = true,
+    stack = false,
     className,
     children,
   } = props;
   const cls = cn(
-    "inline-flex items-center justify-center gap-2 border-2 font-mono font-bold uppercase tracking-[0.18em] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed",
-    sizeClass[size],
+    "inline-flex items-center justify-center gap-3 border-2 px-6 py-[18px] font-mono text-[13px] font-semibold uppercase tracking-[0.18em] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed",
     variantClass[variant],
+    stack && "-mb-[2px]",
     className,
+  );
+
+  const inner = (
+    <>
+      <span className="inline-flex items-center">{children}</span>
+      {icon ? <ArrowRight className="h-4 w-4 shrink-0" aria-hidden /> : null}
+    </>
   );
 
   if (props.href !== undefined) {
     return (
       <Link href={props.href} className={cls}>
-        {children}
+        {inner}
       </Link>
     );
   }
@@ -84,7 +91,7 @@ export function BtnBlock(props: LinkProps | ButtonProps) {
       disabled={props.disabled}
       className={cls}
     >
-      {children}
+      {inner}
     </button>
   );
 }
