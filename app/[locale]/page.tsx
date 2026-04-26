@@ -69,7 +69,8 @@ function HomeContent({
       <MediaTop6 isKo={isKo} items={top6} />
       <CaseStudies isKo={isKo} />
       <WhyUs isKo={isKo} />
-      {/* TODO: Testimonials / FinalCta */}
+      <Testimonials isKo={isKo} />
+      <FinalCta isKo={isKo} t={t} />
     </>
   );
 }
@@ -1006,6 +1007,164 @@ function WhyUs({ isKo }: { isKo: boolean }) {
             </article>
           );
         })}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 9. TESTIMONIALS — SectionHead [06] / Voices + 3컬
+ *   각 셀: 상단 메타바(카테고리 + 주황 결과 박스) → 큰 인용문 → 작성자/회사
+ *   data/testimonials.ts 의 상위 3건 사용.
+ * ──────────────────────────────────────────────────────────────── */
+function Testimonials({ isKo }: { isKo: boolean }) {
+  const list = testimonials.slice(0, 3);
+  if (list.length === 0) return null;
+
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="06"
+        category="Voices"
+        title={
+          isKo ? (
+            <>
+              광고주가 <span className="bx-accent">[직접]</span> 전하는 이야기.
+            </>
+          ) : (
+            <>
+              Voices, <span className="bx-accent">[direct]</span> from clients.
+            </>
+          )
+        }
+        meta={isKo ? "Real voices" : "Real voices"}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {list.map((t, i) => (
+          <article
+            key={t.id}
+            className={[
+              "flex flex-col bg-bx-white",
+              "border-bx-black",
+              i > 0 ? "border-t-2 sm:border-t-0" : "",
+              i % 2 === 1 ? "sm:border-l-2" : "",
+              i >= 2 ? "sm:border-t-2 lg:border-t-0" : "",
+              "lg:border-l-2",
+              i === 0 ? "lg:border-l-0" : "",
+            ].join(" ")}
+          >
+            {/* 상단 메타바 — 카테고리 + 주황 결과 박스 */}
+            <div className="flex items-stretch justify-between border-b-2 border-bx-black">
+              <span className="px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black sm:px-6">
+                [ {isKo ? t.industryKo : t.industryEn} ]
+              </span>
+              <span className="bg-bx-accent px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-white sm:px-5">
+                {isKo ? t.metricKo : t.metricEn}
+              </span>
+            </div>
+
+            {/* 큰 인용문 */}
+            <blockquote className="flex-1 p-6 sm:p-8">
+              <p className="text-lg font-medium leading-snug tracking-tight text-bx-black sm:text-xl">
+                <span className="text-bx-accent">&ldquo;</span>
+                {isKo ? t.bodyKo : t.bodyEn}
+                <span className="text-bx-accent">&rdquo;</span>
+              </p>
+            </blockquote>
+
+            {/* 하단 — 작성자 + 회사 */}
+            <div className="border-t-2 border-bx-black bg-bx-off p-5 sm:p-6">
+              <p className="text-sm font-bold text-bx-black">
+                {isKo ? t.nameKo : t.nameEn}
+              </p>
+              <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                // {isKo ? t.companyKo : t.companyEn}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 10. FINAL CTA — 검정 배경, 2:1 그리드
+ *   좌측 (2컬): [ → ] / Get Started + 거대 카피 (italic outline + accent)
+ *   우측 (1컬): Response Time / 24h + 설명 + 버튼 스택
+ * ──────────────────────────────────────────────────────────────── */
+function FinalCta({
+  isKo,
+  t,
+}: {
+  isKo: boolean;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-black text-bx-white">
+      <div className="grid grid-cols-1 lg:grid-cols-3">
+        {/* 좌측 — lg 2컬 */}
+        <div className="border-bx-white px-6 py-14 sm:px-10 sm:py-20 lg:col-span-2 lg:border-r-2 lg:px-12 lg:py-24">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray">
+            <span className="text-bx-accent">[ → ]</span>
+            <span className="ml-2"> / Get Started</span>
+          </p>
+          <h2 className="mt-8 font-extrabold leading-[0.92] tracking-[-0.03em] [font-size:clamp(2.5rem,7vw,6rem)]">
+            {isKo ? (
+              <>
+                <span className="block">당신의 브랜드를</span>
+                <span className="block">
+                  <span className="bx-outline">도시</span>{" "}
+                  <span className="bx-accent">위에</span>.
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="block">Put your brand</span>
+                <span className="block">
+                  <span className="bx-outline">on the</span>{" "}
+                  <span className="bx-accent">streets</span>.
+                </span>
+              </>
+            )}
+          </h2>
+        </div>
+
+        {/* 우측 — Response Time + 버튼 */}
+        <aside className="flex flex-col gap-8 border-t-2 border-bx-white px-6 py-14 sm:px-10 lg:border-t-0 lg:px-10 lg:py-24">
+          <div>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray">
+              Response Time
+            </p>
+            <p className="mt-3 text-5xl font-extrabold leading-none tracking-tight text-bx-accent">
+              24h
+            </p>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-bx-gray">
+              {isKo
+                ? "30초 신청 · 24시간 내 전문 컨설턴트 회신"
+                : "30s application · expert contact within 24h"}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <BtnBlock
+              href="/contact"
+              variant="accent"
+              stack
+              className="w-full justify-between"
+            >
+              {t("ctaBanner.cta")}
+            </BtnBlock>
+            <BtnBlock
+              href="/media"
+              variant="secondary"
+              icon={false}
+              className="w-full justify-between border-bx-white bg-bx-black text-bx-white hover:bg-bx-white hover:text-bx-black"
+            >
+              <span>{isKo ? "매체 카탈로그" : "Browse media"}</span>
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </BtnBlock>
+          </div>
+        </aside>
       </div>
     </section>
   );
