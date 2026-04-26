@@ -10,6 +10,11 @@ export type { SectionHeadProps } from "./section-head";
 export { MediaCard } from "./media-card";
 export type { MediaCardProps } from "./media-card";
 export { BrutalNav } from "./nav";
-export type { BrutalNavLink, BrutalNavProps } from "./nav";
+export type {
+  BrutalNavLeaf,
+  BrutalNavGroup,
+  BrutalNavEntry,
+  BrutalNavProps,
+} from "./nav";
 export { BrutalFooter } from "./footer";
 export type { BrutalFooterColumn, BrutalFooterProps } from "./footer";
