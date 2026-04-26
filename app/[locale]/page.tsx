@@ -4,9 +4,10 @@ import {
   fetchHomeFeaturedMedia,
   fetchHomePopularMedia,
 } from "@/lib/public-media-catalog";
-import { type MediaItem } from "@/lib/media-data";
+import { type MediaItem, getPrimaryMediaImageUrl } from "@/lib/media-data";
+import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
 import { ArrowRight, ArrowDown, Search, Camera, Database, ClipboardCheck } from "lucide-react";
-import { BtnBlock, SectionHead } from "@/components/brutalist";
+import { BtnBlock, SectionHead, MediaCard } from "@/components/brutalist";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -35,9 +36,8 @@ export default async function HomePage({ params }: Props) {
 function HomeContent({
   locale,
   t,
-  // featuredCatalog/popularCatalog 는 chunk (c) 에서 사용 — 현재 chunk(a)에서는 미사용
-  featuredCatalog: _featuredCatalog,
-  popularCatalog: _popularCatalog,
+  featuredCatalog,
+  popularCatalog,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
@@ -45,6 +45,15 @@ function HomeContent({
   popularCatalog: MediaItem[];
 }) {
   const isKo = locale === "ko";
+  /** TOP 6 — featured 우선, 부족하면 popular 로 채움 (중복 제외) */
+  const seen = new Set<string>();
+  const top6: MediaItem[] = [];
+  for (const m of [...featuredCatalog, ...popularCatalog]) {
+    if (top6.length >= 6) break;
+    if (seen.has(m.id)) continue;
+    seen.add(m.id);
+    top6.push(m);
+  }
 
   return (
     <>
@@ -53,6 +62,8 @@ function HomeContent({
       <Stats isKo={isKo} />
       <Process isKo={isKo} />
       <Regional isKo={isKo} />
+      <MediaTop6 isKo={isKo} items={top6} />
+      <CaseStudies isKo={isKo} />
     </>
   );
 }
@@ -436,6 +447,216 @@ function Regional({ isKo }: { isKo: boolean }) {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </div>
           </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * (c) MEDIA TOP 6
+ * SectionHead [03] / Inventory + 3×2 그리드. MediaCard 재사용
+ * (grayscale → hover color, 사각, 2px 보더, [번호] [Type] · // location).
+ * ──────────────────────────────────────────────────────────────── */
+function MediaTop6({
+  isKo,
+  items,
+}: {
+  isKo: boolean;
+  items: MediaItem[];
+}) {
+  if (items.length === 0) return null;
+  const typeLabelOf = (m: MediaItem) => {
+    const ko: Record<string, string> = {
+      digital: "Digital",
+      static: "Static",
+      mobile: "Mobile",
+      network: "Network",
+    };
+    return ko[m.type] ?? m.type;
+  };
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-16 sm:px-10">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <SectionHead
+            number="03"
+            category="Inventory"
+            title={
+              isKo ? (
+                <>
+                  싱커드 <span className="bx-accent">추천 매체</span> TOP 6
+                </>
+              ) : (
+                <>
+                  Curated <span className="bx-accent">media</span> TOP 6
+                </>
+              )
+            }
+            meta={
+              isKo
+                ? "검증 데이터 기반, 가장 효과적인 매체"
+                : "Most effective media, ranked by verified performance data"
+            }
+            divider={false}
+            className="mb-0 sm:flex-1"
+          />
+          <BtnBlock href="/media" variant="secondary" size="md">
+            <span>{isKo ? "전체 매체 →" : "Browse all →"}</span>
+          </BtnBlock>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 border-t-2 border-bx-black sm:grid-cols-2 lg:grid-cols-3">
+        {items.slice(0, 6).map((m, i) => {
+          const img = getPrimaryMediaImageUrl(m);
+          const price = formatMediaPriceWonWithSymbol(m.price);
+          // MediaCard 가 자체 2px 보더를 가지므로, 그리드 셀 사이가 4px 이중보더가
+          // 되지 않도록 셀 컨테이너에서는 하나만 그려준다 (top, left만).
+          return (
+            <div
+              key={m.id}
+              className={[
+                "border-bx-black",
+                // 모바일/sm에서는 위 보더 (i>0), lg에서는 좌측 보더 (col 시작 아닌 셀)
+                i > 0 ? "border-t-2 sm:border-t-0" : "",
+                i % 2 === 1 ? "sm:border-l-2" : "",
+                i >= 2 ? "sm:border-t-2" : "",
+                "lg:border-l-2 lg:border-t-0",
+                i % 3 === 0 ? "lg:border-l-0" : "",
+                i >= 3 ? "lg:border-t-2" : "",
+              ].join(" ")}
+            >
+              <MediaCard
+                href={`/media/${m.id}`}
+                imageSrc={img}
+                imageAlt={isKo ? m.name : m.nameEn || m.name}
+                index={i + 1}
+                type={typeLabelOf(m)}
+                name={isKo ? m.name : m.nameEn || m.name}
+                location={isKo ? m.location : m.locationEn || m.location}
+                price={price}
+                topRight="Verified"
+                className="h-full border-0"
+              />
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * (c) CASE STUDIES
+ * 정적 사례 카드 4개 (실제 사례 데이터는 /cases 라우트에서 별도 fetch 가능,
+ * 메인 페이지에서는 큐레이션 카드만 노출).
+ * ──────────────────────────────────────────────────────────────── */
+function CaseStudies({ isKo }: { isKo: boolean }) {
+  const cases = [
+    {
+      no: "01",
+      brand: "SAMSUNG",
+      year: "2025",
+      title: isKo ? "갤럭시 신제품 런칭 캠페인" : "Galaxy Launch Campaign",
+      summary: isKo
+        ? "강남·홍대·코엑스 디지털 매체 패키지로 런칭 위크 노출 1.2억"
+        : "Gangnam · Hongdae · COEX digital package — 120M impressions in launch week",
+      stat: { value: "1.2억", label: isKo ? "노출" : "impressions" },
+    },
+    {
+      no: "02",
+      brand: "MUSINSA",
+      year: "2025",
+      title: isKo ? "S/S 시즌 패션 캠페인" : "S/S Fashion Campaign",
+      summary: isKo
+        ? "성수·홍대 거점 OOH + 모바일 연계로 20대 도달률 78% 달성"
+        : "Seongsu · Hongdae OOH + mobile retargeting — 78% reach on Gen Z",
+      stat: { value: "78%", label: isKo ? "20대 도달률" : "Gen Z reach" },
+    },
+    {
+      no: "03",
+      brand: "STARBUCKS",
+      year: "2024",
+      title: isKo ? "썸머 시즌 음료 프로모션" : "Summer Drinks Promo",
+      summary: isKo
+        ? "전국 50개 매체 동시 집행 — CTR 4.2x 업리프트"
+        : "50 nationwide media simultaneous — 4.2x CTR uplift vs baseline",
+      stat: { value: "4.2x", label: isKo ? "CTR 업리프트" : "CTR uplift" },
+    },
+    {
+      no: "04",
+      brand: "OLIVE YOUNG",
+      year: "2024",
+      title: isKo ? "K-뷰티 신제품 인지도 캠페인" : "K-Beauty Awareness",
+      summary: isKo
+        ? "지하철 2호선 + 강남대로 디지털로 브랜드 회상률 +23p"
+        : "Line 2 subway + Gangnam digital — brand recall +23pp",
+      stat: { value: "+23pp", label: isKo ? "브랜드 회상" : "brand recall" },
+    },
+  ];
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-off">
+      <div className="mx-auto max-w-[1400px] px-6 pb-16 pt-16 sm:px-10">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <SectionHead
+            number="04"
+            category="Case studies"
+            title={
+              isKo ? (
+                <>
+                  <span className="bx-invert">집행 사례</span>
+                </>
+              ) : (
+                <>
+                  <span className="bx-invert">Case studies</span>
+                </>
+              )
+            }
+            meta={
+              isKo
+                ? "선택받은 광고주·실측 성과 — 검증된 캠페인 결과"
+                : "Selected advertisers · measured outcomes — verified campaign results"
+            }
+            divider={false}
+            className="mb-0 sm:flex-1"
+          />
+          <BtnBlock href="/cases" variant="primary" size="md">
+            <span>{isKo ? "전체 사례 →" : "All cases →"}</span>
+          </BtnBlock>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 border-t-2 border-bx-black sm:grid-cols-2">
+        {cases.map((c, i) => (
+          <article
+            key={c.no}
+            className={[
+              "group flex flex-col bg-bx-white p-6 transition-colors hover:bg-bx-black hover:text-bx-white sm:p-10",
+              i % 2 === 1 ? "sm:border-l-2 sm:border-bx-black" : "",
+              i >= 2 ? "border-t-2 border-bx-black" : "",
+            ].join(" ")}
+          >
+            <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim group-hover:text-bx-gray">
+              <span>
+                <span className="text-bx-black group-hover:text-bx-white">[{c.no}]</span>
+                <span className="ml-2">/ {c.brand}</span>
+              </span>
+              <span>{c.year}</span>
+            </div>
+            <h3 className="mt-8 text-2xl font-bold leading-tight tracking-tight text-bx-black group-hover:text-bx-white sm:text-3xl">
+              {c.title}
+            </h3>
+            <p className="mt-4 text-sm leading-relaxed text-bx-gray-dim group-hover:text-bx-gray">
+              {c.summary}
+            </p>
+            <div className="mt-8 flex items-baseline gap-3 border-t-2 border-bx-black pt-6 group-hover:border-bx-gray">
+              <span className="text-4xl font-bold tracking-tight text-bx-accent">
+                {c.stat.value}
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim group-hover:text-bx-gray">
+                // {c.stat.label}
+              </span>
+            </div>
+          </article>
         ))}
       </div>
     </section>
