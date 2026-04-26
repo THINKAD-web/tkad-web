@@ -63,7 +63,9 @@ function HomeContent({
     <>
       <Hero isKo={isKo} t={t} heroMedia={heroMedia} />
       <Ticker isKo={isKo} />
-      {/* TODO: Stats / Process / Regional / MediaTop6 / CaseStudies / WhyUs / Testimonials / FinalCta */}
+      <Stats isKo={isKo} />
+      <Process isKo={isKo} />
+      {/* TODO: Regional / MediaTop6 / CaseStudies / WhyUs / Testimonials / FinalCta */}
     </>
   );
 }
@@ -309,6 +311,192 @@ function Ticker({ isKo }: { isKo: boolean }) {
               ●
             </span>
           </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 3. STATS — 4컬럼 통계 (2px 보더 분할)
+ *   500+ / 검증된 매체     // 01
+ *   15Y  / OOH 경력         // 02
+ *   100+ / 대기업 파트너    // 03
+ *   24h  / 상담 회신        // 04
+ *   숫자: Pretendard 800 80px
+ * ──────────────────────────────────────────────────────────────── */
+function Stats({ isKo }: { isKo: boolean }) {
+  const stats = [
+    {
+      no: "01",
+      value: "500+",
+      label: isKo ? "검증된 매체" : "Verified media",
+    },
+    {
+      no: "02",
+      value: "15",
+      unit: "Y",
+      label: isKo ? "OOH 경력" : "Years of OOH",
+    },
+    {
+      no: "03",
+      value: "100+",
+      label: isKo ? "대기업 파트너" : "Enterprise partners",
+    },
+    {
+      no: "04",
+      value: "24",
+      unit: "h",
+      label: isKo ? "상담 회신" : "Response time",
+    },
+  ];
+
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <div className="grid grid-cols-2 lg:grid-cols-4">
+        {stats.map((s, i) => (
+          <div
+            key={s.no}
+            className={[
+              "relative border-bx-black px-6 py-12 sm:px-8 sm:py-14",
+              // 모바일 2컬: 우측 보더는 짝수 인덱스에만, lg 4컬에선 마지막 셀 제외 모두
+              i % 2 === 0 ? "border-r-2" : "lg:border-r-2",
+              i === 3 ? "lg:border-r-0" : "",
+              // 모바일 2행 사이 위 보더
+              i >= 2 ? "border-t-2 lg:border-t-0" : "",
+              // lg 4컬에서도 모든 셀 우측 보더 (마지막 제외)
+              "lg:border-r-2",
+              i === 3 ? "lg:border-r-0" : "",
+            ].join(" ")}
+          >
+            {/* 우상단 // NN */}
+            <span className="absolute right-4 top-4 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim sm:right-6 sm:top-6">
+              // {s.no}
+            </span>
+
+            <p className="flex items-baseline gap-1 font-extrabold leading-none tracking-[-0.03em] text-bx-black [font-size:clamp(3rem,7vw,5rem)]">
+              {s.value}
+              {s.unit ? (
+                <span className="text-3xl font-bold text-bx-gray-dim sm:text-4xl">
+                  {s.unit}
+                </span>
+              ) : null}
+            </p>
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+              / {s.label}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 4. PROCESS — 4단계 매체 검증
+ *   SectionHead [01] / Process | "매체는 발걸음으로 [검증]한다." | Four-step Verification
+ *   각 셀: 64×64 검정 보더 번호 박스 → step (모노) → 제목 → 설명
+ *   hover: 셀 배경 #f5f5f5, 박스 → 주황 배경 + 흰 글자
+ * ──────────────────────────────────────────────────────────────── */
+function Process({ isKo }: { isKo: boolean }) {
+  const steps = [
+    {
+      no: "01",
+      stepKo: "현장 방문",
+      stepEn: "Site Visit",
+      titleKo: "발로 뛰어 확인하는 매체 환경",
+      titleEn: "Walked, watched, verified",
+      descKo:
+        "담당자가 직접 매체 현장을 방문하여 시야, 환경, 주변 유동인구를 확인합니다.",
+      descEn:
+        "Our team personally visits each site to check sightline, environment, and surrounding foot traffic.",
+    },
+    {
+      no: "02",
+      stepKo: "촬영·실측",
+      stepEn: "Photo · Measurement",
+      titleKo: "정밀하게 기록되는 매체 데이터",
+      titleEn: "Precisely measured & documented",
+      descKo:
+        "매체 크기, 시인성, 조도를 정밀 측정하고 다각도로 기록·문서화합니다.",
+      descEn:
+        "We measure size, visibility, and illumination, then document the media from multiple angles.",
+    },
+    {
+      no: "03",
+      stepKo: "데이터 검증",
+      stepEn: "Data Verification",
+      titleKo: "수치로 입증되는 매체 효과",
+      titleEn: "Numbers prove the media",
+      descKo:
+        "유동인구·차량 통행량·노출 빈도를 분석하여 매체 효과를 정량 검증합니다.",
+      descEn:
+        "We quantify exposure by analyzing foot traffic, vehicle flow, and frequency.",
+    },
+    {
+      no: "04",
+      stepKo: "매체 등록",
+      stepEn: "Registration",
+      titleKo: "검증된 매체만 등록되는 큐레이션",
+      titleEn: "Only verified media listed",
+      descKo:
+        "검증을 통과한 매체만 싱커드 플랫폼에 등록되어 광고주에게 제안됩니다.",
+      descEn:
+        "Only media that pass verification are listed on the THINKAD platform.",
+    },
+  ];
+
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="01"
+        category="Process"
+        title={
+          isKo ? (
+            <>
+              매체는 발걸음으로 <span className="bx-accent">[검증]</span>한다.
+            </>
+          ) : (
+            <>
+              <span className="bx-accent">Verification</span> by foot.
+            </>
+          )
+        }
+        meta={isKo ? "Four-step\nVerification" : "Four-step\nVerification"}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {steps.map((s, i) => (
+          <article
+            key={s.no}
+            className={[
+              "group relative border-bx-black p-6 transition-colors duration-150 hover:bg-bx-off sm:p-8",
+              // 보더: sm 2컬, lg 4컬
+              i % 2 === 1 ? "sm:border-l-2" : "",
+              i >= 2 ? "sm:border-t-2 lg:border-t-0" : "",
+              "lg:border-l-2",
+              i === 0 ? "lg:border-l-0" : "",
+            ].join(" ")}
+          >
+            {/* 64×64 번호 박스 — hover 시 주황 invert */}
+            <span className="inline-flex h-16 w-16 items-center justify-center border-2 border-bx-black bg-bx-white font-mono text-base font-bold text-bx-black transition-colors duration-150 group-hover:border-bx-accent group-hover:bg-bx-accent group-hover:text-bx-white">
+              {s.no}
+            </span>
+
+            {/* step (모노) */}
+            <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+              / {isKo ? s.stepKo : s.stepEn}
+            </p>
+
+            {/* 큰 제목 */}
+            <h3 className="mt-3 text-2xl font-bold leading-tight tracking-tight text-bx-black">
+              {isKo ? s.titleKo : s.titleEn}
+            </h3>
+
+            {/* 설명 */}
+            <p className="mt-4 text-sm leading-relaxed text-bx-gray-dim">
+              {isKo ? s.descKo : s.descEn}
+            </p>
+          </article>
         ))}
       </div>
     </section>
