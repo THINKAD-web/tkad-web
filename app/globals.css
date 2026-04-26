@@ -225,6 +225,27 @@ body {
   .bx-marquee { animation: none; }
 }
 
+/* 깜빡이는 강조 점 (HERO Now serving · REGIONAL 활성 도트). */
+@keyframes bx-pulse-fade {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+.bx-pulse {
+  animation: bx-pulse-fade 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bx-pulse { animation: none; }
+}
+
+/* 외곽선 italic 텍스트 (FINAL CTA 거대 카피).
+ * `<span class="bx-outline">도시 위에</span>` 처럼 사용. */
+.bx-outline {
+  font-style: italic;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--color-bx-white);
+  text-stroke: 2px var(--color-bx-white);
+}
+
 @layer base {
   * {
     border-color: var(--border);
