@@ -213,6 +213,18 @@ body {
   color: var(--color-bx-accent);
 }
 
+/* Brutalist marquee — 좌측으로 무한 스크롤. duplicated track 으로 끊김 없음. */
+@keyframes bx-marquee-slide {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.bx-marquee {
+  animation: bx-marquee-slide 32s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bx-marquee { animation: none; }
+}
+
 @layer base {
   * {
     border-color: var(--border);

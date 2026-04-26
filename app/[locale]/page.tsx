@@ -1,54 +1,12 @@
-import dynamic from "next/dynamic";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-// HeroKenBurns 는 아래 ScrollAnimate 정의 이후에 const 로 선언됨
-import { type MediaItem } from "@/lib/media-data";
 import {
   fetchHomeFeaturedMedia,
   fetchHomePopularMedia,
 } from "@/lib/public-media-catalog";
-import {
-  ArrowRight,
-  BarChart3,
-  BadgeCheck,
-  CheckCircle,
-  ChevronDown,
-  Eye,
-  FileCheck,
-  Search,
-  Camera,
-  Database,
-  ClipboardCheck,
-  Trophy,
-  PhoneCall,
-} from "lucide-react";
-
-import { ProcessStepImage } from "@/components/process-step-image";
-import { TestimonialsCarousel } from "@/components/testimonials-carousel";
-import { HomeMediaCarousel } from "@/components/home-media-carousel";
-import { testimonials } from "@/data/testimonials";
-
-const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
-/**
- * HeroKenBurns 는 "use client" 컴포넌트. Server Component(page.tsx) 안에서는
- * `ssr: false` 옵션을 쓸 수 없다(Next.js 16). 대신 그냥 code-split 만 적용하고,
- * 초기 SSR 렌더에서는 클라이언트 훅(useEffect) 없이 기본 index=0 상태로
- * 첫 이미지만 노출 → 클라이언트 하이드레이션 후 애니/캐러셀 시작.
- */
-const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
-  loading: () => (
-    <div aria-hidden className="absolute inset-0 z-0 bg-navy" />
-  ),
-});
+import { type MediaItem } from "@/lib/media-data";
+import { ArrowRight, ArrowDown } from "lucide-react";
+import { BtnBlock } from "@/components/brutalist";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -58,11 +16,7 @@ export default async function HomePage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const t = await getTranslations();
-  /**
-   * 추천 매체: Prisma `isFeatured`·`featuredOrder` (관리자에서 지정).
-   * 인기 매체: Prisma `isPopular`·`popularOrder` (관리자에서 별도 지정).
-   */
-  /** 캐러셀로 좌우 스크롤 — 충분한 아이템 확보 */
+  /** Phase 3 — 브루탈리스트 메인 페이지. 데이터 fetcher 는 그대로. */
   const [featuredCatalog, popularCatalog] = await Promise.all([
     fetchHomeFeaturedMedia(8),
     fetchHomePopularMedia(12),
@@ -81,8 +35,9 @@ export default async function HomePage({ params }: Props) {
 function HomeContent({
   locale,
   t,
-  featuredCatalog,
-  popularCatalog,
+  // featuredCatalog/popularCatalog 는 chunk (c) 에서 사용 — 현재 chunk(a)에서는 미사용
+  featuredCatalog: _featuredCatalog,
+  popularCatalog: _popularCatalog,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
@@ -90,407 +45,201 @@ function HomeContent({
   popularCatalog: MediaItem[];
 }) {
   const isKo = locale === "ko";
-  /** 캐러셀 — 추천 매체 전체 활용 (TOP3 라벨은 첫 3개에만) */
-  const featuredItems = featuredCatalog.slice(0, 8);
-  /** 추천과 겹치는 항목은 인기 섹션에서 제외해 중복 노출 방지 */
-  const popularItems = popularCatalog
-    .filter((m) => !featuredItems.some((f) => f.id === m.id))
-    .slice(0, 12);
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
-        {/* Ken Burns 배경 — 내부에서 가독성 그라디언트/accent 오버레이까지 함께 적용 */}
-        <HeroKenBurns />
+      <Hero isKo={isKo} t={t} />
+      <Ticker isKo={isKo} />
+      <Stats isKo={isKo} />
+    </>
+  );
+}
 
-        <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
-          <div className="hero-fade-in hero-fade-in-seq-0 mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-white/5 px-5 py-2 text-sm text-gold backdrop-blur-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
-            {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
+/* ────────────────────────────────────────────────────────────────
+ * (a) HERO
+ * 풀-블리드 흰 배경 + 두 칼럼 그리드 (좌: 마스시브 타이틀, 우: 서브 + CTA).
+ * 헤더 sticky 와 만나는 상단 보더는 BrutalNav 가 이미 그어줌.
+ * ──────────────────────────────────────────────────────────────── */
+function Hero({
+  isKo,
+  t,
+}: {
+  isKo: boolean;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  return (
+    <section className="relative border-b-2 border-bx-black bg-bx-white">
+      <div className="mx-auto grid max-w-[1400px] grid-cols-1 lg:grid-cols-12">
+        <div className="col-span-1 border-bx-black px-6 py-12 sm:px-10 sm:py-16 lg:col-span-8 lg:border-r-2 lg:py-24">
+          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+            <span className="text-bx-black">[00]</span>
+            <span className="ml-2">/ Index</span>
+            <span className="ml-2">— THINKAD · {new Date().getFullYear()}</span>
           </div>
-
-          <h1 className="text-5xl leading-[1.1] font-extrabold tracking-tight text-white lg:text-7xl">
+          <h1 className="mt-6 text-[clamp(2.5rem,7vw,7.5rem)] font-bold leading-[0.92] tracking-[-0.03em] text-bx-black">
             {isKo ? (
               <>
-                <span className="hero-fade-in hero-fade-in-seq-1 block">
-                  생각하는 광고회사
+                <span className="block">생각하는</span>
+                <span className="block">
+                  <span className="bx-invert">광고</span>를
                 </span>
-                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">
-                  싱커드
+                <span className="block">
+                  만드는 <span className="bx-accent">싱커드</span>
                 </span>
               </>
             ) : (
               <>
-                <span className="hero-fade-in hero-fade-in-seq-1 block">
-                  The Thinking Ad Agency
+                <span className="block">The</span>
+                <span className="block">
+                  <span className="bx-invert">thinking</span>
                 </span>
-                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">
-                  THINKAD
+                <span className="block">
+                  ad <span className="bx-accent">agency</span>
                 </span>
               </>
             )}
           </h1>
-
-          <p className="hero-fade-in hero-fade-in-seq-3 mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300/90 sm:text-lg lg:text-xl">
-            {t("hero.subtitle")}
-          </p>
-
-          <p className="hero-fade-in hero-fade-in-seq-4 mx-auto mt-3 flex items-center justify-center gap-2 text-base text-gold/80 font-medium">
-            <BadgeCheck className="h-5 w-5 text-gold" />
-            {isKo
-              ? "싱커드가 직접 검증하고 관리하는 매체만"
-              : "Only media personally verified and managed by THINKAD"}
-          </p>
-
-          <div className="hero-fade-in hero-fade-in-seq-5 mx-auto mt-10 flex w-full max-w-md flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
-            <Link href="/contact" className="w-full sm:w-auto">
-              <Button
-                variant="cta"
-                size="lg"
-                className="btn-gold h-12 w-full min-h-11 rounded-full px-8 text-base font-semibold shadow-lg shadow-cta/25 sm:h-14 sm:w-auto sm:min-w-[11.5rem] sm:px-10 touch-manipulation"
-              >
-                <PhoneCall className="mr-2 h-5 w-5" />
-                {isKo ? "무료 상담 신청" : "Free Consultation"}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/media" className="w-full sm:w-auto">
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-12 w-full min-h-11 rounded-full border-2 border-white/35 bg-white/5 px-8 text-base font-semibold text-white shadow-sm backdrop-blur-sm hover:bg-white/12 hover:border-white/55 sm:h-14 sm:w-auto sm:min-w-[11.5rem] sm:px-10 touch-manipulation"
-              >
-                {t("hero.cta")}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-          <p className="hero-fade-in hero-fade-in-seq-6 mt-5 text-sm text-slate-400">
-            {isKo
-              ? "30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
-              : "Apply in 30 seconds · Expert consultant contacts within 24h"}
-          </p>
-
-          <div className="hero-fade-in hero-fade-in-seq-7 mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-white/75">
-            {[
-              { value: "500+", label: isKo ? "검증 매체" : "Verified media" },
-              { value: "15년", label: isKo ? "OOH 경력" : "Years of OOH" },
-              { value: "100+", label: isKo ? "대기업 파트너" : "Enterprise partners" },
-            ].map((s) => (
-              <div key={s.label} className="flex items-baseline gap-2">
-                <span className="text-2xl font-extrabold text-gold sm:text-3xl">
-                  {s.value}
-                </span>
-                <span className="text-xs font-medium tracking-wide uppercase text-white/50">
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
-
-        <div
-          className="hero-fade-in hero-fade-in-seq-7 absolute bottom-8 left-1/2 -translate-x-1/2 motion-reduce:animate-none"
-          aria-hidden
-        >
-          <ChevronDown className="hero-chevron-bounce h-6 w-6 text-white/50 motion-reduce:animate-none" />
-        </div>
-      </section>
-
-      {/* Verification Process */}
-      <section className="section-white relative py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,213,181,0.06)_0%,_transparent_70%)]" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <div className="text-center">
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "검증 프로세스" : "Verification Process"}
-              </p>
-              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {isKo ? "싱커드만의 4단계 매체 검증" : "THINKAD's 4-Step Media Verification"}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {isKo
-                  ? "모든 매체는 엄격한 검증 프로세스를 거쳐야만 등록됩니다"
-                  : "Every media must pass our rigorous verification process before registration"}
-              </p>
-            </div>
-          </ScrollAnimate>
-
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-8">
-            {[
-              {
-                icon: Search,
-                step: "01",
-                image: "/images/process/step-1-site-visit.jpg",
-                title: isKo ? "현장 방문" : "Site Visit",
-                desc: isKo
-                  ? "담당자가 직접 매체 현장을 방문하여 설치 환경과 주변 유동인구를 확인합니다."
-                  : "Our team personally visits the media site to check installation conditions and surrounding foot traffic.",
-              },
-              {
-                icon: Camera,
-                step: "02",
-                image: "/images/process/step-2-measurement.jpg",
-                title: isKo ? "촬영 및 실측" : "Photo & Measurement",
-                desc: isKo
-                  ? "매체 크기, 시인성, 조도를 정밀 측정하고 다각도 촬영으로 기록합니다."
-                  : "We precisely measure media size, visibility, and illumination with multi-angle photography.",
-              },
-              {
-                icon: Database,
-                step: "03",
-                image: "/images/process/step-3-data-review.jpg",
-                title: isKo ? "데이터 검증" : "Data Verification",
-                desc: isKo
-                  ? "유동인구 데이터, 차량 통행량, 노출 빈도를 분석하여 매체 효과를 검증합니다."
-                  : "We analyze foot traffic, vehicle flow, and exposure frequency to verify media effectiveness.",
-              },
-              {
-                icon: ClipboardCheck,
-                step: "04",
-                image: "/images/process/step-4-registration.jpg",
-                title: isKo ? "매체 등록" : "Media Registration",
-                desc: isKo
-                  ? "검증을 통과한 매체만 싱커드 플랫폼에 등록되어 광고주에게 제안됩니다."
-                  : "Only verified media are registered on the THINKAD platform and proposed to advertisers.",
-              },
-            ].map((item, index) => (
-              <ScrollAnimate key={item.step} delay={index * 120}>
-              <div className="verification-step group relative">
-                {/* 단계 연결선 — 데스크톱 수평 타임라인 */}
-                {index < 3 && (
-                  <div className="absolute top-[44%] right-0 hidden h-0.5 w-[calc(100%-3rem)] translate-x-[calc(50%+1.5rem)] bg-gradient-to-r from-gold/40 to-gold/10 lg:block" />
-                )}
-                <div className="relative h-full flex flex-col overflow-hidden rounded-2xl border border-navy/8 bg-white shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
-                  {/* 현장 사진 영역 (placeholder 가 자동) */}
-                  <div className="relative aspect-[16/9] bg-gradient-to-br from-navy/8 via-navy/3 to-gold/5">
-                    <ProcessStepImage src={item.image} alt="" />
-                    {/* 번호 뱃지 */}
-                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-navy px-2.5 py-1 text-[10px] font-bold text-gold-light shadow-sm">
-                      STEP {item.step}
-                    </span>
-                    {/* 아이콘 — 이미지 우측 하단에 오버레이 */}
-                    <span className="absolute right-3 bottom-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/92 backdrop-blur-sm ring-1 ring-gold/25 shadow-sm">
-                      <item.icon className="h-5 w-5 text-gold-dark" strokeWidth={1.75} />
-                    </span>
-                  </div>
-                  <div className="flex flex-1 flex-col px-5 py-5">
-                    <h3 className="text-base font-bold text-navy sm:text-lg">{item.title}</h3>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                      {item.desc}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              </ScrollAnimate>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TOP 3 Recommended Media */}
-      <section className="section-light py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <div className="text-center">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-gold/10 px-4 py-1.5 text-sm font-bold text-gold-dark">
-                <Trophy className="h-4 w-4" />
-                TOP 3
-              </div>
-              <h2 className="section-title mt-1 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {isKo ? "싱커드 추천 매체 TOP 3" : "THINKAD Recommended Media TOP 3"}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {isKo
-                  ? "검증 데이터 기반, 가장 효과적인 매체를 엄선했습니다"
-                  : "Curated selection of the most effective media based on verified data"}
-              </p>
-            </div>
-          </ScrollAnimate>
-
-          {featuredItems.length === 0 ? (
-            <p className="mt-8 text-center text-sm text-muted-foreground">
-              {isKo
-                ? "추천 매체를 불러오는 중입니다. 잠시 후 다시 확인해 주세요."
-                : "Featured media will appear here once available."}
+        <aside className="col-span-1 flex flex-col justify-between border-t-2 border-bx-black bg-bx-off px-6 py-10 sm:px-10 lg:col-span-4 lg:border-t-0 lg:py-24">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+              // {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's No.1 OOH agency"}
             </p>
-          ) : (
-            <div className="mt-8">
-              <HomeMediaCarousel
-                items={featuredItems}
-                isKo={isKo}
-                variant="featured"
-                showRankBadge
-                imagePreparingLabel={t("media.imagePreparing")}
-              />
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* 인기 매체 — 추천과 별개로 관리 (isPopular / popularOrder) */}
-      {popularItems.length > 0 && (
-        <section className="section-white py-16">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <ScrollAnimate>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-4 py-1.5 text-sm font-bold text-rose-600">
-                    <span>🔥</span>
-                    {isKo ? "인기 매체" : "Popular"}
-                  </div>
-                  <h2 className="section-title mt-1 text-3xl font-bold text-navy sm:text-4xl">
-                    {isKo ? "지금 가장 주목받는 매체" : "Trending Right Now"}
-                  </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {isKo
-                      ? "최근 집행·관심도 기준으로 관리자가 선별한 매체"
-                      : "Hand-picked by our team based on recent bookings and demand"}
-                  </p>
-                </div>
-                <Link
-                  href="/media"
-                  className="inline-flex items-center gap-1 text-sm font-semibold text-gold hover:text-gold-dark"
-                >
-                  {isKo ? "전체 매체" : "View all"}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </ScrollAnimate>
-            <div className="mt-8">
-              <HomeMediaCarousel
-                items={popularItems}
-                isKo={isKo}
-                variant="popular"
-                imagePreparingLabel={t("media.imagePreparing")}
-              />
-            </div>
+            <p className="mt-4 max-w-md text-base leading-relaxed text-bx-black sm:text-lg">
+              {t("hero.subtitle")}
+            </p>
           </div>
-        </section>
-      )}
-
-      {/* Why THINKAD */}
-      <section className="section-white py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <div className="text-center">
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "차별점" : "Why Us"}
-              </p>
-              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {isKo ? "왜 싱커드인가?" : "Why THINKAD?"}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {isKo
-                  ? "검증되지 않은 매체에 광고비를 낭비하지 마세요"
-                  : "Don't waste your ad budget on unverified media"}
-              </p>
-            </div>
-          </ScrollAnimate>
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-            {[
-              {
-                icon: Eye,
-                title: isKo ? "직접 현장 검증" : "On-Site Verification",
-                desc: isKo
-                  ? "모든 매체를 담당자가 직접 방문하여 실제 노출 환경, 시인성, 유동인구를 확인합니다. 사진과 리포트로 기록된 검증 데이터를 제공합니다."
-                  : "Our team personally visits every media location to verify actual exposure, visibility, and foot traffic. We provide verification data documented with photos and reports.",
-                highlight: isKo ? "100% 현장 방문" : "100% Site Visits",
-              },
-              {
-                icon: BarChart3,
-                title: isKo ? "1년 이상 효과 데이터" : "1+ Year Performance Data",
-                desc: isKo
-                  ? "단기 캠페인이 아닌, 1년 이상 축적된 매체별 효과 데이터를 기반으로 최적의 매체를 추천합니다. 실제 ROI로 검증된 매체만 제안합니다."
-                  : "We recommend optimal media based on 1+ years of accumulated performance data per media, not short-term campaigns. We only propose media verified by actual ROI.",
-                highlight: isKo ? "데이터 기반 추천" : "Data-Driven",
-              },
-              {
-                icon: FileCheck,
-                title: isKo ? "계약~사후관리 책임" : "Contract to Post-Care",
-                desc: isKo
-                  ? "계약, 설치, 집행, 모니터링, 리포팅, 사후관리까지 전 과정을 싱커드가 책임집니다. 중간 단계 없이 원스톱으로 관리합니다."
-                  : "THINKAD takes full responsibility from contract, installation, execution, monitoring, reporting, to post-campaign management. One-stop management with no middlemen.",
-                highlight: isKo ? "원스톱 관리" : "One-Stop",
-              },
-            ].map((item, i) => (
-              <ScrollAnimate key={item.title} delay={i * 100}>
-              <Card
-                className="group relative overflow-hidden border-0 bg-gradient-to-b from-white to-slate-50/50 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1 rounded-2xl"
-              >
-                <div className="absolute top-0 left-0 h-[3px] w-full bg-gradient-to-r from-gold to-gold-light" />
-                <CardHeader className="pb-4">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10 ring-1 ring-gold/20 transition-all duration-300 group-hover:scale-110 group-hover:bg-gold/20">
-                    <item.icon className="h-7 w-7 text-gold" />
-                  </div>
-                  <CardTitle className="text-xl font-bold text-navy">
-                    {item.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-sm leading-relaxed">
-                    {item.desc}
-                  </CardDescription>
-                  <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold/10 px-3 py-1 text-xs font-bold text-gold-dark">
-                    <CheckCircle className="h-3.5 w-3.5" />
-                    {item.highlight}
-                  </div>
-                </CardContent>
-              </Card>
-              </ScrollAnimate>
-            ))}
+          <div className="mt-10 flex flex-col gap-3">
+            <BtnBlock href="/contact" variant="primary" size="lg" className="w-full justify-between">
+              <span>{isKo ? "무료 상담 신청" : "Free Consultation"}</span>
+              <ArrowRight className="h-4 w-4" />
+            </BtnBlock>
+            <BtnBlock href="/media" variant="secondary" size="lg" className="w-full justify-between">
+              <span>{t("hero.cta")}</span>
+              <ArrowDown className="h-4 w-4" />
+            </BtnBlock>
           </div>
-        </div>
-      </section>
+        </aside>
+      </div>
+    </section>
+  );
+}
 
-      {/* Testimonials (캐러셀 — data/testimonials.ts 에서 관리) */}
-      <section className="section-white py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <div className="text-center">
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "고객 후기" : "Testimonials"}
-              </p>
-              <h2 className="section-title mt-3 text-3xl font-bold text-navy sm:text-4xl lg:text-5xl">
-                {isKo ? "광고주가 직접 전하는 이야기" : "What Our Clients Say"}
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                {isKo
-                  ? "싱커드와 함께 성장한 파트너사의 실제 이야기"
-                  : "Real stories from partners who grew with THINKAD"}
-              </p>
+/* ────────────────────────────────────────────────────────────────
+ * (a) TICKER
+ * 무한 가로 스크롤 마퀴. 광고주·파트너 브랜드를 모노스페이스로.
+ * CSS animation 으로 GPU 만 사용. prefers-reduced-motion 시 정지.
+ * ──────────────────────────────────────────────────────────────── */
+const TICKER_BRANDS = [
+  "SAMSUNG",
+  "LG",
+  "HYUNDAI",
+  "KAKAO",
+  "NAVER",
+  "COUPANG",
+  "CJ ENM",
+  "SK TELECOM",
+  "STARBUCKS",
+  "EMART",
+  "SHINSEGAE",
+  "LOTTE",
+  "ASIANA",
+  "OLIVE YOUNG",
+  "MUSINSA",
+  "29CM",
+] as const;
+
+function Ticker({ isKo }: { isKo: boolean }) {
+  const items = [...TICKER_BRANDS, ...TICKER_BRANDS]; // duplicated for seamless loop
+  return (
+    <section
+      aria-label={isKo ? "주요 파트너 마퀴" : "Featured partners marquee"}
+      className="relative overflow-hidden border-b-2 border-bx-black bg-bx-black"
+    >
+      <div className="bx-marquee flex gap-12 whitespace-nowrap py-5 will-change-transform">
+        {items.map((brand, i) => (
+          <span
+            key={`${brand}-${i}`}
+            className="font-mono text-sm font-bold uppercase tracking-[0.3em] text-bx-white"
+          >
+            {brand}
+            <span className="ml-12 text-bx-accent">/</span>
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * (a) STATS
+ * 4컬 통계 블록 — 셀 사이 2px 검정 보더, 각 셀 모노스페이스 라벨 + 거대 숫자.
+ * ──────────────────────────────────────────────────────────────── */
+function Stats({ isKo }: { isKo: boolean }) {
+  const stats = [
+    {
+      no: "01",
+      value: "500+",
+      label: isKo ? "검증 매체" : "Verified media",
+      meta: isKo ? "전국 OOH 인벤토리" : "Nationwide inventory",
+    },
+    {
+      no: "02",
+      value: "15",
+      unit: isKo ? "년" : "yrs",
+      label: isKo ? "OOH 운영 경력" : "OOH operations",
+      meta: isKo ? "축적된 효과 데이터" : "Compounded data",
+    },
+    {
+      no: "03",
+      value: "100+",
+      label: isKo ? "대기업 파트너" : "Enterprise partners",
+      meta: isKo ? "삼성·LG·현대 외" : "Samsung · LG · Hyundai +",
+    },
+    {
+      no: "04",
+      value: "24",
+      unit: "/7",
+      label: isKo ? "원스톱 운영" : "One-stop ops",
+      meta: isKo ? "계약~사후관리" : "Contract → post-care",
+    },
+  ];
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <div className="grid grid-cols-2 lg:grid-cols-4">
+        {stats.map((s, i) => (
+          <div
+            key={s.no}
+            className={[
+              "border-bx-black p-6 sm:p-8",
+              // 가로 보더: 짝수번째(0,2)는 우측 보더 lg
+              i % 2 === 0 ? "border-r-2" : "lg:border-r-2",
+              // lg 4열에서 마지막 (i=3) 우측 보더 제거
+              i === 3 ? "lg:border-r-0" : "",
+              // 모바일/sm 2열에서 위 두 셀과 아래 두 셀 사이 보더
+              i >= 2 ? "border-t-2 lg:border-t-0" : "",
+              // lg에서 모든 셀 동일 라인
+              "lg:border-r-2",
+              i === 3 ? "lg:border-r-0" : "",
+            ].join(" ")}
+          >
+            <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+              [{s.no}] / {s.label}
             </div>
-          </ScrollAnimate>
-          <div className="mt-10">
-            <TestimonialsCarousel items={testimonials} isKo={isKo} />
+            <p className="mt-4 flex items-baseline gap-1 text-5xl font-bold leading-none tracking-tight text-bx-black sm:text-6xl lg:text-7xl">
+              {s.value}
+              {s.unit ? (
+                <span className="text-2xl font-medium text-bx-gray-dim sm:text-3xl">
+                  {s.unit}
+                </span>
+              ) : null}
+            </p>
+            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              // {s.meta}
+            </p>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Banner */}
-      <section className="hero-bg relative overflow-hidden py-16">
-        <div className="absolute inset-0 hero-pattern opacity-30" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,213,181,0.07)_0%,_transparent_70%)]" />
-        <ScrollAnimate className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="section-title text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-            {t("ctaBanner.title")}
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-300/90">
-            {t("ctaBanner.description")}
-          </p>
-          <Link href="/contact" className="mx-auto block w-full max-w-xs sm:max-w-none touch-manipulation">
-            <Button
-              size="lg"
-              className="btn-gold mt-10 h-12 w-full min-h-11 rounded-full px-10 text-base font-bold shadow-lg shadow-gold/20 sm:h-14 sm:w-auto"
-            >
-              {t("ctaBanner.cta")}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </ScrollAnimate>
-      </section>
-    </>
+        ))}
+      </div>
+    </section>
   );
 }
