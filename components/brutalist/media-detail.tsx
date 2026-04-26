@@ -103,13 +103,13 @@ export function BrutalMediaDetail({
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr]">
           {/* 좌측 — 4:3 이미지 + 라벨들 */}
           <div className="border-bx-black lg:border-r-2">
-            <div className="relative aspect-[4/3] w-full overflow-hidden bg-bx-off">
+            <div className="group relative aspect-[4/3] w-full overflow-hidden bg-bx-off">
               {heroImg ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={heroImg}
                   alt={name}
-                  className="h-full w-full object-cover grayscale"
+                  className="h-full w-full object-cover grayscale transition-[filter] duration-500 ease-out group-hover:grayscale-0"
                   loading="eager"
                 />
               ) : (
