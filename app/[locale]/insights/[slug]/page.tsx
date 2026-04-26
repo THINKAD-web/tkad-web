@@ -9,7 +9,6 @@ import {
   buildInsightBreadcrumbJsonLd,
 } from "@/lib/structured-data";
 import { Link } from "@/i18n/navigation";
-import { Badge } from "@/components/ui/badge";
 import { AiGenerationBanner } from "@/components/insights/ai-generation-banner";
 import { SourcesSection } from "@/components/insights/sources-section";
 import { InsightMarkdownBody } from "@/components/insights/markdown-body";
@@ -111,32 +110,35 @@ export default async function InsightDetailPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
-      <nav className="mb-6 text-xs text-muted-foreground">
-        <Link href="/insights" className="hover:text-navy">
+      <nav className="mb-6 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+        <Link href="/insights" className="transition-colors hover:text-bx-accent">
           ← OOH 인사이트
         </Link>
       </nav>
 
       <header className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge className="bg-navy/90 text-white">
-            {insight.period === "monthly" ? "월간" : "분기"}
-          </Badge>
-          <Badge variant="outline" className="border-navy/20 text-navy/70">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          {`// INSIGHT / ${slug.slice(0, 8).toUpperCase()}`}
+        </p>
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="border-2 border-bx-black bg-bx-black px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+            [ {insight.period === "monthly" ? "월간" : "분기"} ]
+          </span>
+          <span className="border-2 border-bx-black bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
             {locale === "ko" ? insight.labelKo : insight.labelEn}
-          </Badge>
+          </span>
           {isAuto ? (
-            <Badge className="border-gold/30 bg-gold/10 text-gold-dark">
+            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
               AI 분석
-            </Badge>
+            </span>
           ) : null}
         </div>
 
-        <h1 className="text-3xl font-extrabold leading-tight text-navy sm:text-4xl">
+        <h1 className="text-3xl font-bold leading-tight tracking-tight text-bx-black sm:text-5xl">
           {locale === "ko" ? insight.titleKo : insight.titleEn}
         </h1>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" aria-hidden />
             {insight.publishedIso}
@@ -156,16 +158,16 @@ export default async function InsightDetailPage({ params }: Params) {
       {insight.summaryKo.length > 0 ? (
         <section
           aria-label="요약"
-          className="mt-8 rounded-2xl border border-gold/30 bg-gold/5 p-5"
+          className="mt-8 border-2 border-bx-accent bg-bx-white p-5"
         >
-          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gold-dark">
-            TL;DR
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ TL;DR ]
           </p>
-          <ul className="space-y-2 text-sm leading-relaxed text-navy/85">
+          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-bx-black">
             {insight.summaryKo.slice(0, 5).map((line, i) => (
               <li key={i} className="flex gap-2">
-                <span aria-hidden className="mt-0.5 text-gold-dark">
-                  •
+                <span aria-hidden className="mt-0.5 text-bx-accent">
+                  ▸
                 </span>
                 <span>{line}</span>
               </li>
@@ -182,8 +184,8 @@ export default async function InsightDetailPage({ params }: Params) {
 
       <SourcesSection sources={sources} />
 
-      <p className="mt-8 rounded-xl border border-navy/10 bg-slate-50/60 p-4 text-[11px] leading-relaxed text-muted-foreground">
-        본 리포트는 AI 가 자동 생성한 분석 자료로, THINKAD 자체 검증을
+      <p className="mt-8 border-2 border-bx-black bg-bx-off p-4 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+        {`// `}본 리포트는 AI 가 자동 생성한 분석 자료로, THINKAD 자체 검증을
         거쳤으나 의사결정에 활용하실 때는 추가 검증을 권장드립니다.
       </p>
     </main>
