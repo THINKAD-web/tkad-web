@@ -13,23 +13,15 @@ import {
   selectBudgetNum,
   usePlannerStore,
 } from "@/lib/planner/store";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import { cn } from "@/lib/utils";
 
 const REASON_COLORS: Record<RecommendReasonKey, string> = {
-  matchRegion: "bg-navy/10 text-navy border-navy/20",
-  ageMatch: "bg-gold/10 text-gold-dark border-gold/30",
-  budgetEfficient: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  goalFit: "bg-indigo-50 text-indigo-800 border-indigo-200",
-  highVisibility: "bg-amber-50 text-amber-900 border-amber-200",
+  matchRegion: "border-bx-black bg-bx-white text-bx-black",
+  ageMatch: "border-bx-accent bg-bx-accent text-bx-white",
+  budgetEfficient: "border-bx-black bg-bx-off text-bx-black",
+  goalFit: "border-bx-black bg-bx-black text-bx-accent",
+  highVisibility: "border-bx-accent bg-bx-white text-bx-accent",
 };
 
 type Props = {
@@ -108,75 +100,77 @@ export function PlannerRecommendationPanel({
   };
 
   return (
-    <Card className="border-gold/30 bg-gradient-to-br from-gold/5 via-transparent to-transparent shadow-lg">
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="border-2 border-bx-accent bg-bx-white">
+      <div className="flex flex-col gap-3 border-b-2 border-bx-black p-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <CardTitle className="flex items-center gap-2 text-navy">
-            <Sparkles className="h-5 w-5 text-gold" aria-hidden />
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ AI RECOMMENDATIONS ]
+          </p>
+          <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight text-bx-black">
+            <Sparkles className="h-5 w-5 text-bx-accent" aria-hidden />
             {t("recommendHeading")}
-          </CardTitle>
-          <CardDescription>{t("recommendDesc")}</CardDescription>
+          </h3>
+          <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            {t("recommendDesc")}
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
+          <BtnBlock
+            variant="secondary"
             size="sm"
-            className="rounded-full border-navy/20"
             onClick={() => setRefreshTick((n) => n + 1)}
             disabled={loading}
           >
             <RefreshCw
-              className={cn("mr-1.5 h-3.5 w-3.5", loading && "animate-spin")}
+              className={cn("h-3.5 w-3.5", loading && "animate-spin")}
               aria-hidden
             />
             {t("recommendRefresh")}
-          </Button>
-          <Button
-            type="button"
+          </BtnBlock>
+          <BtnBlock
+            variant="accent"
             size="sm"
-            className="btn-gold rounded-full"
             onClick={handleAddAll}
             disabled={loading || recommendations.length === 0}
           >
             {t("recommendAddAll")}
-          </Button>
+          </BtnBlock>
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+      <div className="p-5">
         {loading ? (
           <div
-            className="flex items-center justify-center gap-3 py-10 text-sm text-muted-foreground"
+            className="flex items-center justify-center gap-3 py-10 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim"
             role="status"
             aria-live="polite"
           >
-            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-gold border-t-transparent" />
-            {t("recommendLoading")}
+            <span className="inline-block h-4 w-4 animate-spin border-2 border-bx-accent border-t-transparent" />
+            {`// `}{t("recommendLoading")}
           </div>
         ) : recommendations.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">
-            {t("recommendEmpty")}
+          <p className="py-10 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
+            {`// `}{t("recommendEmpty")}
           </p>
         ) : (
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-3">
             {recommendations.map(({ media, reasons }) => {
               const selected = isSelected(media.id);
               return (
                 <li
                   key={media.id}
                   className={cn(
-                    "flex flex-col gap-2 rounded-xl border bg-card p-3 shadow-sm transition",
+                    "-mt-[2px] -ml-[2px] flex flex-col gap-2 border-2 p-4 transition-colors",
                     selected
-                      ? "border-gold/50 ring-2 ring-gold/30"
-                      : "border-navy/10 hover:border-gold/40",
+                      ? "border-bx-accent bg-bx-off"
+                      : "border-bx-black bg-bx-white hover:bg-bx-off",
                   )}
                 >
                   <div className="min-w-0">
-                    <p className="line-clamp-2 text-sm font-bold text-navy">
+                    <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-bx-black">
                       {isKo ? media.name : media.nameEn || media.name}
                     </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {regionLabel(media.region)} ·{" "}
+                    <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                      {`// `}{regionLabel(media.region)} ·{" "}
                       {(isKo
                         ? media.location
                         : media.locationEn || media.location
@@ -186,47 +180,42 @@ export function PlannerRecommendationPanel({
                   {reasons.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {reasons.map((r) => (
-                        <Badge
+                        <span
                           key={r.key}
-                          variant="outline"
                           className={cn(
-                            "rounded-full border text-[10px] font-semibold",
+                            "border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em]",
                             REASON_COLORS[r.key],
                           )}
                         >
                           {t(`recommendReason.${r.key}`)}
-                        </Badge>
+                        </span>
                       ))}
                     </div>
                   ) : null}
-                  <Button
-                    type="button"
+                  <BtnBlock
+                    variant={selected ? "secondary" : "accent"}
                     size="sm"
-                    variant={selected ? "outline" : "default"}
-                    className={cn(
-                      "mt-auto rounded-full",
-                      !selected && "btn-gold border-0",
-                    )}
                     onClick={() => handleToggle(media.id)}
+                    className="mt-auto"
                   >
                     {selected ? (
                       <>
-                        <Check className="mr-1 h-3.5 w-3.5" aria-hidden />
+                        <Check className="h-3.5 w-3.5" aria-hidden />
                         {t("recommendAdded")}
                       </>
                     ) : (
                       <>
-                        <Plus className="mr-1 h-3.5 w-3.5" aria-hidden />
+                        <Plus className="h-3.5 w-3.5" aria-hidden />
                         {t("recommendAdd")}
                       </>
                     )}
-                  </Button>
+                  </BtnBlock>
                 </li>
               );
             })}
           </ul>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

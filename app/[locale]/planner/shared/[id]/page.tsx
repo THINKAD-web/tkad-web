@@ -1,16 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { BtnBlock } from "@/components/brutalist";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 import { CompositePreview } from "@/components/planner/composite-preview";
@@ -65,15 +56,20 @@ export default async function SharedPlannerPage({
   if (result === "expired") {
     return (
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
-        <h1 className="text-xl font-bold text-navy">{t("shareExpiredTitle")}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          [ EXPIRED ]
+        </p>
+        <h1 className="mt-3 text-xl font-bold tracking-tight text-bx-black">
+          {t("shareExpiredTitle")}
+        </h1>
+        <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
           {t("shareExpiredBody")}
         </p>
-        <Link href="/planner" className="mt-6 inline-block">
-          <Button className="btn-gold rounded-full px-8">
+        <div className="mt-6 inline-block">
+          <BtnBlock href="/planner" variant="accent" size="md">
             {t("shareExpiredCta")}
-          </Button>
-        </Link>
+          </BtnBlock>
+        </div>
       </div>
     );
   }
@@ -88,93 +84,99 @@ export default async function SharedPlannerPage({
   const budgetMan = Number.parseInt(plan.budget || "0", 10);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <section className="bg-navy py-14 text-white">
+    <div className="min-h-screen bg-bx-white">
+      <section className="bg-bx-black py-14 text-bx-white">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <Badge className="border-gold/40 bg-gold/15 text-gold">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            {`// SHARED PLAN`}
+          </p>
+          <div className="mt-3 inline-block border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
             {t("shareViewBadge")}
-          </Badge>
-          <h1 className="mt-3 text-2xl font-extrabold sm:text-3xl">
+          </div>
+          <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-4xl">
             {t("title")}
           </h1>
-          <p className="mt-2 text-sm text-white/75">
+          <p className="mt-3 font-mono text-[12px] tracking-tight text-bx-white/75">
             {t("shareViewSubtitle")}
           </p>
         </div>
       </section>
 
       <div className="mx-auto max-w-6xl space-y-6 px-4 py-10 sm:px-6">
-        <Card className="border-navy/10 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-navy">
+        <div className="border-2 border-bx-black bg-bx-white">
+          <div className="border-b-2 border-bx-black p-5">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ OVERVIEW ]
+            </p>
+            <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
               {t("reportSectionOverview")}
-            </CardTitle>
-            <CardDescription>
+            </h3>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
               {t("shareViewSubtitle")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {t("reportLabelGoal")}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-0 p-4 text-sm sm:grid-cols-2">
+            <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {t("reportLabelGoal")} ]
               </p>
-              <p className="font-semibold text-navy">
+              <p className="mt-2 font-bold text-bx-black">
                 {plan.campaignGoal
                   ? t(`goal${capitalize(plan.campaignGoal)}` as never)
                   : "—"}
               </p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {t("reportLabelBudget")}
+            <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {t("reportLabelBudget")} ]
               </p>
-              <p className="font-semibold text-navy">
+              <p className="mt-2 font-mono font-bold tabular-nums text-bx-black">
                 {budgetMan.toLocaleString()}
                 {isKo ? " 만원" : " ₩10K"}
               </p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {t("reportLabelPeriod")}
+            <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {t("reportLabelPeriod")} ]
               </p>
-              <p className="font-semibold text-navy">
+              <p className="mt-2 font-bold text-bx-black">
                 {plan.months}
                 {isKo ? "개월" : " months"}
               </p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {t("reportLabelRegions")}
+            <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {t("reportLabelRegions")} ]
               </p>
-              <p className="font-semibold text-navy">
+              <p className="mt-2 font-bold text-bx-black">
                 {(plan.regions ?? []).join(", ") || "—"}
               </p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {t("reportLabelCategories")}
+            <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4 sm:col-span-2">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {t("reportLabelCategories")} ]
               </p>
-              <p className="font-semibold text-navy">
+              <p className="mt-2 font-bold text-bx-black">
                 {categories
                   .map((c) => t(`cat${capitalize(c)}` as never))
                   .join(", ")}
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {selected.length > 0 ? (
-          <Card className="border-navy/10 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-navy">
-                {t("reportSectionMedia")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="border-2 border-bx-black bg-bx-white">
+            <div className="border-b-2 border-bx-black p-5">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ {t("reportSectionMedia")} ]
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-0 p-4 sm:grid-cols-2 lg:grid-cols-3">
               {selected.map((m) => (
                 <div
                   key={m.id}
-                  className="flex flex-col gap-2 rounded-xl border border-navy/10 bg-white p-3"
+                  className="-mt-[2px] -ml-[2px] flex flex-col gap-2 border-2 border-bx-black bg-bx-white p-3"
                 >
                   <CompositePreview
                     mediaImageUrl={getPrimaryMediaImageUrl(m)}
@@ -183,31 +185,27 @@ export default async function SharedPlannerPage({
                     placement={plan.mediaPlacements?.[m.id]}
                     missingLabel={t("mediaPhotoMissing")}
                   />
-                  <p className="line-clamp-2 text-sm font-bold text-navy">
+                  <p className="line-clamp-2 text-sm font-bold tracking-tight text-bx-black">
                     {isKo ? m.name : m.nameEn || m.name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {isKo
+                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                    {`// `}{isKo
                       ? m.location.slice(0, 40)
                       : (m.locationEn || m.location).slice(0, 40)}
                   </p>
                 </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ) : null}
 
-        <div className="flex flex-wrap gap-3 pt-4">
-          <Link href="/planner">
-            <Button className="btn-gold rounded-full px-6 font-semibold">
-              {t("shareStartOwnCta")}
-            </Button>
-          </Link>
-          <Link href="/contact">
-            <Button variant="outline" className="rounded-full border-navy/20">
-              {t("ctaContact")}
-            </Button>
-          </Link>
+        <div className="flex flex-wrap gap-3 border-t-2 border-bx-black pt-6">
+          <BtnBlock href="/planner" variant="accent" size="md">
+            {t("shareStartOwnCta")}
+          </BtnBlock>
+          <BtnBlock href="/contact" variant="secondary" size="md">
+            {t("ctaContact")}
+          </BtnBlock>
         </div>
       </div>
     </div>

@@ -67,10 +67,10 @@ export function PlannerImpressionsLineChart({
         aria-label={title}
       >
         <defs>
-          <linearGradient id="plannerImpFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgb(26, 42, 108)" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="rgb(232, 213, 181)" stopOpacity="0.05" />
-          </linearGradient>
+          <pattern id="plannerImpFill" width="6" height="6" patternUnits="userSpaceOnUse">
+            <rect width="6" height="6" fill="#f5f5f5" />
+            <path d="M 0 6 L 6 0" stroke="#000000" strokeOpacity="0.06" strokeWidth="1" />
+          </pattern>
         </defs>
         {[yTick1, yTick2, yTick3].map((v, i) => {
           const yy =
@@ -82,14 +82,16 @@ export function PlannerImpressionsLineChart({
                 x2={W - padR}
                 y1={yy}
                 y2={yy}
-                className="stroke-slate-200"
+                stroke="rgba(0,0,0,0.12)"
+                strokeDasharray="3 3"
                 strokeWidth={1}
               />
               <text
                 x={padL - 6}
                 y={yy + 4}
                 textAnchor="end"
-                className="fill-muted-foreground text-[9px]"
+                className="fill-bx-gray-dim text-[9px]"
+                style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {formatCompact(v, isKo)}
               </text>
@@ -100,19 +102,21 @@ export function PlannerImpressionsLineChart({
         <path
           d={lineD}
           fill="none"
-          className="stroke-navy"
+          stroke="#000000"
           strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          strokeLinecap="butt"
+          strokeLinejoin="miter"
         />
         {pts.map((p) => (
-          <circle
+          <rect
             key={p.month}
-            cx={p.x}
-            cy={p.y}
-            r={4}
-            className="fill-gold stroke-navy"
-            strokeWidth={1.5}
+            x={p.x - 4}
+            y={p.y - 4}
+            width={8}
+            height={8}
+            fill="#ff4d00"
+            stroke="#000000"
+            strokeWidth={2}
           />
         ))}
         {pts.map((p) => (
@@ -121,9 +125,10 @@ export function PlannerImpressionsLineChart({
             x={p.x}
             y={H - 8}
             textAnchor="middle"
-            className="fill-muted-foreground text-[9px] font-medium"
+            className="fill-bx-gray-dim text-[9px] font-bold"
+            style={{ fontFamily: "JetBrains Mono, monospace" }}
           >
-            {isKo ? `${p.month}개월` : `M${p.month}`}
+            {isKo ? `${p.month}M` : `M${p.month}`}
           </text>
         ))}
       </svg>
@@ -198,7 +203,8 @@ export function PlannerRoiLineChart({
           x={W - padR}
           y={18}
           textAnchor="end"
-          className="fill-muted-foreground text-[8px]"
+          className="fill-bx-gray-dim text-[8px]"
+          style={{ fontFamily: "JetBrains Mono, monospace" }}
         >
           {roiUnit}
         </text>
@@ -207,30 +213,27 @@ export function PlannerRoiLineChart({
           x2={W - padR}
           y1={chartBottom}
           y2={chartBottom}
-          className="stroke-slate-200"
-          strokeWidth={1}
+          stroke="#000000"
+          strokeWidth={2}
         />
         <path
           d={line("conservative")}
           fill="none"
-          className="stroke-slate-400"
+          stroke="#737373"
           strokeWidth={2}
           strokeDasharray="6 4"
-          strokeLinecap="round"
         />
         <path
           d={line("expected")}
           fill="none"
-          className="stroke-navy"
-          strokeWidth={2.5}
-          strokeLinecap="round"
+          stroke="#000000"
+          strokeWidth={3}
         />
         <path
           d={line("optimistic")}
           fill="none"
-          className="stroke-gold-dark"
-          strokeWidth={2}
-          strokeLinecap="round"
+          stroke="#ff4d00"
+          strokeWidth={2.5}
         />
         {data.map((d, i) => (
           <text
@@ -238,23 +241,24 @@ export function PlannerRoiLineChart({
             x={xFor(i)}
             y={H - 10}
             textAnchor="middle"
-            className="fill-muted-foreground text-[9px] font-medium"
+            className="fill-bx-gray-dim text-[9px] font-bold"
+            style={{ fontFamily: "JetBrains Mono, monospace" }}
           >
-            {isKo ? `${d.month}개월` : `M${d.month}`}
+            {isKo ? `${d.month}M` : `M${d.month}`}
           </text>
         ))}
       </svg>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-muted-foreground sm:text-xs">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim sm:text-[11px]">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400" />
+          <span className="h-[2px] w-4 border-t-2 border-dashed border-bx-gray-dim" />
           {legendConservative}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-0.5 w-4 bg-navy" />
+          <span className="h-[3px] w-4 bg-bx-black" />
           {legendExpected}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-0.5 w-4 bg-gold-dark" />
+          <span className="h-[3px] w-4 bg-bx-accent" />
           {legendOptimistic}
         </span>
       </div>
@@ -303,7 +307,7 @@ export function PlannerDailyReachBarChart({
         role="img"
         aria-label={title}
       >
-        <text x={padL} y={14} className="fill-navy text-[11px] font-bold">
+        <text x={padL} y={14} className="fill-bx-black text-[11px] font-bold">
           {title}
         </text>
         {data.map((p, i) => {
@@ -318,14 +322,14 @@ export function PlannerDailyReachBarChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 2)}
-                rx={6}
-                className="fill-navy/85"
+                fill="#000000"
               />
               <text
                 x={x + barW / 2}
                 y={y - 4}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[8px] font-medium"
+                className="fill-bx-gray-dim text-[8px] font-bold"
+                style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {formatBarTick(p.value)}
               </text>
@@ -333,7 +337,8 @@ export function PlannerDailyReachBarChart({
                 x={x + barW / 2}
                 y={H - 10}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px] font-medium"
+                className="fill-bx-gray-dim text-[9px] font-bold"
+                style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {p.label}
               </text>
@@ -344,7 +349,8 @@ export function PlannerDailyReachBarChart({
           x={W - padR}
           y={H - 2}
           textAnchor="end"
-          className="fill-muted-foreground text-[8px]"
+          className="fill-bx-gray-dim text-[8px]"
+          style={{ fontFamily: "JetBrains Mono, monospace" }}
         >
           {valueLabel}
         </text>
@@ -373,7 +379,7 @@ export function PlannerReachDonutChart({
   const extLen = (extendedPct / 100) * c;
 
   return (
-    <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-6">
+    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
       <svg
         viewBox="0 0 120 120"
         className="h-32 w-32 shrink-0"
@@ -385,13 +391,13 @@ export function PlannerReachDonutChart({
           <circle
             r={r}
             fill="none"
-            className="stroke-slate-200"
+            stroke="#f5f5f5"
             strokeWidth={stroke}
           />
           <circle
             r={r}
             fill="none"
-            className="stroke-navy"
+            stroke="#000000"
             strokeWidth={stroke}
             strokeDasharray={`${coreLen} ${c}`}
             strokeLinecap="butt"
@@ -399,7 +405,7 @@ export function PlannerReachDonutChart({
           <circle
             r={r}
             fill="none"
-            className="stroke-gold-dark"
+            stroke="#ff4d00"
             strokeWidth={stroke}
             strokeDasharray={`${extLen} ${c}`}
             strokeDashoffset={-coreLen}
@@ -408,16 +414,18 @@ export function PlannerReachDonutChart({
         </g>
       </svg>
       <div className="space-y-2 text-sm">
-        <p className="font-bold text-navy">{title}</p>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="h-2.5 w-2.5 rounded-sm bg-navy" />
-          <span className="text-muted-foreground">{coreLabel}</span>
-          <span className="font-bold text-navy">{corePct}%</span>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+          [ {title} ]
+        </p>
+        <div className="flex items-center gap-2 font-mono text-xs">
+          <span className="h-3 w-3 shrink-0 bg-bx-black" />
+          <span className="text-bx-gray-dim">{coreLabel}</span>
+          <span className="font-bold tabular-nums text-bx-black">{corePct}%</span>
         </div>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="h-2.5 w-2.5 rounded-sm bg-gold-dark" />
-          <span className="text-muted-foreground">{extendedLabel}</span>
-          <span className="font-bold text-navy">{extendedPct}%</span>
+        <div className="flex items-center gap-2 font-mono text-xs">
+          <span className="h-3 w-3 shrink-0 bg-bx-accent" />
+          <span className="text-bx-gray-dim">{extendedLabel}</span>
+          <span className="font-bold tabular-nums text-bx-black">{extendedPct}%</span>
         </div>
       </div>
     </div>
@@ -425,11 +433,11 @@ export function PlannerReachDonutChart({
 }
 
 const PIE_COLORS = [
-  "rgb(26, 42, 108)",
-  "rgb(201, 184, 150)",
-  "rgb(46, 64, 120)",
-  "rgb(176, 184, 196)",
-  "rgb(155, 60, 49)",
+  "#000000", // bx-black
+  "#ff4d00", // bx-accent
+  "#737373", // bx-gray-dim
+  "#d4d4d4", // bx-gray
+  "#f5f5f5", // bx-off (with bx-black border via stroke)
 ];
 
 export function PlannerBudgetPieChart({
@@ -464,7 +472,9 @@ export function PlannerBudgetPieChart({
 
   return (
     <div className="w-full space-y-3">
-      <p className="text-sm font-bold text-navy">{title}</p>
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+        [ {title} ]
+      </p>
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-8">
         <svg
           viewBox="0 0 140 140"
@@ -473,18 +483,24 @@ export function PlannerBudgetPieChart({
           aria-label={title}
         >
           {slices.map((s) => (
-            <path key={s.key} d={s.path} fill={s.color} stroke="white" strokeWidth={1} />
+            <path
+              key={s.key}
+              d={s.path}
+              fill={s.color}
+              stroke="#000000"
+              strokeWidth={2}
+            />
           ))}
         </svg>
-        <ul className="min-w-0 flex-1 space-y-1.5 text-xs">
+        <ul className="min-w-0 flex-1 space-y-2 font-mono text-xs">
           {slices.map((s) => (
             <li key={s.key} className="flex items-center gap-2">
               <span
-                className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                className="h-3 w-3 shrink-0 border-2 border-bx-black"
                 style={{ backgroundColor: s.color }}
               />
-              <span className="text-muted-foreground">{s.label}</span>
-              <span className="font-bold text-navy">
+              <span className="text-bx-gray-dim">{s.label}</span>
+              <span className="font-bold tabular-nums text-bx-black">
                 {s.pct}
                 {unitLabel}
               </span>
@@ -528,7 +544,7 @@ export function PlannerCpmCompareChart({
         role="img"
         aria-label={title}
       >
-        <text x={padL} y={18} className="fill-navy text-[11px] font-bold">
+        <text x={padL} y={18} className="fill-bx-black text-[11px] font-bold">
           {title}
         </text>
         {data.map((p, i) => {
@@ -550,14 +566,14 @@ export function PlannerCpmCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 2)}
-                rx={5}
-                className="fill-gold-dark/90"
+                fill="#ff4d00"
               />
               <text
                 x={x + barW / 2}
                 y={y - 4}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[8px] font-medium"
+                className="fill-bx-gray-dim text-[8px] font-bold"
+                style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {p.value >= 1000
                   ? `${Math.round(p.value / 100) / 10}k`
@@ -567,7 +583,8 @@ export function PlannerCpmCompareChart({
                 x={x + barW / 2}
                 y={H - 10}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px] font-medium"
+                className="fill-bx-gray-dim text-[9px] font-bold"
+                style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {p.label}
               </text>
@@ -578,7 +595,8 @@ export function PlannerCpmCompareChart({
           x={W - padR}
           y={H - 2}
           textAnchor="end"
-          className="fill-muted-foreground text-[8px]"
+          className="fill-bx-gray-dim text-[8px]"
+          style={{ fontFamily: "JetBrains Mono, monospace" }}
         >
           {unitLabel}
         </text>
@@ -617,7 +635,7 @@ export function PlannerMonthCompareChart({
         role="img"
         aria-label={title}
       >
-        <text x={padL} y={14} className="fill-navy text-[11px] font-bold">
+        <text x={padL} y={14} className="fill-bx-black text-[11px] font-bold">
           {title}
         </text>
         {[1, 0.5, 0].map((t, i) => {
@@ -630,14 +648,16 @@ export function PlannerMonthCompareChart({
                 x2={W - padR}
                 y1={yy}
                 y2={yy}
-                className="stroke-slate-200"
+                stroke="rgba(0,0,0,0.12)"
+                strokeDasharray="3 3"
                 strokeWidth={1}
               />
               <text
                 x={padL - 6}
                 y={yy + 4}
                 textAnchor="end"
-                className="fill-muted-foreground text-[9px]"
+                className="fill-bx-gray-dim text-[9px]"
+                style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {formatBarTick(v)}
               </text>
@@ -648,6 +668,7 @@ export function PlannerMonthCompareChart({
           const x = padL + gap + i * (barW + gap);
           const h = (d.total / maxY) * innerH;
           const y = padT + innerH - h;
+          const isCurrent = i === data.length - 1; // 마지막(가장 긴 기간)을 강조
           return (
             <g key={d.months}>
               <rect
@@ -655,14 +676,14 @@ export function PlannerMonthCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 3)}
-                rx={6}
-                className="fill-navy/80"
+                fill={isCurrent ? "#ff4d00" : "#000000"}
               />
               <text
                 x={x + barW / 2}
                 y={H - 10}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px] font-medium"
+                className="fill-bx-gray-dim text-[9px] font-bold"
+                style={{ fontFamily: "JetBrains Mono, monospace" }}
               >
                 {barLabels[i] ?? `${d.months}M`}
               </text>

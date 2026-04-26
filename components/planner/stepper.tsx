@@ -25,19 +25,21 @@ export function PlannerStepper({
 }: Props) {
   return (
     <div
-      className="mb-8 flex flex-col items-center gap-3"
+      className="mb-10 flex flex-col items-center gap-4"
       role="group"
       aria-label={stepOfLabel}
     >
-      <p className="text-sm font-semibold text-navy">{stepOfLabel}</p>
-      <ol className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        [ {stepOfLabel} ]
+      </p>
+      <ol className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
         {STEP_NUMBERS.map((s) => {
           const isCurrent = currentStep === s;
           const isComplete = currentStep > s;
           const label = stepLabels?.[s];
           const clickable = Boolean(onStepClick) && (isComplete || isCurrent);
           return (
-            <li key={s} className="flex items-center gap-2 sm:gap-4">
+            <li key={s} className="flex items-center gap-1.5 sm:gap-3">
               {clickable ? (
                 <button
                   type="button"
@@ -45,11 +47,10 @@ export function PlannerStepper({
                   aria-label={label ? `${s}. ${label}` : `Step ${s}`}
                   onClick={() => onStepClick?.(s)}
                   className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60",
+                    "flex h-10 w-10 items-center justify-center border-2 font-mono text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bx-accent",
                     isCurrent
-                      ? "bg-gold text-navy shadow-md cursor-default"
-                      : "bg-navy/15 text-navy ring-2 ring-gold/50 hover:bg-navy/25 cursor-pointer",
+                      ? "border-bx-accent bg-bx-accent text-bx-white cursor-default"
+                      : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white cursor-pointer",
                   )}
                 >
                   {isComplete ? <Check className="h-4 w-4" aria-hidden /> : s}
@@ -59,12 +60,12 @@ export function PlannerStepper({
                   aria-current={isCurrent ? "step" : undefined}
                   aria-label={label ? `${s}. ${label}` : `Step ${s}`}
                   className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors",
+                    "flex h-10 w-10 items-center justify-center border-2 font-mono text-sm font-bold",
                     isCurrent
-                      ? "bg-gold text-navy shadow-md"
+                      ? "border-bx-accent bg-bx-accent text-bx-white"
                       : isComplete
-                        ? "bg-navy/15 text-navy ring-2 ring-gold/50"
-                        : "bg-slate-200 text-muted-foreground",
+                        ? "border-bx-black bg-bx-white text-bx-black"
+                        : "border-bx-black bg-bx-off text-bx-gray-dim",
                   )}
                 >
                   {isComplete ? <Check className="h-4 w-4" aria-hidden /> : s}
@@ -74,8 +75,8 @@ export function PlannerStepper({
                 <div
                   aria-hidden
                   className={cn(
-                    "hidden h-0.5 w-8 sm:block sm:w-10",
-                    isComplete ? "bg-gold/70" : "bg-slate-200",
+                    "hidden h-[2px] w-8 sm:block sm:w-10",
+                    isComplete ? "bg-bx-accent" : "bg-bx-black",
                   )}
                 />
               ) : null}
