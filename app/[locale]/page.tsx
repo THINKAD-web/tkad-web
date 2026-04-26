@@ -65,7 +65,9 @@ function HomeContent({
       <Ticker isKo={isKo} />
       <Stats isKo={isKo} />
       <Process isKo={isKo} />
-      {/* TODO: Regional / MediaTop6 / CaseStudies / WhyUs / Testimonials / FinalCta */}
+      <Regional isKo={isKo} />
+      <MediaTop6 isKo={isKo} items={top6} />
+      {/* TODO: CaseStudies / WhyUs / Testimonials / FinalCta */}
     </>
   );
 }
@@ -499,6 +501,263 @@ function Process({ isKo }: { isKo: boolean }) {
           </article>
         ))}
       </div>
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 5. REGIONAL — 2컬럼
+ *   좌측 (off bg): [02] / Network + 큰 제목 + 설명 + 5대 도시 2x3 리스트
+ *   우측 (검정 bg): 8x10 도트 그리드 + 떠있는 라벨 3개
+ * ──────────────────────────────────────────────────────────────── */
+function Regional({ isKo }: { isKo: boolean }) {
+  const regions = [
+    { name: isKo ? "서울" : "Seoul", count: "320+" },
+    { name: isKo ? "부산" : "Busan", count: "68" },
+    { name: isKo ? "대구" : "Daegu", count: "42" },
+    { name: isKo ? "인천" : "Incheon", count: "38" },
+    { name: isKo ? "대전" : "Daejeon", count: "24" },
+    {
+      name: isKo ? "광주·기타" : "Gwangju · etc.",
+      count: "30+",
+    },
+  ];
+
+  /** 도트 시각화: 0..79 (8행 x 10열).
+   * 활성 6개(주황+pulse) / 중간 12개(흰 70%) / 약함 15개(흰 40%) / 나머지 흰 10% */
+  const ACTIVE = new Set([3, 12, 25, 38, 47, 56]);
+  const MEDIUM = new Set([0, 5, 14, 21, 28, 33, 42, 51, 60, 64, 70, 75]);
+  const WEAK = new Set([
+    1, 2, 7, 11, 17, 22, 27, 35, 41, 50, 53, 58, 62, 68, 73,
+  ]);
+
+  return (
+    <section className="border-b-2 border-bx-black">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
+        {/* 좌측 — off 배경, [02] / Network */}
+        <div className="border-bx-black bg-bx-off px-6 py-12 sm:px-10 sm:py-16 lg:border-r-2 lg:px-12 lg:py-20">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+            <span className="text-bx-black">[02]</span>
+            <span className="ml-2"> / Network</span>
+          </p>
+          <h2 className="mt-6 font-bold leading-[0.96] tracking-[-0.02em] text-bx-black [font-size:clamp(2.25rem,4.5vw,4rem)]">
+            {isKo ? (
+              <>
+                전국 <span className="bx-accent">[5대 도시]</span>
+                <br />
+                매체 커버리지
+              </>
+            ) : (
+              <>
+                Coverage across
+                <br />
+                <span className="bx-accent">[5 major cities]</span>
+              </>
+            )}
+          </h2>
+          <p className="mt-6 max-w-md text-sm leading-relaxed text-bx-gray-dim sm:text-base">
+            {isKo
+              ? "서울 도심 핵심 매체부터 부산·대구·인천·대전 등 전국 거점 도시까지, 검증된 OOH 인벤토리를 한 곳에서 운영합니다."
+              : "From core Seoul inventory to Busan, Daegu, Incheon, and Daejeon — verified OOH media nationwide, managed in one place."}
+          </p>
+
+          {/* 5대 도시 2x3 그리드 */}
+          <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-2">
+            {regions.map((r) => (
+              <li
+                key={r.name}
+                className="flex items-baseline justify-between border-b-2 border-bx-black pb-2"
+              >
+                <span className="text-base font-bold text-bx-black">
+                  {r.name}
+                </span>
+                <span className="font-mono text-sm font-bold tabular-nums text-bx-accent">
+                  {r.count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* 우측 — 검정 배경 도트 그리드 */}
+        <div className="relative overflow-hidden bg-bx-black p-8 sm:p-10 lg:p-12">
+          {/* 떠있는 라벨 3개 */}
+          <FloatingLabel
+            top="14%"
+            left="22%"
+            primary={isKo ? "강남" : "Gangnam"}
+            secondary="92만/일"
+            tone="accent"
+          />
+          <FloatingLabel
+            top="42%"
+            left="58%"
+            primary={isKo ? "성수" : "Seongsu"}
+            secondary="8.5만/일"
+            tone="white"
+          />
+          <FloatingLabel
+            top="72%"
+            left="36%"
+            primary={isKo ? "명동" : "Myeongdong"}
+            secondary={isKo ? "핫매체" : "Hot"}
+            tone="accent"
+          />
+
+          {/* 8x10 도트 그리드 */}
+          <div
+            aria-hidden
+            className="grid h-full w-full grid-cols-10 gap-3 sm:gap-4"
+            style={{ gridTemplateRows: "repeat(8, 1fr)" }}
+          >
+            {Array.from({ length: 80 }).map((_, i) => {
+              const isActive = ACTIVE.has(i);
+              const isMedium = MEDIUM.has(i);
+              const isWeak = WEAK.has(i);
+              const cls = isActive
+                ? "bg-bx-accent bx-pulse"
+                : isMedium
+                  ? "bg-bx-white opacity-70"
+                  : isWeak
+                    ? "bg-bx-white opacity-40"
+                    : "bg-bx-white opacity-10";
+              return (
+                <span
+                  key={i}
+                  className={`block h-2 w-2 rounded-none sm:h-2.5 sm:w-2.5 ${cls}`}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FloatingLabel({
+  top,
+  left,
+  primary,
+  secondary,
+  tone,
+}: {
+  top: string;
+  left: string;
+  primary: string;
+  secondary: string;
+  tone: "accent" | "white";
+}) {
+  return (
+    <span
+      className={[
+        "pointer-events-none absolute z-10 inline-flex items-center gap-2 border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em]",
+        tone === "accent"
+          ? "border-bx-accent bg-bx-black text-bx-white"
+          : "border-bx-white bg-bx-black text-bx-white",
+      ].join(" ")}
+      style={{ top, left, transform: "translate(-50%, -50%)" }}
+    >
+      <span className={tone === "accent" ? "text-bx-accent" : "text-bx-white"}>
+        {primary}
+      </span>
+      <span className="text-bx-gray-dim" aria-hidden>
+        ·
+      </span>
+      <span>{secondary}</span>
+    </span>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+ * 6. MEDIA TOP 6 — SectionHead + 3x2 MediaCard 그리드 + 검정 배너
+ * ──────────────────────────────────────────────────────────────── */
+function MediaTop6({
+  isKo,
+  items,
+}: {
+  isKo: boolean;
+  items: MediaItem[];
+}) {
+  if (items.length === 0) return null;
+  const typeLabelOf = (m: MediaItem) => {
+    const map: Record<string, string> = {
+      digital: isKo ? "디지털" : "Digital",
+      static: isKo ? "고정형" : "Static",
+      mobile: isKo ? "교통" : "Mobile",
+      network: isKo ? "네트워크" : "Network",
+    };
+    return map[m.type] ?? m.type;
+  };
+
+  return (
+    <section className="border-b-2 border-bx-black bg-bx-white">
+      <SectionHead
+        number="03"
+        category="Top Picks"
+        title={
+          isKo ? (
+            <>
+              싱커드 추천 매체 <span className="bx-accent">[TOP 6]</span>
+            </>
+          ) : (
+            <>
+              Curated <span className="bx-accent">[TOP 6]</span>
+            </>
+          )
+        }
+        meta={isKo ? "Editor's Picks\nSpring 2026" : "Editor's Picks\nSpring 2026"}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {items.slice(0, 6).map((m, i) => {
+          const img = getPrimaryMediaImageUrl(m);
+          const price = formatMediaPriceWonWithSymbol(m.price);
+          return (
+            <div
+              key={m.id}
+              className={[
+                "border-bx-black",
+                i > 0 ? "border-t-2 sm:border-t-0" : "",
+                i % 2 === 1 ? "sm:border-l-2" : "",
+                i >= 2 ? "sm:border-t-2" : "",
+                "lg:border-l-2 lg:border-t-0",
+                i % 3 === 0 ? "lg:border-l-0" : "",
+                i >= 3 ? "lg:border-t-2" : "",
+              ].join(" ")}
+            >
+              <MediaCard
+                href={`/media/${m.id}`}
+                imageSrc={img}
+                imageAlt={isKo ? m.name : m.nameEn || m.name}
+                rank={i + 1}
+                type={typeLabelOf(m)}
+                name={isKo ? m.name : m.nameEn || m.name}
+                location={isKo ? m.location : m.locationEn || m.location}
+                visibility={m.visibilityScore ?? null}
+                dailyTraffic={m.dailyFootTraffic ?? null}
+                monthlyImpression={m.monthlyFootTraffic ?? null}
+                price={price}
+                isVerified
+                className="h-full border-0"
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 하단 검정 배너 — 'VIEW ALL 500+ MEDIA / 전체 매체 보기 →' */}
+      <a
+        href={`/${isKo ? "ko" : "en"}/media`}
+        className="group flex items-center justify-between border-t-2 border-bx-black bg-bx-black px-6 py-6 transition-colors hover:bg-bx-accent sm:px-10 sm:py-8"
+      >
+        <span className="font-mono text-[12px] font-bold uppercase tracking-[0.28em] text-bx-white sm:text-sm">
+          VIEW ALL 500+ MEDIA
+        </span>
+        <span className="flex items-center gap-3 font-mono text-[12px] font-bold uppercase tracking-[0.28em] text-bx-white sm:text-sm">
+          {isKo ? "전체 매체 보기" : "Browse all"}
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </span>
+      </a>
     </section>
   );
 }
