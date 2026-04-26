@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import { ArrowLeft, ArrowRight, Clock, Flag } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const historyData = [
   {
@@ -94,43 +93,40 @@ export default function HistoryPage() {
 
   return (
     <>
-      <section className="bg-navy py-28">
+      <section className="bg-bx-black py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "회사 연혁" : "Company History"}
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+                {`// 16 / History`}
               </p>
-              <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
                 {isKo ? "THINKAD 연혁 타임라인" : "THINKAD History Timeline"}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm text-slate-300">
+              <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
                 {isKo
                   ? "2016년 설립부터 AI 기반 OOH 플랫폼까지, 싱커드가 걸어온 길을 연도별로 살펴보세요."
                   : "Explore THlNKAD's journey from its founding in 2016 to the launch of its AI-powered OOH platform."}
               </p>
             </div>
             <div className="hidden sm:block">
-              <Link href="/about">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full border-white/20 text-xs font-semibold text-slate-200 hover:bg-white/10"
-                >
-                  <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-                  {isKo ? "회사 소개로 돌아가기" : "Back to About"}
-                </Button>
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-1 border-2 border-bx-white bg-transparent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-white transition-colors hover:bg-bx-white hover:text-bx-black"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                {isKo ? "About" : "Back to About"}
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-28">
+      <section className="bg-bx-off py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Timeline rail */}
-          <div className="mb-8 overflow-x-auto">
-            <div className="flex min-w-[600px] items-center gap-6 pb-2">
+          <div className="mb-10 overflow-x-auto">
+            <div className="flex min-w-[600px] items-center gap-4 pb-2">
               {historyData.map((item, index) => {
                 const isActive = item.year === activeYear;
                 return (
@@ -140,21 +136,22 @@ export default function HistoryPage() {
                     onClick={() => setActiveYear(item.year)}
                     className="flex flex-1 flex-col items-center gap-2 focus:outline-none"
                   >
-                    <div className="relative flex items-center justify-center">
+                    <div className="relative flex w-full items-center justify-center">
                       <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold transition-all ${
+                        className={cn(
+                          "flex h-12 w-12 items-center justify-center border-2 font-mono text-sm font-bold transition-all",
                           isActive
-                            ? "bg-gold text-navy shadow-lg shadow-gold/40"
-                            : "bg-slate-100 text-navy"
-                        }`}
+                            ? "border-bx-accent bg-bx-accent text-bx-white"
+                            : "border-bx-black bg-bx-white text-bx-black",
+                        )}
                       >
                         {item.year.slice(2)}
                       </div>
                       {index < historyData.length - 1 && (
-                        <div className="absolute left-1/2 top-1/2 h-px w-[220%] -translate-y-1/2 translate-x-[60%] bg-gradient-to-r from-gold/40 to-slate-200" />
+                        <div className="absolute left-1/2 top-1/2 h-0.5 w-[220%] -translate-y-1/2 translate-x-[60%] bg-bx-black" />
                       )}
                     </div>
-                    <span className="text-xs font-medium text-navy">
+                    <span className={cn("font-mono text-[10px] font-bold uppercase tracking-[0.18em]", isActive ? "text-bx-accent" : "text-bx-gray-dim")}>
                       {isKo ? item.labelKo : item.labelEn}
                     </span>
                   </button>
@@ -164,105 +161,100 @@ export default function HistoryPage() {
           </div>
 
           {/* Active card */}
-          <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
-            <Card className="border-0 bg-white shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <div className="grid gap-0 lg:grid-cols-[2fr,1fr]">
+            <article className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+              <header className="flex flex-row items-center justify-between gap-4 border-b-2 border-bx-black p-5">
                 <div>
-                  <Badge className="mb-2 bg-gold/10 text-xs font-semibold text-gold-dark">
-                    {isKo ? "주요 전환점" : "Key Milestone"}
-                  </Badge>
-                  <CardTitle className="text-xl font-bold text-navy">
+                  <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                    [ {isKo ? "주요 전환점" : "KEY MILESTONE"} ]
+                  </span>
+                  <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-black">
                     {isKo ? activeItem.titleKo : activeItem.titleEn}
-                  </CardTitle>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {isKo ? "THINKAD 연혁" : "THINKAD History"}
+                  </h2>
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                    {`// `}{isKo ? "THINKAD 연혁" : "THINKAD History"}
                   </p>
                 </div>
                 <div className="flex flex-col items-end text-right">
-                  <span className="text-xs font-semibold text-slate-500">
-                    {isKo ? "연도" : "Year"}
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ {isKo ? "YEAR" : "YEAR"} ]
                   </span>
-                  <span className="text-2xl font-extrabold text-navy">
+                  <span className="font-mono text-3xl font-bold tabular-nums text-bx-black">
                     {activeItem.year}
                   </span>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm leading-relaxed text-slate-700">
+              </header>
+              <div className="p-5">
+                <p className="text-sm leading-relaxed text-bx-black">
                   {isKo ? activeItem.descriptionKo : activeItem.descriptionEn}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </article>
 
-            <Card className="border-0 bg-slate-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-sm font-semibold text-navy">
-                  <Clock className="h-4 w-4 text-gold" />
+            <article className="-ml-[2px] border-2 border-bx-black bg-bx-off">
+              <header className="border-b-2 border-bx-black p-5">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  [ JOURNEY ]
+                </p>
+                <h3 className="mt-2 flex items-center gap-2 text-sm font-bold tracking-tight text-bx-black">
+                  <Clock className="h-4 w-4 text-bx-accent" />
                   {isKo ? "THINKAD 성장 여정" : "THINKAD Growth Journey"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-xs text-slate-700">
+                </h3>
+              </header>
+              <div className="space-y-4 p-5 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
                 <p>
-                  {isKo
+                  {`// `}{isKo
                     ? "설립 이후 싱커드는 국내 OOH 핵심 거점을 기반으로 매체 네트워크를 확장하며 한국 OOH 미디어랩 전문 회사로 성장해왔습니다."
                     : "Since its founding, THINKAD has expanded its media network around key domestic OOH hubs and grown into a specialized Korean OOH media lab."}
                 </p>
                 <p>
-                  {isKo
+                  {`// `}{isKo
                     ? "2025년에는 데이터와 AI를 결합한 OOH 플래닝 플랫폼을 런칭하여, 매체 추천과 성과 예측을 한층 고도화했습니다."
                     : "In 2025, THINKAD launched an AI-powered OOH planning platform, further advancing media recommendations and performance forecasting."}
                 </p>
                 <div className="pt-2">
-                  <Link href="/about">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-center rounded-full border-navy/10 text-xs font-semibold text-navy hover:bg-navy hover:text-white"
-                    >
-                      <Flag className="mr-1.5 h-3.5 w-3.5" />
-                      {isKo
-                        ? "THINKAD 소개 더 보기"
-                        : "Learn more about THINKAD"}
-                    </Button>
-                  </Link>
+                  <BtnBlock href="/about" variant="secondary" size="sm" className="w-full justify-center">
+                    <Flag className="h-3.5 w-3.5" />
+                    {isKo
+                      ? "THINKAD 소개 더 보기"
+                      : "Learn more about THINKAD"}
+                  </BtnBlock>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </article>
           </div>
 
           {/* Controls */}
           <div className="mt-8 flex items-center justify-between gap-4">
-            <Button
-              variant="outline"
+            <BtnBlock
+              variant="secondary"
               size="sm"
-              className="rounded-full text-xs"
               onClick={goPrev}
               disabled={activeItem.year === historyData[0].year}
             >
-              <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
+              <ArrowLeft className="h-3.5 w-3.5" />
               {isKo ? "이전 연혁" : "Previous"}
-            </Button>
-            <span className="text-xs text-muted-foreground">
+            </BtnBlock>
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              {`// `}
               {historyData.findIndex((item) => item.year === activeItem.year) +
                 1}{" "}
               / {historyData.length}
             </span>
-            <Button
-              variant="outline"
+            <BtnBlock
+              variant="secondary"
               size="sm"
-              className="rounded-full text-xs"
               onClick={goNext}
               disabled={
                 activeItem.year === historyData[historyData.length - 1].year
               }
             >
               {isKo ? "다음 연혁" : "Next"}
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Button>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </BtnBlock>
           </div>
         </div>
       </section>
     </>
   );
 }
-

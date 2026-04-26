@@ -1,15 +1,7 @@
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import {
   Award,
   BarChart3,
@@ -37,21 +29,9 @@ export default async function ServicesPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: "servicesPage" });
 
   const pillars = [
-    {
-      icon: Lightbulb,
-      title: t("pillar1Title"),
-      body: t("pillar1Body"),
-    },
-    {
-      icon: MapPinned,
-      title: t("pillar2Title"),
-      body: t("pillar2Body"),
-    },
-    {
-      icon: Radio,
-      title: t("pillar3Title"),
-      body: t("pillar3Body"),
-    },
+    { icon: Lightbulb, title: t("pillar1Title"), body: t("pillar1Body") },
+    { icon: MapPinned, title: t("pillar2Title"), body: t("pillar2Body") },
+    { icon: Radio, title: t("pillar3Title"), body: t("pillar3Body") },
   ] as const;
 
   const steps = [
@@ -78,62 +58,55 @@ export default async function ServicesPage({ params }: Props) {
 
   return (
     <div className="relative overflow-hidden">
-      <section className="relative border-b border-navy/20 bg-gradient-to-br from-navy via-navy to-[#0c1024]">
-        <div
-          className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.12]"
-          aria-hidden
-        />
+      <section className="relative bg-bx-black">
         <div className="relative mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 sm:py-24 lg:px-8 lg:py-28">
-          <Badge
-            variant="secondary"
-            className="mb-5 border-gold/40 bg-gold/15 text-xs font-semibold tracking-wide text-gold-light"
-          >
-            {t("heroBadge")}
-          </Badge>
-          <h1 className="mx-auto max-w-4xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            {`// 12 / Services`}
+          </p>
+          <span className="mt-3 inline-flex border-2 border-bx-accent bg-bx-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+            [ {t("heroBadge")} ]
+          </span>
+          <h1 className="mx-auto mt-5 max-w-4xl text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
             {t("heroTitle")}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-2xl font-mono text-sm leading-relaxed tracking-tight text-bx-white/75 sm:text-base">
             {t("heroSubtitle")}
           </p>
-          <div className="mt-12 flex flex-wrap justify-center gap-3">
-            <Button variant="cta" className="btn-gold rounded-full px-8" asChild>
-              <Link href="/quote">{t("ctaButton")}</Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-full border-white/25 bg-white/5 text-white hover:bg-white/10"
-              asChild
-            >
-              <Link href="/media">{t("ctaSecondary")}</Link>
-            </Button>
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <BtnBlock href="/quote" variant="accent" size="lg">
+              {t("ctaButton")}
+            </BtnBlock>
+            <BtnBlock href="/media" variant="secondary" size="lg">
+              {t("ctaSecondary")}
+            </BtnBlock>
           </div>
         </div>
       </section>
 
-      <section className="relative bg-white py-24 sm:py-28 lg:py-32">
+      <section className="relative bg-bx-white py-20 sm:py-24 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading
             eyebrow="Services"
             title={t("pillarsTitle")}
-            className="mb-14"
+            className="mb-12"
           />
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-0 md:grid-cols-3">
             {pillars.map((p, i) => {
               const Icon = p.icon;
               return (
                 <AnimatedCard key={p.title} delay={i * 100}>
-                  <Card className="group h-full rounded-2xl border border-navy/8 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-gold/[0.06] hover:shadow-md">
-                    <CardHeader className="space-y-4 pb-4">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/12 text-navy transition-colors duration-300 group-hover:bg-gold/20">
-                        <Icon className="h-8 w-8" aria-hidden />
-                      </div>
-                      <CardTitle className="text-xl text-navy">{p.title}</CardTitle>
-                      <CardDescription className="text-sm leading-relaxed sm:text-[15px]">
-                        {p.body}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
+                  <article className="group -mt-[2px] -ml-[2px] h-full border-2 border-bx-black bg-bx-white p-6 transition-colors duration-300 hover:bg-bx-black hover:text-bx-white">
+                    <div className="flex h-14 w-14 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+                      <Icon className="h-7 w-7" aria-hidden />
+                    </div>
+                    <p className="mt-4 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      [ PILLAR / {String(i + 1).padStart(2, "0")} ]
+                    </p>
+                    <h3 className="mt-2 text-xl font-bold tracking-tight">{p.title}</h3>
+                    <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight opacity-85">
+                      {p.body}
+                    </p>
+                  </article>
                 </AnimatedCard>
               );
             })}
@@ -141,12 +114,12 @@ export default async function ServicesPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="relative border-t border-navy/8 bg-slate-50 py-24 sm:py-28 lg:py-32">
+      <section className="relative bg-bx-off py-20 sm:py-24 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-4 flex items-center gap-2 text-gold">
+          <div className="mb-4 flex items-center gap-2 text-bx-accent">
             <BarChart3 className="h-5 w-5" aria-hidden />
-            <span className="text-xs font-semibold uppercase tracking-[0.2em]">
-              {t("processBadge")}
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em]">
+              [ {t("processBadge")} ]
             </span>
           </div>
           <SectionHeading
@@ -156,28 +129,24 @@ export default async function ServicesPage({ params }: Props) {
             className="mb-12 max-w-2xl"
           />
 
-          <div className="md:hidden flex w-full min-w-0 max-w-full flex-col gap-4 overflow-x-hidden">
+          <div className="md:hidden flex w-full min-w-0 max-w-full flex-col gap-0 overflow-x-hidden">
             {steps.map((step, i) => (
               <AnimatedCard
                 key={step.label}
                 delay={i * 60}
                 className="w-full min-w-0"
               >
-                <Card className="h-full rounded-2xl border border-navy/8 bg-white shadow-sm">
-                  <CardHeader className="pb-2">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy text-sm font-bold text-gold-light shadow-sm">
-                      {step.label}
-                    </span>
-                    <CardTitle className="pt-2 text-base text-navy">
-                      {step.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-sm leading-relaxed text-muted-foreground break-words">
-                      {step.body}
-                    </p>
-                  </CardContent>
-                </Card>
+                <article className="-mt-[2px] h-full border-2 border-bx-black bg-bx-white p-5">
+                  <span className="inline-flex h-10 w-10 items-center justify-center border-2 border-bx-accent bg-bx-accent font-mono text-sm font-bold text-bx-white">
+                    {step.label}
+                  </span>
+                  <h3 className="mt-3 text-base font-bold tracking-tight text-bx-black">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                    {`// `}{step.body}
+                  </p>
+                </article>
               </AnimatedCard>
             ))}
           </div>
@@ -194,9 +163,9 @@ export default async function ServicesPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="relative bg-white py-24 sm:py-28 lg:py-32">
+      <section className="relative bg-bx-white py-20 sm:py-24 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl border border-navy/8 bg-slate-50/80 px-6 py-12 shadow-sm sm:px-10 sm:py-14 lg:px-14">
+          <div className="border-2 border-bx-black bg-bx-off px-6 py-10 sm:px-10 sm:py-14 lg:px-14">
             <SectionHeading
               eyebrow="Why us"
               title={t("diffTitle")}
@@ -210,12 +179,12 @@ export default async function ServicesPage({ params }: Props) {
                   className="flex gap-3 text-sm leading-relaxed sm:text-base"
                 >
                   <span
-                    className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold/18 to-gold/6 text-gold-dark ring-1 ring-gold/25"
+                    className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white"
                     aria-hidden
                   >
                     <Icon className="h-4 w-4" strokeWidth={1.75} />
                   </span>
-                  <span className="pt-1 text-muted-foreground">{text}</span>
+                  <span className="pt-1 text-bx-black">{text}</span>
                 </li>
               ))}
             </ul>
@@ -223,46 +192,31 @@ export default async function ServicesPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="relative border-t border-navy/8 bg-white py-24 sm:py-28 lg:py-32">
+      <section className="relative bg-bx-white py-20 sm:py-24 lg:py-28">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <ServicesFaq title={t("faqTitle")} items={faqItems} />
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-t border-navy/10 py-24 sm:py-28">
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-navy via-navy to-[#0c1024]"
-          aria-hidden
-        />
-        <div
-          className="hero-pattern pointer-events-none absolute inset-0 opacity-[0.12]"
-          aria-hidden
-        />
+      <section className="relative overflow-hidden bg-bx-black py-20 sm:py-24 lg:py-28">
         <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <ClipboardList className="mx-auto h-10 w-10 text-gold" aria-hidden />
-          <h2 className="mt-6 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            [ NEXT STEP ]
+          </p>
+          <ClipboardList className="mx-auto mt-4 h-10 w-10 text-bx-accent" aria-hidden />
+          <h2 className="mt-4 text-2xl font-bold tracking-tight text-bx-white sm:text-3xl">
             {t("ctaTitle")}
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
+          <p className="mx-auto mt-4 max-w-xl font-mono text-sm leading-relaxed tracking-tight text-bx-white/75 sm:text-base">
             {t("ctaSubtitle")}
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Button
-              size="lg"
-              variant="cta"
-              className="btn-gold rounded-full px-10 shadow-lg shadow-cta/30"
-              asChild
-            >
-              <Link href="/quote">{t("ctaButton")}</Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-full border-white/25 bg-white/5 text-white hover:bg-white/10"
-              asChild
-            >
-              <Link href="/media">{t("ctaSecondary")}</Link>
-            </Button>
+            <BtnBlock href="/quote" variant="accent" size="lg">
+              {t("ctaButton")}
+            </BtnBlock>
+            <BtnBlock href="/media" variant="secondary" size="lg">
+              {t("ctaSecondary")}
+            </BtnBlock>
           </div>
         </div>
       </section>
