@@ -114,7 +114,7 @@ export function PlannerImpressionsLineChart({
             y={p.y - 4}
             width={8}
             height={8}
-            fill="#ff4d00"
+            fill="#FF6600"
             stroke="#000000"
             strokeWidth={2}
           />
@@ -232,7 +232,7 @@ export function PlannerRoiLineChart({
         <path
           d={line("optimistic")}
           fill="none"
-          stroke="#ff4d00"
+          stroke="#FF6600"
           strokeWidth={2.5}
         />
         {data.map((d, i) => (
@@ -405,7 +405,7 @@ export function PlannerReachDonutChart({
           <circle
             r={r}
             fill="none"
-            stroke="#ff4d00"
+            stroke="#FF6600"
             strokeWidth={stroke}
             strokeDasharray={`${extLen} ${c}`}
             strokeDashoffset={-coreLen}
@@ -434,7 +434,7 @@ export function PlannerReachDonutChart({
 
 const PIE_COLORS = [
   "#000000", // bx-black
-  "#ff4d00", // bx-accent
+  "#FF6600", // bx-accent
   "#737373", // bx-gray-dim
   "#d4d4d4", // bx-gray
   "#f5f5f5", // bx-off (with bx-black border via stroke)
@@ -566,7 +566,7 @@ export function PlannerCpmCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 2)}
-                fill="#ff4d00"
+                fill="#FF6600"
               />
               <text
                 x={x + barW / 2}
@@ -676,7 +676,7 @@ export function PlannerMonthCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 3)}
-                fill={isCurrent ? "#ff4d00" : "#000000"}
+                fill={isCurrent ? "#FF6600" : "#000000"}
               />
               <text
                 x={x + barW / 2}

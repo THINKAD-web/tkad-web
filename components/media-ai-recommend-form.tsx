@@ -709,7 +709,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     value={budgetMan}
                     onChange={(e) => setBudgetMan(Number(e.target.value))}
                     className="h-3 w-full cursor-pointer appearance-none border-2 border-bx-black bg-bx-white accent-bx-accent"
-                    style={{ accentColor: "#ff4d00" }}
+                    style={{ accentColor: "#FF6600" }}
                     aria-valuemin={budgetMin}
                     aria-valuemax={budgetMax}
                     aria-valuenow={budgetMan}
