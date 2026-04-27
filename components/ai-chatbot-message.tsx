@@ -42,7 +42,7 @@ function MdLink({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-medium text-navy-dark underline decoration-gold/70 underline-offset-2"
+        className="border-b-2 border-bx-black pb-0.5 font-bold text-bx-black transition-colors hover:border-bx-accent hover:text-bx-accent"
       >
         {children}
       </a>
@@ -52,7 +52,7 @@ function MdLink({
     return (
       <Link
         href={href}
-        className="font-medium text-navy-dark underline decoration-gold/70 underline-offset-2"
+        className="border-b-2 border-bx-black pb-0.5 font-bold text-bx-black transition-colors hover:border-bx-accent hover:text-bx-accent"
       >
         {children}
       </Link>
@@ -82,10 +82,10 @@ export function AiChatbotMessage({
     >
       <div
         className={cn(
-          "max-w-[min(100%,min(20rem,calc(100%-0.25rem)))] rounded-2xl px-3 py-2.5 text-sm shadow-[0_1px_2px_rgba(15,23,42,0.06)] sm:px-3.5 sm:py-2.5",
+          "max-w-[min(100%,min(20rem,calc(100%-0.25rem)))] border-2 px-3 py-2.5 text-sm sm:px-3.5",
           isUser
-            ? "rounded-br-md bg-gradient-to-br from-navy to-[#0f1c33] text-white ring-1 ring-white/10"
-            : "rounded-bl-md border border-navy/[0.09] bg-gradient-to-b from-slate-50 to-slate-100/90 text-navy",
+            ? "border-bx-accent bg-bx-accent text-white"
+            : "border-bx-black bg-bx-off text-bx-black",
         )}
       >
         {isUser ? (
@@ -97,8 +97,8 @@ export function AiChatbotMessage({
             className={cn(
               "prose prose-sm max-w-none break-words prose-p:my-1 prose-p:leading-relaxed [overflow-wrap:anywhere]",
               "prose-ul:my-1 prose-li:my-0.5 prose-headings:my-2 prose-headings:text-base",
-              "prose-headings:font-semibold prose-headings:text-navy prose-strong:text-navy",
-              "prose-a:text-navy-dark prose-pre:my-2 prose-pre:max-w-full prose-pre:overflow-x-auto prose-pre:rounded-lg prose-pre:border prose-pre:border-navy/10 prose-pre:bg-white/80 prose-pre:text-[0.8125rem]",
+              "prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-bx-black prose-strong:text-bx-black",
+              "prose-pre:my-2 prose-pre:max-w-full prose-pre:overflow-x-auto prose-pre:border-2 prose-pre:border-bx-black prose-pre:bg-bx-white prose-pre:text-[0.8125rem]",
             )}
           >
             <ReactMarkdown
@@ -116,7 +116,7 @@ export function AiChatbotMessage({
       {timeStr ? (
         <span
           className={cn(
-            "px-1 text-[10px] tabular-nums text-navy/40",
+            "px-1 font-mono text-[10px] uppercase tracking-[0.18em] tabular-nums text-bx-gray-dim",
             isUser ? "text-right" : "text-left",
           )}
         >
