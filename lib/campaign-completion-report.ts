@@ -44,6 +44,8 @@ export async function buildCampaignCompletionReportPdfBuffer(
     clientEmail: campaign.clientEmail,
     status: campaign.status,
     notes: campaign.notes,
+    startDate: campaign.startDate ?? null,
+    endDate: campaign.endDate ?? null,
     scheduleEvents: campaign.scheduleEvents.map((e) => ({
       title: e.title,
       startsAt: e.startsAt,
@@ -63,6 +65,9 @@ export async function buildCampaignCompletionReportPdfBuffer(
       startsAt: b.startsAt,
       endsAt: b.endsAt,
       status: b.status,
+      // KPI 산출용 (Executive Summary)
+      dailyFootTraffic: b.media?.dailyFootfall ?? null,
+      region: b.media?.region ?? null,
     })),
     aiOverviewKo: ai.overviewKo,
     aiMediaDetailKo: ai.mediaDetailKo,
