@@ -5,9 +5,9 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { getCampaignMonitoringMapProvider } from "@/components/campaign-monitoring-map";
 import type { MediaItem } from "@/lib/media-data";
-import { MapPin, MessageCircle } from "lucide-react";
-import { BtnBlock } from "@/components/brutalist";
+import { MapPin } from "lucide-react";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
+import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
@@ -62,10 +62,11 @@ export default function MediaDetailExtras({
     <>
       <div className="mb-6 flex flex-wrap gap-3">
         <MediaQuoteCtaButton media={media} variant="inline" />
-        <BtnBlock href={`/contact?media=${media.id}`} variant="secondary" size="md">
-          <MessageCircle className="h-4 w-4 shrink-0" />
-          {labels.inquiry}
-        </BtnBlock>
+        <MediaInquiryDialog
+          mediaId={media.id}
+          mediaName={isKo ? media.name : (media.nameEn || media.name)}
+          triggerLabel={labels.inquiry}
+        />
       </div>
 
       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
