@@ -753,10 +753,17 @@ export default function AdminCampaignsPage() {
               </p>
             ) : (
               filteredList.map((c) => (
-                <button
+                <div
                   key={c.id}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => loadDetail(c.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      loadDetail(c.id);
+                    }
+                  }}
                   className={`w-full rounded-lg border p-3 text-left transition hover:bg-slate-50 ${
                     selectedId === c.id ? "border-gold bg-gold/5" : "border-slate-200"
                   }`}
@@ -803,7 +810,7 @@ export default function AdminCampaignsPage() {
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                </button>
+                </div>
               ))
             )}
           </CardContent>

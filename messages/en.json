@@ -1477,11 +1477,13 @@
     "recommendAddAll": "Add all",
     "recommendBrowseTitle": "Browse more",
     "recommendBrowseDesc": "Search the full catalog and add to your campaign.",
-    "recommendReason.matchRegion": "Region match",
-    "recommendReason.ageMatch": "Age match",
-    "recommendReason.budgetEfficient": "Budget efficient",
-    "recommendReason.goalFit": "Goal fit",
-    "recommendReason.highVisibility": "High visibility",
+    "recommendReason": {
+      "matchRegion": "Region match",
+      "ageMatch": "Age match",
+      "budgetEfficient": "Budget efficient",
+      "goalFit": "Goal fit",
+      "highVisibility": "High visibility"
+    },
     "creativeUploadProgress": "Uploading... {pct}%",
     "creativeUploadSuccess": "Upload complete",
     "creativeUploadError": "Upload failed. Please try again.",

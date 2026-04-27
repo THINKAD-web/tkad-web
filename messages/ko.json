@@ -1476,11 +1476,13 @@
     "recommendAddAll": "전체 담기",
     "recommendBrowseTitle": "더 찾아보기",
     "recommendBrowseDesc": "추천 외에도 직접 검색해서 「내 캠페인」에 담을 수 있습니다.",
-    "recommendReason.matchRegion": "타깃 지역 매칭",
-    "recommendReason.ageMatch": "타깃 연령 매칭",
-    "recommendReason.budgetEfficient": "예산 효율 우수",
-    "recommendReason.goalFit": "목표 적합",
-    "recommendReason.highVisibility": "고가시성",
+    "recommendReason": {
+      "matchRegion": "타깃 지역 매칭",
+      "ageMatch": "타깃 연령 매칭",
+      "budgetEfficient": "예산 효율 우수",
+      "goalFit": "목표 적합",
+      "highVisibility": "고가시성"
+    },
     "creativeUploadProgress": "업로드 중... {pct}%",
     "creativeUploadSuccess": "업로드 완료",
     "creativeUploadError": "업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.",
