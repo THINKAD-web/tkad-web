@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
+import { buildCampaignCompletionReportPdfBuffer } from "@/lib/campaign-completion-report";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -29,18 +30,8 @@ export async function POST(request: NextRequest, { params }: Params) {
   if (deny) return deny;
   const { id } = await params;
 
-  // CURSOR_RULES.md: AI 자동 생성 절대 금지
-  return json(
-    {
-      error:
-        "AI 기반 완료 보고서 생성은 비활성화되어 있습니다. (CURSOR_RULES: AI 자동 생성 금지)",
-    },
-    410,
-  );
-
   try {
-    // unreachable
-    const buf = await Promise.resolve(Buffer.from([]));
+    const buf = await buildCampaignCompletionReportPdfBuffer(id);
     // 클라이언트명 조회 (파일명용) — buildCampaignCompletionReportPdfBuffer 가
     // 이미 caller-side 에서 fetch 하지만 여기서 다시 fetch 비용은 미미.
     const db = getPrisma();

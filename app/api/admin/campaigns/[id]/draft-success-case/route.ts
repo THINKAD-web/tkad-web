@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { upsertDraftSuccessCaseFromCampaign } from "@/lib/auto-success-case-from-campaign";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 
@@ -11,22 +12,12 @@ export async function POST(request: NextRequest, { params }: Params) {
   if (deny) return deny;
   const { id } = await params;
 
-  // CURSOR_RULES.md: AI 자동 생성 절대 금지
-  return json(
-    {
-      error:
-        "AI 기반 성공사례 초안 생성은 비활성화되어 있습니다. (CURSOR_RULES: AI 자동 생성 금지)",
-    },
-    410,
-  );
-
   const db = getPrisma();
   const c = await db.campaign.findUnique({ where: { id } });
   if (!c) return json({ error: "Not found" }, 404);
 
   try {
-    // unreachable
-    await Promise.resolve();
+    await upsertDraftSuccessCaseFromCampaign(id);
     const sc = await db.successCase.findUnique({ where: { campaignId: id } });
     return json({ ok: true, successCaseId: sc?.id ?? null });
   } catch (e) {
