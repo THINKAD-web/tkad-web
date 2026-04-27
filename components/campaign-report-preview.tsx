@@ -5,6 +5,12 @@ import { BtnBlock } from "@/components/brutalist";
 import { Camera, Download, Loader2 } from "lucide-react";
 import { captureElementAsPng, downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
+import {
+  computeCampaignBaseStats,
+  computeCampaignPlannerKpis,
+  computeCampaignTotalAmount,
+  computeAvgVisibility,
+} from "@/lib/campaign-kpis";
 
 export type CampaignReportData = {
   campaignName: string;
@@ -60,69 +66,10 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
   const ref = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
 
-  const stats = (() => {
-    if (!data.mediaBookings?.length) return null;
-    let totalExposure = 0, totalDays = 0, totalImpressions = 0;
-    for (const b of data.mediaBookings) {
-      const days = diffDays(b.startsAt, b.endsAt);
-      totalExposure += (b.dailyFootTraffic ?? 0) * days;
-      totalDays += days;
-      totalImpressions += (b.impressions ?? 0) * days;
-    }
-    const avgDaily = totalDays > 0 ? Math.round(totalExposure / totalDays) : 0;
-    const maxDays = Math.max(...data.mediaBookings.map((b) => diffDays(b.startsAt, b.endsAt)));
-    return {
-      totalExposure,
-      totalDays,
-      mediaCount: data.mediaBookings.length,
-      avgDaily,
-      maxDays,
-      totalImpressions,
-    };
-  })();
-
-  /** Planner 스타일 추정 KPI — 도달·빈도·CPM·ROI */
-  const totalAmount2 = data.financialDocs?.reduce((s, f) => s + (f.amountKrw ?? 0), 0) ?? 0;
-  const plannerKpis = (() => {
-    if (!stats) return null;
-    /** 노출 추정 (impressions 미설정 시 일유동 × 인지율 0.4 폴백) */
-    const totalImp =
-      stats.totalImpressions > 0
-        ? stats.totalImpressions
-        : Math.round(stats.totalExposure * 0.4);
-    /** 평균 빈도 추정: 6 (월 단위 OOH 통계 평균) */
-    const avgFrequency = 6;
-    /** 도달인 = 총 노출 / 빈도 */
-    const reach = totalImp > 0 ? Math.round(totalImp / avgFrequency) : 0;
-    /** 코어 도달률 — 인구 5,000만 기준 */
-    const corePopulation = 50_000_000;
-    const reachCorePct = Math.min(
-      100,
-      Math.round((reach / corePopulation) * 100 * 10) / 10,
-    );
-    const reachExtendedPct = Math.min(100, Math.round(reachCorePct * 1.6 * 10) / 10);
-    /** Blended CPM (원/1000노출) */
-    const blendedCpm =
-      totalAmount2 > 0 && totalImp > 0
-        ? Math.round((totalAmount2 / totalImp) * 1000)
-        : null;
-    /** ROI 추정: 1억당 환산 노출가치 (단순 가이드 — 실측치 아님) */
-    const roiExpected =
-      totalAmount2 > 0 ? Math.round((totalImp / totalAmount2) * 100_000_000) : null;
-    /** 일 평균 노출 */
-    const dailyImpressionsAvg =
-      stats.totalDays > 0 ? Math.round(totalImp / stats.totalDays) : 0;
-    return {
-      totalImp,
-      avgFrequency,
-      reach,
-      reachCorePct,
-      reachExtendedPct,
-      blendedCpm,
-      roiExpected,
-      dailyImpressionsAvg,
-    };
-  })();
+  // KPI 산식은 lib/campaign-kpis.ts 로 추출 (server PDF 와 공유, 산식 동일).
+  const stats = computeCampaignBaseStats(data.mediaBookings);
+  const totalAmount2 = computeCampaignTotalAmount(data.financialDocs);
+  const plannerKpis = computeCampaignPlannerKpis(stats, totalAmount2);
 
   /** 매체별 효율 (단가 vs 유동인구·CPM) */
   const mediaEfficiency = (() => {
@@ -163,15 +110,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
     };
   })();
 
-  /** 평균 검증 점수 */
-  const avgVisibility = (() => {
-    const scores = (data.mediaBookings ?? [])
-      .map((b) => b.visibilityScore)
-      .filter((v): v is number => typeof v === "number" && v > 0);
-    if (scores.length === 0) return null;
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    return Math.round(avg * 10) / 10; // 1 decimal
-  })();
+  const avgVisibility = computeAvgVisibility(data.mediaBookings);
 
   const totalAmount = data.financialDocs?.reduce((s, f) => s + (f.amountKrw ?? 0), 0) ?? 0;
   const campaignPeriod = (() => {

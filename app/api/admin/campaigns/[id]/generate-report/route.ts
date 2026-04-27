@@ -1,10 +1,29 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { buildCampaignCompletionReportPdfBuffer } from "@/lib/campaign-completion-report";
+import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
+
+/**
+ * #5: "[클라이언트명]_THINKAD_옥외광고_성과보고서_YYYYMM.pdf"
+ * 클라이언트명 비어있으면 "클라이언트미지정", 파일명 금지 문자 제거.
+ */
+function buildClientReportFilename(clientCompany: string | null | undefined): string {
+  const raw = (clientCompany ?? "").trim() || "클라이언트미지정";
+  const safe = raw.replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, "_");
+  const now = new Date();
+  const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return `${safe}_THINKAD_옥외광고_성과보고서_${yyyymm}.pdf`;
+}
+
+function asciiFallbackFilename(campaignId: string): string {
+  const now = new Date();
+  const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return `THINKAD-OOH-Report-${campaignId.slice(0, 8)}-${yyyymm}.pdf`;
+}
 
 export async function POST(request: NextRequest, { params }: Params) {
   const deny = assertAdminDb(request);
@@ -13,12 +32,19 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   try {
     const buf = await buildCampaignCompletionReportPdfBuffer(id);
-    const filename = `thinkad-campaign-${id.slice(0, 8)}-completion.pdf`;
+    // 클라이언트명 조회 (파일명용) — buildCampaignCompletionReportPdfBuffer 가
+    // 이미 caller-side 에서 fetch 하지만 여기서 다시 fetch 비용은 미미.
+    const db = getPrisma();
+    const c = await db.campaign.findUnique({
+      where: { id },
+      select: { clientCompany: true },
+    });
+    const filename = buildClientReportFilename(c?.clientCompany);
     return new Response(new Uint8Array(buf), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `attachment; filename="${asciiFallbackFilename(id)}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
         "Cache-Control": "no-store, private",
       },
     });
