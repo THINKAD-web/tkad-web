@@ -1023,7 +1023,7 @@ export default function AdminCampaignsPage() {
                 </div>
 
                 {/* #ADMIN-CAMPAIGNS-1: 보고서 액션 버튼 brutalist 통일.
-                    보고서 미리보기 토글 / 완료 PDF (AI) / 간단 PDF / 성공사례 초안 (AI) */}
+                    (CURSOR_RULES) AI 자동 생성 경로는 비노출 */}
                 <div className="space-y-2 border-2 border-bx-black bg-bx-white p-3">
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
                     [ REPORT ACTIONS ]
@@ -1031,29 +1031,11 @@ export default function AdminCampaignsPage() {
                   <div className="flex flex-wrap gap-0">
                     <button
                       type="button"
-                      disabled={successCaseBusy}
-                      onClick={() => void createDraftSuccessCase()}
-                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      {successCaseBusy ? "…" : null}
-                      성공사례 초안 (AI)
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => setShowReportPreview((v) => !v)}
                       className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={pdfBusy}
-                      onClick={() => void downloadAiCompletionPdf()}
-                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-accent bg-bx-accent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <FileDown className="h-3.5 w-3.5" />
-                      {pdfBusy ? "생성 중…" : "완료 보고서 PDF (AI)"}
                     </button>
                     <a
                       href={`/api/admin/campaigns/${selectedId}/completion-report`}
@@ -1066,7 +1048,7 @@ export default function AdminCampaignsPage() {
                     </a>
                   </div>
                   <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
-                    {`// `}AI 보고서는 노출·성과·인사이트 섹션 포함. 간단 PDF는 일정·증빙·문서만.
+                    {`// `}보고서 미리보기(웹) / 간단 PDF(서버) 를 제공합니다.
                   </p>
                 </div>
 
