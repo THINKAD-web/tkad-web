@@ -39,10 +39,10 @@ const DEMO_FUNNEL = [
 ];
 
 const DEMO_REGION = [
-  { region: "서울", count: 198, percentage: 57.1, color: "bg-navy" },
-  { region: "부산", count: 52, percentage: 15.0, color: "bg-blue-500" },
-  { region: "제주", count: 34, percentage: 9.8, color: "bg-emerald-500" },
-  { region: "전국", count: 63, percentage: 18.1, color: "bg-amber-500" },
+  { region: "서울", count: 198, percentage: 57.1, color: "bg-bx-black" },
+  { region: "부산", count: 52, percentage: 15.0, color: "bg-bx-accent" },
+  { region: "제주", count: 34, percentage: 9.8, color: "bg-bx-gray-dim" },
+  { region: "전국", count: 63, percentage: 18.1, color: "bg-bx-off" },
 ];
 
 const DEMO_CONV = {
@@ -91,7 +91,14 @@ type LiveStats = {
   typeRevenueKrw: { type: string; totalKrw: number }[];
 };
 
-const REGION_COLORS = ["bg-navy", "bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-violet-500", "bg-rose-400"];
+const REGION_COLORS = [
+  "bg-bx-black",
+  "bg-bx-accent",
+  "bg-bx-gray-dim",
+  "bg-bx-off",
+  "bg-bx-black",
+  "bg-bx-accent",
+];
 
 export default function AdminAnalyticsPage() {
   const [live, setLive] = useState<LiveStats | null>(null);
@@ -250,15 +257,18 @@ export default function AdminAnalyticsPage() {
   const maxTypeRev = Math.max(1, ...typeRevenue.map((t) => t.totalKrw));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-bx-black dark:text-bx-white">
       <div>
-        <h2 className="text-xl font-bold text-navy">분석 대시보드</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          문의, 견적, 계약 데이터를 한눈에 확인하세요.
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+          [ ANALYTICS ]
+        </p>
+        <h2 className="mt-2 text-xl font-bold tracking-tight">분석 대시보드</h2>
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          {`// `}문의, 견적, 계약 데이터를 한눈에 확인하세요.
           {useDb ? (
-            <span className="ml-2 text-emerald-600">· DB 실데이터</span>
+            <span className="ml-2 text-bx-accent">· DB 실데이터</span>
           ) : (
-            <span className="ml-2 text-amber-700">
+            <span className="ml-2 text-bx-gray-dim">
               · 샘플 화면(DB 미연결 시)
             </span>
           )}
@@ -273,7 +283,7 @@ export default function AdminAnalyticsPage() {
                 {kpi.label}
               </p>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-navy">{kpi.value}</span>
+                <span className="text-2xl font-bold text-bx-black dark:text-bx-white">{kpi.value}</span>
                 <span
                   className={`inline-flex items-center gap-0.5 text-xs font-semibold ${
                     kpi.up ? "text-emerald-600" : "text-rose-600"
@@ -295,17 +305,17 @@ export default function AdminAnalyticsPage() {
       <div className="grid gap-6 xl:grid-cols-5">
         <Card className="xl:col-span-3">
           <CardHeader className="flex-row items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-gold" />
+            <BarChart3 className="h-4 w-4 text-bx-accent" />
             <CardTitle className="text-base">월별 문의 / 견적 추이</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-3 flex flex-wrap gap-4 text-xs">
               <span className="flex items-center gap-1.5">
-                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-navy" />
+                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-bx-black dark:bg-bx-white" />
                 문의
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-gold" />
+                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-bx-accent" />
                 견적
               </span>
               {useDb ? (
@@ -331,11 +341,11 @@ export default function AdminAnalyticsPage() {
                   >
                     <div className="flex w-full items-end gap-0.5">
                       <div className="flex flex-1 flex-col items-center gap-1">
-                        <span className="text-[10px] font-semibold text-navy">
+                        <span className="text-[10px] font-semibold text-bx-black dark:text-bx-white">
                           {d.count}
                         </span>
                         <div
-                          className="w-full rounded-t-sm bg-gradient-to-t from-navy to-navy-light"
+                          className="w-full rounded-t-sm bg-bx-black dark:bg-bx-white"
                           style={{
                             height: `${(d.count / maxMonthly) * 130}px`,
                             minHeight: 2,
@@ -343,11 +353,11 @@ export default function AdminAnalyticsPage() {
                         />
                       </div>
                       <div className="flex flex-1 flex-col items-center gap-1">
-                        <span className="text-[10px] font-semibold text-gold">
+                        <span className="text-[10px] font-semibold text-bx-accent">
                           {d.quotes}
                         </span>
                         <div
-                          className="w-full rounded-t-sm bg-gradient-to-t from-gold to-amber-300"
+                          className="w-full rounded-t-sm bg-bx-accent"
                           style={{
                             height: `${(d.quotes / maxMonthly) * 130}px`,
                             minHeight: 2,
@@ -381,18 +391,18 @@ export default function AdminAnalyticsPage() {
 
         <Card className="xl:col-span-2">
           <CardHeader className="flex-row items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-gold" />
+            <TrendingUp className="h-4 w-4 text-bx-accent" />
             <CardTitle className="text-base">전환 퍼널</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {conversionFunnel.map((stage, i) => (
               <div key={stage.stage}>
                 <div className="mb-1 flex items-center justify-between text-sm">
-                  <span className="font-medium text-navy">{stage.stage}</span>
+                  <span className="font-medium text-bx-black dark:text-bx-white">{stage.stage}</span>
                   <span className="text-muted-foreground">
                     {stage.count.toLocaleString()}건
                     {i > 0 && conversionFunnel[i - 1].count > 0 ? (
-                      <span className="ml-1 text-xs text-navy/60">
+                      <span className="ml-1 text-xs text-bx-gray-dim">
                         (
                         {(
                           (stage.count / conversionFunnel[i - 1].count) *
@@ -418,7 +428,7 @@ export default function AdminAnalyticsPage() {
       <div className="grid gap-6 xl:grid-cols-4">
         <Card className="xl:col-span-1">
           <CardHeader className="flex-row items-center gap-2">
-            <Award className="h-4 w-4 text-gold" />
+            <Award className="h-4 w-4 text-bx-accent" />
             <CardTitle className="text-base">인기 매체 TOP 10</CardTitle>
           </CardHeader>
           <CardContent className="max-h-[420px] space-y-3 overflow-y-auto">
@@ -427,11 +437,11 @@ export default function AdminAnalyticsPage() {
                 key={item.rank}
                 className="flex items-center gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold text-sm font-bold text-navy">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bx-accent text-sm font-bold text-bx-white">
                   {item.rank}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-navy">
+                  <p className="truncate text-sm font-medium text-bx-black dark:text-bx-white">
                     {item.name}
                   </p>
                   <div className="mt-0.5 flex flex-wrap items-center gap-2">
@@ -455,13 +465,13 @@ export default function AdminAnalyticsPage() {
 
         <Card className="xl:col-span-1">
           <CardHeader className="flex-row items-center gap-2">
-            <Percent className="h-4 w-4 text-gold" />
+            <Percent className="h-4 w-4 text-bx-accent" />
             <CardTitle className="text-base">계약·전환</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-gold">
+                <span className="text-4xl font-bold text-bx-accent">
                   {conversionData.rate}%
                 </span>
                 <span
@@ -484,13 +494,13 @@ export default function AdminAnalyticsPage() {
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 <span>
                   총 문의{" "}
-                  <span className="font-semibold text-navy">
+                  <span className="font-semibold text-bx-black dark:text-bx-white">
                     {conversionData.total.toLocaleString()}건
                   </span>
                 </span>
                 <span>
                   계약+{" "}
-                  <span className="font-semibold text-navy">
+                  <span className="font-semibold text-bx-black dark:text-bx-white">
                     {conversionData.contracted.toLocaleString()}건
                   </span>
                 </span>
@@ -506,11 +516,11 @@ export default function AdminAnalyticsPage() {
                     key={d.month}
                     className="flex flex-1 flex-col items-center gap-1"
                   >
-                    <span className="text-[10px] font-semibold text-navy">
+                    <span className="text-[10px] font-semibold text-bx-black dark:text-bx-white">
                       {d.rate}%
                     </span>
                     <div
-                      className="w-full rounded-t-sm bg-gradient-to-t from-navy to-navy-light"
+                      className="w-full rounded-t-sm bg-bx-black dark:bg-bx-white"
                       style={{
                         height: `${(d.rate / maxConvRate) * 60}px`,
                         minHeight: 4,
@@ -528,14 +538,14 @@ export default function AdminAnalyticsPage() {
 
         <Card className="xl:col-span-1">
           <CardHeader className="flex-row items-center gap-2">
-            <MapPin className="h-4 w-4 text-gold" />
+            <MapPin className="h-4 w-4 text-bx-accent" />
             <CardTitle className="text-base">지역별 견적 분포</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {regionData.map((r) => (
               <div key={r.region} className="space-y-1.5">
                 <div className="flex items-center justify-between gap-2 text-sm">
-                  <span className="font-medium text-navy">{r.region}</span>
+                  <span className="font-medium text-bx-black dark:text-bx-white">{r.region}</span>
                   <span className="text-muted-foreground">
                     {r.count.toLocaleString()}건 · {r.percentage}%
                   </span>
@@ -550,8 +560,8 @@ export default function AdminAnalyticsPage() {
             ))}
             <div className="mt-2 border-t pt-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-navy">합계</span>
-                <span className="font-semibold text-navy">
+                <span className="font-medium text-bx-black dark:text-bx-white">합계</span>
+                <span className="font-semibold text-bx-black dark:text-bx-white">
                   {regionData.reduce((s, r) => s + r.count, 0).toLocaleString()}건
                 </span>
               </div>
@@ -561,7 +571,7 @@ export default function AdminAnalyticsPage() {
 
         <Card className="xl:col-span-1">
           <CardHeader className="flex-row items-center gap-2">
-            <Layers className="h-4 w-4 text-gold" />
+            <Layers className="h-4 w-4 text-bx-accent" />
             <CardTitle className="text-base">유형별 매출</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -573,7 +583,7 @@ export default function AdminAnalyticsPage() {
               typeRevenue.slice(0, 10).map((t, i) => (
                 <div key={t.type} className="space-y-1">
                   <div className="flex justify-between text-sm">
-                    <span className="font-medium text-navy">{t.type}</span>
+                    <span className="font-medium text-bx-black dark:text-bx-white">{t.type}</span>
                     <span className="text-muted-foreground">
                       {(t.totalKrw / 10000).toLocaleString()}만원
                     </span>

@@ -344,12 +344,12 @@ export default function AdminAiContentEditClient() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 text-bx-black dark:text-bx-white">
       <div className="flex flex-wrap items-center gap-3">
         <Button variant="outline" size="sm" asChild>
           <Link href={`/${locale}/admin/ai-content`}>← 목록</Link>
         </Button>
-        <span className="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-navy">
+        <span className="rounded border-2 border-bx-black bg-bx-off px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-bx-black dark:border-bx-white dark:bg-bx-gray-dim/30 dark:text-bx-white">
           {status || "…"}
         </span>
       </div>
@@ -484,7 +484,7 @@ export default function AdminAiContentEditClient() {
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
-              className="bg-navy text-white"
+              className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
               disabled={saveBusy}
               onClick={() => void save()}
             >
@@ -507,7 +507,7 @@ export default function AdminAiContentEditClient() {
             <Button
               type="button"
               variant="default"
-              className="bg-gold text-navy hover:bg-gold-dark"
+              className="border-2 border-bx-black bg-bx-accent text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black dark:border-bx-white dark:hover:border-bx-white"
               disabled={publishBusy || status === "published"}
               onClick={() => void publish()}
             >
@@ -520,7 +520,7 @@ export default function AdminAiContentEditClient() {
 
           {kind === "success_case" ? (
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card className="border-navy/10">
+              <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
                 <CardHeader>
                   <CardTitle className="text-base">편집</CardTitle>
                 </CardHeader>
@@ -639,11 +639,11 @@ export default function AdminAiContentEditClient() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-navy/10">
+              <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
                 <CardHeader>
                   <CardTitle className="text-base">미리보기</CardTitle>
                 </CardHeader>
-                <CardContent className="prose prose-sm max-w-none text-navy">
+                <CardContent className="prose prose-sm max-w-none text-bx-black dark:text-bx-white">
                   <h3>{titleKo || "(제목)"}</h3>
                   <p className="text-muted-foreground">{scSummaryKo}</p>
                   <h4 className="text-sm">과제</h4>
@@ -659,7 +659,7 @@ export default function AdminAiContentEditClient() {
             </div>
           ) : kind === "trend_report" ? (
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card className="border-navy/10">
+              <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
                 <CardHeader>
                   <CardTitle className="text-base">편집</CardTitle>
                 </CardHeader>
@@ -684,18 +684,18 @@ export default function AdminAiContentEditClient() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-navy/10">
+              <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
                 <CardHeader>
                   <CardTitle className="text-base">미리보기</CardTitle>
                 </CardHeader>
-                <CardContent className="prose prose-sm max-w-none text-navy prose-headings:text-navy">
+                <CardContent className="prose prose-sm max-w-none text-bx-black dark:text-bx-white">
                   <ReactMarkdown>{contentKo || "_(비어 있음)_"}</ReactMarkdown>
                 </CardContent>
               </Card>
             </div>
           ) : kind === "academy_lesson" ? (
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card className="border-navy/10">
+              <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
                 <CardHeader>
                   <CardTitle className="text-base">편집</CardTitle>
                 </CardHeader>
@@ -728,11 +728,11 @@ export default function AdminAiContentEditClient() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-navy/10">
+              <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
                 <CardHeader>
                   <CardTitle className="text-base">첫 챕터 미리보기</CardTitle>
                 </CardHeader>
-                <CardContent className="prose prose-sm max-w-none text-navy prose-headings:text-navy">
+                <CardContent className="prose prose-sm max-w-none text-bx-black dark:text-bx-white">
                   {(() => {
                     try {
                       const ch = JSON.parse(chaptersJson) as unknown;

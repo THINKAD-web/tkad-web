@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   LayoutDashboard,
   MessageSquareText,
@@ -33,7 +34,7 @@ function SignOutButton({ locale, label }: { locale: string; label: string }) {
         await fetch("/api/admin/auth/logout", { method: "POST" });
         window.location.href = `/${locale}/admin/login`;
       }}
-      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+      className="inline-flex shrink-0 items-center gap-1.5 border-2 border-bx-black bg-bx-white px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-white dark:hover:text-bx-black"
     >
       <LogOut className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">{label}</span>
@@ -42,24 +43,26 @@ function SignOutButton({ locale, label }: { locale: string; label: string }) {
 }
 
 const navDefs = [
-  // 1. 메인
+  // 1) 홈/요약
   { href: "/admin", key: "dashboard" as const, icon: LayoutDashboard },
-  // 2. 영업 입구 (일 단위)
+  // 2) 영업/리드
   { href: "/admin/inquiries", key: "inquiries" as const, icon: MessageSquareText },
+  { href: "/admin/crm", key: "crm" as const, icon: UsersRound },
+  { href: "/admin/crm-records", key: "crmRecords" as const, icon: ContactRound },
+  // 3) 견적/계약
   { href: "/admin/quotes", key: "quotesList" as const, icon: ClipboardList },
   { href: "/admin/quotes/new", key: "quotesNew" as const, icon: Calculator },
+  { href: "/admin/quote-templates", key: "quoteTemplates" as const, icon: FileText },
+  // 4) 캠페인 운영
   { href: "/admin/campaigns", key: "campaigns" as const, icon: Megaphone },
-  // 3. 매체 자산
+  // 5) 매체/검증/네트워크
   { href: "/admin/medias", key: "medias" as const, icon: Monitor },
   { href: "/admin/verification", key: "verification" as const, icon: ShieldCheck },
   { href: "/admin/networks", key: "networks" as const, icon: Share2 },
   { href: "/admin/media-hub", key: "mediaHub" as const, icon: Database },
-  // 4. 사람
+  // 6) 사람/권한
   { href: "/admin/users", key: "users" as const, icon: UserCog },
-  { href: "/admin/crm", key: "crm" as const, icon: UsersRound },
-  { href: "/admin/crm-records", key: "crmRecords" as const, icon: ContactRound },
-  // 5. 도구·분석
-  { href: "/admin/quote-templates", key: "quoteTemplates" as const, icon: FileText },
+  // 7) 분석/도구
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
   { href: "/admin/ai-content", key: "aiContent" as const, icon: Sparkles },
 ];
@@ -90,12 +93,12 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   };
 
   const sidebar = (
-    <div className="flex h-full flex-col bg-navy text-white">
-      <div className="flex h-16 items-center gap-2 border-b border-white/10 px-5">
+    <div className="flex h-full flex-col border-r-2 border-bx-black bg-bx-white text-bx-black dark:border-bx-white dark:bg-bx-black dark:text-bx-white">
+      <div className="flex h-16 items-center gap-2 border-b-2 border-bx-black px-5 dark:border-bx-white">
         <span className="text-lg font-extrabold tracking-tight">
-          THINK<span className="text-gold">AD</span>
+          THINK<span className="text-bx-accent">AD</span>
         </span>
-        <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-gold">
+        <span className="border-2 border-bx-black bg-bx-accent px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white dark:border-bx-white">
           ADMIN
         </span>
       </div>
@@ -109,11 +112,12 @@ export default function AdminShell({ children }: { children: ReactNode }) {
               key={item.href}
               href={`/${locale}${item.href}`}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              className={[
+                "flex items-center gap-3 border-2 border-bx-black px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] transition-colors dark:border-bx-white",
                 active
-                  ? "bg-white/15 text-gold"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
-              }`}
+                  ? "bg-bx-black text-bx-white dark:bg-bx-white dark:text-bx-black"
+                  : "bg-bx-white text-bx-black hover:bg-bx-off dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30",
+              ].join(" ")}
             >
               <Icon className="h-[18px] w-[18px] shrink-0" />
               {item.label}
@@ -122,10 +126,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         })}
       </nav>
 
-      <div className="border-t border-white/10 p-3">
+      <div className="border-t-2 border-bx-black p-3 dark:border-bx-white">
         <Link
           href={`/${locale}`}
-          className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+          className="flex items-center gap-2 border-2 border-bx-black bg-bx-white px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-bx-black transition-colors hover:bg-bx-off dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30"
         >
           <ArrowLeft className="h-4 w-4" />
           {tNav("backToSite")}
@@ -135,13 +139,13 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="admin-dashboard-root flex min-h-screen bg-bx-off text-bx-black dark:bg-bx-black dark:text-bx-white">
       <aside className="hidden w-60 shrink-0 md:block">{sidebar}</aside>
 
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-bx-black/50"
             onClick={() => setSidebarOpen(false)}
           />
           <div className="relative h-full w-60">{sidebar}</div>
@@ -149,17 +153,18 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       )}
 
       <div className="flex flex-1 flex-col">
-        <header className="flex h-14 items-center gap-3 border-b bg-white px-4 md:px-6">
+        <header className="flex h-14 items-center gap-3 border-b-2 border-bx-black bg-bx-white px-4 dark:border-bx-white dark:bg-bx-black md:px-6">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="rounded-md p-1.5 hover:bg-slate-100 md:hidden"
+            className="border-2 border-bx-black bg-bx-white p-1.5 text-bx-black transition-colors hover:bg-bx-off dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30 md:hidden"
           >
-            <Menu className="h-5 w-5 text-navy" />
+            <Menu className="h-5 w-5" />
           </button>
-          <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-navy">
+          <h1 className="min-w-0 flex-1 truncate font-mono text-[12px] font-bold uppercase tracking-[0.18em]">
             {navItems.find((n) => isActive(n.href))?.label ?? "관리자"}
           </h1>
+          <ThemeToggle className="inline-flex h-9 w-9 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-white dark:hover:text-bx-black" />
           <SignOutButton locale={locale} label={tNav("signOut")} />
         </header>
         <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>

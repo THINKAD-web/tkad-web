@@ -7,6 +7,7 @@ import { captureElementAsPng, downloadPdfFromHtmlElement } from "@/lib/html-to-p
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
+import { PlannerDailyReachBarChart, PlannerReachDonutChart } from "@/components/planner-charts";
 import {
   computeCampaignBaseStats,
   computeCampaignPlannerKpis,
@@ -56,6 +57,12 @@ function diffDays(start: string, end: string): number {
 
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
+}
+
+function fmtShort(d: string) {
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return "—";
+  return dt.toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit" });
 }
 
 function fmtAmount(n: number) {
@@ -142,6 +149,150 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
     }
     // Dedupe
     return Array.from(new Set(urls)).slice(0, 9);
+  })();
+
+  const dashboardBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const byType = new Map<string, number>();
+    const byRegion = new Map<string, number>();
+    for (const b of bookings) {
+      const t = (b.type ?? "기타").toString();
+      const r = (b.region ?? b.location?.split(" ")[0] ?? "-").toString();
+      const daily = b.dailyFootTraffic ?? 0;
+      byType.set(t, (byType.get(t) ?? 0) + daily);
+      byRegion.set(r, (byRegion.get(r) ?? 0) + 1);
+    }
+    const typeBars = Array.from(byType.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k, value: v }));
+    const regionBars = Array.from(byRegion.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k, value: v }));
+    return { typeBars, regionBars };
+  })();
+
+  const topMediaBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const foot = bookings
+      .filter((b) => typeof b.dailyFootTraffic === "number" && (b.dailyFootTraffic ?? 0) > 0)
+      .sort((a, b) => (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0))
+      .slice(0, 6)
+      .map((b, i) => ({
+        key: `${b.mediaName}-${i}`,
+        label: (b.mediaName ?? "—").slice(0, 10),
+        value: b.dailyFootTraffic ?? 0,
+      }));
+    const imp = bookings
+      .filter((b) => typeof b.impressions === "number" && (b.impressions ?? 0) > 0)
+      .sort((a, b) => (b.impressions ?? 0) - (a.impressions ?? 0))
+      .slice(0, 6)
+      .map((b, i) => ({
+        key: `${b.mediaName}-${i}`,
+        label: (b.mediaName ?? "—").slice(0, 10),
+        value: b.impressions ?? 0,
+      }));
+    return { foot, imp };
+  })();
+
+  const opsBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const byBookingStatus = new Map<string, number>();
+    const byDocStatus = new Map<string, number>();
+    const visibilityTop = bookings
+      .filter((b) => typeof b.visibilityScore === "number" && (b.visibilityScore ?? 0) > 0)
+      .sort((a, b) => (b.visibilityScore ?? 0) - (a.visibilityScore ?? 0))
+      .slice(0, 6)
+      .map((b, i) => ({
+        key: `${b.mediaName}-${i}`,
+        label: (b.mediaName ?? "—").slice(0, 10),
+        value: b.visibilityScore ?? 0,
+      }));
+
+    for (const b of bookings) {
+      const k = (b.status ?? "—").toString();
+      byBookingStatus.set(k, (byBookingStatus.get(k) ?? 0) + 1);
+    }
+    for (const d of data.financialDocs ?? []) {
+      const k = `${d.kind ?? "DOC"} · ${d.status ?? "—"}`;
+      byDocStatus.set(k, (byDocStatus.get(k) ?? 0) + 1);
+    }
+    const bookingStatusBars = Array.from(byBookingStatus.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k.slice(0, 10), value: v }));
+    const docStatusBars = Array.from(byDocStatus.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k.slice(0, 10), value: v }));
+
+    return { bookingStatusBars, docStatusBars, visibilityTop };
+  })();
+
+  const scheduleBars = (() => {
+    const byKind = new Map<string, number>();
+    for (const e of data.scheduleEvents ?? []) {
+      const k = (e.kind ?? "EVENT").toString();
+      byKind.set(k, (byKind.get(k) ?? 0) + 1);
+    }
+    const kindBars = Array.from(byKind.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([k, v]) => ({ key: k, label: k.slice(0, 10), value: v }));
+    return { kindBars };
+  })();
+
+  const bookingMonthBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const buckets = new Array(12).fill(0) as number[];
+    for (const b of bookings) {
+      const d = new Date(b.startsAt);
+      if (Number.isNaN(d.getTime())) continue;
+      const m = d.getMonth(); // 0~11
+      buckets[m] += 1;
+    }
+    const bars = buckets
+      .map((v, i) => ({ key: String(i + 1), label: `${i + 1}월`, value: v }))
+      .filter((p) => p.value > 0);
+    return { bars };
+  })();
+
+  const timeline = (() => {
+    const bookings = (data.mediaBookings ?? []).filter(Boolean);
+    if (bookings.length === 0) return null;
+    const points = bookings
+      .map((b) => ({
+        ...b,
+        s: new Date(b.startsAt).getTime(),
+        e: new Date(b.endsAt).getTime(),
+      }))
+      .filter((x) => Number.isFinite(x.s) && Number.isFinite(x.e) && x.e >= x.s);
+    if (points.length === 0) return null;
+    const minS = Math.min(...points.map((p) => p.s));
+    const maxE = Math.max(...points.map((p) => p.e));
+    const span = Math.max(1, maxE - minS);
+    const rows = points
+      .sort((a, b) => a.s - b.s)
+      .slice(0, 14)
+      .map((p, idx) => {
+        const left = ((p.s - minS) / span) * 100;
+        const width = ((p.e - p.s) / span) * 100;
+        return {
+          key: `${p.mediaName}-${idx}`,
+          label: (p.mediaName ?? "—").slice(0, 18),
+          left,
+          width: Math.max(1.2, width),
+          startsAt: p.startsAt,
+          endsAt: p.endsAt,
+        };
+      });
+    return {
+      minLabel: fmtShort(new Date(minS).toISOString()),
+      maxLabel: fmtShort(new Date(maxE).toISOString()),
+      rows,
+      total: points.length,
+    };
   })();
 
   const handleCapture = async () => {
@@ -516,6 +667,317 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
               ) : null}
             </div>
           )}
+
+          {/* EFFECT DASHBOARD (charts) — planner chart components reused */}
+          {plannerKpis && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ EFFECT DASHBOARD ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-2">
+                <div className="border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 도달 구조 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerReachDonutChart
+                      corePct={plannerKpis.reachCorePct}
+                      extendedPct={plannerKpis.reachExtendedPct}
+                      title="도달 구조"
+                      coreLabel="Core"
+                      extendedLabel="Extended"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 유형별 일유동 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={dashboardBars.typeBars}
+                      title="유형별 일유동(합산)"
+                      valueLabel="daily"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 border-2 border-bx-black bg-bx-white">
+                <div className="border-b-2 border-bx-black p-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                    [ 지역 분포 ]
+                  </p>
+                </div>
+                <div className="p-4">
+                  <PlannerDailyReachBarChart
+                    data={dashboardBars.regionBars}
+                    title="지역별 집행 매체 수"
+                    valueLabel="count"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 노출 패턴 — 24h/weekday/monthly (브루탈 막대, html2canvas 안정) */}
+          {data.mediaBookings?.length ? (
+            <CampaignTrafficSection bookings={data.mediaBookings} />
+          ) : null}
+
+          {/* TOP MEDIA (bars) */}
+          {(topMediaBars.foot.length > 0 || topMediaBars.imp.length > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ TOP MEDIA (DATA) ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-2">
+                <div className="border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 매체별 일유동 TOP ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={topMediaBars.foot}
+                      title="매체별 일유동(상위)"
+                      valueLabel="daily"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 매체별 노출 TOP ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={topMediaBars.imp}
+                      title="매체별 노출(상위)"
+                      valueLabel="impressions"
+                    />
+                  </div>
+                </div>
+              </div>
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  fontSize: "10px",
+                  color: "#737373",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                {`// `}일유동/노출 값이 없는 매체는 차트에서 자동으로 제외됩니다.
+              </p>
+            </div>
+          )}
+
+          {/* OPERATIONS (more charts, no new KPIs) */}
+          {(opsBars.bookingStatusBars.length > 0 ||
+            opsBars.docStatusBars.length > 0 ||
+            opsBars.visibilityTop.length > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ OPERATIONS DASHBOARD ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-3">
+                <div className="border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 예약 상태 분포 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={opsBars.bookingStatusBars}
+                      title="예약 상태(매체 수)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 문서 상태 분포 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={opsBars.docStatusBars}
+                      title="문서 상태(건수)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 가시성 TOP ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={opsBars.visibilityTop}
+                      title="가시성 점수(상위)"
+                      valueLabel="score"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SCHEDULE (more charts) */}
+          {(scheduleBars.kindBars.length > 0 || bookingMonthBars.bars.length > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ SCHEDULE DASHBOARD ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-2">
+                <div className="border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 일정 이벤트 종류 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={scheduleBars.kindBars}
+                      title="일정 이벤트(종류별)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 매체 시작 월 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={bookingMonthBars.bars}
+                      title="집행 시작 월(매체 수)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TIMELINE (gantt-style) */}
+          {timeline?.rows.length ? (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ TIMELINE (MEDIA) ]
+              </h2>
+              <div className="border-2 border-bx-black bg-bx-white">
+                <div className="border-b-2 border-bx-black p-4">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 매체 집행 타임라인 ]
+                    </p>
+                    <p className="font-mono text-[10px] text-bx-gray-dim">
+                      {`// `}표시: {timeline.rows.length}/{timeline.total} · {timeline.minLabel} → {timeline.maxLabel}
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="space-y-2">
+                    {timeline.rows.map((r) => (
+                      <div key={r.key} className="grid grid-cols-[160px_1fr] gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-mono text-[10px] font-bold text-bx-black">
+                            {r.label}
+                          </p>
+                          <p className="font-mono text-[9px] text-bx-gray-dim">
+                            {fmtShort(r.startsAt)} ~ {fmtShort(r.endsAt)}
+                          </p>
+                        </div>
+                        <div className="relative h-8 border-2 border-bx-black bg-[#f5f5f5]">
+                          <div
+                            className="absolute top-0 h-full border-r-2 border-bx-black bg-bx-black"
+                            style={{
+                              left: `${Math.max(0, Math.min(98.8, r.left))}%`,
+                              width: `${Math.max(1.2, Math.min(100, r.width))}%`,
+                            }}
+                          />
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              backgroundImage:
+                                "linear-gradient(to right, rgba(0,0,0,0.10) 1px, transparent 1px)",
+                              backgroundSize: "10% 100%",
+                              pointerEvents: "none",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 font-mono text-[10px] text-bx-gray-dim">
+                    {`// `}집행 시작/종료 일자를 막대로만 표시합니다. (추가 계산/평가 없음)
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           {/* 캠페인 개요 — brutalist */}
           <div style={{ marginBottom: "28px" }}>

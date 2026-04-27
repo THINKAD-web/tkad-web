@@ -10,7 +10,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  ZAxis,
 } from "recharts";
 import type { ScoredMedia } from "@/lib/ai-media-recommend";
 import { estimatedMonthlyImpressions } from "@/lib/ai-recommend-metrics";
@@ -43,10 +42,10 @@ function ChartTooltip({
     <div className="border-2 border-bx-black bg-bx-white px-3 py-2 text-xs">
       <p className="max-w-[220px] font-bold tracking-tight text-bx-black">{p.name}</p>
       <p className="mt-1 font-mono text-[11px] tabular-nums text-bx-gray-dim">
-        {isKo ? "적합도" : "Fit"}: <span className="text-bx-black">{p.x}</span>
+        {isKo ? "추천 점수" : "Fit score"}: <span className="text-bx-black">{p.x}</span>
       </p>
       <p className="font-mono text-[11px] tabular-nums text-bx-gray-dim">
-        {isKo ? "월 추정 노출" : "Est. monthly reach"}:{" "}
+        {isKo ? "월간 노출(추정)" : "Est. monthly reach"}:{" "}
         <span className="text-bx-black">{p.y.toLocaleString()}</span>
       </p>
     </div>
@@ -61,7 +60,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
     return scored.map((s) => ({
       x: s.score,
       y: estimatedMonthlyImpressions(s.item),
-      z: s.score,
+      z: 1,
       name: isKo ? s.item.name : (s.item.nameEn || s.item.name),
       id: s.item.id,
     }));
@@ -88,7 +87,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
       aria-label={tr("resultChartAria")}
     >
       <p className="mb-2 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
-        [ {tr("resultChartHint")} ]
+        [ {isKo ? "오른쪽: 추천 점수 ↑ · 위: 월간 노출(추정) ↑" : "Right: fit ↑ · Up: est. monthly reach ↑"} ]
       </p>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
@@ -101,7 +100,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
             tick={{ fill: "#000000", fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
             stroke="#000000"
             label={{
-              value: isKo ? "AI 적합도" : "AI fit (0–100)",
+              value: isKo ? "추천 점수 (0–100)" : "Fit score (0–100)",
               position: "bottom",
               fill: "#000000",
               fontSize: 11,
@@ -121,7 +120,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
             }
             width={48}
             label={{
-              value: isKo ? "월 추정 노출" : "Est. monthly reach",
+              value: isKo ? "월간 노출(추정)" : "Est. monthly reach",
               angle: -90,
               position: "insideLeft",
               fill: "#000000",
@@ -129,7 +128,6 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
               fontFamily: "JetBrains Mono, monospace",
             }}
           />
-          <ZAxis type="number" dataKey="z" range={[40, 400]} />
           <Tooltip
             cursor={{ strokeDasharray: "3 3" }}
             content={<ChartTooltip isKo={isKo} />}

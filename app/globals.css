@@ -155,6 +155,26 @@
 }
 
 /* Dark mode tokens (next-themes 가 html.dark 클래스 토글 시 적용) */
+/* 관리자 대시보드만: 라이트 모드에서 남색 primary/악센트 제거 + 본문·보조글 대비 강화
+ * (shadcn Card/Button/Input 이 --primary, --muted-foreground 등을 쓰므로 AdminShell 루트에 스코프) */
+html:not(.dark) .admin-dashboard-root {
+  --background: #f5f5f5;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #000000;
+  --muted: #e5e5e5;
+  --muted-foreground: #404040;
+  --accent: #ff6600;
+  --accent-foreground: #ffffff;
+  --border: #000000;
+  --input: #404040;
+  --ring: #ff6600;
+}
+
 .dark {
   --background: #0a0d14;
   --foreground: #f5f6fa;

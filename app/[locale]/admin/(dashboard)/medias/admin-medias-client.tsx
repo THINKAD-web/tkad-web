@@ -1084,8 +1084,8 @@ export default function AdminMediasClient({
                 }}
                 className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                   typeFilter === opt.value
-                    ? "bg-navy text-white"
-                    : "bg-slate-100 text-muted-foreground hover:bg-slate-200"
+                    ? "border-2 border-bx-black bg-bx-black text-bx-white dark:border-bx-white dark:bg-bx-white dark:text-bx-black"
+                    : "border-2 border-bx-black bg-bx-white text-bx-black hover:bg-bx-off dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30"
                 }`}
               >
                 {opt.label}
@@ -1136,7 +1136,7 @@ export default function AdminMediasClient({
             </Button>
             <Button
               onClick={openAdd}
-              className="bg-gold text-navy hover:bg-gold-dark shrink-0"
+              className="shrink-0 border-2 border-bx-black bg-bx-accent text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black dark:border-bx-white dark:hover:border-bx-white"
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">매체 추가</span>
@@ -1184,7 +1184,7 @@ export default function AdminMediasClient({
             <div className="md:hidden">
               {listLoading ? (
                 <div className="px-4 py-12 text-center text-muted-foreground">
-                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-navy/40" />
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-bx-gray-dim" />
                   <p className="mt-2 text-sm">불러오는 중…</p>
                 </div>
               ) : paginated.length === 0 ? (
@@ -1204,7 +1204,7 @@ export default function AdminMediasClient({
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-navy">
+                          <p className="truncate text-sm font-semibold text-bx-black dark:text-bx-white">
                             {media.name}
                           </p>
                           <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -1213,11 +1213,11 @@ export default function AdminMediasClient({
                           <div className="mt-2 flex flex-wrap items-center gap-2">
                             <Badge
                               variant="secondary"
-                              className="bg-navy/5 text-navy text-[10px]"
+                              className="border-2 border-bx-black bg-bx-white text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-bx-black dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
                             >
                               {typeBadgeLabel(media.type)}
                             </Badge>
-                            <span className="text-xs font-semibold text-navy">
+                            <span className="text-xs font-semibold text-bx-black dark:text-bx-white">
                               ₩{media.price.toLocaleString()}
                             </span>
                           </div>
@@ -1292,7 +1292,7 @@ export default function AdminMediasClient({
                         colSpan={8}
                         className="px-4 py-12 text-center text-muted-foreground"
                       >
-                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-navy/40" />
+                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-bx-gray-dim" />
                         <p className="mt-2 text-sm">불러오는 중…</p>
                       </td>
                     </tr>
@@ -1318,7 +1318,7 @@ export default function AdminMediasClient({
                         }`}
                       >
                         <td className="px-4 py-3">
-                          <div className="font-medium text-navy">
+                          <div className="font-medium text-bx-black dark:text-bx-white">
                             {media.name}
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -1331,12 +1331,12 @@ export default function AdminMediasClient({
                         <td className="px-4 py-3">
                           <Badge
                             variant="secondary"
-                            className="bg-navy/5 text-navy text-xs"
+                            className="border-2 border-bx-black bg-bx-white text-xs font-mono font-bold uppercase tracking-[0.12em] text-bx-black dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
                           >
                             {typeBadgeLabel(media.type)}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 font-semibold text-navy">
+                        <td className="px-4 py-3 font-semibold text-bx-black dark:text-bx-white">
                           ₩{media.price.toLocaleString()}
                         </td>
                         <td className="px-4 py-3 text-center">
@@ -1538,7 +1538,7 @@ export default function AdminMediasClient({
           />
           <Card className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col animate-fade-in-up overflow-hidden">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between">
-              <CardTitle className="text-lg text-navy">
+              <CardTitle className="text-lg text-bx-black dark:text-bx-white">
                 {editing ? "매체 수정" : "매체 추가"}
               </CardTitle>
               <Button
@@ -1593,7 +1593,7 @@ export default function AdminMediasClient({
                   <Button
                     type="button"
                     variant="outline"
-                    className="shrink-0 border-navy/20"
+                    className="shrink-0 border-2 border-bx-black bg-bx-white text-bx-black hover:bg-bx-off dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30"
                     disabled={geoLookupLoading}
                     onClick={() => void onGeocodeFromAddress()}
                   >
@@ -1622,9 +1622,9 @@ export default function AdminMediasClient({
                 heightPx={260}
               />
 
-              <div className="rounded-lg border border-navy/10 bg-slate-50/80 p-3">
-                <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-navy">
-                  <MapPin className="h-3.5 w-3.5 text-gold" />
+              <div className="rounded-lg border-2 border-bx-black bg-bx-off p-3 dark:border-bx-white dark:bg-bx-gray-dim/30">
+                <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-bx-black dark:text-bx-white">
+                  <MapPin className="h-3.5 w-3.5 text-bx-accent" />
                   주변 정보 미리보기
                 </div>
                 {nearbyPreviewLoading ? (
@@ -1633,7 +1633,7 @@ export default function AdminMediasClient({
                   <div className="space-y-2 text-xs">
                     {nearbyPreview.nearestSubway && (
                       <p>
-                        <span className="font-medium text-navy">인근 지하철: </span>
+                        <span className="font-medium text-bx-black dark:text-bx-white">인근 지하철: </span>
                         {nearbyPreview.nearestSubway.name}
                         <span className="text-muted-foreground">
                           {" "}
@@ -1642,7 +1642,7 @@ export default function AdminMediasClient({
                       </p>
                     )}
                     <p>
-                      <span className="font-medium text-navy">주변 시설 요약: </span>
+                      <span className="font-medium text-bx-black dark:text-bx-white">주변 시설 요약: </span>
                       {nearbyPreview.nearbyFacilities?.trim() ? (
                         <span>{nearbyPreview.nearbyFacilities}</span>
                       ) : (
@@ -1975,9 +1975,9 @@ export default function AdminMediasClient({
                   }
                 />
               </div>
-              <div className="rounded-xl border border-navy/10 bg-slate-50/80 p-4">
+              <div className="rounded-xl border-2 border-bx-black bg-bx-off p-4 dark:border-bx-white dark:bg-bx-gray-dim/30">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <label className="text-xs font-semibold text-navy">
+                  <label className="text-xs font-semibold text-bx-black dark:text-bx-white">
                     가격 옵션
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -2019,17 +2019,17 @@ export default function AdminMediasClient({
                 </p>
                 <div className="space-y-3">
                   {priceOptDrafts.length === 0 ? (
-                    <p className="rounded-lg border border-dashed border-navy/15 bg-white px-3 py-6 text-center text-xs text-muted-foreground">
+                    <p className="rounded-lg border-2 border-dashed border-bx-black bg-bx-white px-3 py-6 text-center text-xs text-muted-foreground dark:border-bx-white dark:bg-bx-black">
                       옵션이 없습니다.「옵션 추가」또는 JSON을 입력하세요.
                     </p>
                   ) : (
                     priceOptDrafts.map((row, idx) => (
                       <div
                         key={row.key}
-                        className="space-y-2 rounded-lg border border-navy/10 bg-white p-3 shadow-sm"
+                        className="space-y-2 rounded-lg border-2 border-bx-black bg-bx-white p-3 shadow-sm dark:border-bx-white dark:bg-bx-black"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-bold text-navy/50">
+                          <span className="text-[11px] font-bold text-bx-gray-dim">
                             옵션 {idx + 1}
                           </span>
                           <Button
@@ -2141,7 +2141,7 @@ export default function AdminMediasClient({
                     }
                     rows={5}
                     spellCheck={false}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono text-navy shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="w-full rounded-md border-2 border-bx-black bg-bx-white px-3 py-2 text-xs font-mono text-bx-black shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bx-accent dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
                     placeholder='[{"label":"20초 기준","price":30000000,"period":"month","description":"피크 15초"}]'
                   />
                 </div>
@@ -2187,7 +2187,7 @@ export default function AdminMediasClient({
                   반영하세요.
                 </p>
                 {form.image && (
-                  <div className="mt-2 overflow-hidden rounded-lg border border-navy/10">
+                  <div className="mt-2 overflow-hidden rounded-lg border-2 border-bx-black dark:border-bx-white">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={form.image} alt="대표 이미지" className="h-32 w-full object-cover" />
                   </div>
@@ -2234,7 +2234,10 @@ export default function AdminMediasClient({
                 {form.extractedImagesText.trim() && (
                   <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
                     {form.extractedImagesText.trim().split("\n").filter(Boolean).map((url, i) => (
-                      <div key={i} className="group relative overflow-hidden rounded-lg border border-navy/10">
+                      <div
+                        key={i}
+                        className="group relative overflow-hidden rounded-lg border-2 border-bx-black dark:border-bx-white"
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={url} alt="" className="h-20 w-full object-cover" />
                         <button
@@ -2384,7 +2387,7 @@ export default function AdminMediasClient({
                 </Button>
                 <Button
                   onClick={() => void handleSave()}
-                  className="bg-navy text-white hover:bg-navy-light"
+                  className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
                   disabled={
                     !form.name.trim() ||
                     !form.location.trim() ||
@@ -2419,7 +2422,7 @@ export default function AdminMediasClient({
           />
           <Card className="relative z-10 flex max-h-[85vh] w-full max-w-2xl animate-fade-in-up flex-col overflow-hidden">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between">
-              <CardTitle className="text-lg text-navy">
+              <CardTitle className="text-lg text-bx-black dark:text-bx-white">
                 매체 사진 일괄 업로드
               </CardTitle>
               <Button
@@ -2441,15 +2444,15 @@ export default function AdminMediasClient({
                 onClick={() => fileInputRef.current?.click()}
                 className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
                   isDragging
-                    ? "border-gold bg-gold/5"
-                    : "border-slate-200 hover:border-gold/50 hover:bg-slate-50"
+                    ? "border-bx-accent bg-bx-off"
+                    : "border-slate-200 hover:border-bx-accent hover:bg-bx-off"
                 }`}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy/5">
-                  <Upload className="h-6 w-6 text-navy/60" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
+                  <Upload className="h-6 w-6 text-bx-gray-dim" />
                 </div>
                 <div>
-                  <p className="font-medium text-navy">
+                  <p className="font-medium text-bx-black dark:text-bx-white">
                     이미지를 드래그하거나 클릭하여 선택
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -2498,7 +2501,7 @@ export default function AdminMediasClient({
                           className="h-12 w-12 shrink-0 rounded-md object-cover"
                         />
                         <div className="min-w-0 flex-1 space-y-1.5">
-                          <p className="truncate text-sm font-medium text-navy">
+                          <p className="truncate text-sm font-medium text-bx-black dark:text-bx-white">
                             {item.file.name}
                           </p>
                           {item.status === "done" ? (
@@ -2514,7 +2517,7 @@ export default function AdminMediasClient({
                             <div className="space-y-1">
                               <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                                 <div
-                                  className="h-full rounded-full bg-gold transition-all"
+                                  className="h-full rounded-full bg-bx-accent transition-all"
                                   style={{ width: `${item.progress}%` }}
                                 />
                               </div>
@@ -2572,14 +2575,14 @@ export default function AdminMediasClient({
                   </Button>
                   {allDone ? (
                     <Button
-                      className="bg-navy text-white hover:bg-navy-light"
+                      className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
                       onClick={() => setUploadModalOpen(false)}
                     >
                       완료
                     </Button>
                   ) : (
                     <Button
-                      className="bg-navy text-white hover:bg-navy-light"
+                      className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
                       disabled={!allMapped || uploadRunning}
                       onClick={() => void startBulkUpload()}
                     >
@@ -2616,7 +2619,7 @@ export default function AdminMediasClient({
                 <Trash2 className="h-5 w-5 text-destructive" />
               </div>
               <div>
-                <p className="font-semibold text-navy">매체를 삭제하시겠습니까?</p>
+                <p className="font-semibold text-bx-black dark:text-bx-white">매체를 삭제하시겠습니까?</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   이 작업은 되돌릴 수 없습니다.
                 </p>

@@ -68,9 +68,8 @@ export function BrutalFooter({
           />
         ))}
       </div>
-      <div className="flex flex-col items-center justify-between gap-2 border-t-2 border-bx-black bg-bx-black px-6 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-bx-white sm:flex-row">
+      <div className="flex items-center justify-center border-t-2 border-bx-black bg-bx-black px-6 py-4 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-bx-white">
         <span>{copyright ?? "© 2026 THINKAD — All rights reserved"}</span>
-        {legal ? <span className="text-bx-gray">{legal}</span> : null}
       </div>
     </footer>
   );

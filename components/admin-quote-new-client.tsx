@@ -12,12 +12,13 @@ import {
   type AdminMediaDto,
 } from "@/lib/admin-media-dto";
 import {
+  ADMIN_QUOTE_VALIDITY_DAYS,
+  catalogPriceFieldToWon,
   computeAdminQuoteTotals,
   inclusiveCampaignDays,
-  lineSupplyWon,
   monthFactorFromDays,
-} from "@/lib/admin-quote-calc";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+} from "@/lib/pricing";
+import { formatPricePeriodShortLabel, normalizeMediaPricePeriod } from "@/lib/media-price-format";
 import { QuotePdfPreview } from "@/components/quote-pdf-preview";
 import {
   Calculator,
@@ -93,20 +94,23 @@ export default function AdminQuoteNewClient() {
   const [customLines, setCustomLines] = useState<CustomLine[]>([]);
 
   const [startDate, setStartDate] = useState(todayISODate);
-  const [endDate, setEndDate] = useState(() => addMonthsISODate(todayISODate(), 1));
+  // NOTE: 일수(포함) 기반으로 월 환산(days/30)을 쓰기 때문에,
+  // 기본값을 "+1개월 동일 일자"로 두면 31일이 되어 1.03개월로 계산되는 경우가 잦습니다.
+  // 기본은 "30일(포함)"이 되도록 종료일을 하루 당겨 설정합니다.
+  const [endDate, setEndDate] = useState(() =>
+    addDaysISODate(addMonthsISODate(todayISODate(), 1), -1),
+  );
 
   const [discountPercent, setDiscountPercent] = useState("0");
   const [discountWon, setDiscountWon] = useState("0");
   const [vatIncluded, setVatIncluded] = useState(false);
 
-  const [quoteNumber] = useState(() => {
-    const ymd = todayISODate().replace(/-/g, "");
-    const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
-    return `TKQ-${ymd}-${rnd}`;
-  });
+  const [quoteNumber, setQuoteNumber] = useState("");
+  const draftQuoteLabel = `DRAFT-${todayISODate().replace(/-/g, "")}`;
+  const displayQuoteNumber = quoteNumber.trim() || draftQuoteLabel;
   const [issueDatePdf, setIssueDatePdf] = useState(todayISODate);
   const [validUntilPdf, setValidUntilPdf] = useState(() =>
-    addDaysISODate(todayISODate(), 14),
+    addDaysISODate(todayISODate(), ADMIN_QUOTE_VALIDITY_DAYS),
   );
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
@@ -175,20 +179,52 @@ export default function AdminQuoteNewClient() {
   const days = useMemo(() => inclusiveCampaignDays(start, end), [start, end]);
   const monthFactor = useMemo(() => monthFactorFromDays(days), [days]);
 
+  type PeriodKey = "month" | "biweekly" | "week" | "day";
+  const factorForPeriod = useCallback((p: PeriodKey, d: number): number => {
+    const dd = Math.max(0, d);
+    switch (p) {
+      case "biweekly":
+        return dd / 14;
+      case "week":
+        return dd / 7;
+      case "day":
+        return dd;
+      default:
+        return monthFactorFromDays(dd);
+    }
+  }, []);
+
+  /** 매체별 priceOptions 선택 인덱스 (없으면 0) */
+  const [mediaPriceOptionIndex, setMediaPriceOptionIndex] = useState<Record<string, number>>({});
+
+  const selectedPrice = useCallback(
+    (m: AdminMediaDto) => {
+      const idx = mediaPriceOptionIndex[m.id] ?? 0;
+      const opt = m.priceOptions?.[idx];
+      const rawPrice = opt?.price ?? m.price;
+      const period = normalizeMediaPricePeriod(opt?.period);
+      return { rawPrice, period: period as PeriodKey, label: opt?.label ?? null };
+    },
+    [mediaPriceOptionIndex],
+  );
+
   const lineWons = useMemo(() => {
     const out: number[] = [];
     for (const id of selected) {
       const m = medias.find((x) => x.id === id);
       if (!m) continue;
       const qty = quantities[id] ?? 1;
-      out.push(lineSupplyWon(m.price, monthFactor, qty));
+      const { rawPrice, period } = selectedPrice(m);
+      const unitWon = catalogPriceFieldToWon(rawPrice);
+      const factor = factorForPeriod(period, days);
+      out.push(Math.round(unitWon * factor * Math.max(0, qty)));
     }
     for (const c of customLines) {
       const amount = Math.max(0, Math.round(c.unitPriceWon * Math.max(1, c.quantity)));
       if (amount > 0) out.push(amount);
     }
     return out;
-  }, [selected, medias, quantities, monthFactor, customLines]);
+  }, [selected, medias, quantities, days, factorForPeriod, selectedPrice, customLines]);
 
   const dpct = Math.min(100, Math.max(0, parseFloat(discountPercent) || 0));
   const dwon = Math.max(0, parseFloat(discountWon.replace(/,/g, "")) || 0);
@@ -267,6 +303,7 @@ export default function AdminQuoteNewClient() {
       spec: string;
       period: string;
       unitPrice: number;
+      unitPeriod: PeriodKey;
       quantity: number;
       amount: number;
     }[] = [];
@@ -274,14 +311,20 @@ export default function AdminQuoteNewClient() {
       const m = medias.find((x) => x.id === id);
       if (!m) continue;
       const qty = quantities[id] ?? 1;
+      const { rawPrice, period, label } = selectedPrice(m);
+      const unitWon = catalogPriceFieldToWon(rawPrice);
+      const factor = factorForPeriod(period, days);
+      const nameBase = isKo ? m.name : (m.nameEn || m.name) || m.name;
+      const name = label ? `${nameBase} (${label})` : nameBase;
       list.push({
         mediaId: m.id,
-        mediaName: isKo ? m.name : (m.nameEn || m.name) || m.name,
+        mediaName: name,
         spec: mediaSpecLine(m),
         period: campaignPeriodLabel,
-        unitPrice: catalogPriceFieldToWon(m.price),
+        unitPrice: unitWon,
+        unitPeriod: period,
         quantity: qty,
-        amount: lineSupplyWon(m.price, monthFactor, qty),
+        amount: Math.round(unitWon * factor * Math.max(0, qty)),
       });
     }
     for (const c of customLines) {
@@ -295,6 +338,7 @@ export default function AdminQuoteNewClient() {
         spec: "—",
         period: campaignPeriodLabel,
         unitPrice: unit,
+        unitPeriod: "month",
         quantity: qty,
         amount,
       });
@@ -304,10 +348,12 @@ export default function AdminQuoteNewClient() {
     selected,
     medias,
     quantities,
-    monthFactor,
     campaignPeriodLabel,
     isKo,
     customLines,
+    days,
+    factorForPeriod,
+    selectedPrice,
   ]);
 
   const pdfPostRows = useMemo(
@@ -322,6 +368,28 @@ export default function AdminQuoteNewClient() {
       })),
     [lineItems],
   );
+
+  const pdfPeriodUnit = useMemo(() => {
+    const periods = new Set<PeriodKey>();
+    for (const it of lineItems) {
+      if (!it.mediaId.startsWith("custom-")) periods.add(it.unitPeriod);
+    }
+    if (periods.size !== 1) return null;
+    const only = [...periods][0];
+    if (only === "month") return null;
+    return formatPricePeriodShortLabel(only, locale);
+  }, [lineItems, locale]);
+
+  const pdfPeriodMultiplier = useMemo(() => {
+    const periods = new Set<PeriodKey>();
+    for (const it of lineItems) {
+      if (!it.mediaId.startsWith("custom-")) periods.add(it.unitPeriod);
+    }
+    if (periods.size !== 1) return Math.max(1, Math.round(monthFactor));
+    const only = [...periods][0];
+    if (only === "month") return Math.max(1, Math.round(monthFactor));
+    return Math.max(1, Math.round(factorForPeriod(only, days)));
+  }, [lineItems, days, monthFactor, factorForPeriod]);
 
   const saveQuote = useCallback(async () => {
     setPdfError(null);
@@ -347,7 +415,7 @@ export default function AdminQuoteNewClient() {
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          quoteNumber,
+          ...(quoteNumber.trim() ? { quoteNumber: quoteNumber.trim() } : {}),
           clientName: clientNameStored,
           clientPhone: clientPhone.trim(),
           clientEmail: clientEmail.trim() || undefined,
@@ -380,6 +448,8 @@ export default function AdminQuoteNewClient() {
             : t("saveFailed");
         throw new Error(msg);
       }
+      const saved = raw as { quote?: { quoteNumber?: string } };
+      if (saved.quote?.quoteNumber) setQuoteNumber(saved.quote.quoteNumber);
       toast("success", t("saveOk"));
     } catch (e) {
       toast("error", e instanceof Error ? e.message : t("saveFailed"));
@@ -395,6 +465,7 @@ export default function AdminQuoteNewClient() {
     clientPhone,
     clientEmail,
     quoteNumber,
+    displayQuoteNumber,
     validUntilPdf,
     totals,
     lineItems,
@@ -426,7 +497,7 @@ export default function AdminQuoteNewClient() {
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            quoteNumber,
+            quoteNumber: displayQuoteNumber,
             issueDate: issueDatePdf,
             validUntil: validUntilPdf,
             clientCompany: clientCompany.trim(),
@@ -453,7 +524,7 @@ export default function AdminQuoteNewClient() {
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = `thinkad-quote-${quoteNumber}.pdf`;
+              a.download = `thinkad-quote-${displayQuoteNumber}.pdf`;
               a.click();
               URL.revokeObjectURL(url);
               return; // 성공!
@@ -494,7 +565,7 @@ export default function AdminQuoteNewClient() {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
 
-      pdf.save(`thinkad-quote-${quoteNumber}.pdf`);
+      pdf.save(`thinkad-quote-${displayQuoteNumber}.pdf`);
       toast("success", "견적서 PDF가 다운로드되었습니다");
     } catch (e) {
       const msg = e instanceof Error ? e.message : t("pdfFailed");
@@ -511,7 +582,7 @@ export default function AdminQuoteNewClient() {
     clientName,
     clientPhone,
     clientEmail,
-    quoteNumber,
+    displayQuoteNumber,
     issueDatePdf,
     validUntilPdf,
     campaignPeriodLabel,
@@ -529,14 +600,14 @@ export default function AdminQuoteNewClient() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="mb-1 flex items-center gap-2 text-navy">
-            <Calculator className="h-7 w-7 text-gold" />
+          <div className="mb-1 flex items-center gap-2 text-bx-black dark:text-bx-white">
+            <Calculator className="h-7 w-7 text-bx-accent" />
             <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
           </div>
-          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+          <p className="text-sm text-bx-gray-dim">{t("subtitle")}</p>
           <Link
             href="/admin/quotes"
-            className="mt-2 inline-block text-xs font-semibold text-gold hover:text-gold-dark hover:underline"
+            className="mt-2 inline-block text-xs font-semibold text-bx-accent hover:opacity-90 hover:underline"
           >
             {t("goToQuotesList")}
           </Link>
@@ -546,7 +617,7 @@ export default function AdminQuoteNewClient() {
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-navy">{t("mediaTitle")}</CardTitle>
+            <CardTitle className="text-lg text-bx-black dark:text-bx-white">{t("mediaTitle")}</CardTitle>
             <div className="relative mt-2">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -558,7 +629,7 @@ export default function AdminQuoteNewClient() {
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
               <Button type="button" variant="outline" size="sm" onClick={selectAllVisible}>
-                {t("selectAllFiltered")}
+                {t("selectAllVisible")}
               </Button>
               <Button type="button" variant="ghost" size="sm" onClick={clearSelection}>
                 {t("clearSelection")}
@@ -589,10 +660,11 @@ export default function AdminQuoteNewClient() {
                   {filtered.map((m) => {
                     const on = selected.has(m.id);
                     const qty = quantities[m.id] ?? 1;
+                    const { rawPrice, period } = selectedPrice(m);
                     return (
                       <tr
                         key={m.id}
-                        className={`border-b border-slate-100 ${on ? "bg-gold/5" : "bg-white"}`}
+                        className={`border-b border-slate-100 ${on ? "bg-bx-accent/10 dark:bg-bx-accent/20" : "bg-white dark:bg-bx-black"}`}
                       >
                         <td className="px-3 py-2 align-middle">
                           <input
@@ -603,16 +675,55 @@ export default function AdminQuoteNewClient() {
                           />
                         </td>
                         <td className="px-2 py-2 align-middle">
-                          <div className="font-medium text-navy">{m.name}</div>
+                          <div className="font-medium text-bx-black dark:text-bx-white">{m.name}</div>
                           <div className="text-xs text-muted-foreground">
                             {m.location} · {m.type}
                           </div>
                         </td>
                         <td className="px-2 py-2 align-middle tabular-nums">
-                          {new Intl.NumberFormat("ko-KR").format(m.price)}
-                          <span className="text-xs text-muted-foreground">
-                            {t("perMonth")}
-                          </span>
+                          {on && (m.priceOptions?.length ?? 0) > 0 ? (
+                            <div className="space-y-1">
+                              <select
+                                className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs"
+                                value={mediaPriceOptionIndex[m.id] ?? 0}
+                                onChange={(e) => {
+                                  const n = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                  setMediaPriceOptionIndex((prev) => ({
+                                    ...prev,
+                                    [m.id]: n,
+                                  }));
+                                }}
+                              >
+                                {(m.priceOptions ?? []).map((o, i) => (
+                                  <option key={`${o.label}-${i}`} value={i}>
+                                    {o.label} ·{" "}
+                                    {new Intl.NumberFormat("ko-KR").format(
+                                      catalogPriceFieldToWon(o.price),
+                                    )}
+                                    {formatPricePeriodShortLabel(o.period ?? "month", locale)}
+                                  </option>
+                                ))}
+                              </select>
+                              <div className="text-[11px] font-semibold text-bx-black dark:text-bx-white">
+                                {new Intl.NumberFormat("ko-KR").format(
+                                  catalogPriceFieldToWon(rawPrice),
+                                )}
+                                <span className="ml-1 text-[10px] text-muted-foreground">
+                                  {formatPricePeriodShortLabel(period, locale)}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              {new Intl.NumberFormat("ko-KR").format(
+                                catalogPriceFieldToWon(rawPrice),
+                              )}
+                              <span className="text-xs text-muted-foreground">
+                                {" "}
+                                {formatPricePeriodShortLabel(period, locale)}
+                              </span>
+                            </>
+                          )}
                         </td>
                         <td className="px-2 py-2 align-middle">
                           <Input
@@ -634,8 +745,8 @@ export default function AdminQuoteNewClient() {
 
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg text-navy">
-              <Receipt className="h-5 w-5 text-gold" />
+            <CardTitle className="flex items-center gap-2 text-lg text-bx-black dark:text-bx-white">
+              <Receipt className="h-5 w-5 text-bx-accent" />
               {t("termsTitle")}
             </CardTitle>
           </CardHeader>
@@ -663,7 +774,7 @@ export default function AdminQuoteNewClient() {
               </div>
             </div>
             <div className="rounded-lg border bg-slate-50 px-3 py-2 text-xs text-muted-foreground">
-              <span className="font-medium text-navy">{t("periodSummary")}</span>{" "}
+              <span className="font-medium text-bx-black dark:text-bx-white">{t("periodSummary")}</span>{" "}
               {t("daysCount", { days })}{" "}
               <Badge variant="secondary" className="ml-1 text-[10px]">
                 {t("monthFactor", { n: monthFactor.toFixed(2) })}
@@ -707,8 +818,8 @@ export default function AdminQuoteNewClient() {
                   onClick={() => setVatIncluded(false)}
                   className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${
                     !vatIncluded
-                      ? "bg-navy text-white"
-                      : "text-muted-foreground hover:bg-slate-50"
+                      ? "bg-bx-black text-bx-white dark:bg-bx-white dark:text-bx-black"
+                      : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-bx-white/10"
                   }`}
                 >
                   {t("vatExtra")}
@@ -718,8 +829,8 @@ export default function AdminQuoteNewClient() {
                   onClick={() => setVatIncluded(true)}
                   className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${
                     vatIncluded
-                      ? "bg-navy text-white"
-                      : "text-muted-foreground hover:bg-slate-50"
+                      ? "bg-bx-black text-bx-white dark:bg-bx-white dark:text-bx-black"
+                      : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-bx-white/10"
                   }`}
                 >
                   {t("vatIncluded")}
@@ -735,8 +846,8 @@ export default function AdminQuoteNewClient() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg text-navy">
-            <Sparkles className="h-5 w-5 text-gold" />
+          <CardTitle className="flex items-center gap-2 text-lg text-bx-black dark:text-bx-white">
+            <Sparkles className="h-5 w-5 text-bx-accent" />
             추가 비용 항목 (제작비·디자인비·운영비 등)
           </CardTitle>
           <p className="text-xs text-muted-foreground">
@@ -807,7 +918,7 @@ export default function AdminQuoteNewClient() {
                     />
                   </div>
                   <div className="flex items-center justify-between gap-2 sm:flex-col sm:items-end">
-                    <span className="text-sm font-bold tabular-nums text-navy">
+                    <span className="text-sm font-bold tabular-nums text-bx-black dark:text-bx-white">
                       {formatWon(
                         Math.round(
                           Math.max(0, line.unitPriceWon) *
@@ -839,7 +950,7 @@ export default function AdminQuoteNewClient() {
               type="button"
               variant="outline"
               size="sm"
-              className="border-dashed border-navy/30 text-navy hover:bg-navy/5"
+              className="border-dashed border-bx-black/30 text-bx-black hover:bg-bx-off dark:border-bx-white/30 dark:text-bx-white dark:hover:bg-bx-white/10"
               onClick={() =>
                 setCustomLines((arr) => [
                   ...arr,
@@ -866,7 +977,7 @@ export default function AdminQuoteNewClient() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-xs text-muted-foreground hover:text-navy"
+                className="text-xs text-muted-foreground hover:text-bx-black dark:text-bx-white"
                 onClick={() =>
                   setCustomLines((arr) => [
                     ...arr,
@@ -890,7 +1001,7 @@ export default function AdminQuoteNewClient() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-navy">{t("pdfSectionTitle")}</CardTitle>
+          <CardTitle className="text-lg text-bx-black dark:text-bx-white">{t("pdfSectionTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -898,7 +1009,11 @@ export default function AdminQuoteNewClient() {
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 {t("quoteNumberLabel")}
               </label>
-              <Input value={quoteNumber} readOnly className="bg-slate-50 font-mono text-xs" />
+              <Input
+                value={displayQuoteNumber}
+                readOnly
+                className="bg-slate-50 font-mono text-xs"
+              />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -971,7 +1086,7 @@ export default function AdminQuoteNewClient() {
             <Button
               type="button"
               variant="outline"
-              className="border-navy text-navy hover:bg-navy/5"
+              className="border-bx-black text-bx-black hover:bg-bx-off dark:border-bx-white dark:text-bx-white dark:hover:bg-bx-white/10"
               disabled={
                 saveLoading ||
                 pdfLoading ||
@@ -995,7 +1110,7 @@ export default function AdminQuoteNewClient() {
             <Button
               type="button"
               variant="outline"
-              className="border-navy/20 text-navy hover:bg-navy/5"
+              className="border-bx-black/20 text-bx-black hover:bg-bx-off dark:border-bx-white/25 dark:text-bx-white dark:hover:bg-bx-white/10"
               disabled={
                 (selected.size === 0 && customLines.length === 0) ||
                 days <= 0 ||
@@ -1010,7 +1125,7 @@ export default function AdminQuoteNewClient() {
             </Button>
             <Button
               type="button"
-              className="bg-navy text-white hover:bg-navy-light"
+              className="bg-bx-black text-bx-white hover:bg-bx-gray-dim dark:border dark:border-bx-white/20"
               disabled={
                 pdfLoading ||
                 saveLoading ||
@@ -1039,9 +1154,9 @@ export default function AdminQuoteNewClient() {
         </CardContent>
       </Card>
 
-      <Card className="border-gold/30 bg-gradient-to-br from-white to-gold/5">
+      <Card className="border-bx-accent/40 bg-gradient-to-br from-white to-bx-accent/5 dark:from-bx-black dark:to-bx-accent/10">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-navy">{t("summaryTitle")}</CardTitle>
+          <CardTitle className="text-lg text-bx-black dark:text-bx-white">{t("summaryTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           {selected.size === 0 && customLines.length === 0 ? (
@@ -1052,7 +1167,7 @@ export default function AdminQuoteNewClient() {
             <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
               <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumSubtotal")}</dt>
-                <dd className="font-semibold tabular-nums text-navy">
+                <dd className="font-semibold tabular-nums text-bx-black dark:text-bx-white">
                   {formatWon(totals.linesSubtotalWon)}
                 </dd>
               </div>
@@ -1066,25 +1181,25 @@ export default function AdminQuoteNewClient() {
               ) : null}
               <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumAfterDiscount")}</dt>
-                <dd className="font-semibold tabular-nums text-navy">
+                <dd className="font-semibold tabular-nums text-bx-black dark:text-bx-white">
                   {formatWon(totals.afterDiscountWon)}
                 </dd>
               </div>
               <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumSupply")}</dt>
-                <dd className="font-semibold tabular-nums text-navy">
+                <dd className="font-semibold tabular-nums text-bx-black dark:text-bx-white">
                   {formatWon(totals.supplyWon)}
                 </dd>
               </div>
               <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumVat")}</dt>
-                <dd className="font-semibold tabular-nums text-navy">
+                <dd className="font-semibold tabular-nums text-bx-black dark:text-bx-white">
                   {formatWon(totals.vatWon)}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4 rounded-lg border-2 border-gold/50 bg-gold/10 px-3 py-2 sm:col-span-2 lg:col-span-1">
-                <dt className="font-semibold text-navy">{t("sumTotal")}</dt>
-                <dd className="text-lg font-bold tabular-nums text-navy">
+              <div className="flex justify-between gap-4 rounded-lg border-2 border-bx-accent/50 bg-bx-accent/10 px-3 py-2 sm:col-span-2 lg:col-span-1 dark:bg-bx-accent/15">
+                <dt className="font-semibold text-bx-black dark:text-bx-white">{t("sumTotal")}</dt>
+                <dd className="text-lg font-bold tabular-nums text-bx-black dark:text-bx-white">
                   {formatWon(totals.totalWon)}
                 </dd>
               </div>
@@ -1097,7 +1212,7 @@ export default function AdminQuoteNewClient() {
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="text-lg text-navy">견적서 미리보기</CardTitle>
+              <CardTitle className="text-lg text-bx-black dark:text-bx-white">견적서 미리보기</CardTitle>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -1108,7 +1223,7 @@ export default function AdminQuoteNewClient() {
                       const { captureElementAsPng } = await import(
                         "@/lib/html-to-pdf"
                       );
-                      await captureElementAsPng(el, `quote-${quoteNumber}.png`);
+                      await captureElementAsPng(el, `quote-${displayQuoteNumber}.png`);
                     } catch (e) {
                       console.error("[admin-quote-new] PNG capture failed", e);
                       window.alert(
@@ -1116,7 +1231,7 @@ export default function AdminQuoteNewClient() {
                       );
                     }
                   }}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-bx-black dark:text-bx-white hover:bg-slate-50"
                 >
                   <Camera className="h-4 w-4" />
                   이미지 캡처
@@ -1132,7 +1247,7 @@ export default function AdminQuoteNewClient() {
                       );
                       await downloadPdfFromHtmlElement(
                         el,
-                        `quote-${quoteNumber}.pdf`,
+                        `quote-${displayQuoteNumber}.pdf`,
                       );
                     } catch (e) {
                       console.error("[admin-quote-new] PDF download failed", e);
@@ -1141,7 +1256,7 @@ export default function AdminQuoteNewClient() {
                       );
                     }
                   }}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-bx-black dark:text-bx-white hover:bg-slate-50"
                 >
                   <Download className="h-4 w-4" />
                   PDF 저장
@@ -1150,7 +1265,7 @@ export default function AdminQuoteNewClient() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto rounded-xl border border-navy/10 bg-slate-100/90 p-4 md:p-6">
+            <div className="overflow-x-auto rounded-xl border border-bx-black/10 bg-slate-100/90 p-4 dark:border-bx-white/15 dark:bg-bx-white/5 md:p-6">
               <div className="mx-auto w-fit max-w-full">
                 <div id="quote-preview">
                   <QuotePdfPreview
@@ -1161,7 +1276,8 @@ export default function AdminQuoteNewClient() {
                     contactPhone={clientPhone}
                     contactEmail={clientEmail}
                     periodLabel={campaignPeriodLabel}
-                    periodMonths={Math.max(1, Math.round(monthFactor))}
+                    periodMonths={pdfPeriodMultiplier}
+                    periodUnitLabel={pdfPeriodUnit}
                     rows={lineItems.map((it) => {
                       const m = medias.find((x) => x.id === it.mediaId);
                       const size =
@@ -1222,12 +1338,12 @@ export default function AdminQuoteNewClient() {
                   {formatWon(totals.vatWon)}
                 </span>
               </div>
-              <div className="flex justify-between border-t pt-2 text-base font-bold text-navy">
+              <div className="flex justify-between border-t pt-2 text-base font-bold text-bx-black dark:text-bx-white">
                 <span>합계</span>
                 <span className="tabular-nums">{formatWon(totals.totalWon)}</span>
               </div>
               <p className="pt-1 text-[11px] text-muted-foreground">
-                견적번호 {quoteNumber} · 유효기간 {validUntilPdf}
+                견적번호 {displayQuoteNumber} · 유효기간 {validUntilPdf}
               </p>
             </div>
           </CardContent>

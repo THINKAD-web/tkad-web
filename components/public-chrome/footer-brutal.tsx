@@ -12,6 +12,8 @@ import { useTranslations } from "next-intl";
 import { BrutalFooter, type BrutalFooterColumn } from "@/components/brutalist";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 
+const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
+
 export function FooterBrutal() {
   const t = useTranslations();
 
@@ -37,6 +39,11 @@ export function FooterBrutal() {
         label: t("footer.kakaoChannel"),
         external: true,
       },
+      {
+        href: INSTAGRAM_URL,
+        label: "Instagram · @thinkad_korea",
+        external: true,
+      },
     ],
   };
 
@@ -60,8 +67,7 @@ export function FooterBrutal() {
         </>
       }
       columns={[quickLinks, contactInfo, services]}
-      copyright={t("footer.copyright")}
-      legal={`${t("footer.companyName")} · ${t("footer.bizNumber")}`}
+      copyright="(C) 2026. THINKAD Corp. All rights reserved."
     />
   );
 }

@@ -1,7 +1,9 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
-import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench, MessageCircle } from "lucide-react";
+import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench, MessageCircle, Instagram } from "lucide-react";
+
+const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
 export default function Footer() {
   const t = useTranslations();
@@ -85,6 +87,17 @@ export default function Footer() {
                   {t("footer.kakaoChannel")}
                 </a>
               </li>
+              <li className="flex items-center gap-2">
+                <Instagram className="h-4 w-4 shrink-0 text-gold/50" />
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-underline-grow hover:text-gold-light transition-colors duration-300"
+                >
+                  Instagram · @thinkad_korea
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -110,7 +123,6 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-white/10 pt-8">
           <div className="mb-4 text-center text-xs leading-relaxed text-silver/70">
-            <p>{t("footer.companyName")} | {t("footer.bizNumber")}</p>
             <p>{t("footer.ecommerce")} | {t("footer.address")}</p>
           </div>
           <div className="text-center text-sm text-silver/70">

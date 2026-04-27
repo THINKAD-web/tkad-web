@@ -1,10 +1,8 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
-import {
-  generateAdminQuoteNumber,
-  serializeQuote,
-} from "@/lib/admin-sales-quote";
+import { generateNextAdminQuoteNumber } from "@/lib/admin-quote-number";
+import { defaultAdminQuoteValidUntilDate, serializeQuote } from "@/lib/admin-sales-quote";
 
 export const dynamic = "force-dynamic";
 
@@ -21,45 +19,47 @@ export async function POST(request: NextRequest, ctx: Ctx) {
   });
   if (!src) return json({ error: "Not found" }, 404);
 
-  const quoteNumber = generateAdminQuoteNumber();
-
-  try {
-    const created = await db.quote.create({
-      data: {
-        quoteNumber,
-        status: "draft",
-        clientName: src.clientName,
-        clientEmail: src.clientEmail,
-        clientPhone: src.clientPhone,
-        validUntil: src.validUntil,
-        subtotal: src.subtotal,
-        discount: src.discount,
-        tax: src.tax,
-        total: src.total,
-        isKo: src.isKo,
-        sentAt: null,
-        items: {
-          create: src.items.map((it) => ({
-            mediaId: it.mediaId,
-            mediaName: it.mediaName,
-            spec: it.spec,
-            period: it.period,
-            unitPrice: it.unitPrice,
-            quantity: it.quantity,
-            amount: it.amount,
-          })),
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const quoteNumber = await generateNextAdminQuoteNumber(db);
+    try {
+      const created = await db.quote.create({
+        data: {
+          quoteNumber,
+          status: "draft",
+          clientName: src.clientName,
+          clientEmail: src.clientEmail,
+          clientPhone: src.clientPhone,
+          validUntil: defaultAdminQuoteValidUntilDate(),
+          subtotal: src.subtotal,
+          discount: src.discount,
+          tax: src.tax,
+          total: src.total,
+          isKo: src.isKo,
+          sentAt: null,
+          items: {
+            create: src.items.map((it) => ({
+              mediaId: it.mediaId,
+              mediaName: it.mediaName,
+              spec: it.spec,
+              period: it.period,
+              unitPrice: it.unitPrice,
+              quantity: it.quantity,
+              amount: it.amount,
+            })),
+          },
         },
-      },
-      include: { items: { orderBy: { id: "asc" } } },
-    });
-    return json({ quote: serializeQuote(created) }, 201);
-  } catch (e: unknown) {
-    const code =
-      e && typeof e === "object" && "code" in e ? (e as { code?: string }).code : "";
-    if (code === "P2002") {
-      return json({ error: "quoteNumber collision, retry" }, 409);
+        include: { items: { orderBy: { id: "asc" } } },
+      });
+      return json({ quote: serializeQuote(created) }, 201);
+    } catch (e: unknown) {
+      const code =
+        e && typeof e === "object" && "code" in e
+          ? (e as { code?: string }).code
+          : "";
+      if (code === "P2002") continue;
+      console.error("[admin-quotes copy]", e);
+      return json({ error: "Copy failed" }, 500);
     }
-    console.error("[admin-quotes copy]", e);
-    return json({ error: "Copy failed" }, 500);
   }
+  return json({ error: "quoteNumber allocation failed" }, 500);
 }

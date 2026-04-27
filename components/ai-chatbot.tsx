@@ -8,6 +8,7 @@ import {
   FileText,
   Mail,
   MessageCircle,
+  Phone,
   Send,
   X,
 } from "lucide-react";
@@ -465,7 +466,14 @@ export default function AiChatbot() {
                   className="flex h-12 w-full items-center justify-center border-2 border-bx-black px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#191919] transition-colors hover:bg-bx-black hover:text-[#FEE500]"
                   style={{ backgroundColor: "#FEE500" }}
                 >
-                  {t("kakaoOpen")}
+                  {isKo ? "카카오톡채널" : "KakaoTalk Channel"}
+                </a>
+                <a
+                  href="tel:02-515-2772"
+                  className="flex h-12 w-full items-center justify-center gap-2 border-2 border-bx-black bg-bx-white px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                >
+                  <Phone className="h-4 w-4" />
+                  {isKo ? "전화문의" : "Call"} 02-515-2772
                 </a>
                 <BtnBlock href="/contact" variant="secondary" size="md" className="w-full">
                   {t("contactOther")}

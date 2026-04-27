@@ -9,6 +9,7 @@ import type { PlannerMetrics } from "@/lib/planner-logic";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import { DEFAULT_LOGO_PLACEMENT } from "@/components/planner/composite-preview";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
+import { formatPricePeriodShortLabel, normalizeMediaPricePeriod } from "@/lib/media-price-format";
 
 export type PlannerReportPreviewBudgetSlice = {
   label: string;
@@ -69,6 +70,19 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
   const tm = useTranslations("media");
   const t = useTranslations("planner");
 
+  const priceOptionBadge = (m: MediaItem): string | null => {
+    const opts = m.priceOptions ?? [];
+    if (opts.length === 0) return null;
+    const periods = Array.from(
+      new Set(opts.map((o) => normalizeMediaPricePeriod(o.period))),
+    );
+    const hasNonMonth = periods.some((p) => p !== "month");
+    if (!hasNonMonth) return null;
+    const labels = periods.map((p) => formatPricePeriodShortLabel(p, isKo ? "ko" : "en"));
+    const uniq = Array.from(new Set(labels)).join(" · ");
+    return isKo ? `옵션: ${uniq}` : `Options: ${uniq}`;
+  };
+
   const typeLabel = (m: MediaItem) => {
     const ty = m.type;
     if (
@@ -89,14 +103,14 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
       className="box-border w-full max-w-[240mm] space-y-8 border-2 border-bx-black bg-bx-white p-4 text-bx-black antialiased sm:p-6"
     >
       {/* #PLANNER-2: 외곽 보더만 남기고 헤더/그리드 내부 보더 제거 */}
-      <div className="bg-bx-black p-6 text-bx-white sm:p-8">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <div className="bg-bx-black p-7 text-bx-white sm:p-10">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-bx-accent">
           [ THINKAD PLANNER ]
         </p>
-        <h3 className="mt-3 text-xl font-bold tracking-tight sm:text-2xl">
+        <h3 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
           {t("reportPdfTitle")}
         </h3>
-        <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-white/65">
+        <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-white/65">
           {`// `}
           {generatedAt}
         </p>
@@ -193,13 +207,14 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                     {logoUrl && src ? (() => {
                       const p =
                         mediaPlacements?.[m.id] ?? DEFAULT_LOGO_PLACEMENT;
+                      const scale = 1.18;
                       return (
                         <div
                           className="pointer-events-none absolute flex items-start justify-center"
                           style={{
                             left: `${p.xPct}%`,
                             top: `${p.yPct}%`,
-                            width: `${p.widthPct}%`,
+                            width: `${Math.min(92, p.widthPct * scale)}%`,
                             transform: `translate(-50%, -50%) rotate(${p.rotationDeg ?? 0}deg)`,
                           }}
                         >
@@ -207,7 +222,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                           <img
                             src={logoUrl}
                             alt=""
-                            className="w-full object-contain"
+                            className="w-full object-contain drop-shadow-[0_2px_0_rgba(0,0,0,0.45)]"
                           />
                         </div>
                       );
@@ -229,6 +244,15 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                         {isKo ? "만/월" : "₩10K/mo"}
                       </span>
                     </p>
+                    {(() => {
+                      const badge = priceOptionBadge(m);
+                      if (!badge) return null;
+                      return (
+                        <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+                          [ {badge} ]
+                        </p>
+                      );
+                    })()}
                   </div>
                 </li>
               );

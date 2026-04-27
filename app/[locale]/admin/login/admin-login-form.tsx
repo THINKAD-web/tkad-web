@@ -64,15 +64,25 @@ export function AdminLoginForm({ locale }: { locale: string }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full max-w-sm space-y-4 rounded-2xl border border-slate-200 bg-white p-8 shadow-lg"
+      className="w-full max-w-sm space-y-4 border-2 border-bx-black bg-bx-white p-8 dark:border-bx-white dark:bg-bx-black"
     >
       <div>
-        <h1 className="text-xl font-bold text-navy">{t("title")}</h1>
-        <p className="mt-1 text-sm text-slate-500">{t("subtitle")}</p>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+          [ ADMIN ACCESS ]
+        </p>
+        <h1 className="mt-2 text-xl font-bold tracking-tight text-bx-black dark:text-bx-white">
+          {t("title")}
+        </h1>
+        <p className="mt-1 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+          {`// `}{t("subtitle")}
+        </p>
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="admin-user" className="text-xs font-medium text-slate-600">
+        <label
+          htmlFor="admin-user"
+          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black dark:text-bx-white"
+        >
           {t("username")}
         </label>
         <input
@@ -81,12 +91,15 @@ export function AdminLoginForm({ locale }: { locale: string }) {
           autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none ring-navy/20 focus:ring-2"
+          className="w-full border-2 border-bx-black bg-bx-white px-3 py-2 text-sm text-bx-black outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-bx-accent dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
         />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="admin-pass" className="text-xs font-medium text-slate-600">
+        <label
+          htmlFor="admin-pass"
+          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black dark:text-bx-white"
+        >
           {t("password")}
         </label>
         <input
@@ -96,12 +109,12 @@ export function AdminLoginForm({ locale }: { locale: string }) {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none ring-navy/20 focus:ring-2"
+          className="w-full border-2 border-bx-black bg-bx-white px-3 py-2 text-sm text-bx-black outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-bx-accent dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
         />
       </div>
 
       {error ? (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="border-2 border-bx-black bg-bx-accent px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-bx-white dark:border-bx-white" role="alert">
           {error}
         </p>
       ) : null}
@@ -109,7 +122,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-navy py-2.5 text-sm font-semibold text-white transition hover:bg-navy/90 disabled:opacity-60"
+        className="w-full border-2 border-bx-black bg-bx-black py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent disabled:opacity-60 dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
       >
         {loading ? t("submitting") : t("submit")}
       </button>

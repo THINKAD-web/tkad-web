@@ -89,7 +89,10 @@ export default function VerificationQueueClient() {
 
   return (
     <>
-      <nav role="tablist" className="flex gap-1 p-1 bg-slate-100 rounded-xl overflow-x-auto w-fit">
+      <nav
+        role="tablist"
+        className="flex w-fit gap-1 overflow-x-auto rounded-xl bg-bx-off p-1 dark:bg-bx-white/10"
+      >
         {TABS.map(({ key, label, icon: Icon }) => {
           const active = tab === key;
           return (
@@ -97,8 +100,10 @@ export default function VerificationQueueClient() {
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                active ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-800"
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                active
+                  ? "bg-bx-white text-bx-black shadow-sm dark:bg-bx-white dark:text-bx-black"
+                  : "text-bx-gray-dim hover:text-bx-black dark:hover:text-bx-white"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -110,13 +115,13 @@ export default function VerificationQueueClient() {
 
       <div className="mt-5">
         {loading ? (
-          <div className="py-10 text-center text-sm text-slate-400">불러오는 중…</div>
+          <div className="py-10 text-center text-sm text-bx-gray-dim">불러오는 중…</div>
         ) : items.length === 0 ? (
           <Card>
             <CardContent className="py-10 text-center">
               <div className="text-3xl mb-2">✅</div>
-              <p className="text-sm font-medium text-slate-700">해당 상태의 매체가 없습니다</p>
-              <p className="text-xs text-slate-500 mt-1">다른 탭을 확인해보세요.</p>
+              <p className="text-sm font-medium text-bx-black dark:text-bx-white">해당 상태의 매체가 없습니다</p>
+              <p className="mt-1 text-xs text-bx-gray-dim">다른 탭을 확인해보세요.</p>
             </CardContent>
           </Card>
         ) : (
@@ -141,12 +146,12 @@ export default function VerificationQueueClient() {
                           <CardTitle className="text-sm truncate">{m.name}</CardTitle>
                           <ScoreBadge score={m.visibilityScore} />
                         </div>
-                        <p className="flex items-center gap-1 text-xs text-slate-500 truncate">
+                        <p className="flex items-center gap-1 truncate text-xs text-bx-gray-dim">
                           <MapPin className="w-3 h-3" />
                           {m.location}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-slate-400">{m.type}</span>
+                          <span className="text-xs text-bx-gray-dim">{m.type}</span>
                           <span className="text-sm font-semibold text-primary tabular-nums">
                             {formatKRW(m.price)}
                           </span>

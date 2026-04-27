@@ -24,12 +24,12 @@ export default async function AdminLoginPage({ params }: Props) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-100 px-4 py-12">
+    <div className="admin-dashboard-root flex min-h-screen flex-col items-center justify-center bg-bx-off px-4 py-12 text-bx-black dark:bg-bx-black dark:text-bx-white">
       <div className="mb-8 text-center">
-        <span className="text-2xl font-extrabold tracking-tight text-navy">
-          THINK<span className="text-gold">AD</span>
+        <span className="text-2xl font-extrabold tracking-tight">
+          THINK<span className="text-bx-accent">AD</span>
         </span>
-        <span className="ml-2 rounded bg-navy/10 px-1.5 py-0.5 text-[10px] font-semibold text-navy">
+        <span className="ml-2 border-2 border-bx-black bg-bx-accent px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white dark:border-bx-white">
           ADMIN
         </span>
       </div>
@@ -38,7 +38,7 @@ export default async function AdminLoginPage({ params }: Props) {
       </Suspense>
       <Link
         href={`/${locale}`}
-        className="mt-8 text-sm text-slate-500 underline-offset-4 hover:text-navy hover:underline"
+        className="mt-8 border-b-2 border-bx-black pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent dark:border-bx-white dark:text-bx-white dark:hover:border-bx-accent dark:hover:text-bx-accent"
       >
         {locale === "ko" ? "사이트로 돌아가기" : "Back to site"}
       </Link>

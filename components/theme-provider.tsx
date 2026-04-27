@@ -2,6 +2,7 @@
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 
 /**
  * 다크모드 Provider — next-themes 가 html 태그에 `class="dark"` 를 붙였다 뺐다 한다.
@@ -13,6 +14,19 @@ import type { ReactNode } from "react";
  * - storageKey : LocalStorage 키 (tkad 프리픽스로 충돌 방지)
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  // Guard: Some third-party scripts can trigger `unhandledRejection: undefined`,
+  // which surfaces as a noisy Next.js runtime error overlay. Prevent only the
+  // undefined/no-info case; keep real errors visible.
+  useEffect(() => {
+    const onUnhandled = (e: PromiseRejectionEvent) => {
+      if (e.reason === undefined) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("unhandledrejection", onUnhandled);
+    return () => window.removeEventListener("unhandledrejection", onUnhandled);
+  }, []);
+
   return (
     <NextThemesProvider
       attribute="class"

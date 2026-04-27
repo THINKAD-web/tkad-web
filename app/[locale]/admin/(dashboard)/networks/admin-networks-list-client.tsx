@@ -77,10 +77,10 @@ export default function AdminNetworksListClient({
     <div className="space-y-6 p-4 md:p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-bx-black dark:text-bx-white">
             {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">{t("subtitle")}</p>
+          <p className="mt-1 text-sm text-bx-gray-dim">{t("subtitle")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" type="button" onClick={() => refresh()}>
@@ -117,7 +117,7 @@ export default function AdminNetworksListClient({
         {rows.map((row) => (
           <Card
             key={row.id}
-            className={`border-slate-200 ${!row.isActive ? "opacity-70" : ""}`}
+            className={`border-bx-black/15 dark:border-bx-white/20 ${!row.isActive ? "opacity-70" : ""}`}
           >
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between gap-2">
@@ -134,26 +134,26 @@ export default function AdminNetworksListClient({
                 <Badge variant="outline" className="text-[10px] font-normal">
                   {typeLabel(row.type)}
                 </Badge>
-                <Badge className="bg-navy text-[10px] font-medium text-gold">
+                <Badge className="border-2 border-bx-black bg-bx-black text-[10px] font-medium text-bx-white dark:border-bx-white dark:bg-bx-white dark:text-bx-black">
                   {t("sites", { count: row.totalLocations })}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-slate-600">
+            <CardContent className="space-y-3 text-sm text-bx-black/90 dark:text-bx-white/90">
               {row.regions.length > 0 && (
                 <p className="line-clamp-2">{row.regions.join(" · ")}</p>
               )}
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <div className="flex items-center gap-1.5 text-xs text-bx-gray-dim">
                 <MapPin className="h-3.5 w-3.5" />
                 {t("registeredPins", { count: row._count.locations })}
               </div>
               {row.pricePackage != null && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-bx-gray-dim">
                   {t("pricePackage")}: {row.pricePackage.toLocaleString()}
                   {locale === "en" ? " (10K/mo)" : "만원/월"}
                 </p>
               )}
-              <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+              <div className="flex flex-wrap gap-2 border-t border-bx-black/10 pt-3 dark:border-bx-white/15">
                 <Button variant="secondary" size="sm" asChild>
                   <Link href={`/media/network/${row.id}`} target="_blank">
                     {t("publicPreview")}
@@ -187,7 +187,7 @@ export default function AdminNetworksListClient({
 
       {rows.length === 0 && !error && (
         <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center text-slate-600">
+          <CardContent className="flex flex-col items-center gap-3 py-12 text-center text-bx-gray-dim">
             <p className="text-sm">{locale === "en" ? "No networks yet." : "등록된 네트워크가 없습니다."}</p>
             <Button asChild>
               <Link href="/admin/networks/new">
