@@ -1,6 +1,7 @@
 import type { jsPDF } from "jspdf";
 import {
   krFontFamily,
+  ensureKrFontForServerPdf,
   registerNotoSansKrIfAvailable,
 } from "@/lib/jspdf-register-noto-kr";
 import {
@@ -966,7 +967,7 @@ export async function createCampaignCompletionPdfDoc(
 ): Promise<jsPDF> {
   const { default: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const hasKrFont = registerNotoSansKrIfAvailable(doc);
+  const hasKrFont = await ensureKrFontForServerPdf(doc);
   const fam = krFontFamily(hasKrFont);
 
   // page 1: 표지 (총 페이지 수는 끝에서 갱신해야 정확하지만, 1+1+본문 추정으로 미리)
