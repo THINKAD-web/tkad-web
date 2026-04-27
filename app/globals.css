@@ -945,3 +945,13 @@ img {
     scroll-behavior: auto !important;
   }
 }
+
+/* 브루탈리스트 로딩 인디케이터 — 좌→우 슬라이딩 주황 막대.
+ * skeletons.tsx 의 PageHeaderSkeleton 에서 사용. */
+@keyframes loadingSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+.loading-slide {
+  animation: loadingSlide 1.4s ease-in-out infinite;
+}
