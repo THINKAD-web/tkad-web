@@ -5,6 +5,8 @@ import { BtnBlock } from "@/components/brutalist";
 import { Camera, Download, Loader2 } from "lucide-react";
 import { captureElementAsPng, downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
+import type { MediaItem } from "@/lib/media-data";
+import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
 import {
   computeCampaignBaseStats,
   computeCampaignPlannerKpis,
@@ -62,6 +64,19 @@ function fmtAmount(n: number) {
   return `₩${n.toLocaleString()}`;
 }
 
+function thumbUrl(m: Partial<MediaItem> & { imageUrl?: string | null }): string | null {
+  // Prefer explicit imageUrl if provided; otherwise use existing media helpers (if shape matches).
+  if (m.imageUrl) return m.imageUrl;
+  try {
+    // MediaItem shape in this file is partial (from bookings), so guard.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anyM = m as any as MediaItem;
+    return getPrimaryMediaImageUrl(anyM) ?? resolveMediaGallery(anyM)[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export default function CampaignReportPreview({ data }: { data: CampaignReportData }) {
   const ref = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
@@ -104,6 +119,29 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
       return `${fmtDate(new Date(Math.min(...starts)).toISOString())} ~ ${fmtDate(new Date(Math.max(...ends)).toISOString())}`;
     }
     return null;
+  })();
+
+  const mediaThumbs = (() => {
+    const raw = data.mediaBookings ?? [];
+    // Try to find any plausible image URL on the booking object itself (if present).
+    const urls: string[] = [];
+    for (const b of raw) {
+      const u =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.imageUrl ??
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.thumbnailUrl ??
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.media?.imageUrl ??
+        null;
+      if (typeof u === "string" && u.startsWith("http")) urls.push(u);
+      else {
+        const fallback = thumbUrl(b as unknown as Partial<MediaItem>);
+        if (fallback) urls.push(fallback);
+      }
+    }
+    // Dedupe
+    return Array.from(new Set(urls)).slice(0, 9);
   })();
 
   const handleCapture = async () => {
@@ -205,6 +243,62 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
         </div>
 
         <div style={{ padding: "32px 40px" }}>
+
+          {/* Visual hero strip (media + proof) — preview only */}
+          {(mediaThumbs.length > 0 || (data.proofPhotos?.length ?? 0) > 0) && (
+            <div style={{ marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ VISUAL HIGHLIGHTS ]
+              </h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 0 }}>
+                {[
+                  ...mediaThumbs.slice(0, 6).map((u) => ({ url: u, tag: "MEDIA" })),
+                  ...(data.proofPhotos ?? []).slice(0, Math.max(0, 6 - mediaThumbs.slice(0, 6).length)).map((p) => ({ url: p.imageUrl, tag: "PROOF" })),
+                ].slice(0, 6).map((x, i) => (
+                  <div
+                    key={`${x.tag}-${i}`}
+                    style={{
+                      marginTop: "-2px",
+                      marginLeft: "-2px",
+                      border: "2px solid #000000",
+                      background: "#ffffff",
+                      overflow: "hidden",
+                      position: "relative",
+                    }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={x.url}
+                      alt=""
+                      crossOrigin="anonymous"
+                      style={{ width: "100%", height: "96px", objectFit: "cover", display: "block" }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        background: "#000000",
+                        color: "#FF6600",
+                        borderRight: "2px solid #000000",
+                        borderBottom: "2px solid #000000",
+                        padding: "4px 8px",
+                        fontSize: "9px",
+                        fontWeight: 800,
+                        letterSpacing: "0.18em",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                      }}
+                    >
+                      [ {x.tag} ]
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: "10px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                {`// `}미리보기에서는 집행 매체/증빙 이미지를 우선 노출합니다. (데이터가 없으면 생략)
+              </p>
+            </div>
+          )}
 
           {/* Executive Summary — /planner 톤의 컴팩트 대시보드 (기존 KPI만 재배치) */}
           {(stats || plannerKpis || totalAmount > 0) && (
