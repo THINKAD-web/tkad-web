@@ -1381,6 +1381,7 @@
     "reportPreviewNoImage": "No image",
     "reportDownloadPdf": "Download PDF",
     "reportEmailMe": "Email me",
+    "reportEmailSent": "Email sent",
     "reportGenerating": "Generating PDF…",
     "reportPdfError": "Could not generate the PDF. Please try again.",
     "reportPdfTimeout": "PDF generation took too long (over 30 seconds). Close other tabs or try again.",

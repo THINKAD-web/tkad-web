@@ -1380,6 +1380,7 @@
     "reportPreviewNoImage": "이미지 없음",
     "reportDownloadPdf": "PDF 다운로드",
     "reportEmailMe": "이메일로 받기",
+    "reportEmailSent": "전송 완료",
     "reportGenerating": "보고서 PDF 생성 중…",
     "reportPdfError": "PDF를 생성하지 못했습니다. 잠시 후 다시 시도해 주세요.",
     "reportPdfTimeout": "PDF 생성이 30초를 넘겨 중단되었습니다. 다른 탭을 닫거나 잠시 후 다시 시도해 주세요.",
