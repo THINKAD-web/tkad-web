@@ -490,30 +490,22 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             ) : null}
           </div>
         </div>
-        <div className="p-6">
-          {loading ? (
-            <div className="flex min-h-[20rem] flex-col items-center justify-center gap-3 border-2 border-bx-black bg-bx-off py-16 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
-              <Loader2 className="h-8 w-8 animate-spin text-bx-accent" />
-              {`// `}{t("reportGenerating")}
-            </div>
-          ) : error ? (
-            <div className="border-2 border-bx-accent bg-bx-white px-4 py-10 text-center text-sm text-bx-black">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-                [ ERROR ]
-              </p>
-              <p className="mt-3 font-bold">{error}</p>
-              <p className="mt-2 font-mono text-[11px] tracking-tight text-bx-gray-dim">
-                {t("reportPdfErrorHint")}
-              </p>
-            </div>
-          ) : pdfUrl ? (
-            <iframe
-              title={t("reportPdfDocumentTitle")}
-              src={`${pdfUrl}#toolbar=1`}
-              className="mx-auto h-[min(85vh,1100px)] w-full border-2 border-bx-black bg-bx-white"
-            />
-          ) : null}
-        </div>
+        {loading ? (
+          <div className="flex min-h-[8rem] items-center justify-center gap-3 bg-bx-off py-8 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
+            <Loader2 className="h-5 w-5 animate-spin text-bx-accent" />
+            {`// `}{t("reportGenerating")}
+          </div>
+        ) : error ? (
+          <div className="px-5 py-6">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ ERROR ]
+            </p>
+            <p className="mt-2 font-bold text-bx-black">{error}</p>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+              {t("reportPdfErrorHint")}
+            </p>
+          </div>
+        ) : null}
       </div>
     </div>
   );
