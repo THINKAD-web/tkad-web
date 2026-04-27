@@ -1,9 +1,33 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
-import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench, MessageCircle, Instagram } from "lucide-react";
+import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench, MessageCircle } from "lucide-react";
 
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
+
+/**
+ * Instagram brand icon.
+ * lucide-react v1.8.0 은 상표 정책상 브랜드 로고를 export 하지 않아 인라인 SVG 로 대체.
+ */
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
 
 export default function Footer() {
   const t = useTranslations();
@@ -88,7 +112,7 @@ export default function Footer() {
                 </a>
               </li>
               <li className="flex items-center gap-2">
-                <Instagram className="h-4 w-4 shrink-0 text-gold/50" />
+                <InstagramIcon className="h-4 w-4 shrink-0 text-gold/50" />
                 <a
                   href={INSTAGRAM_URL}
                   target="_blank"
