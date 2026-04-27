@@ -331,6 +331,126 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
             </div>
           )}
 
+          {/* Executive Summary — compact (non-evaluative) */}
+          {plannerKpis && stats && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ EXECUTIVE SUMMARY ]
+              </h2>
+              <div
+                style={{
+                  marginTop: "-2px",
+                  marginLeft: "-2px",
+                  border: "2px solid #000000",
+                  background: "#000000",
+                  padding: "16px 18px",
+                }}
+              >
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
+                  {[
+                    {
+                      label: "총 노출",
+                      value: `${(plannerKpis.totalImp / 10000).toLocaleString()}만`,
+                      hint: "회",
+                    },
+                    {
+                      label: "도달인 추정",
+                      value: `${(plannerKpis.reach / 10000).toFixed(1)}만`,
+                      hint: "명",
+                    },
+                    {
+                      label: "BLENDED CPM",
+                      value:
+                        plannerKpis.blendedCpm != null
+                          ? `₩${plannerKpis.blendedCpm.toLocaleString()}`
+                          : "—",
+                      hint: "1,000회 노출 단가",
+                    },
+                    {
+                      label: "ROI 효율",
+                      value:
+                        plannerKpis.roiExpected != null
+                          ? `${(plannerKpis.roiExpected / 10000).toFixed(0)}만`
+                          : "—",
+                      hint: "회/1억",
+                    },
+                  ].map((x) => (
+                    <div
+                      key={x.label}
+                      style={{
+                        marginTop: "-2px",
+                        marginLeft: "-2px",
+                        border: "2px solid #FF6600",
+                        padding: "12px 12px",
+                        background: "#000000",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: "10px",
+                          color: "#FF6600",
+                          fontWeight: 700,
+                          letterSpacing: "0.22em",
+                          textTransform: "uppercase",
+                          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                        }}
+                      >
+                        [ {x.label} ]
+                      </p>
+                      <p
+                        style={{
+                          margin: "8px 0 0",
+                          fontSize: "18px",
+                          fontWeight: 800,
+                          color: "#ffffff",
+                          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        {x.value}
+                      </p>
+                      <p
+                        style={{
+                          margin: "6px 0 0",
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,0.55)",
+                          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                        }}
+                      >
+                        {`// `}
+                        {x.hint}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <p
+                  style={{
+                    margin: "12px 0 0",
+                    fontSize: "10px",
+                    color: "rgba(255,255,255,0.55)",
+                    lineHeight: 1.6,
+                    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                  }}
+                >
+                  {`// `}
+                  산식은 플래너 KPI 가정(평균 빈도/인지율/인구 가정) 기반 추정치이며,
+                  등급/평가/추천을 자동 생성하지 않습니다.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* #ADMIN-CAMPAIGNS-1: 효과 분석 — /planner 효과 측정과 동일한 브루탈리스트 톤
               (계산식·KPI 항목·라벨 텍스트는 변경 없음. 디자인 토큰만 통일) */}
           {plannerKpis && (
@@ -626,46 +746,6 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
               <p style={{ background: "#f5f5f5", border: "2px solid #000000", padding: "16px 18px", fontSize: "12px", color: "#000000", margin: 0, whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
                 {data.notes}
               </p>
-            </div>
-          )}
-
-          {/* 핵심 인사이트 — brutalist */}
-          {plannerKpis && stats && (
-            <div style={{
-              marginBottom: "32px",
-              background: "#000000",
-              border: "2px solid #000000",
-              padding: "20px 24px",
-            }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", margin: "0 0 14px", textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                [ KEY INSIGHT ] 캠페인 종합 평가
-              </h2>
-              <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <li style={{ fontSize: "12px", color: "#ffffff", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                  <span style={{ position: "absolute", left: 0, color: "#FF6600", fontWeight: 800 }}>·</span>
-                  총 <strong style={{ color: "#FF6600" }}>{stats.mediaCount}개 매체</strong>를 <strong style={{ color: "#FF6600" }}>{stats.totalDays}일간</strong> 집행하여 <strong style={{ color: "#FF6600" }}>{(plannerKpis.totalImp / 10000).toLocaleString()}만회</strong>의 노출이 발생할 것으로 추정됩니다.
-                </li>
-                <li style={{ fontSize: "12px", color: "#ffffff", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                  <span style={{ position: "absolute", left: 0, color: "#FF6600", fontWeight: 800 }}>·</span>
-                  <strong style={{ color: "#FF6600" }}>코어 도달률 {plannerKpis.reachCorePct}%</strong>로 약 <strong style={{ color: "#FF6600" }}>{(plannerKpis.reach / 10000).toFixed(1)}만 명</strong>의 잠재 고객에게 메시지가 전달될 것으로 보입니다.
-                </li>
-                {plannerKpis.blendedCpm != null && (
-                  <li style={{ fontSize: "12px", color: "#ffffff", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                    <span style={{ position: "absolute", left: 0, color: "#FF6600", fontWeight: 800 }}>·</span>
-                    Blended CPM은 <strong style={{ color: "#FF6600" }}>₩{plannerKpis.blendedCpm.toLocaleString()}</strong>로 OOH 평균 대비 {plannerKpis.blendedCpm < 8000 ? "효율적인" : plannerKpis.blendedCpm < 15000 ? "양호한" : "프리미엄"} 수준입니다.
-                  </li>
-                )}
-                {avgVisibility != null && (
-                  <li style={{ fontSize: "12px", color: "#ffffff", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                    <span style={{ position: "absolute", left: 0, color: "#FF6600", fontWeight: 800 }}>·</span>
-                    평균 매체 검증 점수 <strong style={{ color: "#FF6600" }}>{avgVisibility} / 4</strong>로 가시성·노출 품질이 검증된 우수 매체 위주로 구성되었습니다.
-                  </li>
-                )}
-                <li style={{ fontSize: "10px", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, paddingLeft: "20px", position: "relative", marginTop: "6px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                  <span style={{ position: "absolute", left: 0 }}>※</span>
-                  {`// `}본 추정치는 OOH 평균 빈도·인지율 기반 가이드 지표. 실제 효과는 집행 현장·시기에 따라 달라질 수 있습니다.
-                </li>
-              </ul>
             </div>
           )}
 

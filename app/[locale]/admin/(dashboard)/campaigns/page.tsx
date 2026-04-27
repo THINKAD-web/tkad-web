@@ -727,13 +727,14 @@ export default function AdminCampaignsPage() {
               {formErr}
             </div>
           )}
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <Input
               placeholder="캠페인명"
               value={form.name}
               onChange={formHandlers.name}
               aria-label="캠페인명"
               disabled={createBusy}
+              className="xl:col-span-2"
             />
             <Input
               placeholder="고객사"
@@ -741,6 +742,7 @@ export default function AdminCampaignsPage() {
               onChange={formHandlers.clientCompany}
               aria-label="고객사"
               disabled={createBusy}
+              className="xl:col-span-2"
             />
             <Input
               placeholder="담당자"
@@ -748,6 +750,7 @@ export default function AdminCampaignsPage() {
               onChange={formHandlers.clientName}
               aria-label="담당자"
               disabled={createBusy}
+              className="xl:col-span-1"
             />
             <Input
               placeholder="이메일"
@@ -756,6 +759,7 @@ export default function AdminCampaignsPage() {
               aria-label="이메일"
               type="email"
               disabled={createBusy}
+              className="xl:col-span-1"
             />
             <Input
               placeholder="전화 (선택)"
@@ -763,10 +767,11 @@ export default function AdminCampaignsPage() {
               onChange={formHandlers.clientPhone}
               aria-label="전화 번호"
               disabled={createBusy}
+              className="xl:col-span-3"
             />
             <Button
               type="button"
-              className="bg-navy"
+              className="bg-navy xl:col-span-3"
               onClick={createCampaign}
               disabled={loading || createBusy}
               aria-label="새 캠페인 등록"
@@ -782,7 +787,7 @@ export default function AdminCampaignsPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <div className="mb-3 flex items-center justify-between">

@@ -200,6 +200,33 @@ function accentLine(
   doc.line(x1, y, x2, y);
 }
 
+function clamp01(n: number): number {
+  if (Number.isNaN(n) || !Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(1, n));
+}
+
+function smallBarChart(
+  doc: jsPDF,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  values: number[],
+  peakIdx: number,
+) {
+  const max = Math.max(...values, 0.0001);
+  const gap = 0.6;
+  const n = Math.max(1, values.length);
+  const bw = (w - gap * (n - 1)) / n;
+  for (let i = 0; i < n; i++) {
+    const v = values[i] ?? 0;
+    const ratio = clamp01(v / max);
+    const bh = Math.max(1.2, h * ratio);
+    setColor(doc, "fill", i === peakIdx ? C_ACCENT : C_BLACK);
+    doc.rect(x + i * (bw + gap), y + (h - bh), bw, bh, "F");
+  }
+}
+
 // ── 표지 (page 1) — 검정 배경 풀블리드 ──
 function drawCoverPage(
   doc: jsPDF,
@@ -364,8 +391,8 @@ function drawExecutiveSummary(
   }
   y += 8;
 
-  // KPI 그리드 (5개)
-  const kpiCardH = 38;
+  // KPI 그리드 (8개)
+  const kpiCardH = 32;
   const halfW = (CONTENT_W - 4) / 2;
   type Card = {
     label: string;
@@ -408,10 +435,44 @@ function drawExecutiveSummary(
       fg: C_BLACK,
       labelFg: C_GRAY,
     },
+    {
+      label: "도달인 추정",
+      value: plannerKpis ? fmtMan(plannerKpis.reach) : "—",
+      suffix: "명",
+      bg: C_WHITE,
+      fg: C_BLACK,
+      labelFg: C_GRAY,
+    },
+    {
+      label: "확장 도달률",
+      value: plannerKpis ? `${plannerKpis.reachExtendedPct}` : "—",
+      suffix: "%",
+      bg: C_WHITE,
+      fg: C_BLACK,
+      labelFg: C_GRAY,
+    },
+    {
+      label: "BLENDED CPM",
+      value:
+        plannerKpis?.blendedCpm != null
+          ? `₩${plannerKpis.blendedCpm.toLocaleString("ko-KR")}`
+          : "—",
+      bg: C_BLACK,
+      fg: C_ACCENT,
+      labelFg: C_ACCENT,
+    },
+    {
+      label: "ROI 효율",
+      value: plannerKpis?.roiExpected != null ? fmtMan(plannerKpis.roiExpected) : "—",
+      suffix: "회/1억",
+      bg: C_BLACK,
+      fg: C_ACCENT,
+      labelFg: C_ACCENT,
+    },
   ];
 
-  // 2x2 그리드
-  for (let i = 0; i < 4; i++) {
+  // 2열 그리드 (8개)
+  for (let i = 0; i < 8; i++) {
     const col = i % 2;
     const row = Math.floor(i / 2);
     const cx = MARGIN_X + col * (halfW + 4);
@@ -424,18 +485,18 @@ function drawExecutiveSummary(
     doc.rect(cx, cy, halfW, kpiCardH, "S");
     monoLabel(doc, fam, c.label, cx + 5, cy + 8, 7, c.labelFg);
     doc.setFont(fam, hasKrFont ? "normal" : "bold");
-    doc.setFontSize(22);
+    doc.setFontSize(18);
     setColor(doc, "text", c.fg);
-    doc.text(c.value, cx + 5, cy + 26);
+    doc.text(c.value, cx + 5, cy + 24);
     if (c.suffix) {
       const valW = doc.getTextWidth(c.value);
       doc.setFontSize(10);
-      doc.text(c.suffix, cx + 5 + valW + 2, cy + 26);
+      doc.text(c.suffix, cx + 5 + valW + 2, cy + 24);
     }
   }
 
   // 5번째 — 총 예산 (가로 풀폭, 강조)
-  const budgetY = y + 2 * (kpiCardH + 4);
+  const budgetY = y + 4 * (kpiCardH + 4);
   setColor(doc, "fill", C_BLACK);
   doc.rect(MARGIN_X, budgetY, CONTENT_W, kpiCardH, "F");
   setColor(doc, "draw", C_BLACK);
@@ -443,7 +504,7 @@ function drawExecutiveSummary(
   doc.rect(MARGIN_X, budgetY, CONTENT_W, kpiCardH, "S");
   monoLabel(doc, fam, "총 예산", MARGIN_X + 6, budgetY + 9, 7, C_ACCENT);
   doc.setFont(fam, hasKrFont ? "normal" : "bold");
-  doc.setFontSize(28);
+  doc.setFontSize(24);
   setColor(doc, "text", C_ACCENT);
   doc.text(
     totalAmount > 0 ? fmtKrwCompact(totalAmount) : "—",
@@ -451,7 +512,50 @@ function drawExecutiveSummary(
     budgetY + 30,
   );
 
-  y = budgetY + kpiCardH + 16;
+  // 미니 차트: 매체 유형 분포
+  y = budgetY + kpiCardH + 10;
+  const byType: Record<string, number> = {};
+  for (const b of p.mediaBookings ?? []) {
+    const t = (b.type || "기타").toString();
+    byType[t] = (byType[t] ?? 0) + 1;
+  }
+  const typeEntries = Object.entries(byType).sort((a, b) => b[1] - a[1]);
+  const topTypes = typeEntries.slice(0, 5);
+  const typeValues = topTypes.map(([, v]) => v);
+  const typePeak =
+    typeValues.length > 0 ? typeValues.indexOf(Math.max(...typeValues)) : 0;
+  if (typeValues.length > 0) {
+    monoLabel(doc, fam, "매체 유형 분포 (미니)", MARGIN_X, y, 8, C_ACCENT);
+    y += 4;
+    accentLine(doc, MARGIN_X, y, MARGIN_X + 72, 0.6, C_ACCENT);
+    y += 6;
+    // 차트 박스
+    setColor(doc, "draw", C_BLACK);
+    doc.setLineWidth(0.6);
+    doc.rect(MARGIN_X, y, CONTENT_W, 18, "S");
+    smallBarChart(
+      doc,
+      MARGIN_X + 4,
+      y + 3,
+      CONTENT_W - 8,
+      12,
+      typeValues,
+      typePeak,
+    );
+    // 라벨 (최대 5개)
+    doc.setFont("courier", "normal");
+    doc.setFontSize(7.5);
+    setColor(doc, "text", C_GRAY);
+    const labelY = y + 18 + 5;
+    const colW = CONTENT_W / Math.max(1, topTypes.length);
+    topTypes.forEach(([label, count], i) => {
+      const tx = MARGIN_X + colW * i;
+      doc.text(`${label}(${count})`, tx, labelY);
+    });
+    y = labelY + 10;
+  } else {
+    y += 12;
+  }
 
   // 주요 매체 TOP 5
   monoLabel(doc, fam, "주요 매체 (TOP 5)", MARGIN_X, y, 8, C_ACCENT);
@@ -525,6 +629,91 @@ function drawBody(
       y = 28;
     }
   };
+  const cell = (
+    text: string,
+    x: number,
+    y: number,
+    w: number,
+    align: "left" | "right" = "left",
+  ) => {
+    const t = (text ?? "").toString();
+    const clipped = t.length > 80 ? `${t.slice(0, 77)}…` : t;
+    doc.text(clipped, x + (align === "right" ? w - 2 : 2), y, { align });
+  };
+  const drawTable = (opts: {
+    headers: string[];
+    widths: number[];
+    rows: string[][];
+    rowH?: number;
+  }) => {
+    const rowH = opts.rowH ?? 7;
+    const x0 = MARGIN_X;
+    const wSum = opts.widths.reduce((a, b) => a + b, 0);
+    const scale = wSum > 0 ? CONTENT_W / wSum : 1;
+    const widths = opts.widths.map((w) => w * scale);
+
+    const drawHeader = () => {
+      ensureSpace(rowH + 2);
+      setColor(doc, "fill", C_BLACK);
+      doc.rect(x0, y, CONTENT_W, rowH, "F");
+      setColor(doc, "draw", C_BLACK);
+      doc.setLineWidth(0.6);
+      doc.rect(x0, y, CONTENT_W, rowH, "S");
+      doc.setFont("courier", "bold");
+      doc.setFontSize(8);
+      setColor(doc, "text", C_ACCENT);
+      let cx = x0;
+      for (let i = 0; i < opts.headers.length; i++) {
+        cell(`[ ${opts.headers[i]} ]`, cx, y + 4.8, widths[i] ?? 0, "left");
+        cx += widths[i] ?? 0;
+        if (i < opts.headers.length - 1) {
+          setColor(doc, "draw", C_WHITE);
+          doc.setLineWidth(0.3);
+          doc.line(cx, y, cx, y + rowH);
+        }
+      }
+      y += rowH;
+    };
+
+    drawHeader();
+
+    doc.setFont(fam, "normal");
+    doc.setFontSize(9);
+    setColor(doc, "text", C_BLACK);
+
+    opts.rows.forEach((r, idx) => {
+      ensureSpace(rowH + 2);
+      const bg = idx % 2 === 0 ? C_WHITE : C_OFF;
+      setColor(doc, "fill", bg);
+      doc.rect(x0, y, CONTENT_W, rowH, "F");
+      setColor(doc, "draw", C_BLACK);
+      doc.setLineWidth(0.6);
+      doc.rect(x0, y, CONTENT_W, rowH, "S");
+      let cx = x0;
+      for (let i = 0; i < opts.headers.length; i++) {
+        cell(r[i] ?? "—", cx, y + 4.8, widths[i] ?? 0, "left");
+        cx += widths[i] ?? 0;
+        if (i < opts.headers.length - 1) {
+          setColor(doc, "draw", C_GRAY_LIGHT);
+          doc.setLineWidth(0.2);
+          doc.line(cx, y, cx, y + rowH);
+        }
+      }
+      y += rowH;
+
+      // 페이지 넘어갈 때 헤더 반복
+      if (y + rowH > pageBottom) {
+        doc.addPage();
+        y = 28;
+        drawHeader();
+        doc.setFont(fam, "normal");
+        doc.setFontSize(9);
+        setColor(doc, "text", C_BLACK);
+      }
+    });
+
+    y += 6;
+  };
   const writeBody = (text: string | null | undefined) => {
     if (!text?.trim()) return;
     doc.setFont(fam, "normal");
@@ -594,18 +783,17 @@ function drawBody(
   if (bookings.length > 0) {
     ensureSpace(14);
     y = writeSectionHeader(doc, fam, "예약 매체", y);
-    doc.setFont(fam, "normal");
-    doc.setFontSize(9);
-    setColor(doc, "text", C_BLACK);
-    for (const b of bookings) {
-      const line = `· ${b.mediaName} · ${b.location} (${b.type}) — ${b.title} [${b.status}] ${fmtDateShort(b.startsAt)}~${fmtDateShort(b.endsAt)}`;
-      for (const w of doc.splitTextToSize(line, CONTENT_W)) {
-        ensureSpace(5);
-        doc.text(w, MARGIN_X, y);
-        y += 4.8;
-      }
-    }
-    y += 8;
+    drawTable({
+      headers: ["매체", "유형", "기간", "상태"],
+      widths: [82, 28, 48, 22],
+      rows: bookings.map((b) => [
+        `${b.mediaName} · ${b.location}`,
+        b.type,
+        `${fmtDateShort(b.startsAt)}~${fmtDateShort(b.endsAt)}`,
+        b.status,
+      ]),
+      rowH: 7,
+    });
   }
 
   if (p.aiMediaDetailKo?.trim()) {
@@ -619,18 +807,17 @@ function drawBody(
   if (p.scheduleEvents.length > 0) {
     ensureSpace(14);
     y = writeSectionHeader(doc, fam, "송출 · 일정", y);
-    doc.setFont(fam, "normal");
-    doc.setFontSize(9);
-    setColor(doc, "text", C_BLACK);
-    for (const ev of p.scheduleEvents) {
-      const line = `· ${ev.title} (${ev.kind}) ${fmtDateShort(ev.startsAt)} ~ ${fmtDateShort(ev.endsAt)}`;
-      for (const w of doc.splitTextToSize(line, CONTENT_W)) {
-        ensureSpace(5);
-        doc.text(w, MARGIN_X, y);
-        y += 4.8;
-      }
-    }
-    y += 8;
+    drawTable({
+      headers: ["항목", "구분", "시작", "종료"],
+      widths: [86, 26, 34, 34],
+      rows: p.scheduleEvents.map((ev) => [
+        ev.title,
+        ev.kind,
+        fmtDateShort(ev.startsAt),
+        fmtDateShort(ev.endsAt),
+      ]),
+      rowH: 7,
+    });
   }
 
   // 송출 증빙 (URL 만)
@@ -663,21 +850,17 @@ function drawBody(
   if (p.financialDocs.length > 0) {
     ensureSpace(14);
     y = writeSectionHeader(doc, fam, "견적 · 계약 · 청구", y);
-    doc.setFont(fam, "normal");
-    doc.setFontSize(9);
-    setColor(doc, "text", C_BLACK);
-    for (const d of p.financialDocs) {
-      const amt =
-        d.amountKrw != null
-          ? ` ${d.amountKrw.toLocaleString("ko-KR")}원`
-          : "";
-      const line = `· [${d.kind}] ${d.title} · ${d.status}${amt}`;
-      for (const w of doc.splitTextToSize(line, CONTENT_W)) {
-        ensureSpace(5);
-        doc.text(w, MARGIN_X, y);
-        y += 4.8;
-      }
-    }
+    drawTable({
+      headers: ["구분", "항목", "상태", "금액(원)"],
+      widths: [22, 86, 28, 44],
+      rows: p.financialDocs.map((d) => [
+        d.kind,
+        d.title,
+        d.status,
+        d.amountKrw != null ? d.amountKrw.toLocaleString("ko-KR") : "—",
+      ]),
+      rowH: 7,
+    });
     // 합계 강조
     const total = computeCampaignTotalAmount(p.financialDocs);
     if (total > 0) {
@@ -717,7 +900,7 @@ function drawBody(
   doc.setFontSize(7.5);
   setColor(doc, "text", C_GRAY);
   doc.text(
-    "// 본 보고서는 관리 시스템 데이터 및 AI 초안을 기준으로 생성. 수치·표현은 최종 검증이 필요합니다.",
+    "// 본 보고서는 관리 시스템 데이터를 기준으로 생성. 수치·표현은 최종 검증이 필요합니다.",
     MARGIN_X,
     y,
   );
