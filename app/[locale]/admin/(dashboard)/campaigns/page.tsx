@@ -581,9 +581,19 @@ export default function AdminCampaignsPage() {
       }
       const blob = await res.blob();
       const cd = res.headers.get("Content-Disposition");
-      let name = "thinkad-campaign-completion.pdf";
-      const m = cd?.match(/filename="([^"]+)"/);
-      if (m?.[1]) name = m[1];
+      // #5: RFC 5987 filename*=UTF-8'' 우선 (한글 파일명), 없으면 ASCII fallback
+      let name = "THINKAD-OOH-Report.pdf";
+      const utf8Match = cd?.match(/filename\*=UTF-8''([^;]+)/i);
+      if (utf8Match?.[1]) {
+        try {
+          name = decodeURIComponent(utf8Match[1].trim());
+        } catch {
+          /* fall through */
+        }
+      } else {
+        const asciiMatch = cd?.match(/filename="([^"]+)"/);
+        if (asciiMatch?.[1]) name = asciiMatch[1];
+      }
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
