@@ -172,6 +172,42 @@
   --color-gold-dark: #f0cd85;
   --color-gold-700: #f0cd85;
   --color-gold-800: #e5b35a;
+
+  /* === Brutalist 다크모드 토큰 ===
+   * 시맨틱:
+   *   bx-black  = "전경 강조색" (라이트=검정 / 다크=밝은 회백색)
+   *   bx-white  = "베이스 배경" (라이트=흰색 / 다크=가장 어두운 톤)
+   *   bx-off    = "면 배경"     (라이트=옅은 회색 / 다크=어두운 톤 + 살짝 밝은 톤)
+   *   bx-gray-dim = "보조 텍스트" (라이트=중간회색 / 다크=가독 가능한 밝은 회색)
+   *   bx-gray   = "구분선·디스에이블" (라이트=옅은 회색 / 다크=어두운 회색)
+   *   bx-accent = 동일 (브랜드 색은 라이트/다크 동일 — Pantone 165)
+   *
+   * 효과: bg-bx-white / text-bx-black / border-bx-black / bg-bx-off 같은 유틸리티
+   * 클래스가 자동으로 다크 모드 색을 가져온다 (Tailwind v4 var 토큰).
+   */
+  --color-bx-black: #f5f6fa;
+  --color-bx-white: #0a0d14;
+  --color-bx-off: #1a1f29;
+  --color-bx-gray: #2a2f3a;
+  --color-bx-gray-dim: #94a3b8;
+  /* bx-accent 은 라이트와 동일 (브랜드 컬러 유지) */
+
+  /* === 시맨틱 보조 토큰 (요구사항: --bx-bg-base, --bx-fg-base, --bx-border, --bx-card-bg) ===
+   * 컴포넌트가 직접 사용 가능. 기존 bx-black/white 토큰과 중복되어도 의미상 명확. */
+  --bx-bg-base: var(--color-bx-white);
+  --bx-bg-card: var(--color-bx-off);
+  --bx-fg-base: var(--color-bx-black);
+  --bx-fg-muted: var(--color-bx-gray-dim);
+  --bx-border: var(--color-bx-black);
+}
+
+/* 라이트 모드 시맨틱 보조 토큰 (다크와 동일 매핑이지만 라이트 :root 토큰값으로 자동 해소). */
+:root {
+  --bx-bg-base: var(--color-bx-white);
+  --bx-bg-card: var(--color-bx-off);
+  --bx-fg-base: var(--color-bx-black);
+  --bx-fg-muted: var(--color-bx-gray-dim);
+  --bx-border: var(--color-bx-black);
 }
 
 /* Hero 섹션 등 항상 어두운 배경(.bg-navy)에는 흰 글씨가 의도된 색이므로
