@@ -1178,7 +1178,98 @@ export default function AdminMediasClient({
 
         <Card>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            {/* #ADMIN-MEDIAS-1 hotfix: 모바일 전용 카드 레이아웃 (md 미만).
+                기존 테이블은 가로 스크롤 9컬럼을 거쳐야 편집 버튼 도달 → 모바일 사용 불가.
+                카드: 매체명·유형·가격·상태·수정·삭제 만 노출. 추천/인기는 데스크톱에서. */}
+            <div className="md:hidden">
+              {listLoading ? (
+                <div className="px-4 py-12 text-center text-muted-foreground">
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-navy/40" />
+                  <p className="mt-2 text-sm">불러오는 중…</p>
+                </div>
+              ) : paginated.length === 0 ? (
+                <div className="px-4 py-12 text-center text-muted-foreground">
+                  {medias.length === 0
+                    ? "등록된 매체가 없습니다. 추가하거나 JSON 간편 등록을 이용하세요."
+                    : "조건에 맞는 매체가 없습니다."}
+                </div>
+              ) : (
+                <ul className="divide-y">
+                  {paginated.map((media) => (
+                    <li
+                      key={media.id}
+                      className={`flex flex-col gap-3 px-4 py-3 ${
+                        isRowActive(media) ? "" : "bg-slate-50/50 opacity-60"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-navy">
+                            {media.name}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {media.location || "—"}
+                          </p>
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <Badge
+                              variant="secondary"
+                              className="bg-navy/5 text-navy text-[10px]"
+                            >
+                              {typeBadgeLabel(media.type)}
+                            </Badge>
+                            <span className="text-xs font-semibold text-navy">
+                              ₩{media.price.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleActive(media)}
+                          aria-label={isRowActive(media) ? "비활성화" : "활성화"}
+                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
+                            isRowActive(media)
+                              ? "bg-emerald-500"
+                              : "bg-slate-300"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                              isRowActive(media)
+                                ? "translate-x-[18px]"
+                                : "translate-x-0.5"
+                            } mt-0.5`}
+                          />
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          className="flex-1 min-w-[7rem]"
+                        >
+                          <Link href={`/admin/medias/${media.id}/edit`}>
+                            <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                            수정
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDeleteConfirm(media.id)}
+                          aria-label="삭제"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-slate-50 text-left text-xs font-medium text-muted-foreground">
@@ -1387,17 +1478,6 @@ export default function AdminMediasClient({
                             <Button
                               variant="ghost"
                               size="icon-xs"
-                              className="md:hidden"
-                              asChild
-                            >
-                              <Link href={`/admin/medias/${media.id}/edit`}>
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Link>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              className="hidden md:inline-flex"
                               onClick={() => openEdit(media)}
                             >
                               <Pencil className="h-3.5 w-3.5" />
