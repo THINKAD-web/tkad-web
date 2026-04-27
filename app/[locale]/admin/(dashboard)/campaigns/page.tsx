@@ -782,7 +782,7 @@ export default function AdminCampaignsPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <div className="mb-3 flex items-center justify-between">
@@ -1074,16 +1074,34 @@ export default function AdminCampaignsPage() {
                   <div className="mt-4">
                     <CampaignReportPreview
                       data={{
-                        campaignName: form.name,
-                        clientCompany: form.clientCompany ?? "",
-                        clientName: form.clientName,
-                        clientEmail: form.clientEmail,
-                        status: list.find(c => c.id === selectedId)?.status ?? "진행중",
-                        notes: list.find(c => c.id === selectedId)?.notes ?? null,
-                        startDate: list.find(c => c.id === selectedId)?.startDate ?? null,
-                        endDate: list.find(c => c.id === selectedId)?.endDate ?? null,
-                        budgetMin: list.find(c => c.id === selectedId)?.budgetMin ?? null,
-                        budgetMax: list.find(c => c.id === selectedId)?.budgetMax ?? null,
+                        campaignName:
+                          list.find((c) => c.id === selectedId)?.name ?? "—",
+                        clientCompany:
+                          list.find((c) => c.id === selectedId)
+                            ?.clientCompany ?? "",
+                        clientName:
+                          list.find((c) => c.id === selectedId)?.clientName ??
+                          "",
+                        clientEmail:
+                          list.find((c) => c.id === selectedId)?.clientEmail ??
+                          "",
+                        status:
+                          list.find((c) => c.id === selectedId)?.status ??
+                          "진행중",
+                        notes:
+                          list.find((c) => c.id === selectedId)?.notes ?? null,
+                        startDate:
+                          list.find((c) => c.id === selectedId)?.startDate ??
+                          null,
+                        endDate:
+                          list.find((c) => c.id === selectedId)?.endDate ??
+                          null,
+                        budgetMin:
+                          list.find((c) => c.id === selectedId)?.budgetMin ??
+                          null,
+                        budgetMax:
+                          list.find((c) => c.id === selectedId)?.budgetMax ??
+                          null,
                         scheduleEvents: events?.map((e: { title: string; startsAt: string; endsAt: string; kind: string }) => ({
                           title: e.title,
                           startsAt: e.startsAt,
