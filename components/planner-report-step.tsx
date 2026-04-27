@@ -26,6 +26,13 @@ function isPdfTimeoutError(e: unknown): boolean {
 }
 import { useToast } from "@/components/toast-provider";
 import PlannerReportPreview from "@/components/planner-report-preview";
+import {
+  PlannerImpressionsLineChart,
+  PlannerRoiLineChart,
+  PlannerDailyReachBarChart,
+  PlannerCpmCompareChart,
+  PlannerMonthCompareChart,
+} from "@/components/planner-charts";
 
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 
@@ -690,30 +697,211 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
       </div>
       <div className="space-y-6 p-5">
         <div className="flex justify-center border-2 border-bx-black bg-bx-off p-3 sm:p-5">
-          <PlannerReportPreview
-            ref={compactPreviewRef}
-            isKo={props.isKo}
-            goalTitle={props.goalTitle}
-            budgetNum={props.budgetNum}
-            periodDisplay={derived.periodDisplay}
-            regionsText={props.regionsText}
-            categoriesText={props.categoriesText}
-            ageText={props.ageText}
-            industryText={props.industryText}
-            portfolio={props.portfolio}
-            matchedCount={props.matchedCount}
-            monthCompare={props.monthCompare}
-            cpmBars={props.cpmBars}
-            metrics={props.metrics}
-            reachCorePct={props.reachCorePct}
-            reachExtendedPct={props.reachExtendedPct}
-            budgetAllocation={derived.budgetAllocation}
-            blendedCpmKrw={derived.blendedCpmKrw}
-            effectSummaryLines={derived.effectSummaryLines}
-            generatedAt={snapshotAt}
-            logoUrl={props.logoUrl}
-            mediaPlacements={props.mediaPlacements}
-          />
+          {/* PDF 캡처 대상(ref): 보고서(Step 6) + 효과측정(Step 7) 스냅샷을 한 번에 출력 */}
+          <div ref={compactPreviewRef} className="w-full max-w-[240mm] space-y-6">
+            <PlannerReportPreview
+              isKo={props.isKo}
+              goalTitle={props.goalTitle}
+              budgetNum={props.budgetNum}
+              periodDisplay={derived.periodDisplay}
+              regionsText={props.regionsText}
+              categoriesText={props.categoriesText}
+              ageText={props.ageText}
+              industryText={props.industryText}
+              portfolio={props.portfolio}
+              matchedCount={props.matchedCount}
+              monthCompare={props.monthCompare}
+              cpmBars={props.cpmBars}
+              metrics={props.metrics}
+              reachCorePct={props.reachCorePct}
+              reachExtendedPct={props.reachExtendedPct}
+              budgetAllocation={derived.budgetAllocation}
+              blendedCpmKrw={derived.blendedCpmKrw}
+              effectSummaryLines={derived.effectSummaryLines}
+              generatedAt={snapshotAt}
+              logoUrl={props.logoUrl}
+              mediaPlacements={props.mediaPlacements}
+            />
+
+            {/* 효과측정 대시보드 스냅샷: 기존 데이터만 사용 (AI/새 산식 X) */}
+            {props.metrics ? (
+              <div className="border-2 border-bx-black bg-bx-white">
+                <div className="border-b-2 border-bx-black p-5">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  [ EFFECT DASHBOARD SNAPSHOT ]
+                </p>
+                <p className="mt-2 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                  {`// `}
+                  {props.isKo
+                    ? "보고서(플랜) + 효과측정(시뮬레이션) 내용을 한 번에 출력합니다."
+                    : "Print the plan report + simulation dashboard in one PDF."}
+                </p>
+                </div>
+
+                <div className="space-y-6 p-5">
+                  {/* KPI 4장 — Step 7과 동일한 숫자(기존 산식 그대로) */}
+                  {(() => {
+                    const budgetKrw = props.budgetNum * 10_000;
+                    const estReach = Math.round(
+                      props.metrics!.estimatedTotalImpressions * 0.75,
+                    );
+                    const estCpm =
+                      props.metrics!.estimatedTotalImpressions > 0
+                        ? Math.round(
+                            (budgetKrw /
+                              props.metrics!.estimatedTotalImpressions) *
+                              1000,
+                          )
+                        : 0;
+                    return (
+                      <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                            [ {t("kpiImpressions")} ]
+                          </p>
+                          <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-accent">
+                            {props.metrics!.estimatedTotalImpressions.toLocaleString()}
+                          </p>
+                          <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                            {t("kpiImpressionsHint")}
+                          </p>
+                        </div>
+                        <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                            [ {t("kpiReach")} ]
+                          </p>
+                          <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                            {estReach.toLocaleString()}
+                          </p>
+                          <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                            {t("kpiReachHint")}
+                          </p>
+                        </div>
+                        <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                            [ {t("kpiCpm")} ]
+                          </p>
+                          <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                            ₩{estCpm.toLocaleString()}
+                          </p>
+                          <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                            {t("kpiCpmHint")}
+                          </p>
+                        </div>
+                        <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-black p-4 text-bx-white">
+                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                            [ {t("kpiRoi")} ]
+                          </p>
+                          <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-accent">
+                            {props.metrics!.roiExpected}
+                            {t("roiUnit")}
+                          </p>
+                          <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-white/65">
+                            {t("kpiRoiHint")}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* 유형별 일유동(포트폴리오) */}
+                  <div className="border-2 border-bx-black bg-bx-white">
+                    <div className="border-b-2 border-bx-black p-5">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ {t("chartDailyBarTitle")} ]
+                      </p>
+                    </div>
+                    <div className="p-5">
+                      <PlannerDailyReachBarChart
+                        data={derived.dailyBars}
+                        title={t("chartDailyBarTitle")}
+                        valueLabel={t("chartDailyBarAxis")}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 유형별 CPM + 1/3/6개월 비교 */}
+                  <div className="grid gap-0 lg:grid-cols-2">
+                    <div className="border-2 border-bx-black bg-bx-white">
+                      <div className="border-b-2 border-bx-black p-5">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                          [ {t("chartCpmTitle")} ]
+                        </p>
+                      </div>
+                      <div className="p-5">
+                        <PlannerCpmCompareChart
+                          data={props.cpmBars}
+                          title={t("chartCpmTitle")}
+                          unitLabel={t("chartCpmUnit")}
+                        />
+                      </div>
+                    </div>
+                    <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                      <div className="border-b-2 border-bx-black p-5">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                          [ {t("chartMonthCompareTitle")} ]
+                        </p>
+                      </div>
+                      <div className="p-5">
+                        <PlannerMonthCompareChart
+                          data={props.monthCompare.map((x) => ({
+                            months: x.months,
+                            total: x.totalImpressions,
+                          }))}
+                          title={t("chartMonthCompareTitle")}
+                          barLabels={[
+                            t("monthCompare1"),
+                            t("monthCompare3"),
+                            t("monthCompare6"),
+                          ]}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 누적 노출 추이 */}
+                  <div className="border-2 border-bx-black bg-bx-white">
+                    <div className="border-b-2 border-bx-black p-5">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ {t("chartImpLineTitle")} ]
+                      </p>
+                    </div>
+                    <div className="p-5">
+                      <PlannerImpressionsLineChart
+                        data={props.metrics!.cumulativeByMonth}
+                        isKo={props.isKo}
+                        title={t("chartImpLineTitle")}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ROI 시나리오 추이 */}
+                  <div className="border-2 border-bx-black bg-bx-white">
+                    <div className="border-b-2 border-bx-black p-5">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        [ {t("chartRoiLineTitle")} ]
+                      </p>
+                      <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                        {t("chartRoiLineHint")}
+                      </p>
+                    </div>
+                    <div className="p-5">
+                      <PlannerRoiLineChart
+                        data={props.metrics!.roiByMonth}
+                        isKo={props.isKo}
+                        title={t("chartRoiLineTitle")}
+                        hint={t("chartRoiLineHint")}
+                        legendConservative={t("roiConservative")}
+                        legendExpected={t("roiExpected")}
+                        legendOptimistic={t("roiOptimistic")}
+                        roiUnit={t("roiUnit")}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
         <div className="flex flex-wrap gap-2 border-t-2 border-bx-black pt-6">
           <BtnBlock
