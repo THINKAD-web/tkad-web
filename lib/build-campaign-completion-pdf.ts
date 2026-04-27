@@ -9,6 +9,7 @@ import {
   computeCampaignTotalAmount,
   type CampaignKpiBooking,
 } from "@/lib/campaign-kpis";
+import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
 
 export type CompletionPdfSchedule = {
   title: string;
@@ -40,6 +41,11 @@ export type CompletionPdfMediaBooking = {
   /** KPI 산출용 (선택) */
   dailyFootTraffic?: number | null;
   region?: string | null;
+  trafficPattern?: {
+    hourly?: number[];
+    weekly?: number[];
+    monthly?: number[];
+  } | null;
 };
 
 export type BuildCampaignCompletionPdfParams = {
@@ -56,11 +62,6 @@ export type BuildCampaignCompletionPdfParams = {
   /** 캠페인 명시 기간 (mediaBookings/scheduleEvents 가 없을 때 표지/요약에 사용) */
   startDate?: Date | string | null;
   endDate?: Date | string | null;
-  /** AI 생성 섹션 (한국어, 선택) — 본문 내 별도 섹션으로 표시 */
-  aiOverviewKo?: string | null;
-  aiMediaDetailKo?: string | null;
-  aiPerformanceKo?: string | null;
-  aiInsightsKo?: string | null;
 };
 
 // ── 디자인 토큰 (검정 + 주황 #FF6600 통일) ──
@@ -364,9 +365,10 @@ function drawExecutiveSummary(
   }
   y += 8;
 
-  // KPI 그리드 (5개)
-  const kpiCardH = 38;
-  const halfW = (CONTENT_W - 4) / 2;
+  // KPI 그리드 (8 + 총예산) — 산식은 lib/campaign-kpis.ts 그대로
+  const cardGap = 4;
+  const kpiCardH = 26;
+  const colW = (CONTENT_W - cardGap * 3) / 4;
   type Card = {
     label: string;
     value: string;
@@ -377,12 +379,36 @@ function drawExecutiveSummary(
   };
   const cards: Card[] = [
     {
+      label: "집행 매체",
+      value: stats ? `${stats.mediaCount}` : "—",
+      suffix: "개",
+      bg: C_WHITE,
+      fg: C_BLACK,
+      labelFg: C_GRAY,
+    },
+    {
+      label: "집행 기간",
+      value: stats ? `${stats.totalDays}` : "—",
+      suffix: "일",
+      bg: C_WHITE,
+      fg: C_BLACK,
+      labelFg: C_GRAY,
+    },
+    {
       label: "총 노출",
       value: plannerKpis ? fmtMan(plannerKpis.totalImp) : "—",
       suffix: "회",
       bg: C_BLACK,
       fg: C_ACCENT,
       labelFg: C_ACCENT,
+    },
+    {
+      label: "도달인 추정",
+      value: plannerKpis ? fmtMan(plannerKpis.reach) : "—",
+      suffix: "명",
+      bg: C_WHITE,
+      fg: C_BLACK,
+      labelFg: C_GRAY,
     },
     {
       label: "코어 도달률",
@@ -393,49 +419,60 @@ function drawExecutiveSummary(
       labelFg: C_GRAY,
     },
     {
-      label: "평균 빈도",
-      value: plannerKpis ? `${plannerKpis.avgFrequency}` : "—",
-      suffix: "회/주",
+      label: "확장 도달률",
+      value: plannerKpis ? `${plannerKpis.reachExtendedPct}` : "—",
+      suffix: "%",
       bg: C_WHITE,
       fg: C_BLACK,
       labelFg: C_GRAY,
     },
     {
-      label: "일평균 유동",
-      value: stats && stats.avgDaily > 0 ? stats.avgDaily.toLocaleString("ko-KR") : "—",
-      suffix: "명",
-      bg: C_WHITE,
-      fg: C_BLACK,
-      labelFg: C_GRAY,
+      label: "BLENDED CPM",
+      value:
+        plannerKpis?.blendedCpm != null
+          ? `₩${plannerKpis.blendedCpm.toLocaleString("ko-KR")}`
+          : "—",
+      bg: C_BLACK,
+      fg: C_ACCENT,
+      labelFg: C_ACCENT,
+    },
+    {
+      label: "ROI 효율",
+      value: plannerKpis?.roiExpected != null ? fmtMan(plannerKpis.roiExpected) : "—",
+      suffix: "회/1억",
+      bg: C_BLACK,
+      fg: C_ACCENT,
+      labelFg: C_ACCENT,
     },
   ];
 
-  // 2x2 그리드
-  for (let i = 0; i < 4; i++) {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    const cx = MARGIN_X + col * (halfW + 4);
-    const cy = y + row * (kpiCardH + 4);
+  // 4x2 그리드
+  for (let i = 0; i < cards.length; i++) {
+    const col = i % 4;
+    const row = Math.floor(i / 4);
+    const cx = MARGIN_X + col * (colW + cardGap);
+    const cy = y + row * (kpiCardH + cardGap);
     const c = cards[i];
     setColor(doc, "fill", c.bg);
-    doc.rect(cx, cy, halfW, kpiCardH, "F");
+    doc.rect(cx, cy, colW, kpiCardH, "F");
     setColor(doc, "draw", C_BLACK);
     doc.setLineWidth(0.6);
-    doc.rect(cx, cy, halfW, kpiCardH, "S");
-    monoLabel(doc, fam, c.label, cx + 5, cy + 8, 7, c.labelFg);
+    doc.rect(cx, cy, colW, kpiCardH, "S");
+    monoLabel(doc, fam, c.label, cx + 4, cy + 7, 6.5, c.labelFg);
     doc.setFont(fam, hasKrFont ? "normal" : "bold");
-    doc.setFontSize(22);
+    doc.setFontSize(13.5);
     setColor(doc, "text", c.fg);
-    doc.text(c.value, cx + 5, cy + 26);
+    doc.text(c.value, cx + 4, cy + 19);
     if (c.suffix) {
       const valW = doc.getTextWidth(c.value);
-      doc.setFontSize(10);
-      doc.text(c.suffix, cx + 5 + valW + 2, cy + 26);
+      doc.setFontSize(7.5);
+      setColor(doc, "text", c.fg);
+      doc.text(c.suffix, cx + 4 + valW + 1.5, cy + 19);
     }
   }
 
   // 5번째 — 총 예산 (가로 풀폭, 강조)
-  const budgetY = y + 2 * (kpiCardH + 4);
+  const budgetY = y + 2 * (kpiCardH + cardGap);
   setColor(doc, "fill", C_BLACK);
   doc.rect(MARGIN_X, budgetY, CONTENT_W, kpiCardH, "F");
   setColor(doc, "draw", C_BLACK);
@@ -443,15 +480,185 @@ function drawExecutiveSummary(
   doc.rect(MARGIN_X, budgetY, CONTENT_W, kpiCardH, "S");
   monoLabel(doc, fam, "총 예산", MARGIN_X + 6, budgetY + 9, 7, C_ACCENT);
   doc.setFont(fam, hasKrFont ? "normal" : "bold");
-  doc.setFontSize(28);
+  doc.setFontSize(22);
   setColor(doc, "text", C_ACCENT);
   doc.text(
     totalAmount > 0 ? fmtKrwCompact(totalAmount) : "—",
     MARGIN_X + 6,
-    budgetY + 30,
+    budgetY + 19,
   );
 
   y = budgetY + kpiCardH + 16;
+
+  // 매체 유형 분포 (미니) — 집행 매체 기준 카운트
+  const byType: Record<string, number> = {};
+  for (const b of p.mediaBookings ?? []) {
+    const t = (b.type ?? "기타").toString();
+    byType[t] = (byType[t] ?? 0) + 1;
+  }
+  const typeEntries = Object.entries(byType).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  if (typeEntries.length > 0) {
+    monoLabel(doc, fam, "매체 유형 분포", MARGIN_X, y, 8, C_ACCENT);
+    y += 4;
+    accentLine(doc, MARGIN_X, y, MARGIN_X + 60, 0.6, C_ACCENT);
+    y += 8;
+    const total = typeEntries.reduce((s, [, c]) => s + c, 0) || 1;
+    const barW = CONTENT_W;
+    const rowH = 9;
+    for (let i = 0; i < typeEntries.length; i++) {
+      const [label, count] = typeEntries[i];
+      const pct = Math.round((count / total) * 100);
+      const cy = y + i * (rowH + 2);
+      // background
+      setColor(doc, "fill", C_OFF);
+      doc.rect(MARGIN_X, cy, barW, rowH, "F");
+      setColor(doc, "draw", C_BLACK);
+      doc.setLineWidth(0.4);
+      doc.rect(MARGIN_X, cy, barW, rowH, "S");
+      // fill
+      setColor(doc, "fill", i === 0 ? C_ACCENT : C_BLACK);
+      doc.rect(MARGIN_X, cy, Math.max(1, (barW * pct) / 100), rowH, "F");
+      // text
+      doc.setFont(fam, hasKrFont ? "normal" : "bold");
+      doc.setFontSize(8.5);
+      setColor(doc, "text", C_WHITE);
+      doc.text(`${label}`, MARGIN_X + 2.5, cy + 6.5);
+      doc.setFont("courier", "bold");
+      doc.setFontSize(8);
+      setColor(doc, "text", C_WHITE);
+      doc.text(`${count}개 · ${pct}%`, PAGE_W - MARGIN_X - 2.5, cy + 6.5, {
+        align: "right",
+      });
+    }
+    y += typeEntries.length * (rowH + 2) + 10;
+  }
+
+  // 노출 패턴 미니(시간대·요일·월별) — 매체 trafficPattern + 유형/지역 추정 기반 가중평균
+  const bookingsForTraffic = (p.mediaBookings ?? []).map((b) => ({
+    type: b.type ?? "digital",
+    region: b.region ?? "national",
+    dailyFootTraffic: b.dailyFootTraffic ?? 0,
+    trafficPattern: b.trafficPattern ?? null,
+  }));
+  const trafficAgg =
+    bookingsForTraffic.length > 0
+      ? aggregatePortfolioTraffic(bookingsForTraffic)
+      : null;
+
+  const drawMiniBars = (
+    title: string,
+    values: number[],
+    x: number,
+    y0: number,
+    w: number,
+    h: number,
+    peakLabel: string,
+    peakIdx: number,
+    labelEvery: number,
+    labels: string[],
+  ) => {
+    // frame
+    setColor(doc, "draw", C_BLACK);
+    doc.setLineWidth(0.6);
+    doc.rect(x, y0, w, h, "S");
+    // title
+    monoLabel(doc, fam, title, x + 4, y0 + 8, 7, C_GRAY);
+    // peak chip
+    setColor(doc, "fill", C_BLACK);
+    doc.rect(x + w - 56, y0 + 2.5, 52, 7, "F");
+    doc.setFont("courier", "bold");
+    doc.setFontSize(7);
+    setColor(doc, "text", C_ACCENT);
+    doc.text(peakLabel, x + w - 30, y0 + 7.5, { align: "center" });
+
+    const max = Math.max(...values, 0.0001);
+    const barY = y0 + 14;
+    const barH = h - 22;
+    const n = values.length;
+    const gap = 0.6;
+    const bw = (w - 8 - gap * (n - 1)) / n;
+    for (let i = 0; i < n; i++) {
+      const v = values[i];
+      const hh = Math.max(1, (v / max) * barH);
+      const bx = x + 4 + i * (bw + gap);
+      const by = barY + (barH - hh);
+      setColor(doc, "fill", i === peakIdx ? C_ACCENT : C_BLACK);
+      doc.rect(bx, by, bw, hh, "F");
+    }
+    // labels row
+    doc.setFont("courier", "normal");
+    doc.setFontSize(6.5);
+    setColor(doc, "text", C_GRAY);
+    const labY = y0 + h - 4;
+    for (let i = 0; i < labels.length; i++) {
+      if (labelEvery > 1 && i % labelEvery !== 0) continue;
+      const bx = x + 4 + i * (bw + gap) + bw / 2;
+      doc.text(labels[i] ?? "", bx, labY, { align: "center" });
+    }
+  };
+
+  const idxMax = (arr: number[]) => {
+    let idx = 0;
+    for (let i = 1; i < arr.length; i++) if (arr[i] > arr[idx]) idx = i;
+    return idx;
+  };
+
+  if (trafficAgg) {
+    monoLabel(doc, fam, "노출 패턴 (요약)", MARGIN_X, y, 8, C_ACCENT);
+    y += 4;
+    accentLine(doc, MARGIN_X, y, MARGIN_X + 60, 0.6, C_ACCENT);
+    y += 8;
+
+    const blockH = 44;
+    const gap = 4;
+    const colW = (CONTENT_W - gap * 2) / 3;
+    const peakHour = idxMax(trafficAgg.hourly);
+    const peakDay = idxMax(trafficAgg.weekly);
+    const peakMonth = idxMax(trafficAgg.monthly);
+    const hourLabels = Array.from({ length: 24 }, (_, i) =>
+      i % 3 === 0 ? String(i) : "",
+    );
+    const weekdayKo = ["월", "화", "수", "목", "금", "토", "일"];
+    const monthLabels = Array.from({ length: 12 }, (_, i) => String(i + 1));
+
+    drawMiniBars(
+      "시간대 (24h)",
+      trafficAgg.hourly,
+      MARGIN_X,
+      y,
+      colW,
+      blockH,
+      `피크 ${peakHour}시`,
+      peakHour,
+      1,
+      hourLabels,
+    );
+    drawMiniBars(
+      "요일",
+      trafficAgg.weekly,
+      MARGIN_X + colW + gap,
+      y,
+      colW,
+      blockH,
+      `피크 ${weekdayKo[peakDay]}요일`,
+      peakDay,
+      1,
+      weekdayKo,
+    );
+    drawMiniBars(
+      "월별",
+      trafficAgg.monthly,
+      MARGIN_X + (colW + gap) * 2,
+      y,
+      colW,
+      blockH,
+      `피크 ${monthLabels[peakMonth]}월`,
+      peakMonth,
+      1,
+      monthLabels,
+    );
+    y += blockH + 14;
+  }
 
   // 주요 매체 TOP 5
   monoLabel(doc, fam, "주요 매체 (TOP 5)", MARGIN_X, y, 8, C_ACCENT);
@@ -525,17 +732,55 @@ function drawBody(
       y = 28;
     }
   };
-  const writeBody = (text: string | null | undefined) => {
-    if (!text?.trim()) return;
-    doc.setFont(fam, "normal");
-    doc.setFontSize(10);
-    setColor(doc, "text", C_BLACK);
-    for (const w of doc.splitTextToSize(text.trim(), CONTENT_W)) {
-      ensureSpace(6);
-      doc.text(w, MARGIN_X, y);
-      y += 5.5;
+  const drawTable = (args: {
+    title: string;
+    columns: { key: string; label: string; w: number }[];
+    rows: Record<string, string>[];
+  }) => {
+    ensureSpace(16);
+    y = writeSectionHeader(doc, fam, args.title, y);
+    const x0 = MARGIN_X;
+    const rowH = 8;
+    // header
+    ensureSpace(rowH + 6);
+    setColor(doc, "fill", C_BLACK);
+    doc.rect(x0, y - 4, CONTENT_W, rowH, "F");
+    setColor(doc, "draw", C_BLACK);
+    doc.setLineWidth(0.6);
+    doc.rect(x0, y - 4, CONTENT_W, rowH, "S");
+    let cx = x0;
+    for (const col of args.columns) {
+      monoLabel(doc, fam, col.label, cx + 2.5, y + 1.5, 6.5, C_ACCENT);
+      cx += col.w;
+      if (cx < x0 + CONTENT_W) {
+        setColor(doc, "draw", C_WHITE);
+        doc.setLineWidth(0.3);
+        doc.line(cx, y - 4, cx, y - 4 + rowH);
+      }
     }
-    y += 6;
+    y += rowH;
+    // rows
+    doc.setFont(fam, hasKrFont ? "normal" : "normal");
+    doc.setFontSize(8.5);
+    for (let i = 0; i < args.rows.length; i++) {
+      ensureSpace(rowH + 2);
+      const ry = y - 4;
+      setColor(doc, "fill", i % 2 === 0 ? C_WHITE : C_OFF);
+      doc.rect(x0, ry, CONTENT_W, rowH, "F");
+      setColor(doc, "draw", C_BLACK);
+      doc.setLineWidth(0.4);
+      doc.rect(x0, ry, CONTENT_W, rowH, "S");
+      cx = x0;
+      for (const col of args.columns) {
+        const txt = args.rows[i][col.key] ?? "—";
+        setColor(doc, "text", C_BLACK);
+        const clipped = doc.splitTextToSize(txt, col.w - 4)[0] ?? "";
+        doc.text(clipped, cx + 2.5, y + 1.5);
+        cx += col.w;
+      }
+      y += rowH;
+    }
+    y += 8;
   };
 
   // 캠페인 정보
@@ -581,107 +826,81 @@ function drawBody(
   }
   y += 10;
 
-  // AI 개요 (있을 때만)
-  if (p.aiOverviewKo?.trim()) {
-    ensureSpace(14);
-    y = writeSectionHeader(doc, fam, "캠페인 개요 (AI)", y);
-    writeBody(p.aiOverviewKo);
-    y += 4;
-  }
-
   // 예약 매체
   const bookings = p.mediaBookings ?? [];
   if (bookings.length > 0) {
-    ensureSpace(14);
-    y = writeSectionHeader(doc, fam, "예약 매체", y);
-    doc.setFont(fam, "normal");
-    doc.setFontSize(9);
-    setColor(doc, "text", C_BLACK);
-    for (const b of bookings) {
-      const line = `· ${b.mediaName} · ${b.location} (${b.type}) — ${b.title} [${b.status}] ${fmtDateShort(b.startsAt)}~${fmtDateShort(b.endsAt)}`;
-      for (const w of doc.splitTextToSize(line, CONTENT_W)) {
-        ensureSpace(5);
-        doc.text(w, MARGIN_X, y);
-        y += 4.8;
-      }
-    }
-    y += 8;
+    drawTable({
+      title: "예약 매체",
+      columns: [
+        { key: "media", label: "매체명", w: 54 },
+        { key: "location", label: "위치", w: 56 },
+        { key: "period", label: "기간", w: 46 },
+        { key: "daily", label: "일유동", w: 22 },
+        { key: "status", label: "상태", w: 22 },
+      ],
+      rows: bookings.map((b) => ({
+        media: b.mediaName || "—",
+        location: b.location || "—",
+        period: `${fmtDateShort(b.startsAt)}~${fmtDateShort(b.endsAt)}`,
+        daily: b.dailyFootTraffic ? `${b.dailyFootTraffic.toLocaleString("ko-KR")}` : "—",
+        status: b.status || "—",
+      })),
+    });
   }
 
-  if (p.aiMediaDetailKo?.trim()) {
-    ensureSpace(14);
-    y = writeSectionHeader(doc, fam, "매체·집행 상세 (AI)", y);
-    writeBody(p.aiMediaDetailKo);
-    y += 4;
-  }
 
   // 송출·일정
   if (p.scheduleEvents.length > 0) {
-    ensureSpace(14);
-    y = writeSectionHeader(doc, fam, "송출 · 일정", y);
-    doc.setFont(fam, "normal");
-    doc.setFontSize(9);
-    setColor(doc, "text", C_BLACK);
-    for (const ev of p.scheduleEvents) {
-      const line = `· ${ev.title} (${ev.kind}) ${fmtDateShort(ev.startsAt)} ~ ${fmtDateShort(ev.endsAt)}`;
-      for (const w of doc.splitTextToSize(line, CONTENT_W)) {
-        ensureSpace(5);
-        doc.text(w, MARGIN_X, y);
-        y += 4.8;
-      }
-    }
-    y += 8;
+    drawTable({
+      title: "송출 · 일정",
+      columns: [
+        { key: "title", label: "제목", w: 96 },
+        { key: "kind", label: "구분", w: 28 },
+        { key: "period", label: "기간", w: 66 },
+      ],
+      rows: p.scheduleEvents.map((ev) => ({
+        title: ev.title,
+        kind: ev.kind,
+        period: `${fmtDateShort(ev.startsAt)}~${fmtDateShort(ev.endsAt)}`,
+      })),
+    });
   }
 
   // 송출 증빙 (URL 만)
   if (p.proofPhotos.length > 0) {
-    ensureSpace(14);
-    y = writeSectionHeader(doc, fam, "송출 증빙 (URL)", y);
-    doc.setFont(fam, "normal");
-    doc.setFontSize(8);
-    setColor(doc, "text", C_GRAY);
-    for (const ph of p.proofPhotos) {
-      const cap = ph.caption ? ` — ${ph.caption}` : "";
-      const line = `· ${ph.imageUrl}${cap}`;
-      for (const w of doc.splitTextToSize(line, CONTENT_W)) {
-        ensureSpace(4.5);
-        doc.text(w, MARGIN_X, y);
-        y += 4.2;
-      }
-    }
-    y += 8;
+    drawTable({
+      title: "송출 증빙",
+      columns: [
+        { key: "url", label: "URL", w: 128 },
+        { key: "caption", label: "캡션", w: 72 },
+      ],
+      rows: p.proofPhotos.slice(0, 20).map((ph) => ({
+        url: ph.imageUrl,
+        caption: ph.caption ?? "",
+      })),
+    });
   }
 
-  if (p.aiPerformanceKo?.trim()) {
-    ensureSpace(14);
-    y = writeSectionHeader(doc, fam, "성과 분석 (AI)", y);
-    writeBody(p.aiPerformanceKo);
-    y += 4;
-  }
 
   // 견적·계약·청구
   if (p.financialDocs.length > 0) {
-    ensureSpace(14);
-    y = writeSectionHeader(doc, fam, "견적 · 계약 · 청구", y);
-    doc.setFont(fam, "normal");
-    doc.setFontSize(9);
-    setColor(doc, "text", C_BLACK);
-    for (const d of p.financialDocs) {
-      const amt =
-        d.amountKrw != null
-          ? ` ${d.amountKrw.toLocaleString("ko-KR")}원`
-          : "";
-      const line = `· [${d.kind}] ${d.title} · ${d.status}${amt}`;
-      for (const w of doc.splitTextToSize(line, CONTENT_W)) {
-        ensureSpace(5);
-        doc.text(w, MARGIN_X, y);
-        y += 4.8;
-      }
-    }
-    // 합계 강조
+    drawTable({
+      title: "견적 · 계약 · 청구",
+      columns: [
+        { key: "kind", label: "구분", w: 32 },
+        { key: "title", label: "항목", w: 98 },
+        { key: "amount", label: "금액", w: 40 },
+        { key: "status", label: "상태", w: 30 },
+      ],
+      rows: p.financialDocs.map((d) => ({
+        kind: d.kind,
+        title: d.title,
+        amount: d.amountKrw != null ? fmtKrwCompact(d.amountKrw) : "—",
+        status: d.status,
+      })),
+    });
     const total = computeCampaignTotalAmount(p.financialDocs);
     if (total > 0) {
-      y += 4;
       ensureSpace(10);
       setColor(doc, "fill", C_BLACK);
       doc.rect(MARGIN_X, y - 4, CONTENT_W, 9, "F");
@@ -692,22 +911,11 @@ function drawBody(
       doc.setFont(fam, hasKrFont ? "normal" : "bold");
       doc.setFontSize(10);
       setColor(doc, "text", C_ACCENT);
-      doc.text(
-        `${total.toLocaleString("ko-KR")}원`,
-        PAGE_W - MARGIN_X - 4,
-        y + 2,
-        { align: "right" },
-      );
+      doc.text(fmtKrwCompact(total), PAGE_W - MARGIN_X - 4, y + 2, {
+        align: "right",
+      });
       y += 14;
-    } else {
-      y += 8;
     }
-  }
-
-  if (p.aiInsightsKo?.trim()) {
-    ensureSpace(14);
-    y = writeSectionHeader(doc, fam, "AI 인사이트 · 다음 캠페인 제안", y);
-    writeBody(p.aiInsightsKo);
   }
 
   // 마지막 디스클레이머
@@ -717,7 +925,7 @@ function drawBody(
   doc.setFontSize(7.5);
   setColor(doc, "text", C_GRAY);
   doc.text(
-    "// 본 보고서는 관리 시스템 데이터 및 AI 초안을 기준으로 생성. 수치·표현은 최종 검증이 필요합니다.",
+    "// 본 보고서는 관리 시스템 데이터(매체/일정/문서)를 기준으로 생성되었습니다.",
     MARGIN_X,
     y,
   );

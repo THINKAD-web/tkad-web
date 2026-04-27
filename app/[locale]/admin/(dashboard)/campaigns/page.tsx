@@ -559,84 +559,9 @@ export default function AdminCampaignsPage() {
     }
   };
 
-  const downloadAiCompletionPdf = async () => {
-    if (!selectedId) return;
-    setPdfBusy(true);
-    try {
-      const res = await fetch(
-        `/api/admin/campaigns/${selectedId}/generate-report`,
-        {
-          method: "POST",
-          credentials: "include",
-        },
-      );
-      if (!res.ok) {
-        const j = (await res.json().catch(() => ({}))) as { error?: string };
-        const hint =
-          res.status === 503
-            ? "\n(서버에 ANTHROPIC_API_KEY 가 설정되어 있지 않습니다. Vercel 환경변수를 확인해주세요.)"
-            : "";
-        window.alert(`${j.error ?? "PDF 생성 실패"}${hint}`);
-        return;
-      }
-      const blob = await res.blob();
-      const cd = res.headers.get("Content-Disposition");
-      // #5: RFC 5987 filename*=UTF-8'' 우선 (한글 파일명), 없으면 ASCII fallback
-      let name = "THINKAD-OOH-Report.pdf";
-      const utf8Match = cd?.match(/filename\*=UTF-8''([^;]+)/i);
-      if (utf8Match?.[1]) {
-        try {
-          name = decodeURIComponent(utf8Match[1].trim());
-        } catch {
-          /* fall through */
-        }
-      } else {
-        const asciiMatch = cd?.match(/filename="([^"]+)"/);
-        if (asciiMatch?.[1]) name = asciiMatch[1];
-      }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = name;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error("[admin/campaigns] AI PDF fetch failed", e);
-      window.alert(
-        `PDF 생성 중 네트워크 오류가 발생했습니다.\n${e instanceof Error ? e.message : String(e)}`,
-      );
-    } finally {
-      setPdfBusy(false);
-    }
-  };
+  // (규칙) AI 기반 보고서 생성은 비활성화되었습니다.
 
-  const createDraftSuccessCase = async () => {
-    if (!selectedId) return;
-    setSuccessCaseBusy(true);
-    try {
-      const res = await fetch(
-        `/api/admin/campaigns/${selectedId}/draft-success-case`,
-        { method: "POST", credentials: "include" },
-      );
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        successCaseId?: string | null;
-      };
-      if (!res.ok) {
-        window.alert(data.error ?? "실패");
-        return;
-      }
-      if (data.successCaseId) {
-        window.open(
-          `/${adminLocale}/admin/ai-content/edit/${data.successCaseId}?type=success_case`,
-          "_blank",
-          "noopener,noreferrer",
-        );
-      }
-    } finally {
-      setSuccessCaseBusy(false);
-    }
-  };
+  // (규칙) AI 기반 성공사례 초안 생성은 비활성화되었습니다.
 
   const addEvent = async () => {
     if (!selectedId || !evForm.title || !evForm.startsAt || !evForm.endsAt)
@@ -1023,7 +948,7 @@ export default function AdminCampaignsPage() {
                 </div>
 
                 {/* #ADMIN-CAMPAIGNS-1: 보고서 액션 버튼 brutalist 통일.
-                    보고서 미리보기 토글 / 완료 PDF (AI) / 간단 PDF / 성공사례 초안 (AI) */}
+                    보고서 미리보기 토글 / 완료 보고서 PDF / 간단 PDF */}
                 <div className="space-y-2 border-2 border-bx-black bg-bx-white p-3">
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
                     [ REPORT ACTIONS ]
@@ -1031,30 +956,29 @@ export default function AdminCampaignsPage() {
                   <div className="flex flex-wrap gap-0">
                     <button
                       type="button"
-                      disabled={successCaseBusy}
-                      onClick={() => void createDraftSuccessCase()}
-                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      {successCaseBusy ? "…" : null}
-                      성공사례 초안 (AI)
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => setShowReportPreview((v) => !v)}
-                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                      className="inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
                     </button>
-                    <button
-                      type="button"
-                      disabled={pdfBusy}
-                      onClick={() => void downloadAiCompletionPdf()}
+                    <a
+                      href={
+                        selectedId
+                          ? `/api/admin/campaigns/${selectedId}/completion-report`
+                          : "#"
+                      }
                       className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-accent bg-bx-accent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:opacity-40 disabled:cursor-not-allowed"
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-disabled={!selectedId}
+                      onClick={(e) => {
+                        if (!selectedId) e.preventDefault();
+                      }}
                     >
                       <FileDown className="h-3.5 w-3.5" />
-                      {pdfBusy ? "생성 중…" : "완료 보고서 PDF (AI)"}
-                    </button>
+                      완료 보고서 PDF
+                    </a>
                     <a
                       href={`/api/admin/campaigns/${selectedId}/completion-report`}
                       className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
@@ -1066,7 +990,7 @@ export default function AdminCampaignsPage() {
                     </a>
                   </div>
                   <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
-                    {`// `}AI 보고서는 노출·성과·인사이트 섹션 포함. 간단 PDF는 일정·증빙·문서만.
+                    {`// `}완료 보고서는 KPI/패턴/매체/일정/문서를 포함. 간단 PDF는 일정·증빙·문서만.
                   </p>
                 </div>
 
