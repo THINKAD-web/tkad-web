@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function RegisterPage() {
@@ -58,16 +58,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-10 bg-gradient-to-b from-secondary/30 to-background">
+    <div className="flex min-h-[calc(100vh-72px)] items-center justify-center bg-bx-off px-4 py-10 dark:bg-bx-black">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-primary">회원가입</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            THINKAD 계정을 만들어보세요
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ REGISTER ]
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-bx-black">
+            회원가입
+          </h1>
+          <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+            {`// `}THINKAD 계정을 만들어보세요
           </p>
         </div>
 
-        <div className="bg-card border border-border/60 rounded-2xl shadow-sm p-6 sm:p-8">
+        <div className="border-2 border-bx-black bg-bx-white p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <Field label="이름" htmlFor="name">
               <input
@@ -94,11 +99,7 @@ export default function RegisterPage() {
               />
             </Field>
 
-            <Field
-              label="비밀번호"
-              htmlFor="password"
-              hint="(8자 이상)"
-            >
+            <Field label="비밀번호" htmlFor="password" hint="(8자 이상)">
               <input
                 id="password"
                 type="password"
@@ -125,21 +126,30 @@ export default function RegisterPage() {
             </Field>
 
             {error && (
-              <div className="text-sm text-destructive bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2">
-                {error}
+              <div className="border-2 border-bx-accent bg-bx-white px-3 py-2 font-mono text-[12px] tracking-tight text-bx-accent">
+                {`// `}{error}
               </div>
             )}
 
-            <Button type="submit" disabled={loading} className="w-full h-11">
+            <BtnBlock
+              type="submit"
+              variant="accent"
+              size="lg"
+              disabled={loading}
+              className="w-full"
+            >
               {loading && <Spinner size="sm" />}
               {loading ? "가입 중…" : "가입하기"}
-            </Button>
+            </BtnBlock>
           </form>
         </div>
 
-        <p className="mt-6 text-sm text-center text-muted-foreground">
-          이미 계정이 있으신가요?{" "}
-          <Link href="/login" className="text-primary font-semibold hover:underline">
+        <p className="mt-6 text-center font-mono text-[12px] tracking-tight text-bx-gray-dim">
+          {`// `}이미 계정이 있으신가요?{" "}
+          <Link
+            href="/login"
+            className="border-b-2 border-bx-black pb-0.5 font-bold text-bx-black transition-colors hover:border-bx-accent hover:text-bx-accent"
+          >
             로그인
           </Link>
         </p>
@@ -149,7 +159,7 @@ export default function RegisterPage() {
 }
 
 const inputCls =
-  "w-full h-11 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
+  "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
 
 function Field({
   label,
@@ -163,10 +173,12 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-foreground">
-        {label}
-        {hint && <span className="ml-1 text-xs text-muted-foreground">{hint}</span>}
+    <div>
+      <label
+        htmlFor={htmlFor}
+        className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent"
+      >
+        [ {label}{hint && <span className="ml-1 text-bx-gray-dim">{hint}</span>} ]
       </label>
       {children}
     </div>
