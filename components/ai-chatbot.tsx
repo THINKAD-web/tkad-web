@@ -178,7 +178,7 @@ export default function AiChatbot() {
           type="button"
           onClick={() => setOpen((o) => !o)}
           className={cn(
-            "relative z-10 flex h-14 w-14 items-center justify-center border-2 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bx-accent",
+            "relative z-10 flex h-11 w-11 items-center justify-center border-2 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bx-accent",
             open
               ? "border-bx-black bg-bx-black text-bx-white hover:bg-bx-accent hover:border-bx-accent"
               : "border-bx-black bg-bx-accent text-white hover:bg-bx-black hover:border-bx-black",
@@ -187,9 +187,9 @@ export default function AiChatbot() {
           aria-label={open ? t("closeAria") : t("openAria")}
         >
           {open ? (
-            <X className="h-6 w-6" strokeWidth={2.5} />
+            <X className="h-5 w-5" strokeWidth={2.5} />
           ) : (
-            <MessageCircle className="h-7 w-7" strokeWidth={2} />
+            <MessageCircle className="h-5 w-5" strokeWidth={2} />
           )}
         </button>
         <span
@@ -220,16 +220,16 @@ export default function AiChatbot() {
             <div className="flex shrink-0 flex-col border-b-2 border-bx-black bg-bx-black text-bx-white">
               <div className="flex items-center gap-3 px-4 py-3">
                 <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white"
                   aria-hidden
                 >
-                  <Bot className="h-5 w-5" strokeWidth={2} />
+                  <Bot className="h-6 w-6" strokeWidth={2} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
                     [ AI ASSISTANT ]
                   </p>
-                  <p className="mt-1 truncate text-sm font-bold tracking-tight text-bx-white">
+                  <p className="mt-1 truncate text-base font-bold tracking-tight text-bx-white">
                     {t("title")}
                   </p>
                 </div>
