@@ -40,11 +40,11 @@ export function ThemeToggle({ className }: { className?: string }) {
       title={mounted ? label : undefined}
       className={
         className ??
-        "inline-flex h-9 w-9 items-center justify-center rounded-full border border-primary/14 bg-white/88 text-primary/70 transition-all duration-300 hover:border-silver/55 hover:bg-white hover:text-primary dark:bg-card dark:border-border dark:text-foreground/80 dark:hover:bg-secondary/60"
+        "inline-flex h-9 w-9 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
       }
     >
       {!mounted ? (
-        <span className="block h-4 w-4 rounded-full bg-current opacity-20" />
+        <span className="block h-4 w-4 bg-current opacity-20" />
       ) : theme === "system" ? (
         <Monitor className="h-4 w-4" />
       ) : resolvedTheme === "dark" ? (
