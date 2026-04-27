@@ -558,7 +558,8 @@ export default function MediaBrowseClient({
             />
           ) : (
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-3">
+              {/* #MEDIA-1: 정밀필터 진입점 숨김 (코드 보존) */}
+              <div className="hidden flex-col gap-3">
                 <button
                   type="button"
                   onClick={togglePrecisionFilters}
@@ -691,7 +692,8 @@ export default function MediaBrowseClient({
                         </option>
                       </select>
                     </label>
-                    <div className="inline-flex border-2 border-bx-black bg-bx-white">
+                    {/* #MEDIA-1: 목록/지도 뷰 토글 진입점 숨김 (코드 보존) */}
+                    <div className="hidden border-2 border-bx-black bg-bx-white">
                       <button
                         type="button"
                         onClick={() => setBrowseMode("list")}

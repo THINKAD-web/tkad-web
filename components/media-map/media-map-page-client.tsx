@@ -216,7 +216,8 @@ export default function MediaMapPageClient() {
               className="w-full h-12 pl-11 pr-4 bg-background border border-border/80 rounded-full text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary focus:shadow-md transition-all"
             />
           </div>
-          <div className="flex items-center justify-between gap-2">
+          {/* #MAP-2: 검색창 아래 필터 영역 숨김 (코드는 보존) */}
+          <div className="hidden items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => setFiltersExpanded((v) => !v)}
@@ -250,7 +251,7 @@ export default function MediaMapPageClient() {
             </div>
           </div>
 
-          {filtersExpanded && (
+          {filtersExpanded && false && (
             <div className="space-y-2 rounded-lg border border-dashed border-border/70 bg-muted/40 p-2.5">
               <div className="flex gap-2">
                 <select

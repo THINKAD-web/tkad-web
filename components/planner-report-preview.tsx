@@ -88,7 +88,8 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
       id="planner-report-content"
       className="box-border w-full max-w-[240mm] space-y-8 border-2 border-bx-black bg-bx-white p-4 text-bx-black antialiased sm:p-6"
     >
-      <div className="border-2 border-bx-black bg-bx-black p-6 text-bx-white sm:p-8">
+      {/* #PLANNER-2: 외곽 보더만 남기고 헤더/그리드 내부 보더 제거 */}
+      <div className="bg-bx-black p-6 text-bx-white sm:p-8">
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
           [ THINKAD PLANNER ]
         </p>
@@ -99,15 +100,15 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
           {`// `}
           {generatedAt}
         </p>
-        <dl className="mt-6 grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="-mt-[2px] -ml-[2px] border-2 border-bx-white px-4 py-3">
+        <dl className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
             <dt className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
               <Target className="h-3.5 w-3.5" aria-hidden />
               {t("reportLabelGoal")}
             </dt>
             <dd className="mt-1 text-sm font-bold">{goalTitle}</dd>
           </div>
-          <div className="-mt-[2px] -ml-[2px] border-2 border-bx-white px-4 py-3">
+          <div>
             <dt className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
               <Wallet className="h-3.5 w-3.5" aria-hidden />
               {t("reportLabelBudget")}
@@ -117,35 +118,35 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
               {isKo ? "만원 (총)" : " ₩10K (total)"}
             </dd>
           </div>
-          <div className="-mt-[2px] -ml-[2px] border-2 border-bx-white px-4 py-3">
+          <div>
             <dt className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
               <CalendarRange className="h-3.5 w-3.5" aria-hidden />
               {t("reportLabelPeriod")}
             </dt>
             <dd className="mt-1 text-sm font-bold">{periodDisplay}</dd>
           </div>
-          <div className="-mt-[2px] -ml-[2px] border-2 border-bx-white px-4 py-3">
+          <div>
             <dt className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
               <MapPin className="h-3.5 w-3.5" aria-hidden />
               {t("reportLabelRegions")}
             </dt>
             <dd className="mt-1 text-sm font-bold">{regionsText}</dd>
           </div>
-          <div className="-mt-[2px] -ml-[2px] border-2 border-bx-white px-4 py-3">
+          <div>
             <dt className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
               <Layers className="h-3.5 w-3.5" aria-hidden />
               {t("reportLabelCategories")}
             </dt>
             <dd className="mt-1 text-sm font-bold">{categoriesText}</dd>
           </div>
-          <div className="-mt-[2px] -ml-[2px] border-2 border-bx-white px-4 py-3">
+          <div>
             <dt className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
               <Users className="h-3.5 w-3.5" aria-hidden />
               {t("reportLabelAge")}
             </dt>
             <dd className="mt-1 text-sm font-bold">{ageText}</dd>
           </div>
-          <div className="-mt-[2px] -ml-[2px] border-2 border-bx-white px-4 py-3 sm:col-span-2 lg:col-span-3">
+          <div className="sm:col-span-2 lg:col-span-3">
             <dt className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
               <Briefcase className="h-3.5 w-3.5" aria-hidden />
               {t("reportLabelIndustry")}

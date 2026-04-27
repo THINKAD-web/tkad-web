@@ -18,7 +18,6 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 
-import { ProcessStepImage } from "@/components/process-step-image";
 import { TestimonialsCarousel } from "@/components/testimonials-carousel";
 import { HomeMediaCarousel } from "@/components/home-media-carousel";
 import { testimonials } from "@/data/testimonials";
@@ -239,14 +238,15 @@ function HomeContent({
             ].map((item, index) => (
               <ScrollAnimate key={item.step} delay={index * 120}>
                 <div className="group relative h-full border-2 border-bx-black bg-bx-white lg:border-0 lg:border-t-2">
-                  {/* 현장 사진 영역 */}
-                  <div className="relative aspect-[16/10] overflow-hidden border-b-2 border-bx-black bg-bx-off">
-                    <ProcessStepImage src={item.image} alt="" />
+                  {/* #HOME-1: 사진 → SVG 아이콘 */}
+                  <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden border-b-2 border-bx-black bg-bx-off">
+                    <item.icon
+                      className="h-20 w-20 text-bx-black sm:h-24 sm:w-24"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />
                     <span className="absolute left-0 top-0 inline-flex items-center gap-1 border-b-2 border-r-2 border-bx-black bg-bx-accent px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
                       STEP {item.step}
-                    </span>
-                    <span className="absolute right-0 bottom-0 inline-flex h-10 w-10 items-center justify-center border-l-2 border-t-2 border-bx-black bg-bx-white">
-                      <item.icon className="h-5 w-5 text-bx-black" strokeWidth={1.75} />
                     </span>
                   </div>
                   <div className="flex flex-col gap-2 p-6">
