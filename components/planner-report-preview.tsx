@@ -9,6 +9,7 @@ import type { PlannerMetrics } from "@/lib/planner-logic";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import { DEFAULT_LOGO_PLACEMENT } from "@/components/planner/composite-preview";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
+import { portfolioDailyByCategory } from "@/lib/planner-calculate";
 import {
   PlannerImpressionsLineChart,
   PlannerRoiLineChart,
@@ -65,6 +66,9 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
   ageText,
   industryText,
   portfolio,
+  matchedCount,
+  monthCompare,
+  cpmBars,
   metrics,
   reachCorePct,
   reachExtendedPct,
