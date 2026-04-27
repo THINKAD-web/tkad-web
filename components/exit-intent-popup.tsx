@@ -2,12 +2,20 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useLocale } from "next-intl";
-import { PhoneCall, Gift } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { PhoneCall, Gift, ArrowRight } from "lucide-react";
+import { BtnBlock } from "@/components/brutalist";
 import { Link } from "@/i18n/navigation";
 import Modal from "@/components/ui/modal";
 
-const STORAGE_KEY = "tkad-exit-intent-dismissed";
+const STORAGE_KEY = "tkad-exit-intent-last-shown-date";
+
+function todayKey(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 export default function ExitIntentPopup() {
   const locale = useLocale();
@@ -17,17 +25,22 @@ export default function ExitIntentPopup() {
   const dismiss = useCallback(() => {
     setShow(false);
     try {
-      sessionStorage.setItem(STORAGE_KEY, "1");
+      localStorage.setItem(STORAGE_KEY, todayKey());
     } catch {}
   }, []);
 
   useEffect(() => {
     try {
-      if (sessionStorage.getItem(STORAGE_KEY)) return;
+      const last = localStorage.getItem(STORAGE_KEY);
+      if (last && last === todayKey()) return;
     } catch {}
 
     const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0) setShow(true);
+      if (e.clientY > 0) return;
+      setShow(true);
+      try {
+        localStorage.setItem(STORAGE_KEY, todayKey());
+      } catch {}
     };
 
     document.addEventListener("mouseout", handleMouseLeave);
@@ -39,42 +52,68 @@ export default function ExitIntentPopup() {
       open={show}
       onClose={dismiss}
       ariaLabel={isKo ? "특별 혜택 안내" : "Special offer"}
-      className="max-w-md"
+      className="max-w-[560px] rounded-none border-2 border-bx-black"
     >
-      <div className="p-8">
-        <div className="flex flex-col items-center text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold/10">
-            <Gift className="h-8 w-8 text-gold" />
+      <div className="bg-bx-white">
+        <div className="border-b-2 border-bx-black bg-bx-black px-6 py-4">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ FREE CONSULTATION ]
+          </p>
+        </div>
+
+        <div className="grid gap-0 md:grid-cols-[220px_1fr]">
+          <div className="border-b-2 border-bx-black bg-bx-off p-6 md:border-b-0 md:border-r-2">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center border-2 border-bx-black bg-bx-white">
+                <Gift className="h-6 w-6 text-bx-accent" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  [ BONUS ]
+                </p>
+                <p className="mt-1 text-sm font-bold text-bx-black">
+                  {isKo ? "OOH 전략 리포트" : "OOH Strategy Report"}
+                </p>
+              </div>
+            </div>
+            <p className="mt-4 text-xs leading-relaxed text-bx-gray-dim">
+              {isKo
+                ? "상담 신청 시, 선택하신 조건 기반으로 리포트를 제공합니다."
+                : "Request a consult to receive a report based on your inputs."}
+            </p>
           </div>
 
-          <h3 className="text-xl font-bold text-navy">
-            {isKo
-              ? "떠나시기 전, 잠깐!"
-              : "Wait, before you go!"}
-          </h3>
+          <div className="p-6">
+            <h3 className="text-2xl font-extrabold tracking-tight text-bx-black">
+              {isKo ? "떠나시기 전, 잠깐!" : "Wait, before you go!"}
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-bx-gray-dim">
+              {isKo
+                ? "무료 상담을 신청하시면 맞춤형 OOH 광고 전략 리포트를 무료로 제공해 드립니다."
+                : "Request a free consultation and receive a customized OOH advertising strategy report at no cost."}
+            </p>
 
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {isKo
-              ? "무료 상담을 신청하시면 맞춤형 OOH 광고 전략 리포트를 무료로 제공해 드립니다."
-              : "Request a free consultation and receive a customized OOH advertising strategy report at no cost."}
-          </p>
+            <div className="mt-6 flex flex-wrap gap-0">
+              <Link href="/contact" onClick={dismiss} className="w-full sm:w-auto">
+                <BtnBlock className="w-full sm:w-auto">
+                  <PhoneCall className="h-4 w-4" />
+                  {isKo ? "무료 상담 신청하기" : "Request Free Consultation"}
+                  <ArrowRight className="h-4 w-4" />
+                </BtnBlock>
+              </Link>
+              <button
+                type="button"
+                onClick={dismiss}
+                className="-ml-[2px] w-full border-2 border-bx-black bg-bx-white px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white sm:w-auto"
+              >
+                {isKo ? "다음에 할게요" : "Maybe later"}
+              </button>
+            </div>
 
-          <Link href="/contact" className="mt-6 w-full" onClick={dismiss}>
-            <Button
-              size="lg"
-              className="h-14 w-full rounded-xl bg-gold text-base font-bold text-navy hover:bg-gold-dark"
-            >
-              <PhoneCall className="mr-2 h-5 w-5" />
-              {isKo ? "무료 상담 신청하기" : "Request Free Consultation"}
-            </Button>
-          </Link>
-
-          <button
-            onClick={dismiss}
-            className="mt-3 text-sm text-muted-foreground hover:text-navy"
-          >
-            {isKo ? "괜찮습니다, 다음에 할게요" : "No thanks, maybe later"}
-          </button>
+            <p className="mt-4 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+              {`// `}{isKo ? "하루에 한 번만 노출됩니다." : "Shown once per day."}
+            </p>
+          </div>
         </div>
       </div>
     </Modal>

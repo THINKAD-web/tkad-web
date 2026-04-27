@@ -5,6 +5,9 @@ import { BtnBlock } from "@/components/brutalist";
 import { Camera, Download, Loader2 } from "lucide-react";
 import { captureElementAsPng, downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
+import type { MediaItem } from "@/lib/media-data";
+import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
+import { PlannerDailyReachBarChart, PlannerReachDonutChart } from "@/components/planner-charts";
 import {
   computeCampaignBaseStats,
   computeCampaignPlannerKpis,
@@ -56,10 +59,29 @@ function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 }
 
+function fmtShort(d: string) {
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return "—";
+  return dt.toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit" });
+}
+
 function fmtAmount(n: number) {
   if (n >= 100_000_000) return `₩${(n / 100_000_000).toFixed(1).replace(/\.0$/, "")}억`;
   if (n >= 10_000) return `₩${Math.round(n / 10_000).toLocaleString()}만`;
   return `₩${n.toLocaleString()}`;
+}
+
+function thumbUrl(m: Partial<MediaItem> & { imageUrl?: string | null }): string | null {
+  // Prefer explicit imageUrl if provided; otherwise use existing media helpers (if shape matches).
+  if (m.imageUrl) return m.imageUrl;
+  try {
+    // MediaItem shape in this file is partial (from bookings), so guard.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anyM = m as any as MediaItem;
+    return getPrimaryMediaImageUrl(anyM) ?? resolveMediaGallery(anyM)[0] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export default function CampaignReportPreview({ data }: { data: CampaignReportData }) {
@@ -71,27 +93,8 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
   const totalAmount2 = computeCampaignTotalAmount(data.financialDocs);
   const plannerKpis = computeCampaignPlannerKpis(stats, totalAmount2);
 
-  /** 매체별 효율 (단가 vs 유동인구·CPM) */
-  const mediaEfficiency = (() => {
-    if (!data.mediaBookings?.length || !data.financialDocs?.length) return null;
-    const totalDays = stats?.totalDays ?? 0;
-    const total = totalAmount2;
-    if (total <= 0 || totalDays <= 0) return null;
-    return data.mediaBookings.slice(0, 8).map((b) => {
-      const days = diffDays(b.startsAt, b.endsAt);
-      const exposure = (b.dailyFootTraffic ?? 0) * days;
-      const allocAmount = total * (days / totalDays / data.mediaBookings!.length);
-      const cpm = exposure > 0 ? Math.round((allocAmount / exposure) * 1000) : null;
-      return {
-        name: b.mediaName,
-        location: b.location,
-        days,
-        dailyFootTraffic: b.dailyFootTraffic ?? 0,
-        cpm,
-        type: b.type ?? null,
-      };
-    });
-  })();
+  // NOTE: 규칙 준수(새 산식/평가/추천 금지)를 위해 "매체별 추정 CPM" 등
+  // 추가 계산(안분/추정) 기반 효율 분석 섹션은 표시하지 않습니다.
 
   /** 유형·지역 분포 */
   const distribution = (() => {
@@ -123,6 +126,173 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
       return `${fmtDate(new Date(Math.min(...starts)).toISOString())} ~ ${fmtDate(new Date(Math.max(...ends)).toISOString())}`;
     }
     return null;
+  })();
+
+  const mediaThumbs = (() => {
+    const raw = data.mediaBookings ?? [];
+    // Try to find any plausible image URL on the booking object itself (if present).
+    const urls: string[] = [];
+    for (const b of raw) {
+      const u =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.imageUrl ??
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.thumbnailUrl ??
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.media?.imageUrl ??
+        null;
+      if (typeof u === "string" && u.startsWith("http")) urls.push(u);
+      else {
+        const fallback = thumbUrl(b as unknown as Partial<MediaItem>);
+        if (fallback) urls.push(fallback);
+      }
+    }
+    // Dedupe
+    return Array.from(new Set(urls)).slice(0, 9);
+  })();
+
+  const dashboardBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const byType = new Map<string, number>();
+    const byRegion = new Map<string, number>();
+    for (const b of bookings) {
+      const t = (b.type ?? "기타").toString();
+      const r = (b.region ?? b.location?.split(" ")[0] ?? "-").toString();
+      const daily = b.dailyFootTraffic ?? 0;
+      byType.set(t, (byType.get(t) ?? 0) + daily);
+      byRegion.set(r, (byRegion.get(r) ?? 0) + 1);
+    }
+    const typeBars = Array.from(byType.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k, value: v }));
+    const regionBars = Array.from(byRegion.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k, value: v }));
+    return { typeBars, regionBars };
+  })();
+
+  const topMediaBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const foot = bookings
+      .filter((b) => typeof b.dailyFootTraffic === "number" && (b.dailyFootTraffic ?? 0) > 0)
+      .sort((a, b) => (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0))
+      .slice(0, 6)
+      .map((b, i) => ({
+        key: `${b.mediaName}-${i}`,
+        label: (b.mediaName ?? "—").slice(0, 10),
+        value: b.dailyFootTraffic ?? 0,
+      }));
+    const imp = bookings
+      .filter((b) => typeof b.impressions === "number" && (b.impressions ?? 0) > 0)
+      .sort((a, b) => (b.impressions ?? 0) - (a.impressions ?? 0))
+      .slice(0, 6)
+      .map((b, i) => ({
+        key: `${b.mediaName}-${i}`,
+        label: (b.mediaName ?? "—").slice(0, 10),
+        value: b.impressions ?? 0,
+      }));
+    return { foot, imp };
+  })();
+
+  const opsBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const byBookingStatus = new Map<string, number>();
+    const byDocStatus = new Map<string, number>();
+    const visibilityTop = bookings
+      .filter((b) => typeof b.visibilityScore === "number" && (b.visibilityScore ?? 0) > 0)
+      .sort((a, b) => (b.visibilityScore ?? 0) - (a.visibilityScore ?? 0))
+      .slice(0, 6)
+      .map((b, i) => ({
+        key: `${b.mediaName}-${i}`,
+        label: (b.mediaName ?? "—").slice(0, 10),
+        value: b.visibilityScore ?? 0,
+      }));
+
+    for (const b of bookings) {
+      const k = (b.status ?? "—").toString();
+      byBookingStatus.set(k, (byBookingStatus.get(k) ?? 0) + 1);
+    }
+    for (const d of data.financialDocs ?? []) {
+      const k = `${d.kind ?? "DOC"} · ${d.status ?? "—"}`;
+      byDocStatus.set(k, (byDocStatus.get(k) ?? 0) + 1);
+    }
+    const bookingStatusBars = Array.from(byBookingStatus.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k.slice(0, 10), value: v }));
+    const docStatusBars = Array.from(byDocStatus.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k.slice(0, 10), value: v }));
+
+    return { bookingStatusBars, docStatusBars, visibilityTop };
+  })();
+
+  const scheduleBars = (() => {
+    const byKind = new Map<string, number>();
+    for (const e of data.scheduleEvents ?? []) {
+      const k = (e.kind ?? "EVENT").toString();
+      byKind.set(k, (byKind.get(k) ?? 0) + 1);
+    }
+    const kindBars = Array.from(byKind.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([k, v]) => ({ key: k, label: k.slice(0, 10), value: v }));
+    return { kindBars };
+  })();
+
+  const bookingMonthBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const buckets = new Array(12).fill(0) as number[];
+    for (const b of bookings) {
+      const d = new Date(b.startsAt);
+      if (Number.isNaN(d.getTime())) continue;
+      const m = d.getMonth(); // 0~11
+      buckets[m] += 1;
+    }
+    const bars = buckets
+      .map((v, i) => ({ key: String(i + 1), label: `${i + 1}월`, value: v }))
+      .filter((p) => p.value > 0);
+    return { bars };
+  })();
+
+  const timeline = (() => {
+    const bookings = (data.mediaBookings ?? []).filter(Boolean);
+    if (bookings.length === 0) return null;
+    const points = bookings
+      .map((b) => ({
+        ...b,
+        s: new Date(b.startsAt).getTime(),
+        e: new Date(b.endsAt).getTime(),
+      }))
+      .filter((x) => Number.isFinite(x.s) && Number.isFinite(x.e) && x.e >= x.s);
+    if (points.length === 0) return null;
+    const minS = Math.min(...points.map((p) => p.s));
+    const maxE = Math.max(...points.map((p) => p.e));
+    const span = Math.max(1, maxE - minS);
+    const rows = points
+      .sort((a, b) => a.s - b.s)
+      .slice(0, 14)
+      .map((p, idx) => {
+        const left = ((p.s - minS) / span) * 100;
+        const width = ((p.e - p.s) / span) * 100;
+        return {
+          key: `${p.mediaName}-${idx}`,
+          label: (p.mediaName ?? "—").slice(0, 18),
+          left,
+          width: Math.max(1.2, width),
+          startsAt: p.startsAt,
+          endsAt: p.endsAt,
+        };
+      });
+    return {
+      minLabel: fmtShort(new Date(minS).toISOString()),
+      maxLabel: fmtShort(new Date(maxE).toISOString()),
+      rows,
+      total: points.length,
+    };
   })();
 
   const handleCapture = async () => {
@@ -224,6 +394,590 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
         </div>
 
         <div style={{ padding: "32px 40px" }}>
+
+          {/* Visual hero strip (media + proof) — preview only */}
+          {(mediaThumbs.length > 0 || (data.proofPhotos?.length ?? 0) > 0) && (
+            <div style={{ marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ VISUAL HIGHLIGHTS ]
+              </h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 0 }}>
+                {[
+                  ...mediaThumbs.slice(0, 6).map((u) => ({ url: u, tag: "MEDIA" })),
+                  ...(data.proofPhotos ?? []).slice(0, Math.max(0, 6 - mediaThumbs.slice(0, 6).length)).map((p) => ({ url: p.imageUrl, tag: "PROOF" })),
+                ].slice(0, 6).map((x, i) => (
+                  <div
+                    key={`${x.tag}-${i}`}
+                    style={{
+                      marginTop: "-2px",
+                      marginLeft: "-2px",
+                      border: "2px solid #000000",
+                      background: "#ffffff",
+                      overflow: "hidden",
+                      position: "relative",
+                    }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={x.url}
+                      alt=""
+                      crossOrigin="anonymous"
+                      style={{ width: "100%", height: "96px", objectFit: "cover", display: "block" }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        background: "#000000",
+                        color: "#FF6600",
+                        borderRight: "2px solid #000000",
+                        borderBottom: "2px solid #000000",
+                        padding: "4px 8px",
+                        fontSize: "9px",
+                        fontWeight: 800,
+                        letterSpacing: "0.18em",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                      }}
+                    >
+                      [ {x.tag} ]
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: "10px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                {`// `}미리보기에서는 집행 매체/증빙 이미지를 우선 노출합니다. (데이터가 없으면 생략)
+              </p>
+            </div>
+          )}
+
+          {/* Executive Summary — /planner 톤의 컴팩트 대시보드 (기존 KPI만 재배치) */}
+          {(stats || plannerKpis || totalAmount > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ EXECUTIVE SUMMARY ]
+              </h2>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
+                {[
+                  {
+                    label: "집행 매체",
+                    value: stats ? `${stats.mediaCount}` : "—",
+                    suffix: "개",
+                    invert: false,
+                  },
+                  {
+                    label: "집행 기간",
+                    value: stats ? `${stats.totalDays}` : "—",
+                    suffix: "일",
+                    invert: false,
+                  },
+                  {
+                    label: "총 노출",
+                    value: plannerKpis ? `${(plannerKpis.totalImp / 10000).toLocaleString()}만` : "—",
+                    suffix: "회",
+                    invert: true,
+                  },
+                  {
+                    label: "도달인 추정",
+                    value: plannerKpis ? `${(plannerKpis.reach / 10000).toFixed(1)}만` : "—",
+                    suffix: "명",
+                    invert: false,
+                  },
+                  {
+                    label: "코어 도달률",
+                    value: plannerKpis ? `${plannerKpis.reachCorePct}` : "—",
+                    suffix: "%",
+                    invert: false,
+                  },
+                  {
+                    label: "확장 도달률",
+                    value: plannerKpis ? `${plannerKpis.reachExtendedPct}` : "—",
+                    suffix: "%",
+                    invert: false,
+                  },
+                  {
+                    label: "BLENDED CPM",
+                    value:
+                      plannerKpis?.blendedCpm != null
+                        ? `₩${plannerKpis.blendedCpm.toLocaleString()}`
+                        : "—",
+                    suffix: " / 1,000",
+                    invert: true,
+                  },
+                  {
+                    label: "ROI 효율",
+                    value:
+                      plannerKpis?.roiExpected != null
+                        ? `${(plannerKpis.roiExpected / 10000).toFixed(0)}만`
+                        : "—",
+                    suffix: "회/1억",
+                    invert: true,
+                  },
+                ].map((c) => (
+                  <div
+                    key={c.label}
+                    style={{
+                      marginTop: "-2px",
+                      marginLeft: "-2px",
+                      background: c.invert ? "#000000" : "#ffffff",
+                      border: "2px solid #000000",
+                      padding: "14px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.22em",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                        color: c.invert ? "#FF6600" : "#737373",
+                      }}
+                    >
+                      [ {c.label} ]
+                    </p>
+                    <p
+                      style={{
+                        margin: "8px 0 0",
+                        fontSize: "20px",
+                        fontWeight: 800,
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                        fontVariantNumeric: "tabular-nums",
+                        color: c.invert ? "#FF6600" : "#000000",
+                      }}
+                    >
+                      {c.value}
+                      {c.suffix ? (
+                        <span
+                          style={{
+                            marginLeft: "4px",
+                            fontSize: "10px",
+                            color: c.invert ? "rgba(255,255,255,0.55)" : "#737373",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {c.suffix}
+                        </span>
+                      ) : null}
+                    </p>
+                  </div>
+                ))}
+                {totalAmount > 0 && (
+                  <div
+                    style={{
+                      marginTop: "-2px",
+                      marginLeft: "-2px",
+                      background: "#000000",
+                      border: "2px solid #000000",
+                      padding: "14px",
+                      gridColumn: "span 4",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "10px",
+                        color: "#FF6600",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.22em",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                      }}
+                    >
+                      [ 총 집행 금액 ]
+                    </p>
+                    <p
+                      style={{
+                        margin: "8px 0 0",
+                        fontSize: "22px",
+                        fontWeight: 900,
+                        color: "#FF6600",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      {fmtAmount(totalAmount)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {distribution?.types?.length ? (
+                <div style={{ marginTop: "16px" }}>
+                  <p
+                    style={{
+                      margin: "0 0 10px",
+                      fontSize: "10px",
+                      color: "#737373",
+                      fontWeight: 700,
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    }}
+                  >
+                    [ 매체 유형 분포 (요약) ]
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                    {distribution.types.slice(0, 6).map(([label, count], i) => {
+                      const total = stats?.mediaCount ?? 0;
+                      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                      return (
+                        <div
+                          key={label}
+                          style={{
+                            marginTop: "-2px",
+                            background: "#ffffff",
+                            padding: "10px 12px",
+                            border: "2px solid #000000",
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                            <span style={{ fontSize: "11px", fontWeight: 700, color: "#000000" }}>{label}</span>
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                color: "#737373",
+                                fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                                fontVariantNumeric: "tabular-nums",
+                              }}
+                            >
+                              {count}개 · {pct}%
+                            </span>
+                          </div>
+                          <div style={{ height: "6px", background: "#f5f5f5", border: "2px solid #000000", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${pct}%`, background: i === 0 ? "#FF6600" : "#000000" }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {/* EFFECT DASHBOARD (charts) — planner chart components reused */}
+          {plannerKpis && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ EFFECT DASHBOARD ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-2">
+                <div className="border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 도달 구조 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerReachDonutChart
+                      corePct={plannerKpis.reachCorePct}
+                      extendedPct={plannerKpis.reachExtendedPct}
+                      title="도달 구조"
+                      coreLabel="Core"
+                      extendedLabel="Extended"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 유형별 일유동 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={dashboardBars.typeBars}
+                      title="유형별 일유동(합산)"
+                      valueLabel="daily"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 border-2 border-bx-black bg-bx-white">
+                <div className="border-b-2 border-bx-black p-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                    [ 지역 분포 ]
+                  </p>
+                </div>
+                <div className="p-4">
+                  <PlannerDailyReachBarChart
+                    data={dashboardBars.regionBars}
+                    title="지역별 집행 매체 수"
+                    valueLabel="count"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 노출 패턴 — 24h/weekday/monthly (브루탈 막대, html2canvas 안정) */}
+          {data.mediaBookings?.length ? (
+            <CampaignTrafficSection bookings={data.mediaBookings} />
+          ) : null}
+
+          {/* TOP MEDIA (bars) */}
+          {(topMediaBars.foot.length > 0 || topMediaBars.imp.length > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ TOP MEDIA (DATA) ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-2">
+                <div className="border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 매체별 일유동 TOP ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={topMediaBars.foot}
+                      title="매체별 일유동(상위)"
+                      valueLabel="daily"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 매체별 노출 TOP ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={topMediaBars.imp}
+                      title="매체별 노출(상위)"
+                      valueLabel="impressions"
+                    />
+                  </div>
+                </div>
+              </div>
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  fontSize: "10px",
+                  color: "#737373",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                {`// `}일유동/노출 값이 없는 매체는 차트에서 자동으로 제외됩니다.
+              </p>
+            </div>
+          )}
+
+          {/* OPERATIONS (more charts, no new KPIs) */}
+          {(opsBars.bookingStatusBars.length > 0 ||
+            opsBars.docStatusBars.length > 0 ||
+            opsBars.visibilityTop.length > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ OPERATIONS DASHBOARD ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-3">
+                <div className="border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 예약 상태 분포 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={opsBars.bookingStatusBars}
+                      title="예약 상태(매체 수)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 문서 상태 분포 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={opsBars.docStatusBars}
+                      title="문서 상태(건수)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 가시성 TOP ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={opsBars.visibilityTop}
+                      title="가시성 점수(상위)"
+                      valueLabel="score"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SCHEDULE (more charts) */}
+          {(scheduleBars.kindBars.length > 0 || bookingMonthBars.bars.length > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ SCHEDULE DASHBOARD ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-2">
+                <div className="border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 일정 이벤트 종류 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={scheduleBars.kindBars}
+                      title="일정 이벤트(종류별)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+                  <div className="border-b-2 border-bx-black p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 매체 시작 월 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={bookingMonthBars.bars}
+                      title="집행 시작 월(매체 수)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TIMELINE (gantt-style) */}
+          {timeline?.rows.length ? (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ TIMELINE (MEDIA) ]
+              </h2>
+              <div className="border-2 border-bx-black bg-bx-white">
+                <div className="border-b-2 border-bx-black p-4">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      [ 매체 집행 타임라인 ]
+                    </p>
+                    <p className="font-mono text-[10px] text-bx-gray-dim">
+                      {`// `}표시: {timeline.rows.length}/{timeline.total} · {timeline.minLabel} → {timeline.maxLabel}
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="space-y-2">
+                    {timeline.rows.map((r) => (
+                      <div key={r.key} className="grid grid-cols-[160px_1fr] gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-mono text-[10px] font-bold text-bx-black">
+                            {r.label}
+                          </p>
+                          <p className="font-mono text-[9px] text-bx-gray-dim">
+                            {fmtShort(r.startsAt)} ~ {fmtShort(r.endsAt)}
+                          </p>
+                        </div>
+                        <div className="relative h-8 border-2 border-bx-black bg-[#f5f5f5]">
+                          <div
+                            className="absolute top-0 h-full border-r-2 border-bx-black bg-bx-black"
+                            style={{
+                              left: `${Math.max(0, Math.min(98.8, r.left))}%`,
+                              width: `${Math.max(1.2, Math.min(100, r.width))}%`,
+                            }}
+                          />
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              backgroundImage:
+                                "linear-gradient(to right, rgba(0,0,0,0.10) 1px, transparent 1px)",
+                              backgroundSize: "10% 100%",
+                              pointerEvents: "none",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 font-mono text-[10px] text-bx-gray-dim">
+                    {`// `}집행 시작/종료 일자를 막대로만 표시합니다. (추가 계산/평가 없음)
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           {/* 캠페인 개요 — brutalist */}
           <div style={{ marginBottom: "28px" }}>
@@ -417,43 +1171,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
             <CampaignTrafficSection bookings={data.mediaBookings} />
           )}
 
-          {/* 매체별 효율 표 — brutalist */}
-          {mediaEfficiency && mediaEfficiency.length > 0 && (
-            <div style={{ marginBottom: "32px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                [ 매체별 효율 분석 ]
-              </h2>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", border: "2px solid #000000" }}>
-                <thead>
-                  <tr style={{ background: "#000000", color: "#ffffff" }}>
-                    {["매체", "유형", "기간", "일유동", "추정 CPM"].map((h) => (
-                      <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", borderRight: "2px solid #ffffff" }}>
-                        [ {h} ]
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {mediaEfficiency.map((m, i) => (
-                    <tr key={i} style={{ borderBottom: "2px solid #000000", background: i % 2 === 0 ? "#ffffff" : "#f5f5f5" }}>
-                      <td style={{ padding: "10px 12px", fontWeight: 700, color: "#000000" }}>{m.name}</td>
-                      <td style={{ padding: "10px 12px", color: "#000000" }}>{m.type ?? "—"}</td>
-                      <td style={{ padding: "10px 12px", color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>{m.days}일</td>
-                      <td style={{ padding: "10px 12px", color: "#000000", fontWeight: 600, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
-                        {m.dailyFootTraffic > 0 ? `${m.dailyFootTraffic.toLocaleString()}명` : "—"}
-                      </td>
-                      <td style={{ padding: "10px 12px", color: "#FF6600", fontWeight: 700, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
-                        {m.cpm != null ? `₩${m.cpm.toLocaleString()}` : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p style={{ margin: "8px 0 0", fontSize: "10px", color: "#737373", textAlign: "right", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                {`// `}매체별 비용은 일수 비율로 안분 추정. 정확한 단가는 견적서 참고.
-              </p>
-            </div>
-          )}
+          {/* (규칙) 매체별 "추정" 효율 분석 섹션 제거 */}
 
           {/* 유형 / 지역 분포 — brutalist */}
           {distribution && (
@@ -629,45 +1347,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
             </div>
           )}
 
-          {/* 핵심 인사이트 — brutalist */}
-          {plannerKpis && stats && (
-            <div style={{
-              marginBottom: "32px",
-              background: "#000000",
-              border: "2px solid #000000",
-              padding: "20px 24px",
-            }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", margin: "0 0 14px", textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                [ KEY INSIGHT ] 캠페인 종합 평가
-              </h2>
-              <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <li style={{ fontSize: "12px", color: "#ffffff", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                  <span style={{ position: "absolute", left: 0, color: "#FF6600", fontWeight: 800 }}>·</span>
-                  총 <strong style={{ color: "#FF6600" }}>{stats.mediaCount}개 매체</strong>를 <strong style={{ color: "#FF6600" }}>{stats.totalDays}일간</strong> 집행하여 <strong style={{ color: "#FF6600" }}>{(plannerKpis.totalImp / 10000).toLocaleString()}만회</strong>의 노출이 발생할 것으로 추정됩니다.
-                </li>
-                <li style={{ fontSize: "12px", color: "#ffffff", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                  <span style={{ position: "absolute", left: 0, color: "#FF6600", fontWeight: 800 }}>·</span>
-                  <strong style={{ color: "#FF6600" }}>코어 도달률 {plannerKpis.reachCorePct}%</strong>로 약 <strong style={{ color: "#FF6600" }}>{(plannerKpis.reach / 10000).toFixed(1)}만 명</strong>의 잠재 고객에게 메시지가 전달될 것으로 보입니다.
-                </li>
-                {plannerKpis.blendedCpm != null && (
-                  <li style={{ fontSize: "12px", color: "#ffffff", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                    <span style={{ position: "absolute", left: 0, color: "#FF6600", fontWeight: 800 }}>·</span>
-                    Blended CPM은 <strong style={{ color: "#FF6600" }}>₩{plannerKpis.blendedCpm.toLocaleString()}</strong>로 OOH 평균 대비 {plannerKpis.blendedCpm < 8000 ? "효율적인" : plannerKpis.blendedCpm < 15000 ? "양호한" : "프리미엄"} 수준입니다.
-                  </li>
-                )}
-                {avgVisibility != null && (
-                  <li style={{ fontSize: "12px", color: "#ffffff", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                    <span style={{ position: "absolute", left: 0, color: "#FF6600", fontWeight: 800 }}>·</span>
-                    평균 매체 검증 점수 <strong style={{ color: "#FF6600" }}>{avgVisibility} / 4</strong>로 가시성·노출 품질이 검증된 우수 매체 위주로 구성되었습니다.
-                  </li>
-                )}
-                <li style={{ fontSize: "10px", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, paddingLeft: "20px", position: "relative", marginTop: "6px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                  <span style={{ position: "absolute", left: 0 }}>※</span>
-                  {`// `}본 추정치는 OOH 평균 빈도·인지율 기반 가이드 지표. 실제 효과는 집행 현장·시기에 따라 달라질 수 있습니다.
-                </li>
-              </ul>
-            </div>
-          )}
+          {/* (규칙) 평가/인사이트 자동 생성 섹션 제거 */}
 
           {/* 푸터 — brutalist */}
           <div style={{ borderTop: "2px solid #000000", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>

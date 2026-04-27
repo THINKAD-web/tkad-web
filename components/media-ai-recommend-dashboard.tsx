@@ -269,6 +269,57 @@ export default function MediaAiRecommendDashboard({
             <Star className="h-4 w-4 text-bx-accent" />
             [ {tr("resultChartTitle")} ]
           </h3>
+          <div className="mt-3 grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-off p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {isKo ? "읽는 법" : "How to read"} ]
+              </p>
+              <ul className="mt-2 space-y-1 text-sm leading-relaxed text-bx-black">
+                <li>
+                  - {isKo ? "오른쪽일수록 추천 점수가 높아요." : "Further right = higher fit score."}
+                </li>
+                <li>
+                  - {isKo ? "위로 갈수록 월간 노출(추정)이 커요." : "Higher up = more estimated monthly reach."}
+                </li>
+                <li>
+                  - {isKo ? "오른쪽 위에 몰릴수록 유리해요." : "Top-right cluster is generally better."}
+                </li>
+              </ul>
+            </div>
+            <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {isKo ? "어려운 용어" : "Terms"} ]
+              </p>
+              <dl className="mt-2 space-y-2 text-sm text-bx-black">
+                <div>
+                  <dt className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black">
+                    {isKo ? "추천 점수" : "Fit score"}
+                  </dt>
+                  <dd className="text-bx-gray-dim">
+                    {isKo ? "조건(목표·지역·예산·타깃)과의 매칭 정도(0–100)" : "How well it matches your inputs (0–100)."}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black">
+                    {isKo ? "월간 노출(추정)" : "Est. monthly reach"}
+                  </dt>
+                  <dd className="text-bx-gray-dim">
+                    {isKo ? "서로 간 상대 비교용(정확한 실측이 아닐 수 있음)" : "For relative comparison (may not be measured)."}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4 sm:col-span-2 lg:col-span-1">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {isKo ? "빠른 팁" : "Quick tip"} ]
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-bx-gray-dim">
+                {isKo
+                  ? "차트는 ‘완벽한 답’이 아니라 후보를 빠르게 좁히기 위한 지도예요. TOP 3부터 보고, 마음에 드는 매체를 비교/견적으로 이어가세요."
+                  : "This chart helps you narrow options quickly. Start with TOP 3, then compare and request a quote."}
+              </p>
+            </div>
+          </div>
           <div className="mt-4">
             <MediaAiRecommendChart locale={locale} scored={scored} />
           </div>

@@ -4,16 +4,20 @@ import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
-const EXPIRATION_DAYS = 30;
+const EXPIRATION_DAYS_SHARE = 30;
+const EXPIRATION_HOURS_DRAFT = 24;
 
 const SavePlanBodySchema = z.object({
   userEmail: z.string().email().optional().nullable(),
   planJson: z.record(z.string(), z.unknown()),
+  /** `share`(기본): 30일 · `draft`: 24시간 임시 링크 */
+  saveMode: z.enum(["share", "draft"]).optional().default("share"),
 });
 
 /**
  * 플래너 상태 스냅샷 저장.
- * - 30일 후 자동 만료 (GET 시 expiresAt 체크, cron 으로 주기 purge 가능)
+ * - share: 30일 만료 (GET 시 expiresAt 체크, cron 으로 주기 purge 가능)
+ * - draft: 24시간 만료
  * - 익명 가능 (userEmail 없이도 저장)
  */
 export async function POST(request: NextRequest) {
@@ -35,9 +39,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const expiresAt = new Date(
-    Date.now() + EXPIRATION_DAYS * 24 * 60 * 60 * 1000,
-  );
+  const ms =
+    parsed.data.saveMode === "draft"
+      ? EXPIRATION_HOURS_DRAFT * 60 * 60 * 1000
+      : EXPIRATION_DAYS_SHARE * 24 * 60 * 60 * 1000;
+  const expiresAt = new Date(Date.now() + ms);
 
   try {
     const created = await prisma.savedPlannerPlan.create({

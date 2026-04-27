@@ -43,6 +43,22 @@ function isMissingContentTableError(e: unknown): boolean {
   return false;
 }
 
+function isDatabaseAuthError(e: unknown): boolean {
+  if (
+    e instanceof Prisma.PrismaClientKnownRequestError &&
+    // P1000: Authentication failed against the database server
+    e.code === "P1000"
+  ) {
+    return true;
+  }
+  if (e instanceof Error) {
+    const msg = e.message || "";
+    if (/Authentication failed against the database server/i.test(msg)) return true;
+    if (/AuthenticationFailed/i.test(msg)) return true;
+  }
+  return false;
+}
+
 export async function getPublishedInsightReports(): Promise<InsightReport[]> {
   if (!isDatabaseConfigured()) return [];
   try {
@@ -53,6 +69,7 @@ export async function getPublishedInsightReports(): Promise<InsightReport[]> {
     return rows.map(trendReportToInsightReport);
   } catch (e) {
     if (isMissingContentTableError(e)) return [];
+    if (isDatabaseAuthError(e)) return [];
     throw e;
   }
 }
@@ -67,6 +84,7 @@ export async function getPublishedAcademyLessonsForUi(): Promise<AcademyLesson[]
     return rows.map(dbAcademyLessonToUi);
   } catch (e) {
     if (isMissingContentTableError(e)) return [];
+    if (isDatabaseAuthError(e)) return [];
     throw e;
   }
 }
@@ -92,6 +110,7 @@ export async function getSuccessCasesForMedia(
     return rows.map(successCaseToPublicListItem);
   } catch (e) {
     if (isMissingContentTableError(e)) return [];
+    if (isDatabaseAuthError(e)) return [];
     throw e;
   }
 }
@@ -114,6 +133,7 @@ export async function getPublishedSuccessCases(): Promise<
     return mapped;
   } catch (e) {
     if (isMissingContentTableError(e)) return getSampleSuccessCaseListItems();
+    if (isDatabaseAuthError(e)) return getSampleSuccessCaseListItems();
     throw e;
   }
 }
@@ -143,6 +163,7 @@ export async function getPublishedSuccessCaseById(
     return publishedCount === 0 ? getSampleSuccessCaseDetail(id) : null;
   } catch (e) {
     if (isMissingContentTableError(e)) return getSampleSuccessCaseDetail(id);
+    if (isDatabaseAuthError(e)) return getSampleSuccessCaseDetail(id);
     throw e;
   }
 }

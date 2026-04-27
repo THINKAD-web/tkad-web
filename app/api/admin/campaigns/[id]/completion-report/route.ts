@@ -60,6 +60,9 @@ export async function GET(request: NextRequest, { params }: Params) {
       status: b.status,
       dailyFootTraffic: b.media?.dailyFootfall ?? null,
       region: b.media?.region ?? null,
+      trafficPattern:
+        (b.media as { trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null } | null | undefined)
+          ?.trafficPattern ?? null,
     })),
   });
 

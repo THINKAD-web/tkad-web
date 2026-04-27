@@ -9,7 +9,7 @@ export const MEDIA_CATALOG_GRID_CLASS =
 
 /** 컴팩트 행 그리드 — 매체검색·견적·비교 공통 */
 export const MEDIA_CATALOG_COMPACT_GRID_CLASS =
-  "grid grid-cols-1 gap-0 sm:grid-cols-2";
+  "grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-3";
 
 /** 컴팩트 행(링크/선택) 외곽 — 시각 통일.
  *  Phase 3: 2px 검정 보더 + 사각, 호버 시 off bg. 그리드 컨테이너에서 -mt/-ml 로 보더 겹침 처리. */

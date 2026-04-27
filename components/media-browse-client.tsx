@@ -791,27 +791,7 @@ export default function MediaBrowseClient({
                   </div>
                 ) : null}
 
-                {browseLenientSearchTier ? (
-                  <div
-                    role="status"
-                    className="mb-4 flex flex-col gap-3 border-2 border-bx-black bg-bx-off px-4 py-3 text-sm leading-relaxed text-bx-black sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <p className="min-w-0">
-                      <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
-                        {`// LENIENT`}
-                      </span>
-                      {tMedia("browseLenientSearchBanner")}
-                    </p>
-                    <BtnBlock
-                      onClick={resetFilters}
-                      variant="secondary"
-                      size="sm"
-                      className="shrink-0"
-                    >
-                      {tMedia("resetAllBrowseFilters")}
-                    </BtnBlock>
-                  </div>
-                ) : null}
+                {/* (요청) LENIENT 안내 문구 숨김 처리 */}
 
                 {catalogMinPadActive ? (
                   <div

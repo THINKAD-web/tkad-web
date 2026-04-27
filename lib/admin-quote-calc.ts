@@ -1,5 +1,7 @@
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 
+/** 앱에서 가격·견적 합산의 공개 진입점은 `@/lib/pricing`. */
+
 /** 부가세율 (한국) */
 const VAT_RATE = 0.1;
 const MS_PER_DAY = 86_400_000;

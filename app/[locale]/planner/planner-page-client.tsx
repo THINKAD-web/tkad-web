@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  GitCompare,
   Layers,
   Send,
   TrendingUp,
@@ -17,6 +18,7 @@ import {
   ArrowRight,
   MessageCircle,
 } from "lucide-react";
+import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import type { MediaItem } from "@/lib/media-data";
 import {
   filterPlannerMediaMulti,
@@ -71,6 +73,10 @@ import {
 } from "@/lib/planner/types";
 import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
 import { canProceedFromStep } from "@/lib/planner/validation";
+import {
+  formatPricePeriodShortLabel,
+  normalizeMediaPricePeriod,
+} from "@/lib/media-price-format";
 
 const GOALS: {
   key: PlannerCampaignGoal;
@@ -107,6 +113,22 @@ export default function PlannerPageClient({
   const locale = useLocale();
   const isKo = locale === "ko";
   const { toast } = useToast();
+
+  const priceOptionBadge = useCallback(
+    (m: MediaItem): string | null => {
+      const opts = m.priceOptions ?? [];
+      if (opts.length === 0) return null;
+      const periods = Array.from(
+        new Set(opts.map((o) => normalizeMediaPricePeriod(o.period))),
+      );
+      const hasNonMonth = periods.some((p) => p !== "month");
+      if (!hasNonMonth) return null;
+      const labels = periods.map((p) => formatPricePeriodShortLabel(p, locale));
+      const uniq = Array.from(new Set(labels)).join(" · ");
+      return isKo ? `옵션: ${uniq}` : `Options: ${uniq}`;
+    },
+    [locale, isKo],
+  );
 
   const wizardStep = usePlannerStore((s) => s.wizardStep);
   const campaignGoal = usePlannerStore((s) => s.campaignGoal);
@@ -260,6 +282,12 @@ export default function PlannerPageClient({
       ? `/quote?media=${portfolio.map((m) => m.id).join(",")}`
       : "/quote";
 
+  const compareHref = useMemo(() => {
+    const ids = Array.from(campaignMediaIds).slice(0, COMPARE_MAX_ITEMS);
+    const q = ids.join(",");
+    return q ? `/compare?ids=${q}` : "/compare";
+  }, [campaignMediaIds]);
+
   const applyPreset = useCallback(
     (id: "premium" | "national" | "value") => {
       applyPresetAction(id);
@@ -313,7 +341,7 @@ export default function PlannerPageClient({
    * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
    * 기존 localStorage persist 는 유지 — DB 저장은 "공유/이메일 발송" 시점에만.
    */
-  const savePlan = useCallback(async () => {
+  const savePlan = useCallback(async (saveMode: "share" | "draft" = "share") => {
     if (saving) return;
     setSaving(true);
     try {
@@ -335,7 +363,7 @@ export default function PlannerPageClient({
       const res = await fetch("/api/planner/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planJson }),
+        body: JSON.stringify({ planJson, saveMode }),
       });
 
       if (!res.ok) {
@@ -373,7 +401,10 @@ export default function PlannerPageClient({
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(url).catch(() => {});
       }
-      toast("success", t("savedToast"));
+      toast(
+        "success",
+        saveMode === "draft" ? t("savedToastDraft24h") : t("savedToast"),
+      );
     } catch (e) {
       console.error("[planner.save] error", e);
       toast(
@@ -887,15 +918,28 @@ export default function PlannerPageClient({
                 <ChevronLeft className="h-4 w-4" />
                 {t("editInputs")}
               </BtnBlock>
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <BtnBlock
                   variant="primary"
                   size="md"
-                  onClick={savePlan}
+                  onClick={() => void savePlan("share")}
                   disabled={saving}
                 >
                   <Download className="h-4 w-4" />
                   {saving ? t("savingInProgress") : t("ctaSave")}
+                </BtnBlock>
+                <BtnBlock
+                  variant="secondary"
+                  size="md"
+                  onClick={() => void savePlan("draft")}
+                  disabled={saving}
+                >
+                  <Download className="h-4 w-4" />
+                  {t("ctaSaveDraft24h")}
+                </BtnBlock>
+                <BtnBlock href={compareHref} variant="secondary" size="md">
+                  <GitCompare className="h-4 w-4" />
+                  {t("ctaCompareSelection")}
                 </BtnBlock>
                 <BtnBlock href={quoteHref} variant="accent" size="md">
                   <Send className="h-4 w-4" />
@@ -1109,6 +1153,15 @@ export default function PlannerPageClient({
                               {isKo ? "만/월" : "₩10K/mo"}
                             </span>
                           </p>
+                          {(() => {
+                            const badge = priceOptionBadge(m);
+                            if (!badge) return null;
+                            return (
+                              <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+                                [ {badge} ]
+                              </p>
+                            );
+                          })()}
                         </div>
                       </Link>
                     ))}
