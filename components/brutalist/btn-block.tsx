@@ -21,12 +21,13 @@ export type BtnBlockSize = "sm" | "md" | "lg";
 
 const variantClass: Record<BtnBlockVariant, string> = {
   primary:
-    "bg-bx-black text-bx-white border-bx-black hover:bg-bx-accent hover:border-bx-accent",
+    "bg-bx-black text-bx-white border-bx-black hover:bg-bx-accent hover:border-bx-accent hover:text-white",
   secondary:
     "bg-bx-white text-bx-black border-bx-black hover:bg-bx-black hover:text-bx-white",
   dark: "bg-bx-black text-bx-white border-bx-black hover:bg-bx-gray-dim hover:border-bx-gray-dim",
+  /* accent: 주황 배경은 라이트/다크 모두 동일 (브랜드 색). 텍스트는 항상 흰색 유지. */
   accent:
-    "bg-bx-accent text-bx-white border-bx-accent hover:bg-bx-black hover:border-bx-black",
+    "bg-bx-accent text-white border-bx-accent hover:bg-bx-black hover:border-bx-black hover:text-bx-white",
 };
 
 const sizeClass: Record<BtnBlockSize, string> = {

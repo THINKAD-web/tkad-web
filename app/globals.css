@@ -86,13 +86,16 @@
    * Phase 2/3 컴포넌트·페이지에서 사용.
    * 유틸리티 예: bg-bx-off · text-bx-accent · border-bx-black · text-bx-gray-dim
    * 기존 navy/gold 토큰은 Phase 3 까지 유지 (페이지 전환 안전성).
+   *
+   * 다크모드 대응: var() 참조 형태로 정의하여 .dark 셀렉터에서 --bx-* 변수
+   * 재정의 시 자동 색 전환됨. (직접 hex 면 빌드 시점에 inline 박혀 .dark 무효)
    */
-  --color-bx-black: #000000;
-  --color-bx-white: #ffffff;
-  --color-bx-off: #f5f5f5;
-  --color-bx-gray: #d4d4d4;
-  --color-bx-gray-dim: #737373;
-  --color-bx-accent: #FF6600;
+  --color-bx-black: var(--bx-black);
+  --color-bx-white: var(--bx-white);
+  --color-bx-off: var(--bx-off);
+  --color-bx-gray: var(--bx-gray);
+  --color-bx-gray-dim: var(--bx-gray-dim);
+  --color-bx-accent: var(--bx-accent);
 
   /* Font — Phase 1: Space Grotesk(영문) + Pretendard(한글) 우선.
    * Wanted Sans·Geist 는 폴백으로 유지. JetBrains Mono 는 메타·라벨 전용. */
@@ -141,6 +144,14 @@
   --ring: #0d1b2e;
   --cta: #9b3c31;
   --cta-hover: #85342a;
+
+  /* Brutalist 라이트 모드 변수 (--color-bx-* 가 var() 참조). */
+  --bx-black: #000000;
+  --bx-white: #ffffff;
+  --bx-off: #f5f5f5;
+  --bx-gray: #d4d4d4;
+  --bx-gray-dim: #737373;
+  --bx-accent: #FF6600;
 }
 
 /* Dark mode tokens (next-themes 가 html.dark 클래스 토글 시 적용) */
@@ -172,6 +183,41 @@
   --color-gold-dark: #f0cd85;
   --color-gold-700: #f0cd85;
   --color-gold-800: #e5b35a;
+
+  /* === Brutalist 다크모드 변수 ===
+   * @theme inline 의 --color-bx-* 가 var(--bx-*) 를 참조하므로 여기서 값만 변경.
+   *
+   * 시맨틱:
+   *   bx-black  = "전경 강조색" (라이트=검정 / 다크=밝은 회백색)
+   *   bx-white  = "베이스 배경" (라이트=흰색 / 다크=가장 어두운 톤)
+   *   bx-off    = "면 배경"     (라이트=옅은 회색 / 다크=살짝 밝은 어두움)
+   *   bx-gray-dim = "보조 텍스트" (라이트=중간회색 / 다크=가독 밝은 회색)
+   *   bx-gray   = "구분선" (라이트=옅은 회색 / 다크=어두운 회색)
+   *   bx-accent = 동일 (브랜드 색 라이트/다크 동일 — Pantone 165)
+   */
+  --bx-black: #f5f6fa;
+  --bx-white: #0a0d14;
+  --bx-off: #1a1f29;
+  --bx-gray: #2a2f3a;
+  --bx-gray-dim: #94a3b8;
+  /* --bx-accent 은 라이트와 동일하므로 재정의 안 함 (브랜드 컬러 유지) */
+
+  /* === 시맨틱 보조 토큰 (요구사항: --bx-bg-base, --bx-fg-base, --bx-border, --bx-card-bg) ===
+   * 컴포넌트가 직접 사용 가능. 기존 bx-black/white 토큰과 중복되어도 의미상 명확. */
+  --bx-bg-base: var(--color-bx-white);
+  --bx-bg-card: var(--color-bx-off);
+  --bx-fg-base: var(--color-bx-black);
+  --bx-fg-muted: var(--color-bx-gray-dim);
+  --bx-border: var(--color-bx-black);
+}
+
+/* 라이트 모드 시맨틱 보조 토큰 (다크와 동일 매핑이지만 라이트 :root 토큰값으로 자동 해소). */
+:root {
+  --bx-bg-base: var(--color-bx-white);
+  --bx-bg-card: var(--color-bx-off);
+  --bx-fg-base: var(--color-bx-black);
+  --bx-fg-muted: var(--color-bx-gray-dim);
+  --bx-border: var(--color-bx-black);
 }
 
 /* Hero 섹션 등 항상 어두운 배경(.bg-navy)에는 흰 글씨가 의도된 색이므로
@@ -944,4 +990,14 @@ img {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* 브루탈리스트 로딩 인디케이터 — 좌→우 슬라이딩 주황 막대.
+ * skeletons.tsx 의 PageHeaderSkeleton 에서 사용. */
+@keyframes loadingSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+.loading-slide {
+  animation: loadingSlide 1.4s ease-in-out infinite;
 }

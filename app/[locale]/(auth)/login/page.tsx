@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function LoginPage() {
@@ -47,21 +47,32 @@ export default function LoginPage() {
     }
   }
 
+  const inputCls =
+    "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+
   return (
-    <div className="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-10 bg-gradient-to-b from-secondary/30 to-background">
+    <div className="flex min-h-[calc(100vh-72px)] items-center justify-center bg-bx-off px-4 py-10 dark:bg-bx-black">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-primary">로그인</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            THINKAD 계정으로 로그인하세요
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            [ LOGIN ]
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-bx-black">
+            로그인
+          </h1>
+          <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+            {`// `}THINKAD 계정으로 로그인하세요
           </p>
         </div>
 
-        <div className="bg-card border border-border/60 rounded-2xl shadow-sm p-6 sm:p-8">
+        <div className="border-2 border-bx-black bg-bx-white p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label htmlFor="email" className="block text-sm font-medium text-foreground">
-                이메일
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent"
+              >
+                [ 이메일 ]
               </label>
               <input
                 id="email"
@@ -70,13 +81,16 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-11 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                className={inputCls}
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                비밀번호
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent"
+              >
+                [ 비밀번호 ]
               </label>
               <input
                 id="password"
@@ -86,30 +100,35 @@ export default function LoginPage() {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-11 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                className={inputCls}
               />
             </div>
 
             {error && (
-              <div className="text-sm text-destructive bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2">
-                {error}
+              <div className="border-2 border-bx-accent bg-bx-white px-3 py-2 font-mono text-[12px] tracking-tight text-bx-accent">
+                {`// `}{error}
               </div>
             )}
 
-            <Button
+            <BtnBlock
               type="submit"
+              variant="accent"
+              size="lg"
               disabled={loading}
-              className="w-full h-11"
+              className="w-full"
             >
               {loading && <Spinner size="sm" />}
               {loading ? "로그인 중…" : "로그인"}
-            </Button>
+            </BtnBlock>
           </form>
         </div>
 
-        <p className="mt-6 text-sm text-center text-muted-foreground">
-          계정이 없으신가요?{" "}
-          <Link href="/register" className="text-primary font-semibold hover:underline">
+        <p className="mt-6 text-center font-mono text-[12px] tracking-tight text-bx-gray-dim">
+          {`// `}계정이 없으신가요?{" "}
+          <Link
+            href="/register"
+            className="border-b-2 border-bx-black pb-0.5 font-bold text-bx-black transition-colors hover:border-bx-accent hover:text-bx-accent"
+          >
             회원가입
           </Link>
         </p>
