@@ -1012,52 +1012,51 @@ export default function AdminCampaignsPage() {
                   </ul>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    <Button
+                {/* #ADMIN-CAMPAIGNS-1: 보고서 액션 버튼 brutalist 통일.
+                    보고서 미리보기 토글 / 완료 PDF (AI) / 간단 PDF / 성공사례 초안 (AI) */}
+                <div className="space-y-2 border-2 border-bx-black bg-bx-white p-3">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    [ REPORT ACTIONS ]
+                  </p>
+                  <div className="flex flex-wrap gap-0">
+                    <button
                       type="button"
-                      size="sm"
-                      variant="secondary"
-                      className="gap-1.5"
                       disabled={successCaseBusy}
                       onClick={() => void createDraftSuccessCase()}
+                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {successCaseBusy ? "…" : null}
                       성공사례 초안 (AI)
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       type="button"
-                      size="sm"
-                      variant="outline"
-                      className="gap-1.5 border-navy/20 text-navy hover:bg-navy/5"
                       onClick={() => setShowReportPreview((v) => !v)}
+                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3.5 w-3.5" />
                       {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       type="button"
-                      size="sm"
-                      className="gap-1.5 bg-navy text-white hover:bg-navy/90"
                       disabled={pdfBusy}
                       onClick={() => void downloadAiCompletionPdf()}
+                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-accent bg-bx-accent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      <FileDown className="h-4 w-4" />
+                      <FileDown className="h-3.5 w-3.5" />
                       {pdfBusy ? "생성 중…" : "완료 보고서 PDF (AI)"}
-                    </Button>
+                    </button>
                     <a
                       href={`/api/admin/campaigns/${selectedId}/completion-report`}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-navy hover:bg-slate-50"
+                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <FileText className="h-4 w-4" />
+                      <FileText className="h-3.5 w-3.5" />
                       간단 PDF
                     </a>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    AI 보고서는 노출·성과·인사이트 섹션을 포함합니다. 간단 PDF는
-                    일정·증빙·문서만 포함합니다.
+                  <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                    {`// `}AI 보고서는 노출·성과·인사이트 섹션 포함. 간단 PDF는 일정·증빙·문서만.
                   </p>
                 </div>
 
