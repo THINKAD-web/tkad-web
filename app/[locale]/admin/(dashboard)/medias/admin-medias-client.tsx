@@ -1387,6 +1387,17 @@ export default function AdminMediasClient({
                             <Button
                               variant="ghost"
                               size="icon-xs"
+                              className="md:hidden"
+                              asChild
+                            >
+                              <Link href={`/admin/medias/${media.id}/edit`}>
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              className="hidden md:inline-flex"
                               onClick={() => openEdit(media)}
                             >
                               <Pencil className="h-3.5 w-3.5" />
