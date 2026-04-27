@@ -9,6 +9,7 @@ import type { MediaItem } from "@/lib/media-data";
 import {
   budgetSplitByCategory,
   plannerBlendCpmKrw,
+  portfolioDailyByCategory,
   type PlannerCampaignGoal,
   type PlannerMetrics,
 } from "@/lib/planner-logic";
@@ -39,6 +40,12 @@ export type PlannerReportSharedProps = {
   ageText: string;
   industryText: string;
   portfolio: MediaItem[];
+  /** Step 7과 동일: 조건에 맞는 전체 후보(필터 결과) */
+  matchedCount: number;
+  /** Step 7과 동일: 1/3/6개월 총 노출 비교 */
+  monthCompare: { months: number; totalImpressions: number }[];
+  /** Step 7과 동일: 유형별 예상 CPM (필터 결과 기반) */
+  cpmBars: { key: string; label: string; value: number }[];
   metrics: PlannerMetrics | null;
   reachCorePct: number;
   reachExtendedPct: number;
@@ -78,6 +85,15 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       props.metrics.estimatedMonthlyImpressions,
     );
   }, [props.metrics, props.portfolio]);
+
+  const dailyBars = useMemo(() => {
+    const pts = portfolioDailyByCategory(props.portfolio);
+    return pts.map((p) => ({
+      key: p.key,
+      label: props.isKo ? p.labelKo : p.labelEn,
+      value: p.daily,
+    }));
+  }, [props.portfolio, props.isKo]);
 
   const effectSummaryLines = useMemo(() => {
     if (!props.metrics) return [];
@@ -120,6 +136,8 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       periodDisplay,
       budgetAllocation,
       blendedCpmKrw,
+      dailyBars,
+      cpmBars: props.cpmBars,
       effectSummaryLines,
       contact,
     }),
@@ -127,6 +145,8 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       periodDisplay,
       budgetAllocation,
       blendedCpmKrw,
+      dailyBars,
+      props.cpmBars,
       effectSummaryLines,
       contact,
     ],
@@ -400,6 +420,9 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           ageText={props.ageText}
           industryText={props.industryText}
           portfolio={props.portfolio}
+          matchedCount={props.matchedCount}
+          monthCompare={props.monthCompare}
+          cpmBars={props.cpmBars}
           metrics={props.metrics}
           reachCorePct={props.reachCorePct}
           reachExtendedPct={props.reachExtendedPct}
@@ -678,6 +701,9 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             ageText={props.ageText}
             industryText={props.industryText}
             portfolio={props.portfolio}
+            matchedCount={props.matchedCount}
+            monthCompare={props.monthCompare}
+            cpmBars={props.cpmBars}
             metrics={props.metrics}
             reachCorePct={props.reachCorePct}
             reachExtendedPct={props.reachExtendedPct}

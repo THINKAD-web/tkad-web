@@ -9,6 +9,14 @@ import type { PlannerMetrics } from "@/lib/planner-logic";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import { DEFAULT_LOGO_PLACEMENT } from "@/components/planner/composite-preview";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
+import {
+  PlannerImpressionsLineChart,
+  PlannerRoiLineChart,
+  PlannerDailyReachBarChart,
+  PlannerCpmCompareChart,
+  PlannerMonthCompareChart,
+  PlannerReachDonutChart,
+} from "@/components/planner-charts";
 
 export type PlannerReportPreviewBudgetSlice = {
   label: string;
@@ -26,6 +34,9 @@ type Props = {
   ageText: string;
   industryText: string;
   portfolio: MediaItem[];
+  matchedCount: number;
+  monthCompare: { months: number; totalImpressions: number }[];
+  cpmBars: { key: string; label: string; value: number }[];
   metrics: PlannerMetrics | null;
   reachCorePct: number;
   reachExtendedPct: number;
@@ -293,6 +304,146 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                 {metrics.roiExpected}
                 {t("roiUnit")}
               </p>
+            </div>
+          </div>
+          {/* 시뮬레이션 상세 — 기존 Effect 섹션 내부 확장 (섹션 추가 X) */}
+          <div className="mt-6 grid grid-cols-1 gap-0 lg:grid-cols-2">
+            <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white">
+              <div className="border-b-2 border-bx-black p-4">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  [ {t("results")} ]
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-0 p-4 sm:grid-cols-2">
+                <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                    [ {t("matchedMedia")} ]
+                  </p>
+                  <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                    {matchedCount}
+                    <span className="ml-1 text-base text-bx-gray-dim">
+                      {t("countUnit")}
+                    </span>
+                  </p>
+                </div>
+                <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                    [ {t("avgMonthlySlot")} ]
+                  </p>
+                  <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                    {Math.round(metrics.avgMonthlyPrice).toLocaleString()}
+                    <span className="ml-1 text-sm text-bx-gray-dim">
+                      {isKo ? "만원/월" : "₩10K/mo"}
+                    </span>
+                  </p>
+                </div>
+                <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4 sm:col-span-2">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                    [ {t("estMonthlyImp")} ]
+                  </p>
+                  <p className="mt-2 font-mono text-xl font-bold tabular-nums text-bx-black">
+                    {metrics.estimatedMonthlyImpressions.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="-ml-[2px] border-2 border-bx-black bg-bx-white p-6">
+              <PlannerReachDonutChart
+                corePct={reachCorePct}
+                extendedPct={reachExtendedPct}
+                title={t("chartReachTitle")}
+                coreLabel={t("reachCore")}
+                extendedLabel={t("reachExtended")}
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 border-2 border-bx-black bg-bx-white">
+            <div className="border-b-2 border-bx-black p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {t("chartDailyBarTitle")} ]
+              </p>
+            </div>
+            <div className="p-4">
+              <PlannerDailyReachBarChart
+                data={portfolioDailyByCategory(portfolio).map((p) => ({
+                  key: p.key,
+                  label: isKo ? p.labelKo : p.labelEn,
+                  value: p.daily,
+                }))}
+                title={t("chartDailyBarTitle")}
+                valueLabel={t("chartDailyBarAxis")}
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-0 lg:grid-cols-2">
+            <div className="border-2 border-bx-black bg-bx-white">
+              <div className="border-b-2 border-bx-black p-4">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  [ {t("chartCpmTitle")} ]
+                </p>
+              </div>
+              <div className="p-4">
+                <PlannerCpmCompareChart
+                  data={cpmBars}
+                  title={t("chartCpmTitle")}
+                  unitLabel={t("chartCpmUnit")}
+                />
+              </div>
+            </div>
+            <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
+              <div className="border-b-2 border-bx-black p-4">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  [ {t("chartMonthCompareTitle")} ]
+                </p>
+              </div>
+              <div className="p-4">
+                <PlannerMonthCompareChart
+                  data={monthCompare.map((x) => ({
+                    months: x.months,
+                    total: x.totalImpressions,
+                  }))}
+                  title={t("chartMonthCompareTitle")}
+                  barLabels={[t("monthCompare1"), t("monthCompare3"), t("monthCompare6")]}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 border-2 border-bx-black bg-bx-white">
+            <div className="border-b-2 border-bx-black p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {t("chartImpLineTitle")} ]
+              </p>
+            </div>
+            <div className="p-4">
+              <PlannerImpressionsLineChart
+                data={metrics.cumulativeByMonth}
+                isKo={isKo}
+                title={t("chartImpLineTitle")}
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 border-2 border-bx-black bg-bx-white">
+            <div className="border-b-2 border-bx-black p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                [ {t("chartRoiLineTitle")} ]
+              </p>
+            </div>
+            <div className="p-4">
+              <PlannerRoiLineChart
+                data={metrics.roiByMonth}
+                isKo={isKo}
+                title={t("chartRoiLineTitle")}
+                hint={t("chartRoiLineHint")}
+                legendConservative={t("roiConservative")}
+                legendExpected={t("roiExpected")}
+                legendOptimistic={t("roiOptimistic")}
+                roiUnit={t("roiUnit")}
+              />
             </div>
           </div>
         </section>
