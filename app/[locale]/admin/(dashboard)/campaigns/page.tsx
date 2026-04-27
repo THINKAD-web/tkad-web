@@ -170,7 +170,8 @@ export default function AdminCampaignsPage() {
   const [bookingSearchResults, setBookingSearchResults] = useState<{ id: string; name: string; location: string; dailyFootfall?: number | null }[]>([]);
   const [bookingBusy, setBookingBusy] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
-  const [showReportPreview, setShowReportPreview] = useState(false);
+  // 관리자 페이지에서는 선택 캠페인 확인이 핵심이므로 기본값을 "열림"으로 둡니다.
+  const [showReportPreview, setShowReportPreview] = useState(true);
   const [successCaseBusy, setSuccessCaseBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -707,8 +708,8 @@ export default function AdminCampaignsPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 xl:grid-cols-[420px_1fr] xl:items-start">
+        <Card className="xl:sticky xl:top-6">
           <CardHeader>
             <div className="mb-3 flex items-center justify-between">
               <CardTitle className="text-base">캠페인 목록</CardTitle>
