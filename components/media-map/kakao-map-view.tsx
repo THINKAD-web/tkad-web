@@ -37,15 +37,6 @@ declare global {
 const KAKAO_SDK_URL = (appkey: string) =>
   `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false&libraries=clusterer`;
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 function loadKakaoSdk(appkey: string): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof window === "undefined") return reject(new Error("SSR"));
@@ -197,12 +188,13 @@ export default function KakaoMapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markers]);
 
+  // #MAP-1: 미니 팝업(CustomOverlay) 비활성화. 마커 선택 시 panTo만 수행.
+  // 상세는 사이드 카드(media-map-page-client.tsx) 또는 onMarkerDetail 라우팅으로 노출.
   useEffect(() => {
     const map = mapRef.current as any;
     if (!map) return;
     const kakao = (window as unknown as { kakao: any }).kakao;
 
-    // 기존 InfoWindow 닫기 (CustomOverlay는 setMap(null))
     const existingInfo = infoWindowRef.current as any;
     if (existingInfo?.setMap) existingInfo.setMap(null);
     infoWindowRef.current = null;
@@ -212,49 +204,7 @@ export default function KakaoMapView({
     if (!m) return;
 
     map.panTo(new kakao.maps.LatLng(m.lat, m.lng));
-
-    // 가격 포맷
-    const priceLabel =
-      m.price >= 100_000_000
-        ? `${(m.price / 100_000_000).toFixed(1)}억`
-        : m.price >= 10_000
-          ? `${Math.round(m.price / 10_000).toLocaleString("ko-KR")}만원`
-          : `${m.price.toLocaleString("ko-KR")}원`;
-
-    const containerEl = document.createElement("div");
-    containerEl.style.cssText =
-      "padding:10px 12px;min-width:220px;background:#fff;border:1px solid #e4e6ec;border-radius:12px;box-shadow:0 8px 24px rgba(13,27,46,0.15);font-family:Pretendard,system-ui,sans-serif;";
-    containerEl.innerHTML = `
-      <div style="font-size:13px;font-weight:600;color:#0D1B2E;margin-bottom:4px;line-height:1.3;">
-        ${escapeHtml(m.name)}
-      </div>
-      <div style="font-size:14px;font-weight:700;color:#C8913C;margin-bottom:8px;">
-        ${priceLabel}
-      </div>
-      <button type="button" data-detail="${escapeHtml(m.id)}"
-        style="width:100%;padding:7px 10px;background:#0D1B2E;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">
-        자세히 보기 →
-      </button>
-    `;
-    const btn = containerEl.querySelector<HTMLButtonElement>("[data-detail]");
-    btn?.addEventListener("click", () => {
-      onMarkerDetailRef.current?.(m.id);
-    });
-
-    const info = new kakao.maps.CustomOverlay({
-      position: new kakao.maps.LatLng(m.lat, m.lng),
-      content: containerEl,
-      yAnchor: 1.4,
-      zIndex: 100,
-    });
-    info.setMap(map);
-    infoWindowRef.current = info;
-
-    return () => {
-      info.setMap(null);
-    };
-  // markers는 매번 바뀔 수 있으므로 ref로 조회 (InfoWindow 재생성 방지)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId]);
 
   if (sdkError) {
