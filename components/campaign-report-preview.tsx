@@ -387,81 +387,82 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
             </div>
           )}
 
-          {/* Planner 스타일 효과 분석 (도달·빈도·CPM·ROI) */}
+          {/* #ADMIN-CAMPAIGNS-1: 효과 분석 — /planner 효과 측정과 동일한 브루탈리스트 톤
+              (계산식·KPI 항목·라벨 텍스트는 변경 없음. 디자인 토큰만 통일) */}
           {plannerKpis && (
             <div style={{ marginBottom: "32px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                ✨ 미디어 효과 분석 (Planner 추정)
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ 미디어 효과 분석 ]
               </h2>
-              <p style={{ margin: "0 0 12px", fontSize: "11px", color: "#64748b", lineHeight: 1.6 }}>
-                실측 노출 데이터와 OOH 평균 빈도(주 6회) 가정을 결합한 추정 지표입니다. 캠페인 종료 후 실측 보정 권장.
+              <p style={{ margin: "0 0 12px", fontSize: "11px", color: "#737373", lineHeight: 1.6, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                {`// `}실측 노출 데이터와 OOH 평균 빈도(주 6회) 가정을 결합한 추정 지표입니다. 캠페인 종료 후 실측 보정 권장.
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
-                <div style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)", borderRadius: "12px", padding: "14px", border: "1px solid #fcd34d" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#92400e", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>코어 도달률</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#92400e" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 코어 도달률 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.reachCorePct}<span style={{ fontSize: "12px", marginLeft: "1px" }}>%</span>
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#92400e", opacity: 0.85 }}>전국 5천만 인구 기준</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}전국 5천만 기준</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>확장 도달률</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 확장 도달률 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.reachExtendedPct}<span style={{ fontSize: "12px", marginLeft: "1px" }}>%</span>
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>SNS·온라인 부가 도달 포함</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}SNS·온라인 부가 도달</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>평균 빈도</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 평균 빈도 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.avgFrequency}<span style={{ fontSize: "12px", marginLeft: "1px" }}>회/주</span>
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>OOH 평균 노출 빈도</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}OOH 평균 노출 빈도</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>일평균 노출</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 일평균 노출 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.dailyImpressionsAvg > 0
                       ? `${(plannerKpis.dailyImpressionsAvg / 10000).toFixed(1)}만`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>예상 일일 노출 합산</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}예상 일일 노출 합산</p>
                 </div>
-                <div style={{ background: "#0d1b2e", borderRadius: "12px", padding: "14px", border: "1px solid #0d1b2e" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#c8913c", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Blended CPM</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#ffffff" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#000000", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#FF6600", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ BLENDED CPM ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.blendedCpm != null
                       ? `₩${plannerKpis.blendedCpm.toLocaleString()}`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "rgba(255,255,255,0.55)" }}>1,000회 노출 단가</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "rgba(255,255,255,0.55)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}1,000회 노출 단가</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>도달인 추정</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 도달인 추정 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.reach > 0
                       ? `${(plannerKpis.reach / 10000).toFixed(1)}만`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>총 노출 ÷ 빈도</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}총 노출 ÷ 빈도</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>총 추정 노출</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 총 추정 노출 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.totalImp > 0
                       ? `${(plannerKpis.totalImp / 10000).toLocaleString()}만`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>실측+추정 합산</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}실측+추정 합산</p>
                 </div>
-                <div style={{ background: "#fff7ed", borderRadius: "12px", padding: "14px", border: "1px solid #fed7aa" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#9a3412", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>ROI 효율</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#9a3412" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#000000", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#FF6600", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ ROI 효율 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.roiExpected != null
                       ? `${(plannerKpis.roiExpected / 10000).toFixed(0)}만`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#9a3412", opacity: 0.85 }}>1억당 노출 환산</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "rgba(255,255,255,0.55)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}1억당 노출 환산</p>
                 </div>
               </div>
             </div>
