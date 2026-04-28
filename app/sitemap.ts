@@ -70,6 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let mediaPart: MetadataRoute.Sitemap = [];
   let regionLandingPart: MetadataRoute.Sitemap = [];
   let typeLandingPart: MetadataRoute.Sitemap = [];
+  let areaLandingPart: MetadataRoute.Sitemap = [];
   try {
     const mediaCatalog = await fetchPublicMediaCatalog();
     mediaPart = mediaCatalog.map((m) => {
@@ -84,15 +85,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const regionSet = new Set<string>();
     const typeSet = new Set<string>();
+    const areaSet = new Set<string>();
     for (const m of mediaCatalog) {
       if (m.region) regionSet.add(m.region);
       if (m.type) typeSet.add(m.type);
+      const area = m.district || m.city;
+      if (area) areaSet.add(area);
     }
     regionLandingPart = Array.from(regionSet).map((region) =>
       sitemapEntry(`/media/region/${encodeURIComponent(region)}`),
     );
     typeLandingPart = Array.from(typeSet).map((type) =>
       sitemapEntry(`/media/type/${encodeURIComponent(type)}`),
+    );
+    areaLandingPart = Array.from(areaSet).map((area) =>
+      sitemapEntry(`/media/area/${encodeURIComponent(area)}`),
     );
   } catch {
     // 카탈로그 실패 → 매체/랜딩 부분 없이 진행
@@ -128,6 +135,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticPart,
     ...regionLandingPart,
     ...typeLandingPart,
+    ...areaLandingPart,
     ...casePart,
     ...mediaPart,
     ...insightPart,

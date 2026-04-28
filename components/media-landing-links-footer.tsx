@@ -20,12 +20,15 @@ type Props = {
   availableRegions?: string[];
   /** 카탈로그에서 발견된 모든 type 슬러그 (DB unique). 없으면 KNOWN 목록 사용. */
   availableTypes?: string[];
+  /** 카탈로그의 unique district / city (한글). 상위 N개만 노출. */
+  availableAreas?: string[];
   locale: string;
 };
 
 export function MediaLandingLinksFooter({
   availableRegions,
   availableTypes,
+  availableAreas,
   locale,
 }: Props) {
   const isKo = locale === "ko";
@@ -33,6 +36,8 @@ export function MediaLandingLinksFooter({
     ? availableRegions
     : KNOWN_REGION_SLUGS;
   const types = availableTypes?.length ? availableTypes : KNOWN_TYPE_SLUGS;
+  // district/city 는 동적이라 KNOWN 목록 없음 — 카탈로그 unique values 만 사용 (최대 16개)
+  const areas = (availableAreas ?? []).slice(0, 16);
 
   return (
     <section className="border-t-2 border-bx-black bg-bx-off py-12">
@@ -80,6 +85,29 @@ export function MediaLandingLinksFooter({
             </ul>
           </div>
         </div>
+
+        {areas.length > 0 ? (
+          <div className="mt-10 border-t-2 border-bx-black/15 pt-8">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ {isKo ? "지구·구역별 매체 찾기" : "BROWSE BY DISTRICT"} ]
+            </p>
+            <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+              {isKo ? "지구·구역으로 찾기" : "Find by district"}
+            </h2>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {areas.map((area) => (
+                <li key={area}>
+                  <Link
+                    href={`/media/area/${encodeURIComponent(area)}`}
+                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold tracking-[0.04em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                  >
+                    {area}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
     </section>
   );
