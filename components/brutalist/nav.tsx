@@ -43,7 +43,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
   const Logo = (
     <Link
       href="/"
-      className="font-mono text-sm font-bold uppercase tracking-[0.22em] text-bx-black"
+      className="font-mono text-base font-bold uppercase tracking-[0.22em] text-bx-black"
     >
       {logo ?? (
         <>
@@ -117,7 +117,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
             {links.map((entry, i) =>
               isGroup(entry) ? (
                 <li key={`mg-${i}`}>
-                  <p className="bg-bx-off px-5 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  <p className="bg-bx-off px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
                     [ {entry.label} ]
                   </p>
                   <ul className="divide-y-2 divide-bx-black">
@@ -126,7 +126,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
                         <Link
                           href={leaf.href}
                           onClick={() => setMobileOpen(false)}
-                          className="block px-5 py-3 font-mono text-xs uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-off hover:text-bx-accent"
+                          className="flex min-h-[3.25rem] items-center px-5 py-3 font-mono text-sm font-semibold uppercase tracking-[0.2em] text-bx-black transition-colors hover:bg-bx-off hover:text-bx-accent"
                         >
                           {leaf.label}
                         </Link>
@@ -139,7 +139,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
                   <Link
                     href={entry.href}
                     onClick={() => setMobileOpen(false)}
-                    className="block px-5 py-4 font-mono text-xs uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-off hover:text-bx-accent"
+                    className="flex min-h-[3.25rem] items-center px-5 py-3 font-mono text-sm font-semibold uppercase tracking-[0.2em] text-bx-black transition-colors hover:bg-bx-off hover:text-bx-accent"
                   >
                     {entry.label}
                   </Link>

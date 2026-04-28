@@ -20,6 +20,26 @@ export async function generateMetadata({
   return {
     title,
     description,
+    keywords: isKo
+      ? [
+          "옥외광고",
+          "OOH",
+          "매체 검색",
+          "디지털 사이니지",
+          "빌보드",
+          "버스 광고",
+          "지하철 광고",
+          "THINKAD",
+        ]
+      : [
+          "OOH",
+          "out-of-home",
+          "media search",
+          "digital signage",
+          "billboard",
+          "transit ads",
+          "THINKAD",
+        ],
     alternates: pageAlternates(locale, "/media"),
     openGraph: {
       title: ogTitle,

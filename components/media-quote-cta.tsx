@@ -25,6 +25,7 @@ export function MediaQuoteCtaButton({
   className?: string;
 }) {
   const t = useTranslations("media.detail");
+  const tCta = useTranslations("mediaDetail.cta");
   const [open, setOpen] = useState(false);
 
   return (
@@ -44,8 +45,17 @@ export function MediaQuoteCtaButton({
         ) : (
           <Calculator className="mr-2 h-5 w-5 shrink-0" aria-hidden />
         )}
-        <span className="truncate">
-          {variant === "sticky" ? t("stickyCtaQuoteSticky") : t("quoteCtaInline")}
+        <span className="min-w-0 truncate text-left">
+          {variant === "sticky" ? (
+            <>
+              <span className="sm:hidden">{tCta("quoteShort")}</span>
+              <span className="hidden sm:inline">
+                {t("stickyCtaQuoteSticky")}
+              </span>
+            </>
+          ) : (
+            t("quoteCtaInline")
+          )}
         </span>
       </Button>
       <MediaDetailQuoteModal

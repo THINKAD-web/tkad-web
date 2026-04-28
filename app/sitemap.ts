@@ -7,16 +7,31 @@ import { siteUrl, sitemapPaths } from "@/lib/seo";
 const lastModified = new Date();
 const origin = siteUrl.replace(/\/$/, "");
 
+/** 핵심 랜딩(검색 유입·전환) 우선순위 살짝 상향 */
+function staticPathPriority(path: string): number {
+  if (path === "") return 1;
+  if (path === "/media" || path === "/planner" || path === "/quote") return 0.95;
+  if (path === "/compare" || path === "/insights" || path === "/cases") return 0.9;
+  return 0.8;
+}
+
 function sitemapEntry(path: string): MetadataRoute.Sitemap[number] {
   const suffix = path === "" ? "" : path;
   const ko = `${origin}/ko${suffix}`;
   const en = `${origin}/en${suffix}`;
   const isHome = path === "";
+  const priority = isHome
+    ? 1
+    : path.startsWith("/cases/") && !path.includes("//")
+      ? 0.75
+      : path.startsWith("/media/") || path.startsWith("/insights/")
+        ? 0.72
+        : staticPathPriority(path);
   return {
     url: ko,
     lastModified,
     changeFrequency: isHome ? "daily" : "weekly",
-    priority: isHome ? 1 : path.startsWith("/cases/") ? 0.75 : 0.8,
+    priority,
     alternates: {
       languages: {
         ko,

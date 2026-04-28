@@ -18,6 +18,7 @@ import {
   Trash2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { captureElementAsPng } from "@/lib/html-to-pdf";
 import {
   CampaignStatus,
   DOC_STATUS_LIST,
@@ -155,12 +156,14 @@ export default function AdminCampaignsPage() {
     media?: {
       name: string;
       location: string;
+      image?: string | null;
       dailyFootfall?: number | null;
       impressions?: number | null;
       visibilityScore?: number | null;
       type?: string | null;
       region?: string | null;
       operatingHours?: string | null;
+      trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null;
     } | null;
     startsAt: string;
     endsAt: string;
@@ -169,9 +172,23 @@ export default function AdminCampaignsPage() {
   const [bookingForm, setBookingForm] = useState({ mediaSearch: "", mediaId: "", mediaName: "", startsAt: "", endsAt: "" });
   const [bookingSearchResults, setBookingSearchResults] = useState<{ id: string; name: string; location: string; dailyFootfall?: number | null }[]>([]);
   const [bookingBusy, setBookingBusy] = useState(false);
-  const [pdfBusy, setPdfBusy] = useState(false);
+  /** loadDetail 응답 기준 — 목록(list)보다 최신 메타(비고·기간 등)로 미리보기를 맞춤 */
+  const [reportCampaignMeta, setReportCampaignMeta] = useState<{
+    name: string;
+    clientCompany: string;
+    clientName: string;
+    clientEmail: string;
+    status: string;
+    notes: string | null;
+    startDate: string | null;
+    endDate: string | null;
+    budgetMin: number | null;
+    budgetMax: number | null;
+  } | null>(null);
   // 관리자 페이지에서는 선택 캠페인 확인이 핵심이므로 기본값을 "열림"으로 둡니다.
   const [showReportPreview, setShowReportPreview] = useState(true);
+  const reportCaptureRef = useRef<HTMLDivElement>(null);
+  const [reportPngBusy, setReportPngBusy] = useState(false);
   const [successCaseBusy, setSuccessCaseBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -199,6 +216,7 @@ export default function AdminCampaignsPage() {
 
   const loadDetail = async (id: string) => {
     setSelectedId(id);
+    setReportCampaignMeta(null);
     try {
       const [cRes, uRes] = await Promise.all([
         fetch(`/api/admin/campaigns/${id}`),
@@ -227,6 +245,34 @@ export default function AdminCampaignsPage() {
         setUnlinkedQuotes(uJson.quotes ?? []);
         return;
       }
+      const campFull = c as typeof c & {
+        name: string;
+        clientCompany: string;
+        clientName: string;
+        clientEmail: string;
+        status: string;
+        notes?: string | null;
+        startDate?: string | Date | null;
+        endDate?: string | Date | null;
+        budgetMin?: number | null;
+        budgetMax?: number | null;
+      };
+      setReportCampaignMeta({
+        name: campFull.name,
+        clientCompany: campFull.clientCompany,
+        clientName: campFull.clientName,
+        clientEmail: campFull.clientEmail,
+        status: campFull.status,
+        notes: campFull.notes ?? null,
+        startDate: campFull.startDate
+          ? new Date(campFull.startDate).toISOString()
+          : null,
+        endDate: campFull.endDate
+          ? new Date(campFull.endDate).toISOString()
+          : null,
+        budgetMin: campFull.budgetMin ?? null,
+        budgetMax: campFull.budgetMax ?? null,
+      });
       setEvents(
         (c.scheduleEvents ?? []).map((x) => ({
           ...x,
@@ -263,6 +309,7 @@ export default function AdminCampaignsPage() {
       );
       setUnlinkedQuotes(uJson.quotes ?? []);
     } catch {
+      setReportCampaignMeta(null);
       setEvents([]);
       setDocs([]);
       setLinkedQuotes([]);
@@ -564,6 +611,65 @@ export default function AdminCampaignsPage() {
 
   // (규칙) AI 기반 성공사례 초안 생성은 비활성화되었습니다.
 
+  const reportPreviewData = useMemo(() => {
+    if (!selectedId) return null;
+    const row = list.find((c) => c.id === selectedId);
+    const m = reportCampaignMeta;
+    const st = (m?.status ?? row?.status) as CampaignStatus;
+    return {
+      campaignName: m?.name ?? row?.name ?? "—",
+      clientCompany: m?.clientCompany ?? row?.clientCompany ?? "",
+      clientName: m?.clientName ?? row?.clientName ?? "",
+      clientEmail: m?.clientEmail ?? row?.clientEmail ?? "",
+      status: STATUS_LABEL[st] ?? m?.status ?? row?.status ?? "—",
+      notes: m?.notes ?? row?.notes ?? null,
+      startDate: m?.startDate ?? row?.startDate ?? null,
+      endDate: m?.endDate ?? row?.endDate ?? null,
+      budgetMin: m?.budgetMin ?? row?.budgetMin ?? null,
+      budgetMax: m?.budgetMax ?? row?.budgetMax ?? null,
+      scheduleEvents: events.map((e) => ({
+        title: e.title,
+        startsAt: e.startsAt,
+        endsAt: e.endsAt,
+        kind: e.kind,
+      })),
+      proofPhotos: proofs.map((p) => ({
+        imageUrl: p.imageUrl,
+        caption: p.caption,
+      })),
+      mediaBookings: mediaBookings.map((b) => ({
+        title: b.title,
+        mediaName: b.media?.name ?? "—",
+        location: b.media?.location ?? "—",
+        startsAt: b.startsAt,
+        endsAt: b.endsAt,
+        status: b.status,
+        imageUrl: b.media?.image ?? undefined,
+        dailyFootTraffic: b.media?.dailyFootfall ?? null,
+        type: b.media?.type ?? null,
+        region: b.media?.region ?? null,
+        visibilityScore: b.media?.visibilityScore ?? null,
+        operatingHours: b.media?.operatingHours ?? null,
+        impressions: b.media?.impressions ?? null,
+        trafficPattern: b.media?.trafficPattern ?? null,
+      })),
+      financialDocs: docs.map((f) => ({
+        kind: f.kind,
+        title: f.title,
+        amountKrw: f.amountKrw,
+        status: f.status,
+      })),
+    };
+  }, [
+    selectedId,
+    list,
+    reportCampaignMeta,
+    events,
+    proofs,
+    docs,
+    mediaBookings,
+  ]);
+
   const addEvent = async () => {
     if (!selectedId || !evForm.title || !evForm.startsAt || !evForm.endsAt)
       return;
@@ -830,7 +936,7 @@ export default function AdminCampaignsPage() {
               완료 보고서 미리보기
             </CardTitle>
             <p className="text-xs text-muted-foreground">
-              선택한 캠페인의 완료 보고서를 브라우저에서 확인합니다. (PDF는 별도 다운로드)
+              미리보기·이미지 저장은 아래에서 동작합니다. 공식 PDF는「완료 보고서 PDF」로 받습니다.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -846,6 +952,39 @@ export default function AdminCampaignsPage() {
                 >
                   <Eye className="h-3.5 w-3.5" />
                   {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
+                </button>
+                <button
+                  type="button"
+                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={
+                    !selectedId ||
+                    !showReportPreview ||
+                    !reportPreviewData ||
+                    reportPngBusy
+                  }
+                  onClick={async () => {
+                    const el = reportCaptureRef.current;
+                    if (!el) return;
+                    setReportPngBusy(true);
+                    try {
+                      const d = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+                      await captureElementAsPng(el, `싱커드_게재보고서_${d}.png`);
+                    } catch (e) {
+                      console.error("[campaigns] report png", e);
+                      window.alert(
+                        `이미지 저장에 실패했습니다.\n${e instanceof Error ? e.message : String(e)}`,
+                      );
+                    } finally {
+                      setReportPngBusy(false);
+                    }
+                  }}
+                >
+                  {reportPngBusy ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Camera className="h-3.5 w-3.5" />
+                  )}
+                  이미지 저장
                 </button>
                 <a
                   href={
@@ -864,18 +1003,9 @@ export default function AdminCampaignsPage() {
                   <FileDown className="h-3.5 w-3.5" />
                   완료 보고서 PDF
                 </a>
-                <a
-                  href={`/api/admin/campaigns/${selectedId}/completion-report`}
-                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <FileText className="h-3.5 w-3.5" />
-                  간단 PDF
-                </a>
               </div>
               <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
-                {`// `}완료 보고서는 KPI/패턴/매체/일정/문서를 포함. 간단 PDF는 일정·증빙·문서만.
+                {`// `}서버 PDF(완료 보고서)는 KPI·패턴·매체·일정·문서를 반영합니다. 이미지 저장은 화면 캡처용입니다.
               </p>
             </div>
 
@@ -883,72 +1013,8 @@ export default function AdminCampaignsPage() {
               <p className="text-sm text-muted-foreground">
                 왼쪽에서 캠페인을 선택하세요.
               </p>
-            ) : showReportPreview ? (
-              <CampaignReportPreview
-                data={{
-                  campaignName:
-                    list.find((c) => c.id === selectedId)?.name ?? "—",
-                  clientCompany:
-                    list.find((c) => c.id === selectedId)
-                      ?.clientCompany ?? "",
-                  clientName:
-                    list.find((c) => c.id === selectedId)?.clientName ??
-                    "",
-                  clientEmail:
-                    list.find((c) => c.id === selectedId)?.clientEmail ??
-                    "",
-                  status:
-                    list.find((c) => c.id === selectedId)?.status ??
-                    "진행중",
-                  notes:
-                    list.find((c) => c.id === selectedId)?.notes ?? null,
-                  startDate:
-                    list.find((c) => c.id === selectedId)?.startDate ??
-                    null,
-                  endDate:
-                    list.find((c) => c.id === selectedId)?.endDate ??
-                    null,
-                  budgetMin:
-                    list.find((c) => c.id === selectedId)?.budgetMin ??
-                    null,
-                  budgetMax:
-                    list.find((c) => c.id === selectedId)?.budgetMax ??
-                    null,
-                  scheduleEvents: events?.map((e: { title: string; startsAt: string; endsAt: string; kind: string }) => ({
-                    title: e.title,
-                    startsAt: e.startsAt,
-                    endsAt: e.endsAt,
-                    kind: e.kind,
-                  })),
-                  proofPhotos: proofs?.map((p: { imageUrl: string; caption?: string | null }) => ({
-                    imageUrl: p.imageUrl,
-                    caption: p.caption,
-                  })),
-                  mediaBookings: mediaBookings.map((b) => ({
-                    title: b.title,
-                    mediaName: b.media?.name ?? "—",
-                    location: b.media?.location ?? "—",
-                    startsAt: b.startsAt,
-                    endsAt: b.endsAt,
-                    status: b.status,
-                    dailyFootTraffic: b.media?.dailyFootfall ?? null,
-                    type: b.media?.type ?? null,
-                    region: b.media?.region ?? null,
-                    visibilityScore: b.media?.visibilityScore ?? null,
-                    operatingHours: b.media?.operatingHours ?? null,
-                    impressions: b.media?.impressions ?? null,
-                    trafficPattern:
-                      (b.media as { trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null } | null | undefined)
-                        ?.trafficPattern ?? null,
-                  })),
-                  financialDocs: docs?.map((f: { kind: string; title: string; amountKrw?: number | null; status: string }) => ({
-                    kind: f.kind,
-                    title: f.title,
-                    amountKrw: f.amountKrw,
-                    status: f.status,
-                  })),
-                }}
-              />
+            ) : showReportPreview && reportPreviewData ? (
+              <CampaignReportPreview ref={reportCaptureRef} data={reportPreviewData} />
             ) : (
               <p className="text-sm text-muted-foreground">
                 미리보기가 닫혀 있습니다.

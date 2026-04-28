@@ -1,5 +1,12 @@
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { siteUrl } from "@/lib/seo";
+import {
+  buildMediaSeoJsonDescription,
+  collectMediaSeoKeywordStrings,
+} from "@/lib/media-seo";
+
+/** 푸터·SNS와 동일 (Organization sameAs / E-E-A-T) */
+const INSTAGRAM_THINKAD = "https://www.instagram.com/thinkad_korea" as const;
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 
@@ -30,7 +37,7 @@ export function buildStructuredDataGraph() {
           "대한민국 No.1 OOH 광고 에이전시. 전국 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 집행 및 사후관리.",
         foundingDate: "2016",
         taxID: "319-86-00382",
-        sameAs: [KAKAO_CHANNEL_PUBLIC_URL],
+        sameAs: [KAKAO_CHANNEL_PUBLIC_URL, INSTAGRAM_THINKAD],
         contactPoint: [
           {
             "@type": "ContactPoint",
@@ -72,8 +79,8 @@ export function buildStructuredDataGraph() {
         },
         geo: {
           "@type": "GeoCoordinates",
-          latitude: 37.5446,
-          longitude: 127.0557,
+          latitude: 37.5407427,
+          longitude: 127.0595201,
         },
         openingHoursSpecification: {
           "@type": "OpeningHoursSpecification",
@@ -114,13 +121,7 @@ export function buildMediaPlaceJsonLd(
 ): Record<string, unknown> {
   const isKo = locale === "ko";
   const name = isKo ? media.name : media.nameEn || media.name;
-  const description = isKo
-    ? media.description ||
-      media.catalogDescription ||
-      `${media.location} 위치의 검증 OOH 매체 — 일 유동인구 ${media.dailyFootTraffic.toLocaleString()}명, 가시성 ${media.visibilityScore ?? 0}점.`
-    : media.descriptionEn ||
-      media.catalogDescriptionEn ||
-      `Verified OOH media in ${media.locationEn || media.location}. Daily footfall ${media.dailyFootTraffic.toLocaleString()}, visibility score ${media.visibilityScore ?? 0}.`;
+  const description = buildMediaSeoJsonDescription(media, locale, 1100);
   const image = getPrimaryMediaImageUrl(media);
   const url = `${siteUrl}/${locale}/media/${media.id}`;
 
@@ -158,6 +159,11 @@ export function buildMediaPlaceJsonLd(
       worstRating: 1,
       ratingCount: Math.max(1, media.visibilityScore),
     };
+  }
+
+  const kw = collectMediaSeoKeywordStrings(media, locale, 28);
+  if (kw.length) {
+    data.keywords = kw.join(", ");
   }
 
   return data;

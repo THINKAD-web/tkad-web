@@ -917,7 +917,11 @@ export default function MediaBrowseClient({
                                   : (isKo ? "+ 비교 추가" : "+ Compare")}
                               </BtnBlock>
                               <BtnBlock
-                                href={`/quote?media=${mapSelectedMedia.id}`}
+                                href={`/quote?media=${mapSelectedMedia.id}${
+                                  (mapSelectedMedia.priceOptions?.length ?? 0) > 0
+                                    ? "&po=0"
+                                    : ""
+                                }`}
                                 variant="accent"
                                 size="sm"
                                 className="flex-1 min-w-[8rem]"

@@ -2,7 +2,9 @@ import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
+  const origin = siteUrl.replace(/\/$/, "");
   return {
+    host: origin,
     rules: {
       userAgent: "*",
       allow: "/",

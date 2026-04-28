@@ -43,6 +43,7 @@ export function PlannerRecommendationPanel({
   const regions = usePlannerStore((s) => s.regions);
   const categories = usePlannerStore((s) => s.categories);
   const ageKey = usePlannerStore((s) => s.ageKey);
+  const industryKey = usePlannerStore((s) => s.industryKey);
   const budgetMan = usePlannerStore(selectBudgetNum);
   const months = usePlannerStore((s) => s.months);
   const selectedIds = usePlannerStore((s) => s.campaignMediaIds);
@@ -60,19 +61,20 @@ export function PlannerRecommendationPanel({
           regions,
           categories,
           ageKey,
+          industryKey,
           budgetMan,
           months,
         },
         limit,
       ),
-    [catalog, goal, regions, categories, ageKey, budgetMan, months, limit],
+    [catalog, goal, regions, categories, ageKey, industryKey, budgetMan, months, limit],
   );
 
   // 분석 애니메이션 (UX 몰입용 1.2초). 입력이 바뀌거나 refresh 시 loading 재개.
   // render 단에서 입력 스냅샷을 추적해 effect 내부 setState 체인을 피함.
   const depsKey = `${goal ?? ""}|${regions.join(",")}|${categories.join(
     ",",
-  )}|${ageKey}|${refreshTick}`;
+  )}|${ageKey}|${industryKey}|${refreshTick}`;
   const [loadingKey, setLoadingKey] = useState(depsKey);
   if (loadingKey !== depsKey) {
     setLoadingKey(depsKey);

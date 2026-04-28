@@ -59,7 +59,10 @@ export default function MediaDetailStickyCta({
             className="min-w-0 flex-1"
           >
             <BarChart3 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            <span className="truncate">{t("stickyCtaCompare")}</span>
+            <span className="min-w-0 truncate text-center">
+              <span className="sm:hidden">{tCta("compareShort")}</span>
+              <span className="hidden sm:inline">{t("stickyCtaCompare")}</span>
+            </span>
           </BtnBlock>
         </div>
       </div>
