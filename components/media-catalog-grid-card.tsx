@@ -56,7 +56,9 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const cheapest = props.priceMan
     ? null
     : getCheapestMediaPriceOption(media);
-  const priceNum = props.priceMan ?? cheapest?.priceMan ?? media.price;
+  // cheapest.priceWon 은 이미 원(₩) 단위 — formatMediaPriceWonWithSymbol 에 그대로 전달.
+  // priceMan / media.price 폴백은 기존 동작 유지 (호출부 데이터 단위에 의존).
+  const priceNum = cheapest?.priceWon ?? props.priceMan ?? media.price;
   const displayPeriod = cheapest?.period ?? media.pricePeriod;
   const tl = typeLabels[media.type];
   // 가장 저렴한 옵션 사용 시에는 단가 단위(월/주/일) 명시 — 비교 혼동 방지
