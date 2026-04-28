@@ -3,6 +3,7 @@ import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
+import { listGuideMeta } from "@/lib/guides-data";
 
 const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
@@ -131,6 +132,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // ── Guides — 비-draft 만 포함
+  const guidePart: MetadataRoute.Sitemap = listGuideMeta()
+    .filter((g) => !g.draft)
+    .map((g) =>
+      sitemapEntry(
+        `/guides/${g.slug}`,
+        new Date(g.updatedAt ?? g.publishedAt),
+      ),
+    );
+
   return [
     ...staticPart,
     ...regionLandingPart,
@@ -139,5 +150,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...casePart,
     ...mediaPart,
     ...insightPart,
+    ...guidePart,
   ];
 }
