@@ -793,3 +793,84 @@ model UserFavoriteMedia {
   @@index([mediaId])
   @@map("user_favorite_medias")
 }
+
+// ── Community (Phase 3a) ─────────────────────────────────────────
+// 광고주 / 매체사 / 마케터 간 Q&A · 매체 후기 · 매체 추천 게시판.
+// 익명 + 가입 사용자 모두 작성 가능 (Turnstile 으로 스팸 차단).
+// 신고 누적 시 자동 hidden, 어드민이 검토 후 published / deleted 결정.
+
+model CommunityPost {
+  id          String   @id @default(cuid())
+  category    String   // "qa" | "review" | "recommend"
+  title       String   @db.VarChar(200)
+  body        String   @db.Text
+  authorName  String   @map("author_name") @db.VarChar(50)
+  /** 가입 사용자 글일 때 User.id, 익명일 때 null */
+  authorUserId String? @map("author_user_id")
+  /** 본문 내 노출 안 함 — 어드민 검토 / 답변 통보용 */
+  authorEmail String?  @map("author_email")
+  isAnonymous Boolean  @default(false) @map("is_anonymous")
+  /** 작성 IP (rate limit / 신고 추적용, 일정 기간 후 익명화 가능) */
+  authorIp    String?  @map("author_ip")
+  status      String   @default("published") // published | hidden | deleted
+  reportCount Int      @default(0) @map("report_count")
+  likeCount   Int      @default(0) @map("like_count")
+  viewCount   Int      @default(0) @map("view_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  comments    CommunityComment[]
+
+  @@index([category, status, createdAt])
+  @@index([status, createdAt])
+  @@index([authorUserId])
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id          String   @id @default(cuid())
+  postId      String   @map("post_id")
+  post        CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  body        String   @db.Text
+  authorName  String   @map("author_name") @db.VarChar(50)
+  authorUserId String? @map("author_user_id")
+  authorEmail String?  @map("author_email")
+  isAnonymous Boolean  @default(false) @map("is_anonymous")
+  authorIp    String?  @map("author_ip")
+  status      String   @default("published") // published | hidden | deleted
+  reportCount Int      @default(0) @map("report_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([postId, status, createdAt])
+  @@index([authorUserId])
+  @@map("community_comments")
+}
+
+model CommunityReport {
+  id         String   @id @default(cuid())
+  /** "post" | "comment" */
+  targetType String   @map("target_type")
+  targetId   String   @map("target_id")
+  reason     String   @db.Text
+  reporterIp String?  @map("reporter_ip")
+  reporterUserId String? @map("reporter_user_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([targetType, targetId])
+  @@index([createdAt])
+  @@map("community_reports")
+}
+
+model CommunityPostLike {
+  id        String   @id @default(cuid())
+  postId    String   @map("post_id")
+  /** 가입 사용자 likeId, 익명은 ipHash */
+  userId    String?  @map("user_id")
+  ipHash    String?  @map("ip_hash")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([postId, userId], name: "post_user_unique")
+  @@unique([postId, ipHash], name: "post_ip_unique")
+  @@index([postId])
+  @@map("community_post_likes")
+}
