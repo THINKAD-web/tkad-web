@@ -106,8 +106,11 @@ function useLgUp() {
 
 export default function MediaBrowseClient({
   catalog = [],
+  hideHero = false,
 }: {
   catalog?: MediaItem[];
+  /** region/type/area 랜딩에서 자체 hero 가 이미 있을 때 내부 hero 섹션 숨김 */
+  hideHero?: boolean;
 }) {
   // TODO: dev server restart if needed (after large UI changes)
   const t = useTranslations();
@@ -470,46 +473,48 @@ export default function MediaBrowseClient({
 
   return (
     <>
-      <section className="bg-bx-black py-24">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
-            {`// 01 / Media Search`}
-          </p>
-          <div className="mt-4 flex items-center justify-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
-              {t("media.title")}
-            </h1>
-            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-bx-white">
-              BETA
-            </span>
+      {hideHero ? null : (
+        <section className="bg-bx-black py-24">
+          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+              {`// 01 / Media Search`}
+            </p>
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+                {t("media.title")}
+              </h1>
+              <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-bx-white">
+                BETA
+              </span>
+            </div>
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-white/70">
+              {`// `}
+              {t("media.subtitle")}
+            </p>
+            <div className="relative mx-auto mt-10 max-w-2xl">
+              <Search
+                className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-bx-gray-dim"
+                aria-hidden
+              />
+              <input
+                type="search"
+                value={catalogSearchQuery}
+                onChange={(e) => setCatalogSearchQuery(e.target.value)}
+                placeholder={
+                  isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
+                }
+                className="h-14 w-full border-2 border-bx-white bg-bx-white pl-14 pr-5 font-mono text-sm tracking-tight text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none sm:h-16 sm:text-base"
+                aria-label={isKo ? "매체 검색" : "Search media"}
+              />
+            </div>
+            <div className="mt-8">
+              <BtnBlock href="/contact" variant="accent" size="md">
+                {isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
+              </BtnBlock>
+            </div>
           </div>
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-white/70">
-            {`// `}
-            {t("media.subtitle")}
-          </p>
-          <div className="relative mx-auto mt-10 max-w-2xl">
-            <Search
-              className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-bx-gray-dim"
-              aria-hidden
-            />
-            <input
-              type="search"
-              value={catalogSearchQuery}
-              onChange={(e) => setCatalogSearchQuery(e.target.value)}
-              placeholder={
-                isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
-              }
-              className="h-14 w-full border-2 border-bx-white bg-bx-white pl-14 pr-5 font-mono text-sm tracking-tight text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none sm:h-16 sm:text-base"
-              aria-label={isKo ? "매체 검색" : "Search media"}
-            />
-          </div>
-          <div className="mt-8">
-            <BtnBlock href="/contact" variant="accent" size="md">
-              {isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
-            </BtnBlock>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="bg-bx-white py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
