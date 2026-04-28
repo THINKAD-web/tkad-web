@@ -29,7 +29,15 @@ export function CommunityWriteForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const turnstileEnabled = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  // Turnstile site key 가 있어도 운영 도메인 (tkad.co.kr) 이 아니면 우회.
+  // Cloudflare 대시보드에 vercel.app preview 도메인이 등록 안 돼있어
+  // 위젯이 토큰을 못 받는 경우 차단 회피. 서버도 verifyTurnstileForRequest 로 동일 정책.
+  const isProductionDomain =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "tkad.co.kr" ||
+      window.location.hostname === "www.tkad.co.kr");
+  const turnstileEnabled =
+    isProductionDomain && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   const titleOk = title.trim().length > 0 && title.trim().length <= COMMUNITY_LIMITS.POST_TITLE_MAX;
   const bodyOk =

@@ -24,7 +24,14 @@ export function CommunityCommentForm({ postId }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const turnstileEnabled = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  // Turnstile site key 가 있어도 운영 도메인 (tkad.co.kr) 이 아니면 우회.
+  // 서버도 verifyTurnstileForRequest 로 동일 호스트 기반 정책 적용.
+  const isProductionDomain =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "tkad.co.kr" ||
+      window.location.hostname === "www.tkad.co.kr");
+  const turnstileEnabled =
+    isProductionDomain && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const canSubmit =
     body.trim().length >= 2 &&
     !busy &&
