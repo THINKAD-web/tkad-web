@@ -146,11 +146,12 @@ export function mediaDetailPricePeriodTranslationKey(
  *     → 일별/주별/월별 상관없이 가장 작은 절대값을 표시 ("최저가부터" 컨셉)
  *   - 후보 0건이면 null
  *
- * 반환 형식: priceMan(만원 단위) + period (없으면 월 기본).
+ * 반환 형식: priceWon(원 단위, formatMediaPriceWonWithSymbol 에 그대로 전달 가능)
+ *           + period (없으면 월 기본).
  */
 export function getCheapestMediaPriceOption(
   media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
-): { priceMan: number; period: MediaPricePeriodKey } | null {
+): { priceWon: number; period: MediaPricePeriodKey } | null {
   type Cand = { rawPrice: number; period: MediaPricePeriodKey };
   const candidates: Cand[] = [];
 
@@ -177,7 +178,7 @@ export function getCheapestMediaPriceOption(
   );
   const cheapest = candidates[0];
   return {
-    priceMan: catalogPriceFieldToPriceMan(cheapest.rawPrice),
+    priceWon: catalogPriceFieldToWon(cheapest.rawPrice),
     period: cheapest.period,
   };
 }
