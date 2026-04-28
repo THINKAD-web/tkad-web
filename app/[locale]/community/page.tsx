@@ -4,41 +4,100 @@ import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { pageAlternates } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
-import { Users } from "lucide-react";
-import { COMMUNITY_CATEGORIES, COMMUNITY_CATEGORY_LABELS } from "@/lib/community/types";
+import {
+  COMMUNITY_CATEGORIES,
+  COMMUNITY_CATEGORY_LABELS,
+  type CommunityCategory,
+} from "@/lib/community/types";
+import { listCommunityPosts } from "@/lib/community/queries";
+import {
+  ArrowRight,
+  Eye,
+  Heart,
+  MessageSquare,
+  PenLine,
+  Users,
+  Shield,
+} from "lucide-react";
 
-type Props = { params: Promise<{ locale: string }> };
+type Props = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ category?: string; sort?: string; page?: string }>;
+};
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const title = isKo ? "광고 커뮤니티" : "Advertising Community";
+  const title = isKo ? "광고 소통 커뮤니티" : "Advertising Community";
   const description = isKo
-    ? "OOH 광고주·매체사·마케터의 정보 교류 공간 — Q&A · 매체 후기 · 매체 추천."
-    : "Information-sharing space for OOH advertisers, media operators, and marketers — Q&A, reviews, recommendations.";
+    ? "OOH 광고주·매체사·마케터의 정보 교류 공간 — Q&A · 매체 후기 · 매체 추천. 익명 / 가입 모두 작성 가능."
+    : "Information sharing for OOH advertisers, media operators, marketers — Q&A, reviews, recommendations. Anonymous or signed-in.";
   return {
     title,
     description,
     alternates: pageAlternates(locale, "/community"),
     openGraph: { title, description, type: "website" },
-    // Phase 3a 단계 — UI 없이 정책 페이지만 indexable. UI 머지 시 noindex 해제.
-    robots: { index: false, follow: false },
+    robots: { index: true, follow: true },
   };
 }
 
-/**
- * /community 랜딩 — Phase 3a 단계의 placeholder.
- * Phase 3b (UI) 머지 시 실제 게시판 목록으로 교체 예정.
- */
-export default async function CommunityPlaceholderPage({ params }: Props) {
+function isCategory(s: unknown): s is CommunityCategory {
+  return s === "qa" || s === "review" || s === "recommend";
+}
+
+function fmtRelativeKo(iso: string): string {
+  const date = new Date(iso);
+  const now = Date.now();
+  const diffMs = now - date.getTime();
+  const min = Math.floor(diffMs / 60_000);
+  if (min < 1) return "방금 전";
+  if (min < 60) return `${min}분 전`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}시간 전`;
+  const day = Math.floor(hr / 24);
+  if (day < 30) return `${day}일 전`;
+  return date.toLocaleDateString("ko-KR");
+}
+
+export default async function CommunityListPage({
+  params,
+  searchParams,
+}: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const isKo = locale === "ko";
+  const sp = await searchParams;
+
+  const activeCategory = isCategory(sp.category) ? sp.category : undefined;
+  const activeSort = sp.sort === "popular" ? "popular" : "new";
+  const activePage = Math.max(1, Number(sp.page ?? "1") || 1);
+
+  let posts: Awaited<ReturnType<typeof listCommunityPosts>> = {
+    items: [],
+    total: 0,
+    page: activePage,
+    pageSize: 20,
+  };
+  let dbError: string | null = null;
+  try {
+    posts = await listCommunityPosts({
+      category: activeCategory,
+      page: activePage,
+      sort: activeSort,
+    });
+  } catch (e) {
+    // DB 마이그레이션 미완료 등으로 community_posts 테이블 없을 때 graceful fallback
+    dbError = e instanceof Error ? e.message : String(e);
+  }
 
   const breadcrumb = buildBreadcrumbJsonLd(locale, [
     { name: isKo ? "홈" : "Home", path: "" },
     { name: isKo ? "커뮤니티" : "Community", path: "/community" },
   ]);
+
+  const totalPages = Math.max(1, Math.ceil(posts.total / posts.pageSize));
 
   return (
     <>
@@ -47,66 +106,237 @@ export default async function CommunityPlaceholderPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
 
-      <section className="bg-bx-black py-16 sm:py-24">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-            [ {isKo ? "곧 출시" : "COMING SOON"} ]
-          </p>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-bx-white sm:text-4xl lg:text-5xl">
-            <Users className="mr-3 inline-block h-8 w-8 text-bx-accent" aria-hidden />
-            {isKo ? "광고 소통 커뮤니티" : "Advertising Community"}
-          </h1>
-          <p className="mt-6 max-w-3xl text-base leading-relaxed text-bx-white/80 sm:text-lg">
-            {isKo
-              ? "OOH 광고주 · 매체사 · 마케터의 정보 교류 공간이 곧 오픈됩니다. 데이터·API 인프라 준비 완료 — UI 작업 진행 중입니다."
-              : "Coming soon — a space for OOH advertisers, media operators, and marketers to share. Data + API infrastructure complete; UI in progress."}
-          </p>
+      {/* Hero */}
+      <section className="bg-bx-black py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ {isKo ? "커뮤니티" : "COMMUNITY"} ]
+              </p>
+              <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-bx-white sm:text-4xl">
+                <Users
+                  className="mr-3 inline-block h-8 w-8 text-bx-accent"
+                  aria-hidden
+                />
+                {isKo ? "광고 소통 커뮤니티" : "Advertising Community"}
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-bx-white/80 sm:text-base">
+                {isKo
+                  ? "OOH 광고주 · 매체사 · 마케터의 정보 교류 공간. 익명 또는 가입 사용자로 자유롭게 글을 작성할 수 있습니다."
+                  : "Info-sharing space for OOH advertisers, media operators, marketers. Post anonymously or as a registered user."}
+              </p>
+            </div>
+            <Link
+              href="/community/write"
+              className="inline-flex shrink-0 items-center gap-2 border-2 border-bx-accent bg-bx-accent px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-white hover:text-bx-black hover:border-bx-white"
+            >
+              <PenLine className="h-3.5 w-3.5" />
+              {isKo ? "글쓰기" : "New post"}
+            </Link>
+          </div>
         </div>
       </section>
 
-      <section className="bg-bx-white py-12 sm:py-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-            [ {isKo ? "준비 중인 카테고리" : "UPCOMING CATEGORIES"} ]
-          </p>
-          <ul className="mt-6 grid gap-0 sm:grid-cols-3">
-            {COMMUNITY_CATEGORIES.map((cat) => {
-              const labels = COMMUNITY_CATEGORY_LABELS[cat];
-              return (
-                <li
-                  key={cat}
-                  className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-6"
+      {/* Filters */}
+      <section className="border-b-2 border-bx-black bg-bx-off py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <ul className="flex flex-wrap gap-0">
+              <li>
+                <Link
+                  href="/community"
+                  className={`-ml-[2px] inline-flex items-center gap-1.5 border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+                    !activeCategory
+                      ? "bg-bx-black text-bx-white"
+                      : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                  }`}
                 >
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-                    [ {isKo ? labels.ko : labels.en} ]
-                  </p>
-                  <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-black">
-                    {isKo ? labels.ko : labels.en}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-bx-gray-dim">
-                    {isKo ? labels.description.ko : labels.description.en}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-
-          <div className="mt-12 border-2 border-bx-black bg-bx-off p-6">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-              [ {isKo ? "운영 정책" : "POLICY"} ]
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-bx-black">
-              {isKo
-                ? "오픈 전 운영 정책을 미리 확인할 수 있습니다."
-                : "Read the community policy before launch."}
-            </p>
-            <Link
-              href="/community/policy"
-              className="mt-4 inline-flex items-center gap-2 border-2 border-bx-black bg-bx-black px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent"
-            >
-              {isKo ? "정책 보기" : "View policy"} →
-            </Link>
+                  {isKo ? "전체" : "All"}
+                </Link>
+              </li>
+              {COMMUNITY_CATEGORIES.map((cat) => {
+                const labels = COMMUNITY_CATEGORY_LABELS[cat];
+                const active = activeCategory === cat;
+                return (
+                  <li key={cat}>
+                    <Link
+                      href={`/community?category=${cat}${activeSort === "popular" ? "&sort=popular" : ""}`}
+                      className={`-ml-[2px] inline-flex items-center gap-1.5 border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+                        active
+                          ? "bg-bx-accent text-bx-white border-bx-accent"
+                          : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                      }`}
+                    >
+                      {isKo ? labels.ko : labels.en}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="flex gap-0">
+              <Link
+                href={`/community${activeCategory ? `?category=${activeCategory}` : ""}`}
+                className={`inline-flex items-center border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+                  activeSort === "new"
+                    ? "bg-bx-black text-bx-white"
+                    : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                }`}
+              >
+                {isKo ? "최신" : "Newest"}
+              </Link>
+              <Link
+                href={`/community?${activeCategory ? `category=${activeCategory}&` : ""}sort=popular`}
+                className={`-ml-[2px] inline-flex items-center border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+                  activeSort === "popular"
+                    ? "bg-bx-black text-bx-white"
+                    : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                }`}
+              >
+                {isKo ? "인기" : "Popular"}
+              </Link>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* List */}
+      <section className="bg-bx-white py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {dbError ? (
+            <div className="border-2 border-bx-accent bg-bx-white p-8 text-center">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ DB 마이그레이션 필요 ]
+              </p>
+              <p className="mt-3 font-bold text-bx-black">
+                {isKo
+                  ? "커뮤니티 테이블이 아직 생성되지 않았습니다."
+                  : "Community tables are not yet created."}
+              </p>
+              <p className="mt-2 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                {`// `}운영자가 Neon SQL Editor 에서{" "}
+                <code>prisma/migrations/20260428_add_community/migration.sql</code>{" "}
+                실행 필요.
+              </p>
+            </div>
+          ) : posts.items.length === 0 ? (
+            <div className="border-2 border-bx-black bg-bx-off p-12 text-center">
+              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
+                {`// `}
+                {isKo ? "아직 등록된 글이 없습니다." : "No posts yet."}
+              </p>
+              <Link
+                href="/community/write"
+                className="mt-6 inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black"
+              >
+                {isKo ? "첫 글 작성하기" : "Write the first post"}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          ) : (
+            <ul className="space-y-0">
+              {posts.items.map((p) => {
+                const labels = COMMUNITY_CATEGORY_LABELS[p.category];
+                return (
+                  <li
+                    key={p.id}
+                    className="-mt-[2px] border-2 border-bx-black bg-bx-white"
+                  >
+                    <Link
+                      href={`/community/posts/${p.id}`}
+                      className="flex flex-col gap-3 p-5 transition-colors hover:bg-bx-off sm:p-6"
+                    >
+                      <div className="flex flex-wrap items-baseline gap-3">
+                        <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                          {isKo ? labels.ko : labels.en}
+                        </span>
+                        <h2 className="text-lg font-bold tracking-tight text-bx-black sm:text-xl">
+                          {p.title}
+                        </h2>
+                      </div>
+                      <p className="font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim line-clamp-2">
+                        {p.bodyExcerpt}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                        <span>
+                          {p.isAnonymous ? "익명" : p.authorName}
+                        </span>
+                        <span>·</span>
+                        <span className="tabular-nums">
+                          {fmtRelativeKo(p.createdAt)}
+                        </span>
+                        <span className="ml-auto flex items-center gap-3 tabular-nums">
+                          <span className="inline-flex items-center gap-1">
+                            <Eye className="h-3 w-3" />
+                            {p.viewCount}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Heart className="h-3 w-3" />
+                            {p.likeCount}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <MessageSquare className="h-3 w-3" />
+                            {p.commentCount}
+                          </span>
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {/* 페이지네이션 */}
+          {posts.items.length > 0 && totalPages > 1 ? (
+            <nav
+              className="mt-8 flex justify-center gap-0"
+              aria-label="pagination"
+            >
+              {Array.from({ length: totalPages }).map((_, idx) => {
+                const n = idx + 1;
+                const active = n === posts.page;
+                const qs = new URLSearchParams();
+                if (activeCategory) qs.set("category", activeCategory);
+                if (activeSort === "popular") qs.set("sort", "popular");
+                if (n > 1) qs.set("page", String(n));
+                const href = `/community${qs.toString() ? "?" + qs.toString() : ""}`;
+                return (
+                  <Link
+                    key={n}
+                    href={href}
+                    className={`-ml-[2px] inline-flex h-10 w-10 items-center justify-center border-2 border-bx-black font-mono text-[11px] font-bold tabular-nums transition-colors ${
+                      active
+                        ? "bg-bx-black text-bx-white"
+                        : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                    }`}
+                  >
+                    {n}
+                  </Link>
+                );
+              })}
+            </nav>
+          ) : null}
+        </div>
+      </section>
+
+      {/* 정책 안내 */}
+      <section className="border-t-2 border-bx-black bg-bx-off py-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+            <Shield className="mr-2 inline h-3.5 w-3.5 text-bx-accent" aria-hidden />
+            {`// `}
+            {isKo
+              ? "글 작성 전 운영 정책을 확인해주세요"
+              : "Please review the community policy before posting"}
+          </p>
+          <Link
+            href="/community/policy"
+            className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent hover:text-bx-black"
+          >
+            {isKo ? "운영 정책 보기" : "View policy"}
+            <ArrowRight className="h-3 w-3" />
+          </Link>
         </div>
       </section>
     </>
