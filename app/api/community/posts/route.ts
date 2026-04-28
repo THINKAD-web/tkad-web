@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
-import { verifyTurnstileToken } from "@/lib/turnstile-verify";
+import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
 import { getCurrentUser } from "@/lib/user-session";
 import {
   createCommunityPost,
@@ -68,10 +68,11 @@ export async function POST(req: NextRequest) {
 
   const turnstileToken =
     (body as Record<string, unknown>).turnstileToken;
-  const turnstile = await verifyTurnstileToken(
-    typeof turnstileToken === "string" ? turnstileToken : undefined,
-    ip,
-  );
+  const turnstile = await verifyTurnstileForRequest({
+    token: typeof turnstileToken === "string" ? turnstileToken : undefined,
+    remoteip: ip,
+    host: req.headers.get("host"),
+  });
   if (!turnstile.ok) {
     return NextResponse.json(
       { error: "캡차 검증에 실패했습니다.", reason: turnstile.reason },

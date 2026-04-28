@@ -11,6 +11,7 @@ import { typeLabels } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   formatMediaPriceWonWithSymbol,
+  getCheapestMediaPriceOption,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
@@ -50,9 +51,16 @@ export type MediaCatalogGridCardProps =
 export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const tMedia = useTranslations("media");
   const { media, isKo, imagePreparingLabel, popularIds } = props;
-  const priceNum = props.priceMan ?? media.price;
+  // priceMan 명시(예: 네트워크 패키지 월 환산) 가 우선.
+  // 없으면 priceOptions + price 중 *가장 저렴한* 옵션을 표시.
+  const cheapest = props.priceMan
+    ? null
+    : getCheapestMediaPriceOption(media);
+  const priceNum = props.priceMan ?? cheapest?.priceMan ?? media.price;
+  const displayPeriod = cheapest?.period ?? media.pricePeriod;
   const tl = typeLabels[media.type];
-  const showPricePeriod = props.showPricePeriod ?? false;
+  // 가장 저렴한 옵션 사용 시에는 단가 단위(월/주/일) 명시 — 비교 혼동 방지
+  const showPricePeriod = props.showPricePeriod ?? !!cheapest;
 
   const thumbnailOverlays = (
     <>
@@ -121,7 +129,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           {formatMediaPriceWonWithSymbol(priceNum)}
           {showPricePeriod ? (
             <span className="ml-1 text-[11px] font-normal uppercase tracking-[0.18em] text-bx-gray-dim">
-              · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
+              · {tMedia(mediaPricePeriodTranslationKey(displayPeriod))}
             </span>
           ) : null}
         </p>
