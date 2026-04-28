@@ -15,8 +15,7 @@ import {
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
 import { pageAlternates } from "@/lib/seo";
-import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
-import { MEDIA_CATALOG_GRID_CLASS } from "@/components/media-catalog-shared";
+import MediaBrowseClient from "@/components/media-browse-client";
 import { ArrowRight, MapPin } from "lucide-react";
 
 type Props = {
@@ -163,9 +162,9 @@ export default async function RegionLandingPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="bg-bx-white py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {filtered.length === 0 ? (
+      {filtered.length === 0 ? (
+        <section className="bg-bx-white py-12 sm:py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="border-2 border-bx-black bg-bx-off p-12 text-center">
               <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
                 {`// `}
@@ -181,39 +180,11 @@ export default async function RegionLandingPage({ params }: Props) {
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
-          ) : (
-            <>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
-                [ {isKo ? "검증된 매체" : "VERIFIED"} ] · {filtered.length} {isKo ? "개" : "items"}
-              </p>
-              <ul className={`mt-4 ${MEDIA_CATALOG_GRID_CLASS}`}>
-                {filtered.map((media) => (
-                  <li key={media.id} className="group">
-                    <Link
-                      href={`/media/${media.id}`}
-                      className="block"
-                      aria-label={
-                        isKo
-                          ? `${media.name} 상세 보기`
-                          : `${media.nameEn || media.name} details`
-                      }
-                    >
-                      <MediaCatalogGridCard
-                        media={media}
-                        isKo={isKo}
-                        imagePreparingLabel={
-                          isKo ? "이미지 준비 중" : "Image coming soon"
-                        }
-                        variant="link"
-                      />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      ) : (
+        <MediaBrowseClient catalog={filtered} hideHero />
+      )}
 
       {/* 다른 지역 / 유형으로 내부 링크 — SEO + 사용자 탐색 */}
       <section className="border-t-2 border-bx-black bg-bx-off py-12">
