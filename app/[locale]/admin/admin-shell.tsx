@@ -55,6 +55,7 @@ const navDefs = [
   { href: "/admin/quote-templates", key: "quoteTemplates" as const, icon: FileText },
   // 4) 캠페인 운영
   { href: "/admin/campaigns", key: "campaigns" as const, icon: Megaphone },
+  { href: "/admin/community", key: "community" as const, icon: MessageSquareText },
   // 5) 매체/검증/네트워크
   { href: "/admin/medias", key: "medias" as const, icon: Monitor },
   { href: "/admin/verification", key: "verification" as const, icon: ShieldCheck },
