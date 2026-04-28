@@ -273,3 +273,62 @@ export function buildInsightBreadcrumbJsonLd(
     ],
   };
 }
+
+/**
+ * 범용 BreadcrumbList JSON-LD 빌더.
+ *
+ * @example
+ *   buildBreadcrumbJsonLd("ko", [
+ *     { name: "홈", path: "" },
+ *     { name: "서비스", path: "/services" },
+ *   ]);
+ *
+ * `path` 는 locale 미포함 (`/services`, `/media/region/seoul`). 빈 문자열 = 홈.
+ */
+export function buildBreadcrumbJsonLd(
+  locale: string,
+  items: { name: string; path: string }[],
+): Record<string, unknown> {
+  const origin = siteUrl.replace(/\/$/, "");
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      name: it.name,
+      item: `${origin}/${locale}${it.path}`,
+    })),
+  };
+}
+
+/**
+ * `/media` 카탈로그 ItemList JSON-LD — 검색 리치 결과 / 매체 목록 노출용.
+ * 카탈로그 전체 대신 상위 N개 ID 만 등록 (스키마 한도 + 페이로드 합리화).
+ */
+export function buildMediaCatalogItemListJsonLd(
+  locale: string,
+  items: { id: string; name: string; nameEn?: string; location: string; locationEn?: string }[],
+  limit = 30,
+): Record<string, unknown> {
+  const origin = siteUrl.replace(/\/$/, "");
+  const isKo = locale === "ko";
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    numberOfItems: items.length,
+    itemListElement: items.slice(0, limit).map((m, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      url: `${origin}/${locale}/media/${m.id}`,
+      name: isKo ? m.name : (m.nameEn || m.name),
+      ...(m.location && {
+        item: {
+          "@type": "Place",
+          name: isKo ? m.name : (m.nameEn || m.name),
+          address: isKo ? m.location : (m.locationEn || m.location),
+        },
+      }),
+    })),
+  };
+}

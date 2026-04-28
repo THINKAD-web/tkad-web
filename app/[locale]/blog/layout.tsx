@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
 import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
+import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 
 export async function generateMetadata({
   params,
@@ -34,10 +35,25 @@ export async function generateMetadata({
   };
 }
 
-export default function BlogLayout({
+export default async function BlogLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  return children;
+  const locale = await resolveLocaleParam(params);
+  const breadcrumb = buildBreadcrumbJsonLd(locale, [
+    { name: locale === "ko" ? "홈" : "Home", path: "" },
+    { name: locale === "ko" ? "블로그" : "Blog", path: "/blog" },
+  ]);
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+      />
+      {children}
+    </>
+  );
 }
