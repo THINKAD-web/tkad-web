@@ -27,6 +27,7 @@ import {
   ImagePlus,
   CheckCircle2,
   Code2,
+  Layers,
   Loader2,
   AlertCircle,
   Star,
@@ -1139,6 +1140,15 @@ export default function AdminMediasClient({
               >
                 <Code2 className="h-4 w-4" />
                 <span className="hidden sm:inline">JSON 간편 등록</span>
+              </Link>
+            </Button>
+            <Button variant="outline" className="shrink-0" asChild>
+              <Link
+                href="/admin/medias/bulk-import"
+                className="inline-flex items-center gap-2"
+              >
+                <Layers className="h-4 w-4" />
+                <span className="hidden sm:inline">일괄 가져오기</span>
               </Link>
             </Button>
             <Button

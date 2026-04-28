@@ -1,0 +1,210 @@
+import { revalidatePath } from "next/cache";
+import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
+import { assertAdminDb, json } from "@/lib/admin-guard";
+import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
+import { getPrisma } from "@/lib/prisma";
+import { enrichQuickAddRowForPersist } from "@/lib/media-quick-add-enrich-one";
+import {
+  mediaQuickAddCreateToPrismaUpdate,
+  validateQuickAddItems,
+  type QuickAddMediaJson,
+} from "@/lib/media-quick-add";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
+type ImportOutcome =
+  | { kind: "created"; id: string; name: string }
+  | { kind: "updated"; id: string; name: string }
+  | { kind: "failed"; name: string; error: string };
+
+/**
+ * 매체 일괄 import (upsert).
+ *
+ * 동작:
+ *   - body: { items: QuickAddMediaJson[], matchKey?: "name" | "id", dryRun?: boolean }
+ *   - matchKey="name" (기본): `media_name` 으로 찾아 있으면 update, 없으면 create.
+ *   - matchKey="id": 각 item 의 `id` 필드 (camelCase 그대로) 로 매칭. 없으면 실패.
+ *   - dryRun: DB 변경 없이 어떤 작업이 일어날지만 리포트.
+ *
+ * 신규 등록은 quick-add POST 와 동일하게 카카오 좌표·주변 시설·유동인구 보강을 수행.
+ * 기존 매체 update 도 동일한 enrich 로직을 거쳐 누락 필드를 채움 (이미 값이 있으면 보존).
+ */
+export async function POST(request: NextRequest) {
+  const deny = assertAdminDb(request);
+  if (deny) return deny;
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "Invalid JSON" }, 400);
+  }
+  if (body === null || typeof body !== "object" || Array.isArray(body)) {
+    return json({ error: "요청 본문은 객체여야 합니다." }, 400);
+  }
+
+  const itemsRaw = (body as { items?: unknown }).items;
+  if (!Array.isArray(itemsRaw)) {
+    return json({ error: "items 배열이 필요합니다." }, 400);
+  }
+  const matchKeyRaw = (body as { matchKey?: unknown }).matchKey;
+  const matchKey: "name" | "id" =
+    matchKeyRaw === "id" ? "id" : "name";
+  const dryRun = (body as { dryRun?: unknown }).dryRun === true;
+
+  // matchKey="id" 면 각 item 의 id 필드를 별도로 추출 (validateQuickAddItem 가 모르는 필드라 별도 보존)
+  const explicitIds: (string | null)[] = itemsRaw.map((it) => {
+    if (it && typeof it === "object") {
+      const v = (it as Record<string, unknown>).id;
+      if (typeof v === "string" && v.trim()) return v.trim();
+    }
+    return null;
+  });
+
+  const validated = validateQuickAddItems(itemsRaw);
+  if (!validated.ok) {
+    return json({ error: validated.error }, 400);
+  }
+
+  const db = getPrisma();
+  const outcomes: ImportOutcome[] = [];
+
+  for (let i = 0; i < validated.items.length; i++) {
+    const row = validated.items[i] as QuickAddMediaJson;
+    const explicitId = explicitIds[i];
+    try {
+      // 매칭: id 우선(명시적), 그 외 name
+      const existing = await (async () => {
+        if (matchKey === "id") {
+          if (!explicitId) return null;
+          return db.media.findUnique({ where: { id: explicitId } });
+        }
+        // name 매칭 — 활성·비활성 무관 (관리자 의도)
+        return db.media.findFirst({ where: { name: row.media_name } });
+      })();
+
+      if (matchKey === "id" && !explicitId) {
+        outcomes.push({
+          kind: "failed",
+          name: row.media_name,
+          error: "matchKey=id 인데 item.id 가 비어있습니다.",
+        });
+        continue;
+      }
+
+      const { createPayload, addressVerified, autoPopulatedAt } =
+        await enrichQuickAddRowForPersist(row);
+
+      if (existing) {
+        if (dryRun) {
+          outcomes.push({
+            kind: "updated",
+            id: existing.id,
+            name: existing.name,
+          });
+          continue;
+        }
+        const data = mediaQuickAddCreateToPrismaUpdate(createPayload);
+        data.addressVerified = addressVerified;
+        if (autoPopulatedAt != null) {
+          data.autoPopulatedAt = autoPopulatedAt;
+        }
+        const updated = await db.media.update({
+          where: { id: existing.id },
+          data,
+        });
+        if (updated.price !== existing.price) {
+          await db.mediaPriceSnapshot.create({
+            data: {
+              mediaId: updated.id,
+              price: updated.price,
+              note: "bulk-import-update",
+            },
+          });
+        }
+        outcomes.push({
+          kind: "updated",
+          id: updated.id,
+          name: updated.name,
+        });
+      } else {
+        if (dryRun) {
+          outcomes.push({
+            kind: "created",
+            id: "(신규)",
+            name: row.media_name,
+          });
+          continue;
+        }
+        const created = await db.media.create({
+          data: {
+            ...createPayload,
+            priceOptions: createPayload.priceOptions ?? Prisma.JsonNull,
+            addressVerified,
+            autoPopulatedAt,
+          },
+        });
+        await db.mediaPriceSnapshot.create({
+          data: {
+            mediaId: created.id,
+            price: created.price,
+            note: "bulk-import-create",
+          },
+        });
+        outcomes.push({
+          kind: "created",
+          id: created.id,
+          name: created.name,
+        });
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "알 수 없는 오류";
+      outcomes.push({
+        kind: "failed",
+        name: row.media_name,
+        error: msg,
+      });
+    }
+  }
+
+  if (!dryRun) {
+    try {
+      for (const locale of ["ko", "en"] as const) {
+        revalidatePath(`/${locale}/medias`);
+        revalidatePath(`/${locale}/media`);
+        revalidatePath(`/${locale}/planner`);
+        revalidatePath(`/${locale}/compare`);
+        revalidatePath(`/${locale}/quote`);
+      }
+    } catch {
+      /* optional */
+    }
+  }
+
+  if (isAdminAuthDebugEnabled()) {
+    console.log("[admin-api] medias bulk-import", {
+      total: outcomes.length,
+      created: outcomes.filter((o) => o.kind === "created").length,
+      updated: outcomes.filter((o) => o.kind === "updated").length,
+      failed: outcomes.filter((o) => o.kind === "failed").length,
+      matchKey,
+      dryRun,
+    });
+  }
+
+  const counts = {
+    created: outcomes.filter((o) => o.kind === "created").length,
+    updated: outcomes.filter((o) => o.kind === "updated").length,
+    failed: outcomes.filter((o) => o.kind === "failed").length,
+  };
+
+  return json({
+    ok: true,
+    matchKey,
+    dryRun,
+    counts,
+    outcomes,
+  });
+}
