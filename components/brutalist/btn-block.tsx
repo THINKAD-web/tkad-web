@@ -41,6 +41,9 @@ type BaseProps = {
   size?: BtnBlockSize;
   className?: string;
   children: ReactNode;
+  /** 툴팁(비활성 버튼 안내 등) — button / Link 모두 전달 */
+  title?: string;
+  "aria-label"?: string;
 };
 
 type LinkProps = BaseProps & {
@@ -63,6 +66,8 @@ export function BtnBlock(props: LinkProps | ButtonProps) {
     size = "md",
     className,
     children,
+    title,
+    "aria-label": ariaLabel,
   } = props;
   const cls = cn(
     "inline-flex items-center justify-center gap-2 border-2 font-mono font-bold uppercase tracking-[0.18em] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed",
@@ -73,7 +78,12 @@ export function BtnBlock(props: LinkProps | ButtonProps) {
 
   if (props.href !== undefined) {
     return (
-      <Link href={props.href} className={cls}>
+      <Link
+        href={props.href}
+        className={cls}
+        title={title}
+        aria-label={ariaLabel}
+      >
         {children}
       </Link>
     );
@@ -84,6 +94,8 @@ export function BtnBlock(props: LinkProps | ButtonProps) {
       onClick={props.onClick}
       disabled={props.disabled}
       className={cls}
+      title={title}
+      aria-label={ariaLabel}
     >
       {children}
     </button>
