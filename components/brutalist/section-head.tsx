@@ -46,7 +46,7 @@ export function SectionHead({
         className,
       )}
     >
-      <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+      <div className="font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
         <span className="text-bx-black">[{number}]</span>
         {category ? (
           <span className="ml-2">/ {category}</span>

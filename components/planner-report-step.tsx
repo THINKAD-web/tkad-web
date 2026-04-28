@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import { useTranslations } from "next-intl";
-import { ExternalLink, FileDown, Loader2, Mail, RefreshCw } from "lucide-react";
+import { Camera, FileDown, Loader2, Mail, RefreshCw } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/lib/planner-logic";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import {
+  captureElementAsPng,
   defaultPlannerPdfFilename,
   downloadPdfFromHtmlElement,
   htmlElementToPdf,
@@ -139,7 +140,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const { toast } = useToast();
   const derived = usePlannerReportDerived(props);
 
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
@@ -152,6 +152,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const [userEmail, setUserEmail] = useState("");
   const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [capturing, setCapturing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -175,7 +176,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         const nextUrl = URL.createObjectURL(blob);
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         urlRef.current = nextUrl;
-        setPdfUrl(nextUrl);
       } catch (e) {
         console.error("[planner-pdf html2canvas]", e);
         if (!cancelled) {
@@ -220,13 +220,14 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
 
   const downloadPdf = useCallback(() => {
     const asciiName = defaultPlannerPdfFilename();
+    const liveBlobUrl = urlRef.current;
 
-    /** 미리보기와 동일 Blob — 사용자 제스처 안에서 동기 다운로드(비동기 재생성 후 클릭 시 차단 방지) */
-    if (pdfUrl && !loading && !error) {
+    /** 미리보기와 동일 Blob — `urlRef`가 진실( effect 정리로 state `pdfUrl`이 revoke URL을 가질 수 있음) */
+    if (liveBlobUrl && !loading && !error) {
       setDownloading(true);
       try {
         const a = document.createElement("a");
-        a.href = pdfUrl;
+        a.href = liveBlobUrl;
         a.download = asciiName;
         a.rel = "noopener";
         document.body.appendChild(a);
@@ -271,7 +272,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       }
     })();
   }, [
-    pdfUrl,
     loading,
     error,
     props.isKo,
@@ -290,6 +290,33 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     tCommon,
     toast,
   ]);
+
+  const captureReportPng = useCallback(async () => {
+    const el =
+      document.getElementById("planner-report-content") ?? previewRef.current;
+    if (!el) {
+      toast("error", tCommon("pdfGenerationFailed"));
+      return;
+    }
+    setCapturing(true);
+    try {
+      await new Promise<void>((r) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => r())),
+      );
+      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      const name = props.isKo
+        ? `싱커드_플래너보고서_${ymd}.png`
+        : `THINKAD_planner_${ymd}.png`;
+      await captureElementAsPng(el, name);
+      toast("success", t("reportImageSaved"));
+    } catch (e) {
+      console.error("[planner-capture]", e);
+      toast("error", tCommon("pdfGenerationFailed"));
+    } finally {
+      setCapturing(false);
+    }
+  }, [props.isKo, t, tCommon, toast]);
+
   const sendEmailReport = useCallback(async () => {
     const email = userEmail.trim();
     if (
@@ -430,7 +457,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
               variant="secondary"
               size="md"
               onClick={downloadPdf}
-              disabled={loading || downloading}
+              disabled={loading || downloading || capturing}
             >
               {downloading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -439,17 +466,19 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
               )}
               {t("reportDownloadPdf")}
             </BtnBlock>
-            {pdfUrl && !loading ? (
-              <a
-                href={pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
-              >
-                <ExternalLink className="h-4 w-4" />
-                {t("reportOpenPdfNewTab")}
-              </a>
-            ) : null}
+            <BtnBlock
+              variant="secondary"
+              size="md"
+              onClick={() => void captureReportPng()}
+              disabled={loading || capturing || downloading}
+            >
+              {capturing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Camera className="h-4 w-4" />
+              )}
+              {t("reportCapturePng")}
+            </BtnBlock>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <input
                 type="email"
@@ -518,6 +547,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const { toast } = useToast();
   const derived = usePlannerReportDerived(props);
   const [downloading, setDownloading] = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const compactPreviewRef = useRef<HTMLDivElement>(null);
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
@@ -567,6 +597,33 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     tCommon,
     toast,
   ]);
+
+  const captureReportPngCompact = useCallback(async () => {
+    const el =
+      document.getElementById("planner-report-content") ?? compactPreviewRef.current;
+    if (!el) {
+      toast("error", tCommon("pdfGenerationFailed"));
+      return;
+    }
+    setCapturing(true);
+    try {
+      await new Promise<void>((r) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => r())),
+      );
+      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      const name = props.isKo
+        ? `싱커드_플래너보고서_${ymd}.png`
+        : `THINKAD_planner_${ymd}.png`;
+      await captureElementAsPng(el, name);
+      toast("success", t("reportImageSaved"));
+    } catch (e) {
+      console.error("[planner-capture compact]", e);
+      toast("error", tCommon("pdfGenerationFailed"));
+    } finally {
+      setCapturing(false);
+    }
+  }, [props.isKo, t, tCommon, toast]);
+
   const sendEmailReport = useCallback(async () => {
     const email = userEmail.trim();
     if (
@@ -694,7 +751,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             variant="accent"
             size="md"
             onClick={() => void downloadPdf()}
-            disabled={downloading}
+            disabled={downloading || capturing}
           >
             {downloading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -702,6 +759,19 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
               <FileDown className="h-4 w-4" />
             )}
             {t("reportDownloadPdf")}
+          </BtnBlock>
+          <BtnBlock
+            variant="secondary"
+            size="md"
+            onClick={() => void captureReportPngCompact()}
+            disabled={downloading || capturing}
+          >
+            {capturing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Camera className="h-4 w-4" />
+            )}
+            {t("reportCapturePng")}
           </BtnBlock>
           <div className="flex flex-wrap items-center gap-2">
             <input

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Bus,
   ClipboardList,
@@ -17,10 +17,20 @@ import { cn } from "@/lib/utils";
 import ContactInquiryForm from "@/components/contact-inquiry-form";
 import { ContactFeedbackSurvey } from "@/components/contact-feedback-survey";
 
+/** 뚝섬로17가길 48 (성수에이원지식산업센터) — 지도 핀은 도로 주소·건물 위치 기준 (OSM/Nominatim) */
+const OFFICE_MAP_LAT = 37.5407427;
+const OFFICE_MAP_LNG = 127.0595201;
+
+function officeMapEmbedSrc(hl: string) {
+  return `https://maps.google.com/maps?q=${OFFICE_MAP_LAT}%2C${OFFICE_MAP_LNG}&z=18&hl=${encodeURIComponent(hl)}&output=embed`;
+}
+
 type MainTab = "inquiry" | "feedback";
 
 export default function ContactPageContent() {
   const t = useTranslations("contact");
+  const locale = useLocale();
+  const mapHl = locale === "en" ? "en" : "ko";
   const [mainTab, setMainTab] = useState<MainTab>("inquiry");
 
   return (
@@ -162,8 +172,8 @@ export default function ContactPageContent() {
           <div className="overflow-hidden border-2 border-bx-black bg-bx-white">
             <div className="aspect-video w-full border-b-2 border-bx-black">
               <iframe
-                title="THINKAD Office Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3163.5!2d127.056!3d37.5445!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca4e3db3e19fb%3A0x1c5a6d1ef2a1c0d0!2z7ISx7IiY7JeQ7J207JuQ7KeA7Iud7IKw7JeF7IS87YSw!5e0!3m2!1sko!2skr!4v1700000000000"
+                title="THINKAD — 서울 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호"
+                src={officeMapEmbedSrc(mapHl)}
                 className="h-full w-full border-0 grayscale"
                 allowFullScreen
                 loading="lazy"

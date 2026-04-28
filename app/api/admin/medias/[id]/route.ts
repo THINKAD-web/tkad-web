@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { MediaAvailability } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
@@ -425,6 +426,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         id: media.id,
         name: media.name,
       });
+    }
+    try {
+      for (const locale of ["ko", "en"] as const) {
+        revalidatePath(`/${locale}/compare`);
+        revalidatePath(`/${locale}/media`);
+        revalidatePath(`/${locale}/media/${id}`);
+        revalidatePath(`/${locale}/planner`);
+        revalidatePath(`/${locale}/quote`);
+      }
+    } catch {
+      /* revalidatePath는 일부 환경에서만 동작 */
     }
     return json({ media });
   } catch {

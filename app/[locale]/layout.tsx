@@ -62,6 +62,9 @@ export async function generateMetadata({
       ? "대한민국 No.1 OOH 광고 에이전시. 전국 500+ 검증된 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 계약~사후관리 원스톱 서비스."
       : "Korea's leading OOH agency. Search 500+ verified OOH media nationwide, data-driven campaign consulting, and end-to-end execution.";
 
+  const googleVer = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+  const naverVer = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION?.trim();
+
   return {
     title: {
       default: titleDefault,
@@ -72,11 +75,18 @@ export async function generateMetadata({
     keywords: [
       "OOH 광고",
       "옥외광고",
+      "DOOH",
+      "디지털 옥외광고",
       "빌보드 광고",
       "디지털 사이니지",
       "전광판 광고",
       "교통 광고",
+      "버스쉘터 광고",
+      "지하철 광고",
+      "OOH media Korea",
       "광고 에이전시",
+      "옥외광고 견적",
+      "미디어 플래너",
       "싱커드",
       "THINKAD",
       "코엑스 전광판",
@@ -87,7 +97,31 @@ export async function generateMetadata({
     publisher: "THINKAD 싱커드",
     formatDetection: { telephone: true, email: true, address: true },
     alternates: pageAlternates(locale, ""),
-    robots: { index: true, follow: true },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+    ...(googleVer || naverVer
+      ? {
+          verification: {
+            ...(googleVer ? { google: googleVer } : {}),
+            ...(naverVer
+              ? {
+                  other: {
+                    "naver-site-verification": naverVer,
+                  },
+                }
+              : {}),
+          },
+        }
+      : {}),
     openGraph: {
       type: "website",
       locale: locale === "ko" ? "ko_KR" : "en_US",
@@ -109,8 +143,6 @@ export async function generateMetadata({
       description,
     },
     other: {
-      "naver-site-verification": "",
-      "google-site-verification": "",
       "theme-color": "#0D1B2E",
       "msapplication-TileColor": "#0D1B2E",
     },

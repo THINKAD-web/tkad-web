@@ -344,10 +344,17 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     .split(/[\n,]/)
     .map((s) => s.trim())
     .filter(Boolean);
-  const extractedImages = form.extractedImagesText
+  const galleryLines = form.extractedImagesText
     .split("\n")
     .map((s) => s.trim())
     .filter(Boolean);
+  const imageInput = form.image.trim();
+  /** 대표 URL: 입력 필드 우선, 비어 있으면 갤러리 첫 줄(공개 카탈로그가 image → extracted 순으로 병합하므로 일치시킴) */
+  const primaryImage = imageInput || galleryLines[0] || null;
+  /** 대표와 동일한 URL은 extracted 에서 제외해 DB·목록에 이중 저장되지 않게 함 */
+  const extractedImages = primaryImage
+    ? galleryLines.filter((u) => u !== primaryImage)
+    : galleryLines;
   const vis = Math.round(Number(form.visibilityScore) || 0);
   let priceOptions: unknown = null;
   const rawOpts = form.priceOptionsJson.trim();
@@ -366,7 +373,7 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     region: form.region.trim(),
     type: form.type.trim(),
     price: Math.round(form.price) || 0,
-    image: form.image.trim() || null,
+    image: primaryImage,
     width: form.width.trim() || null,
     height: form.height.trim() || null,
     description: form.description.trim() || null,

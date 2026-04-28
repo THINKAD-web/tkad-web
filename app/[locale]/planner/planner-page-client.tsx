@@ -817,7 +817,7 @@ export default function PlannerPageClient({
                 </div>
 
                 <PlannerRecommendationPanel
-                  catalog={catalog}
+                  catalog={filtered}
                   isKo={isKo}
                   regionLabel={mediaRegionLabel}
                 />

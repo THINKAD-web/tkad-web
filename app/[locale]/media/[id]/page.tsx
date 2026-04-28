@@ -25,6 +25,11 @@ import {
   getSimilarMediaFromCatalog,
   typeLabels,
 } from "@/lib/media-data";
+import {
+  buildMediaMetaDescription,
+  buildMediaMetaKeywordsList,
+  buildMediaPageTitle,
+} from "@/lib/media-seo";
 import { pageAlternates } from "@/lib/seo";
 import {
   buildMediaBreadcrumbJsonLd,
@@ -82,26 +87,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!media) return { title: "Media" };
   const isKo = locale === "ko";
   const name = isKo ? media.name : media.nameEn || media.name;
-  const loc = isKo ? media.location : media.locationEn || media.location;
-  const title = isKo ? `${name} - ${loc} | THINKAD` : `${name} - ${loc} | THINKAD`;
-  const won = media.keywordFilter
-    ? Math.round(
-        (media.keywordFilter.budgetMin + media.keywordFilter.budgetMax) / 2,
-      )
-    : media.price * 10_000;
-  const dailyFootfall = media.dailyFootTraffic;
-  const description = media.keywordFilter
-    ? isKo
-      ? `${loc} · ${media.keywordFilter.priceText} · 일 유동 ${dailyFootfall.toLocaleString()}명`
-      : `${loc} · ${media.keywordFilter.priceText} · ${dailyFootfall.toLocaleString()} daily footfall`
-    : isKo
-      ? `${loc} 일 유동 ${dailyFootfall.toLocaleString()}명, 가시성 ${media.visibilityScore ?? 0}점. 검증된 OOH 매체로 캠페인을 시뮬레이션해 보세요. ₩${won.toLocaleString()}`
-      : `${loc} — ${dailyFootfall.toLocaleString()} daily footfall, visibility ${media.visibilityScore ?? 0}. Simulate your campaign on this verified OOH media. ₩${won.toLocaleString()}`;
+  const title = buildMediaPageTitle(media, locale);
+  const description = buildMediaMetaDescription(media, locale);
+  const keywords = buildMediaMetaKeywordsList(media, locale, 28);
 
   const heroImage = getPrimaryMediaImageUrl(media);
   return {
     title,
     description,
+    keywords,
     alternates: pageAlternates(locale, `/media/${media.id}`),
     openGraph: {
       title,

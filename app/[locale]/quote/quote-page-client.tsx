@@ -8,8 +8,9 @@ import {
   Calculator,
   MapPin,
   Send,
-  Download,
+  FileDown,
   Camera,
+  Loader2,
   ChevronRight,
   ChevronLeft,
   Sparkles,
@@ -20,7 +21,14 @@ import {
   ShieldCheck,
   Flame,
 } from "lucide-react";
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import {
   dedupeImageUrls,
   getPrimaryMediaImageUrl,
@@ -29,7 +37,6 @@ import {
   type MediaItem,
 } from "@/lib/media-data";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
-import Spinner from "@/components/spinner";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
@@ -129,7 +136,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [emailHoneypot, setEmailHoneypot] = useState("");
 
-  useEffect(() => {
+  // URL `?media=` + `po` 는 layout effect 에서 먼저 반영 — 이후 `selectedIds` 동기화
+  // useEffect가 빈 `selectedIds`로 `mediaPriceOptionIndex`를 지우는 레이스를 방지합니다.
+  useLayoutEffect(() => {
     if (mediaQueryApplied.current) return;
     if (typeof window === "undefined") return;
     // catalog 가 아직 비어 있으면 다음 렌더에 다시 시도 (사용자 견적이 매체 일부만 받는 회귀 방지).
@@ -137,7 +146,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     const params = new URLSearchParams(window.location.search);
     const raw = params.get("media");
     if (!raw) return;
-    mediaQueryApplied.current = true;
     const requestedIds = raw
       .split(",")
       .map((x) => x.trim())
@@ -155,6 +163,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       );
     }
     if (matchedIds.length === 0) return;
+    mediaQueryApplied.current = true;
     setSelectedIds(new Set(matchedIds));
     const poRaw = params.get("po");
     const po = poRaw != null ? parseInt(poRaw, 10) : NaN;
@@ -640,7 +649,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     try {
       const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       await captureElementAsPng(el, isKo ? `싱커드_견적서_${ymd}.png` : `THINKAD_quote_${ymd}.png`);
-      toast("success", isKo ? "이미지로 저장됐어요" : "Saved as image");
+      toast("success", t("quote.imageSaved"));
     } catch {
       toast("error", t("quote.pdfError"));
     } finally {
@@ -1442,15 +1451,15 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       {selectedMedia.length > 0 ? (
                         <div className="space-y-3">
                           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-                            [ PDF PREVIEW ]
+                            {isKo ? "[ PDF 미리보기 ]" : "[ PDF PREVIEW ]"}
                           </p>
-                          <h3 className="text-sm font-bold tracking-tight text-bx-black">
+                          <h3 className="text-base font-bold tracking-tight text-bx-black sm:text-lg">
                             {t("quote.pdfPreviewTitle")}
                           </h3>
                           <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
                             {`// `}{t("quote.pdfPreviewHint")}
                           </p>
-                          <div className="overflow-x-auto border-2 border-bx-black bg-bx-off p-4 md:p-6">
+                          <div className="overflow-x-auto border-2 border-bx-black bg-bx-off p-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] md:p-6">
                             <div className="mx-auto w-fit max-w-full">
                               <QuotePdfPreview
                                 ref={pdfPreviewRef}
@@ -1475,9 +1484,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
                       <div className="border-2 border-bx-black bg-bx-off p-5 text-sm">
                         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-                          {t("quote.reviewTitle")}
+                          [ {t("quote.reviewTitle")} ]
                         </p>
-                        <ul className="mt-3 space-y-2 text-muted-foreground">
+                        <ul className="mt-3 space-y-2 text-bx-black/80">
                           <li>
                             <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
                               {t("quote.reviewMediaCount")}:{" "}
@@ -1529,50 +1538,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </ul>
                       </div>
 
-                      <div className="flex flex-col gap-3 sm:flex-row">
-                        <BtnBlock
-                          variant="dark"
-                          size="md"
-                          onClick={handleDownloadPdf}
-                          disabled={downloading || selectedMedia.length === 0}
-                          className="flex-1"
-                        >
-                          {downloading ? (
-                            <>
-                              <Spinner className="h-4 w-4" />
-                              {t("quote.generatingPdf")}
-                            </>
-                          ) : (
-                            <>
-                              <Download className="h-4 w-4" />
-                              {t("quote.downloadPdf")}
-                            </>
-                          )}
-                        </BtnBlock>
-                        <BtnBlock
-                          variant="secondary"
-                          size="md"
-                          onClick={handleCapture}
-                          disabled={capturing || selectedMedia.length === 0}
-                          className="flex-1"
-                        >
-                          {capturing ? (
-                            <Spinner className="h-4 w-4" />
-                          ) : (
-                            <Camera className="h-4 w-4" />
-                          )}
-                          {isKo ? "이미지 저장" : "Save as Image"}
-                        </BtnBlock>
-                      </div>
-
-                      <div className="relative border-2 border-bx-accent bg-bx-white p-5">
-                        <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-                          <Mail className="h-4 w-4" />
-                          [ {t("quote.emailPdfTitle")} ]
-                        </div>
-                        <p className="mt-2 mb-3 font-mono text-[11px] tracking-tight text-bx-gray-dim">
-                          {`// `}{t("quote.emailPdfDesc")}
-                        </p>
+                      <div className="relative border-2 border-bx-black bg-bx-white">
                         <div className="absolute -left-[9999px]" aria-hidden>
                           <input
                             value={emailHoneypot}
@@ -1581,40 +1547,88 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             autoComplete="off"
                           />
                         </div>
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-                          <div className="flex-1">
-                            <label className="sr-only" htmlFor="quote-pdf-email">
-                              {t("quote.email")}
-                            </label>
-                            <input
-                              id="quote-pdf-email"
-                              type="email"
-                              placeholder={t("quote.emailPlaceholder")}
-                              value={form.email}
-                              onChange={(e) =>
-                                updateField("email", e.target.value)
-                              }
-                              className="h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
-                            />
+                        <div className="flex flex-col gap-4 border-b-2 border-bx-black p-5 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                              [ PDF DOCUMENT ]
+                            </p>
+                            <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+                              {t("quote.pdfDocumentTitle")}
+                            </h3>
+                            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                              {t("quote.pdfDocumentDesc")}
+                            </p>
                           </div>
-                          <BtnBlock
-                            variant="accent"
-                            size="md"
-                            onClick={handleEmailPdf}
-                            disabled={emailPdfLoading || selectedMedia.length === 0}
-                          >
-                            {emailPdfLoading ? (
-                              <>
-                                <Spinner className="h-4 w-4" />
-                                {t("quote.sendingPdf")}
-                              </>
-                            ) : (
-                              <>
-                                <Send className="h-4 w-4" />
-                                {t("quote.sendPdfEmail")}
-                              </>
-                            )}
-                          </BtnBlock>
+                          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-wrap sm:items-center sm:justify-end md:flex-row">
+                            <BtnBlock
+                              variant="secondary"
+                              size="md"
+                              onClick={handleDownloadPdf}
+                              disabled={
+                                downloading || selectedMedia.length === 0
+                              }
+                              className="w-full sm:w-auto"
+                            >
+                              {downloading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <FileDown className="h-4 w-4" />
+                              )}
+                              {downloading
+                                ? t("quote.generatingPdf")
+                                : t("quote.downloadPdf")}
+                            </BtnBlock>
+                            <BtnBlock
+                              variant="secondary"
+                              size="md"
+                              onClick={handleCapture}
+                              disabled={
+                                capturing || selectedMedia.length === 0
+                              }
+                              className="w-full sm:w-auto"
+                            >
+                              {capturing ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Camera className="h-4 w-4" />
+                              )}
+                              {t("quote.capturePng")}
+                            </BtnBlock>
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                              <label className="sr-only" htmlFor="quote-pdf-email">
+                                {t("quote.email")}
+                              </label>
+                              <input
+                                id="quote-pdf-email"
+                                type="email"
+                                placeholder={t("quote.emailPlaceholder")}
+                                value={form.email}
+                                onChange={(e) =>
+                                  updateField("email", e.target.value)
+                                }
+                                className="h-10 w-full min-w-0 border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none sm:min-w-[14rem] sm:w-56"
+                              />
+                              <BtnBlock
+                                variant="accent"
+                                size="md"
+                                onClick={handleEmailPdf}
+                                disabled={
+                                  emailPdfLoading ||
+                                  selectedMedia.length === 0
+                                }
+                                className="w-full shrink-0 sm:w-auto"
+                              >
+                                {emailPdfLoading ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Mail className="h-4 w-4" />
+                                )}
+                                {emailPdfLoading
+                                  ? t("quote.sendingPdf")
+                                  : t("quote.sendPdfEmail")}
+                              </BtnBlock>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -1737,7 +1751,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           >
                             {loading ? (
                               <>
-                                <Spinner className="mr-2" />
+                                <Loader2 className="h-4 w-4 animate-spin" />
                                 {t("quote.submitting")}
                               </>
                             ) : (
