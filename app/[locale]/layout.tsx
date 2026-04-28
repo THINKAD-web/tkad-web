@@ -15,6 +15,7 @@ import PageTransition from "@/components/page-transition";
 import ConditionalPublicChrome from "@/components/conditional-public-chrome";
 import ToastProvider from "@/components/toast-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import PwaRegister from "@/components/pwa-register";
 import "../globals.css";
 
 const geistSans = localFont({
@@ -43,6 +44,9 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  // PWA: 노치/홈인디케이터 영역까지 풀-블리드 (env(safe-area-inset-*) 활용)
+  viewportFit: "cover" as const,
+  themeColor: "#0D1B2E",
 };
 
 export async function generateMetadata({
@@ -96,6 +100,14 @@ export async function generateMetadata({
     creator: "THINKAD 싱커드",
     publisher: "THINKAD 싱커드",
     formatDetection: { telephone: true, email: true, address: true },
+    // PWA — iOS 홈 화면 추가 시 풀-스크린 모드 + 상태바 스타일.
+    // capable: true 가 모바일 사파리에서 standalone 모드 진입 신호.
+    appleWebApp: {
+      capable: true,
+      title: locale === "ko" ? "싱커드" : "THINKAD",
+      statusBarStyle: "black-translucent",
+    },
+    manifest: "/manifest.webmanifest",
     alternates: pageAlternates(locale, ""),
     robots: {
       index: true,
@@ -192,6 +204,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                 <FooterBrutal />
                 <DeferredPublicWidgets />
               </ConditionalPublicChrome>
+              <PwaRegister />
             </ToastProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
