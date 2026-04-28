@@ -215,7 +215,11 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
                 <img
                   key={i}
                   src={url}
-                  alt=""
+                  alt={
+                    isKo
+                      ? `${title} 캠페인 이미지 ${i + 1}`
+                      : `${title} campaign image ${i + 1}`
+                  }
                   className="-mt-[2px] -ml-[2px] aspect-video w-full border-2 border-bx-black object-cover grayscale transition-all duration-500 hover:grayscale-0"
                 />
               ))}

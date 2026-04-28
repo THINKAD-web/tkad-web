@@ -1,0 +1,241 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { getGuideBySlug, GUIDES } from "@/lib/guides-data";
+import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
+import { pageAlternates, siteUrl } from "@/lib/seo";
+import { regionLabel, typeLabel } from "@/lib/media-keyword-landing";
+import { ArrowRight, BookText, Calendar } from "lucide-react";
+
+type Props = {
+  params: Promise<{ locale: string; slug: string }>;
+};
+
+export async function generateStaticParams() {
+  return GUIDES.map((g) => ({ slug: g.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: rawLocale, slug } = await params;
+  const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
+  const guide = getGuideBySlug(slug);
+  if (!guide) return { title: locale === "ko" ? "가이드 없음" : "Guide not found" };
+  return {
+    title: guide.title,
+    description: guide.description,
+    keywords: guide.keywords,
+    alternates: pageAlternates(locale, `/guides/${slug}`),
+    openGraph: {
+      title: guide.title,
+      description: guide.description,
+      type: "article",
+      publishedTime: guide.publishedAt,
+      modifiedTime: guide.updatedAt ?? guide.publishedAt,
+    },
+    twitter: { card: "summary_large_image", title: guide.title, description: guide.description },
+    robots: guide.draft
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
+  };
+}
+
+/**
+ * Article + FAQPage JSON-LD — 가이드 상세에서 함께 출력.
+ * publishedAt / updatedAt 으로 검색엔진 freshness 시그널 제공.
+ */
+function buildGuideArticleJsonLd(guide: NonNullable<ReturnType<typeof getGuideBySlug>>, locale: string) {
+  const url = `${siteUrl.replace(/\/$/, "")}/${locale}/guides/${guide.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${url}#article`,
+    headline: guide.title.slice(0, 110),
+    description: guide.description,
+    url,
+    datePublished: guide.publishedAt,
+    dateModified: guide.updatedAt ?? guide.publishedAt,
+    inLanguage: locale === "ko" ? "ko-KR" : "en-US",
+    author: { "@id": `${siteUrl}/#organization` },
+    publisher: { "@id": `${siteUrl}/#organization` },
+    mainEntityOfPage: url,
+    keywords: guide.keywords.join(", "),
+  };
+}
+
+function buildGuideFaqJsonLd(guide: NonNullable<ReturnType<typeof getGuideBySlug>>, locale: string) {
+  if (!guide.faqs?.length) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    inLanguage: locale === "ko" ? "ko-KR" : "en-US",
+    mainEntity: guide.faqs.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+  };
+}
+
+export default async function GuideDetailPage({ params }: Props) {
+  const { locale: rawLocale, slug } = await params;
+  const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
+  setRequestLocale(locale);
+  const guide = getGuideBySlug(slug);
+  if (!guide) notFound();
+
+  const isKo = locale === "ko";
+  const breadcrumb = buildBreadcrumbJsonLd(locale, [
+    { name: isKo ? "홈" : "Home", path: "" },
+    { name: isKo ? "가이드" : "Guides", path: "/guides" },
+    { name: guide.title.slice(0, 60), path: `/guides/${guide.slug}` },
+  ]);
+  const article = buildGuideArticleJsonLd(guide, locale);
+  const faqLd = buildGuideFaqJsonLd(guide, locale);
+  const ld = [article, breadcrumb, ...(faqLd ? [faqLd] : [])];
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+      />
+
+      <article className="bg-bx-white">
+        {/* Hero */}
+        <header className="border-b-2 border-bx-black bg-bx-black py-16 sm:py-20">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <BookText className="mr-2 inline h-3.5 w-3.5" aria-hidden />
+              [ {isKo ? "가이드" : "GUIDE"} ]
+            </p>
+            {guide.draft ? (
+              <p className="mt-4 inline-flex items-center border-2 border-bx-accent bg-bx-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                {`// `}
+                {isKo
+                  ? "초안 — 편집자 검수 진행 중"
+                  : "DRAFT — under editor review"}
+              </p>
+            ) : null}
+            <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-bx-white sm:text-4xl lg:text-5xl">
+              {guide.title}
+            </h1>
+            <p className="mt-6 max-w-3xl text-base leading-relaxed text-bx-white/80 sm:text-lg">
+              {guide.description}
+            </p>
+            <p className="mt-6 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-white/55">
+              <Calendar className="h-3 w-3" aria-hidden />
+              {`// `}
+              {new Date(guide.publishedAt).toLocaleDateString(
+                isKo ? "ko-KR" : "en-US",
+              )}
+              {guide.updatedAt && guide.updatedAt !== guide.publishedAt
+                ? ` · ${isKo ? "갱신" : "Updated"} ${new Date(guide.updatedAt).toLocaleDateString(isKo ? "ko-KR" : "en-US")}`
+                : null}
+            </p>
+          </div>
+        </header>
+
+        {/* 본문 */}
+        <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          {guide.sections.map((sec, i) => (
+            <section key={i} className="mt-10 first:mt-0">
+              <h2 className="text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+                {sec.heading}
+              </h2>
+              <div className="mt-5 space-y-4">
+                {sec.paragraphs.map((p, idx) => (
+                  <p key={idx} className="text-base leading-relaxed text-bx-black">
+                    {p}
+                  </p>
+                ))}
+              </div>
+              {sec.bullets && sec.bullets.length > 0 ? (
+                <ul className="mt-5 space-y-2">
+                  {sec.bullets.map((b, idx) => (
+                    <li
+                      key={idx}
+                      className="flex gap-3 border-l-2 border-bx-accent pl-4 text-base leading-relaxed text-bx-black"
+                    >
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </section>
+          ))}
+
+          {/* FAQ */}
+          {guide.faqs && guide.faqs.length > 0 ? (
+            <section className="mt-16 border-t-2 border-bx-black pt-10">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                [ FAQ ]
+              </p>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+                {isKo ? "자주 묻는 질문" : "Frequently Asked Questions"}
+              </h2>
+              <dl className="mt-6 space-y-0">
+                {guide.faqs.map((f, idx) => (
+                  <div
+                    key={idx}
+                    className="-mt-[2px] border-2 border-bx-black bg-bx-white p-5"
+                  >
+                    <dt className="text-base font-bold text-bx-black">
+                      Q. {f.question}
+                    </dt>
+                    <dd className="mt-3 text-base leading-relaxed text-bx-black">
+                      {f.answer}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : null}
+
+          {/* 관련 키워드 랜딩으로 내부 링크 */}
+          <section className="mt-16 border-t-2 border-bx-black pt-10">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              [ {isKo ? "관련 매체 둘러보기" : "BROWSE RELATED MEDIA"} ]
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {guide.relatedRegion ? (
+                <li>
+                  <Link
+                    href={`/media/region/${guide.relatedRegion}`}
+                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                  >
+                    {regionLabel(guide.relatedRegion, locale)}
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </li>
+              ) : null}
+              {guide.relatedTypes?.map((t) => (
+                <li key={t}>
+                  <Link
+                    href={`/media/type/${t}`}
+                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                  >
+                    {typeLabel(t, locale)}
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </li>
+              ))}
+              {guide.relatedAreas?.map((a) => (
+                <li key={a}>
+                  <Link
+                    href={`/media/area/${encodeURIComponent(a)}`}
+                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold tracking-[0.04em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                  >
+                    {a}
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      </article>
+    </>
+  );
+}

@@ -50,6 +50,36 @@ export function typeLabel(slug: string, locale: string): string {
 export const KNOWN_REGION_SLUGS = Object.keys(REGION_LABELS);
 export const KNOWN_TYPE_SLUGS = Object.keys(TYPE_LABELS);
 
+/** District(시·군·구) 표시 라벨 — 한글 슬러그 그대로 노출. */
+export function areaLabel(slug: string, _locale: string): string {
+  void _locale;
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
+export function areaLandingTitle(slug: string, locale: string, count: number): string {
+  const label = areaLabel(slug, locale);
+  if (locale === "ko") {
+    return `${label} OOH 광고 매체 — THINKAD 검증 ${count}개`;
+  }
+  return `${label} OOH advertising — ${count} verified media · THINKAD`;
+}
+
+export function areaLandingDescription(
+  slug: string,
+  locale: string,
+  count: number,
+): string {
+  const label = areaLabel(slug, locale);
+  if (locale === "ko") {
+    return `${label}에서 집행 가능한 OOH(옥외광고) 매체 ${count}개. 빌보드 · 디지털 사이니지 · 교통광고 등 THINKAD 가 직접 검증한 매체 정보를 비교하세요.`;
+  }
+  return `${count} OOH media in ${label} verified by THINKAD: billboards, digital signage, transit. Compare prices and locations.`;
+}
+
 export function regionLandingTitle(slug: string, locale: string, count: number): string {
   const label = regionLabel(slug, locale);
   if (locale === "ko") {

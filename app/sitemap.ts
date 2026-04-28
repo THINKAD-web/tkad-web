@@ -3,6 +3,7 @@ import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
+import { listGuideMeta } from "@/lib/guides-data";
 
 const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
@@ -70,6 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let mediaPart: MetadataRoute.Sitemap = [];
   let regionLandingPart: MetadataRoute.Sitemap = [];
   let typeLandingPart: MetadataRoute.Sitemap = [];
+  let areaLandingPart: MetadataRoute.Sitemap = [];
   try {
     const mediaCatalog = await fetchPublicMediaCatalog();
     mediaPart = mediaCatalog.map((m) => {
@@ -84,15 +86,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const regionSet = new Set<string>();
     const typeSet = new Set<string>();
+    const areaSet = new Set<string>();
     for (const m of mediaCatalog) {
       if (m.region) regionSet.add(m.region);
       if (m.type) typeSet.add(m.type);
+      const area = m.district || m.city;
+      if (area) areaSet.add(area);
     }
     regionLandingPart = Array.from(regionSet).map((region) =>
       sitemapEntry(`/media/region/${encodeURIComponent(region)}`),
     );
     typeLandingPart = Array.from(typeSet).map((type) =>
       sitemapEntry(`/media/type/${encodeURIComponent(type)}`),
+    );
+    areaLandingPart = Array.from(areaSet).map((area) =>
+      sitemapEntry(`/media/area/${encodeURIComponent(area)}`),
     );
   } catch {
     // 카탈로그 실패 → 매체/랜딩 부분 없이 진행
@@ -124,12 +132,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // ── Guides — 비-draft 만 포함
+  const guidePart: MetadataRoute.Sitemap = listGuideMeta()
+    .filter((g) => !g.draft)
+    .map((g) =>
+      sitemapEntry(
+        `/guides/${g.slug}`,
+        new Date(g.updatedAt ?? g.publishedAt),
+      ),
+    );
+
   return [
     ...staticPart,
     ...regionLandingPart,
     ...typeLandingPart,
+    ...areaLandingPart,
     ...casePart,
     ...mediaPart,
     ...insightPart,
+    ...guidePart,
   ];
 }
