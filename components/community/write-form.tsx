@@ -180,8 +180,15 @@ export function CommunityWriteForm() {
           <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
             이메일 (선택, 답변 통보용 — 게시물에 노출 X)
           </span>
+          {/*
+            type="text" + inputMode="email" — Safari/iOS 가 type="email" 의
+            기본 HTML5 검증으로 "The string did not match the expected pattern"
+            을 띄우는 것 회피. 서버에서 lib/community/validate.ts 가 정식 검증.
+          */}
           <input
-            type="email"
+            type="text"
+            inputMode="email"
+            autoComplete="email"
             value={authorEmail}
             onChange={(e) => setAuthorEmail(e.target.value)}
             placeholder="example@domain.com"
