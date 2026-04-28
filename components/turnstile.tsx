@@ -55,17 +55,27 @@ export function TurnstileWidget({
     if (!siteKey) return;
     let cancelled = false;
 
-    void loadScript().then(() => {
-      if (cancelled || !containerRef.current || !window.turnstile) return;
-      if (widgetIdRef.current !== null) return;
-
-      widgetIdRef.current = window.turnstile.render(containerRef.current, {
-        sitekey: siteKey,
-        callback: (token: string) => onVerifyRef.current(token),
-        "expired-callback": () => onVerifyRef.current(""),
-        theme: "light",
+    void loadScript()
+      .then(() => {
+        if (cancelled || !containerRef.current || !window.turnstile) return;
+        if (widgetIdRef.current !== null) return;
+        try {
+          widgetIdRef.current = window.turnstile.render(containerRef.current, {
+            sitekey: siteKey,
+            callback: (token: string) => onVerifyRef.current(token),
+            "expired-callback": () => onVerifyRef.current(""),
+            theme: "light",
+          });
+        } catch (e) {
+          // 잘못된 site key / 도메인 미허가 등 — Turnstile JS 가
+          // "string did not match the expected pattern" 같은 에러를 throw 할 수 있음.
+          // 위젯 비활성화 (= form 그대로 사용 가능).
+          console.warn("[turnstile] render failed:", e);
+        }
+      })
+      .catch((e) => {
+        console.warn("[turnstile] script load failed:", e);
       });
-    });
 
     return () => {
       cancelled = true;
