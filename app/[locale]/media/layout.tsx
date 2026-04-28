@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
 import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
+import {
+  buildBreadcrumbJsonLd,
+  buildMediaCatalogItemListJsonLd,
+} from "@/lib/structured-data";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
 export async function generateMetadata({
   params,
@@ -54,10 +59,53 @@ export async function generateMetadata({
   };
 }
 
-export default function MediaLayout({
+/**
+ * /media 카탈로그 — ItemList + BreadcrumbList JSON-LD.
+ * 카탈로그 fetch 실패해도 layout 은 깨지지 않도록 try/catch.
+ */
+export default async function MediaLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  return children;
+  const locale = await resolveLocaleParam(params);
+
+  let itemList: Record<string, unknown> | null = null;
+  try {
+    const catalog = await fetchPublicMediaCatalog();
+    if (catalog.length > 0) {
+      itemList = buildMediaCatalogItemListJsonLd(
+        locale,
+        catalog.map((m) => ({
+          id: m.id,
+          name: m.name,
+          nameEn: m.nameEn,
+          location: m.location,
+          locationEn: m.locationEn,
+        })),
+        30,
+      );
+    }
+  } catch {
+    // 카탈로그 실패 → ItemList 없이 (Breadcrumb 만)
+  }
+
+  const breadcrumb = buildBreadcrumbJsonLd(locale, [
+    { name: locale === "ko" ? "홈" : "Home", path: "" },
+    { name: locale === "ko" ? "옥외광고 매체" : "OOH media", path: "/media" },
+  ]);
+
+  const ld = itemList ? [itemList, breadcrumb] : [breadcrumb];
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+      />
+      {children}
+    </>
+  );
 }

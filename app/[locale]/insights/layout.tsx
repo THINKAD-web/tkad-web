@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
 import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
+import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 
 export async function generateMetadata({
   params,
@@ -38,10 +39,25 @@ export async function generateMetadata({
   };
 }
 
-export default function InsightsLayout({
+export default async function InsightsLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  return children;
+  const locale = await resolveLocaleParam(params);
+  const breadcrumb = buildBreadcrumbJsonLd(locale, [
+    { name: locale === "ko" ? "홈" : "Home", path: "" },
+    { name: locale === "ko" ? "OOH 인사이트" : "OOH Insights", path: "/insights" },
+  ]);
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+      />
+      {children}
+    </>
+  );
 }

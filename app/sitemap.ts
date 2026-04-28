@@ -4,7 +4,7 @@ import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
 
-const lastModified = new Date();
+const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
 
 /** 핵심 랜딩(검색 유입·전환) 우선순위 살짝 상향 */
@@ -15,7 +15,10 @@ function staticPathPriority(path: string): number {
   return 0.8;
 }
 
-function sitemapEntry(path: string): MetadataRoute.Sitemap[number] {
+function sitemapEntry(
+  path: string,
+  lastModified: Date = buildTime,
+): MetadataRoute.Sitemap[number] {
   const suffix = path === "" ? "" : path;
   const ko = `${origin}/ko${suffix}`;
   const en = `${origin}/en${suffix}`;
@@ -44,34 +47,89 @@ function sitemapEntry(path: string): MetadataRoute.Sitemap[number] {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPart = sitemapPaths.map((p) => sitemapEntry(p));
-  const cases = await getPublishedSuccessCases();
-  const casePart = cases.map((c) => sitemapEntry(`/cases/${c.id}`));
-  let mediaPart: MetadataRoute.Sitemap = [];
+
+  // ── Success cases — DB updatedAt 우선
+  let casePart: MetadataRoute.Sitemap = [];
   try {
-    const mediaCatalog = await fetchPublicMediaCatalog();
-    mediaPart = mediaCatalog.map((m) => sitemapEntry(`/media/${m.id}`));
+    const cases = await getPublishedSuccessCases();
+    casePart = cases.map((c) => {
+      const updated = (c as { updatedAt?: Date | string | null }).updatedAt;
+      const lastmod = updated
+        ? updated instanceof Date
+          ? updated
+          : new Date(updated)
+        : buildTime;
+      return sitemapEntry(`/cases/${c.id}`, lastmod);
+    });
   } catch {
-    // 카탈로그 fetch 실패 시 정적/사례 부분만 반환 (sitemap 자체는 살림)
+    // 사례 fetch 실패 → 사례 부분 없이 진행
   }
 
-  // PR-5: 자동 발행된 trend report (slug 있는 published 만)
+  // ── Media catalog — fetchPublicMediaCatalog 의 updatedAt 우선
+  // ── Tier 2 — region/type 키워드 랜딩 자동 생성 (DB unique values)
+  let mediaPart: MetadataRoute.Sitemap = [];
+  let regionLandingPart: MetadataRoute.Sitemap = [];
+  let typeLandingPart: MetadataRoute.Sitemap = [];
+  try {
+    const mediaCatalog = await fetchPublicMediaCatalog();
+    mediaPart = mediaCatalog.map((m) => {
+      const updated = (m as { updatedAt?: Date | string | null }).updatedAt;
+      const lastmod = updated
+        ? updated instanceof Date
+          ? updated
+          : new Date(updated)
+        : buildTime;
+      return sitemapEntry(`/media/${m.id}`, lastmod);
+    });
+
+    const regionSet = new Set<string>();
+    const typeSet = new Set<string>();
+    for (const m of mediaCatalog) {
+      if (m.region) regionSet.add(m.region);
+      if (m.type) typeSet.add(m.type);
+    }
+    regionLandingPart = Array.from(regionSet).map((region) =>
+      sitemapEntry(`/media/region/${encodeURIComponent(region)}`),
+    );
+    typeLandingPart = Array.from(typeSet).map((type) =>
+      sitemapEntry(`/media/type/${encodeURIComponent(type)}`),
+    );
+  } catch {
+    // 카탈로그 실패 → 매체/랜딩 부분 없이 진행
+  }
+
+  // ── Trend reports — published + slug 만, updatedAt/publishedAt 우선
   let insightPart: MetadataRoute.Sitemap = [];
   if (isDatabaseConfigured()) {
     try {
       const db = getPrisma();
       const insights = await db.trendReport.findMany({
         where: { status: "published", slug: { not: null } },
-        select: { slug: true },
+        select: { slug: true, publishedAt: true, updatedAt: true },
         orderBy: { publishedAt: "desc" },
         take: 1000,
       });
       insightPart = insights
-        .filter((i): i is { slug: string } => typeof i.slug === "string")
-        .map((i) => sitemapEntry(`/insights/${i.slug}`));
+        .filter(
+          (i): i is typeof i & { slug: string } => typeof i.slug === "string",
+        )
+        .map((i) =>
+          sitemapEntry(
+            `/insights/${i.slug}`,
+            i.updatedAt ?? i.publishedAt ?? buildTime,
+          ),
+        );
     } catch {
-      // 인사이트 fetch 실패 시 다른 부분만 반환
+      // 인사이트 fetch 실패
     }
   }
 
-  return [...staticPart, ...casePart, ...mediaPart, ...insightPart];
+  return [
+    ...staticPart,
+    ...regionLandingPart,
+    ...typeLandingPart,
+    ...casePart,
+    ...mediaPart,
+    ...insightPart,
+  ];
 }
