@@ -1988,6 +1988,24 @@
     "ctaSecondary": "매체 둘러보기"
   },
   "mediaDetail": {
+    "availability": {
+      "eyebrow": "예약 가능 캘린더",
+      "title": "이 매체 예약 가능 일정",
+      "desc": "주황색 사선이 표시된 날짜는 이미 예약된 기간입니다. 원하는 기간이 비어있다면 우측 [예약 신청]을 눌러주세요.",
+      "loading": "캘린더를 불러오는 중…",
+      "error": "예약 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+      "prevMonth": "이전 달",
+      "nextMonth": "다음 달",
+      "dayAvailable": "예약 가능",
+      "dayBlocked": "예약 불가 (기존 예약 있음)",
+      "dayPast": "지난 날짜",
+      "legendAvailable": "예약 가능",
+      "legendBlocked": "예약 불가",
+      "legendToday": "오늘",
+      "statsAvailable": "이번 달 {n}일 예약 가능",
+      "statsBlocked": "{n}일 예약 불가",
+      "ctaRequest": "예약 신청"
+    },
     "traffic": {
       "title": "시간대 · 요일 · 월별 유동인구",
       "desc": "노출 효율을 좌우하는 핵심 패턴입니다. 데이터가 없는 매체는 지역·유형 기반 추정치로 표시됩니다.",

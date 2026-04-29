@@ -59,6 +59,7 @@ import { RoadviewCard } from "@/components/media-detail/roadview-card";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { TrafficCharts } from "@/components/media-detail/traffic-charts";
+import { MediaAvailabilityCalendar } from "@/components/media-detail/availability-calendar";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
@@ -707,6 +708,8 @@ export default async function MediaDetailPage({ params }: Props) {
               isKo={isKo}
             />
           </div>
+
+          <MediaAvailabilityCalendar mediaId={media.id} />
 
           <section
             aria-labelledby="media-detail-description-heading"
