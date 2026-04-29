@@ -406,15 +406,34 @@ export default function AdminCampaignsPage() {
     return result;
   }, [list, statusFilter, searchQuery]);
 
-  const addMediaBooking = async () => {
+  const addMediaBooking = async ({ force = false } = {}) => {
     if (!selectedId || !bookingForm.mediaId || !bookingForm.startsAt || !bookingForm.endsAt) return;
     setBookingBusy(true);
     try {
       const res = await fetch(`/api/admin/campaigns/${selectedId}/bookings`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mediaId: bookingForm.mediaId, startsAt: bookingForm.startsAt, endsAt: bookingForm.endsAt }),
+        body: JSON.stringify({
+          mediaId: bookingForm.mediaId,
+          startsAt: bookingForm.startsAt,
+          endsAt: bookingForm.endsAt,
+          force,
+        }),
       });
+      if (res.status === 409) {
+        const j = (await res.json()) as {
+          conflicts?: { summary: string }[];
+          error?: string;
+        };
+        const summary = (j.conflicts ?? []).map((c) => `· ${c.summary}`).join("\n");
+        const ok = window.confirm(
+          `이 매체에 활성 예약이 겹칩니다.\n\n${summary}\n\n그래도 강제 연결할까요?`,
+        );
+        if (ok) {
+          await addMediaBooking({ force: true });
+        }
+        return;
+      }
       if (!res.ok) { const j = await res.json(); window.alert(j.error ?? "실패"); return; }
       setBookingForm({ mediaSearch: "", mediaId: "", mediaName: "", startsAt: "", endsAt: "" });
       setBookingSearchResults([]);

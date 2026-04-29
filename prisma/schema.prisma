@@ -21,6 +21,20 @@ enum MediaAvailability {
   maintenance
 }
 
+/// 예약 상태 머신.
+///   requested  : 광고주가 자가 신청 (운영자 검토 전)
+///   tentative  : 어드민 가홀드 (영업·견적 진행 중) — 신규 예약 차단
+///   confirmed  : 확정 — 신규 예약 차단
+///   cancelled  : 취소됨 — 충돌 판정 제외
+///   expired    : requested 후 N일 미응답 자동 만료 (cron)
+enum MediaBookingStatus {
+  requested
+  tentative
+  confirmed
+  cancelled
+  expired
+}
+
 enum MediaPricePeriod {
   month
   biweekly
@@ -170,20 +184,39 @@ model MediaPriceSnapshot {
 }
 
 model MediaBooking {
-  id         String    @id @default(cuid())
-  mediaId    String    @map("media_id")
-  title      String
-  startsAt   DateTime  @map("starts_at")
-  endsAt     DateTime  @map("ends_at")
-  status     String    @default("hold")
-  campaignId String?   @map("campaign_id")
-  notes      String?
+  id                String              @id @default(cuid())
+  mediaId           String              @map("media_id")
+  title             String
+  startsAt          DateTime            @map("starts_at")
+  endsAt            DateTime            @map("ends_at")
+  /// 기본값 tentative — 운영자가 직접 만드는 슬롯은 가홀드부터.
+  /// 광고주 자가 신청은 API 에서 명시적으로 requested 로 생성.
+  status            MediaBookingStatus  @default(tentative)
+  campaignId        String?             @map("campaign_id")
+  notes             String?
 
-  media    Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  /// 광고주 자가 신청 추적 — 가입 사용자
+  requestedByUserId String?             @map("requested_by_user_id")
+  /// 익명 신청 시 연락처 (가입 사용자면 User 테이블 참조 우선)
+  requesterName     String?             @map("requester_name")
+  requesterEmail    String?             @map("requester_email")
+  requesterPhone    String?             @map("requester_phone")
+  /// 광고주가 입력한 희망 예산 (₩)
+  budgetWon         Int?                @map("budget_won")
+  /// 어드민이 status 결정한 시각 (requested → tentative/confirmed/cancelled)
+  decidedAt         DateTime?           @map("decided_at")
+  decidedByAdminId  String?             @map("decided_by_admin_id")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt       @map("updated_at")
 
-  @@index([mediaId])
+  media       Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  requestedBy User?     @relation("BookingRequester", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+
+  /// 충돌 쿼리(특정 매체 + 활성 status) 빈번 → 복합 인덱스
+  @@index([mediaId, status])
   @@index([startsAt, endsAt])
+  @@index([requestedByUserId])
   @@map("media_bookings")
 }
 
@@ -745,6 +778,7 @@ model User {
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
   sessions        UserSession[]
+  bookingRequests MediaBooking[] @relation("BookingRequester")
 
   @@index([email])
   @@map("users")
