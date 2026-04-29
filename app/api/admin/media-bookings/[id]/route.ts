@@ -7,6 +7,10 @@ import {
   findConflictingBookings,
   summarizeConflict,
 } from "@/lib/booking-conflict";
+import {
+  sendBookingRequestDecision,
+  type BookingRequestSummary,
+} from "@/lib/booking-emails";
 
 export const dynamic = "force-dynamic";
 
@@ -157,7 +161,42 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
 
   try {
-    const booking = await db.mediaBooking.update({ where: { id }, data });
+    const booking = await db.mediaBooking.update({
+      where: { id },
+      data,
+      include: { media: { select: { name: true } } },
+    });
+
+    // 광고주 자가 신청건 (requesterEmail 있음) + 상태 변경시 → 결과 메일 발송.
+    // 메일 실패는 throw 안 함 (PATCH 자체는 성공 응답).
+    const statusChanged = body.status !== undefined && body.status !== existing.status;
+    if (
+      statusChanged &&
+      booking.requesterEmail &&
+      booking.requesterName
+    ) {
+      const summary: BookingRequestSummary = {
+        id: booking.id,
+        mediaName: booking.media?.name ?? "",
+        mediaId: booking.mediaId,
+        startsAt: booking.startsAt,
+        endsAt: booking.endsAt,
+        requesterName: booking.requesterName,
+        requesterEmail: booking.requesterEmail,
+        requesterPhone: booking.requesterPhone,
+        budgetWon: booking.budgetWon,
+        notes: booking.notes,
+      };
+      void sendBookingRequestDecision(
+        booking.requesterEmail,
+        summary,
+        booking.status,
+        booking.notes,
+      ).catch((e) => {
+        console.error("[admin.media-bookings.PATCH] decision email failed", e);
+      });
+    }
+
     return json({ booking });
   } catch (e) {
     console.error("[admin.media-bookings.PATCH]", e);

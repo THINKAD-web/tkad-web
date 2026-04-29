@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { AdminBookingRequestsReviewPanel } from "@/components/admin/booking-requests-review-panel";
 
 type MediaAvailability = "available" | "reserved" | "maintenance";
 
@@ -485,6 +486,8 @@ export default function AdminMediaHubPage() {
         </Link>
       </div>
       {err ? <p className="text-sm text-red-600">{err}</p> : null}
+
+      <AdminBookingRequestsReviewPanel />
 
       <Card>
         <CardHeader>
