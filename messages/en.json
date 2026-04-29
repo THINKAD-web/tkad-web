@@ -2005,6 +2005,24 @@
     "ctaSecondary": "Browse media"
   },
   "mediaDetail": {
+    "availability": {
+      "eyebrow": "Availability calendar",
+      "title": "Booked & available dates",
+      "desc": "Orange-striped dates are already booked. If your desired period is open, hit [Request booking] on the right.",
+      "loading": "Loading calendar…",
+      "error": "Could not load availability. Please try again later.",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "dayAvailable": "Available",
+      "dayBlocked": "Booked",
+      "dayPast": "Past date",
+      "legendAvailable": "Available",
+      "legendBlocked": "Booked",
+      "legendToday": "Today",
+      "statsAvailable": "{n} days available this month",
+      "statsBlocked": "{n} days booked",
+      "ctaRequest": "Request booking"
+    },
     "traffic": {
       "title": "Hourly · Weekday · Monthly footfall",
       "desc": "Key patterns driving exposure. Media without measured data show region/type-based estimates.",
