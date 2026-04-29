@@ -3,15 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { BookingRequestModal } from "@/components/media-detail/booking-request-modal";
 
 type Props = {
   mediaId: string;
-  /**
-   * 예약 신청 CTA 링크. 기본은 견적 페이지에 mediaId prefill — 기능 3 (광고주 자가 예약)
-   * 머지 후엔 `/media/${id}/booking-request` 같은 전용 경로로 교체.
-   */
-  requestHref?: string;
+  /** 매체 이름 (모달 헤더 노출용) */
+  mediaName: string;
+  /** 가입 사용자 prefill (선택) */
+  userPrefill?: { name?: string; email?: string };
 };
 
 type BlockedRange = {
@@ -72,8 +71,13 @@ function dayIsBlocked(date: Date, blocked: BlockedRange[]): boolean {
   });
 }
 
-export function MediaAvailabilityCalendar({ mediaId, requestHref }: Props) {
-  const ctaHref = requestHref ?? `/quote?mediaId=${encodeURIComponent(mediaId)}`;
+export function MediaAvailabilityCalendar({
+  mediaId,
+  mediaName,
+  userPrefill,
+}: Props) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [refreshTick, setRefreshTick] = useState(0);
   const t = useTranslations("mediaDetail.availability");
   const today = useMemo(() => startOfDay(new Date()), []);
   const [viewMonth, setViewMonth] = useState<Date>(
@@ -115,7 +119,7 @@ export function MediaAvailabilityCalendar({ mediaId, requestHref }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [mediaId, today]);
+  }, [mediaId, today, refreshTick]);
 
   const cells = useMemo(() => buildMonthCells(viewMonth), [viewMonth]);
   const blockedRanges = data?.blockedRanges ?? [];
@@ -331,16 +335,31 @@ export function MediaAvailabilityCalendar({ mediaId, requestHref }: Props) {
                   ? `  ·  ${t("statsBlocked", { n: stats.blockedDays })}`
                   : null}
               </p>
-              <Link
-                href={ctaHref}
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
                 className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black"
               >
                 {t("ctaRequest")}
-              </Link>
+              </button>
             </div>
           </>
         )}
       </div>
+
+      <BookingRequestModal
+        open={modalOpen}
+        mediaId={mediaId}
+        mediaName={mediaName}
+        blockedRanges={blockedRanges}
+        prefill={userPrefill}
+        onClose={() => setModalOpen(false)}
+        onSuccess={() => {
+          // 신청 완료 → 캘린더는 변하지 않지만 (requested 비공개), 사용자에게 피드백
+          // 후속: 캘린더 위젯 위에 "신청 접수됨" 배너 띄우거나 토스트
+          setRefreshTick((n) => n + 1);
+        }}
+      />
     </section>
   );
 }

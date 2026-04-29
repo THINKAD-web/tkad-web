@@ -2004,7 +2004,50 @@
     "ctaButton": "Request a quote",
     "ctaSecondary": "Browse media"
   },
+  "myBookingRequests": {
+    "eyebrow": "My booking requests",
+    "title": "My booking requests",
+    "desc": "Decisions will be sent to the email you registered.",
+    "backToMy": "Back to my page",
+    "loading": "Loading…",
+    "error": "Failed to load your requests.",
+    "empty": "You haven't submitted any booking requests yet.",
+    "browseMedia": "Browse media",
+    "period": "Period",
+    "budget": "Budget",
+    "requestedAt": "Requested",
+    "decidedAt": "Decided",
+    "note": "Note",
+    "status": {
+      "requested": "Pending review",
+      "tentative": "On hold",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    }
+  },
   "mediaDetail": {
+    "bookingRequest": {
+      "eyebrow": "Booking request",
+      "title": "Request a booking on this media",
+      "close": "Close",
+      "startsAt": "Start date/time",
+      "endsAt": "End date/time",
+      "name": "Name / Company",
+      "namePlaceholder": "John Doe / ABC Ads",
+      "email": "Email (for our reply)",
+      "phone": "Phone (optional)",
+      "budget": "Budget in 만원 / 10K KRW (optional)",
+      "budgetPlaceholder": "e.g. 300",
+      "notes": "Notes (optional)",
+      "notesPlaceholder": "Campaign goal, creative format, operational requests, …",
+      "captcha": "CAPTCHA",
+      "agreeTerms": "I agree that the operator may reply via the contact info provided. Submitted info is used solely for review purposes.",
+      "submit": "Submit request",
+      "submitting": "Submitting…",
+      "cancel": "Cancel",
+      "overlapWarning": "Your selected period overlaps with existing bookings. We'll still accept this request — the operator may propose alternative dates after review."
+    },
     "availability": {
       "eyebrow": "Availability calendar",
       "title": "Booked & available dates",

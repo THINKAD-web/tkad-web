@@ -709,7 +709,10 @@ export default async function MediaDetailPage({ params }: Props) {
             />
           </div>
 
-          <MediaAvailabilityCalendar mediaId={media.id} />
+          <MediaAvailabilityCalendar
+            mediaId={media.id}
+            mediaName={isKo ? media.name : (media.nameEn || media.name)}
+          />
 
           <section
             aria-labelledby="media-detail-description-heading"

@@ -14,7 +14,9 @@ import {
   ArrowRight,
   MessageSquareText,
   Clock,
+  CalendarClock,
 } from "lucide-react";
+import { MediaBookingStatus } from "@prisma/client";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 
@@ -41,6 +43,7 @@ async function loadStats() {
       pendingVerification: 0,
       quotesThisMonth: 0,
       totalRevenue: 0,
+      pendingBookingRequests: 0,
       recentInquiries: [] as Array<{
         id: string;
         company: string | null;
@@ -67,6 +70,7 @@ async function loadStats() {
     pendingVerification,
     quotesThisMonth,
     revenueAgg,
+    pendingBookingRequests,
     recentInquiries,
     recentQuotes,
   ] = await Promise.all([
@@ -76,6 +80,13 @@ async function loadStats() {
     db.ooHQuote.aggregate({
       where: { status: { in: ["payment_confirmed", "contract_confirmed"] } },
       _sum: { totalAmount: true },
+    }),
+    // 광고주 자가 신청건 중 운영자 검토 대기 (requested + 광고주 식별 정보 있음)
+    db.mediaBooking.count({
+      where: {
+        status: MediaBookingStatus.requested,
+        requesterEmail: { not: null },
+      },
     }),
     db.contactInquiry
       .findMany({
@@ -108,6 +119,7 @@ async function loadStats() {
     pendingVerification,
     quotesThisMonth,
     totalRevenue: revenueAgg._sum.totalAmount ?? 0,
+    pendingBookingRequests,
     recentInquiries,
     recentQuotes,
   };
@@ -145,6 +157,17 @@ export default async function AdminOverviewPage({ params }: Props) {
       icon: Wallet,
       tone: "bg-emerald-50 text-emerald-600 border-emerald-100",
       href: `/${locale}/admin/quotes`,
+    },
+    {
+      // 광고주가 직접 신청한 예약 — 운영자 검토 대기
+      label: "검토 대기 신청",
+      value: s.pendingBookingRequests.toLocaleString("ko-KR"),
+      icon: CalendarClock,
+      tone:
+        s.pendingBookingRequests > 0
+          ? "bg-orange-50 text-orange-700 border-orange-200"
+          : "bg-slate-50 text-slate-500 border-slate-100",
+      href: `/${locale}/admin/media-hub`,
     },
   ];
 
