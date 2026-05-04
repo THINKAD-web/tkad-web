@@ -189,17 +189,18 @@ export default function MediaMapPageClient() {
     (id: string) => {
       const item = items.find((x) => x.id === id);
       const name = item?.name;
-      setCartIds((prev) => {
-        const exists = prev.includes(id);
-        const next = exists ? prev.filter((x) => x !== id) : [...prev, id];
-        writeCart(next);
-        if (exists) {
-          toast.warning(name ? `${name}이(가) 장바구니에서 제거되었습니다.` : "장바구니에서 제거되었습니다.");
-        } else {
-          toast.success(name ? `${name}이(가) 장바구니에 담겼습니다.` : "매체가 장바구니에 담겼습니다.");
-        }
-        return next;
-      });
+      const prev = readCart();
+      const exists = prev.includes(id);
+      const next = exists ? prev.filter((x) => x !== id) : [...prev, id];
+      writeCart(next);
+      setCartIds(next);
+      if (exists) {
+        toast.warning(
+          name ? `${name}이(가) 장바구니에서 제거되었습니다.` : "장바구니에서 제거되었습니다.",
+        );
+      } else {
+        toast.success(name ? `${name}이(가) 장바구니에 담겼습니다.` : "매체가 장바구니에 담겼습니다.");
+      }
     },
     [items, toast],
   );

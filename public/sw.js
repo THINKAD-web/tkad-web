@@ -13,7 +13,7 @@
  *   - 견적·인증·로그인 등 민감 경로 모두 SW 우회
  */
 
-const CACHE_NAME = "thinkad-pwa-v1";
+const CACHE_NAME = "thinkad-pwa-v2";
 const APP_SHELL = ["/offline", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {

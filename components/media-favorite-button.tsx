@@ -30,8 +30,8 @@ export function MediaFavoriteButton({ mediaId, mediaName }: Props) {
         const r = await fetch("/api/my/favorites", { cache: "no-store" });
         const rd = await r.json();
         if (cancelled) return;
-        if (rd?.ok) {
-          setFavorited((rd.data.ids as string[]).includes(mediaId));
+        if (rd?.ok && rd.data && Array.isArray(rd.data.ids)) {
+          setFavorited(rd.data.ids.includes(mediaId));
         }
       } catch {
         if (!cancelled) setLoggedIn(false);

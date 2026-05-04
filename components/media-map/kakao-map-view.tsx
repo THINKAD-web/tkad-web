@@ -154,11 +154,14 @@ export default function KakaoMapView({
     }
 
     let cancelled = false;
+    let idleHandler: (() => void) | null = null;
 
     loadKakaoSdk(appkey)
       .then(() => {
         if (cancelled || !containerRef.current) return;
         const kakao = (window as unknown as { kakao: any }).kakao;
+        // React Strict / 라우트 재진입 시 이전 지도 노드가 남으면 Kakao 초기화 실패 가능
+        containerRef.current.innerHTML = "";
 
         const map = new kakao.maps.Map(containerRef.current, {
           center: new kakao.maps.LatLng(center.lat, center.lng),
@@ -203,6 +206,7 @@ export default function KakaoMapView({
           onBoundsChange(next);
         };
 
+        idleHandler = fireBounds;
         kakao.maps.event.addListener(map, "idle", fireBounds);
         fireBounds();
       })
@@ -210,6 +214,28 @@ export default function KakaoMapView({
 
     return () => {
       cancelled = true;
+      const mapInst = mapRef.current as Record<string, unknown> | null;
+      const kw = typeof window !== "undefined" ? (window as unknown as { kakao?: any }).kakao : null;
+      if (mapInst && idleHandler && kw?.maps?.event?.removeListener) {
+        try {
+          kw.maps.event.removeListener(mapInst, "idle", idleHandler);
+        } catch {
+          /* noop */
+        }
+      }
+      idleHandler = null;
+      const clusterer = clustererRef.current as { clear?: () => void } | null;
+      try {
+        clusterer?.clear?.();
+      } catch {
+        /* noop */
+      }
+      clustererRef.current = null;
+      markerObjsRef.current.clear();
+      mapRef.current = null;
+      infoWindowRef.current = null;
+      lastBoundsSentRef.current = null;
+      if (containerRef.current) containerRef.current.innerHTML = "";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
