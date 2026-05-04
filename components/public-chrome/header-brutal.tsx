@@ -33,13 +33,14 @@ function LanguageToggle() {
       type="button"
       onClick={() =>
         startTransition(() => {
+          if (pathname == null || pathname === "") return;
           router.replace(pathname, { locale: next });
         })
       }
       disabled={isPending}
       aria-label={locale === "ko" ? "Switch to English" : "한국어로 전환"}
       title={label}
-      className="inline-flex h-10 w-10 shrink-0 items-center justify-center border-2 border-bx-black/25 bg-bx-off text-bx-black transition-all duration-300 hover:border-hermes hover:bg-bx-black hover:text-white hover:shadow-[0_0_28px_rgba(255,98,0,0.35)] disabled:opacity-50 dark:border-white/15 dark:bg-bx-off dark:text-bx-black dark:hover:border-hermes dark:hover:bg-hermes dark:hover:text-white dark:hover:shadow-[0_0_32px_rgba(255,98,0,0.45)]"
+      className="inline-flex h-10 w-10 shrink-0 items-center justify-center border-2 border-border/25 bg-muted text-foreground transition-all duration-300 hover:border-hermes hover:bg-foreground hover:text-white hover:shadow-[0_0_28px_rgba(255,98,0,0.35)] disabled:opacity-50 dark:border-white/15 dark:bg-muted dark:text-foreground dark:hover:border-hermes dark:hover:bg-hermes dark:hover:text-white dark:hover:shadow-[0_0_32px_rgba(255,98,0,0.45)]"
     >
       <Globe className="h-4 w-4" />
       <span className="sr-only">{label}</span>

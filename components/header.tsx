@@ -39,6 +39,7 @@ function LanguageToggle() {
 
   const switchLocale = (next: "ko" | "en") => {
     startTransition(() => {
+      if (pathname == null || pathname === "") return;
       router.replace(pathname, { locale: next });
     });
   };

@@ -25,6 +25,7 @@ export default function AdminQuotesHubClient() {
       if (next === "sales") sp.delete("tab");
       else sp.set("tab", "booking");
       const q = sp.toString();
+      if (pathname == null || pathname === "") return;
       router.replace(q ? `${pathname}?${q}` : pathname);
     },
     [pathname, router, searchParams],
@@ -32,15 +33,15 @@ export default function AdminQuotesHubClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2 border-b-2 border-bx-black pb-2 dark:border-bx-white">
+      <div className="flex flex-wrap gap-2 border-b-2 border-border pb-2 dark:border-hero-fg">
         <button
           type="button"
           onClick={() => setTab("sales")}
           className={cn(
-            "border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors dark:border-bx-white",
+            "border-2 border-border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors dark:border-hero-fg",
             tab === "sales"
-              ? "bg-bx-black text-bx-white dark:bg-bx-white dark:text-bx-black"
-              : "bg-bx-white text-bx-black hover:bg-bx-off dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30",
+              ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground"
+              : "bg-card text-foreground hover:bg-muted dark:bg-hero-void dark:text-hero-fg dark:hover:bg-muted/50",
           )}
         >
           {t("tabSales")}
@@ -49,10 +50,10 @@ export default function AdminQuotesHubClient() {
           type="button"
           onClick={() => setTab("booking")}
           className={cn(
-            "border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors dark:border-bx-white",
+            "border-2 border-border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors dark:border-hero-fg",
             tab === "booking"
-              ? "bg-bx-black text-bx-white dark:bg-bx-white dark:text-bx-black"
-              : "bg-bx-white text-bx-black hover:bg-bx-off dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30",
+              ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground"
+              : "bg-card text-foreground hover:bg-muted dark:bg-hero-void dark:text-hero-fg dark:hover:bg-muted/50",
           )}
         >
           {t("tabBooking")}

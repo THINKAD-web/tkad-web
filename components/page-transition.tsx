@@ -7,21 +7,21 @@ import { cn } from "@/lib/utils";
 export default function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [show, setShow] = useState(true);
-  const [displayChildren, setDisplayChildren] = useState(children);
+  const [displayChildren, setDisplayChildren] = useState<ReactNode>(children ?? null);
   const firstPaint = useRef(true);
   const childrenRef = useRef(children);
-  childrenRef.current = children;
+  childrenRef.current = children ?? null;
 
   useEffect(() => {
     if (firstPaint.current) {
       firstPaint.current = false;
-      setDisplayChildren(childrenRef.current);
+      setDisplayChildren(childrenRef.current ?? null);
       return;
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional route transition
     setShow(false);
     const id = setTimeout(() => {
-      setDisplayChildren(childrenRef.current);
+      setDisplayChildren(childrenRef.current ?? null);
       requestAnimationFrame(() => setShow(true));
     }, 120);
     return () => clearTimeout(id);
