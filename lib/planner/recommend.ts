@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { matchesPlannerCategory } from "@/lib/planner-logic";
 import type {
   PlannerAgeKey,
   PlannerCampaignGoal,
@@ -287,11 +288,17 @@ export function scoreMedia(
 
   const score = parts.reduce((a, p) => a + p.weighted, 0);
 
-  const reasons = parts
-    .filter((p) => p.raw >= 0.7)
+  let reasons = parts
+    .filter((p) => p.raw >= 0.55)
     .sort((a, b) => b.weighted - a.weighted)
     .slice(0, 3)
     .map<RecommendReason>((p) => ({ key: p.key, weight: p.weighted }));
+  if (reasons.length === 0) {
+    const top = [...parts].sort((a, b) => b.weighted - a.weighted)[0];
+    if (top && top.raw > 0.12) {
+      reasons = [{ key: top.key, weight: top.weighted }];
+    }
+  }
 
   return { media, score, reasons };
 }
@@ -362,9 +369,9 @@ export function recommendPlannerMedia(
   const effFn = efficiencyScoreFactory(catalog);
   const filtered = catalog.filter((m) => {
     if (ctx.categories.length === 0) return true;
-    // 네트워크 매체는 type="network" 이므로 별도 허용 (카테고리 필터에 포함되지 않음)
-    if (m.type === "network") return true;
-    return (ctx.categories as readonly string[]).includes(m.type);
+    return (ctx.categories as readonly PlannerCategory[]).some((c) =>
+      matchesPlannerCategory(m, c),
+    );
   });
   const emptyReasonLast = (a: ScoredMedia, b: ScoredMedia) => {
     const ae = a.reasons.length === 0 ? 1 : 0;

@@ -32,9 +32,9 @@ import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
 
 const inputCls =
-  "h-10 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+  "h-10 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 const labelCls =
-  "block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent";
+  "block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary";
 
 export default function AcademyPageClient({
   dbLessons,
@@ -132,30 +132,30 @@ export default function AcademyPageClient({
 
   return (
     <>
-      <section className="bg-bx-black py-24">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
             {`// 10 / Academy`}
           </p>
           <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-2">
-            <span className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+            <span className="inline-flex items-center gap-2 border-2 border-primary bg-primary px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
               <GraduationCap className="h-4 w-4" />
               {t("heroBadge")}
             </span>
-            <span className="border-2 border-bx-white bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-black">
+            <span className="border-2 border-hero-fg bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-foreground">
               BETA
             </span>
           </div>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
             {t("heroTitle")}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {t("heroSubtitle")}
           </p>
         </div>
       </section>
 
-      <section className="bg-bx-white py-8">
+      <section className="bg-card py-8">
         <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-6 lg:px-8">
           {[
             { href: "#academy-basics", icon: Video, t: "valueStripBasics", d: "valueStripBasicsDesc" },
@@ -166,9 +166,9 @@ export default function AcademyPageClient({
             <a
               key={href}
               href={href}
-              className="group -ml-[2px] flex gap-3 border-2 border-bx-black bg-bx-off p-4 transition-colors hover:bg-bx-black hover:text-bx-white"
+              className="group -ml-[2px] flex gap-3 border-2 border-border bg-muted p-4 transition-colors hover:bg-foreground hover:text-background"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
                 <Icon className="h-5 w-5" />
               </div>
               <div className="min-w-0 text-left">
@@ -182,28 +182,28 @@ export default function AcademyPageClient({
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl space-y-16 bg-bx-off px-4 py-14 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-16 bg-muted px-4 py-14 sm:px-6 lg:px-8">
         <section id="academy-basics" className="scroll-mt-24">
           <div className="mb-8 text-center">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ BASICS ]
             </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               {t("sectionBasics")}
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-bx-gray-dim">
+            <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-muted-foreground">
               {`// `}{t("sectionBasicsDesc")}
             </p>
           </div>
           {dbLessons.length === 0 ? (
-            <div className="border-2 border-bx-black bg-bx-white py-12 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <div className="border-2 border-border bg-card py-12 text-center">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 [ PREPARING ]
               </p>
-              <p className="mt-3 text-base font-bold text-bx-black">
+              <p className="mt-3 text-base font-bold text-foreground">
                 {t("preparingLessons")}
               </p>
-              <p className="mx-auto mt-2 max-w-md font-mono text-[12px] tracking-tight text-bx-gray-dim">
+              <p className="mx-auto mt-2 max-w-md font-mono text-[12px] tracking-tight text-muted-foreground">
                 {t("preparingLessonsDesc")}
               </p>
             </div>
@@ -212,16 +212,16 @@ export default function AcademyPageClient({
               {dbLessons.map((lesson) => (
                 <article
                   key={lesson.id}
-                  className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white"
+                  className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card"
                 >
-                  <header className="border-b-2 border-bx-black p-5">
-                    <span className="inline-flex w-fit border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+                  <header className="border-b-2 border-border p-5">
+                    <span className="inline-flex w-fit border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground">
                       [ {t("minutes", { n: lesson.durationMin })} ]
                     </span>
-                    <h3 className="mt-3 text-lg font-bold tracking-tight text-bx-black">
+                    <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
                       {isKo ? lesson.titleKo : lesson.titleEn}
                     </h3>
-                    <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                    <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                       {`// `}{isKo ? lesson.descKo : lesson.descEn}
                     </p>
                   </header>
@@ -258,13 +258,13 @@ export default function AcademyPageClient({
 
         <section id="academy-webinars" className="scroll-mt-24">
           <div className="mb-8 text-center">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ WEBINARS ]
             </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               {t("sectionWebinars")}
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-bx-gray-dim">
+            <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-muted-foreground">
               {`// `}{t("sectionWebinarsDesc")}
             </p>
           </div>
@@ -272,33 +272,33 @@ export default function AcademyPageClient({
             {academyWebinars.map((w) => (
               <article
                 key={w.id}
-                className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white"
+                className="-mt-[2px] -ml-[2px] border-2 border-border bg-card"
               >
-                <header className="border-b-2 border-bx-black p-5">
-                  <span className="inline-flex w-fit border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+                <header className="border-b-2 border-border p-5">
+                  <span className="inline-flex w-fit border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground">
                     [ {t("badgeLive")} ]
                   </span>
-                  <h3 className="mt-3 text-lg font-bold tracking-tight text-bx-black">
+                  <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
                     {isKo ? w.titleKo : w.titleEn}
                   </h3>
-                  <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                  <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                     {`// `}{isKo ? w.descKo : w.descEn}
                   </p>
                 </header>
                 <div className="space-y-3 p-5 text-sm">
-                  <div className="flex flex-wrap gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                  <div className="flex flex-wrap gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                     <span className="inline-flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4 text-bx-accent" />
-                      <span className="font-bold text-bx-black">{t("webinarWhen")}: </span>
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span className="font-bold text-foreground">{t("webinarWhen")}: </span>
                       {formatWebinarWhen(w.datetimeIso)}
                     </span>
                     <span className="inline-flex items-center gap-1.5">
-                      <Users className="h-4 w-4 text-bx-accent" />
-                      <span className="font-bold text-bx-black">{t("webinarSeats")}: </span>
+                      <Users className="h-4 w-4 text-primary" />
+                      <span className="font-bold text-foreground">{t("webinarSeats")}: </span>
                       {t("seatsCount", { n: w.seatsLeft })}
                     </span>
                     <span className="inline-flex items-center gap-1.5">
-                      <span className="font-bold text-bx-black">{t("webinarLevel")}: </span>
+                      <span className="font-bold text-foreground">{t("webinarLevel")}: </span>
                       {isKo ? w.levelKo : w.levelEn}
                     </span>
                   </div>
@@ -318,13 +318,13 @@ export default function AcademyPageClient({
 
         <section id="academy-downloads" className="scroll-mt-24">
           <div className="mb-8 text-center">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ DOWNLOADS ]
             </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               {t("sectionDownloads")}
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-bx-gray-dim">
+            <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-muted-foreground">
               {`// `}{t("sectionDownloadsDesc")}
             </p>
           </div>
@@ -332,17 +332,17 @@ export default function AcademyPageClient({
             {academyDownloads.map((asset) => (
               <article
                 key={asset.id}
-                className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white"
+                className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card"
               >
                 <div className="flex flex-1 flex-col p-5">
-                  <FileSpreadsheet className="h-8 w-8 text-bx-accent" />
-                  <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <FileSpreadsheet className="h-8 w-8 text-primary" />
+                  <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ ASSET / PDF ]
                   </p>
-                  <h3 className="mt-1 text-base font-bold tracking-tight text-bx-black">
+                  <h3 className="mt-1 text-base font-bold tracking-tight text-foreground">
                     {isKo ? asset.titleKo : asset.titleEn}
                   </h3>
-                  <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                  <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                     {`// `}{isKo ? asset.descKo : asset.descEn}
                   </p>
                   <BtnBlock
@@ -362,16 +362,16 @@ export default function AcademyPageClient({
                 </div>
               </article>
             ))}
-            <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white">
+            <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card">
               <div className="flex flex-1 flex-col p-5">
-                <Presentation className="h-8 w-8 text-bx-accent" />
-                <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <Presentation className="h-8 w-8 text-primary" />
+                <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                   [ PPT ]
                 </p>
-                <h3 className="mt-1 text-base font-bold tracking-tight text-bx-black">
+                <h3 className="mt-1 text-base font-bold tracking-tight text-foreground">
                   {t("pptTitle")}
                 </h3>
-                <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                   {`// `}{t("pptDesc")}
                 </p>
                 <BtnBlock
@@ -385,16 +385,16 @@ export default function AcademyPageClient({
                 </BtnBlock>
               </div>
             </article>
-            <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white">
+            <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card">
               <div className="flex flex-1 flex-col p-5">
-                <MonitorPlay className="h-8 w-8 text-bx-accent" />
-                <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <MonitorPlay className="h-8 w-8 text-primary" />
+                <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                   [ VIDEO ]
                 </p>
-                <h3 className="mt-1 text-base font-bold tracking-tight text-bx-black">
+                <h3 className="mt-1 text-base font-bold tracking-tight text-foreground">
                   {t("videoAssetTitle")}
                 </h3>
-                <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                   {`// `}{t("videoAssetDesc")}
                 </p>
                 <BtnBlock
@@ -420,15 +420,15 @@ export default function AcademyPageClient({
           id="academy-register"
           className="scroll-mt-24"
         >
-          <div className="border-2 border-bx-black bg-bx-white">
-            <header className="border-b-2 border-bx-black p-5">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <div className="border-2 border-border bg-card">
+            <header className="border-b-2 border-border p-5">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 [ REGISTER ]
               </p>
-              <h3 className="mt-2 text-xl font-bold tracking-tight text-bx-black">
+              <h3 className="mt-2 text-xl font-bold tracking-tight text-foreground">
                 {t("sectionRegister")}
               </h3>
-              <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+              <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
                 {`// `}{t("sectionRegisterDesc")}
               </p>
             </header>
@@ -509,15 +509,15 @@ export default function AcademyPageClient({
 
         <section
           id="academy-consult"
-          className="scroll-mt-24 border-2 border-bx-accent bg-bx-black px-6 py-12 text-center"
+          className="scroll-mt-24 border-2 border-primary bg-hero-void px-6 py-12 text-center"
         >
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ {t("consultSectionTitle")} ]
           </p>
-          <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-white sm:text-2xl">
+          <h2 className="mt-3 text-xl font-bold tracking-tight text-hero-fg sm:text-2xl">
             {t("ctaTitle")}
           </h2>
-          <p className="mx-auto mt-3 max-w-xl font-mono text-[12px] tracking-tight text-bx-white/75">
+          <p className="mx-auto mt-3 max-w-xl font-mono text-[12px] tracking-tight text-hero-fg/75">
             {`// `}{t("consultSectionDesc")}
           </p>
           <div className="mt-6 inline-flex">
@@ -538,14 +538,14 @@ export default function AcademyPageClient({
         className="max-w-4xl"
         ariaLabel={t("videoModalTitle")}
       >
-        <div className="border-2 border-bx-black bg-bx-white p-4 pt-12 sm:p-6">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="border-2 border-border bg-card p-4 pt-12 sm:p-6">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ VIDEO ]
           </p>
-          <h3 className="mt-2 pr-10 text-lg font-bold tracking-tight text-bx-black">
+          <h3 className="mt-2 pr-10 text-lg font-bold tracking-tight text-foreground">
             {videoTitle}
           </h3>
-          <div className="mt-4 aspect-video w-full overflow-hidden border-2 border-bx-black bg-bx-black">
+          <div className="mt-4 aspect-video w-full overflow-hidden border-2 border-border bg-hero-void">
             <iframe
               title={videoTitle}
               src={videoEmbed}

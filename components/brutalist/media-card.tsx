@@ -48,11 +48,11 @@ export function MediaCard({
     <Link
       href={href}
       className={cn(
-        "group relative flex h-full flex-col border-2 border-bx-black bg-bx-white transition-colors duration-200 hover:bg-bx-off",
+        "group relative flex h-full flex-col border-2 border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-hermes/45 hover:shadow-[0_16px_40px_rgba(255,98,0,0.1)] dark:hover:shadow-[0_18px_48px_rgba(255,98,0,0.16)]",
         className,
       )}
     >
-      <div className="relative aspect-[4/3] overflow-hidden border-b-2 border-bx-black bg-bx-off">
+      <div className="relative aspect-[4/3] overflow-hidden border-b-2 border-border bg-muted/40">
         {imageSrc ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
@@ -63,33 +63,37 @@ export function MediaCard({
             decoding="async"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+          <div className="flex h-full w-full items-center justify-center font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
             [ no image ]
           </div>
         )}
         {topRight ? (
-          <div className="absolute right-0 top-0 border-b-2 border-l-2 border-bx-black bg-bx-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-bx-white">
+          <div className="absolute right-0 top-0 border-b-2 border-l-2 border-border bg-hermes px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-[0_0_16px_rgba(255,98,0,0.35)]">
             {topRight}
           </div>
         ) : null}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5">
         {(index !== undefined || type) && (
-          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-bx-gray-dim">
-            {index !== undefined ? <span className="text-bx-black">[{String(index).padStart(2, "0")}]</span> : <span />}
+          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            {index !== undefined ? (
+              <span className="text-foreground">[{String(index).padStart(2, "0")}]</span>
+            ) : (
+              <span />
+            )}
             {type ? <span>[ {type} ]</span> : null}
           </div>
         )}
-        <h3 className="text-lg font-bold leading-tight tracking-tight text-bx-black sm:text-xl">
+        <h3 className="text-lg font-black leading-tight tracking-tight text-foreground sm:text-xl">
           {name}
         </h3>
         {location ? (
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
             // {location}
           </p>
         ) : null}
         {price ? (
-          <p className="mt-1 font-mono text-sm font-bold text-bx-black">
+          <p className="mt-1 font-mono text-base font-black tabular-nums text-foreground">
             {price}
           </p>
         ) : null}

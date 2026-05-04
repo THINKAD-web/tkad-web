@@ -234,15 +234,15 @@ export default function AdminAiContentPage() {
   };
 
   return (
-    <div className="space-y-8 p-6 text-bx-black dark:text-bx-white">
+    <div className="space-y-8 p-6 text-foreground">
       <div className="flex flex-wrap items-center gap-3">
-        <Sparkles className="h-8 w-8 text-bx-accent" />
+        <Sparkles className="h-8 w-8 text-primary" />
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
             [ AI CONTENT ]
           </p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight">AI 콘텐츠</h1>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
             {`// `}트렌드·아카데미·성공 사례 초안 생성, 검토 및 게시
           </p>
         </div>
@@ -258,14 +258,14 @@ export default function AdminAiContentPage() {
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
+        <Card className="border-2 border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-lg text-bx-black dark:text-bx-white">
+            <CardTitle className="text-lg text-foreground">
               트렌드 보고서 생성
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+            <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               대상 월
             </label>
             <Input
@@ -279,7 +279,7 @@ export default function AdminAiContentPage() {
             ) : null}
             <Button
               type="button"
-              className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+              className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
               disabled={genTrendBusy || loading}
               onClick={() => void generateTrend()}
             >
@@ -291,15 +291,15 @@ export default function AdminAiContentPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
+        <Card className="border-2 border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-lg text-bx-black dark:text-bx-white">
+            <CardTitle className="text-lg text-foreground">
               아카데미 강의 생성
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 코스(그룹) 제목
               </label>
               <Input
@@ -309,7 +309,7 @@ export default function AdminAiContentPage() {
               />
             </div>
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 강의 초점 / 제목
               </label>
               <Input
@@ -324,7 +324,7 @@ export default function AdminAiContentPage() {
             ) : null}
             <Button
               type="button"
-              className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+              className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
               disabled={genLessonBusy || loading}
               onClick={() => void generateLesson()}
             >
@@ -336,15 +336,15 @@ export default function AdminAiContentPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
+        <Card className="border-2 border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-lg text-bx-black dark:text-bx-white">
+            <CardTitle className="text-lg text-foreground">
               성공 사례 생성
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 광고주 / 클라이언트명
               </label>
               <Input
@@ -355,7 +355,7 @@ export default function AdminAiContentPage() {
               />
             </div>
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 업종
               </label>
               <Input
@@ -366,7 +366,7 @@ export default function AdminAiContentPage() {
               />
             </div>
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 사용 매체 (쉼표 또는 줄바꿈)
               </label>
               <Input
@@ -381,7 +381,7 @@ export default function AdminAiContentPage() {
             ) : null}
             <Button
               type="button"
-              className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+              className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
               disabled={genScBusy || loading}
               onClick={() => void generateSuccessCase()}
             >
@@ -394,31 +394,31 @@ export default function AdminAiContentPage() {
         </Card>
       </div>
 
-      <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
+      <Card className="border-2 border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-lg text-bx-black dark:text-bx-white">
+          <CardTitle className="text-lg text-foreground">
             검토 대기 (Draft / Reviewed)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {loading ? (
-            <p className="text-sm text-bx-gray-dim">불러오는 중…</p>
+            <p className="text-sm text-muted-foreground">불러오는 중…</p>
           ) : (
             <>
               <div>
-                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                   트렌드
                 </p>
                 <ul className="space-y-2 text-sm">
                   {draftTrends.length === 0 ? (
-                    <li className="text-bx-gray-dim">없음</li>
+                    <li className="text-muted-foreground">없음</li>
                   ) : (
                     draftTrends.map((r) => (
                       <li
                         key={r.id}
-                        className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-bx-black/10 py-2 dark:border-bx-white/15"
+                        className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-border/10 py-2 border-border/15"
                       >
-                        <span className="font-medium text-bx-black dark:text-bx-white">
+                        <span className="font-medium text-foreground">
                           {r.month} · {r.titleKo}
                         </span>
                         <span className="flex items-center gap-2">
@@ -437,19 +437,19 @@ export default function AdminAiContentPage() {
                 </ul>
               </div>
               <div>
-                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                   아카데미
                 </p>
                 <ul className="space-y-2 text-sm">
                   {draftLessons.length === 0 ? (
-                    <li className="text-bx-gray-dim">없음</li>
+                    <li className="text-muted-foreground">없음</li>
                   ) : (
                     draftLessons.map((r) => (
                       <li
                         key={r.id}
-                        className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-bx-black/10 py-2 dark:border-bx-white/15"
+                        className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-border/10 py-2 border-border/15"
                       >
-                        <span className="font-medium text-bx-black dark:text-bx-white">
+                        <span className="font-medium text-foreground">
                           {r.courseId} · {r.titleKo}
                         </span>
                         <span className="flex items-center gap-2">
@@ -468,19 +468,19 @@ export default function AdminAiContentPage() {
                 </ul>
               </div>
               <div>
-                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                   성공 사례
                 </p>
                 <ul className="space-y-2 text-sm">
                   {draftSuccessCases.length === 0 ? (
-                    <li className="text-bx-gray-dim">없음</li>
+                    <li className="text-muted-foreground">없음</li>
                   ) : (
                     draftSuccessCases.map((r) => (
                       <li
                         key={r.id}
-                        className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-bx-black/10 py-2 dark:border-bx-white/15"
+                        className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-border/10 py-2 border-border/15"
                       >
-                        <span className="font-medium text-bx-black dark:text-bx-white">
+                        <span className="font-medium text-foreground">
                           {r.clientName} · {r.industry} — {r.titleKo}
                         </span>
                         <span className="flex items-center gap-2">
@@ -503,23 +503,23 @@ export default function AdminAiContentPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
+      <Card className="border-2 border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-lg text-bx-black dark:text-bx-white">게시됨</CardTitle>
+          <CardTitle className="text-lg text-foreground">게시됨</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
               트렌드
             </p>
             <ul className="space-y-2 text-sm">
               {publishedTrends.length === 0 ? (
-                <li className="text-bx-gray-dim">없음</li>
+                <li className="text-muted-foreground">없음</li>
               ) : (
                 publishedTrends.map((r) => (
                   <li
                     key={r.id}
-                    className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-bx-black/10 py-2 dark:border-bx-white/15"
+                    className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-border/10 py-2 border-border/15"
                   >
                     <span>
                       {r.month} · {r.titleKo}
@@ -535,17 +535,17 @@ export default function AdminAiContentPage() {
             </ul>
           </div>
           <div>
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
               아카데미
             </p>
             <ul className="space-y-2 text-sm">
               {publishedLessons.length === 0 ? (
-                <li className="text-bx-gray-dim">없음</li>
+                <li className="text-muted-foreground">없음</li>
               ) : (
                 publishedLessons.map((r) => (
                   <li
                     key={r.id}
-                    className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-bx-black/10 py-2 dark:border-bx-white/15"
+                    className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-border/10 py-2 border-border/15"
                   >
                     <span>
                       {r.courseId} · {r.titleKo}
@@ -561,17 +561,17 @@ export default function AdminAiContentPage() {
             </ul>
           </div>
           <div>
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
               성공 사례
             </p>
             <ul className="space-y-2 text-sm">
               {publishedSuccessCases.length === 0 ? (
-                <li className="text-bx-gray-dim">없음</li>
+                <li className="text-muted-foreground">없음</li>
               ) : (
                 publishedSuccessCases.map((r) => (
                   <li
                     key={r.id}
-                    className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-bx-black/10 py-2 dark:border-bx-white/15"
+                    className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-border/10 py-2 border-border/15"
                   >
                     <span>
                       {r.clientName} · {r.titleKo}

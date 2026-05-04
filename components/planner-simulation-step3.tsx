@@ -192,26 +192,26 @@ export default function PlannerSimulationStep3({
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center sm:text-left">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ STEP 5 / LOGO + SIMULATION ]
         </p>
-        <h2 className="text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+        <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
           {t("stepSimTitle")}
         </h2>
-        <p className="text-sm leading-relaxed text-bx-gray-dim">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           {t("stepSimDesc")}
         </p>
       </div>
 
-      <div className="border-2 border-bx-black bg-bx-white">
-        <div className="border-b-2 border-bx-black p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <div className="border-2 border-border bg-card">
+        <div className="border-b-2 border-border p-5">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ CREATIVE UPLOAD ]
           </p>
-          <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+          <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
             {t("creativeUploadTitle")}
           </h3>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
             {t("creativeUploadDesc")}
           </p>
         </div>
@@ -221,16 +221,16 @@ export default function PlannerSimulationStep3({
               className={cn(
                 "relative border-2 p-6 transition-colors",
                 creativeObjectUrl
-                  ? "border-bx-accent bg-bx-off"
-                  : "border-bx-black bg-bx-off hover:bg-bx-white",
+                  ? "border-primary bg-muted"
+                  : "border-border bg-muted hover:bg-card",
               )}
             >
               <div className="flex flex-col items-center justify-center gap-2 text-center">
-                <ImageUp className="h-8 w-8 text-bx-accent" aria-hidden />
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
+                <ImageUp className="h-8 w-8 text-primary" aria-hidden />
+                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
                   [ {t("creativeUploadCta")} ]
                 </p>
-                <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
                   {t("creativeUploadHint")}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
@@ -272,18 +272,18 @@ export default function PlannerSimulationStep3({
                     aria-valuemax={100}
                     aria-valuenow={upload.pct}
                   >
-                    <div className="h-2 w-full border-2 border-bx-black bg-bx-white">
+                    <div className="h-2 w-full border-2 border-border bg-card">
                       <div
-                        className="h-full bg-bx-accent transition-all"
+                        className="h-full bg-primary transition-all"
                         style={{ width: `${upload.pct}%` }}
                       />
                     </div>
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                       {`// `}{t("creativeUploadProgress", { pct: upload.pct })}
                     </p>
                   </div>
                 ) : upload.status === "done" ? (
-                  <p className="mt-3 inline-flex items-center gap-1 border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                  <p className="mt-3 inline-flex items-center gap-1 border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
                     <Check className="h-3 w-3" aria-hidden />
                     {t("creativeUploadSuccess")}
                   </p>
@@ -291,11 +291,11 @@ export default function PlannerSimulationStep3({
               </div>
             </div>
 
-            <div className="-ml-[2px] -mt-[2px] space-y-2 border-2 border-bx-black bg-bx-white p-5 lg:mt-0">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <div className="-ml-[2px] -mt-[2px] space-y-2 border-2 border-border bg-card p-5 lg:mt-0">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 [ {t("creativeSpecTitle")} ]
               </p>
-              <ul className="space-y-1.5 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+              <ul className="space-y-1.5 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                 <li>· {t("creativeSpecTypes")}</li>
                 <li>· {t("creativeSpecRatio")}</li>
                 <li>· {t("creativeSpecTip")}</li>
@@ -305,31 +305,31 @@ export default function PlannerSimulationStep3({
         </div>
       </div>
 
-      <div className="border-2 border-bx-black bg-bx-white">
-        <div className="border-b-2 border-bx-black p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <div className="border-2 border-border bg-card">
+        <div className="border-b-2 border-border p-5">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ SIMULATION ]
           </p>
-          <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+          <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
             {t("simViewTitle")}
           </h3>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
             {t("simViewDesc")}
           </p>
         </div>
         <div className="p-5">
           {creativeObjectUrl || creativeUploadedUrl ? (
-            <div className="mb-4 border-2 border-bx-accent bg-bx-white px-4 py-3">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <div className="mb-4 border-2 border-primary bg-card px-4 py-3">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 [ {t("simCompositeApproxTitle")} ]
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-bx-black">
+              <p className="mt-1 text-sm leading-relaxed text-foreground">
                 {t("simCompositeApproxBody")}
               </p>
             </div>
           ) : null}
           {mediaCards.length === 0 ? (
-            <div className="border-2 border-bx-black bg-bx-off py-12 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+            <div className="border-2 border-border bg-muted py-12 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}{t("simEmpty")}
             </div>
           ) : (
@@ -337,7 +337,7 @@ export default function PlannerSimulationStep3({
               {/* 썸네일 그리드 — 3개 이상일 때 한눈에 비교 */}
               {mediaCards.length >= 2 ? (
                 <div>
-                  <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                     [ {t("simGridLabel")} ]
                   </p>
                   <ul className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4">
@@ -348,8 +348,8 @@ export default function PlannerSimulationStep3({
                           className={cn(
                             "block w-full overflow-hidden border-2 transition-colors",
                             i === slideIndex
-                              ? "border-bx-accent"
-                              : "border-bx-black hover:border-bx-accent",
+                              ? "border-primary"
+                              : "border-border hover:border-primary",
                           )}
                           onClick={() => {
                             setSlideDir((i > slideIndex ? 1 : -1) as 1 | -1);
@@ -378,7 +378,7 @@ export default function PlannerSimulationStep3({
               ) : null}
 
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                   [ {t("simPerMediaLabel")} ]
                 </p>
                 <div className="flex items-center gap-2">
@@ -404,7 +404,7 @@ export default function PlannerSimulationStep3({
                       ) : null}
                     </>
                   ) : null}
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
                     {t("simCounter", {
                       current: slideIndex + 1,
                       total: mediaCards.length,
@@ -419,7 +419,7 @@ export default function PlannerSimulationStep3({
                   onClick={goPrev}
                   disabled={slideIndex <= 0}
                   aria-label={t("simPrev")}
-                  className="absolute left-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-30"
+                  className="absolute left-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-30"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -428,12 +428,12 @@ export default function PlannerSimulationStep3({
                   onClick={goNext}
                   disabled={slideIndex >= maxIdx}
                   aria-label={t("simNext")}
-                  className="absolute right-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-30"
+                  className="absolute right-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-30"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
 
-                <div className="overflow-hidden border-2 border-bx-black bg-bx-off">
+                <div className="overflow-hidden border-2 border-border bg-muted">
                   <AnimatePresence
                     initial={false}
                     custom={slideDir === 0 ? 1 : slideDir}
@@ -491,7 +491,7 @@ export default function PlannerSimulationStep3({
                 </div>
               </div>
 
-              <p className="text-center font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              <p className="text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                 {`// `}{t("simSwipeHint")}
               </p>
 
@@ -505,10 +505,10 @@ export default function PlannerSimulationStep3({
                       setSlideIndex(i);
                     }}
                     className={cn(
-                      "h-3 border-2 border-bx-black transition-all",
+                      "h-3 border-2 border-border transition-all",
                       i === slideIndex
-                        ? "w-8 bg-bx-accent"
-                        : "w-3 bg-bx-white hover:bg-bx-off",
+                        ? "w-8 bg-primary"
+                        : "w-3 bg-card hover:bg-muted",
                     )}
                     aria-label={t("simDotLabel", { n: i + 1 })}
                   />

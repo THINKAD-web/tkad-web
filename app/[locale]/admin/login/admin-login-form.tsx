@@ -64,16 +64,16 @@ export function AdminLoginForm({ locale }: { locale: string }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full max-w-sm space-y-4 border-2 border-bx-black bg-bx-white p-8 dark:border-bx-white dark:bg-bx-black"
+      className="w-full max-w-sm space-y-4 border-2 border-border bg-card p-8"
     >
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
           [ ADMIN ACCESS ]
         </p>
-        <h1 className="mt-2 text-xl font-bold tracking-tight text-bx-black dark:text-bx-white">
+        <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground">
           {t("title")}
         </h1>
-        <p className="mt-1 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+        <p className="mt-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
           {`// `}{t("subtitle")}
         </p>
       </div>
@@ -81,7 +81,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       <div className="space-y-1.5">
         <label
           htmlFor="admin-user"
-          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black dark:text-bx-white"
+          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground"
         >
           {t("username")}
         </label>
@@ -91,14 +91,14 @@ export function AdminLoginForm({ locale }: { locale: string }) {
           autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full border-2 border-bx-black bg-bx-white px-3 py-2 text-sm text-bx-black outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-bx-accent dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
+          className="w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:outline focus-visible:outline-2 focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
 
       <div className="space-y-1.5">
         <label
           htmlFor="admin-pass"
-          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black dark:text-bx-white"
+          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground"
         >
           {t("password")}
         </label>
@@ -109,12 +109,12 @@ export function AdminLoginForm({ locale }: { locale: string }) {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border-2 border-bx-black bg-bx-white px-3 py-2 text-sm text-bx-black outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-bx-accent dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
+          className="w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:outline focus-visible:outline-2 focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
 
       {error ? (
-        <p className="border-2 border-bx-black bg-bx-accent px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-bx-white dark:border-bx-white" role="alert">
+        <p className="border-2 border-border bg-primary px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-primary-foreground" role="alert">
           {error}
         </p>
       ) : null}
@@ -122,7 +122,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full border-2 border-bx-black bg-bx-black py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent disabled:opacity-60 dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+        className="w-full border-2 border-border bg-foreground py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground disabled:opacity-60"
       >
         {loading ? t("submitting") : t("submit")}
       </button>

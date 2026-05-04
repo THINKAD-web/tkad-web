@@ -17,11 +17,11 @@ import { BtnBlock } from "@/components/brutalist";
 import { cn } from "@/lib/utils";
 
 const REASON_COLORS: Record<RecommendReasonKey, string> = {
-  matchRegion: "border-bx-black bg-bx-white text-bx-black",
-  ageMatch: "border-bx-accent bg-bx-accent text-bx-white",
-  budgetEfficient: "border-bx-black bg-bx-off text-bx-black",
-  goalFit: "border-bx-black bg-bx-black text-bx-accent",
-  highVisibility: "border-bx-accent bg-bx-white text-bx-accent",
+  matchRegion: "border-border bg-card text-foreground",
+  ageMatch: "border-primary bg-primary text-primary-foreground",
+  budgetEfficient: "border-border bg-muted text-foreground",
+  goalFit: "border-border bg-foreground text-primary",
+  highVisibility: "border-primary bg-card text-primary",
 };
 
 type Props = {
@@ -102,17 +102,17 @@ export function PlannerRecommendationPanel({
   };
 
   return (
-    <div className="border-2 border-bx-accent bg-bx-white">
-      <div className="flex flex-col gap-3 border-b-2 border-bx-black p-5 sm:flex-row sm:items-start sm:justify-between">
+    <div className="border-2 border-primary bg-card">
+      <div className="flex flex-col gap-3 border-b-2 border-border p-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ AI RECOMMENDATIONS ]
           </p>
-          <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight text-bx-black">
-            <Sparkles className="h-5 w-5 text-bx-accent" aria-hidden />
+          <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+            <Sparkles className="h-5 w-5 text-primary" aria-hidden />
             {t("recommendHeading")}
           </h3>
-          <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
             {t("recommendDesc")}
           </p>
         </div>
@@ -142,15 +142,15 @@ export function PlannerRecommendationPanel({
       <div className="p-5">
         {loading ? (
           <div
-            className="flex items-center justify-center gap-3 py-10 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim"
+            className="flex items-center justify-center gap-3 py-10 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground"
             role="status"
             aria-live="polite"
           >
-            <span className="inline-block h-4 w-4 animate-spin border-2 border-bx-accent border-t-transparent" />
+            <span className="inline-block h-4 w-4 animate-spin border-2 border-primary border-t-transparent" />
             {`// `}{t("recommendLoading")}
           </div>
         ) : recommendations.length === 0 ? (
-          <p className="py-10 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
+          <p className="py-10 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{t("recommendEmpty")}
           </p>
         ) : (
@@ -163,15 +163,15 @@ export function PlannerRecommendationPanel({
                   className={cn(
                     "-mt-[2px] -ml-[2px] flex flex-col gap-2 border-2 p-4 transition-colors",
                     selected
-                      ? "border-bx-accent bg-bx-off"
-                      : "border-bx-black bg-bx-white hover:bg-bx-off",
+                      ? "border-primary bg-muted"
+                      : "border-border bg-card hover:bg-muted",
                   )}
                 >
                   <div className="min-w-0">
-                    <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-bx-black">
+                    <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
                       {isKo ? media.name : media.nameEn || media.name}
                     </p>
-                    <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                    <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                       {`// `}{regionLabel(media.region)} ·{" "}
                       {(isKo
                         ? media.location

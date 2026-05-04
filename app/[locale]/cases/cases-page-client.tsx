@@ -67,30 +67,30 @@ export default function CasesPageClient({ initialCases }: Props) {
 
   return (
     <>
-      <section className="bg-bx-black py-24">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
             {`// 08 / Cases`}
           </p>
           <div className="mt-3 inline-flex flex-wrap items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
               {empty ? t("cases.reportHeroTitle") : t("cases.title")}
             </h1>
-            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-bx-white">
+            <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-primary-foreground">
               BETA
             </span>
           </div>
-          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
           </p>
         </div>
       </section>
 
-      <section className="bg-bx-off py-20 sm:py-24">
+      <section className="bg-muted py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {empty ? (
             <div className="space-y-14">
-              <p className="mx-auto max-w-3xl text-center text-lg font-bold leading-relaxed text-bx-black sm:text-xl">
+              <p className="mx-auto max-w-3xl text-center text-lg font-bold leading-relaxed text-foreground sm:text-xl">
                 {t("cases.reportLead")}
               </p>
 
@@ -98,12 +98,12 @@ export default function CasesPageClient({ initialCases }: Props) {
                 {featureCards.map((card) => (
                   <div
                     key={card.titleKey}
-                    className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-5"
+                    className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-5"
                   >
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t(card.titleKey)} ]
                     </p>
-                    <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                    <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                       {t(card.descKey)}
                     </p>
                   </div>
@@ -111,40 +111,40 @@ export default function CasesPageClient({ initialCases }: Props) {
               </div>
 
               <div>
-                <div className="mx-auto max-w-2xl border-2 border-bx-black bg-bx-white p-6 sm:p-8">
+                <div className="mx-auto max-w-2xl border-2 border-border bg-card p-6 sm:p-8">
                   <div className="mb-4 flex items-center justify-between gap-2">
-                    <span className="border-2 border-bx-black bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                    <span className="border-2 border-border bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
                       [ {t("cases.reportSampleBadge")} ]
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-bx-gray-dim">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                       {t("cases.reportSampleLabel")}
                     </span>
                   </div>
-                  <div className="space-y-3 border-2 border-bx-black bg-bx-off p-4">
-                    <div className="h-2.5 w-3/4 bg-bx-black" />
-                    <div className="h-2 w-1/2 bg-bx-black/40" />
-                    <div className="mt-4 space-y-2 border-t-2 border-bx-black pt-4">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <div className="space-y-3 border-2 border-border bg-muted p-4">
+                    <div className="h-2.5 w-3/4 bg-hero-void" />
+                    <div className="h-2 w-1/2 bg-hero-void/40" />
+                    <div className="mt-4 space-y-2 border-t-2 border-border pt-4">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ {t("cases.reportSampleLine1")} ]
                       </p>
-                      <div className="h-16 border-2 border-bx-black bg-bx-white" />
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <div className="h-16 border-2 border-border bg-card" />
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ {t("cases.reportSampleLine2")} ]
                       </p>
                       <div className="flex gap-0">
-                        <div className="-ml-[2px] h-12 flex-1 border-2 border-bx-accent bg-bx-accent" />
-                        <div className="-ml-[2px] h-12 flex-1 border-2 border-bx-black bg-bx-white" />
-                        <div className="-ml-[2px] h-12 flex-1 border-2 border-bx-black bg-bx-white" />
+                        <div className="-ml-[2px] h-12 flex-1 border-2 border-primary bg-primary" />
+                        <div className="-ml-[2px] h-12 flex-1 border-2 border-border bg-card" />
+                        <div className="-ml-[2px] h-12 flex-1 border-2 border-border bg-card" />
                       </div>
-                      <p className="pt-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <p className="pt-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ {t("cases.reportSampleLine3")} ]
                       </p>
-                      <div className="h-2 w-full bg-bx-black/30" />
-                      <div className="h-2 w-5/6 bg-bx-black/20" />
+                      <div className="h-2 w-full bg-hero-void/30" />
+                      <div className="h-2 w-5/6 bg-hero-void/20" />
                     </div>
                   </div>
                 </div>
-                <p className="mt-4 text-center font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                <p className="mt-4 text-center font-mono text-[11px] tracking-tight text-muted-foreground">
                   {`// `}{t("cases.reportSampleCaption")}
                 </p>
               </div>
@@ -157,12 +157,12 @@ export default function CasesPageClient({ initialCases }: Props) {
             </div>
           ) : (
             <>
-              <p className="mb-10 text-center font-mono text-[12px] tracking-tight text-bx-gray-dim sm:text-sm">
+              <p className="mb-10 text-center font-mono text-[12px] tracking-tight text-muted-foreground sm:text-sm">
                 {`// `}{t("cases.listIntro")}
               </p>
 
               <div className="mb-8 space-y-4">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                   [ {t("cases.filterIndustry")} ]
                 </p>
                 <div className="flex flex-wrap gap-0">
@@ -174,8 +174,8 @@ export default function CasesPageClient({ initialCases }: Props) {
                       className={cn(
                         "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                         industry === key
-                          ? "border-bx-accent bg-bx-accent text-bx-white"
-                          : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-foreground hover:bg-muted",
                       )}
                     >
                       {key === "all" ? t("cases.all") : key}
@@ -183,14 +183,14 @@ export default function CasesPageClient({ initialCases }: Props) {
                   ))}
                 </div>
 
-                <div className="flex flex-col gap-3 border-2 border-bx-black bg-bx-white p-4 sm:flex-row sm:flex-wrap sm:items-stretch">
+                <div className="flex flex-col gap-3 border-2 border-border bg-card p-4 sm:flex-row sm:flex-wrap sm:items-stretch">
                   <div className="relative min-w-[200px] flex-1">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-bx-gray-dim" />
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder={t("cases.searchPlaceholder")}
-                      className="h-11 w-full border-2 border-bx-black bg-bx-white pl-10 pr-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                      className="h-11 w-full border-2 border-border bg-card pl-10 pr-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                       aria-label={t("cases.searchPlaceholder")}
                     />
                   </div>
@@ -207,7 +207,7 @@ export default function CasesPageClient({ initialCases }: Props) {
                   </BtnBlock>
                 </div>
 
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                   {`// `}{t("cases.resultsCount", { count: filtered.length })}
                 </p>
               </div>
@@ -216,9 +216,9 @@ export default function CasesPageClient({ initialCases }: Props) {
                 {filtered.map((cs) => (
                   <article
                     key={cs.id}
-                    className="group -mt-[2px] -ml-[2px] flex flex-col overflow-hidden border-2 border-bx-black bg-bx-white"
+                    className="group -mt-[2px] -ml-[2px] flex flex-col overflow-hidden border-2 border-border bg-card"
                   >
-                    <div className="relative flex h-48 items-center justify-center overflow-hidden border-b-2 border-bx-black bg-bx-off">
+                    <div className="relative flex h-48 items-center justify-center overflow-hidden border-b-2 border-border bg-muted">
                       {cs.thumbnailUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -227,34 +227,34 @@ export default function CasesPageClient({ initialCases }: Props) {
                           className="absolute inset-0 h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
                         />
                       ) : (
-                        <TrendingUp className="h-12 w-12 text-bx-gray-dim transition-transform group-hover:scale-110" />
+                        <TrendingUp className="h-12 w-12 text-muted-foreground transition-transform group-hover:scale-110" />
                       )}
-                      <span className="absolute right-3 top-3 border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                      <span className="absolute right-3 top-3 border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
                         [ {cs.industry} ]
                       </span>
                     </div>
                     <div className="flex flex-1 flex-col p-5">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ CASE / {cs.id.slice(0, 6).toUpperCase()} ]
                       </p>
-                      <h3 className="mt-2 text-base font-bold tracking-tight text-bx-black">
+                      <h3 className="mt-2 text-base font-bold tracking-tight text-foreground">
                         {isKo ? cs.titleKo : cs.titleEn ?? cs.titleKo}
                       </h3>
-                      <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                      <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                         {cs.summaryKo}
                       </p>
-                      <div className="mt-4 border-2 border-bx-black bg-bx-off p-3">
+                      <div className="mt-4 border-2 border-border bg-muted p-3">
                         <div className="flex items-start gap-2">
-                          <Layers className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bx-accent" />
+                          <Layers className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
                           <div className="min-w-0">
-                            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                               [ {t("cases.mediaLabel")} ]
                             </p>
                             <div className="mt-2 flex flex-wrap gap-1">
                               {cs.mediaUsed.map((m) => (
                                 <span
                                   key={m}
-                                  className="border-2 border-bx-black bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black"
+                                  className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground"
                                 >
                                   {m}
                                 </span>
@@ -287,14 +287,14 @@ export default function CasesPageClient({ initialCases }: Props) {
                 ))}
               </div>
 
-              <div className="mt-16 border-2 border-bx-accent bg-bx-black px-6 py-10 text-center">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <div className="mt-16 border-2 border-primary bg-hero-void px-6 py-10 text-center">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                   [ NEXT STEP ]
                 </p>
-                <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-white sm:text-2xl">
+                <h2 className="mt-3 text-xl font-bold tracking-tight text-hero-fg sm:text-2xl">
                   {t("cases.sectionCtaTitle")}
                 </h2>
-                <p className="mx-auto mt-3 max-w-xl font-mono text-[12px] tracking-tight text-bx-white/75">
+                <p className="mx-auto mt-3 max-w-xl font-mono text-[12px] tracking-tight text-hero-fg/75">
                   {`// `}{t("cases.sectionCtaDesc")}
                 </p>
                 <div className="mt-6 inline-flex">

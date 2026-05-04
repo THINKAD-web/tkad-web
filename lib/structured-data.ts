@@ -70,8 +70,7 @@ export function buildStructuredDataGraph() {
         email: "mannote@tkad.co.kr",
         address: {
           "@type": "PostalAddress",
-          streetAddress:
-            "뚝섬로17가길 48 성수에이원지식산업센터 1102호",
+          streetAddress: "뚝섬로17가길 48  1102",
           addressLocality: "성동구",
           addressRegion: "서울특별시",
           postalCode: "04799",

@@ -74,7 +74,7 @@ export function HomeMediaCarousel({
       : "min-w-0 shrink-0 grow-0 basis-[70%] sm:basis-[42%] md:basis-[31%] lg:basis-[23.5%]";
 
   const arrowBase =
-    "pointer-events-auto inline-flex h-10 w-10 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-30 disabled:cursor-not-allowed";
+    "pointer-events-auto inline-flex h-10 w-10 items-center justify-center border-2 border-border bg-card text-foreground transition-all duration-300 hover:border-hermes hover:bg-foreground hover:text-background hover:shadow-[0_0_24px_rgba(255,98,0,0.22)] disabled:cursor-not-allowed disabled:opacity-30";
 
   if (items.length === 0) return null;
 

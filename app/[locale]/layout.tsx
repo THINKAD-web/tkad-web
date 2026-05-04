@@ -46,7 +46,7 @@ export const viewport = {
   maximumScale: 1,
   // PWA: 노치/홈인디케이터 영역까지 풀-블리드 (env(safe-area-inset-*) 활용)
   viewportFit: "cover" as const,
-  themeColor: "#0D1B2E",
+  themeColor: "#020202",
 };
 
 export async function generateMetadata({
@@ -155,8 +155,8 @@ export async function generateMetadata({
       description,
     },
     other: {
-      "theme-color": "#0D1B2E",
-      "msapplication-TileColor": "#0D1B2E",
+      "theme-color": "#020202",
+      "msapplication-TileColor": "#020202",
     },
   };
 }

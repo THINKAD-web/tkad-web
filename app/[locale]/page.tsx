@@ -33,7 +33,7 @@ const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
  */
 const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
   loading: () => (
-    <div aria-hidden className="absolute inset-0 z-0 bg-bx-black" />
+    <div aria-hidden className="absolute inset-0 z-0 bg-hero-void" />
   ),
 });
 
@@ -86,23 +86,23 @@ function HomeContent({
   return (
     <>
       {/* Hero */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bx-black">
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-hero-void text-hero-fg">
         {/* Ken Burns 배경 — 내부에서 가독성 그라디언트/accent 오버레이까지 함께 적용 */}
         <HeroKenBurns />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
-          <div className="hero-fade-in hero-fade-in-seq-0 mb-8 inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-black/60 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent backdrop-blur-sm">
-            <span className="h-1.5 w-1.5 bg-bx-accent" />
+          <div className="hero-fade-in hero-fade-in-seq-0 mb-8 inline-flex items-center gap-2 border-2 border-hermes/80 bg-black/50 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.22em] text-hermes backdrop-blur-sm">
+            <span className="h-1.5 w-1.5 bg-hermes shadow-[0_0_12px_rgba(255,98,0,0.9)]" />
             {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
           </div>
 
-          <h1 className="text-5xl leading-[1.05] font-extrabold tracking-tight text-bx-white lg:text-7xl">
+          <h1 className="text-5xl leading-[1.05] font-black tracking-tight text-hero-fg lg:text-7xl">
             {isKo ? (
               <>
                 <span className="hero-fade-in hero-fade-in-seq-1 block">
                   생각하는 광고회사
                 </span>
-                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block text-bx-accent">
+                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block text-hermes drop-shadow-[0_0_40px_rgba(255,98,0,0.35)]">
                   싱커드
                 </span>
               </>
@@ -111,18 +111,18 @@ function HomeContent({
                 <span className="hero-fade-in hero-fade-in-seq-1 block">
                   The Thinking Ad Agency
                 </span>
-                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block text-bx-accent">
+                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block text-hermes drop-shadow-[0_0_40px_rgba(255,98,0,0.35)]">
                   THINKAD
                 </span>
               </>
             )}
           </h1>
 
-          <p className="hero-fade-in hero-fade-in-seq-3 mx-auto mt-8 max-w-2xl text-base leading-relaxed text-bx-white/85 sm:text-lg">
+          <p className="hero-fade-in hero-fade-in-seq-3 mx-auto mt-8 max-w-2xl text-base leading-relaxed text-hero-fg/88 sm:text-lg">
             {t("hero.subtitle")}
           </p>
 
-          <p className="hero-fade-in hero-fade-in-seq-4 mx-auto mt-4 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="hero-fade-in hero-fade-in-seq-4 mx-auto mt-4 font-mono text-[11px] uppercase tracking-[0.22em] text-hermes">
             {`// `}
             {isKo
               ? "싱커드가 직접 검증하고 관리하는 매체만"
@@ -139,23 +139,23 @@ function HomeContent({
               <ArrowRight className="h-4 w-4" />
             </BtnBlock>
           </div>
-          <p className="hero-fade-in hero-fade-in-seq-6 mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-white/50">
+          <p className="hero-fade-in hero-fade-in-seq-6 mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-hero-fg/45">
             {isKo
               ? "// 30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
               : "// Apply in 30 seconds · Consultant contacts within 24h"}
           </p>
 
-          <div className="hero-fade-in hero-fade-in-seq-7 mt-12 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-bx-white/80">
+          <div className="hero-fade-in hero-fade-in-seq-7 mt-12 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-hero-fg/78">
             {[
               { value: "500+", label: isKo ? "검증 매체" : "Verified media" },
               { value: "15년", label: isKo ? "OOH 경력" : "Years of OOH" },
               { value: "100+", label: isKo ? "대기업 파트너" : "Enterprise partners" },
             ].map((s) => (
               <div key={s.label} className="flex items-baseline gap-2">
-                <span className="text-2xl font-extrabold text-bx-accent sm:text-3xl">
+                <span className="text-2xl font-black text-hermes sm:text-3xl">
                   {s.value}
                 </span>
-                <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-bx-white/55">
+                <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-hero-fg/50">
                   {s.label}
                 </span>
               </div>
@@ -167,12 +167,12 @@ function HomeContent({
           className="hero-fade-in hero-fade-in-seq-7 absolute bottom-8 left-1/2 -translate-x-1/2 motion-reduce:animate-none"
           aria-hidden
         >
-          <ChevronDown className="hero-chevron-bounce h-6 w-6 text-bx-white/50 motion-reduce:animate-none" />
+          <ChevronDown className="hero-chevron-bounce h-6 w-6 text-hero-fg/45 motion-reduce:animate-none" />
         </div>
       </section>
 
       {/* Verification Process */}
-      <section className="bg-bx-white py-20">
+      <section className="bg-background py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <SectionHead
@@ -197,7 +197,7 @@ function HomeContent({
             />
           </ScrollAnimate>
 
-          <div className="mt-12 grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4 lg:divide-x-2 lg:divide-bx-black">
+          <div className="mt-12 grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4 lg:divide-x-2 lg:divide-border">
             {[
               {
                 icon: Search,
@@ -237,23 +237,33 @@ function HomeContent({
               },
             ].map((item, index) => (
               <ScrollAnimate key={item.step} delay={index * 120}>
-                <div className="group relative h-full border-2 border-bx-black bg-bx-white lg:border-0 lg:border-t-2">
-                  {/* #HOME-1: 사진 → SVG 아이콘 */}
-                  <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden border-b-2 border-bx-black bg-bx-off">
-                    <item.icon
-                      className="h-20 w-20 text-bx-black sm:h-24 sm:w-24"
-                      strokeWidth={1.5}
+                <div className="group relative h-full border-2 border-border bg-card lg:border-0 lg:border-t-2">
+                  <div className="relative flex min-h-[120px] items-center justify-center overflow-hidden border-b-2 border-border bg-muted/25 sm:min-h-[128px]">
+                    <div
+                      className="pointer-events-none absolute inset-0 opacity-[0.18] dark:opacity-[0.28]"
                       aria-hidden
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(90deg, var(--border) 1px, transparent 1px), linear-gradient(var(--border) 1px, transparent 1px)",
+                        backgroundSize: "18px 18px",
+                      }}
                     />
-                    <span className="absolute left-0 top-0 inline-flex items-center gap-1 border-b-2 border-r-2 border-bx-black bg-bx-accent px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                    <div className="relative flex size-[3.25rem] items-center justify-center border-2 border-border bg-card text-hermes shadow-[0_1px_0_var(--border)] transition-[border-color,box-shadow] duration-300 group-hover:border-hermes/50 group-hover:shadow-[0_0_0_1px_color-mix(in_srgb,var(--hermes)_35%,transparent)] sm:size-14">
+                      <item.icon
+                        className="size-7 sm:size-[1.85rem]"
+                        strokeWidth={1.85}
+                        aria-hidden
+                      />
+                    </div>
+                    <span className="absolute left-0 top-0 inline-flex items-center border-b-2 border-r-2 border-border bg-hermes px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white sm:text-[10px] sm:tracking-[0.22em]">
                       STEP {item.step}
                     </span>
                   </div>
                   <div className="flex flex-col gap-2 p-6">
-                    <h3 className="text-lg font-bold tracking-tight text-bx-black sm:text-xl">
+                    <h3 className="text-lg font-black tracking-tight text-foreground sm:text-xl">
                       {item.title}
                     </h3>
-                    <p className="font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                    <p className="text-sm leading-relaxed text-muted-foreground">
                       {item.desc}
                     </p>
                   </div>
@@ -265,7 +275,7 @@ function HomeContent({
       </section>
 
       {/* 싱커드 추천 매체 — 표시 개수와 무관하게 'TOP 3' 표기 제거 */}
-      <section className="bg-bx-off py-20">
+      <section className="bg-muted/30 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <SectionHead
@@ -291,7 +301,7 @@ function HomeContent({
           </ScrollAnimate>
 
           {featuredItems.length === 0 ? (
-            <p className="mt-8 text-center font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
+            <p className="mt-8 text-center font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
               {isKo
                 ? "// 추천 매체 준비 중"
                 : "// featured media coming soon"}
@@ -311,7 +321,7 @@ function HomeContent({
 
       {/* 인기 매체 — 추천과 별개로 관리 (isPopular / popularOrder) */}
       {popularItems.length > 0 && (
-        <section className="bg-bx-white py-20">
+        <section className="bg-background py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <ScrollAnimate>
               <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -334,7 +344,7 @@ function HomeContent({
                 />
                 <Link
                   href="/media"
-                  className="group inline-flex items-center gap-2 self-end border-b-2 border-bx-black pb-1 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent"
+                  className="group inline-flex items-center gap-2 self-end border-b-2 border-foreground/25 pb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground transition-colors hover:border-hermes hover:text-hermes"
                 >
                   {isKo ? "전체 매체" : "View all"}
                   <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
@@ -353,7 +363,7 @@ function HomeContent({
       )}
 
       {/* Why THINKAD */}
-      <section className="bg-bx-off py-20">
+      <section className="bg-muted/30 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <SectionHead
@@ -405,20 +415,24 @@ function HomeContent({
               },
             ].map((item, i) => (
               <ScrollAnimate key={item.title} delay={i * 100}>
-                <div className="group relative h-full border-2 border-bx-black bg-bx-white p-8 transition-colors hover:bg-bx-black hover:text-bx-white lg:border-r-0 lg:last:border-r-2">
+                <div className="group relative h-full border-2 border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-hermes/50 hover:shadow-[0_20px_48px_rgba(255,98,0,0.12)] dark:hover:shadow-[0_24px_56px_rgba(255,98,0,0.18)] lg:border-r-0 lg:last:border-r-2">
                   <div className="mb-6 flex items-center justify-between">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim group-hover:text-bx-white/60">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [{String(i + 1).padStart(2, "0")}]
                     </span>
-                    <item.icon className="h-7 w-7 text-bx-black transition-colors group-hover:text-bx-accent" strokeWidth={1.75} />
+                    <item.icon
+                      className="h-7 w-7 text-foreground transition-colors group-hover:text-hermes"
+                      strokeWidth={1.75}
+                      aria-hidden
+                    />
                   </div>
-                  <h3 className="text-xl font-bold tracking-tight text-bx-black group-hover:text-bx-white">
+                  <h3 className="text-xl font-black tracking-tight text-foreground">
                     {item.title}
                   </h3>
-                  <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim group-hover:text-bx-white/80">
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     {item.desc}
                   </p>
-                  <div className="mt-6 inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                  <div className="mt-6 inline-flex items-center gap-2 border-2 border-hermes bg-hermes px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white shadow-[0_0_20px_rgba(255,98,0,0.35)]">
                     {item.highlight}
                   </div>
                 </div>
@@ -429,7 +443,7 @@ function HomeContent({
       </section>
 
       {/* Testimonials (캐러셀 — data/testimonials.ts 에서 관리) */}
-      <section className="bg-bx-white py-20">
+      <section className="bg-background py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
             <SectionHead
@@ -460,15 +474,19 @@ function HomeContent({
       </section>
 
       {/* CTA Banner */}
-      <section className="bg-bx-black py-20 text-bx-white">
+      <section className="relative overflow-hidden bg-hero-void py-24 text-hero-fg">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,98,0,0.12),transparent_55%)]"
+        />
         <ScrollAnimate className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-hermes">
             {`// ${isKo ? "지금 시작하세요" : "Get started now"}`}
           </p>
-          <h2 className="mt-4 text-3xl font-bold leading-[1.05] tracking-tight text-bx-white sm:text-4xl lg:text-6xl">
+          <h2 className="mt-4 text-3xl font-black leading-[1.08] tracking-tight text-hero-fg sm:text-4xl lg:text-6xl">
             {t("ctaBanner.title")}
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-bx-white/75 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-hero-fg/78 sm:text-lg">
             {t("ctaBanner.description")}
           </p>
           <div className="mt-10 flex justify-center">

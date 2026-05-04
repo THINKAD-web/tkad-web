@@ -196,9 +196,9 @@ export default function AdminCrmRecordsPage() {
   };
 
   return (
-    <div className="space-y-6 text-bx-black dark:text-bx-white">
+    <div className="space-y-6 text-foreground">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
           [ CRM RECORDS ]
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight">CRM · 고객 히스토리</h2>
@@ -245,7 +245,7 @@ export default function AdminCrmRecordsPage() {
           />
           <Button
             type="button"
-            className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+            className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
             onClick={createAccount}
           >
             저장
@@ -274,11 +274,11 @@ export default function AdminCrmRecordsPage() {
                   onClick={() => loadOne(a.id)}
                   className={`w-full rounded-lg border p-3 text-left ${
                     sel === a.id
-                      ? "border-bx-accent bg-bx-off dark:bg-bx-gray-dim/30"
+                      ? "border-primary bg-muted bg-muted/60"
                       : "border-slate-200"
                   }`}
                 >
-                  <div className="flex items-center gap-2 font-semibold text-bx-black dark:text-bx-white">
+                  <div className="flex items-center gap-2 font-semibold text-foreground">
                     <UserRound className="h-4 w-4" />
                     {a.company}
                   </div>
@@ -310,8 +310,8 @@ export default function AdminCrmRecordsPage() {
               </p>
             ) : (
               <>
-                <div className="flex flex-wrap items-center gap-2 rounded border-2 border-bx-black bg-bx-off p-3 dark:border-bx-white dark:bg-bx-gray-dim/30">
-                  <span className="text-sm font-semibold text-bx-black dark:text-bx-white">
+                <div className="flex flex-wrap items-center gap-2 rounded border-2 border-border bg-muted p-3 border-border bg-muted/60">
+                  <span className="text-sm font-semibold text-foreground">
                     고객 등급
                   </span>
                   <select
@@ -329,7 +329,7 @@ export default function AdminCrmRecordsPage() {
 
                 {preferredMedia.length > 0 ? (
                   <div>
-                    <h3 className="mb-2 text-sm font-semibold text-bx-black dark:text-bx-white">
+                    <h3 className="mb-2 text-sm font-semibold text-foreground">
                       선호 매체 (연결 캠페인 견적 기준)
                     </h3>
                     <ul className="space-y-1 text-xs">
@@ -338,7 +338,7 @@ export default function AdminCrmRecordsPage() {
                           key={m.id}
                           className="flex justify-between gap-2 rounded border bg-white px-2 py-1.5"
                         >
-                          <span className="font-medium text-bx-black dark:text-bx-white">
+                          <span className="font-medium text-foreground">
                             {m.name}
                           </span>
                           <span className="text-muted-foreground">

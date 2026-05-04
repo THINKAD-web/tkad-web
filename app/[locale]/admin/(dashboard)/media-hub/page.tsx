@@ -466,9 +466,9 @@ export default function AdminMediaHubPage() {
   };
 
   return (
-    <div className="space-y-6 text-bx-black dark:text-bx-white">
+    <div className="space-y-6 text-foreground">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
           [ MEDIA HUB ]
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight">매체 허브 (DB)</h2>
@@ -479,7 +479,7 @@ export default function AdminMediaHubPage() {
         </p>
         <Link
           href="/admin/medias/quick-add"
-          className="mt-2 inline-flex items-center gap-1.5 border-b-2 border-bx-black pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent dark:border-bx-white dark:text-bx-white"
+          className="mt-2 inline-flex items-center gap-1.5 border-b-2 border-border pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
         >
           <Code2 className="h-4 w-4" />
           JSON 간편 등록 (DB)
@@ -552,7 +552,7 @@ export default function AdminMediaHubPage() {
           />
           <Button
             type="button"
-            className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+            className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
             onClick={createMedia}
             disabled={loading}
           >
@@ -584,12 +584,12 @@ export default function AdminMediaHubPage() {
                   onClick={() => loadDetail(m)}
                   className={`w-full rounded-lg border p-3 text-left ${
                     sel?.id === m.id
-                      ? "border-bx-accent bg-bx-off dark:bg-bx-gray-dim/30"
+                      ? "border-primary bg-muted bg-muted/60"
                       : "border-slate-200"
                   }`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold text-bx-black dark:text-bx-white">{m.name}</p>
+                    <p className="font-semibold text-foreground">{m.name}</p>
                     {m.availability ? (
                       <Badge variant="secondary" className="text-[10px]">
                         {AVAIL_LABEL[m.availability]}
@@ -623,7 +623,7 @@ export default function AdminMediaHubPage() {
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-sm font-semibold text-bx-black dark:text-bx-white">
+                  <span className="text-sm font-semibold text-foreground">
                     가용 상태
                   </span>
                   <select
@@ -659,7 +659,7 @@ export default function AdminMediaHubPage() {
                     />
                   </label>
                   {uploadMsg ? (
-                    <p className="mt-2 text-xs text-bx-black dark:text-bx-white">{uploadMsg}</p>
+                    <p className="mt-2 text-xs text-foreground">{uploadMsg}</p>
                   ) : null}
                 </div>
 
@@ -680,7 +680,7 @@ export default function AdminMediaHubPage() {
                           title={`${key}: ${val.toLocaleString()}원`}
                         >
                           <div
-                            className="w-full rounded-t-sm bg-bx-black dark:bg-bx-white"
+                            className="w-full rounded-t-sm bg-foreground dark:bg-card"
                             style={{
                               height: `${Math.max(4, (val / maxMonthPrice) * 48)}px`,
                             }}
@@ -796,10 +796,10 @@ export default function AdminMediaHubPage() {
                         strongest === "confirmed"
                           ? "bg-emerald-200 font-semibold text-emerald-900"
                           : strongest === "tentative"
-                            ? "bg-bx-accent/30 font-semibold text-bx-black dark:text-bx-white"
+                            ? "bg-primary/30 font-semibold text-foreground"
                             : strongest === "requested"
                               ? "bg-amber-100 font-semibold text-amber-900"
-                              : "bg-slate-50 text-bx-black dark:text-bx-white";
+                              : "bg-slate-50 text-foreground";
                       return (
                         <div
                           key={idx}
@@ -827,7 +827,7 @@ export default function AdminMediaHubPage() {
                       확정 (confirmed)
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <span className="inline-block h-3 w-3 rounded bg-bx-accent/30" />
+                      <span className="inline-block h-3 w-3 rounded bg-primary/30" />
                       가홀드 (tentative)
                     </span>
                     <span className="inline-flex items-center gap-1">
@@ -836,7 +836,7 @@ export default function AdminMediaHubPage() {
                     </span>
                   </div>
 
-                  <h4 className="mb-2 mt-4 text-xs font-semibold text-bx-black dark:text-bx-white">
+                  <h4 className="mb-2 mt-4 text-xs font-semibold text-foreground">
                     슬롯 추가
                   </h4>
                   <div className="grid gap-2 sm:grid-cols-2">
@@ -933,7 +933,7 @@ export default function AdminMediaHubPage() {
                       };
                       const statusColor: Record<string, string> = {
                         requested: "bg-amber-100 text-amber-900",
-                        tentative: "bg-bx-accent/30 text-bx-black",
+                        tentative: "bg-primary/30 text-foreground",
                         confirmed: "bg-emerald-200 text-emerald-900",
                         cancelled: "bg-slate-200 text-slate-700",
                         expired: "bg-slate-100 text-slate-500",

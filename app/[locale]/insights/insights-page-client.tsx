@@ -7,11 +7,11 @@ import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
 
 const inputCls =
-  "h-10 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+  "h-10 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 const textareaCls =
-  "min-h-[100px] w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+  "min-h-[100px] w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 const labelCls =
-  "block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent";
+  "block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary";
 import {
   BarChart3,
   BookOpen,
@@ -162,38 +162,38 @@ export default function InsightsPageClient({
 
   return (
     <>
-      <section className="bg-bx-black py-24">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
             {`// 09 / Insights`}
           </p>
           <div className="mt-3 inline-flex flex-wrap items-center justify-center gap-2">
-            <span className="border-2 border-bx-white bg-transparent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+            <span className="border-2 border-hero-fg bg-transparent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hero-fg">
               {t("filterMonthly")} · {t("filterQuarterly")}
             </span>
-            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+            <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
               OOH
             </span>
-            <span className="border-2 border-bx-white bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-black">
+            <span className="border-2 border-hero-fg bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-foreground">
               BETA
             </span>
           </div>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
             {t("heroTitle")}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {t("heroSubtitle")}
           </p>
         </div>
       </section>
 
-      <section className="bg-bx-white py-10">
+      <section className="bg-card py-10">
         <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
           <a
             href="#reports"
-            className="group -ml-[2px] flex gap-4 border-2 border-bx-black bg-bx-off p-5 transition-colors hover:bg-bx-black hover:text-bx-white"
+            className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
               <CalendarRange className="h-6 w-6" />
             </div>
             <div className="text-left">
@@ -205,9 +205,9 @@ export default function InsightsPageClient({
           </a>
           <a
             href="#reports"
-            className="group -ml-[2px] flex gap-4 border-2 border-bx-black bg-bx-off p-5 transition-colors hover:bg-bx-black hover:text-bx-white"
+            className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
               <Download className="h-6 w-6" />
             </div>
             <div className="text-left">
@@ -219,9 +219,9 @@ export default function InsightsPageClient({
           </a>
           <a
             href="#custom-report"
-            className="group -ml-[2px] flex gap-4 border-2 border-bx-black bg-bx-off p-5 transition-colors hover:bg-bx-black hover:text-bx-white"
+            className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
               <Send className="h-6 w-6" />
             </div>
             <div className="text-left">
@@ -234,27 +234,27 @@ export default function InsightsPageClient({
         </div>
       </section>
 
-      <section className="bg-bx-off py-16 sm:py-20">
+      <section className="bg-muted py-16 sm:py-20">
         <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
           <div id="reports" className="scroll-mt-24 space-y-2">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ REPORTS ]
             </p>
-            <h2 className="text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               {t("reportsSectionTitle")}
             </h2>
-            <p className="max-w-2xl font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+            <p className="max-w-2xl font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
               {`// `}{t("reportsSectionDesc")}
             </p>
           </div>
 
           {!hasLibrary ? (
-            <div className="border-2 border-bx-black bg-bx-white py-12 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <div className="border-2 border-border bg-card py-12 text-center">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 [ PREPARING ]
               </p>
-              <p className="mt-3 text-base font-bold text-bx-black">{t("preparingContent")}</p>
-              <p className="mx-auto mt-3 max-w-md font-mono text-[12px] tracking-tight text-bx-gray-dim">
+              <p className="mt-3 text-base font-bold text-foreground">{t("preparingContent")}</p>
+              <p className="mx-auto mt-3 max-w-md font-mono text-[12px] tracking-tight text-muted-foreground">
                 {t("preparingContentDesc")}
               </p>
             </div>
@@ -273,8 +273,8 @@ export default function InsightsPageClient({
                       className={cn(
                         "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                         period === tab.value
-                          ? "border-bx-accent bg-bx-accent text-bx-white"
-                          : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-foreground hover:bg-muted",
                       )}
                     >
                       <CalendarRange className="h-3.5 w-3.5" />
@@ -297,8 +297,8 @@ export default function InsightsPageClient({
                       className={cn(
                         "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                         vertical === tab.value
-                          ? "border-bx-accent bg-bx-accent text-bx-white"
-                          : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-foreground hover:bg-muted",
                       )}
                     >
                       {tab.label}
@@ -307,7 +307,7 @@ export default function InsightsPageClient({
                 </div>
               </div>
 
-              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                 {`// `}{t("resultsCount", { count: filtered.length })}
               </p>
 
@@ -325,7 +325,7 @@ export default function InsightsPageClient({
               </div>
 
               {filtered.length === 0 ? (
-                <p className="py-8 text-center font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                <p className="py-8 text-center font-mono text-[12px] tracking-tight text-muted-foreground">
                   {`// `}{t("empty")}
                 </p>
               ) : null}
@@ -333,22 +333,22 @@ export default function InsightsPageClient({
           )}
 
           <div
-            className="scroll-mt-24 border-2 border-bx-black bg-bx-white"
+            className="scroll-mt-24 border-2 border-border bg-card"
             id="custom-report"
           >
-            <div className="border-b-2 border-bx-black p-5">
+            <div className="border-b-2 border-border p-5">
               <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+                <div className="flex h-11 w-11 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
                   <Send className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ {t("customSectionEyebrow")} ]
                   </p>
-                  <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+                  <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
                     {t("formTitle")}
                   </h3>
-                  <p className="mt-1 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                  <p className="mt-1 font-mono text-[12px] tracking-tight text-muted-foreground">
                     {`// `}{t("formDesc")}
                   </p>
                 </div>
@@ -370,7 +370,7 @@ export default function InsightsPageClient({
                 </div>
                 <div className="sm:col-span-1">
                   <label className={labelCls} htmlFor="ins-email">
-                    [ {t("formEmail")} ] <span className="text-bx-accent">*</span>
+                    [ {t("formEmail")} ] <span className="text-primary">*</span>
                   </label>
                   <input
                     id="ins-email"
@@ -459,20 +459,20 @@ export default function InsightsPageClient({
         ariaLabel={t("viewerTitle")}
         ariaLabelledBy="insights-viewer-title"
       >
-        <div className="border-2 border-bx-black bg-bx-white p-6 pt-12">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="border-2 border-border bg-card p-6 pt-12">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ VIEWER ]
           </p>
-          <h2 id="insights-viewer-title" className="mt-2 pr-8 text-lg font-bold tracking-tight text-bx-black">
+          <h2 id="insights-viewer-title" className="mt-2 pr-8 text-lg font-bold tracking-tight text-foreground">
             {viewerTitle}
           </h2>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
             {`// `}{t("viewerHint")}
           </p>
-          <div className="mt-4 min-h-[60vh] overflow-hidden border-2 border-bx-black bg-bx-off">
+          <div className="mt-4 min-h-[60vh] overflow-hidden border-2 border-border bg-muted">
             {viewerLoading ? (
-              <div className="flex min-h-[60vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
-                <Loader2 className="h-6 w-6 animate-spin text-bx-accent" />
+              <div className="flex min-h-[60vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 {`// `}{t("viewerLoading")}
               </div>
             ) : viewerUrl ? (
@@ -508,19 +508,19 @@ function ReportCard({
   const tags = report.verticalTags.filter((x) => x !== "general") as InsightVerticalTag[];
 
   return (
-    <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white">
-      <header className="border-b-2 border-bx-black p-5">
+    <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card">
+      <header className="border-b-2 border-border p-5">
         <div className="flex flex-wrap items-center gap-1">
-          <span className="border-2 border-bx-black bg-bx-black px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+          <span className="border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg">
             [ {periodBadge} ]
           </span>
-          <span className="border-2 border-bx-black bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
+          <span className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
             {isKo ? report.labelKo : report.labelEn}
           </span>
           {tags.map((tag) => (
             <span
               key={tag}
-              className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white"
+              className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground"
             >
               {tag === "fashion"
                 ? t("verticalFashion")
@@ -530,43 +530,43 @@ function ReportCard({
             </span>
           ))}
         </div>
-        <h3 className="mt-3 text-lg font-bold tracking-tight text-bx-black">
+        <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
           {isKo ? report.titleKo : report.titleEn}
         </h3>
-        <p className="mt-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+        <p className="mt-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
           <FileText className="h-3.5 w-3.5" />
           {report.publishedIso}
         </p>
       </header>
       <div className="mt-auto flex flex-1 flex-col gap-4 p-5">
-        <ul className="space-y-2 text-sm text-bx-black">
+        <ul className="space-y-2 text-sm text-foreground">
           {(isKo ? report.summaryKo : report.summaryEn).map((line, i) => (
             <li key={i} className="flex gap-2 leading-relaxed">
-              <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-bx-accent" />
+              <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>{line}</span>
             </li>
           ))}
         </ul>
 
-        <div className="border-2 border-bx-black bg-bx-off p-3 text-xs">
-          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="border-2 border-border bg-muted p-3 text-xs">
+          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             <MonitorPlay className="h-3.5 w-3.5" />
             [ {t("previewDooh")} ]
           </p>
-          <p className="mt-2 leading-relaxed text-bx-black">
+          <p className="mt-2 leading-relaxed text-foreground">
             {(isKo ? report.doohKo : report.doohEn)[0]}
           </p>
         </div>
 
-        <div className="border-2 border-bx-black bg-bx-off p-3 text-xs">
-          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="border-2 border-border bg-muted p-3 text-xs">
+          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             <BookOpen className="h-3.5 w-3.5" />
             [ {t("previewVertical")} ]
           </p>
-          <p className="mt-2 font-bold text-bx-black">
+          <p className="mt-2 font-bold text-foreground">
             {isKo ? report.verticalBlocks[0]?.labelKo : report.verticalBlocks[0]?.labelEn}
           </p>
-          <p className="mt-1 text-bx-black/75">
+          <p className="mt-1 text-foreground/75">
             {(isKo ? report.verticalBlocks[0]?.bulletsKo : report.verticalBlocks[0]?.bulletsEn)?.[0]}
           </p>
         </div>

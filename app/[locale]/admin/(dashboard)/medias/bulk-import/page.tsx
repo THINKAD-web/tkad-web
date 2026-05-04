@@ -141,15 +141,15 @@ export default function AdminMediasBulkImportPage() {
         <div>
           <Link
             href="/admin/medias"
-            className="mb-2 inline-flex items-center gap-1 border-b-2 border-bx-black pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent dark:border-bx-white dark:text-bx-white"
+            className="mb-2 inline-flex items-center gap-1 border-b-2 border-border pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             매체 목록
           </Link>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
             [ MEDIA BULK IMPORT ]
           </p>
-          <h2 className="mt-2 text-xl font-bold tracking-tight text-bx-black dark:text-bx-white">
+          <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground">
             매체 일괄 가져오기 (JSON Upsert)
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -258,7 +258,7 @@ export default function AdminMediasBulkImportPage() {
             </Button>
             <Button
               type="button"
-              className="border-2 border-bx-black bg-bx-accent font-semibold text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black dark:border-bx-white dark:hover:border-bx-white"
+              className="border-2 border-border bg-primary font-semibold text-primary-foreground transition-colors hover:bg-foreground hover:border-border"
               disabled={parseState.kind !== "ok" || submitting || dryRunBusy}
               onClick={() => {
                 if (parseState.kind !== "ok") return;

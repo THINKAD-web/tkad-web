@@ -239,7 +239,7 @@ function PrivacyContent({
                     <p className="text-bx-black">
                       <strong>주식회사 싱커드 (THINKAD)</strong><br />
                       사업자등록번호: 319-86-00382<br />
-                      주소: 서울특별시 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호<br />
+                      주소: 서울특별시 성동구 뚝섬로17가길 48  1102<br />
                       전화: 02-515-2772<br />
                       이메일:{" "}
                       <a href="mailto:mannote@tkad.co.kr" className="border-b-2 border-bx-black pb-0.5 font-mono text-bx-black transition-colors hover:border-bx-accent hover:text-bx-accent">mannote@tkad.co.kr</a>

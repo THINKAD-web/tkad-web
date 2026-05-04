@@ -45,7 +45,10 @@ export function BrutalFooter({
 
   return (
     <footer
-      className={cn("border-t-2 border-bx-black bg-bx-white", className)}
+      className={cn(
+        "border-t-2 border-border bg-background text-foreground",
+        className,
+      )}
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* 1번 셀 — 브랜드 컬럼 또는 일반 컬럼 0번 */}
@@ -68,18 +71,17 @@ export function BrutalFooter({
           />
         ))}
       </div>
-      <div className="flex items-center justify-center border-t-2 border-bx-black bg-bx-black px-6 py-4 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-bx-white">
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-hermes/25 bg-hero-void px-6 py-5 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-hero-fg/80">
         <span>{copyright ?? "© 2026 THINKAD — All rights reserved"}</span>
+        {legal ? <span className="text-hero-fg/50">{legal}</span> : null}
       </div>
     </footer>
   );
 }
 
 function cellBorders(idx: number): string {
-  // 모바일 1열: idx>0 위 2px / sm 2열: 3번째부터 위 2px, 짝수 idx 좌측 2px
-  // lg 4열: 0번 좌측보더 X, 나머지 좌측 2px, 위 보더 X
   return cn(
-    "border-bx-black p-6",
+    "border-border p-6 sm:p-8",
     idx > 0 && "border-t-2 sm:border-t-0",
     idx > 0 && "sm:border-l-0 lg:border-l-2",
     idx >= 2 && "sm:border-t-2 lg:border-t-0",
@@ -100,14 +102,16 @@ function BrandCell({
     <div className={cellBorders(cellIdx)}>
       <Link
         href="/"
-        className="inline-block font-mono text-base font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:text-bx-accent"
+        className="inline-block font-mono text-base font-black uppercase tracking-[0.22em] text-foreground transition-colors hover:text-hermes"
       >
-        THINK<span className="text-bx-accent">AD</span>
+        THINK<span className="text-hermes">AD</span>
       </Link>
-      <div className="mt-4 max-w-xs space-y-3 font-mono text-[12px] leading-relaxed tracking-tight text-bx-black">
-        <p>{description}</p>
+      <div className="mt-4 max-w-xs space-y-3 text-sm leading-relaxed text-muted-foreground">
+        <p className="font-medium text-foreground/90">{description}</p>
         {brandMeta ? (
-          <div className="text-[11px] text-bx-gray-dim">{brandMeta}</div>
+          <div className="font-mono text-[11px] text-muted-foreground/90">
+            {brandMeta}
+          </div>
         ) : null}
       </div>
     </div>
@@ -123,13 +127,13 @@ function ColumnCell({
 }) {
   return (
     <div className={cellBorders(cellIdx)}>
-      <h3 className="mb-4 font-mono text-[10px] uppercase tracking-[0.22em] text-bx-gray-dim">
-        [ {col.title} ]
+      <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-hermes/90">
+        {col.title}
       </h3>
       <ul className="space-y-2.5">
         {col.items.map((it, i) => {
           const cls =
-            "font-mono text-[12px] tracking-tight text-bx-black transition-colors hover:text-bx-accent";
+            "text-sm font-medium tracking-tight text-foreground/90 transition-colors hover:text-hermes";
           if (!it.href) {
             return (
               <li key={i} className={cls}>

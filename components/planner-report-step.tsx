@@ -404,18 +404,18 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
       <div className="space-y-2 text-center">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ STEP 6 / REPORT ]
         </p>
-        <h2 className="text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+        <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
           {t("stepReportTitle")}
         </h2>
-        <p className="text-sm leading-relaxed text-bx-gray-dim">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           {t("stepReportDesc")}
         </p>
       </div>
 
-      <div className="mx-auto flex w-full justify-center border-2 border-bx-black bg-bx-off p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto flex w-full justify-center border-2 border-border bg-muted p-4 sm:p-6 lg:p-8">
         <PlannerReportPreview
           ref={previewRef}
           isKo={props.isKo}
@@ -439,16 +439,16 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         />
       </div>
 
-      <div className="border-2 border-bx-black bg-bx-white">
-        <div className="flex flex-col gap-4 border-b-2 border-bx-black p-5 sm:flex-row sm:items-start sm:justify-between">
+      <div className="border-2 border-border bg-card">
+        <div className="flex flex-col gap-4 border-b-2 border-border p-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ PDF DOCUMENT ]
             </p>
-            <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+            <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
               {t("reportPdfDocumentTitle")}
             </h3>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
               {t("reportPreviewDesc")}
             </p>
           </div>
@@ -488,7 +488,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                   setUserEmail(e.target.value);
                   setEmailSent(false);
                 }}
-                className="h-10 w-full min-w-[14rem] border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none sm:w-56"
+                className="h-10 w-full min-w-[14rem] border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:w-56"
               />
               <BtnBlock
                 variant="accent"
@@ -520,17 +520,17 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           </div>
         </div>
         {loading ? (
-          <div className="flex min-h-[8rem] items-center justify-center gap-3 bg-bx-off py-8 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
-            <Loader2 className="h-5 w-5 animate-spin text-bx-accent" />
+          <div className="flex min-h-[8rem] items-center justify-center gap-3 bg-muted py-8 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
             {`// `}{t("reportGenerating")}
           </div>
         ) : error ? (
           <div className="px-5 py-6">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ ERROR ]
             </p>
-            <p className="mt-2 font-bold text-bx-black">{error}</p>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            <p className="mt-2 font-bold text-foreground">{error}</p>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
               {t("reportPdfErrorHint")}
             </p>
           </div>
@@ -710,20 +710,20 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <div className="border-2 border-bx-black bg-bx-white">
-      <div className="border-b-2 border-bx-black p-5">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+    <div className="border-2 border-border bg-card">
+      <div className="border-b-2 border-border p-5">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ REPORT PREVIEW ]
         </p>
-        <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+        <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
           {t("reportPreviewTitle")}
         </h3>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
           {t("reportCompactDesc")}
         </p>
       </div>
       <div className="space-y-6 p-5">
-        <div className="flex justify-center border-2 border-bx-black bg-bx-off p-3 sm:p-5">
+        <div className="flex justify-center border-2 border-border bg-muted p-3 sm:p-5">
           <PlannerReportPreview
             ref={compactPreviewRef}
             isKo={props.isKo}
@@ -746,7 +746,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             mediaPlacements={props.mediaPlacements}
           />
         </div>
-        <div className="flex flex-wrap gap-2 border-t-2 border-bx-black pt-6">
+        <div className="flex flex-wrap gap-2 border-t-2 border-border pt-6">
           <BtnBlock
             variant="accent"
             size="md"
@@ -782,7 +782,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                 setUserEmail(e.target.value);
                 setEmailSent(false);
               }}
-              className="h-10 w-full min-w-[12rem] border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none sm:w-52"
+              className="h-10 w-full min-w-[12rem] border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:w-52"
             />
             <BtnBlock
               variant="secondary"

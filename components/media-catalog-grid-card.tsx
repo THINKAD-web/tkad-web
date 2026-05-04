@@ -22,7 +22,7 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
  * 그리드 컨테이너에서 보더 겹침 처리를 위해 -mt/-ml 사용.
  */
 export const mediaCatalogGridCardShellClass =
-  "relative -mt-[2px] -ml-[2px] block min-w-0 border-2 border-bx-black bg-bx-white transition-colors group-hover:bg-bx-off";
+  "tkad-catalog-card-shell relative -mt-[2px] -ml-[2px] block min-w-0 border-2 border-bx-black bg-bx-white transition-colors group-hover:bg-bx-off dark:group-hover:bg-bx-off";
 
 type Common = {
   media: MediaItem;
@@ -67,7 +67,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const thumbnailOverlays = (
     <>
       {media.catalogSource !== "network" ? (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-bx-black bg-bx-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-bx-white">
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-bx-black bg-hermes px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-[0_0_20px_rgba(255,98,0,0.45)]">
           Verified
         </div>
       ) : (
@@ -114,23 +114,22 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       >
         {thumbnailOverlays}
       </MediaCatalogThumbnail>
-      <div className="flex flex-col gap-2 p-5">
-        <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-bx-gray-dim">
-          <span className="text-bx-black">
-            [ {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)} ]
+      <div className="flex flex-col gap-2.5 p-5">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-navy-600 sm:text-sm">
+            {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
           </span>
         </div>
-        <h3 className="line-clamp-2 break-words text-base font-bold leading-tight tracking-tight text-bx-black sm:text-lg">
+        <h3 className="line-clamp-2 break-words text-base font-semibold leading-snug tracking-tight text-navy sm:text-lg">
           {isKo ? media.name : (media.nameEn || media.name)}
         </h3>
-        <p className="line-clamp-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
-          {`// `}
+        <p className="line-clamp-2 text-sm leading-relaxed text-silver-600">
           {formatMediaLocationShort(media, isKo)}
         </p>
-        <p className="mt-1 break-words font-mono text-sm font-bold tabular-nums leading-tight text-bx-black">
+        <p className="mt-0.5 break-words text-lg font-black tabular-nums leading-snug text-navy dark:text-hero-fg">
           {formatMediaPriceWonWithSymbol(priceNum)}
           {showPricePeriod ? (
-            <span className="ml-1 text-[11px] font-normal uppercase tracking-[0.18em] text-bx-gray-dim">
+            <span className="ml-1.5 text-sm font-normal text-silver-500">
               · {tMedia(mediaPricePeriodTranslationKey(displayPeriod))}
             </span>
           ) : null}

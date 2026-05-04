@@ -23,17 +23,18 @@ export default function PageTransition({ children }: { children: ReactNode }) {
     const id = setTimeout(() => {
       setDisplayChildren(childrenRef.current);
       requestAnimationFrame(() => setShow(true));
-    }, 200);
+    }, 120);
     return () => clearTimeout(id);
   }, [pathname]);
 
   return (
     <div
       className={cn(
-        "ease-out transition-opacity duration-300 motion-reduce:transition-none",
+        "ease-out motion-reduce:transition-none motion-reduce:translate-y-0",
+        "origin-top transition-[opacity,transform] duration-200",
         show
-          ? "opacity-100"
-          : "pointer-events-none opacity-0",
+          ? "translate-y-0 opacity-100"
+          : "pointer-events-none translate-y-1 opacity-0 motion-reduce:translate-y-0",
       )}
     >
       {displayChildren}

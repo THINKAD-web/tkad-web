@@ -146,13 +146,13 @@ export default function AdminQuoteTemplatesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
           [ QUOTE TEMPLATES ]
         </p>
-        <h2 className="mt-2 text-lg font-bold tracking-tight text-bx-black dark:text-bx-white">
+        <h2 className="mt-2 text-lg font-bold tracking-tight text-foreground">
           견적서 PDF · 템플릿
         </h2>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
           {`// `}HTML 템플릿을 저장하고 PDF로 생성·다운로드하거나 이메일로 발송합니다.
         </p>
       </div>
@@ -164,7 +164,7 @@ export default function AdminQuoteTemplatesPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {loading ? (
-              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                 {`// `}불러오는 중…
               </p>
             ) : (
@@ -174,16 +174,16 @@ export default function AdminQuoteTemplatesPage() {
                     <button
                       type="button"
                       className={[
-                        "w-full border-2 border-bx-black bg-bx-white px-2 py-2 text-left font-mono text-[11px] font-bold uppercase tracking-[0.12em] transition-colors hover:bg-bx-off dark:border-bx-white dark:bg-bx-black dark:hover:bg-bx-gray-dim/30",
+                        "w-full border-2 border-border bg-card px-2 py-2 text-left font-mono text-[11px] font-bold uppercase tracking-[0.12em] transition-colors hover:bg-muted/50",
                         sel?.id === t.id
-                          ? "bg-bx-black text-bx-white dark:bg-bx-white dark:text-bx-black"
-                          : "text-bx-black dark:text-bx-white",
+                          ? "bg-foreground text-background"
+                          : "text-foreground",
                       ].join(" ")}
                       onClick={() => setSel({ ...t })}
                     >
                       {t.name}{" "}
                       {t.isDefault ? (
-                        <span className="text-bx-accent">(기본)</span>
+                        <span className="text-primary">(기본)</span>
                       ) : null}
                     </button>
                   </li>
@@ -191,7 +191,7 @@ export default function AdminQuoteTemplatesPage() {
               </ul>
             )}
             <div className="space-y-2 border-t pt-3">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                 [ 새 템플릿 ]
               </p>
               <Input
@@ -241,7 +241,7 @@ export default function AdminQuoteTemplatesPage() {
               <Button
                 type="button"
                 size="sm"
-                className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+                className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
                 onClick={saveNew}
               >
                 <Plus className="mr-1 h-4 w-4" />
@@ -301,12 +301,12 @@ export default function AdminQuoteTemplatesPage() {
                 </Button>
               </>
             ) : (
-              <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+              <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
                 {`// `}템플릿을 선택하거나 새로 만드세요.
               </p>
             )}
             <div className="border-t pt-3">
-              <p className="mb-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+              <p className="mb-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                 {`// `}{DEFAULT_VARS}
               </p>
               <textarea
@@ -334,7 +334,7 @@ export default function AdminQuoteTemplatesPage() {
                 <Button
                   type="button"
                   size="sm"
-                  className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+                  className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
                   onClick={() => genPdf("email")}
                 >
                   <Mail className="mr-1 h-4 w-4" />
