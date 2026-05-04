@@ -115,10 +115,16 @@ export default function MediaMapPageClient() {
         if (f.q) qs.set("q", f.q);
 
         const res = await fetch(`/api/media/map?${qs.toString()}`, { cache: "no-store" });
-        const data = (await res.json()) as {
-          ok?: boolean;
-          data?: { items?: Item[]; facets?: Facets };
-        };
+        const ct = res.headers.get("content-type") ?? "";
+        if (!res.ok || !ct.includes("application/json")) {
+          return;
+        }
+        let data: { ok?: boolean; data?: { items?: Item[]; facets?: Facets } };
+        try {
+          data = (await res.json()) as typeof data;
+        } catch {
+          return;
+        }
         if (data?.ok && data.data) {
           setItems(Array.isArray(data.data.items) ? data.data.items : []);
           setFacets(

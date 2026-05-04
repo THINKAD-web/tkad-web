@@ -128,6 +128,7 @@ export default function KakaoMapView({
   const markerObjsRef = useRef<Map<string, unknown>>(new Map());
   const clustererRef = useRef<unknown>(null);
   const infoWindowRef = useRef<unknown>(null);
+  const lastBoundsSentRef = useRef<MapBounds | null>(null);
   const onMarkerDetailRef = useRef(onMarkerDetail);
   const onSelectRef = useRef(onSelect);
   const markersRef = useRef<MapMarker[]>(markers);
@@ -182,12 +183,24 @@ export default function KakaoMapView({
           const b = map.getBounds();
           const sw = b.getSouthWest();
           const ne = b.getNorthEast();
-          onBoundsChange({
+          const next: MapBounds = {
             swLat: sw.getLat(),
             swLng: sw.getLng(),
             neLat: ne.getLat(),
             neLng: ne.getLng(),
-          });
+          };
+          const prev = lastBoundsSentRef.current;
+          if (
+            prev &&
+            prev.swLat === next.swLat &&
+            prev.swLng === next.swLng &&
+            prev.neLat === next.neLat &&
+            prev.neLng === next.neLng
+          ) {
+            return;
+          }
+          lastBoundsSentRef.current = next;
+          onBoundsChange(next);
         };
 
         kakao.maps.event.addListener(map, "idle", fireBounds);

@@ -63,8 +63,10 @@ export function getPrisma(): PrismaClient {
   }
   if (globalThis.prisma) return globalThis.prisma;
   const client = createPrismaClient();
+  // 프로덕션에서도 싱글톤 유지 — 미설정 시 요청·Proxy 접근마다 Pool/Client 가
+  // 새로 생겨 Neon 연결 고갈·간헐 500(특히 /api/media/map 반복)로 이어질 수 있음.
+  globalThis.prisma = client;
   if (process.env.NODE_ENV !== "production") {
-    globalThis.prisma = client;
     devPrismaDatabaseUrl = process.env.DATABASE_URL?.trim();
   }
   return client;
