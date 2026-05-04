@@ -5,7 +5,7 @@
  *   <SectionHead
  *     number="01"
  *     category="Service"
- *     title={<>What we <span className="bx-accent">deliver</span></>}
+ *     title={<>What we <span className="text-accent">deliver</span></>}
  *     meta="curated for Korean OOH market"
  *   />
  *

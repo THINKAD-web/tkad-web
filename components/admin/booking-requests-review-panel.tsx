@@ -120,10 +120,10 @@ export function AdminBookingRequestsReviewPanel() {
   };
 
   return (
-    <Card className="border-2 border-bx-accent bg-bx-white dark:border-bx-accent dark:bg-bx-black">
+    <Card className="border-2 border-accent bg-card dark:border-accent dark:bg-hero-void">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Bell className="h-4 w-4 text-bx-accent" />
+          <Bell className="h-4 w-4 text-accent" />
           검토 대기 — 광고주 신청 ({items.length}건)
         </CardTitle>
         <Button
@@ -147,7 +147,7 @@ export function AdminBookingRequestsReviewPanel() {
         ) : error ? (
           <p className="text-sm text-rose-600">{error}</p>
         ) : items.length === 0 ? (
-          <p className="py-4 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+          <p className="py-4 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {`// 현재 대기 중인 신청이 없습니다`}
           </p>
         ) : (
@@ -157,36 +157,36 @@ export function AdminBookingRequestsReviewPanel() {
               return (
                 <li
                   key={it.id}
-                  className="flex flex-col gap-3 border-2 border-bx-black/15 p-3 sm:flex-row sm:items-start sm:gap-4"
+                  className="flex flex-col gap-3 border-2 border-border/15 p-3 sm:flex-row sm:items-start sm:gap-4"
                 >
                   <div className="min-w-0 flex-1 space-y-1.5">
                     <div className="flex flex-wrap items-baseline gap-2">
-                      <p className="font-bold text-bx-black dark:text-bx-white">
+                      <p className="font-bold text-foreground dark:text-hero-fg">
                         {it.mediaName}
                       </p>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-bx-gray-dim">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                         {it.mediaLocation}
                       </span>
                     </div>
-                    <p className="text-xs text-bx-black dark:text-bx-white">
-                      <span className="font-mono uppercase tracking-[0.14em] text-bx-gray-dim">
+                    <p className="text-xs text-foreground dark:text-hero-fg">
+                      <span className="font-mono uppercase tracking-[0.14em] text-muted-foreground">
                         기간:
                       </span>{" "}
                       {fmt(it.startsAt)} → {fmt(it.endsAt)}{" "}
-                      <span className="font-mono uppercase tracking-[0.14em] text-bx-gray-dim">
+                      <span className="font-mono uppercase tracking-[0.14em] text-muted-foreground">
                         / 예산:
                       </span>{" "}
                       {fmtBudget(it.budgetWon)}
                     </p>
-                    <p className="text-xs text-bx-black dark:text-bx-white">
-                      <span className="font-mono uppercase tracking-[0.14em] text-bx-gray-dim">
+                    <p className="text-xs text-foreground dark:text-hero-fg">
+                      <span className="font-mono uppercase tracking-[0.14em] text-muted-foreground">
                         신청자:
                       </span>{" "}
                       {it.requesterName}
                       {it.requesterEmail ? (
                         <a
                           href={`mailto:${it.requesterEmail}`}
-                          className="ml-2 inline-flex items-center gap-1 text-bx-accent hover:underline"
+                          className="ml-2 inline-flex items-center gap-1 text-accent hover:underline"
                         >
                           <Mail className="h-3 w-3" />
                           {it.requesterEmail}
@@ -195,7 +195,7 @@ export function AdminBookingRequestsReviewPanel() {
                       {it.requesterPhone ? (
                         <a
                           href={`tel:${it.requesterPhone}`}
-                          className="ml-2 inline-flex items-center gap-1 text-bx-accent hover:underline"
+                          className="ml-2 inline-flex items-center gap-1 text-accent hover:underline"
                         >
                           <Phone className="h-3 w-3" />
                           {it.requesterPhone}
@@ -203,11 +203,11 @@ export function AdminBookingRequestsReviewPanel() {
                       ) : null}
                     </p>
                     {it.notes ? (
-                      <p className="border-l-4 border-bx-accent bg-bx-off px-3 py-1.5 text-xs whitespace-pre-wrap text-bx-black dark:bg-bx-gray-dim/30 dark:text-bx-white">
+                      <p className="border-l-4 border-accent bg-muted px-3 py-1.5 text-xs whitespace-pre-wrap text-foreground dark:bg-muted/50 dark:text-hero-fg">
                         {it.notes}
                       </p>
                     ) : null}
-                    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-bx-gray-dim">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                       신청: {fmt(it.createdAt)}
                     </p>
                   </div>

@@ -41,7 +41,7 @@ export function MediaInquiryDialog({
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-md border-2 border-bx-black bg-bx-white px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black transition-all duration-200 hover:bg-bx-black hover:text-bx-white",
+          "inline-flex items-center justify-center gap-2 rounded-md border-2 border-border bg-card px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:bg-foreground hover:text-background",
           className,
         )}
       >
@@ -51,7 +51,7 @@ export function MediaInquiryDialog({
 
       {open ? (
         <div
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-bx-black/60 p-3 sm:items-center sm:p-6"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-hero-void/60 p-3 sm:items-center sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={triggerLabel}
@@ -60,18 +60,18 @@ export function MediaInquiryDialog({
           }}
         >
           <div
-            className="w-full max-w-md rounded-lg border-2 border-bx-black bg-bx-white shadow-[8px_8px_0_0_var(--bx-black)]"
+            className="w-full max-w-md rounded-lg border-2 border-border bg-card shadow-[8px_8px_0_0_var(--foreground)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-3 border-b-2 border-bx-black bg-bx-off px-5 py-4 rounded-t-md">
+            <div className="flex items-start justify-between gap-3 border-b-2 border-border bg-muted px-5 py-4 rounded-t-md">
               <div className="min-w-0">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                   [ INQUIRY ]
                 </p>
-                <h2 className="mt-1 truncate text-lg font-bold tracking-tight text-bx-black">
+                <h2 className="mt-1 truncate text-lg font-bold tracking-tight text-foreground">
                   {triggerLabel}
                 </h2>
-                <p className="mt-1 truncate font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                <p className="mt-1 truncate font-mono text-[11px] tracking-tight text-muted-foreground">
                   {`// `}
                   {mediaName}
                 </p>
@@ -80,7 +80,7 @@ export function MediaInquiryDialog({
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="닫기"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -90,7 +90,7 @@ export function MediaInquiryDialog({
               <Link
                 href={`/contact?media=${mediaId}`}
                 onClick={() => setOpen(false)}
-                className="group flex items-center gap-3 rounded-md border-2 border-bx-accent bg-bx-accent px-4 py-3 text-bx-white transition-all hover:bg-bx-black hover:border-bx-black"
+                className="group flex items-center gap-3 rounded-md border-2 border-accent bg-accent px-4 py-3 text-accent-foreground transition-all hover:bg-foreground hover:border-border"
               >
                 <FileText className="h-5 w-5 shrink-0" strokeWidth={2} />
                 <div className="min-w-0 flex-1">
@@ -108,17 +108,17 @@ export function MediaInquiryDialog({
                 href={KAKAO_CHANNEL_PUBLIC_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 rounded-md border-2 border-bx-black bg-bx-white px-4 py-3 text-bx-black transition-all hover:bg-bx-off"
+                className="flex items-center gap-3 rounded-md border-2 border-border bg-card px-4 py-3 text-foreground transition-all hover:bg-muted"
               >
                 <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 border-bx-black"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 border-border"
                   style={{ backgroundColor: "#FEE500", color: "#191919" }}
                   aria-hidden
                 >
                   <MessageCircle className="h-4 w-4" strokeWidth={2.25} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                     [ KAKAOTALK ]
                   </p>
                   <p className="text-sm font-bold tracking-tight">
@@ -130,13 +130,13 @@ export function MediaInquiryDialog({
 
               <a
                 href="tel:02-515-2772"
-                className="flex items-center gap-3 rounded-md border-2 border-bx-black bg-bx-white px-4 py-3 text-bx-black transition-all hover:bg-bx-off"
+                className="flex items-center gap-3 rounded-md border-2 border-border bg-card px-4 py-3 text-foreground transition-all hover:bg-muted"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 border-bx-black bg-bx-white text-bx-accent">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 border-border bg-card text-accent">
                   <Phone className="h-4 w-4" strokeWidth={2} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                     [ PHONE ]
                   </p>
                   <p className="text-sm font-bold tabular-nums tracking-tight">
@@ -147,7 +147,7 @@ export function MediaInquiryDialog({
               </a>
             </div>
 
-            <p className="border-t-2 border-bx-black/10 bg-bx-off px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim rounded-b-md">
+            <p className="border-t-2 border-border/10 bg-muted px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground rounded-b-md">
               {`// `}평일 9:30 – 18:30 / 주말·공휴일 휴무
             </p>
           </div>

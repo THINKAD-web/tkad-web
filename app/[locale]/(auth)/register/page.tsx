@@ -58,21 +58,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-72px)] items-center justify-center bg-bx-off px-4 py-10 dark:bg-bx-black">
+    <div className="flex min-h-[calc(100vh-72px)] items-center justify-center bg-muted px-4 py-10 dark:bg-hero-void">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ REGISTER ]
           </p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-bx-black">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
             회원가입
           </h1>
-          <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+          <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
             {`// `}THINKAD 계정을 만들어보세요
           </p>
         </div>
 
-        <div className="border-2 border-bx-black bg-bx-white p-6 sm:p-8">
+        <div className="border-2 border-border bg-card p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <Field label="이름" htmlFor="name">
               <input
@@ -126,7 +126,7 @@ export default function RegisterPage() {
             </Field>
 
             {error && (
-              <div className="border-2 border-bx-accent bg-bx-white px-3 py-2 font-mono text-[12px] tracking-tight text-bx-accent">
+              <div className="border-2 border-accent bg-card px-3 py-2 font-mono text-[12px] tracking-tight text-accent">
                 {`// `}{error}
               </div>
             )}
@@ -144,11 +144,11 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        <p className="mt-6 text-center font-mono text-[12px] tracking-tight text-bx-gray-dim">
+        <p className="mt-6 text-center font-mono text-[12px] tracking-tight text-muted-foreground">
           {`// `}이미 계정이 있으신가요?{" "}
           <Link
             href="/login"
-            className="border-b-2 border-bx-black pb-0.5 font-bold text-bx-black transition-colors hover:border-bx-accent hover:text-bx-accent"
+            className="border-b-2 border-border pb-0.5 font-bold text-foreground transition-colors hover:border-accent hover:text-accent"
           >
             로그인
           </Link>
@@ -159,7 +159,7 @@ export default function RegisterPage() {
 }
 
 const inputCls =
-  "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+  "h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none";
 
 function Field({
   label,
@@ -176,9 +176,9 @@ function Field({
     <div>
       <label
         htmlFor={htmlFor}
-        className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent"
+        className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent"
       >
-        [ {label}{hint && <span className="ml-1 text-bx-gray-dim">{hint}</span>} ]
+        [ {label}{hint && <span className="ml-1 text-muted-foreground">{hint}</span>} ]
       </label>
       {children}
     </div>

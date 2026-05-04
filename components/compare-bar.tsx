@@ -48,7 +48,7 @@ export default function CompareBar({ items, locale, onClear }: Props) {
   return (
     <FloatingSelectionBar
       open={open}
-      className="border-t-2 border-bx-accent bg-bx-black/95 px-2 pb-2 shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.5)] sm:px-4 sm:pb-3"
+      className="border-t-2 border-accent bg-hero-void/95 px-2 pb-2 shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.5)] sm:px-4 sm:pb-3"
       ariaLabel={isKo ? "선택한 매체 작업" : "Selected media actions"}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -58,12 +58,12 @@ export default function CompareBar({ items, locale, onClear }: Props) {
           aria-atomic="true"
         >
           <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-bx-accent bg-bx-black text-sm font-bold leading-none text-bx-accent"
+            className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-accent bg-hero-void text-sm font-bold leading-none text-accent"
             aria-hidden
           >
             ✓
           </span>
-          <span className="min-w-0 font-mono text-xs font-bold uppercase tabular-nums tracking-[0.12em] text-bx-white/95 sm:text-sm">
+          <span className="min-w-0 font-mono text-xs font-bold uppercase tabular-nums tracking-[0.12em] text-hero-fg/95 sm:text-sm">
             {t("compareFloatingSelected", { count })}
             <span className="sr-only">
               {" "}

@@ -30,12 +30,12 @@ export default function MediaDetailStickyCta({
       role="region"
       aria-label={t("stickyCtaRegionLabel")}
     >
-      <div className="pointer-events-auto mx-auto max-w-lg overflow-hidden rounded-lg border-2 border-bx-accent bg-bx-black shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.45)]">
-        <div className="flex items-center justify-between border-b-2 border-bx-accent/30 px-3 py-1.5">
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-bx-accent">
+      <div className="pointer-events-auto mx-auto max-w-lg overflow-hidden rounded-lg border-2 border-accent bg-hero-void shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.45)]">
+        <div className="flex items-center justify-between border-b-2 border-accent/30 px-3 py-1.5">
+          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-accent">
             [ MEDIA ACTIONS ]
           </span>
-          <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-bx-white/40">
+          <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-hero-fg/40">
             {`// `}3 OPTIONS
           </span>
         </div>

@@ -69,8 +69,8 @@ export default function QuoteStatusClient({
 
   if (loading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
-        <Loader2 className="h-6 w-6 animate-spin text-bx-accent" />
+      <div className="flex min-h-[40vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin text-accent" />
         {`// LOADING`}
       </div>
     );
@@ -78,22 +78,22 @@ export default function QuoteStatusClient({
 
   if (!quote) {
     return (
-      <div className="mx-auto max-w-lg border-2 border-bx-accent bg-bx-white py-10 text-center">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <div className="mx-auto max-w-lg border-2 border-accent bg-card py-10 text-center">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ ERROR ]
         </p>
-        <p className="mt-3 px-4 text-sm text-bx-black">{t("loadError")}</p>
+        <p className="mt-3 px-4 text-sm text-foreground">{t("loadError")}</p>
       </div>
     );
   }
 
   if (quote.status === "cancelled") {
     return (
-      <div className="mx-auto max-w-lg border-2 border-bx-black bg-bx-off px-4 py-10 text-center">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <div className="mx-auto max-w-lg border-2 border-border bg-muted px-4 py-10 text-center">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ CANCELLED ]
         </p>
-        <p className="mt-3 text-sm text-bx-black">{t("milestone_cancelled")}</p>
+        <p className="mt-3 text-sm text-foreground">{t("milestone_cancelled")}</p>
         <div className="mt-6 flex justify-center">
           <BtnBlock href="/quote" variant="secondary" size="md">
             {t("backToQuote")}
@@ -118,23 +118,23 @@ export default function QuoteStatusClient({
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-10 sm:px-6">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ QUOTE STATUS ]
         </p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           {t("statusTitle")}
         </h1>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
           {`// `}{t("statusSubtitle")}
         </p>
       </div>
 
-      <div className="border-2 border-bx-black bg-bx-white">
-        <div className="border-b-2 border-bx-black p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <div className="border-2 border-border bg-card">
+        <div className="border-b-2 border-border p-5">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ TIMELINE ]
           </p>
-          <h2 className="mt-2 text-base font-bold tracking-tight text-bx-black">
+          <h2 className="mt-2 text-base font-bold tracking-tight text-foreground">
             {t("timeline")}
           </h2>
         </div>
@@ -147,8 +147,8 @@ export default function QuoteStatusClient({
                 <div
                   className={
                     done
-                      ? "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white"
-                      : "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-gray-dim"
+                      ? "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border-2 border-accent bg-accent text-accent-foreground"
+                      : "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border-2 border-border bg-card text-muted-foreground"
                   }
                 >
                   {done ? (
@@ -161,7 +161,7 @@ export default function QuoteStatusClient({
                   <p
                     className={
                       "text-sm font-bold " +
-                      (done ? "text-bx-black" : "text-bx-gray-dim")
+                      (done ? "text-foreground" : "text-muted-foreground")
                     }
                   >
                     {label}
@@ -174,17 +174,17 @@ export default function QuoteStatusClient({
       </div>
 
       {quote.invoiceSentAt || quote.invoiceDocUrl ? (
-        <div className="border-2 border-bx-accent bg-bx-white p-4 text-sm text-bx-black">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="border-2 border-accent bg-card p-4 text-sm text-foreground">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ INVOICE SENT ]
           </p>
           <p className="mt-2 font-bold">{t("invoiceEmailed")}</p>
-          <p className="mt-2 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="mt-2 font-mono text-[11px] tracking-tight text-muted-foreground">
             {`// `}{t("bankHint")}
           </p>
         </div>
       ) : (
-        <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+        <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
           {`// `}{t("bankHint")}
         </p>
       )}

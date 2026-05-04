@@ -88,15 +88,15 @@ export default function ResourcesPage() {
 
   return (
     <>
-      <section className="bg-bx-black py-24">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
             {`// 14 / Resources`}
           </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
             {isKo ? "리소스 센터" : "Resource Center"}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {isKo
               ? "THINKAD의 자료를 다운로드하세요"
               : "Download THINKAD resources"}
@@ -104,36 +104,36 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      <section className="bg-bx-off py-20 sm:py-24">
+      <section className="bg-muted py-20 sm:py-24">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-0">
             {resources.map((resource) => (
               <article
                 key={resource.id}
-                className="-mt-[2px] overflow-hidden border-2 border-bx-black bg-bx-white"
+                className="-mt-[2px] overflow-hidden border-2 border-border bg-card"
               >
                 <div className="flex flex-col sm:flex-row">
-                  <div className="flex shrink-0 items-center justify-center border-b-2 border-bx-black bg-bx-black p-8 sm:w-48 sm:border-b-0 sm:border-r-2">
-                    <resource.icon className="h-16 w-16 text-bx-accent" />
+                  <div className="flex shrink-0 items-center justify-center border-b-2 border-border bg-hero-void p-8 sm:w-48 sm:border-b-0 sm:border-r-2">
+                    <resource.icon className="h-16 w-16 text-accent" />
                   </div>
                   <div className="flex flex-1 flex-col">
-                    <header className="border-b-2 border-bx-black p-5">
+                    <header className="border-b-2 border-border p-5">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                        <span className="inline-flex items-center gap-1 border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
                           <FileText className="h-3 w-3" />
                           PDF
                         </span>
-                        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                           {resource.fileSize} · {resource.pages}{" "}
                           {isKo ? "페이지" : "pages"}
                         </span>
                       </div>
-                      <h3 className="mt-3 text-lg font-bold tracking-tight text-bx-black">
+                      <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
                         {isKo ? resource.titleKo : resource.titleEn}
                       </h3>
                     </header>
                     <div className="flex flex-1 flex-col justify-between gap-4 p-5">
-                      <p className="font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                      <p className="font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                         {`// `}{isKo
                           ? resource.descriptionKo
                           : resource.descriptionEn}
@@ -154,16 +154,16 @@ export default function ResourcesPage() {
             ))}
           </div>
 
-          <div className="mt-12 border-2 border-bx-accent bg-bx-black p-8 text-center">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <div className="mt-12 border-2 border-accent bg-hero-void p-8 text-center">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
               [ NEED MORE? ]
             </p>
-            <h3 className="mt-3 text-lg font-bold tracking-tight text-bx-white">
+            <h3 className="mt-3 text-lg font-bold tracking-tight text-hero-fg">
               {isKo
                 ? "더 많은 자료가 필요하신가요?"
                 : "Need more resources?"}
             </h3>
-            <p className="mt-3 font-mono text-[12px] tracking-tight text-bx-white/75">
+            <p className="mt-3 font-mono text-[12px] tracking-tight text-hero-fg/75">
               {`// `}{isKo
                 ? "맞춤형 자료가 필요하시면 언제든 문의해 주세요."
                 : "Contact us anytime if you need customized materials."}

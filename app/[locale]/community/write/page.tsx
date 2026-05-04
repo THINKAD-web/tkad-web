@@ -34,11 +34,11 @@ export default async function CommunityWritePage({ params }: Props) {
   return (
     <>
       {/* 상단 — 뒤로 */}
-      <section className="border-b-2 border-bx-black bg-bx-off py-4">
+      <section className="border-b-2 border-border bg-muted py-4">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <Link
             href="/community"
-            className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent hover:text-bx-black"
+            className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent hover:text-foreground"
           >
             <ArrowLeft className="h-3 w-3" />
             {isKo ? "커뮤니티 목록" : "Community list"}
@@ -47,25 +47,25 @@ export default async function CommunityWritePage({ params }: Props) {
       </section>
 
       {/* Hero */}
-      <section className="border-b-2 border-bx-black bg-bx-black py-10">
+      <section className="border-b-2 border-border bg-hero-void py-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "글쓰기" : "NEW POST"} ]
           </p>
-          <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-bx-white sm:text-3xl">
+          <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-hero-fg sm:text-3xl">
             <PenLine
-              className="mr-3 inline-block h-7 w-7 text-bx-accent"
+              className="mr-3 inline-block h-7 w-7 text-accent"
               aria-hidden
             />
             {isKo ? "새 글 작성" : "New post"}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-bx-white/70">
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-hero-fg/70">
             {isKo ? (
               <>
                 작성 전{" "}
                 <Link
                   href="/community/policy"
-                  className="font-bold text-bx-accent hover:text-bx-white underline underline-offset-4"
+                  className="font-bold text-accent hover:text-background underline underline-offset-4"
                 >
                   운영 정책
                 </Link>{" "}
@@ -77,7 +77,7 @@ export default async function CommunityWritePage({ params }: Props) {
                 Please review the{" "}
                 <Link
                   href="/community/policy"
-                  className="font-bold text-bx-accent hover:text-bx-white underline underline-offset-4"
+                  className="font-bold text-accent hover:text-background underline underline-offset-4"
                 >
                   community policy
                 </Link>{" "}
@@ -90,7 +90,7 @@ export default async function CommunityWritePage({ params }: Props) {
       </section>
 
       {/* 작성 폼 */}
-      <section className="bg-bx-white py-10">
+      <section className="bg-card py-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <CommunityWriteForm />
         </div>

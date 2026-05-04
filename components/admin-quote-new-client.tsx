@@ -600,14 +600,14 @@ export default function AdminQuoteNewClient() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="mb-1 flex items-center gap-2 text-bx-black dark:text-bx-white">
-            <Calculator className="h-7 w-7 text-bx-accent" />
+          <div className="mb-1 flex items-center gap-2 text-foreground dark:text-hero-fg">
+            <Calculator className="h-7 w-7 text-accent" />
             <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
           </div>
-          <p className="text-sm text-bx-gray-dim">{t("subtitle")}</p>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
           <Link
             href="/admin/quotes"
-            className="mt-2 inline-block text-xs font-semibold text-bx-accent hover:opacity-90 hover:underline"
+            className="mt-2 inline-block text-xs font-semibold text-accent hover:opacity-90 hover:underline"
           >
             {t("goToQuotesList")}
           </Link>
@@ -617,7 +617,7 @@ export default function AdminQuoteNewClient() {
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-bx-black dark:text-bx-white">{t("mediaTitle")}</CardTitle>
+            <CardTitle className="text-lg text-foreground dark:text-hero-fg">{t("mediaTitle")}</CardTitle>
             <div className="relative mt-2">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -664,7 +664,7 @@ export default function AdminQuoteNewClient() {
                     return (
                       <tr
                         key={m.id}
-                        className={`border-b border-slate-100 ${on ? "bg-bx-accent/10 dark:bg-bx-accent/20" : "bg-white dark:bg-bx-black"}`}
+                        className={`border-b border-slate-100 ${on ? "bg-accent/10 dark:bg-accent/20" : "bg-white dark:bg-hero-void"}`}
                       >
                         <td className="px-3 py-2 align-middle">
                           <input
@@ -675,7 +675,7 @@ export default function AdminQuoteNewClient() {
                           />
                         </td>
                         <td className="px-2 py-2 align-middle">
-                          <div className="font-medium text-bx-black dark:text-bx-white">{m.name}</div>
+                          <div className="font-medium text-foreground dark:text-hero-fg">{m.name}</div>
                           <div className="text-xs text-muted-foreground">
                             {m.location} · {m.type}
                           </div>
@@ -704,7 +704,7 @@ export default function AdminQuoteNewClient() {
                                   </option>
                                 ))}
                               </select>
-                              <div className="text-[11px] font-semibold text-bx-black dark:text-bx-white">
+                              <div className="text-[11px] font-semibold text-foreground dark:text-hero-fg">
                                 {new Intl.NumberFormat("ko-KR").format(
                                   catalogPriceFieldToWon(rawPrice),
                                 )}
@@ -745,8 +745,8 @@ export default function AdminQuoteNewClient() {
 
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg text-bx-black dark:text-bx-white">
-              <Receipt className="h-5 w-5 text-bx-accent" />
+            <CardTitle className="flex items-center gap-2 text-lg text-foreground dark:text-hero-fg">
+              <Receipt className="h-5 w-5 text-accent" />
               {t("termsTitle")}
             </CardTitle>
           </CardHeader>
@@ -774,7 +774,7 @@ export default function AdminQuoteNewClient() {
               </div>
             </div>
             <div className="rounded-lg border bg-slate-50 px-3 py-2 text-xs text-muted-foreground">
-              <span className="font-medium text-bx-black dark:text-bx-white">{t("periodSummary")}</span>{" "}
+              <span className="font-medium text-foreground dark:text-hero-fg">{t("periodSummary")}</span>{" "}
               {t("daysCount", { days })}{" "}
               <Badge variant="secondary" className="ml-1 text-[10px]">
                 {t("monthFactor", { n: monthFactor.toFixed(2) })}
@@ -818,8 +818,8 @@ export default function AdminQuoteNewClient() {
                   onClick={() => setVatIncluded(false)}
                   className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${
                     !vatIncluded
-                      ? "bg-bx-black text-bx-white dark:bg-bx-white dark:text-bx-black"
-                      : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-bx-white/10"
+                      ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground"
+                      : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10"
                   }`}
                 >
                   {t("vatExtra")}
@@ -829,8 +829,8 @@ export default function AdminQuoteNewClient() {
                   onClick={() => setVatIncluded(true)}
                   className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${
                     vatIncluded
-                      ? "bg-bx-black text-bx-white dark:bg-bx-white dark:text-bx-black"
-                      : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-bx-white/10"
+                      ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground"
+                      : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10"
                   }`}
                 >
                   {t("vatIncluded")}
@@ -846,8 +846,8 @@ export default function AdminQuoteNewClient() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg text-bx-black dark:text-bx-white">
-            <Sparkles className="h-5 w-5 text-bx-accent" />
+          <CardTitle className="flex items-center gap-2 text-lg text-foreground dark:text-hero-fg">
+            <Sparkles className="h-5 w-5 text-accent" />
             추가 비용 항목 (제작비·디자인비·운영비 등)
           </CardTitle>
           <p className="text-xs text-muted-foreground">
@@ -918,7 +918,7 @@ export default function AdminQuoteNewClient() {
                     />
                   </div>
                   <div className="flex items-center justify-between gap-2 sm:flex-col sm:items-end">
-                    <span className="text-sm font-bold tabular-nums text-bx-black dark:text-bx-white">
+                    <span className="text-sm font-bold tabular-nums text-foreground dark:text-hero-fg">
                       {formatWon(
                         Math.round(
                           Math.max(0, line.unitPriceWon) *
@@ -950,7 +950,7 @@ export default function AdminQuoteNewClient() {
               type="button"
               variant="outline"
               size="sm"
-              className="border-dashed border-bx-black/30 text-bx-black hover:bg-bx-off dark:border-bx-white/30 dark:text-bx-white dark:hover:bg-bx-white/10"
+              className="border-dashed border-border/30 text-foreground hover:bg-muted dark:border-hero-fg/30 dark:text-hero-fg dark:hover:bg-card/10"
               onClick={() =>
                 setCustomLines((arr) => [
                   ...arr,
@@ -977,7 +977,7 @@ export default function AdminQuoteNewClient() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-xs text-muted-foreground hover:text-bx-black dark:text-bx-white"
+                className="text-xs text-muted-foreground hover:text-foreground dark:text-hero-fg"
                 onClick={() =>
                   setCustomLines((arr) => [
                     ...arr,
@@ -1001,7 +1001,7 @@ export default function AdminQuoteNewClient() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-bx-black dark:text-bx-white">{t("pdfSectionTitle")}</CardTitle>
+          <CardTitle className="text-lg text-foreground dark:text-hero-fg">{t("pdfSectionTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -1086,7 +1086,7 @@ export default function AdminQuoteNewClient() {
             <Button
               type="button"
               variant="outline"
-              className="border-bx-black text-bx-black hover:bg-bx-off dark:border-bx-white dark:text-bx-white dark:hover:bg-bx-white/10"
+              className="border-border text-foreground hover:bg-muted dark:border-hero-fg dark:text-hero-fg dark:hover:bg-card/10"
               disabled={
                 saveLoading ||
                 pdfLoading ||
@@ -1110,7 +1110,7 @@ export default function AdminQuoteNewClient() {
             <Button
               type="button"
               variant="outline"
-              className="border-bx-black/20 text-bx-black hover:bg-bx-off dark:border-bx-white/25 dark:text-bx-white dark:hover:bg-bx-white/10"
+              className="border-border/20 text-foreground hover:bg-muted dark:border-hero-fg/25 dark:text-hero-fg dark:hover:bg-card/10"
               disabled={
                 (selected.size === 0 && customLines.length === 0) ||
                 days <= 0 ||
@@ -1125,7 +1125,7 @@ export default function AdminQuoteNewClient() {
             </Button>
             <Button
               type="button"
-              className="bg-bx-black text-bx-white hover:bg-bx-gray-dim dark:border dark:border-bx-white/20"
+              className="bg-hero-void text-hero-fg hover:bg-muted dark:border dark:border-hero-fg/20"
               disabled={
                 pdfLoading ||
                 saveLoading ||
@@ -1154,9 +1154,9 @@ export default function AdminQuoteNewClient() {
         </CardContent>
       </Card>
 
-      <Card className="border-bx-accent/40 bg-gradient-to-br from-white to-bx-accent/5 dark:from-bx-black dark:to-bx-accent/10">
+      <Card className="border-accent/40 bg-gradient-to-br from-white to-accent/5 dark:from-hero-void dark:to-accent/10">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-bx-black dark:text-bx-white">{t("summaryTitle")}</CardTitle>
+          <CardTitle className="text-lg text-foreground dark:text-hero-fg">{t("summaryTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           {selected.size === 0 && customLines.length === 0 ? (
@@ -1167,7 +1167,7 @@ export default function AdminQuoteNewClient() {
             <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
               <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumSubtotal")}</dt>
-                <dd className="font-semibold tabular-nums text-bx-black dark:text-bx-white">
+                <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.linesSubtotalWon)}
                 </dd>
               </div>
@@ -1181,25 +1181,25 @@ export default function AdminQuoteNewClient() {
               ) : null}
               <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumAfterDiscount")}</dt>
-                <dd className="font-semibold tabular-nums text-bx-black dark:text-bx-white">
+                <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.afterDiscountWon)}
                 </dd>
               </div>
               <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumSupply")}</dt>
-                <dd className="font-semibold tabular-nums text-bx-black dark:text-bx-white">
+                <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.supplyWon)}
                 </dd>
               </div>
               <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumVat")}</dt>
-                <dd className="font-semibold tabular-nums text-bx-black dark:text-bx-white">
+                <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.vatWon)}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4 rounded-lg border-2 border-bx-accent/50 bg-bx-accent/10 px-3 py-2 sm:col-span-2 lg:col-span-1 dark:bg-bx-accent/15">
-                <dt className="font-semibold text-bx-black dark:text-bx-white">{t("sumTotal")}</dt>
-                <dd className="text-lg font-bold tabular-nums text-bx-black dark:text-bx-white">
+              <div className="flex justify-between gap-4 rounded-lg border-2 border-accent/50 bg-accent/10 px-3 py-2 sm:col-span-2 lg:col-span-1 dark:bg-accent/15">
+                <dt className="font-semibold text-foreground dark:text-hero-fg">{t("sumTotal")}</dt>
+                <dd className="text-lg font-bold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.totalWon)}
                 </dd>
               </div>
@@ -1212,7 +1212,7 @@ export default function AdminQuoteNewClient() {
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="text-lg text-bx-black dark:text-bx-white">견적서 미리보기</CardTitle>
+              <CardTitle className="text-lg text-foreground dark:text-hero-fg">견적서 미리보기</CardTitle>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -1231,7 +1231,7 @@ export default function AdminQuoteNewClient() {
                       );
                     }
                   }}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-bx-black dark:text-bx-white hover:bg-slate-50"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-foreground dark:text-hero-fg hover:bg-slate-50"
                 >
                   <Camera className="h-4 w-4" />
                   이미지 캡처
@@ -1256,7 +1256,7 @@ export default function AdminQuoteNewClient() {
                       );
                     }
                   }}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-bx-black dark:text-bx-white hover:bg-slate-50"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-foreground dark:text-hero-fg hover:bg-slate-50"
                 >
                   <Download className="h-4 w-4" />
                   PDF 저장
@@ -1265,7 +1265,7 @@ export default function AdminQuoteNewClient() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto rounded-xl border border-bx-black/10 bg-slate-100/90 p-4 dark:border-bx-white/15 dark:bg-bx-white/5 md:p-6">
+            <div className="overflow-x-auto rounded-xl border border-border/10 bg-slate-100/90 p-4 dark:border-hero-fg/15 dark:bg-card/5 md:p-6">
               <div className="mx-auto w-fit max-w-full">
                 <div id="quote-preview">
                   <QuotePdfPreview
@@ -1338,7 +1338,7 @@ export default function AdminQuoteNewClient() {
                   {formatWon(totals.vatWon)}
                 </span>
               </div>
-              <div className="flex justify-between border-t pt-2 text-base font-bold text-bx-black dark:text-bx-white">
+              <div className="flex justify-between border-t pt-2 text-base font-bold text-foreground dark:text-hero-fg">
                 <span>합계</span>
                 <span className="tabular-nums">{formatWon(totals.totalWon)}</span>
               </div>

@@ -83,7 +83,7 @@ export function CommunityWriteForm() {
       {/* 카테고리 */}
       <div>
         <label className="block">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ 카테고리 ]
           </span>
         </label>
@@ -96,16 +96,16 @@ export function CommunityWriteForm() {
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className={`-ml-[2px] inline-flex flex-col items-start gap-1 border-2 border-bx-black px-4 py-3 text-left font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+                className={`-ml-[2px] inline-flex flex-col items-start gap-1 border-2 border-border px-4 py-3 text-left font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                   active
-                    ? "bg-bx-accent text-bx-white border-bx-accent"
-                    : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                    ? "bg-accent text-accent-foreground border-accent"
+                    : "bg-card text-foreground hover:bg-foreground hover:text-background"
                 }`}
               >
                 <span>{labels.ko}</span>
                 <span
                   className={`font-mono text-[9px] tracking-tight ${
-                    active ? "text-bx-white/70" : "text-bx-gray-dim"
+                    active ? "text-hero-fg/70" : "text-muted-foreground"
                   }`}
                   style={{ textTransform: "none", letterSpacing: 0 }}
                 >
@@ -119,7 +119,7 @@ export function CommunityWriteForm() {
 
       {/* 제목 */}
       <label className="block">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ 제목 ]
         </span>
         <input
@@ -129,16 +129,16 @@ export function CommunityWriteForm() {
           placeholder="제목을 입력해주세요"
           maxLength={COMMUNITY_LIMITS.POST_TITLE_MAX}
           required
-          className="mt-3 w-full border-2 border-bx-black bg-bx-white px-3 py-3 text-base font-bold text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+          className="mt-3 w-full border-2 border-border bg-card px-3 py-3 text-base font-bold text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
         />
-        <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-bx-gray-dim">
+        <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-muted-foreground">
           {title.length} / {COMMUNITY_LIMITS.POST_TITLE_MAX}
         </p>
       </label>
 
       {/* 본문 */}
       <label className="block">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ 본문 ]
         </span>
         <textarea
@@ -148,30 +148,30 @@ export function CommunityWriteForm() {
           placeholder={`본문을 입력해주세요. (${COMMUNITY_LIMITS.POST_BODY_MIN}-${COMMUNITY_LIMITS.POST_BODY_MAX.toLocaleString()}자)\n\n· 매체 / 단가에 대한 구체적 질문\n· 개인 후기 / 경험\n· 캠페인 목표 + 추천 요청\n등을 작성하면 다른 사용자의 답변을 받기 쉽습니다.`}
           maxLength={COMMUNITY_LIMITS.POST_BODY_MAX}
           required
-          className="mt-3 w-full resize-y border-2 border-bx-black bg-bx-white px-3 py-3 text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+          className="mt-3 w-full resize-y border-2 border-border bg-card px-3 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
         />
-        <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-bx-gray-dim">
+        <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-muted-foreground">
           {body.length} / {COMMUNITY_LIMITS.POST_BODY_MAX.toLocaleString()}
         </p>
       </label>
 
       {/* 작성자 정보 */}
-      <div className="border-2 border-bx-black bg-bx-off p-5 space-y-4">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <div className="border-2 border-border bg-muted p-5 space-y-4">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ 작성자 정보 ]
         </p>
-        <label className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-black">
+        <label className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-foreground">
           <input
             type="checkbox"
             checked={isAnonymous}
             onChange={(e) => setIsAnonymous(e.target.checked)}
-            className="h-4 w-4 border-2 border-bx-black"
+            className="h-4 w-4 border-2 border-border"
           />
           익명으로 작성
         </label>
         {!isAnonymous ? (
           <label className="block">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               작성자 이름
             </span>
             <input
@@ -180,12 +180,12 @@ export function CommunityWriteForm() {
               onChange={(e) => setAuthorName(e.target.value)}
               placeholder="홍길동"
               maxLength={COMMUNITY_LIMITS.AUTHOR_NAME_MAX}
-              className="mt-1 w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+              className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
             />
           </label>
         ) : null}
         <label className="block">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             이메일 (선택, 답변 통보용 — 게시물에 노출 X)
           </span>
           {/*
@@ -200,10 +200,10 @@ export function CommunityWriteForm() {
             value={authorEmail}
             onChange={(e) => setAuthorEmail(e.target.value)}
             placeholder="example@domain.com"
-            className="mt-1 w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+            className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
           />
         </label>
-        <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
+        <p className="font-mono text-[10px] tracking-tight text-muted-foreground">
           {`// `}
           IP 주소는 스팸 방지 목적으로 60일간 보관 후 자동 익명화됩니다.
         </p>
@@ -222,7 +222,7 @@ export function CommunityWriteForm() {
       {/* Turnstile */}
       {turnstileEnabled ? (
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ 캡차 ]
           </p>
           <div className="mt-3">
@@ -232,7 +232,7 @@ export function CommunityWriteForm() {
       ) : null}
 
       {error ? (
-        <p className="border-2 border-bx-accent bg-bx-white px-4 py-3 font-mono text-[11px] tracking-tight text-bx-accent">
+        <p className="border-2 border-accent bg-card px-4 py-3 font-mono text-[11px] tracking-tight text-accent">
           {`// `}
           {error}
         </p>
@@ -243,7 +243,7 @@ export function CommunityWriteForm() {
         <button
           type="submit"
           disabled={!canSubmit}
-          className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Send className="h-3.5 w-3.5" />
           {busy ? "전송 중…" : "글 등록"}

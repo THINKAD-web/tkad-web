@@ -135,20 +135,20 @@ export default function CartPage() {
   }
 
   const inputCls =
-    "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+    "h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none";
   const labelCls =
-    "mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent";
+    "mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
-      <header className="mb-6 border-b-2 border-bx-black pb-5">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <header className="mb-6 border-b-2 border-border pb-5">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ CART / QUOTE REQUEST ]
         </p>
-        <h1 className="mt-2 text-xl font-bold tracking-tight text-bx-black sm:text-3xl">
+        <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-3xl">
           견적서 요청
         </h1>
-        <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+        <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
           {`// `}선택한 매체로 30분 안에 PDF 견적서를 받아보세요
         </p>
       </header>
@@ -161,7 +161,7 @@ export default function CartPage() {
           action={
             <Link
               href="/media/map"
-              className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+              className="inline-flex items-center gap-2 border-2 border-border bg-card px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
             >
               매체 탐색하러 가기
             </Link>
@@ -170,7 +170,7 @@ export default function CartPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-[1fr_360px]">
           <div className="space-y-3">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
               [ SELECTED / {items.length} ]
             </p>
             {loading && <Spinner size="sm" label="불러오는 중…" />}
@@ -178,50 +178,50 @@ export default function CartPage() {
               {items.map((it) => (
                 <li
                   key={it.id}
-                  className="-mt-[2px] flex items-center gap-3 border-2 border-bx-black bg-bx-white p-3"
+                  className="-mt-[2px] flex items-center gap-3 border-2 border-border bg-card p-3"
                 >
                   {it.image ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={it.image}
                       alt={it.name}
-                      className="h-16 w-16 flex-shrink-0 border-2 border-bx-black object-cover"
+                      className="h-16 w-16 flex-shrink-0 border-2 border-border object-cover"
                     />
                   ) : (
-                    <div className="h-16 w-16 flex-shrink-0 border-2 border-bx-black bg-bx-off" />
+                    <div className="h-16 w-16 flex-shrink-0 border-2 border-border bg-muted" />
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-bold tracking-tight text-bx-black">{it.name}</div>
-                    <div className="mt-1 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                    <div className="truncate text-sm font-bold tracking-tight text-foreground">{it.name}</div>
+                    <div className="mt-1 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                       {`// `}{it.region} · {it.type}
                     </div>
-                    <div className="mt-1 font-mono text-sm font-bold tabular-nums text-bx-accent">
+                    <div className="mt-1 font-mono text-sm font-bold tabular-nums text-accent">
                       {formatKRW(it.price)}
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemove(it.id, it.name)}
-                    className="border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-accent hover:text-bx-white hover:border-bx-accent"
+                    className="border-2 border-border bg-card px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-accent hover:text-background hover:border-accent"
                   >
                     제거
                   </button>
                 </li>
               ))}
             </ul>
-            <div className="flex items-center justify-between border-t-2 border-bx-black pt-4">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <div className="flex items-center justify-between border-t-2 border-border pt-4">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                 [ TOTAL ]
               </span>
-              <span className="font-mono text-lg font-bold tabular-nums text-bx-accent">{formatKRW(total)}</span>
+              <span className="font-mono text-lg font-bold tabular-nums text-accent">{formatKRW(total)}</span>
             </div>
           </div>
 
-          <aside className="h-fit border-2 border-bx-accent bg-bx-white p-5 md:sticky md:top-24">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <aside className="h-fit border-2 border-accent bg-card p-5 md:sticky md:top-24">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
               [ CAMPAIGN INFO ]
             </p>
-            <h2 className="mt-2 mb-5 text-base font-bold tracking-tight text-bx-black">캠페인 정보</h2>
+            <h2 className="mt-2 mb-5 text-base font-bold tracking-tight text-foreground">캠페인 정보</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className={labelCls}>[ 담당자 이름 * ]</label>
@@ -306,7 +306,7 @@ export default function CartPage() {
               </div>
 
               {error && (
-                <div className="border-2 border-bx-accent bg-bx-white p-3 font-mono text-[11px] tracking-tight text-bx-accent">
+                <div className="border-2 border-accent bg-card p-3 font-mono text-[11px] tracking-tight text-accent">
                   {`// `}{error}
                 </div>
               )}
@@ -314,7 +314,7 @@ export default function CartPage() {
               <button
                 type="submit"
                 disabled={submitting || items.length === 0}
-                className="flex w-full items-center justify-center gap-2 border-2 border-bx-accent bg-bx-accent px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 border-2 border-accent bg-accent px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:opacity-50"
               >
                 {submitting && <Spinner size="sm" />}
                 {submitting ? "생성 중…" : "견적서 생성"}

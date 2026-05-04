@@ -20,7 +20,6 @@ import {
 } from "@/components/media-catalog-shared";
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { mediaPricePeriodTranslationKey } from "@/lib/media-price-format";
 
 export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   const locale = useLocale();
@@ -80,19 +79,19 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
 
   if (items.length < 2) {
     return (
-      <section className="flex min-h-[60vh] flex-col items-center justify-center border-b-2 border-bx-black bg-bx-off px-4 py-16 text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center border-2 border-bx-black bg-bx-white">
-          <GitCompare className="h-8 w-8 text-bx-black" aria-hidden />
+      <section className="flex min-h-[60vh] flex-col items-center justify-center border-b-2 border-border bg-muted px-4 py-16 text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center border-2 border-border bg-card">
+          <GitCompare className="h-8 w-8 text-foreground" aria-hidden />
         </div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           {`[ ${isKo ? "COMPARE" : "COMPARE"} ]`}
         </p>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           {items.length === 1
             ? (isKo ? "매체를 1개 더 선택해주세요" : "Select one more media")
             : (isKo ? "비교할 매체를 선택해주세요" : "Select media to compare")}
         </h1>
-        <p className="mt-3 max-w-md text-sm leading-relaxed text-bx-gray-dim">
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
           {items.length === 1
             ? (isKo ? `"${items[0].name}" 선택됨 · 1개 더 선택하면 비교가 시작돼요` : `"${items[0].nameEn}" selected · Select 1 more to compare`)
             : (isKo ? "매체 검색에서 2개 이상의 매체를 선택하세요" : "Select at least 2 media from the media search page")}
@@ -107,20 +106,20 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
 
   return (
     <>
-      <section className="border-b-2 border-bx-accent bg-bx-black py-16 sm:py-20">
+      <section className="border-b-2 border-accent bg-hero-void py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-accent">
             {`[ ${isKo ? "스펙 비교" : "SPEC COMPARE"} ]`}
           </p>
           <div className="mb-2 mt-3 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-            <h1 className="text-3xl font-bold tracking-tight text-bx-white sm:text-4xl">
+            <h1 className="text-3xl font-bold tracking-tight text-hero-fg sm:text-4xl">
               {isKo ? "매체 비교" : "Media Comparison"}
             </h1>
-            <span className="border-2 border-bx-accent bg-bx-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+            <span className="border-2 border-accent bg-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent-foreground">
               BETA
             </span>
           </div>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-bx-white/75 sm:text-base">
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-hero-fg/75 sm:text-base">
             {isKo
               ? "선택한 매체를 매체 검색과 동일한 카드로 보고, 아래 표에서 수치를 나란히 비교한 뒤 견적·PDF·이미지 저장으로 이어갈 수 있습니다."
               : "Same cards as Media Search, a spec table for side-by-side metrics, then quote, PDF, or image export."}
@@ -128,14 +127,14 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
         </div>
       </section>
 
-      <section className="bg-bx-off py-12 sm:py-16">
+      <section className="bg-muted py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-8">
             <div className="min-w-0">
               <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black">
+                <div className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground">
                   {t("media.results")}:{" "}
-                  <span className="tabular-nums text-bx-accent">
+                  <span className="tabular-nums text-accent">
                     {visibleItems.length}
                   </span>
                 </div>
@@ -146,7 +145,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     gridLabel={t("media.browseCardLayoutGrid")}
                     compactLabel={t("media.browseCardLayoutCompact")}
                   />
-                  <div className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-white px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
+                  <div className="inline-flex items-center gap-2 border-2 border-accent bg-card px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
                     <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
                     <span>{tMedia("browseCatalogVerifiedBadge")}</span>
                   </div>
@@ -175,9 +174,6 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                       isKo={isKo}
                       href={mediaItemDetailPath(media.id)}
                       imagePreparingLabel={tMedia("imagePreparing")}
-                      pricePeriodLabel={tMedia(
-                        mediaPricePeriodTranslationKey(media.pricePeriod),
-                      )}
                       popularIds={popularIds}
                     />
                   ))}
@@ -186,7 +182,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
 
               <div
                 ref={comparePdfRef}
-                className="border-2 border-bx-black bg-bx-white p-1 shadow-[4px_4px_0_0_rgba(0,0,0,0.12)] sm:p-2"
+                className="border-2 border-border bg-card p-1 shadow-[4px_4px_0_0_rgba(0,0,0,0.12)] sm:p-2"
               >
                 <CompareSpecTable items={visibleItems} isKo={isKo} />
               </div>
@@ -232,7 +228,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     {isKo ? "이미지 저장" : "Save Image"}
                   </BtnBlock>
                 </div>
-                <p className="text-center font-mono text-[10px] uppercase tracking-[0.16em] text-bx-gray-dim">
+                <p className="text-center font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                   {isKo
                     ? "견적·상세: 위 매체 ID가 그대로 전달됩니다."
                     : "Quote and detail links pass the same media IDs."}

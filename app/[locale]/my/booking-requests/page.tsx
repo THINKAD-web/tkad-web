@@ -47,7 +47,7 @@ function fmtBudget(won: number | null): string {
 
 const STATUS_STYLE: Record<Status, string> = {
   requested: "border-amber-400 bg-amber-50 text-amber-900",
-  tentative: "border-bx-black bg-bx-off text-bx-black",
+  tentative: "border-border bg-muted text-foreground",
   confirmed: "border-emerald-500 bg-emerald-50 text-emerald-900",
   cancelled: "border-rose-400 bg-rose-50 text-rose-900",
   expired: "border-slate-300 bg-slate-50 text-slate-500",
@@ -100,7 +100,7 @@ export default function MyBookingRequestsPage() {
   if (!authChecked && loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-bx-accent" />
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
       </div>
     );
   }
@@ -110,43 +110,43 @@ export default function MyBookingRequestsPage() {
       <div className="mb-6">
         <Link
           href="/my"
-          className="mb-3 inline-flex items-center gap-1 border-b-2 border-bx-black pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent"
+          className="mb-3 inline-flex items-center gap-1 border-b-2 border-border pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-accent hover:border-accent"
         >
           <ArrowLeft className="h-4 w-4" />
           {t("backToMy")}
         </Link>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ {t("eyebrow")} ]
         </p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           <CalendarDays
-            className="mr-2 inline-block h-6 w-6 text-bx-accent"
+            className="mr-2 inline-block h-6 w-6 text-accent"
             aria-hidden
           />
           {t("title")}
         </h1>
-        <p className="mt-1 text-sm text-bx-gray-dim">{t("desc")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("desc")}</p>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center gap-2 border-2 border-bx-black bg-bx-off px-4 py-12 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+        <div className="flex items-center justify-center gap-2 border-2 border-border bg-muted px-4 py-12 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           {t("loading")}
         </div>
       ) : error ? (
-        <p className="border-2 border-bx-accent bg-bx-white px-4 py-3 font-mono text-[11px] tracking-tight text-bx-accent">
+        <p className="border-2 border-accent bg-card px-4 py-3 font-mono text-[11px] tracking-tight text-accent">
           {`// `}
           {t("error")}
         </p>
       ) : items.length === 0 ? (
-        <div className="border-2 border-bx-black bg-bx-off p-12 text-center">
-          <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
+        <div className="border-2 border-border bg-muted p-12 text-center">
+          <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
             {`// `}
             {t("empty")}
           </p>
           <Link
             href="/media"
-            className="mt-6 inline-flex items-center gap-2 border-2 border-bx-black bg-bx-black px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent"
+            className="mt-6 inline-flex items-center gap-2 border-2 border-border bg-hero-void px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-hero-fg transition-colors hover:bg-accent hover:border-accent"
           >
             {t("browseMedia")}
           </Link>
@@ -158,7 +158,7 @@ export default function MyBookingRequestsPage() {
             return (
               <li
                 key={it.id}
-                className="flex flex-col gap-3 border-2 border-bx-black bg-bx-white p-5 sm:flex-row sm:items-start sm:gap-5"
+                className="flex flex-col gap-3 border-2 border-border bg-card p-5 sm:flex-row sm:items-start sm:gap-5"
               >
                 <Link
                   href={`/media/${it.media.id}`}
@@ -170,10 +170,10 @@ export default function MyBookingRequestsPage() {
                     <img
                       src={it.media.image}
                       alt=""
-                      className="aspect-video w-full border-2 border-bx-black object-cover sm:aspect-square"
+                      className="aspect-video w-full border-2 border-border object-cover sm:aspect-square"
                     />
                   ) : (
-                    <div className="flex aspect-video w-full items-center justify-center border-2 border-bx-black bg-bx-off font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim sm:aspect-square">
+                    <div className="flex aspect-video w-full items-center justify-center border-2 border-border bg-muted font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:aspect-square">
                       {`// no image`}
                     </div>
                   )}
@@ -184,11 +184,11 @@ export default function MyBookingRequestsPage() {
                     <div className="min-w-0">
                       <Link
                         href={`/media/${it.media.id}`}
-                        className="line-clamp-1 text-base font-bold tracking-tight text-bx-black hover:text-bx-accent sm:text-lg"
+                        className="line-clamp-1 text-base font-bold tracking-tight text-foreground hover:text-accent sm:text-lg"
                       >
                         {it.media.name}
                       </Link>
-                      <p className="mt-0.5 line-clamp-1 font-mono text-[11px] uppercase tracking-[0.16em] text-bx-gray-dim">
+                      <p className="mt-0.5 line-clamp-1 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                         {`// `}
                         {it.media.location}
                       </p>
@@ -202,38 +202,38 @@ export default function MyBookingRequestsPage() {
 
                   <dl className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-2">
                     <div className="flex gap-2">
-                      <dt className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-bx-gray-dim">
+                      <dt className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                         {t("period")}
                       </dt>
-                      <dd className="text-bx-black">
+                      <dd className="text-foreground">
                         {fmtDate(it.startsAt)} → {fmtDate(it.endsAt)}
                       </dd>
                     </div>
                     <div className="flex gap-2">
-                      <dt className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-bx-gray-dim">
+                      <dt className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                         {t("budget")}
                       </dt>
-                      <dd className="text-bx-black">{fmtBudget(it.budgetWon)}</dd>
+                      <dd className="text-foreground">{fmtBudget(it.budgetWon)}</dd>
                     </div>
                     <div className="flex gap-2">
-                      <dt className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-bx-gray-dim">
+                      <dt className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                         {t("requestedAt")}
                       </dt>
-                      <dd className="text-bx-black">{fmtDate(it.createdAt)}</dd>
+                      <dd className="text-foreground">{fmtDate(it.createdAt)}</dd>
                     </div>
                     {it.decidedAt ? (
                       <div className="flex gap-2">
-                        <dt className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-bx-gray-dim">
+                        <dt className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                           {t("decidedAt")}
                         </dt>
-                        <dd className="text-bx-black">{fmtDate(it.decidedAt)}</dd>
+                        <dd className="text-foreground">{fmtDate(it.decidedAt)}</dd>
                       </div>
                     ) : null}
                   </dl>
 
                   {it.notes ? (
-                    <p className="border-l-4 border-bx-accent bg-bx-off px-3 py-2 text-xs text-bx-black">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-bx-gray-dim">
+                    <p className="border-l-4 border-accent bg-muted px-3 py-2 text-xs text-foreground">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                         {t("note")}:
                       </span>{" "}
                       {it.notes}

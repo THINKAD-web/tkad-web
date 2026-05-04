@@ -69,54 +69,54 @@ export default function MediaDetailExtras({
         />
       </div>
 
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
         [ LOCATION MAP ]
       </p>
-      <h2 className="mt-2 mb-6 text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+      <h2 className="mt-2 mb-6 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
         {labels.locationMap}
       </h2>
       <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-8">
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-6 border-2 border-bx-black bg-bx-white p-6 lg:max-w-md">
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-6 border-2 border-border bg-card p-6 lg:max-w-md">
           <div>
-            <p className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {labels.locationAddressLabel}
             </p>
-            <p className="text-base font-medium leading-relaxed text-bx-black">
+            <p className="text-base font-medium leading-relaxed text-foreground">
               {isKo ? media.location : (media.locationEn || media.location)}
             </p>
           </div>
           <div>
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
               [ {labels.locationRegionLabel} ]
             </p>
-            <p className="text-base font-bold text-bx-black">{regionDisplay}</p>
+            <p className="text-base font-bold text-foreground">{regionDisplay}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t-2 border-bx-black pt-5">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t-2 border-border pt-5">
             <a
               href={kakaoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black underline underline-offset-4 transition-colors hover:text-bx-accent"
+              className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground underline underline-offset-4 transition-colors hover:text-accent"
             >
               {labels.openKakao}
             </a>
-            <span className="font-mono text-bx-gray-dim/40 select-none" aria-hidden>
+            <span className="font-mono text-muted-foreground/40 select-none" aria-hidden>
               ·
             </span>
             <a
               href={googleUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black underline underline-offset-4 transition-colors hover:text-bx-accent"
+              className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground underline underline-offset-4 transition-colors hover:text-accent"
             >
               {labels.openGoogle}
             </a>
           </div>
         </div>
-        <div className="min-w-0 flex-1 border-2 border-bx-black bg-bx-white lg:min-w-0 lg:flex-[1.15]">
+        <div className="min-w-0 flex-1 border-2 border-border bg-card lg:min-w-0 lg:flex-[1.15]">
           {mapProvider === "kakao" ? (
-            <p className="border-b-2 border-bx-black px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+            <p className="border-b-2 border-border px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
               [ {labels.kakaoMapEmbedBadge} ]
             </p>
           ) : null}

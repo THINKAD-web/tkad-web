@@ -119,26 +119,26 @@ export function TrafficCharts({
   const weeklyPeak = peakIndex(pattern.weekly);
 
   return (
-    <section className="border-2 border-bx-black bg-bx-white">
-      <header className="flex flex-col gap-3 border-b-2 border-bx-black px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+    <section className="border-2 border-border bg-card">
+      <header className="flex flex-col gap-3 border-b-2 border-border px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
         <div className="space-y-1">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ TRAFFIC PATTERN ]
           </p>
-          <h3 className="text-lg font-bold tracking-tight text-bx-black sm:text-xl">
+          <h3 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
             {t("title")}
           </h3>
-          <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
             {t("desc")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {isEstimated ? (
-            <span className="border-2 border-bx-accent bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
+            <span className="border-2 border-accent bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
               {t("estimatedBadge")}
             </span>
           ) : null}
-          <div role="tablist" className="inline-flex border-2 border-bx-black bg-bx-white">
+          <div role="tablist" className="inline-flex border-2 border-border bg-card">
             {(
               [
                 ["hourly", t("tabHourly")],
@@ -154,10 +154,10 @@ export function TrafficCharts({
                 onClick={() => setTab(k)}
                 className={cn(
                   "px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
-                  i > 0 && "border-l-2 border-bx-black",
+                  i > 0 && "border-l-2 border-border",
                   tab === k
-                    ? "bg-bx-black text-bx-white"
-                    : "text-bx-black hover:bg-bx-off",
+                    ? "bg-hero-void text-hero-fg"
+                    : "text-foreground hover:bg-muted",
                 )}
               >
                 {label}
@@ -260,18 +260,18 @@ export function TrafficCharts({
           </ResponsiveContainer>
         </div>
 
-        <ul className="grid gap-2 border-t-2 border-bx-black pt-4 sm:grid-cols-3">
+        <ul className="grid gap-2 border-t-2 border-border pt-4 sm:grid-cols-3">
           <li className="font-mono text-[11px] tracking-tight">
-            <span className="text-bx-gray-dim">{t("insightHour")}: </span>
-            <span className="font-bold text-bx-black">{insights.peakHourLabel}</span>
+            <span className="text-muted-foreground">{t("insightHour")}: </span>
+            <span className="font-bold text-foreground">{insights.peakHourLabel}</span>
           </li>
           <li className="font-mono text-[11px] tracking-tight">
-            <span className="text-bx-gray-dim">{t("insightWeekday")}: </span>
-            <span className="font-bold text-bx-black">{insights.peakWeekdayLabel}</span>
+            <span className="text-muted-foreground">{t("insightWeekday")}: </span>
+            <span className="font-bold text-foreground">{insights.peakWeekdayLabel}</span>
           </li>
           <li className="font-mono text-[11px] tracking-tight">
-            <span className="text-bx-gray-dim">{t("insightMonth")}: </span>
-            <span className="font-bold text-bx-black">{insights.peakMonthLabel}</span>
+            <span className="text-muted-foreground">{t("insightMonth")}: </span>
+            <span className="font-bold text-foreground">{insights.peakMonthLabel}</span>
           </li>
         </ul>
       </div>

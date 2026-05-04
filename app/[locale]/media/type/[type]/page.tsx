@@ -121,32 +121,32 @@ export default async function TypeLandingPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify([itemListLd, breadcrumbLd]) }}
       />
 
-      <section className="bg-bx-black py-16 sm:py-20">
+      <section className="bg-hero-void py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "유형별 매체" : "BY TYPE"} ]
           </p>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-bx-white sm:text-4xl lg:text-5xl">
+          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl lg:text-5xl">
             <Layers
-              className="mr-3 inline-block h-8 w-8 text-bx-accent"
+              className="mr-3 inline-block h-8 w-8 text-accent"
               aria-hidden
             />
             {title}
           </h1>
-          <p className="mt-6 max-w-3xl text-base leading-relaxed text-bx-white/80 sm:text-lg">
+          <p className="mt-6 max-w-3xl text-base leading-relaxed text-hero-fg/80 sm:text-lg">
             {description}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/media"
-              className="inline-flex items-center gap-2 border-2 border-bx-white bg-transparent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-white hover:text-bx-black"
+              className="inline-flex items-center gap-2 border-2 border-hero-fg bg-transparent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-hero-fg transition-colors hover:bg-card hover:text-foreground"
             >
               {isKo ? "전체 매체 보기" : "All media"}
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               href="/recommend"
-              className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black"
+              className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border"
             >
               {isKo ? "AI 매체 추천" : "AI recommend"}
             </Link>
@@ -155,10 +155,10 @@ export default async function TypeLandingPage({ params }: Props) {
       </section>
 
       {filtered.length === 0 ? (
-        <section className="bg-bx-white py-12 sm:py-16">
+        <section className="bg-card py-12 sm:py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="border-2 border-bx-black bg-bx-off p-12 text-center">
-              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
+            <div className="border-2 border-border bg-muted p-12 text-center">
+              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
                 {`// `}
                 {isKo
                   ? `현재 ${label} 유형의 매체가 없습니다.`
@@ -166,7 +166,7 @@ export default async function TypeLandingPage({ params }: Props) {
               </p>
               <Link
                 href="/media"
-                className="mt-6 inline-flex items-center gap-2 border-2 border-bx-black bg-bx-black px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent"
+                className="mt-6 inline-flex items-center gap-2 border-2 border-border bg-hero-void px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-hero-fg transition-colors hover:bg-accent hover:border-accent"
               >
                 {isKo ? "전체 매체 보기" : "Browse all media"}
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -178,9 +178,9 @@ export default async function TypeLandingPage({ params }: Props) {
         <MediaBrowseClient catalog={filtered} hideHero />
       )}
 
-      <section className="border-t-2 border-bx-black bg-bx-off py-12">
+      <section className="border-t-2 border-border bg-muted py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "다른 유형으로 찾기" : "BROWSE OTHER TYPES"} ]
           </p>
           <ul className="mt-4 flex flex-wrap gap-2">
@@ -188,7 +188,7 @@ export default async function TypeLandingPage({ params }: Props) {
               <li key={slug}>
                 <Link
                   href={`/media/type/${slug}`}
-                  className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                  className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                 >
                   {typeLabel(slug, locale)}
                 </Link>

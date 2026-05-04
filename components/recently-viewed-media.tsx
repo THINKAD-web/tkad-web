@@ -80,17 +80,17 @@ export default function RecentlyViewedMedia({ locale }: Props) {
       className="relative mt-12 md:mt-16"
       aria-label={isKo ? "최근 본 매체" : "Recently viewed media"}
     >
-      <div className="border-2 border-bx-black bg-bx-white">
-        <div className="flex items-center justify-between gap-3 border-b-2 border-bx-black px-5 py-4">
+      <div className="border-2 border-border bg-card">
+        <div className="flex items-center justify-between gap-3 border-b-2 border-border px-5 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex size-8 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+            <span className="flex size-8 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
               <Clock className="size-4" aria-hidden />
             </span>
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                 [ RECENTLY VIEWED / {items.length} ]
               </p>
-              <h3 className="mt-1 text-sm font-bold tracking-tight text-bx-black sm:text-base">
+              <h3 className="mt-1 text-sm font-bold tracking-tight text-foreground sm:text-base">
                 {isKo ? "최근 본 매체" : "Recently viewed"}
               </h3>
             </div>
@@ -101,7 +101,7 @@ export default function RecentlyViewedMedia({ locale }: Props) {
               clearRecentlyViewed();
               setItems([]);
             }}
-            className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+            className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
             aria-label={isKo ? "최근 본 매체 초기화" : "Reset recently viewed"}
           >
             <RotateCcw className="size-3" />

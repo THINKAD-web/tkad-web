@@ -213,11 +213,11 @@ export default function AdminQuotesListClient() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-bx-black dark:text-bx-white">{t("title")}</h1>
-          <p className="text-sm text-bx-gray-dim">{t("subtitle")}</p>
+          <h1 className="text-2xl font-bold text-foreground dark:text-hero-fg">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Link href="/admin/quotes/new">
-          <Button className="bg-bx-black text-bx-white hover:bg-bx-gray-dim dark:border dark:border-bx-white/20">
+          <Button className="bg-hero-void text-hero-fg hover:bg-muted dark:border dark:border-hero-fg/20">
             <Plus className="mr-2 h-4 w-4" />
             {t("newQuote")}
           </Button>
@@ -226,7 +226,7 @@ export default function AdminQuotesListClient() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base text-bx-black dark:text-bx-white">{t("filters")}</CardTitle>
+          <CardTitle className="text-base text-foreground dark:text-hero-fg">{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           <div className="relative min-w-[200px] flex-1">
@@ -279,7 +279,7 @@ export default function AdminQuotesListClient() {
       </Card>
 
       {emailOpenId ? (
-        <Card className="border-2 border-bx-black/20 dark:border-bx-white/25">
+        <Card className="border-2 border-border/20 dark:border-hero-fg/25">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">{t("emailTitle")}</CardTitle>
           </CardHeader>
@@ -297,7 +297,7 @@ export default function AdminQuotesListClient() {
             </div>
             <Button
               type="button"
-              className="bg-bx-black text-bx-white dark:border dark:border-bx-white/20"
+              className="bg-hero-void text-hero-fg dark:border dark:border-hero-fg/20"
               disabled={busyId === emailOpenId}
               onClick={() => void sendEmail()}
             >
@@ -331,7 +331,7 @@ export default function AdminQuotesListClient() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="border-b bg-bx-off text-left text-xs text-bx-gray-dim dark:bg-bx-white/5">
+                <thead className="border-b bg-muted text-left text-xs text-muted-foreground dark:bg-card/5">
                   <tr>
                     <th className="px-3 py-2 font-medium">{t("colNumber")}</th>
                     <th className="px-3 py-2 font-medium">{t("colClient")}</th>
@@ -343,8 +343,8 @@ export default function AdminQuotesListClient() {
                 </thead>
                 <tbody>
                   {quotes.map((row) => (
-                    <tr key={row.id} className="border-b border-bx-black/10 dark:border-bx-white/10">
-                      <td className="px-3 py-2 font-mono text-xs font-medium text-bx-black dark:text-bx-white">
+                    <tr key={row.id} className="border-b border-border/10 dark:border-hero-fg/10">
+                      <td className="px-3 py-2 font-mono text-xs font-medium text-foreground dark:text-hero-fg">
                         {row.quoteNumber}
                       </td>
                       <td className="px-3 py-2">

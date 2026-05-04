@@ -181,21 +181,21 @@ export function CompareSpecTable({
 
   const colStripe = (i: number) =>
     i % 3 === 0
-      ? "bg-bx-accent"
+      ? "bg-accent"
       : i % 3 === 1
-        ? "bg-bx-black"
-        : "bg-bx-white ring-1 ring-bx-black/20";
+        ? "bg-hero-void"
+        : "bg-card ring-1 ring-border/20";
 
   return (
-    <div className="mt-10 border-2 border-bx-black bg-bx-white md:mt-12">
-      <div className="border-b-2 border-bx-black bg-bx-black px-3 py-3 sm:px-4 sm:py-4">
-        <h2 className="text-base font-bold tracking-tight text-bx-white sm:text-lg">
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-bx-accent">
+    <div className="mt-10 border-2 border-border bg-card md:mt-12">
+      <div className="border-b-2 border-border bg-hero-void px-3 py-3 sm:px-4 sm:py-4">
+        <h2 className="text-base font-bold tracking-tight text-hero-fg sm:text-lg">
+          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-accent">
             {`[ ${isKo ? "지표" : "METRICS"} ] `}
           </span>
           {t("compareSpecTitle")}
         </h2>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-bx-white/65 sm:text-xs">
+        <p className="mt-1.5 text-[11px] leading-relaxed text-hero-fg/65 sm:text-xs">
           {t("compareSpecHint")}
         </p>
       </div>
@@ -203,12 +203,12 @@ export function CompareSpecTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[min(100%,42rem)] border-collapse text-left text-sm">
           <thead>
-            <tr className="bg-bx-off">
+            <tr className="bg-muted">
               <th
                 scope="col"
-                className="sticky left-0 z-20 min-w-[7.5rem] border-b-2 border-r-2 border-bx-black bg-bx-off px-2 py-2.5 sm:min-w-[9.5rem] sm:px-3"
+                className="sticky left-0 z-20 min-w-[7.5rem] border-b-2 border-r-2 border-border bg-muted px-2 py-2.5 sm:min-w-[9.5rem] sm:px-3"
               >
-                <span className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-bx-gray-dim">
+                <span className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                   {t("compareColMetric")}
                 </span>
               </th>
@@ -216,21 +216,21 @@ export function CompareSpecTable({
                 <th
                   key={m.id}
                   scope="col"
-                  className="min-w-[8.5rem] max-w-[14rem] border-b-2 border-bx-black px-2 py-2.5 align-bottom sm:min-w-[10.5rem] sm:px-3"
+                  className="min-w-[8.5rem] max-w-[14rem] border-b-2 border-border px-2 py-2.5 align-bottom sm:min-w-[10.5rem] sm:px-3"
                 >
                   <div
-                    className={`mb-1.5 h-1.5 w-full border border-bx-black/10 ${colStripe(idx)}`}
+                    className={`mb-1.5 h-1.5 w-full border border-border/10 ${colStripe(idx)}`}
                     aria-hidden
                   />
                   <Link
                     href={mediaItemDetailPath(m.id)}
-                    className="line-clamp-2 text-left text-[11px] font-bold leading-snug text-bx-black underline decoration-bx-accent decoration-1 underline-offset-2 hover:text-bx-accent sm:text-xs"
+                    className="line-clamp-2 text-left text-[11px] font-bold leading-snug text-foreground underline decoration-accent decoration-1 underline-offset-2 hover:text-accent sm:text-xs"
                   >
                     {isKo ? m.name : (m.nameEn || m.name)}
                   </Link>
                   <Link
                     href={`/planner?addMedia=${encodeURIComponent(m.id)}`}
-                    className="mt-1.5 inline-flex max-w-full items-center gap-1 border border-bx-black/15 bg-bx-off px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-bx-black hover:border-bx-accent hover:bg-bx-accent/10"
+                    className="mt-1.5 inline-flex max-w-full items-center gap-1 border border-border/15 bg-muted px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-foreground hover:border-accent hover:bg-accent/10"
                     aria-label={t("compareStartPlanner")}
                   >
                     <span aria-hidden>▸</span> {t("compareStartPlanner")}
@@ -245,19 +245,19 @@ export function CompareSpecTable({
                 return (
               <tr
                 key={row.key}
-                className={rowIdx % 2 === 0 ? "bg-bx-white" : "bg-bx-off/80"}
+                className={rowIdx % 2 === 0 ? "bg-card" : "bg-muted/80"}
               >
                 <th
                   scope="row"
-                  className={`sticky left-0 z-10 max-w-[10rem] border-b-2 border-r-2 border-bx-black px-2 py-2.5 text-left text-[10px] font-bold leading-snug sm:max-w-[12rem] sm:px-3 sm:text-xs ${
+                  className={`sticky left-0 z-10 max-w-[10rem] border-b-2 border-r-2 border-border px-2 py-2.5 text-left text-[10px] font-bold leading-snug sm:max-w-[12rem] sm:px-3 sm:text-xs ${
                     row.key === "price"
-                      ? "bg-bx-accent/15 text-bx-black"
-                      : "text-bx-black/80"
-                  } ${rowIdx % 2 === 0 ? "bg-bx-off" : "bg-bx-off"}`}
+                      ? "bg-accent/15 text-foreground"
+                      : "text-foreground/80"
+                  } ${rowIdx % 2 === 0 ? "bg-muted" : "bg-muted"}`}
                 >
                   {row.label}
                   {row.better && (
-                    <span className="ml-1 text-[9px] font-mono text-bx-gray-dim">
+                    <span className="ml-1 text-[9px] font-mono text-muted-foreground">
                       {row.better === "higher" ? "↑" : "↓"}
                     </span>
                   )}
@@ -267,12 +267,12 @@ export function CompareSpecTable({
                   return (
                   <td
                     key={`${row.key}-${m.id}`}
-                    className={`max-w-[16rem] border-b-2 border-bx-black/10 px-2 py-2.5 text-[11px] sm:px-3 sm:text-sm ${
+                    className={`max-w-[16rem] border-b-2 border-border/10 px-2 py-2.5 text-[11px] sm:px-3 sm:text-sm ${
                       isBest
-                        ? "bg-bx-accent/12 font-bold text-bx-black"
+                        ? "bg-accent/12 font-bold text-foreground"
                         : row.key === "price"
-                          ? "font-bold text-bx-black"
-                          : "text-bx-black/85"
+                          ? "font-bold text-foreground"
+                          : "text-foreground/85"
                     }`}
                   >
                     <div className="flex min-w-0 items-start gap-1">
@@ -280,7 +280,7 @@ export function CompareSpecTable({
                         {row.cell(m)}
                       </span>
                       {isBest && (
-                        <span className="shrink-0 border border-bx-accent bg-bx-accent px-1 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wide text-bx-white">
+                        <span className="shrink-0 border border-accent bg-accent px-1 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wide text-accent-foreground">
                           {row.better === "higher"
                             ? (isKo ? "최고" : "Best")
                             : (isKo ? "최저" : "Best")}

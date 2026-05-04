@@ -181,11 +181,11 @@ function HomeContent({
               title={
                 isKo ? (
                   <>
-                    싱커드만의 <span className="bx-accent">4단계</span> 매체 검증
+                    싱커드만의 <span className="text-accent">4단계</span> 매체 검증
                   </>
                 ) : (
                   <>
-                    THINKAD&apos;s <span className="bx-accent">4-Step</span> Media Verification
+                    THINKAD&apos;s <span className="text-accent">4-Step</span> Media Verification
                   </>
                 )
               }
@@ -284,11 +284,11 @@ function HomeContent({
               title={
                 isKo ? (
                   <>
-                    싱커드 <span className="bx-accent">추천</span> 매체
+                    싱커드 <span className="text-accent">추천</span> 매체
                   </>
                 ) : (
                   <>
-                    THINKAD <span className="bx-accent">Recommended</span> Media
+                    THINKAD <span className="text-accent">Recommended</span> Media
                   </>
                 )
               }
@@ -331,11 +331,11 @@ function HomeContent({
                   title={
                     isKo ? (
                       <>
-                        지금 가장 <span className="bx-accent">주목</span>받는 매체
+                        지금 가장 <span className="text-accent">주목</span>받는 매체
                       </>
                     ) : (
                       <>
-                        <span className="bx-accent">Trending</span> Right Now
+                        <span className="text-accent">Trending</span> Right Now
                       </>
                     )
                   }
@@ -372,11 +372,11 @@ function HomeContent({
               title={
                 isKo ? (
                   <>
-                    왜 <span className="bx-accent">싱커드</span>인가?
+                    왜 <span className="text-accent">싱커드</span>인가?
                   </>
                 ) : (
                   <>
-                    Why <span className="bx-accent">THINKAD</span>?
+                    Why <span className="text-accent">THINKAD</span>?
                   </>
                 )
               }
@@ -452,11 +452,11 @@ function HomeContent({
               title={
                 isKo ? (
                   <>
-                    광고주가 직접 전하는 <span className="bx-accent">이야기</span>
+                    광고주가 직접 전하는 <span className="text-accent">이야기</span>
                   </>
                 ) : (
                   <>
-                    What Our <span className="bx-accent">Clients</span> Say
+                    What Our <span className="text-accent">Clients</span> Say
                   </>
                 )
               }

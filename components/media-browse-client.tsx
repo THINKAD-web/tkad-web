@@ -515,16 +515,16 @@ export default function MediaBrowseClient({
         </section>
       )}
 
-      <section className="bg-bx-white py-12">
+      <section className="bg-card py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {mainTab === "search" ? (
-            <p className="mb-6 text-center text-sm font-medium text-silver-600 sm:text-base">
+            <p className="mb-6 text-center text-sm font-medium text-muted-foreground sm:text-base">
               {t("media.resultsSectionEyebrow")}
             </p>
           ) : null}
           <div className="mb-10 flex justify-center">
             <div
-              className="inline-flex border-2 border-navy/20 bg-silver-50 shadow-xs"
+              className="inline-flex border-2 border-border bg-card shadow-xs"
               role="tablist"
               aria-label={isKo ? "매체 탐색 방식" : "Browse mode"}
             >
@@ -535,8 +535,8 @@ export default function MediaBrowseClient({
                 onClick={() => setMainTab("search")}
                 className={`touch-manipulation px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5 ${
                   mainTab === "search"
-                    ? "bg-navy text-bx-white"
-                    : "text-navy hover:bg-white"
+                    ? "bg-hero-void text-hero-fg"
+                    : "text-foreground hover:bg-muted"
                 }`}
               >
                 {t("media.ai.tabSearch")}
@@ -546,10 +546,10 @@ export default function MediaBrowseClient({
                 role="tab"
                 aria-selected={mainTab === "ai"}
                 onClick={() => setMainTab("ai")}
-                className={`touch-manipulation border-l-2 border-navy/15 px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5 ${
+                className={`touch-manipulation border-l-2 border-border px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5 ${
                   mainTab === "ai"
-                    ? "bg-gold text-navy"
-                    : "text-navy hover:bg-white"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-foreground hover:bg-muted"
                 }`}
               >
                 {t("media.ai.tabAi")}
@@ -574,7 +574,7 @@ export default function MediaBrowseClient({
                 <button
                   type="button"
                   onClick={togglePrecisionFilters}
-                  className="inline-flex w-full items-center justify-center gap-2 border-2 border-bx-black bg-bx-white px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white sm:w-auto sm:self-start"
+                  className="inline-flex w-full items-center justify-center gap-2 border-2 border-border bg-card px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background sm:w-auto sm:self-start"
                 >
                   {precisionFiltersOpen
                     ? t("media.advancedFiltersHide")
@@ -586,11 +586,11 @@ export default function MediaBrowseClient({
                   )}
                 </button>
                 {!precisionFiltersOpen ? (
-                  <div className="border-2 border-bx-black bg-bx-off px-5 py-4 text-left">
-                    <p className="text-[15px] font-bold leading-snug tracking-tight text-bx-black sm:text-base">
+                  <div className="border-2 border-border bg-muted px-5 py-4 text-left">
+                    <p className="text-[15px] font-bold leading-snug tracking-tight text-foreground sm:text-base">
                       {t("media.advancedFiltersCollapsedHint")}
                     </p>
-                    <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                    <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersCollapsedSubhint")}
                     </p>
                   </div>
@@ -599,14 +599,14 @@ export default function MediaBrowseClient({
 
               {lgUp && precisionFiltersOpen ? (
                 <div className="space-y-4">
-                  <div className="border-2 border-bx-black bg-bx-white px-5 py-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  <div className="border-2 border-border bg-card px-5 py-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ {t("media.advancedFiltersSectionLabel")} ]
                     </p>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersSectionSubtext")}
                     </p>
-                    <p className="mt-3 text-sm leading-relaxed text-bx-black">
+                    <p className="mt-3 text-sm leading-relaxed text-foreground">
                       {tMedia("precisionFilterPanelIntro")}
                     </p>
                   </div>
@@ -621,23 +621,23 @@ export default function MediaBrowseClient({
                 <SheetContent
                   side="bottom"
                   showCloseButton
-                  className="max-h-[92vh] gap-0 overflow-y-auto border-t-2 border-bx-black bg-bx-white p-0"
+                  className="max-h-[92vh] gap-0 overflow-y-auto border-t-2 border-border bg-card p-0"
                 >
-                  <SheetHeader className="sticky top-0 z-10 border-b-2 border-bx-black bg-bx-white px-4 pb-3 pt-3 text-left">
-                    <SheetTitle className="text-left text-base font-bold tracking-tight text-bx-black">
+                  <SheetHeader className="sticky top-0 z-10 border-b-2 border-border bg-card px-4 pb-3 pt-3 text-left">
+                    <SheetTitle className="text-left text-base font-bold tracking-tight text-foreground">
                       {t("media.advancedFiltersSectionLabel")}
                     </SheetTitle>
-                    <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                    <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersSectionSubtext")}
                     </p>
-                    <p className="pt-1 text-[12px] leading-relaxed text-bx-black">
+                    <p className="pt-1 text-[12px] leading-relaxed text-foreground">
                       {tMedia("precisionFilterPanelIntro")}
                     </p>
                   </SheetHeader>
                   <div className="mx-3 mb-4 mt-2 sm:mx-4">
                     <MediaPrecisionFiltersAssistant {...precisionAssistantProps} />
                   </div>
-                  <div className="sticky bottom-0 border-t-2 border-bx-black bg-bx-white p-3">
+                  <div className="sticky bottom-0 border-t-2 border-border bg-card p-3">
                     <BtnBlock
                       onClick={() => setPrecisionFiltersOpen(false)}
                       variant="primary"
@@ -653,13 +653,13 @@ export default function MediaBrowseClient({
               <div className="min-w-0">
                 <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <span className="text-base font-semibold text-navy sm:text-lg">
+                    <span className="text-base font-semibold text-foreground sm:text-lg">
                       {t("media.results")}:{" "}
-                      <span className="tabular-nums text-gold-dark">
+                      <span className="tabular-nums text-accent">
                         {gridDisplayList.length}
                       </span>
                       {catalogMinPadActive ? (
-                        <span className="ml-2 text-sm font-normal text-silver-500">
+                        <span className="ml-2 text-sm font-normal text-muted-foreground">
                           {tMedia("catalogMinPadCountHint", {
                             matched: sortedFiltered.length,
                           })}
@@ -667,8 +667,8 @@ export default function MediaBrowseClient({
                       ) : null}
                     </span>
                     {debouncedCatalogSearch.trim() ? (
-                      <span className="inline-flex max-w-full items-center gap-1.5 border border-gold/50 bg-gold/10 px-3 py-1.5 text-xs font-medium text-navy sm:text-sm">
-                        <Search className="size-3.5 shrink-0 text-gold-dark" aria-hidden />
+                      <span className="inline-flex max-w-full items-center gap-1.5 border-2 border-border bg-muted px-3 py-1.5 text-xs font-medium text-foreground sm:text-sm">
+                        <Search className="size-3.5 shrink-0 text-accent" aria-hidden />
                         <span className="min-w-0 truncate">
                           {t("media.activeKeywordLabel")}: {debouncedCatalogSearch}
                         </span>
@@ -676,12 +676,12 @@ export default function MediaBrowseClient({
                     ) : null}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <label className="inline-flex items-center gap-2 border border-navy/20 bg-silver-50 px-3 py-2 text-sm text-navy">
-                      <span className="shrink-0 text-silver-500">
+                    <label className="inline-flex items-center gap-2 border-2 border-border bg-card px-3 py-2 text-sm text-foreground">
+                      <span className="shrink-0 text-muted-foreground">
                         {t("media.sortLabel")}
                       </span>
                       <select
-                        className="max-w-[11rem] min-w-0 border-l border-navy/15 bg-transparent pl-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gold/40"
+                        className="max-w-[11rem] min-w-0 border-l border-border bg-transparent pl-2 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
                         value={sortBy}
                         onChange={(e) =>
                           setSortBy(
@@ -707,14 +707,14 @@ export default function MediaBrowseClient({
                       </select>
                     </label>
                     {/* #MEDIA-1: 목록/지도 뷰 토글 진입점 숨김 (코드 보존) */}
-                    <div className="hidden border-2 border-bx-black bg-bx-white">
+                    <div className="hidden border-2 border-border bg-card">
                       <button
                         type="button"
                         onClick={() => setBrowseMode("list")}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
                           browseMode === "list"
-                            ? "bg-bx-black text-bx-white"
-                            : "text-bx-black hover:bg-bx-off"
+                            ? "bg-hero-void text-hero-fg"
+                            : "text-foreground hover:bg-muted"
                         }`}
                       >
                         <LayoutList className="h-3.5 w-3.5" />
@@ -723,10 +723,10 @@ export default function MediaBrowseClient({
                       <button
                         type="button"
                         onClick={() => setBrowseMode("map")}
-                        className={`inline-flex items-center gap-1.5 border-l-2 border-bx-black px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
+                        className={`inline-flex items-center gap-1.5 border-l-2 border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
                           browseMode === "map"
-                            ? "bg-bx-black text-bx-white"
-                            : "text-bx-black hover:bg-bx-off"
+                            ? "bg-hero-void text-hero-fg"
+                            : "text-foreground hover:bg-muted"
                         }`}
                       >
                         <MapIcon className="h-3.5 w-3.5" />
@@ -776,8 +776,8 @@ export default function MediaBrowseClient({
                         </BtnBlock>
                       </>
                     ) : null}
-                    <div className="inline-flex items-center gap-2 border border-navy/25 bg-navy px-3 py-2 text-xs font-medium text-gold sm:text-sm">
-                      <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
+                    <div className="inline-flex items-center gap-2 border-2 border-border bg-hero-void px-3 py-2 text-xs font-medium text-hero-fg sm:text-sm">
+                      <ShieldCheck className="h-4 w-4 shrink-0 text-hermes" aria-hidden />
                       <span>{tMedia("browseCatalogVerifiedBadge")}</span>
                     </div>
                   </div>
@@ -786,10 +786,10 @@ export default function MediaBrowseClient({
                 {precisionFilterRelaxed ? (
                   <div
                     role="status"
-                    className="mb-4 flex flex-col gap-3 border-2 border-bx-accent bg-bx-white px-4 py-3 text-sm leading-relaxed text-bx-black sm:flex-row sm:items-center sm:justify-between"
+                    className="mb-4 flex flex-col gap-3 border-2 border-accent bg-card px-4 py-3 text-sm leading-relaxed text-foreground sm:flex-row sm:items-center sm:justify-between"
                   >
                     <p className="min-w-0">
-                      <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                         {`// RELAXED`}
                       </span>
                       {tMedia("precisionFilterRelaxedBanner")}
@@ -810,9 +810,9 @@ export default function MediaBrowseClient({
                 {catalogMinPadActive ? (
                   <div
                     role="status"
-                    className="mb-4 border-2 border-bx-black bg-bx-off px-4 py-3 text-sm leading-relaxed text-bx-black"
+                    className="mb-4 border-2 border-border bg-muted px-4 py-3 text-sm leading-relaxed text-foreground"
                   >
-                    <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                    <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       {`// PADDED`}
                     </span>
                     {tMedia("catalogMinPadBanner", {
@@ -823,14 +823,14 @@ export default function MediaBrowseClient({
                 ) : null}
 
                 {gridDisplayList.length === 0 ? (
-                  <div className="flex min-h-[32rem] flex-col items-center justify-center gap-8 border-2 border-bx-black bg-bx-off px-6 py-20 text-center sm:px-10">
-                    <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                  <div className="flex min-h-[32rem] flex-col items-center justify-center gap-8 border-2 border-border bg-muted px-6 py-20 text-center sm:px-10">
+                    <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       {`// 0 RESULTS`}
                     </p>
-                    <p className="max-w-2xl text-3xl font-bold leading-[1.05] tracking-tight text-bx-black sm:text-4xl lg:text-5xl">
+                    <p className="max-w-2xl text-3xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
                       {tMedia("catalogBrowseEmptyTitle")}
                     </p>
-                    <p className="max-w-xl text-base leading-relaxed text-bx-gray-dim sm:text-lg">
+                    <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
                       {tMedia("catalogBrowseEmptySubtitle")}
                     </p>
                     <BtnBlock onClick={resetFilters} variant="primary" size="lg">
@@ -856,9 +856,9 @@ export default function MediaBrowseClient({
                               : mapSelectedMedia.nameEn
                           }
                         >
-                          <div className="overflow-hidden border-2 border-bx-black bg-bx-white">
-                            <div className="flex items-start gap-3 border-b-2 border-bx-black p-3 sm:p-4">
-                              <div className="h-20 w-28 shrink-0 overflow-hidden border-2 border-bx-black sm:h-24 sm:w-32">
+                          <div className="overflow-hidden border-2 border-border bg-card">
+                            <div className="flex items-start gap-3 border-b-2 border-border p-3 sm:p-4">
+                              <div className="h-20 w-28 shrink-0 overflow-hidden border-2 border-border sm:h-24 sm:w-32">
                                 <MediaCatalogThumbnail
                                   media={mapSelectedMedia}
                                   placeholderLabel={t("media.imagePreparing")}
@@ -868,14 +868,14 @@ export default function MediaBrowseClient({
                                 />
                               </div>
                               <div className="min-w-0 flex-1 pt-0.5">
-                                <h3 className="line-clamp-2 text-base font-bold leading-snug tracking-tight text-bx-black sm:text-lg">
+                                <h3 className="line-clamp-2 text-base font-bold leading-snug tracking-tight text-foreground sm:text-lg">
                                   {isKo
                                     ? mapSelectedMedia.name
                                     : mapSelectedMedia.nameEn}
                                 </h3>
-                                <p className="mt-1.5 font-mono text-sm font-bold tabular-nums text-bx-black">
+                                <p className="mt-1.5 font-mono text-sm font-bold tabular-nums text-foreground">
                                   {formatMediaPriceWonWithSymbol(mapSelectedMedia.price)}
-                                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-bx-gray-dim">
+                                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                                     ·{" "}
                                     {tMedia(
                                       mediaPricePeriodTranslationKey(
@@ -884,14 +884,14 @@ export default function MediaBrowseClient({
                                     )}
                                   </span>
                                 </p>
-                                <p className="mt-1.5 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                                <p className="mt-1.5 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                                   <Users
-                                    className="h-3 w-3 shrink-0 text-bx-accent"
+                                    className="h-3 w-3 shrink-0 text-accent"
                                     aria-hidden
                                   />
                                   <span>
                                     {t("media.mapPopupFootTraffic")}:{" "}
-                                    <span className="font-bold text-bx-black">
+                                    <span className="font-bold text-foreground">
                                       {mapSelectedMedia.dailyFootTraffic.toLocaleString()}
                                     </span>
                                   </span>
@@ -900,7 +900,7 @@ export default function MediaBrowseClient({
                               <button
                                 type="button"
                                 onClick={() => setMapPopupOpen(false)}
-                                className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                                className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background"
                                 aria-label={t("media.mapPopupClose")}
                               >
                                 <X className="h-4 w-4" />
@@ -963,7 +963,7 @@ export default function MediaBrowseClient({
                         popularIds={popularIds}
                         topLeftSlot={
                           <label
-                            className="absolute left-2.5 top-2.5 z-20 flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-bx-black bg-bx-white"
+                            className="absolute left-2.5 top-2.5 z-20 flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -981,7 +981,7 @@ export default function MediaBrowseClient({
                                   compareItems.length >= COMPARE_MAX_ITEMS)
                               }
                               aria-label={t("media.compareToggleAria")}
-                              className="h-4 w-4 accent-bx-accent"
+                              className="h-4 w-4 accent-cta"
                             />
                           </label>
                         }
@@ -997,13 +997,10 @@ export default function MediaBrowseClient({
                         isKo={isKo}
                         href={mediaItemDetailPath(media.id)}
                         imagePreparingLabel={t("media.imagePreparing")}
-                        pricePeriodLabel={tMedia(
-                          mediaPricePeriodTranslationKey(media.pricePeriod),
-                        )}
                         popularIds={popularIds}
                         leadingSlot={
                           <label
-                            className="flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-bx-black bg-bx-white"
+                            className="flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -1021,7 +1018,7 @@ export default function MediaBrowseClient({
                                   compareItems.length >= COMPARE_MAX_ITEMS)
                               }
                               aria-label={t("media.compareToggleAria")}
-                              className="h-4 w-4 accent-bx-accent"
+                              className="h-4 w-4 accent-cta"
                             />
                           </label>
                         }
@@ -1030,7 +1027,7 @@ export default function MediaBrowseClient({
                   </div>
                     )}
                     {catalogPageCount > 1 ? (
-                      <div className="mt-8 flex flex-wrap items-center justify-center gap-4 border-t border-navy/10 pt-6">
+                      <div className="mt-8 flex flex-wrap items-center justify-center gap-4 border-t-2 border-border pt-6">
                         <BtnBlock
                           disabled={catalogPage <= 1}
                           onClick={() =>
@@ -1041,7 +1038,7 @@ export default function MediaBrowseClient({
                         >
                           ← {t("media.pagePrev")}
                         </BtnBlock>
-                        <span className="text-sm text-silver-600">
+                        <span className="text-sm text-muted-foreground">
                           {t("media.pageSummary", {
                             from:
                               gridDisplayList.length === 0

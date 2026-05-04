@@ -46,8 +46,8 @@ export function CommunityPostInteractions({ postId, initialLikeCount }: Props) {
           disabled={likeBusy || liked}
           className={`inline-flex items-center gap-2 border-2 px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors disabled:opacity-60 ${
             liked
-              ? "border-bx-accent bg-bx-accent text-bx-white"
-              : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+              ? "border-accent bg-accent text-accent-foreground"
+              : "border-border bg-card text-foreground hover:bg-foreground hover:text-background"
           }`}
         >
           <Heart
@@ -60,7 +60,7 @@ export function CommunityPostInteractions({ postId, initialLikeCount }: Props) {
         <button
           type="button"
           onClick={() => setReportOpen(true)}
-          className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+          className="inline-flex items-center gap-2 border-2 border-border bg-card px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
         >
           <Flag className="h-3.5 w-3.5" />
           신고
@@ -129,23 +129,23 @@ export function ReportModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-bx-black/60 p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-hero-void/60 p-4"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-md border-2 border-bx-black bg-bx-white">
-        <div className="flex items-center justify-between border-b-2 border-bx-black bg-bx-black px-5 py-3">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <div className="w-full max-w-md border-2 border-border bg-card">
+        <div className="flex items-center justify-between border-b-2 border-border bg-hero-void px-5 py-3">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {targetType === "post" ? "게시글 신고" : "댓글 신고"} ]
           </p>
           <button
             type="button"
             onClick={onClose}
             aria-label="닫기"
-            className="text-bx-white hover:text-bx-accent"
+            className="text-hero-fg hover:text-accent"
           >
             <X className="h-4 w-4" />
           </button>
@@ -153,10 +153,10 @@ export function ReportModal({
 
         {done ? (
           <div className="p-6">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
               [ 신고 접수 ]
             </p>
-            <p className="mt-3 text-sm text-bx-black">
+            <p className="mt-3 text-sm text-foreground">
               {done.autoHidden
                 ? "신고가 누적되어 게시물이 자동 숨김 처리되었습니다. 어드민 검토 후 결정됩니다."
                 : "신고가 접수되었습니다. 어드민이 24시간 내 검토합니다."}
@@ -164,7 +164,7 @@ export function ReportModal({
             <button
               type="button"
               onClick={onClose}
-              className="mt-6 inline-flex w-full items-center justify-center border-2 border-bx-black bg-bx-black px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white"
+              className="mt-6 inline-flex w-full items-center justify-center border-2 border-border bg-hero-void px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-hero-fg"
             >
               확인
             </button>
@@ -172,7 +172,7 @@ export function ReportModal({
         ) : (
           <div className="p-5">
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                 [ 신고 사유 ]
               </span>
               <textarea
@@ -180,15 +180,15 @@ export function ReportModal({
                 onChange={(e) => setReason(e.target.value)}
                 rows={5}
                 placeholder="구체적인 사유를 입력해주세요 (5-500자)"
-                className="mt-2 w-full resize-none border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                className="mt-2 w-full resize-none border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 maxLength={500}
               />
-              <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-bx-gray-dim">
+              <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-muted-foreground">
                 {reason.length} / 500
               </p>
             </label>
             {error ? (
-              <p className="mt-3 border-2 border-bx-accent bg-bx-white px-3 py-2 font-mono text-[11px] tracking-tight text-bx-accent">
+              <p className="mt-3 border-2 border-accent bg-card px-3 py-2 font-mono text-[11px] tracking-tight text-accent">
                 {`// `}
                 {error}
               </p>
@@ -197,7 +197,7 @@ export function ReportModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 border-2 border-bx-black bg-bx-white px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black hover:bg-bx-off"
+                className="flex-1 border-2 border-border bg-card px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground hover:bg-muted"
               >
                 취소
               </button>
@@ -205,7 +205,7 @@ export function ReportModal({
                 type="button"
                 onClick={handleSubmit}
                 disabled={busy}
-                className="-ml-[2px] flex-1 border-2 border-bx-accent bg-bx-accent px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:opacity-60"
+                className="-ml-[2px] flex-1 border-2 border-accent bg-accent px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:opacity-60"
               >
                 {busy ? "처리 중…" : "신고 접수"}
               </button>

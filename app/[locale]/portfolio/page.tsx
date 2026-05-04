@@ -113,17 +113,17 @@ export default function PortfolioPage() {
 
   return (
     <>
-      <section className="bg-bx-black py-24">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
             {`// 13 / Portfolio`}
           </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
             {isKo
               ? "THINKAD가 집행한 OOH 캠페인"
               : "OOH campaigns delivered by THINKAD"}
           </h1>
-          <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+          <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {isKo
               ? "전광판, 버스, 지하철, 빌딩 래핑까지 다양한 옥외 매체로 진행한 실제 캠페인 사례를 한눈에 확인해 보세요."
               : "Explore real-world OOH campaigns across billboards, buses, subways and building wraps."}
@@ -131,9 +131,9 @@ export default function PortfolioPage() {
         </div>
       </section>
 
-      <section className="bg-bx-white py-4">
+      <section className="bg-card py-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <div className="flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
             <Filter className="h-3.5 w-3.5" />
             [ {isKo ? "CATEGORY" : "CATEGORY"} ]
           </div>
@@ -148,8 +148,8 @@ export default function PortfolioPage() {
                   className={cn(
                     "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     isActive
-                      ? "border-bx-accent bg-bx-accent text-bx-white"
-                      : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   {cat.label}
@@ -160,11 +160,11 @@ export default function PortfolioPage() {
         </div>
       </section>
 
-      <section className="bg-bx-off py-10">
+      <section className="bg-muted py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+          <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{isKo ? "Total campaigns" : "Total campaigns"}:{" "}
-            <span className="font-bold text-bx-accent">
+            <span className="font-bold text-accent">
               {filteredItems.length}
             </span>
           </div>
@@ -177,32 +177,32 @@ export default function PortfolioPage() {
                 onClick={() => setActiveItem(item)}
                 className="group -mt-[2px] -ml-[2px] text-left"
               >
-                <article className="flex h-full flex-col border-2 border-bx-black bg-bx-white">
-                  <div className="relative h-40 overflow-hidden border-b-2 border-bx-black bg-bx-black">
-                    <div className="absolute inset-0 flex items-center justify-center font-mono text-xs font-bold uppercase tracking-[0.22em] text-bx-accent/70">
+                <article className="flex h-full flex-col border-2 border-border bg-card">
+                  <div className="relative h-40 overflow-hidden border-b-2 border-border bg-hero-void">
+                    <div className="absolute inset-0 flex items-center justify-center font-mono text-xs font-bold uppercase tracking-[0.22em] text-accent/70">
                       OOH CAMPAIGN
                     </div>
                     <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center justify-between gap-2">
-                      <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                      <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
                         [ {CATEGORY_LABELS[item.category]} ]
                       </span>
-                      <span className="border-2 border-bx-white bg-transparent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                      <span className="border-2 border-hero-fg bg-transparent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hero-fg">
                         {item.year} · {item.location}
                       </span>
                     </div>
-                    <div className="absolute right-3 top-3 inline-flex items-center gap-1 border-2 border-bx-white bg-bx-black/80 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+                    <div className="absolute right-3 top-3 inline-flex items-center gap-1 border-2 border-hero-fg bg-hero-void/80 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg">
                       <Maximize2 className="h-3 w-3" />
                       {isKo ? "VIEW" : "VIEW"}
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col gap-2 p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                       [ {item.client} ]
                     </p>
-                    <h2 className="text-sm font-bold tracking-tight text-bx-black sm:text-base">
+                    <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
                       {item.title}
                     </h2>
-                    <p className="line-clamp-3 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                    <p className="line-clamp-3 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                       {item.description}
                     </p>
                   </div>
@@ -212,7 +212,7 @@ export default function PortfolioPage() {
           </div>
 
           {filteredItems.length === 0 && (
-            <div className="mt-8 border-2 border-bx-black bg-bx-white px-6 py-10 text-center text-sm text-bx-gray-dim">
+            <div className="mt-8 border-2 border-border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
               {isKo
                 ? "선택하신 카테고리에 해당하는 캠페인이 없습니다. 다른 카테고리를 선택해 보세요."
                 : "No campaigns found for the selected category."}
@@ -222,69 +222,69 @@ export default function PortfolioPage() {
       </section>
 
       {activeItem && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-bx-black/80 px-4">
-          <div className="relative w-full max-w-3xl border-2 border-bx-black bg-bx-white">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-hero-void/80 px-4">
+          <div className="relative w-full max-w-3xl border-2 border-border bg-card">
             <button
               type="button"
               onClick={() => setActiveItem(null)}
-              className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+              className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background"
               aria-label={isKo ? "닫기" : "Close"}
             >
               <X className="h-4 w-4" />
             </button>
 
             <div className="grid gap-0 overflow-hidden sm:grid-cols-5">
-              <div className="relative h-56 border-b-2 border-bx-black bg-bx-black sm:h-full sm:col-span-3 sm:border-b-0 sm:border-r-2">
+              <div className="relative h-56 border-b-2 border-border bg-hero-void sm:h-full sm:col-span-3 sm:border-b-0 sm:border-r-2">
                 <div className="flex h-full flex-col justify-between p-5">
                   <div>
-                    <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                    <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
                       [ {CATEGORY_LABELS[activeItem.category]} ]
                     </span>
-                    <h2 className="mt-4 text-lg font-bold leading-snug tracking-tight text-bx-white">
+                    <h2 className="mt-4 text-lg font-bold leading-snug tracking-tight text-hero-fg">
                       {activeItem.title}
                     </h2>
-                    <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-accent">
+                    <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-accent">
                       {activeItem.client} · {activeItem.year}
                     </p>
                   </div>
-                  <p className="mt-3 font-mono text-[11px] leading-relaxed tracking-tight text-bx-white/75">
+                  <p className="mt-3 font-mono text-[11px] leading-relaxed tracking-tight text-hero-fg/75">
                     {`// `}{activeItem.location}
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between bg-bx-white p-5 text-sm text-bx-black sm:col-span-2">
+              <div className="flex flex-col justify-between bg-card p-5 text-sm text-foreground sm:col-span-2">
                 <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                     [ {isKo ? "캠페인 개요" : "Campaign Overview"} ]
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed text-bx-black">
+                  <p className="mt-2 text-sm leading-relaxed text-foreground">
                     {activeItem.description}
                   </p>
                 </div>
-                <div className="mt-4 border-2 border-bx-accent bg-bx-off px-3 py-3 text-[11px] text-bx-black">
+                <div className="mt-4 border-2 border-accent bg-muted px-3 py-3 text-[11px] text-foreground">
                   {isKo ? (
                     <>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                         [ INTERESTED? ]
                       </p>
                       <p className="mt-2 font-bold">
                         비슷한 캠페인을 진행하고 싶으신가요?
                       </p>
-                      <p className="mt-1 font-mono leading-relaxed tracking-tight text-bx-gray-dim">
+                      <p className="mt-1 font-mono leading-relaxed tracking-tight text-muted-foreground">
                         {`// `}견적 문의나 자세한 성과 데이터가 필요하시면 상단
                         &quot;문의&quot; 또는 &quot;견적&quot; 메뉴를 통해 연락 주세요.
                       </p>
                     </>
                   ) : (
                     <>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                         [ INTERESTED? ]
                       </p>
                       <p className="mt-2 font-bold">
                         Interested in a similar campaign?
                       </p>
-                      <p className="mt-1 font-mono leading-relaxed tracking-tight text-bx-gray-dim">
+                      <p className="mt-1 font-mono leading-relaxed tracking-tight text-muted-foreground">
                         {`// `}Contact us via the Inquiry or Quote menu for detailed
                         performance data and pricing.
                       </p>

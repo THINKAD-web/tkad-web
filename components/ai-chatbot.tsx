@@ -171,7 +171,7 @@ export default function AiChatbot() {
       <div className="group/button fixed bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))] right-[max(1rem,env(safe-area-inset-right,0px))] z-[55] sm:bottom-6 sm:right-6">
         {showFabPulse ? (
           <span
-            className="pointer-events-none absolute inset-0 z-0 animate-ping bg-bx-accent/55"
+            className="pointer-events-none absolute inset-0 z-0 animate-ping bg-accent/55"
             aria-hidden
           />
         ) : null}
@@ -179,10 +179,10 @@ export default function AiChatbot() {
           type="button"
           onClick={() => setOpen((o) => !o)}
           className={cn(
-            "relative z-10 flex h-11 w-11 items-center justify-center border-2 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bx-accent",
+            "relative z-10 flex h-11 w-11 items-center justify-center border-2 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent",
             open
-              ? "border-bx-black bg-bx-black text-bx-white hover:bg-bx-accent hover:border-bx-accent"
-              : "border-bx-black bg-bx-accent text-white hover:bg-bx-black hover:border-bx-black",
+              ? "border-border bg-hero-void text-hero-fg hover:bg-accent hover:border-accent"
+              : "border-border bg-accent text-white hover:bg-foreground hover:border-border",
           )}
           aria-expanded={open}
           aria-label={open ? t("closeAria") : t("openAria")}
@@ -194,7 +194,7 @@ export default function AiChatbot() {
           )}
         </button>
         <span
-          className="pointer-events-none absolute bottom-full right-0 mb-2 hidden max-w-[11rem] border-2 border-bx-black bg-bx-black px-3 py-1.5 text-center font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white opacity-0 transition-opacity group-hover/button:opacity-100 sm:block"
+          className="pointer-events-none absolute bottom-full right-0 mb-2 hidden max-w-[11rem] border-2 border-border bg-hero-void px-3 py-1.5 text-center font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg opacity-0 transition-opacity group-hover/button:opacity-100 sm:block"
           role="tooltip"
         >
           {t("tooltip")}
@@ -204,7 +204,7 @@ export default function AiChatbot() {
       {/* === Dialog overlay + panel === */}
       {open ? (
         <div
-          className="fixed inset-0 z-[54] bg-bx-black/45 sm:pointer-events-none sm:bg-transparent"
+          className="fixed inset-0 z-[54] bg-hero-void/45 sm:pointer-events-none sm:bg-transparent"
           aria-hidden={false}
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
@@ -212,32 +212,32 @@ export default function AiChatbot() {
           role="presentation"
         >
           <div
-            className="pointer-events-auto fixed inset-x-3 bottom-3 top-auto z-[56] mx-auto flex max-h-[50vh] min-h-[300px] flex-col overflow-hidden border-2 border-bx-black bg-bx-white sm:inset-x-auto sm:bottom-6 sm:right-6 sm:left-auto sm:top-auto sm:mx-0 sm:h-[min(480px,70vh)] sm:max-h-[70vh] sm:min-h-0 sm:w-[380px] sm:max-w-[380px]"
+            className="pointer-events-auto fixed inset-x-3 bottom-3 top-auto z-[56] mx-auto flex max-h-[50vh] min-h-[300px] flex-col overflow-hidden border-2 border-border bg-card sm:inset-x-auto sm:bottom-6 sm:right-6 sm:left-auto sm:top-auto sm:mx-0 sm:h-[min(480px,70vh)] sm:max-h-[70vh] sm:min-h-0 sm:w-[380px] sm:max-w-[380px]"
             role="dialog"
             aria-label={t("dialogLabel")}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header — 검정 단색 + 모노 라벨 */}
-            <div className="flex shrink-0 flex-col border-b-2 border-bx-black bg-bx-black text-bx-white">
+            <div className="flex shrink-0 flex-col border-b-2 border-border bg-hero-void text-hero-fg">
               <div className="flex items-center gap-3 px-4 py-3">
                 <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-accent bg-accent text-accent-foreground"
                   aria-hidden
                 >
                   <Bot className="h-6 w-6" strokeWidth={2} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
                     [ AI ASSISTANT ]
                   </p>
-                  <p className="mt-1 truncate text-base font-bold tracking-tight text-bx-white">
+                  <p className="mt-1 truncate text-base font-bold tracking-tight text-hero-fg">
                     {t("title")}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-bx-white bg-transparent text-bx-white transition-colors hover:bg-bx-white hover:text-bx-black"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-hero-fg bg-transparent text-hero-fg transition-colors hover:bg-card hover:text-foreground"
                   aria-label={t("closeAria")}
                 >
                   <X className="h-4 w-4" strokeWidth={2.25} />
@@ -245,7 +245,7 @@ export default function AiChatbot() {
               </div>
               {/* Tabs */}
               <div
-                className="flex gap-0 border-t-2 border-bx-white/20"
+                className="flex gap-0 border-t-2 border-hero-fg/20"
                 role="tablist"
                 aria-label={t("dialogLabel")}
               >
@@ -265,10 +265,10 @@ export default function AiChatbot() {
                       onClick={() => setPanelTab(tab.id)}
                       className={cn(
                         "flex min-w-0 flex-1 items-center justify-center gap-1.5 px-2 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
-                        i > 0 && "border-l-2 border-bx-white/20",
+                        i > 0 && "border-l-2 border-hero-fg/20",
                         panelTab === tab.id
-                          ? "bg-bx-accent text-bx-white"
-                          : "text-bx-white/70 hover:bg-bx-white/10 hover:text-bx-white",
+                          ? "bg-accent text-accent-foreground"
+                          : "text-hero-fg/70 hover:bg-card/10 hover:text-background",
                       )}
                     >
                       <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -282,8 +282,8 @@ export default function AiChatbot() {
             {panelTab === "chat" ? (
               <>
                 {/* Suggestions */}
-                <div className="shrink-0 border-b-2 border-bx-black bg-bx-off px-3 py-3">
-                  <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="shrink-0 border-b-2 border-border bg-muted px-3 py-3">
+                  <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                     [ {t("suggestionsLabel")} ]
                   </p>
                   <div className="flex flex-wrap gap-0">
@@ -293,7 +293,7 @@ export default function AiChatbot() {
                         type="button"
                         disabled={loading}
                         onClick={() => applySuggestion(t(key))}
-                        className="-mt-[2px] -ml-[2px] max-w-full border-2 border-bx-black bg-bx-white px-2.5 py-1.5 text-left font-mono text-[11px] font-bold tracking-tight text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-40"
+                        className="-mt-[2px] -ml-[2px] max-w-full border-2 border-border bg-card px-2.5 py-1.5 text-left font-mono text-[11px] font-bold tracking-tight text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
                       >
                         <span className="break-words">{t(key)}</span>
                       </button>
@@ -303,10 +303,10 @@ export default function AiChatbot() {
                 {/* Messages */}
                 <div
                   ref={listRef}
-                  className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto overflow-x-hidden bg-bx-white px-3 py-3"
+                  className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto overflow-x-hidden bg-card px-3 py-3"
                 >
                   {messages.length === 0 && !loading ? (
-                    <p className="px-1 text-center font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                    <p className="px-1 text-center font-mono text-[12px] tracking-tight text-muted-foreground">
                       {`// `}{t("emptyState")}
                     </p>
                   ) : null}
@@ -321,19 +321,19 @@ export default function AiChatbot() {
                     />
                   ))}
                   {loading ? (
-                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                       {`// `}{t("thinking")}
                     </p>
                   ) : null}
                   {error ? (
-                    <p className="border-2 border-bx-accent bg-bx-white px-3 py-2 font-mono text-[12px] tracking-tight text-bx-accent">
+                    <p className="border-2 border-accent bg-card px-3 py-2 font-mono text-[12px] tracking-tight text-accent">
                       {`// `}{error}
                     </p>
                   ) : null}
                 </div>
 
                 {/* Input area */}
-                <div className="shrink-0 border-t-2 border-bx-black bg-bx-off p-3">
+                <div className="shrink-0 border-t-2 border-border bg-muted p-3">
                   <BtnBlock
                     href="/quote"
                     variant="secondary"
@@ -356,7 +356,7 @@ export default function AiChatbot() {
                       }}
                       placeholder={t("placeholder")}
                       rows={2}
-                      className="min-h-[2.75rem] min-w-0 flex-1 resize-none border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black outline-none placeholder:text-bx-gray-dim focus:border-bx-accent"
+                      className="min-h-[2.75rem] min-w-0 flex-1 resize-none border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-accent"
                       disabled={loading}
                     />
                     <button
@@ -364,24 +364,24 @@ export default function AiChatbot() {
                       disabled={loading || !input.trim()}
                       onClick={() => void send()}
                       aria-label={t("send")}
-                      className="-ml-[2px] flex h-11 w-11 shrink-0 items-center justify-center border-2 border-bx-accent bg-bx-accent text-white transition-colors hover:bg-bx-black hover:border-bx-black hover:text-bx-white disabled:pointer-events-none disabled:opacity-40"
+                      className="-ml-[2px] flex h-11 w-11 shrink-0 items-center justify-center border-2 border-accent bg-accent text-white transition-colors hover:bg-foreground hover:border-border hover:text-background disabled:pointer-events-none disabled:opacity-40"
                     >
                       <Send className="h-4 w-4" strokeWidth={2.25} />
                     </button>
                   </div>
-                  <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                  <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                     {`// `}{t("disclaimer")}
                   </p>
                 </div>
               </>
             ) : panelTab === "compare" ? (
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-bx-white">
-                <div className="flex min-w-0 items-center gap-2 border-b-2 border-bx-black bg-bx-off px-4 py-3">
-                  <BarChart3 className="h-4 w-4 text-bx-accent" />
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-card">
+                <div className="flex min-w-0 items-center gap-2 border-b-2 border-border bg-muted px-4 py-3">
+                  <BarChart3 className="h-4 w-4 text-accent" />
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                     [ {t("tabCompare")} ]
                   </span>
-                  <span className="ml-auto font-mono text-[11px] font-bold tabular-nums text-bx-black">
+                  <span className="ml-auto font-mono text-[11px] font-bold tabular-nums text-foreground">
                     {t("compareCount", {
                       count: compareEntries.length,
                       max: COMPARE_MAX_ITEMS,
@@ -391,7 +391,7 @@ export default function AiChatbot() {
                 <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-3">
                   {compareEntries.length === 0 ? (
                     <div className="flex flex-col items-center gap-4 py-8 text-center">
-                      <p className="font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                      <p className="font-mono text-[12px] tracking-tight text-muted-foreground">
                         {`// `}{t("compareEmpty")}
                       </p>
                       <BtnBlock href="/media" variant="secondary" size="sm">
@@ -403,15 +403,15 @@ export default function AiChatbot() {
                       {compareEntries.map((e) => (
                         <li
                           key={e.id}
-                          className="-mt-[2px] flex items-center gap-2 border-2 border-bx-black bg-bx-white px-3 py-2.5 text-xs"
+                          className="-mt-[2px] flex items-center gap-2 border-2 border-border bg-card px-3 py-2.5 text-xs"
                         >
-                          <span className="min-w-0 flex-1 truncate font-bold tracking-tight text-bx-black">
+                          <span className="min-w-0 flex-1 truncate font-bold tracking-tight text-foreground">
                             {isKo ? e.name : (e.nameEn || e.name) || e.name}
                           </span>
                           <button
                             type="button"
                             onClick={() => removeCompare(e.id)}
-                            className="shrink-0 border-2 border-bx-black bg-bx-white p-1 text-bx-black transition-colors hover:bg-bx-accent hover:border-bx-accent hover:text-bx-white"
+                            className="shrink-0 border-2 border-border bg-card p-1 text-foreground transition-colors hover:bg-accent hover:border-accent hover:text-background"
                             aria-label={t("removeFromCompareAria")}
                           >
                             <X className="h-3.5 w-3.5" />
@@ -422,7 +422,7 @@ export default function AiChatbot() {
                   )}
                 </div>
                 {compareEntries.length > 0 ? (
-                  <div className="shrink-0 border-t-2 border-bx-black bg-bx-off p-3">
+                  <div className="shrink-0 border-t-2 border-border bg-muted p-3">
                     <div className="flex gap-0">
                       <BtnBlock
                         variant="secondary"
@@ -445,7 +445,7 @@ export default function AiChatbot() {
                         <button
                           type="button"
                           disabled
-                          className="-ml-[2px] flex-1 border-2 border-bx-black bg-bx-gray-dim/40 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-white opacity-60"
+                          className="-ml-[2px] flex-1 border-2 border-border bg-muted-foreground/40 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-hero-fg opacity-60"
                         >
                           {t("compareNow")}
                         </button>
@@ -455,22 +455,22 @@ export default function AiChatbot() {
                 ) : null}
               </div>
             ) : (
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden bg-bx-white px-4 py-5">
-                <p className="font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden bg-card px-4 py-5">
+                <p className="font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                   {`// `}{t("kakaoTabLead")}
                 </p>
                 <a
                   href={KAKAO_CHANNEL_PUBLIC_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-12 w-full items-center justify-center border-2 border-bx-black px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#191919] transition-colors hover:bg-bx-black hover:text-[#FEE500]"
+                  className="flex h-12 w-full items-center justify-center border-2 border-border px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#191919] transition-colors hover:bg-foreground hover:text-[#FEE500]"
                   style={{ backgroundColor: "#FEE500" }}
                 >
                   {isKo ? "카카오톡채널" : "KakaoTalk Channel"}
                 </a>
                 <a
                   href="tel:02-515-2772"
-                  className="flex h-12 w-full items-center justify-center gap-2 border-2 border-bx-black bg-bx-white px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                  className="flex h-12 w-full items-center justify-center gap-2 border-2 border-border bg-card px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                 >
                   <Phone className="h-4 w-4" />
                   {isKo ? "전화문의" : "Call"} 02-515-2772

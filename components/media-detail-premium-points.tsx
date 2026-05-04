@@ -11,26 +11,26 @@ export default function MediaDetailPremiumPoints({
   return (
     <section
       aria-labelledby="media-detail-premium-heading"
-      className="relative mt-10 border-2 border-bx-black bg-bx-white"
+      className="relative mt-10 border-2 border-border bg-card"
     >
       <div className="px-6 py-7 sm:px-8 sm:py-9">
         <div
           className={
             items.length > 0
-              ? "mb-6 flex flex-wrap items-center gap-4 border-b-2 border-bx-black pb-5"
+              ? "mb-6 flex flex-wrap items-center gap-4 border-b-2 border-border pb-5"
               : "flex flex-wrap items-center gap-4 pb-1"
           }
         >
-          <span className="flex h-12 w-12 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+          <span className="flex h-12 w-12 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
             <Sparkles className="h-6 w-6" strokeWidth={2} aria-hidden />
           </span>
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
               [ THINKAD PREMIUM SELECTION ]
             </p>
             <h2
               id="media-detail-premium-heading"
-              className="mt-1 text-xl font-bold tracking-tight text-bx-black sm:text-2xl"
+              className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
             >
               {title}
             </h2>
@@ -43,16 +43,16 @@ export default function MediaDetailPremiumPoints({
               return (
                 <li
                   key={`${line}-${i}`}
-                  className="group relative -mt-[2px] -ml-[2px] flex items-start gap-4 border-2 border-bx-black bg-bx-white p-6 transition-colors hover:bg-bx-black hover:text-bx-white"
+                  className="group relative -mt-[2px] -ml-[2px] flex items-start gap-4 border-2 border-border bg-card p-6 transition-colors hover:bg-foreground hover:text-background"
                 >
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-black text-bx-accent transition-colors group-hover:bg-bx-accent group-hover:text-bx-white">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-hero-void text-accent transition-colors group-hover:bg-accent group-hover:text-background">
                     <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim group-hover:text-bx-white/60">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground group-hover:text-hero-fg/60">
                       [{String(i + 1).padStart(2, "0")}]
                     </span>
-                    <p className="mt-1 text-base font-bold leading-snug tracking-tight text-bx-black group-hover:text-bx-white">
+                    <p className="mt-1 text-base font-bold leading-snug tracking-tight text-foreground group-hover:text-background">
                       {line}
                     </p>
                   </div>

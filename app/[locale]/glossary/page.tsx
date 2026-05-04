@@ -37,19 +37,19 @@ export default async function GlossaryPage({ params }: Props) {
   return (
     <>
       {/* Hero */}
-      <section className="bg-bx-black py-16 sm:py-20">
+      <section className="bg-hero-void py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "용어집" : "GLOSSARY"} ]
           </p>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-bx-white sm:text-4xl lg:text-5xl">
+          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl lg:text-5xl">
             <BookOpen
-              className="mr-3 inline-block h-8 w-8 text-bx-accent"
+              className="mr-3 inline-block h-8 w-8 text-accent"
               aria-hidden
             />
             {isKo ? "옥외광고 용어집" : "OOH Advertising Glossary"}
           </h1>
-          <p className="mt-6 max-w-3xl text-base leading-relaxed text-bx-white/80 sm:text-lg">
+          <p className="mt-6 max-w-3xl text-base leading-relaxed text-hero-fg/80 sm:text-lg">
             {isKo
               ? `OOH(옥외광고) / DOOH / CPM / GRP 등 캠페인 기획·견적 시 자주 마주치는 ${GLOSSARY_TERMS.length}개 핵심 용어. 모든 정의는 업계 표준에 기반합니다.`
               : `${GLOSSARY_TERMS.length} essential terms for OOH campaign planning — billboard, DOOH, CPM, GRP, and more. All definitions follow industry standards.`}
@@ -58,9 +58,9 @@ export default async function GlossaryPage({ params }: Props) {
       </section>
 
       {/* TOC — 카테고리 */}
-      <section className="border-b-2 border-bx-black bg-bx-off py-8">
+      <section className="border-b-2 border-border bg-muted py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "분류" : "CATEGORIES"} ]
           </p>
           <ul className="mt-4 flex flex-wrap gap-2">
@@ -72,7 +72,7 @@ export default async function GlossaryPage({ params }: Props) {
                 <li key={cat}>
                   <a
                     href={`#cat-${cat}`}
-                    className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                    className="inline-flex items-center gap-2 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                   >
                     {isKo ? labels.ko : labels.en}
                     <span className="font-mono text-[10px] tabular-nums opacity-70">
@@ -87,7 +87,7 @@ export default async function GlossaryPage({ params }: Props) {
       </section>
 
       {/* 카테고리별 용어 목록 */}
-      <section className="bg-bx-white py-12">
+      <section className="bg-card py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {CATEGORY_ORDER.map((cat) => {
             const items = grouped.get(cat) ?? [];
@@ -95,10 +95,10 @@ export default async function GlossaryPage({ params }: Props) {
             const labels = GLOSSARY_CATEGORIES[cat];
             return (
               <div key={cat} id={`cat-${cat}`} className="mt-12 first:mt-0 scroll-mt-24">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                   [ {isKo ? labels.ko : labels.en} ]
                 </p>
-                <h2 className="mt-3 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+                <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   {isKo ? labels.ko : labels.en}
                 </h2>
                 <dl className="mt-6 space-y-0">
@@ -106,34 +106,34 @@ export default async function GlossaryPage({ params }: Props) {
                     <div
                       key={t.id}
                       id={`term-${t.id}`}
-                      className="-mt-[2px] border-2 border-bx-black bg-bx-white p-5 sm:p-6 scroll-mt-24"
+                      className="-mt-[2px] border-2 border-border bg-card p-5 sm:p-6 scroll-mt-24"
                     >
                       <dt className="flex flex-wrap items-baseline gap-3">
-                        <span className="text-xl font-extrabold tracking-tight text-bx-black sm:text-2xl">
+                        <span className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
                           {isKo ? t.term : (t.termEn || t.term)}
                         </span>
                         {t.termEn && t.termEn !== t.term && isKo ? (
-                          <span className="font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+                          <span className="font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                             {t.termEn}
                           </span>
                         ) : null}
                         {!isKo && t.term !== t.termEn ? (
-                          <span className="font-mono text-[12px] font-bold tracking-[0.04em] text-bx-gray-dim">
+                          <span className="font-mono text-[12px] font-bold tracking-[0.04em] text-muted-foreground">
                             {t.term}
                           </span>
                         ) : null}
                       </dt>
                       {t.abbreviationFull ? (
-                        <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-accent">
+                        <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-accent">
                           {`// `}
                           {t.abbreviationFull}
                         </p>
                       ) : null}
-                      <dd className="mt-3 text-base leading-relaxed text-bx-black">
+                      <dd className="mt-3 text-base leading-relaxed text-foreground">
                         {isKo ? t.definitionKo : t.definitionEn}
                       </dd>
                       {t.aliases && t.aliases.length > 0 ? (
-                        <p className="mt-3 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                        <p className="mt-3 font-mono text-[11px] tracking-tight text-muted-foreground">
                           {isKo ? "동의어 / 변형: " : "Aliases: "}
                           {t.aliases.join(" · ")}
                         </p>
@@ -147,7 +147,7 @@ export default async function GlossaryPage({ params }: Props) {
                               <li key={rid}>
                                 <a
                                   href={`#term-${rid}`}
-                                  className="inline-flex items-center gap-1 border-2 border-bx-black bg-bx-off px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                                  className="inline-flex items-center gap-1 border-2 border-border bg-muted px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                                 >
                                   → {isKo ? r.term : (r.termEn || r.term)}
                                 </a>
@@ -166,12 +166,12 @@ export default async function GlossaryPage({ params }: Props) {
       </section>
 
       {/* CTA */}
-      <section className="border-t-2 border-bx-black bg-bx-black py-12">
+      <section className="border-t-2 border-border bg-hero-void py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "다음 단계" : "NEXT"} ]
           </p>
-          <h3 className="mt-3 text-2xl font-bold tracking-tight text-bx-white sm:text-3xl">
+          <h3 className="mt-3 text-2xl font-bold tracking-tight text-hero-fg sm:text-3xl">
             {isKo
               ? "용어를 익혔다면, 지금 매체를 비교해보세요"
               : "Now you know the terms — start comparing media"}
@@ -179,13 +179,13 @@ export default async function GlossaryPage({ params }: Props) {
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
               href="/media"
-              className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black"
+              className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border"
             >
               {isKo ? "매체 검색" : "Browse media"}
             </Link>
             <Link
               href="/planner"
-              className="inline-flex items-center gap-2 border-2 border-bx-white bg-transparent px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-white hover:text-bx-black"
+              className="inline-flex items-center gap-2 border-2 border-hero-fg bg-transparent px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.22em] text-hero-fg transition-colors hover:bg-card hover:text-foreground"
             >
               {isKo ? "플래너 시작" : "Start planner"}
             </Link>

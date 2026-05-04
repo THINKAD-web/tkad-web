@@ -169,8 +169,8 @@ export default function AdminOohQuotesClient() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-bx-black dark:text-bx-white">{t("title")}</h1>
-        <p className="text-sm text-bx-gray-dim">{t("subtitle")}</p>
+        <h1 className="text-2xl font-bold text-foreground dark:text-hero-fg">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <Card>

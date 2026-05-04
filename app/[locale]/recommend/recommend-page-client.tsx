@@ -125,28 +125,34 @@ export default function RecommendPageClient({
 
   if (catalog.length === 0) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
-        {`// `}{t("media.ai.emptyCatalog")}
+      <div className="border-t-2 border-border bg-card">
+        <div className="mx-auto max-w-2xl px-4 py-20 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+          {`// `}
+          {t("media.ai.emptyCatalog")}
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <section className="bg-hero-void py-24">
+      <section className="bg-gradient-to-b from-hero-void via-hero-void to-[#0c0c10] py-20 text-hero-fg sm:py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
+          <p className="text-xs font-semibold tracking-wide text-hermes sm:text-sm">
+            {isKo ? "AI 매체 추천" : "AI media recommendation"}
+          </p>
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.22em] text-hero-fg/70">
             {`// 04 / AI Media Explorer`}
           </p>
           <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-black leading-[1.12] tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
               {isKo ? "TKAD Bot과 함께 매체 탐험 시작!" : tr("heroTitle")}
             </h1>
-            <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-primary-foreground">
+            <span className="border border-hermes/70 bg-hermes/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-hermes">
               BETA
             </span>
           </div>
-          <p className="mx-auto mt-6 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-hero-fg/85 sm:text-lg">
             {isKo
               ? "몇 가지 정보만 알려주시면, TKAD Bot이 캠페인에 꼭 맞는 매체들을 찾아드려요."
               : tr("heroSubtitle")}
@@ -154,7 +160,7 @@ export default function RecommendPageClient({
         </div>
       </section>
 
-      <section className="bg-muted py-16 sm:py-20">
+      <section className="border-t-2 border-border bg-card py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {phase === "form" && (
             <MediaAiRecommendForm
@@ -185,8 +191,8 @@ export default function RecommendPageClient({
           )}
 
           {phase === "noResults" && (
-            <div className="mx-auto max-w-lg border-2 border-border bg-card p-8 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            <div className="mx-auto max-w-lg border-2 border-border bg-muted p-8 text-center">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hermes">
                 [ NO RESULTS ]
               </p>
               <p className="mt-4 text-sm font-medium leading-relaxed text-foreground">
@@ -211,7 +217,7 @@ export default function RecommendPageClient({
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                     [ FULL LIST ]
                   </p>
                   <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -241,8 +247,8 @@ export default function RecommendPageClient({
               </div>
 
               {top3.length > 0 && (
-                <div className="border-2 border-primary bg-card px-5 py-4">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                <div className="border-2 border-accent bg-muted px-5 py-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                     [ TOP 3 PICKS ]
                   </p>
                   <p className="mt-1 text-sm font-bold tracking-tight text-foreground">
@@ -257,14 +263,14 @@ export default function RecommendPageClient({
                         className="flex items-center justify-between gap-2 border-t-2 border-border pt-2"
                       >
                         <span className="inline-flex min-w-0 items-center gap-2">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-border bg-primary font-mono text-[10px] font-bold text-primary-foreground">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-border bg-accent font-mono text-[10px] font-bold text-accent-foreground">
                             {i + 1}
                           </span>
                           <span className="line-clamp-1 text-sm font-bold tracking-tight text-foreground">
                             {isKo ? s.item.name : s.item.nameEn}
                           </span>
                         </span>
-                        <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+                        <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
                           {isKo ? `${s.score}점 궁합` : `MATCH ${s.score}`}
                         </span>
                       </li>
@@ -292,7 +298,7 @@ export default function RecommendPageClient({
                     </ul>
                     <Link
                       href={mediaItemDetailPath(s.item.id)}
-                      className="mt-4 inline-flex items-center gap-1 border-b-2 border-border pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:text-primary hover:border-primary"
+                      className="mt-4 inline-flex items-center gap-1 border-b-2 border-border pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:border-accent hover:text-accent"
                     >
                       {isKo ? "상세 보기" : "Details"} →
                     </Link>
@@ -354,11 +360,11 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
   return (
     <div className="w-full max-w-md space-y-6 px-6">
       <div className="flex flex-col items-center gap-3">
-        <div className="relative flex h-20 w-20 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
+        <div className="relative flex h-20 w-20 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
           <span className="text-3xl" aria-hidden>
             🤖
           </span>
-          <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-primary">
+          <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-hermes">
             TKAD bot
           </span>
         </div>
@@ -376,7 +382,7 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
       <div className="space-y-3 border-2 border-border bg-card p-6">
         <div className="h-3 w-full overflow-hidden border-2 border-border bg-card">
           <motion.div
-            className="h-full w-2/5 bg-primary"
+            className="h-full w-2/5 bg-hermes"
             animate={{ x: ["-30%", "220%"] }}
             transition={{
               duration: 1.35,

@@ -4,6 +4,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { randomBytes, scryptSync } from "crypto";
 import { allSampleSuccessCaseSeedData } from "@/lib/sample-success-case";
+import { normalizePgDatabaseUrl } from "@/lib/normalize-pg-database-url";
 
 function hashPassword(plain: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -12,7 +13,9 @@ function hashPassword(plain: string): string {
 }
 
 async function main() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const pool = new Pool({
+    connectionString: normalizePgDatabaseUrl(process.env.DATABASE_URL!),
+  });
   const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
   console.log("Seeding database...\n");

@@ -107,21 +107,21 @@ export default async function CommunityListPage({
       />
 
       {/* Hero */}
-      <section className="bg-bx-black py-12 sm:py-16">
+      <section className="bg-hero-void py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
                 [ {isKo ? "커뮤니티" : "COMMUNITY"} ]
               </p>
-              <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-bx-white sm:text-4xl">
+              <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl">
                 <Users
-                  className="mr-3 inline-block h-8 w-8 text-bx-accent"
+                  className="mr-3 inline-block h-8 w-8 text-accent"
                   aria-hidden
                 />
                 {isKo ? "광고 소통 커뮤니티" : "Advertising Community"}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-bx-white/80 sm:text-base">
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-hero-fg/80 sm:text-base">
                 {isKo
                   ? "OOH 광고주 · 매체사 · 마케터의 정보 교류 공간. 익명 또는 가입 사용자로 자유롭게 글을 작성할 수 있습니다."
                   : "Info-sharing space for OOH advertisers, media operators, marketers. Post anonymously or as a registered user."}
@@ -129,7 +129,7 @@ export default async function CommunityListPage({
             </div>
             <Link
               href="/community/write"
-              className="inline-flex shrink-0 items-center gap-2 border-2 border-bx-accent bg-bx-accent px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-white hover:text-bx-black hover:border-bx-white"
+              className="inline-flex shrink-0 items-center gap-2 border-2 border-accent bg-accent px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-card hover:text-foreground hover:border-hero-fg"
             >
               <PenLine className="h-3.5 w-3.5" />
               {isKo ? "글쓰기" : "New post"}
@@ -139,17 +139,17 @@ export default async function CommunityListPage({
       </section>
 
       {/* Filters */}
-      <section className="border-b-2 border-bx-black bg-bx-off py-6">
+      <section className="border-b-2 border-border bg-muted py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <ul className="flex flex-wrap gap-0">
               <li>
                 <Link
                   href="/community"
-                  className={`-ml-[2px] inline-flex items-center gap-1.5 border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+                  className={`-ml-[2px] inline-flex items-center gap-1.5 border-2 border-border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                     !activeCategory
-                      ? "bg-bx-black text-bx-white"
-                      : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                      ? "bg-hero-void text-hero-fg"
+                      : "bg-card text-foreground hover:bg-foreground hover:text-background"
                   }`}
                 >
                   {isKo ? "전체" : "All"}
@@ -162,10 +162,10 @@ export default async function CommunityListPage({
                   <li key={cat}>
                     <Link
                       href={`/community?category=${cat}${activeSort === "popular" ? "&sort=popular" : ""}`}
-                      className={`-ml-[2px] inline-flex items-center gap-1.5 border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+                      className={`-ml-[2px] inline-flex items-center gap-1.5 border-2 border-border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                         active
-                          ? "bg-bx-accent text-bx-white border-bx-accent"
-                          : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                          ? "bg-accent text-accent-foreground border-accent"
+                          : "bg-card text-foreground hover:bg-foreground hover:text-background"
                       }`}
                     >
                       {isKo ? labels.ko : labels.en}
@@ -177,20 +177,20 @@ export default async function CommunityListPage({
             <div className="flex gap-0">
               <Link
                 href={`/community${activeCategory ? `?category=${activeCategory}` : ""}`}
-                className={`inline-flex items-center border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+                className={`inline-flex items-center border-2 border-border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                   activeSort === "new"
-                    ? "bg-bx-black text-bx-white"
-                    : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                    ? "bg-hero-void text-hero-fg"
+                    : "bg-card text-foreground hover:bg-foreground hover:text-background"
                 }`}
               >
                 {isKo ? "최신" : "Newest"}
               </Link>
               <Link
                 href={`/community?${activeCategory ? `category=${activeCategory}&` : ""}sort=popular`}
-                className={`-ml-[2px] inline-flex items-center border-2 border-bx-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+                className={`-ml-[2px] inline-flex items-center border-2 border-border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                   activeSort === "popular"
-                    ? "bg-bx-black text-bx-white"
-                    : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                    ? "bg-hero-void text-hero-fg"
+                    : "bg-card text-foreground hover:bg-foreground hover:text-background"
                 }`}
               >
                 {isKo ? "인기" : "Popular"}
@@ -201,33 +201,33 @@ export default async function CommunityListPage({
       </section>
 
       {/* List */}
-      <section className="bg-bx-white py-12">
+      <section className="bg-card py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {dbError ? (
-            <div className="border-2 border-bx-accent bg-bx-white p-8 text-center">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <div className="border-2 border-accent bg-card p-8 text-center">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
                 [ DB 마이그레이션 필요 ]
               </p>
-              <p className="mt-3 font-bold text-bx-black">
+              <p className="mt-3 font-bold text-foreground">
                 {isKo
                   ? "커뮤니티 테이블이 아직 생성되지 않았습니다."
                   : "Community tables are not yet created."}
               </p>
-              <p className="mt-2 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+              <p className="mt-2 font-mono text-[11px] tracking-tight text-muted-foreground">
                 {`// `}운영자가 Neon SQL Editor 에서{" "}
                 <code>prisma/migrations/20260428_add_community/migration.sql</code>{" "}
                 실행 필요.
               </p>
             </div>
           ) : posts.items.length === 0 ? (
-            <div className="border-2 border-bx-black bg-bx-off p-12 text-center">
-              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
+            <div className="border-2 border-border bg-muted p-12 text-center">
+              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
                 {`// `}
                 {isKo ? "아직 등록된 글이 없습니다." : "No posts yet."}
               </p>
               <Link
                 href="/community/write"
-                className="mt-6 inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black"
+                className="mt-6 inline-flex items-center gap-2 border-2 border-accent bg-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border"
               >
                 {isKo ? "첫 글 작성하기" : "Write the first post"}
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -240,24 +240,24 @@ export default async function CommunityListPage({
                 return (
                   <li
                     key={p.id}
-                    className="-mt-[2px] border-2 border-bx-black bg-bx-white"
+                    className="-mt-[2px] border-2 border-border bg-card"
                   >
                     <Link
                       href={`/community/posts/${p.id}`}
-                      className="flex flex-col gap-3 p-5 transition-colors hover:bg-bx-off sm:p-6"
+                      className="flex flex-col gap-3 p-5 transition-colors hover:bg-muted sm:p-6"
                     >
                       <div className="flex flex-wrap items-baseline gap-3">
-                        <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                        <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
                           {isKo ? labels.ko : labels.en}
                         </span>
-                        <h2 className="text-lg font-bold tracking-tight text-bx-black sm:text-xl">
+                        <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
                           {p.title}
                         </h2>
                       </div>
-                      <p className="font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim line-clamp-2">
+                      <p className="font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground line-clamp-2">
                         {p.bodyExcerpt}
                       </p>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                         <span>
                           {p.isAnonymous ? "익명" : p.authorName}
                         </span>
@@ -305,10 +305,10 @@ export default async function CommunityListPage({
                   <Link
                     key={n}
                     href={href}
-                    className={`-ml-[2px] inline-flex h-10 w-10 items-center justify-center border-2 border-bx-black font-mono text-[11px] font-bold tabular-nums transition-colors ${
+                    className={`-ml-[2px] inline-flex h-10 w-10 items-center justify-center border-2 border-border font-mono text-[11px] font-bold tabular-nums transition-colors ${
                       active
-                        ? "bg-bx-black text-bx-white"
-                        : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+                        ? "bg-hero-void text-hero-fg"
+                        : "bg-card text-foreground hover:bg-foreground hover:text-background"
                     }`}
                   >
                     {n}
@@ -321,10 +321,10 @@ export default async function CommunityListPage({
       </section>
 
       {/* 정책 안내 */}
-      <section className="border-t-2 border-bx-black bg-bx-off py-8">
+      <section className="border-t-2 border-border bg-muted py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
-            <Shield className="mr-2 inline h-3.5 w-3.5 text-bx-accent" aria-hidden />
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            <Shield className="mr-2 inline h-3.5 w-3.5 text-accent" aria-hidden />
             {`// `}
             {isKo
               ? "글 작성 전 운영 정책을 확인해주세요"
@@ -332,7 +332,7 @@ export default async function CommunityListPage({
           </p>
           <Link
             href="/community/policy"
-            className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent hover:text-bx-black"
+            className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent hover:text-foreground"
           >
             {isKo ? "운영 정책 보기" : "View policy"}
             <ArrowRight className="h-3 w-3" />

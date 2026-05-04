@@ -56,11 +56,11 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
           {items.map((t) => (
             <article
               key={t.id}
-              className="relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden border-2 border-bx-black bg-bx-white p-5 sm:p-6 md:basis-[48%] lg:basis-[32%]"
+              className="relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden border-2 border-border bg-card p-5 sm:p-6 md:basis-[48%] lg:basis-[32%]"
             >
               <Quote
                 aria-hidden
-                className="absolute right-5 top-5 h-8 w-8 text-bx-accent/20"
+                className="absolute right-5 top-5 h-8 w-8 text-accent/20"
                 strokeWidth={1.5}
                 fill="currentColor"
               />
@@ -71,24 +71,24 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
                   <img
                     src={t.avatarUrl}
                     alt=""
-                    className="h-12 w-12 shrink-0 border-2 border-bx-black object-cover"
+                    className="h-12 w-12 shrink-0 border-2 border-border object-cover"
                   />
                 ) : (
                   <span
                     aria-hidden
-                    className="inline-flex h-12 w-12 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-black text-sm font-extrabold text-bx-white"
+                    className="inline-flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-hero-void text-sm font-extrabold text-hero-fg"
                   >
                     {t.initials}
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-bold tracking-tight text-bx-black">
+                  <div className="truncate text-sm font-bold tracking-tight text-foreground">
                     {isKo ? t.nameKo : t.nameEn}
                   </div>
-                  <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+                  <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                     {isKo ? t.roleKo : t.roleEn}
                   </div>
-                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] tracking-tight text-muted-foreground">
                     {t.logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={t.logoUrl} alt="" className="h-4 w-auto" />
@@ -96,7 +96,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
                     <span className="truncate">
                       {isKo ? t.companyKo : t.companyEn}
                     </span>
-                    <span className="text-bx-black/30">·</span>
+                    <span className="text-foreground/30">·</span>
                     <span className="truncate">
                       {isKo ? t.industryKo : t.industryEn}
                     </span>
@@ -105,7 +105,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
               </header>
 
               <div
-                className="mb-4 inline-flex w-fit items-center gap-2 border-2 border-bx-accent bg-bx-accent px-3 py-1.5 text-bx-white"
+                className="mb-4 inline-flex w-fit items-center gap-2 border-2 border-accent bg-accent px-3 py-1.5 text-accent-foreground"
                 aria-label={isKo ? "성과 수치" : "Key outcome"}
               >
                 <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em]">
@@ -116,17 +116,17 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
                 </span>
               </div>
 
-              <p className="flex-1 text-sm leading-relaxed text-bx-black">
+              <p className="flex-1 text-sm leading-relaxed text-foreground">
                 &ldquo;{isKo ? t.bodyKo : t.bodyEn}&rdquo;
               </p>
 
-              <footer className="mt-4 flex items-center justify-between gap-3 border-t-2 border-bx-black/10 pt-3">
+              <footer className="mt-4 flex items-center justify-between gap-3 border-t-2 border-border/10 pt-3">
                 <div className="flex items-center gap-0.5" aria-label={`별점 ${t.rating}`}>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
                       className={`h-3.5 w-3.5 ${
-                        i < t.rating ? "fill-bx-accent text-bx-accent" : "text-bx-black/15"
+                        i < t.rating ? "fill-accent text-accent" : "text-foreground/15"
                       }`}
                       strokeWidth={1.5}
                     />
@@ -135,7 +135,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
                 {t.caseHref && (
                   <Link
                     href={t.caseHref}
-                    className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-accent hover:text-bx-black"
+                    className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent hover:text-foreground"
                   >
                     {isKo ? "사례 →" : "Case →"}
                   </Link>
@@ -152,7 +152,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
           onClick={scrollPrev}
           disabled={!canPrev}
           aria-label="이전 후기"
-          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-40"
+          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -161,7 +161,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
           onClick={scrollNext}
           disabled={!canNext}
           aria-label="다음 후기"
-          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-40"
+          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -177,8 +177,8 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
             aria-current={selected === i}
             className={`h-2 transition-all ${
               selected === i
-                ? "w-8 bg-bx-accent"
-                : "w-2 bg-bx-black/20 hover:bg-bx-black/40"
+                ? "w-8 bg-accent"
+                : "w-2 bg-hero-void/20 hover:bg-hero-void/40"
             }`}
           />
         ))}

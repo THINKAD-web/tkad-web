@@ -159,20 +159,20 @@ export function BookingRequestModal({
       aria-labelledby="booking-request-modal-title"
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:items-center"
     >
-      <div className="relative w-full max-w-xl border-2 border-bx-black bg-bx-white">
-        <div className="flex items-center justify-between border-b-2 border-bx-black px-5 py-4">
+      <div className="relative w-full max-w-xl border-2 border-border bg-card">
+        <div className="flex items-center justify-between border-b-2 border-border px-5 py-4">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
               [ {t("eyebrow")} ]
             </p>
             <h3
               id="booking-request-modal-title"
-              className="mt-1 text-base font-bold tracking-tight text-bx-black"
+              className="mt-1 text-base font-bold tracking-tight text-foreground"
             >
-              <CalIcon className="mr-1.5 inline-block h-4 w-4 text-bx-accent" aria-hidden />
+              <CalIcon className="mr-1.5 inline-block h-4 w-4 text-accent" aria-hidden />
               {t("title")}
             </h3>
-            <p className="mt-1 line-clamp-1 font-mono text-[11px] uppercase tracking-[0.16em] text-bx-gray-dim">
+            <p className="mt-1 line-clamp-1 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
               {`// `}{mediaName}
             </p>
           </div>
@@ -180,7 +180,7 @@ export function BookingRequestModal({
             type="button"
             onClick={onClose}
             aria-label={t("close")}
-            className="border-2 border-bx-black bg-bx-white p-1.5 transition-colors hover:bg-bx-black hover:text-bx-white"
+            className="border-2 border-border bg-card p-1.5 transition-colors hover:bg-foreground hover:text-background"
           >
             <X className="h-4 w-4" />
           </button>
@@ -190,7 +190,7 @@ export function BookingRequestModal({
           {/* 시작 / 종료 */}
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 {t("startsAt")} *
               </span>
               <input
@@ -198,11 +198,11 @@ export function BookingRequestModal({
                 required
                 value={startsAt}
                 onChange={(e) => setStartsAt(e.target.value)}
-                className="mt-1 w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black focus:border-bx-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground focus:border-accent focus:outline-none"
               />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 {t("endsAt")} *
               </span>
               <input
@@ -210,13 +210,13 @@ export function BookingRequestModal({
                 required
                 value={endsAt}
                 onChange={(e) => setEndsAt(e.target.value)}
-                className="mt-1 w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black focus:border-bx-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground focus:border-accent focus:outline-none"
               />
             </label>
           </div>
 
           {overlapsBlocked ? (
-            <p className="flex items-start gap-2 border-2 border-bx-accent bg-bx-accent/10 px-3 py-2 font-mono text-[11px] tracking-tight text-bx-accent">
+            <p className="flex items-start gap-2 border-2 border-accent bg-accent/10 px-3 py-2 font-mono text-[11px] tracking-tight text-accent">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
               {t("overlapWarning")}
             </p>
@@ -225,7 +225,7 @@ export function BookingRequestModal({
           {/* 이름 / 이메일 */}
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 {t("name")} *
               </span>
               <input
@@ -235,11 +235,11 @@ export function BookingRequestModal({
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("namePlaceholder")}
                 maxLength={80}
-                className="mt-1 w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
               />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 {t("email")} *
               </span>
               {/* type="text" + inputMode — Safari/iOS 의 type="email" 검증 회피
@@ -252,7 +252,7 @@ export function BookingRequestModal({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="example@domain.com"
-                className="mt-1 w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
               />
             </label>
           </div>
@@ -260,7 +260,7 @@ export function BookingRequestModal({
           {/* 연락처 / 예산 */}
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 {t("phone")}
               </span>
               <input
@@ -271,11 +271,11 @@ export function BookingRequestModal({
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="010-1234-5678"
                 maxLength={40}
-                className="mt-1 w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
               />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 {t("budget")}
               </span>
               <input
@@ -285,14 +285,14 @@ export function BookingRequestModal({
                 value={budgetMan}
                 onChange={(e) => setBudgetMan(e.target.value)}
                 placeholder={t("budgetPlaceholder")}
-                className="mt-1 w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
               />
             </label>
           </div>
 
           {/* 메모 */}
           <label className="block">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               {t("notes")}
             </span>
             <textarea
@@ -301,7 +301,7 @@ export function BookingRequestModal({
               placeholder={t("notesPlaceholder")}
               maxLength={2000}
               rows={3}
-              className="mt-1 w-full resize-y border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+              className="mt-1 w-full resize-y border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
             />
           </label>
 
@@ -318,7 +318,7 @@ export function BookingRequestModal({
           {/* Turnstile */}
           {turnstileEnabled ? (
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 {t("captcha")}
               </p>
               <div className="mt-1">
@@ -328,29 +328,29 @@ export function BookingRequestModal({
           ) : null}
 
           {/* 약관 동의 */}
-          <label className="flex items-start gap-2 text-xs text-bx-black">
+          <label className="flex items-start gap-2 text-xs text-foreground">
             <input
               type="checkbox"
               checked={agreeTerms}
               onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="mt-0.5 h-4 w-4 border-2 border-bx-black"
+              className="mt-0.5 h-4 w-4 border-2 border-border"
               required
             />
             <span className="leading-relaxed">{t("agreeTerms")}</span>
           </label>
 
           {error ? (
-            <p className="border-2 border-bx-accent bg-bx-white px-3 py-2 font-mono text-[11px] tracking-tight text-bx-accent">
+            <p className="border-2 border-accent bg-card px-3 py-2 font-mono text-[11px] tracking-tight text-accent">
               {`// `}{error}
             </p>
           ) : null}
 
           {/* 제출 / 취소 */}
-          <div className="flex flex-wrap gap-2 border-t-2 border-bx-black/10 pt-4">
+          <div className="flex flex-wrap gap-2 border-t-2 border-border/10 pt-4">
             <button
               type="submit"
               disabled={!canSubmit}
-              className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:cursor-not-allowed disabled:opacity-50"
             >
               {busy ? (
                 <>
@@ -364,7 +364,7 @@ export function BookingRequestModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+              className="inline-flex items-center gap-2 border-2 border-border bg-card px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
             >
               {t("cancel")}
             </button>

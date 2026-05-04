@@ -63,6 +63,17 @@ export async function generateMetadata({
  * /media 카탈로그 — ItemList + BreadcrumbList JSON-LD.
  * 카탈로그 fetch 실패해도 layout 은 깨지지 않도록 try/catch.
  */
+function safeJsonLdStringify(value: unknown): string | null {
+  try {
+    return JSON.stringify(value, (_k, v) =>
+      typeof v === "bigint" ? v.toString() : v,
+    ).replace(/</g, "\\u003c");
+  } catch (e) {
+    console.error("[media/layout] JSON-LD serialization failed", e);
+    return null;
+  }
+}
+
 export default async function MediaLayout({
   children,
   params,
@@ -88,8 +99,8 @@ export default async function MediaLayout({
         30,
       );
     }
-  } catch {
-    // 카탈로그 실패 → ItemList 없이 (Breadcrumb 만)
+  } catch (e) {
+    console.error("[media/layout] catalog fetch or ItemList build failed", e);
   }
 
   const breadcrumb = buildBreadcrumbJsonLd(locale, [
@@ -98,13 +109,16 @@ export default async function MediaLayout({
   ]);
 
   const ld = itemList ? [itemList, breadcrumb] : [breadcrumb];
+  const ldHtml = safeJsonLdStringify(ld);
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
-      />
+      {ldHtml ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: ldHtml }}
+        />
+      ) : null}
       {children}
     </>
   );

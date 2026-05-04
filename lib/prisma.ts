@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { config as loadEnv } from "dotenv";
 import { resolve } from "node:path";
 import { Pool } from "pg";
+import { normalizePgDatabaseUrl } from "@/lib/normalize-pg-database-url";
 
 declare global {
   var prisma: PrismaClient | undefined;
@@ -28,15 +29,15 @@ ensureLocalDatabaseEnvFromFiles();
 let devPrismaDatabaseUrl: string | undefined;
 
 function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL?.trim();
-  if (!connectionString) {
+  const rawUrl = process.env.DATABASE_URL?.trim();
+  if (!rawUrl) {
     throw new Error(
       "Missing DATABASE_URL. Add it to .env (e.g. Neon: https://neon.tech → Connection string)",
     );
   }
 
   const pool = new Pool({
-    connectionString,
+    connectionString: normalizePgDatabaseUrl(rawUrl),
     max: Number(process.env.DATABASE_POOL_MAX || 15),
   });
 

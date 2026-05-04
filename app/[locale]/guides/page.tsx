@@ -24,19 +24,19 @@ export default async function GuidesIndexPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
 
-      <section className="bg-bx-black py-16 sm:py-20">
+      <section className="bg-hero-void py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "가이드" : "GUIDES"} ]
           </p>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-bx-white sm:text-4xl lg:text-5xl">
+          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl lg:text-5xl">
             <BookText
-              className="mr-3 inline-block h-8 w-8 text-bx-accent"
+              className="mr-3 inline-block h-8 w-8 text-accent"
               aria-hidden
             />
             {isKo ? "OOH 광고 집행 가이드" : "OOH Campaign Guides"}
           </h1>
-          <p className="mt-6 max-w-3xl text-base leading-relaxed text-bx-white/80 sm:text-lg">
+          <p className="mt-6 max-w-3xl text-base leading-relaxed text-hero-fg/80 sm:text-lg">
             {isKo
               ? "지역 / 산업 / 매체 유형별 OOH 광고 집행 가이드. THINKAD 의 캠페인 데이터 기반."
               : "Region / industry / media-type OOH guides based on THINKAD campaign data."}
@@ -44,11 +44,11 @@ export default async function GuidesIndexPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="bg-bx-white py-12 sm:py-16">
+      <section className="bg-card py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {guides.length === 0 ? (
-            <div className="border-2 border-bx-black bg-bx-off p-12 text-center">
-              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
+            <div className="border-2 border-border bg-muted p-12 text-center">
+              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
                 {`// `}
                 {isKo ? "준비 중인 가이드가 없습니다." : "No guides available yet."}
               </p>
@@ -59,18 +59,18 @@ export default async function GuidesIndexPage({ params }: Props) {
                 <li key={g.slug}>
                   <Link
                     href={`/guides/${g.slug}`}
-                    className="-mt-[2px] -ml-[2px] flex h-full flex-col border-2 border-bx-black bg-bx-white p-6 transition-colors hover:bg-bx-black hover:text-bx-white"
+                    className="-mt-[2px] -ml-[2px] flex h-full flex-col border-2 border-border bg-card p-6 transition-colors hover:bg-foreground hover:text-background"
                   >
                     {g.draft ? (
-                      <span className="mb-3 inline-flex w-fit items-center border-2 border-bx-accent bg-bx-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                      <span className="mb-3 inline-flex w-fit items-center border-2 border-accent bg-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
                         [ DRAFT ]
                       </span>
                     ) : null}
                     <h2 className="text-xl font-bold tracking-tight">{g.title}</h2>
-                    <p className="mt-3 flex-1 text-sm leading-relaxed text-bx-gray-dim group-hover:text-bx-white/80">
+                    <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground group-hover:text-hero-fg/80">
                       {g.description}
                     </p>
-                    <span className="mt-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    <span className="mt-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
                       {isKo ? "읽기" : "Read"}
                       <ArrowRight className="h-3.5 w-3.5" />
                     </span>

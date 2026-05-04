@@ -146,17 +146,17 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
   if (lat == null || lng == null) return null;
 
   return (
-    <section className="border-2 border-bx-black bg-bx-white">
-      <header className="flex flex-row items-start justify-between gap-3 border-b-2 border-bx-black px-5 py-4 sm:px-6">
+    <section className="border-2 border-border bg-card">
+      <header className="flex flex-row items-start justify-between gap-3 border-b-2 border-border px-5 py-4 sm:px-6">
         <div className="min-w-0 space-y-1">
-          <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             <Eye className="h-3.5 w-3.5" aria-hidden />
             [ ROADVIEW ]
           </p>
-          <h3 className="text-lg font-bold tracking-tight text-bx-black">
+          <h3 className="text-lg font-bold tracking-tight text-foreground">
             {t("title")}
           </h3>
-          <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
             {t("desc")}
           </p>
         </div>
@@ -165,7 +165,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t("externalAria")}
-          className="inline-flex shrink-0 items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+          className="inline-flex shrink-0 items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
         >
           <ExternalLink className="h-3.5 w-3.5" aria-hidden />
           {t("openExternal")}
@@ -173,22 +173,22 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
       </header>
       <div className="p-5 sm:p-6">
         {open ? (
-          <div className="relative aspect-video w-full overflow-hidden border-2 border-bx-black bg-bx-off">
+          <div className="relative aspect-video w-full overflow-hidden border-2 border-border bg-muted">
             <div ref={containerRef} className="h-full w-full" />
             {loading ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-bx-off/90 font-mono text-sm font-bold uppercase tracking-[0.18em] text-bx-black">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin text-bx-accent" aria-hidden />
+              <div className="absolute inset-0 flex items-center justify-center bg-muted/90 font-mono text-sm font-bold uppercase tracking-[0.18em] text-foreground">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin text-accent" aria-hidden />
                 {t("loading")}
               </div>
             ) : null}
             {errorMsg ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-bx-white px-6 text-center text-sm text-bx-black">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card px-6 text-center text-sm text-foreground">
                 <p className="font-bold">{errorMsg}</p>
                 <a
                   href={externalHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                  className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                 >
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                   {t("openExternal")}
@@ -200,7 +200,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="flex aspect-video w-full items-center justify-center border-2 border-bx-black bg-bx-off font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+            className="flex aspect-video w-full items-center justify-center border-2 border-border bg-muted font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
           >
             <Eye className="mr-2 h-4 w-4" aria-hidden />
             {t("loadCta")}

@@ -102,29 +102,29 @@ export default async function GuideDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
       />
 
-      <article className="bg-bx-white">
+      <article className="bg-card">
         {/* Hero */}
-        <header className="border-b-2 border-bx-black bg-bx-black py-16 sm:py-20">
+        <header className="border-b-2 border-border bg-hero-void py-16 sm:py-20">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
               <BookText className="mr-2 inline h-3.5 w-3.5" aria-hidden />
               [ {isKo ? "가이드" : "GUIDE"} ]
             </p>
             {guide.draft ? (
-              <p className="mt-4 inline-flex items-center border-2 border-bx-accent bg-bx-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+              <p className="mt-4 inline-flex items-center border-2 border-accent bg-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
                 {`// `}
                 {isKo
                   ? "초안 — 편집자 검수 진행 중"
                   : "DRAFT — under editor review"}
               </p>
             ) : null}
-            <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-bx-white sm:text-4xl lg:text-5xl">
+            <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl lg:text-5xl">
               {guide.title}
             </h1>
-            <p className="mt-6 max-w-3xl text-base leading-relaxed text-bx-white/80 sm:text-lg">
+            <p className="mt-6 max-w-3xl text-base leading-relaxed text-hero-fg/80 sm:text-lg">
               {guide.description}
             </p>
-            <p className="mt-6 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-white/55">
+            <p className="mt-6 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-hero-fg/55">
               <Calendar className="h-3 w-3" aria-hidden />
               {`// `}
               {new Date(guide.publishedAt).toLocaleDateString(
@@ -141,12 +141,12 @@ export default async function GuideDetailPage({ params }: Props) {
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           {guide.sections.map((sec, i) => (
             <section key={i} className="mt-10 first:mt-0">
-              <h2 className="text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 {sec.heading}
               </h2>
               <div className="mt-5 space-y-4">
                 {sec.paragraphs.map((p, idx) => (
-                  <p key={idx} className="text-base leading-relaxed text-bx-black">
+                  <p key={idx} className="text-base leading-relaxed text-foreground">
                     {p}
                   </p>
                 ))}
@@ -156,7 +156,7 @@ export default async function GuideDetailPage({ params }: Props) {
                   {sec.bullets.map((b, idx) => (
                     <li
                       key={idx}
-                      className="flex gap-3 border-l-2 border-bx-accent pl-4 text-base leading-relaxed text-bx-black"
+                      className="flex gap-3 border-l-2 border-accent pl-4 text-base leading-relaxed text-foreground"
                     >
                       {b}
                     </li>
@@ -168,23 +168,23 @@ export default async function GuideDetailPage({ params }: Props) {
 
           {/* FAQ */}
           {guide.faqs && guide.faqs.length > 0 ? (
-            <section className="mt-16 border-t-2 border-bx-black pt-10">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <section className="mt-16 border-t-2 border-border pt-10">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                 [ FAQ ]
               </p>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 {isKo ? "자주 묻는 질문" : "Frequently Asked Questions"}
               </h2>
               <dl className="mt-6 space-y-0">
                 {guide.faqs.map((f, idx) => (
                   <div
                     key={idx}
-                    className="-mt-[2px] border-2 border-bx-black bg-bx-white p-5"
+                    className="-mt-[2px] border-2 border-border bg-card p-5"
                   >
-                    <dt className="text-base font-bold text-bx-black">
+                    <dt className="text-base font-bold text-foreground">
                       Q. {f.question}
                     </dt>
-                    <dd className="mt-3 text-base leading-relaxed text-bx-black">
+                    <dd className="mt-3 text-base leading-relaxed text-foreground">
                       {f.answer}
                     </dd>
                   </div>
@@ -194,8 +194,8 @@ export default async function GuideDetailPage({ params }: Props) {
           ) : null}
 
           {/* 관련 키워드 랜딩으로 내부 링크 */}
-          <section className="mt-16 border-t-2 border-bx-black pt-10">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <section className="mt-16 border-t-2 border-border pt-10">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
               [ {isKo ? "관련 매체 둘러보기" : "BROWSE RELATED MEDIA"} ]
             </p>
             <ul className="mt-4 flex flex-wrap gap-2">
@@ -203,7 +203,7 @@ export default async function GuideDetailPage({ params }: Props) {
                 <li>
                   <Link
                     href={`/media/region/${guide.relatedRegion}`}
-                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                    className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                   >
                     {regionLabel(guide.relatedRegion, locale)}
                     <ArrowRight className="h-3 w-3" />
@@ -214,7 +214,7 @@ export default async function GuideDetailPage({ params }: Props) {
                 <li key={t}>
                   <Link
                     href={`/media/type/${t}`}
-                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                    className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                   >
                     {typeLabel(t, locale)}
                     <ArrowRight className="h-3 w-3" />
@@ -225,7 +225,7 @@ export default async function GuideDetailPage({ params }: Props) {
                 <li key={a}>
                   <Link
                     href={`/media/area/${encodeURIComponent(a)}`}
-                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold tracking-[0.04em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                    className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold tracking-[0.04em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                   >
                     {a}
                     <ArrowRight className="h-3 w-3" />

@@ -71,7 +71,7 @@ export function CommunityCommentForm({ postId }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
         [ 댓글 작성 ]
       </p>
 
@@ -81,22 +81,22 @@ export function CommunityCommentForm({ postId }: Props) {
           onChange={(e) => setBody(e.target.value)}
           rows={4}
           placeholder="댓글을 남겨주세요. (2-2000자)"
-          className="w-full resize-none border-2 border-bx-black bg-bx-white px-3 py-3 text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+          className="w-full resize-none border-2 border-border bg-card px-3 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
           maxLength={2000}
           required
         />
-        <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-bx-gray-dim">
+        <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-muted-foreground">
           {body.length} / 2000
         </p>
       </label>
 
       <div className="flex flex-wrap items-center gap-3">
-        <label className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-black">
+        <label className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-foreground">
           <input
             type="checkbox"
             checked={isAnonymous}
             onChange={(e) => setIsAnonymous(e.target.checked)}
-            className="h-4 w-4 border-2 border-bx-black"
+            className="h-4 w-4 border-2 border-border"
           />
           익명으로 작성
         </label>
@@ -107,7 +107,7 @@ export function CommunityCommentForm({ postId }: Props) {
             onChange={(e) => setAuthorName(e.target.value)}
             placeholder="작성자 이름"
             maxLength={50}
-            className="flex-1 min-w-[180px] border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+            className="flex-1 min-w-[180px] border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
           />
         ) : null}
       </div>
@@ -117,7 +117,7 @@ export function CommunityCommentForm({ postId }: Props) {
       ) : null}
 
       {error ? (
-        <p className="border-2 border-bx-accent bg-bx-white px-3 py-2 font-mono text-[11px] tracking-tight text-bx-accent">
+        <p className="border-2 border-accent bg-card px-3 py-2 font-mono text-[11px] tracking-tight text-accent">
           {`// `}
           {error}
         </p>
@@ -126,7 +126,7 @@ export function CommunityCommentForm({ postId }: Props) {
       <button
         type="submit"
         disabled={!canSubmit}
-        className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {busy ? "전송 중…" : "댓글 등록"}
       </button>

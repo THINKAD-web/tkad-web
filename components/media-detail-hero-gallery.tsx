@@ -55,9 +55,9 @@ export default function MediaDetailHeroGallery({
 
   if (!hasImage) {
     return (
-      <section className="relative w-full overflow-hidden bg-bx-black">
+      <section className="relative w-full overflow-hidden bg-hero-void">
         <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-12">
-          <div className="relative aspect-[16/9] w-full overflow-hidden border-2 border-bx-white bg-bx-black">
+          <div className="relative aspect-[16/9] w-full overflow-hidden border-2 border-hero-fg bg-hero-void">
             <MediaImagePlaceholder
               label={tMedia("imagePreparing")}
               size="lg"
@@ -70,13 +70,13 @@ export default function MediaDetailHeroGallery({
   }
 
   return (
-    <section className="relative w-full overflow-hidden bg-bx-black">
+    <section className="relative w-full overflow-hidden bg-hero-void">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-stretch px-4 py-6 sm:px-6 lg:px-12">
-        <div className="group relative aspect-[16/9] w-full overflow-hidden border-2 border-bx-white bg-bx-black">
+        <div className="group relative aspect-[16/9] w-full overflow-hidden border-2 border-hero-fg bg-hero-void">
           <button
             type="button"
             onClick={() => openAt(0)}
-            className="absolute inset-0 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-bx-accent"
+            className="absolute inset-0 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label={labels.expand}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -88,14 +88,14 @@ export default function MediaDetailHeroGallery({
             />
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute right-3 top-3 flex h-9 w-9 items-center justify-center border-2 border-bx-white bg-bx-black text-bx-white opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              className="pointer-events-none absolute right-3 top-3 flex h-9 w-9 items-center justify-center border-2 border-hero-fg bg-hero-void text-hero-fg opacity-0 transition-opacity duration-200 group-hover:opacity-100"
             >
               <ZoomIn className="h-4 w-4" />
             </span>
           </button>
         </div>
 
-        <div className="mt-6 flex flex-col gap-4 pb-2 text-bx-white">
+        <div className="mt-6 flex flex-col gap-4 pb-2 text-hero-fg">
           {children}
         </div>
       </div>

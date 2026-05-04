@@ -723,9 +723,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 [ EFFECT DASHBOARD ]
               </h2>
               <div className="grid gap-0 lg:grid-cols-2">
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 도달 구조 ]
                     </p>
                   </div>
@@ -739,9 +739,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 유형별 일유동 ]
                     </p>
                   </div>
@@ -754,9 +754,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                   </div>
                 </div>
               </div>
-              <div className="mt-6 border-2 border-bx-black bg-bx-white">
-                <div className="border-b-2 border-bx-black p-4">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+              <div className="mt-6 border-2 border-border bg-card">
+                <div className="border-b-2 border-border p-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                     [ 지역 분포 ]
                   </p>
                 </div>
@@ -793,9 +793,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 [ TOP MEDIA (DATA) ]
               </h2>
               <div className="grid gap-0 lg:grid-cols-2">
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 매체별 일유동 TOP ]
                     </p>
                   </div>
@@ -807,9 +807,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 매체별 노출 TOP ]
                     </p>
                   </div>
@@ -854,9 +854,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 [ OPERATIONS DASHBOARD ]
               </h2>
               <div className="grid gap-0 lg:grid-cols-3">
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 예약 상태 분포 ]
                     </p>
                   </div>
@@ -868,9 +868,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 문서 상태 분포 ]
                     </p>
                   </div>
@@ -882,9 +882,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 가시성 TOP ]
                     </p>
                   </div>
@@ -917,9 +917,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 [ SCHEDULE DASHBOARD ]
               </h2>
               <div className="grid gap-0 lg:grid-cols-2">
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 일정 이벤트 종류 ]
                     </p>
                   </div>
@@ -931,9 +931,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 매체 시작 월 ]
                     </p>
                   </div>
@@ -965,13 +965,13 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               >
                 [ TIMELINE (MEDIA) ]
               </h2>
-              <div className="border-2 border-bx-black bg-bx-white">
-                <div className="border-b-2 border-bx-black p-4">
+              <div className="border-2 border-border bg-card">
+                <div className="border-b-2 border-border p-4">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                       [ 매체 집행 타임라인 ]
                     </p>
-                    <p className="font-mono text-[10px] text-bx-gray-dim">
+                    <p className="font-mono text-[10px] text-muted-foreground">
                       {`// `}표시: {timeline.rows.length}/{timeline.total} · {timeline.minLabel} → {timeline.maxLabel}
                     </p>
                   </div>
@@ -981,16 +981,16 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     {timeline.rows.map((r) => (
                       <div key={r.key} className="grid grid-cols-[160px_1fr] gap-3">
                         <div className="min-w-0">
-                          <p className="truncate font-mono text-[10px] font-bold text-bx-black">
+                          <p className="truncate font-mono text-[10px] font-bold text-foreground">
                             {r.label}
                           </p>
-                          <p className="font-mono text-[9px] text-bx-gray-dim">
+                          <p className="font-mono text-[9px] text-muted-foreground">
                             {fmtShort(r.startsAt)} ~ {fmtShort(r.endsAt)}
                           </p>
                         </div>
-                        <div className="relative h-8 border-2 border-bx-black bg-[#f5f5f5]">
+                        <div className="relative h-8 border-2 border-border bg-[#f5f5f5]">
                           <div
-                            className="absolute top-0 h-full border-r-2 border-bx-black bg-bx-black"
+                            className="absolute top-0 h-full border-r-2 border-border bg-hero-void"
                             style={{
                               left: `${Math.max(0, Math.min(98.8, r.left))}%`,
                               width: `${Math.max(1.2, Math.min(100, r.width))}%`,
@@ -1009,7 +1009,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                       </div>
                     ))}
                   </div>
-                  <p className="mt-3 font-mono text-[10px] text-bx-gray-dim">
+                  <p className="mt-3 font-mono text-[10px] text-muted-foreground">
                     {`// `}집행 시작/종료 일자를 막대로만 표시합니다. (추가 계산/평가 없음)
                   </p>
                 </div>

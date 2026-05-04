@@ -162,31 +162,31 @@ export function MediaAvailabilityCalendar({
   return (
     <section
       aria-labelledby="availability-calendar-heading"
-      className="mt-12 border-t-2 border-bx-black py-10"
+      className="mt-12 border-t-2 border-border py-10"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {t("eyebrow")} ]
           </p>
           <h2
             id="availability-calendar-heading"
-            className="mt-2 text-xl font-bold tracking-tight text-bx-black sm:text-2xl"
+            className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
           >
             <CalendarDays
-              className="mr-2 inline-block h-5 w-5 text-bx-accent"
+              className="mr-2 inline-block h-5 w-5 text-accent"
               aria-hidden
             />
             {t("title")}
           </h2>
-          <p className="mt-1 max-w-xl font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="mt-1 max-w-xl font-mono text-[11px] tracking-tight text-muted-foreground">
             {`// `}
             {t("desc")}
           </p>
         </div>
 
         {/* 월 네비게이션 */}
-        <div className="inline-flex items-center gap-1 border-2 border-bx-black bg-bx-white">
+        <div className="inline-flex items-center gap-1 border-2 border-border bg-card">
           <button
             type="button"
             disabled={!canGoBack || loading}
@@ -195,12 +195,12 @@ export function MediaAvailabilityCalendar({
                 new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1),
               )
             }
-            className="px-3 py-2 text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-bx-black"
+            className="px-3 py-2 text-foreground transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-foreground"
             aria-label={t("prevMonth")}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <span className="min-w-[110px] text-center font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-bx-black">
+          <span className="min-w-[110px] text-center font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-foreground">
             {viewMonth.getFullYear()}.
             {String(viewMonth.getMonth() + 1).padStart(2, "0")}
           </span>
@@ -212,7 +212,7 @@ export function MediaAvailabilityCalendar({
                 new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1),
               )
             }
-            className="px-3 py-2 text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-bx-black"
+            className="px-3 py-2 text-foreground transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-foreground"
             aria-label={t("nextMonth")}
           >
             <ChevronRight className="h-4 w-4" />
@@ -222,12 +222,12 @@ export function MediaAvailabilityCalendar({
 
       <div className="mt-6">
         {loading ? (
-          <div className="flex items-center justify-center gap-2 border-2 border-bx-black bg-bx-off px-4 py-12 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+          <div className="flex items-center justify-center gap-2 border-2 border-border bg-muted px-4 py-12 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             {t("loading")}
           </div>
         ) : error ? (
-          <p className="border-2 border-bx-accent bg-bx-white px-4 py-3 font-mono text-[11px] tracking-tight text-bx-accent">
+          <p className="border-2 border-accent bg-card px-4 py-3 font-mono text-[11px] tracking-tight text-accent">
             {`// `}
             {t("error")}
           </p>
@@ -242,10 +242,10 @@ export function MediaAvailabilityCalendar({
                       key={d}
                       className={`font-mono text-[10px] font-bold uppercase tracking-[0.2em] ${
                         i === 6
-                          ? "text-bx-accent"
+                          ? "text-accent"
                           : i === 5
-                            ? "text-bx-black"
-                            : "text-bx-gray-dim"
+                            ? "text-foreground"
+                            : "text-muted-foreground"
                       }`}
                     >
                       {d}
@@ -266,15 +266,15 @@ export function MediaAvailabilityCalendar({
                       "relative flex aspect-square items-center justify-center border-2 text-sm font-bold tabular-nums transition-colors";
                     if (isPast) {
                       cls +=
-                        " border-transparent bg-transparent text-bx-gray-dim/40";
+                        " border-transparent bg-transparent text-muted-foreground/40";
                     } else if (blocked) {
                       cls +=
-                        " border-bx-accent bg-bx-accent/15 text-bx-accent";
+                        " border-accent bg-accent/15 text-accent";
                     } else {
-                      cls += " border-bx-black bg-bx-white text-bx-black";
+                      cls += " border-border bg-card text-foreground";
                     }
                     if (isToday) {
-                      cls += " ring-2 ring-bx-black ring-offset-1";
+                      cls += " ring-2 ring-foreground ring-offset-1";
                     }
 
                     return (
@@ -311,25 +311,25 @@ export function MediaAvailabilityCalendar({
             </div>
 
             {/* 범례 + 통계 + CTA */}
-            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               <span className="inline-flex items-center gap-2">
-                <span className="inline-block h-3 w-3 border-2 border-bx-black bg-bx-white" />
+                <span className="inline-block h-3 w-3 border-2 border-border bg-card" />
                 {t("legendAvailable")}
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="inline-block h-3 w-3 border-2 border-bx-accent bg-bx-accent/15" />
+                <span className="inline-block h-3 w-3 border-2 border-accent bg-accent/15" />
                 {t("legendBlocked")}
               </span>
               {isCurrentMonth ? (
                 <span className="inline-flex items-center gap-2">
-                  <span className="inline-block h-3 w-3 border-2 border-bx-black ring-2 ring-bx-black ring-offset-1" />
+                  <span className="inline-block h-3 w-3 border-2 border-border ring-2 ring-foreground ring-offset-1" />
                   {t("legendToday")}
                 </span>
               ) : null}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-bx-black/15 pt-4">
-              <p className="text-sm leading-relaxed text-bx-black">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/15 pt-4">
+              <p className="text-sm leading-relaxed text-foreground">
                 {t("statsAvailable", { n: stats.availableDays })}
                 {stats.blockedDays > 0
                   ? `  ·  ${t("statsBlocked", { n: stats.blockedDays })}`
@@ -338,7 +338,7 @@ export function MediaAvailabilityCalendar({
               <button
                 type="button"
                 onClick={() => setModalOpen(true)}
-                className="inline-flex items-center gap-2 border-2 border-bx-accent bg-bx-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black"
+                className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border"
               >
                 {t("ctaRequest")}
               </button>

@@ -507,7 +507,7 @@ function TrafficBarBlock({
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-foreground">
           [ {title} ]
         </p>
-        <span className="border-2 border-primary bg-primary px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-hero-fg">
+        <span className="border-2 border-primary bg-primary px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-primary-foreground">
           {peakLabel}
         </span>
       </div>
