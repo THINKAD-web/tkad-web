@@ -38,30 +38,41 @@ const KAKAO_SDK_URL = (appkey: string) =>
   `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false&libraries=clusterer`;
 
 /**
- * 클러스터 숫자 뱃지 스타일 — 값은 모두 문자열(px)로 두는 편이 Kakao MarkerClusterer와 잘 맞음.
- * (커스텀 마커 이미지 + 숫자 미표시 이슈는 공식 샘플처럼 클러스터용 마커에는 image 미지정으로 해결)
- * calculator 기본 구간 [10, 100, 1000, 10000] → 스타일 5단
+ * 클러스터 숫자 뱃지 — THINKAD Hermès 오렌지 + 브루탈 보더 (값은 문자열로 Kakao MarkerClusterer 호환)
+ * calculator 는 아래 TKAD_CLUSTER_CALCULATOR 와 길이(스타일 단계)를 맞출 것
  */
+const TKAD_CLUSTER_CALCULATOR = [5, 14, 35, 90] as const;
+
 const TKAD_CLUSTER_STYLES: Array<Record<string, string>> = (() => {
-  const mk = (px: number, fs: string) => {
+  const mk = (px: number, fs: string, ring: string) => {
     const h = `${px}px`;
-    const r = `${Math.round(px / 2)}px`;
     const lh = `${px - 2}px`;
     return {
       width: h,
       height: h,
-      borderRadius: r,
-      background: "rgba(255, 98, 0, 0.95)",
+      borderRadius: "50%",
+      background: `linear-gradient(155deg, #ff8533 0%, #ff6200 45%, #e65800 100%)`,
       border: "2px solid #020202",
-      color: "#ffffff",
+      color: "#f4f2ef",
       textAlign: "center",
       lineHeight: lh,
       fontSize: fs,
-      fontWeight: "700",
+      fontWeight: "800",
+      fontFamily:
+        "'JetBrains Mono', 'Pretendard Variable', Pretendard, ui-monospace, system-ui, sans-serif",
+      letterSpacing: "-0.04em",
       cursor: "pointer",
+      boxShadow: `${ring}, 0 10px 22px rgba(2,2,2,0.28)`,
     };
   };
-  return [mk(44, "12px"), mk(48, "13px"), mk(52, "14px"), mk(56, "15px"), mk(60, "16px")];
+  // 단계별로 살짝 커지는 링(헤르메스 글로우)
+  return [
+    mk(42, "11px", "0 0 0 1px rgba(255,255,255,0.22)"),
+    mk(46, "12px", "0 0 0 1px rgba(255,255,255,0.24)"),
+    mk(50, "13px", "0 0 0 1px rgba(255,255,255,0.26)"),
+    mk(54, "14px", "0 0 0 1px rgba(255,255,255,0.28)"),
+    mk(58, "15px", "0 0 0 1px rgba(255,255,255,0.3)"),
+  ];
 })();
 
 function orangePinMarkerImage(kakao: {
@@ -159,6 +170,7 @@ export default function KakaoMapView({
 
     let cancelled = false;
     let idleHandler: (() => void) | null = null;
+    let clusterClickHandler: ((cluster: unknown) => void) | null = null;
 
     loadKakaoSdk(appkey)
       .then(() => {
@@ -175,14 +187,55 @@ export default function KakaoMapView({
           mapRef.current = map;
 
           if (typeof kakao.maps.MarkerClusterer === "function") {
-            // minLevel 10: 공식 basicClusterer 샘플과 동일(레벨이 충분히 축소될 때만 클러스터 합침)
-            clustererRef.current = new kakao.maps.MarkerClusterer({
+            // minLevel 낮을수록(숫자 작을수록) 더 확대된 상태에서도 클러스터가 동작 — 겹침 숫자 노출 증가
+            const clusterer = new kakao.maps.MarkerClusterer({
               map,
               averageCenter: true,
-              minLevel: 10,
-              gridSize: 60,
+              minLevel: 7,
+              gridSize: 54,
+              disableClickZoom: true,
+              calculator: [...TKAD_CLUSTER_CALCULATOR],
               styles: TKAD_CLUSTER_STYLES,
             });
+            clustererRef.current = clusterer;
+
+            clusterClickHandler = (cluster: unknown) => {
+              if (cancelled) return;
+              const c = cluster as {
+                getCenter?: () => unknown;
+                getMarkers?: () => unknown[];
+              };
+              const centerLatLng = c.getCenter?.();
+              const markersIn =
+                typeof c.getMarkers === "function" ? (c.getMarkers() ?? []) : [];
+
+              if (markersIn.length > 1) {
+                const bounds = new kakao.maps.LatLngBounds();
+                for (const m of markersIn as Array<{ getPosition?: () => unknown }>) {
+                  try {
+                    const p = m.getPosition?.();
+                    if (p) bounds.extend(p);
+                  } catch {
+                    /* noop */
+                  }
+                }
+                try {
+                  // (상,우,하,좌) 패딩 px — 클러스터 탭 후 주변 맥락이 보이도록
+                  map.setBounds(bounds, 72, 72, 72, 72);
+                } catch {
+                  try {
+                    map.setBounds(bounds, 72);
+                  } catch {
+                    const next = Math.max(1, map.getLevel() - 2);
+                    if (centerLatLng) map.setLevel(next, { anchor: centerLatLng });
+                  }
+                }
+              } else {
+                const next = Math.max(1, map.getLevel() - 2);
+                if (centerLatLng) map.setLevel(next, { anchor: centerLatLng });
+              }
+            };
+            kakao.maps.event.addListener(clusterer, "clusterclick", clusterClickHandler);
           } else {
             // clusterer 라이브러리 미로드 시 fallback: map에 직접 마커 추가
             clustererRef.current = null;
@@ -239,7 +292,17 @@ export default function KakaoMapView({
         }
       }
       idleHandler = null;
-      const clusterer = clustererRef.current as { clear?: () => void } | null;
+      const clusterer = clustererRef.current as {
+        clear?: () => void;
+      } | null;
+      if (clusterer && clusterClickHandler && kw?.maps?.event?.removeListener) {
+        try {
+          kw.maps.event.removeListener(clusterer, "clusterclick", clusterClickHandler);
+        } catch {
+          /* noop */
+        }
+      }
+      clusterClickHandler = null;
       try {
         clusterer?.clear?.();
       } catch {
