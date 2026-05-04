@@ -133,6 +133,8 @@ export default function KakaoMapView({
   const onSelectRef = useRef(onSelect);
   const markersRef = useRef<MapMarker[]>(markers);
   const [sdkError, setSdkError] = useState<string | null>(null);
+  /** SDK 비동기 로드 후 지도 인스턴스가 생긴 뒤에만 true — markers effect 가 한 번 더 돌게 함 */
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     onMarkerDetailRef.current = onMarkerDetail;
@@ -159,58 +161,68 @@ export default function KakaoMapView({
     loadKakaoSdk(appkey)
       .then(() => {
         if (cancelled || !containerRef.current) return;
-        const kakao = (window as unknown as { kakao: any }).kakao;
-        // React Strict / 라우트 재진입 시 이전 지도 노드가 남으면 Kakao 초기화 실패 가능
-        containerRef.current.innerHTML = "";
+        try {
+          const kakao = (window as unknown as { kakao: any }).kakao;
+          // React Strict / 라우트 재진입 시 이전 지도 노드가 남으면 Kakao 초기화 실패 가능
+          containerRef.current.innerHTML = "";
 
-        const map = new kakao.maps.Map(containerRef.current, {
-          center: new kakao.maps.LatLng(center.lat, center.lng),
-          level: zoom,
-        });
-        mapRef.current = map;
-
-        if (typeof kakao.maps.MarkerClusterer === "function") {
-          clustererRef.current = new kakao.maps.MarkerClusterer({
-            map,
-            averageCenter: true,
-            minLevel: 6,
-            gridSize: 60,
-            styles: TKAD_CLUSTER_STYLES,
+          const map = new kakao.maps.Map(containerRef.current, {
+            center: new kakao.maps.LatLng(center.lat, center.lng),
+            level: zoom,
           });
-        } else {
-          // clusterer 라이브러리 미로드 시 fallback: map에 직접 마커 추가
-          clustererRef.current = null;
-        }
+          mapRef.current = map;
 
-        const fireBounds = () => {
-          const b = map.getBounds();
-          const sw = b.getSouthWest();
-          const ne = b.getNorthEast();
-          const next: MapBounds = {
-            swLat: sw.getLat(),
-            swLng: sw.getLng(),
-            neLat: ne.getLat(),
-            neLng: ne.getLng(),
-          };
-          const prev = lastBoundsSentRef.current;
-          if (
-            prev &&
-            prev.swLat === next.swLat &&
-            prev.swLng === next.swLng &&
-            prev.neLat === next.neLat &&
-            prev.neLng === next.neLng
-          ) {
-            return;
+          if (typeof kakao.maps.MarkerClusterer === "function") {
+            clustererRef.current = new kakao.maps.MarkerClusterer({
+              map,
+              averageCenter: true,
+              minLevel: 6,
+              gridSize: 60,
+              styles: TKAD_CLUSTER_STYLES,
+            });
+          } else {
+            // clusterer 라이브러리 미로드 시 fallback: map에 직접 마커 추가
+            clustererRef.current = null;
           }
-          lastBoundsSentRef.current = next;
-          onBoundsChange(next);
-        };
 
-        idleHandler = fireBounds;
-        kakao.maps.event.addListener(map, "idle", fireBounds);
-        fireBounds();
+          const fireBounds = () => {
+            if (cancelled) return;
+            const b = map.getBounds();
+            const sw = b.getSouthWest();
+            const ne = b.getNorthEast();
+            const next: MapBounds = {
+              swLat: sw.getLat(),
+              swLng: sw.getLng(),
+              neLat: ne.getLat(),
+              neLng: ne.getLng(),
+            };
+            const prev = lastBoundsSentRef.current;
+            if (
+              prev &&
+              prev.swLat === next.swLat &&
+              prev.swLng === next.swLng &&
+              prev.neLat === next.neLat &&
+              prev.neLng === next.neLng
+            ) {
+              return;
+            }
+            lastBoundsSentRef.current = next;
+            onBoundsChange(next);
+          };
+
+          idleHandler = fireBounds;
+          kakao.maps.event.addListener(map, "idle", fireBounds);
+          fireBounds();
+          if (!cancelled) setMapReady(true);
+        } catch (e: unknown) {
+          if (!cancelled) {
+            setSdkError(e instanceof Error ? e.message : "지도 초기화에 실패했습니다.");
+          }
+        }
       })
-      .catch((e: Error) => setSdkError(e.message));
+      .catch((e: Error) => {
+        if (!cancelled) setSdkError(e.message);
+      });
 
     return () => {
       cancelled = true;
@@ -241,58 +253,71 @@ export default function KakaoMapView({
   }, []);
 
   useEffect(() => {
+    if (!mapReady) return;
     const map = mapRef.current as any;
     if (!map) return;
-    const clusterer = clustererRef.current as any;
-    const kakao = (window as unknown as { kakao: any }).kakao;
+    try {
+      const clusterer = clustererRef.current as any;
+      const kakao = (window as unknown as { kakao: any }).kakao;
+      if (!kakao?.maps) return;
 
-    const existing = markerObjsRef.current;
-    const nextIds = new Set(markers.map((m) => m.id));
+      const existing = markerObjsRef.current;
+      const nextIds = new Set(markers.map((m) => m.id));
 
-    for (const [id, m] of existing) {
-      if (!nextIds.has(id)) {
-        if (clusterer) clusterer.removeMarker(m);
-        else (m as any).setMap(null);
-        existing.delete(id);
+      for (const [id, m] of existing) {
+        if (!nextIds.has(id)) {
+          if (clusterer) clusterer.removeMarker(m);
+          else (m as any).setMap(null);
+          existing.delete(id);
+        }
       }
-    }
 
-    const pinImage = orangePinMarkerImage(kakao.maps);
-    const toAdd: unknown[] = [];
-    for (const mk of markers) {
-      if (existing.has(mk.id)) continue;
-      const marker = new kakao.maps.Marker({
-        position: new kakao.maps.LatLng(mk.lat, mk.lng),
-        title: mk.name,
-        image: pinImage,
-      });
-      kakao.maps.event.addListener(marker, "click", () => onSelectRef.current(mk.id));
-      existing.set(mk.id, marker);
-      if (clusterer) toAdd.push(marker);
-      else marker.setMap(map);
+      const pinImage = orangePinMarkerImage(kakao.maps);
+      const toAdd: unknown[] = [];
+      for (const mk of markers) {
+        if (existing.has(mk.id)) continue;
+        if (!Number.isFinite(mk.lat) || !Number.isFinite(mk.lng)) continue;
+        const marker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(mk.lat, mk.lng),
+          title: mk.name,
+          image: pinImage,
+        });
+        kakao.maps.event.addListener(marker, "click", () => onSelectRef.current(mk.id));
+        existing.set(mk.id, marker);
+        if (clusterer) toAdd.push(marker);
+        else marker.setMap(map);
+      }
+      if (clusterer && toAdd.length) clusterer.addMarkers(toAdd);
+    } catch (e) {
+      console.error("[KakaoMapView] markers sync failed", e);
     }
-    if (clusterer && toAdd.length) clusterer.addMarkers(toAdd);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [markers]);
+  }, [markers, mapReady]);
 
   // #MAP-1: 미니 팝업(CustomOverlay) 비활성화. 마커 선택 시 panTo만 수행.
   // 상세는 사이드 카드(media-map-page-client.tsx) 또는 onMarkerDetail 라우팅으로 노출.
   useEffect(() => {
+    if (!mapReady) return;
     const map = mapRef.current as any;
     if (!map) return;
-    const kakao = (window as unknown as { kakao: any }).kakao;
+    try {
+      const kakao = (window as unknown as { kakao: any }).kakao;
+      if (!kakao?.maps) return;
 
-    const existingInfo = infoWindowRef.current as any;
-    if (existingInfo?.setMap) existingInfo.setMap(null);
-    infoWindowRef.current = null;
+      const existingInfo = infoWindowRef.current as any;
+      if (existingInfo?.setMap) existingInfo.setMap(null);
+      infoWindowRef.current = null;
 
-    if (!selectedId) return;
-    const m = markersRef.current.find((x) => x.id === selectedId);
-    if (!m) return;
+      if (!selectedId) return;
+      const m = markersRef.current.find((x) => x.id === selectedId);
+      if (!m || !Number.isFinite(m.lat) || !Number.isFinite(m.lng)) return;
 
-    map.panTo(new kakao.maps.LatLng(m.lat, m.lng));
+      map.panTo(new kakao.maps.LatLng(m.lat, m.lng));
+    } catch (e) {
+      console.error("[KakaoMapView] panTo failed", e);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId]);
+  }, [selectedId, mapReady]);
 
   if (sdkError) {
     return (
