@@ -37,29 +37,31 @@ declare global {
 const KAKAO_SDK_URL = (appkey: string) =>
   `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false&libraries=clusterer`;
 
-/** 카카오 기본 클러스터 스프라이트가 깨지거나 다크 테마 `color` 상속으로 숫자가 사라지는 경우 방지 */
+/**
+ * 클러스터 숫자 뱃지 스타일 — 값은 모두 문자열(px)로 두는 편이 Kakao MarkerClusterer와 잘 맞음.
+ * (커스텀 마커 이미지 + 숫자 미표시 이슈는 공식 샘플처럼 클러스터용 마커에는 image 미지정으로 해결)
+ * calculator 기본 구간 [10, 100, 1000, 10000] → 스타일 5단
+ */
 const TKAD_CLUSTER_STYLES: Array<Record<string, string>> = (() => {
-  const border = "2px solid #020202";
   const mk = (px: number, fs: string) => {
     const h = `${px}px`;
     const r = `${Math.round(px / 2)}px`;
-    const lh = `${px - 4}px`;
+    const lh = `${px - 2}px`;
     return {
       width: h,
       height: h,
       borderRadius: r,
-      background: "#ff6200",
-      border,
+      background: "rgba(255, 98, 0, 0.95)",
+      border: "2px solid #020202",
       color: "#ffffff",
       textAlign: "center",
       lineHeight: lh,
       fontSize: fs,
       fontWeight: "700",
-      boxSizing: "border-box",
+      cursor: "pointer",
     };
   };
-  // calculator 기본 구간 [10, 100, 1000, 10000] → 스타일 5단
-  return [mk(46, "12px"), mk(50, "13px"), mk(54, "14px"), mk(58, "15px"), mk(62, "16px")];
+  return [mk(44, "12px"), mk(48, "13px"), mk(52, "14px"), mk(56, "15px"), mk(60, "16px")];
 })();
 
 function orangePinMarkerImage(kakao: {
@@ -173,10 +175,11 @@ export default function KakaoMapView({
           mapRef.current = map;
 
           if (typeof kakao.maps.MarkerClusterer === "function") {
+            // minLevel 10: 공식 basicClusterer 샘플과 동일(레벨이 충분히 축소될 때만 클러스터 합침)
             clustererRef.current = new kakao.maps.MarkerClusterer({
               map,
               averageCenter: true,
-              minLevel: 6,
+              minLevel: 10,
               gridSize: 60,
               styles: TKAD_CLUSTER_STYLES,
             });
@@ -272,20 +275,26 @@ export default function KakaoMapView({
         }
       }
 
-      const pinImage = orangePinMarkerImage(kakao.maps);
+      const pinImage = clusterer ? null : orangePinMarkerImage(kakao.maps);
       const toAdd: unknown[] = [];
       for (const mk of markers) {
         if (existing.has(mk.id)) continue;
         if (!Number.isFinite(mk.lat) || !Number.isFinite(mk.lng)) continue;
-        const marker = new kakao.maps.Marker({
-          position: new kakao.maps.LatLng(mk.lat, mk.lng),
-          title: mk.name,
-          image: pinImage,
-        });
+        // MarkerClusterer 경로: 공식 샘플처럼 map·image 없이 생성해야 클러스터/숫자가 정상 표시됨
+        const marker = pinImage
+          ? new kakao.maps.Marker({
+              position: new kakao.maps.LatLng(mk.lat, mk.lng),
+              title: mk.name,
+              image: pinImage,
+            })
+          : new kakao.maps.Marker({
+              position: new kakao.maps.LatLng(mk.lat, mk.lng),
+              title: mk.name,
+            });
         kakao.maps.event.addListener(marker, "click", () => onSelectRef.current(mk.id));
         existing.set(mk.id, marker);
         if (clusterer) toAdd.push(marker);
-        else marker.setMap(map);
+        else (marker as { setMap: (m: unknown) => void }).setMap(map);
       }
       if (clusterer && toAdd.length) clusterer.addMarkers(toAdd);
     } catch (e) {
