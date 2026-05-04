@@ -7,8 +7,12 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* THINKAD 2025 — Primary #0D1B2E · Accent #C8913C · Silver #B0B8C4 · Page #D6D9E6 · CTA #9B3C31 */
+/* THINKAD — Hermès orange #FF6200 · 프리미엄 다크/라이트 (next-themes) */
 @theme inline {
+  --color-hermes: var(--hermes);
+  --color-hero-void: var(--hero-void);
+  --color-hero-fg: var(--hero-fg);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -47,9 +51,9 @@
   --color-gold-200: #f0cd85;
   --color-gold-300: #e5b35a;
   --color-gold-400: #d49e44;
-  --color-gold: #c8913c;
-  --color-gold-light: #e0a85f;
-  --color-gold-dark: #a67524;
+  --color-gold: #ff6200;
+  --color-gold-light: #ff8533;
+  --color-gold-dark: #e65800;
   --color-gold-500: #c8913c;
   --color-gold-600: #a67524;
   --color-gold-700: #7e5818;
@@ -69,8 +73,8 @@
   --color-silver-800: #151922;
   --color-silver-900: #0a0d14;
 
-  --color-cta: #9b3c31;
-  --color-cta-hover: #85342a;
+  --color-cta: #ff6200;
+  --color-cta-hover: #e65800;
   --color-page: #ffffff;
   --color-brand-dark: #0a1420;
 
@@ -126,118 +130,112 @@
 :root {
   /* Phase 1: --radius 도 0. 일부 컴포넌트가 var(--radius) 를 직접 참조해도 사각이 되도록. */
   --radius: 0;
-  --background: #ffffff;
-  --foreground: #0a1420;
-  --card: #ffffff;
-  --card-foreground: #0a1420;
-  --primary: #0d1b2e;
-  --primary-foreground: #ffffff;
-  --secondary: #e4e7f0;
-  --secondary-foreground: #0a1420;
-  --accent: #c8913c;
-  --accent-foreground: #0a1420;
-  --muted: #dfe3ec;
-  --muted-foreground: #5a6372;
-  --destructive: #dc2626;
-  --border: #c1c7d4;
-  --input: #c1c7d4;
-  --ring: #0d1b2e;
-  --cta: #9b3c31;
-  --cta-hover: #85342a;
+  --hermes: #ff6200;
+  --hermes-muted: color-mix(in srgb, var(--hermes) 55%, white);
+  /* 히어로 등 “항상 어두운” 표면 — 라이트/다크 테마와 무관하게 고정 */
+  --hero-void: #020202;
+  --hero-fg: #f5f3f0;
 
-  /* Brutalist 라이트 모드 변수 (--color-bx-* 가 var() 참조). */
-  --bx-black: #000000;
+  --background: #f4f3f0;
+  --foreground: #08080a;
+  --card: #ffffff;
+  --card-foreground: #08080a;
+  --primary: #08080a;
+  --primary-foreground: #fafafa;
+  --secondary: #e9e8e4;
+  --secondary-foreground: #08080a;
+  --accent: #ff6200;
+  --accent-foreground: #ffffff;
+  --muted: #e4e3df;
+  --muted-foreground: #5a5a5e;
+  --destructive: #dc2626;
+  --border: #d8d6d0;
+  --input: #cfcac0;
+  --ring: #ff6200;
+  --cta: #ff6200;
+  --cta-hover: #e65800;
+
+  /* Brutalist 라이트 — 고급 라이트 톤 */
+  --bx-black: #08080a;
   --bx-white: #ffffff;
-  --bx-off: #f5f5f5;
-  --bx-gray: #d4d4d4;
-  --bx-gray-dim: #737373;
-  --bx-accent: #FF6600;
+  --bx-off: #f0efeb;
+  --bx-gray: #d5d2cb;
+  --bx-gray-dim: #5c5c62;
+  --bx-accent: #ff6200;
+
+  --bx-bg-base: var(--color-bx-white);
+  --bx-bg-card: var(--color-bx-off);
+  --bx-fg-base: var(--color-bx-black);
+  --bx-fg-muted: var(--color-bx-gray-dim);
+  --bx-border: var(--color-bx-black);
 }
 
 /* Dark mode tokens (next-themes 가 html.dark 클래스 토글 시 적용) */
 /* 관리자 대시보드만: 라이트 모드에서 남색 primary/악센트 제거 + 본문·보조글 대비 강화
  * (shadcn Card/Button/Input 이 --primary, --muted-foreground 등을 쓰므로 AdminShell 루트에 스코프) */
 html:not(.dark) .admin-dashboard-root {
-  --background: #f5f5f5;
-  --foreground: #000000;
+  --background: #f0efec;
+  --foreground: #0a0a0c;
   --card: #ffffff;
-  --card-foreground: #000000;
-  --primary: #000000;
-  --primary-foreground: #ffffff;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #000000;
-  --muted: #e5e5e5;
-  --muted-foreground: #404040;
-  --accent: #ff6600;
+  --card-foreground: #0a0a0c;
+  --primary: #0a0a0c;
+  --primary-foreground: #fafafa;
+  --secondary: #e6e4df;
+  --secondary-foreground: #0a0a0c;
+  --muted: #dcd9d3;
+  --muted-foreground: #4a4a50;
+  --accent: #ff6200;
   --accent-foreground: #ffffff;
-  --border: #000000;
-  --input: #404040;
-  --ring: #ff6600;
+  --border: #c8c4bc;
+  --input: #a8a49c;
+  --ring: #ff6200;
 }
 
 .dark {
-  --background: #0a0d14;
-  --foreground: #f5f6fa;
-  --card: #151922;
-  --card-foreground: #f5f6fa;
-  --primary: #e0a85f;
-  --primary-foreground: #0a1420;
-  --secondary: #1e232e;
-  --secondary-foreground: #f5f6fa;
-  --accent: #e0a85f;
-  --accent-foreground: #0a1420;
-  --muted: #1a1f29;
-  --muted-foreground: #a3adbb;
-  --destructive: #ef4444;
-  --border: #262c39;
-  --input: #262c39;
-  --ring: #e0a85f;
+  --background: #020202;
+  --foreground: #f4f2ef;
+  --card: #0c0c0f;
+  --card-foreground: #f4f2ef;
+  --primary: #ff6200;
+  --primary-foreground: #020202;
+  --secondary: #16161a;
+  --secondary-foreground: #f4f2ef;
+  --accent: #ff6200;
+  --accent-foreground: #020202;
+  --muted: #141418;
+  --muted-foreground: #9b9ba3;
+  --destructive: #f87171;
+  --border: #2a2a32;
+  --input: #2a2a32;
+  --ring: #ff6200;
+  --cta: #ff6200;
+  --cta-hover: #ff8533;
 
-  /* Dark mode 가독성 보정 — 하드코딩된 navy/gold 색상이 어두운 배경에서 안 보이지 않도록 토큰 재매핑 */
-  --color-navy: #f5f6fa;
-  --color-navy-700: #f5f6fa;
-  --color-navy-800: #f5f6fa;
+  /* 다크에서도 남색 유틸은 “밝은 텍스트”로 (레거시 bg-navy 섹션용) */
+  --color-navy: #f4f2ef;
+  --color-navy-700: #f4f2ef;
+  --color-navy-800: #f4f2ef;
   --color-navy-900: #ffffff;
-  --color-navy-light: #c1c7d4;
-  --color-navy-dark: #f5f6fa;
-  --color-gold-dark: #f0cd85;
-  --color-gold-700: #f0cd85;
-  --color-gold-800: #e5b35a;
+  --color-navy-light: #c4c2bd;
+  --color-navy-dark: #f4f2ef;
+  --color-gold: #ff6200;
+  --color-gold-dark: #ffb38a;
+  --color-gold-700: #ff8533;
+  --color-gold-800: #ff6200;
 
-  /* === Brutalist 다크모드 변수 ===
-   * @theme inline 의 --color-bx-* 가 var(--bx-*) 를 참조하므로 여기서 값만 변경.
-   *
-   * 시맨틱:
-   *   bx-black  = "전경 강조색" (라이트=검정 / 다크=밝은 회백색)
-   *   bx-white  = "베이스 배경" (라이트=흰색 / 다크=가장 어두운 톤)
-   *   bx-off    = "면 배경"     (라이트=옅은 회색 / 다크=살짝 밝은 어두움)
-   *   bx-gray-dim = "보조 텍스트" (라이트=중간회색 / 다크=가독 밝은 회색)
-   *   bx-gray   = "구분선" (라이트=옅은 회색 / 다크=어두운 회색)
-   *   bx-accent = 동일 (브랜드 색 라이트/다크 동일 — Pantone 165)
-   */
-  --bx-black: #f5f6fa;
-  --bx-white: #0a0d14;
-  --bx-off: #1a1f29;
-  --bx-gray: #2a2f3a;
-  --bx-gray-dim: #94a3b8;
-  /* --bx-accent 은 라이트와 동일하므로 재정의 안 함 (브랜드 컬러 유지) */
+  /* Brutalist 다크 — 고대비 프리미엄 */
+  --bx-black: #f2f1ee;
+  --bx-white: #030303;
+  --bx-off: #101014;
+  --bx-gray: #2e2e36;
+  --bx-gray-dim: #9c9ca8;
+  --bx-accent: #ff6200;
 
-  /* === 시맨틱 보조 토큰 (요구사항: --bx-bg-base, --bx-fg-base, --bx-border, --bx-card-bg) ===
-   * 컴포넌트가 직접 사용 가능. 기존 bx-black/white 토큰과 중복되어도 의미상 명확. */
   --bx-bg-base: var(--color-bx-white);
   --bx-bg-card: var(--color-bx-off);
   --bx-fg-base: var(--color-bx-black);
   --bx-fg-muted: var(--color-bx-gray-dim);
-  --bx-border: var(--color-bx-black);
-}
-
-/* 라이트 모드 시맨틱 보조 토큰 (다크와 동일 매핑이지만 라이트 :root 토큰값으로 자동 해소). */
-:root {
-  --bx-bg-base: var(--color-bx-white);
-  --bx-bg-card: var(--color-bx-off);
-  --bx-fg-base: var(--color-bx-black);
-  --bx-fg-muted: var(--color-bx-gray-dim);
-  --bx-border: var(--color-bx-black);
+  --bx-border: var(--color-bx-gray);
 }
 
 /* Hero 섹션 등 항상 어두운 배경(.bg-navy)에는 흰 글씨가 의도된 색이므로
@@ -285,9 +283,9 @@ body {
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
   }
 }
 
@@ -456,16 +454,50 @@ body {
 .hero-radial-accent {
   background: radial-gradient(
     ellipse at top right,
-    rgba(255, 102, 0, 0.14) 0%,
-    transparent 58%
+    rgba(255, 98, 0, 0.22) 0%,
+    transparent 55%
   );
 }
 .hero-radial-cta {
   background: radial-gradient(
     ellipse at bottom left,
-    rgba(255, 102, 0, 0.1) 0%,
-    transparent 52%
+    rgba(255, 98, 0, 0.16) 0%,
+    transparent 50%
   );
+}
+
+/* 매체 카드 — 강한 리프트 + Hermès glow (그룹 호버) */
+.tkad-catalog-card-shell {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s ease,
+    border-color 0.35s ease;
+}
+html:not(.dark) .group:hover .tkad-catalog-card-shell {
+  transform: translateY(-6px);
+  box-shadow:
+    0 22px 44px rgba(8, 8, 10, 0.14),
+    0 0 0 1px rgba(255, 98, 0, 0.2),
+    0 0 36px rgba(255, 98, 0, 0.14);
+}
+.dark .group:hover .tkad-catalog-card-shell {
+  transform: translateY(-10px);
+  box-shadow:
+    0 32px 72px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 98, 0, 0.35),
+    0 0 60px rgba(255, 98, 0, 0.22);
+}
+
+/* 공개 헤더 — 살짝 글래스 */
+.tkad-nav-chrome {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+html:not(.dark) .tkad-nav-chrome {
+  background: color-mix(in srgb, var(--background) 94%, transparent);
+}
+.dark .tkad-nav-chrome {
+  background: color-mix(in srgb, var(--background) 92%, transparent);
 }
 
 /* ── Premium Service card hover ── */
@@ -500,9 +532,18 @@ body {
   transition: opacity 0.25s ease;
 }
 .premium-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(26, 42, 108, 0.08);
-  border-color: color-mix(in srgb, var(--primary) 14%, transparent);
+  transform: translateY(-6px);
+  box-shadow:
+    0 18px 40px rgba(8, 8, 10, 0.12),
+    0 0 0 1px rgba(255, 98, 0, 0.15),
+    0 0 36px rgba(255, 98, 0, 0.12);
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.dark .premium-card:hover {
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 98, 0, 0.28),
+    0 0 48px rgba(255, 98, 0, 0.18);
 }
 .premium-card:hover::before {
   opacity: 1;
@@ -520,7 +561,7 @@ body {
   bottom: -8px;
   width: 48px;
   height: 2px;
-  background: linear-gradient(90deg, #0d1b2e, #c8913c);
+  background: linear-gradient(90deg, #020202, #ff6200);
   border-radius: 2px;
   transform: translateX(-50%);
 }
@@ -1013,11 +1054,69 @@ img {
 }
 
 /* 브루탈리스트 로딩 인디케이터 — 좌→우 슬라이딩 주황 막대.
- * skeletons.tsx 의 PageHeaderSkeleton 에서 사용. */
+ * skeletons.tsx 의 PageHeaderSkeleton · admin/loading 등에서 사용. */
 @keyframes loadingSlide {
   0%   { transform: translateX(-100%); }
   100% { transform: translateX(300%); }
 }
 .loading-slide {
   animation: loadingSlide 1.4s ease-in-out infinite;
+}
+
+/* 라우트 전환 상단 바 — 인디터미넌트 캡슐 (Linear / Vercel 계열) */
+@keyframes navCapsule {
+  0% {
+    transform: translate3d(-120%, 0, 0);
+  }
+  100% {
+    transform: translate3d(calc(100vw + 120%), 0, 0);
+  }
+}
+.nav-loading-capsule {
+  animation: navCapsule 0.95s cubic-bezier(0.33, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+/* 페이지 스트리밍 스켈레톤 — 펄스 대신 쉬머 하이라이트 */
+@keyframes skeletonShimmerSweep {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--muted);
+}
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 55%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 45%,
+    color-mix(in srgb, var(--foreground) 18%, transparent) 50%,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 55%,
+    transparent 100%
+  );
+  transform: translate3d(-100%, 0, 0);
+  animation: skeletonShimmerSweep 1.25s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer::after {
+    animation: none;
+    transform: none;
+    opacity: 0.35;
+  }
+  .nav-loading-capsule {
+    animation: none;
+    transform: translate3d(0, 0, 0);
+    width: 100% !important;
+    opacity: 0.55;
+  }
 }

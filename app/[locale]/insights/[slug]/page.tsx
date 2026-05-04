@@ -110,35 +110,35 @@ export default async function InsightDetailPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
-      <nav className="mb-6 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
-        <Link href="/insights" className="transition-colors hover:text-bx-accent">
+      <nav className="mb-6 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        <Link href="/insights" className="transition-colors hover:text-primary">
           ← OOH 인사이트
         </Link>
       </nav>
 
       <header className="space-y-4">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
           {`// INSIGHT / ${slug.slice(0, 8).toUpperCase()}`}
         </p>
         <div className="flex flex-wrap items-center gap-1">
-          <span className="border-2 border-bx-black bg-bx-black px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+          <span className="border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg">
             [ {insight.period === "monthly" ? "월간" : "분기"} ]
           </span>
-          <span className="border-2 border-bx-black bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
+          <span className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
             {locale === "ko" ? insight.labelKo : insight.labelEn}
           </span>
           {isAuto ? (
-            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+            <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground">
               AI 분석
             </span>
           ) : null}
         </div>
 
-        <h1 className="text-3xl font-bold leading-tight tracking-tight text-bx-black sm:text-5xl">
+        <h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
           {locale === "ko" ? insight.titleKo : insight.titleEn}
         </h1>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" aria-hidden />
             {insight.publishedIso}
@@ -158,15 +158,15 @@ export default async function InsightDetailPage({ params }: Params) {
       {insight.summaryKo.length > 0 ? (
         <section
           aria-label="요약"
-          className="mt-8 border-2 border-bx-accent bg-bx-white p-5"
+          className="mt-8 border-2 border-primary bg-card p-5"
         >
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ TL;DR ]
           </p>
-          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-bx-black">
+          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-foreground">
             {insight.summaryKo.slice(0, 5).map((line, i) => (
               <li key={i} className="flex gap-2">
-                <span aria-hidden className="mt-0.5 text-bx-accent">
+                <span aria-hidden className="mt-0.5 text-primary">
                   ▸
                 </span>
                 <span>{line}</span>
@@ -184,7 +184,7 @@ export default async function InsightDetailPage({ params }: Params) {
 
       <SourcesSection sources={sources} />
 
-      <p className="mt-8 border-2 border-bx-black bg-bx-off p-4 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+      <p className="mt-8 border-2 border-border bg-muted p-4 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
         {`// `}본 리포트는 AI 가 자동 생성한 분석 자료로, THINKAD 자체 검증을
         거쳤으나 의사결정에 활용하실 때는 추가 검증을 권장드립니다.
       </p>

@@ -755,13 +755,13 @@ export default function AdminCampaignsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
           [ CAMPAIGNS ]
         </p>
-        <h2 className="mt-2 text-lg font-bold tracking-tight text-bx-black dark:text-bx-white">
+        <h2 className="mt-2 text-lg font-bold tracking-tight text-foreground">
           캠페인 관리
         </h2>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
           제안 → 협의 → 계약 → 제작 → 송출 → 완료 파이프라인, 송출 일정, 견적·계약·청구,
           송출 증빙 사진을 한 곳에서 관리합니다.
         </p>
@@ -824,7 +824,7 @@ export default function AdminCampaignsPage() {
               />
               <Button
                 type="button"
-                className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+                className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
                 onClick={createCampaign}
                 disabled={loading || createBusy}
                 aria-label="새 캠페인 등록"
@@ -896,11 +896,11 @@ export default function AdminCampaignsPage() {
                       }
                     }}
                     className={`w-full rounded-lg border p-2 text-left transition hover:bg-slate-50 ${
-                      selectedId === c.id ? "border-bx-accent bg-bx-off" : "border-slate-200"
+                      selectedId === c.id ? "border-primary bg-muted" : "border-slate-200"
                     }`}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="line-clamp-1 font-semibold text-bx-black dark:text-bx-white">{c.name}</span>
+                      <span className="line-clamp-1 font-semibold text-foreground">{c.name}</span>
                       <Badge variant="secondary">
                         {STATUS_LABEL[c.status]}
                       </Badge>
@@ -959,22 +959,22 @@ export default function AdminCampaignsPage() {
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2 border-2 border-bx-black bg-bx-white p-3">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <div className="space-y-2 border-2 border-border bg-card p-3">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 [ REPORT ACTIONS ]
               </p>
               <div className="flex flex-wrap gap-0">
                 <button
                   type="button"
                   onClick={() => setShowReportPreview((v) => !v)}
-                  className="inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                  className="inline-flex items-center justify-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                 >
                   <Eye className="h-3.5 w-3.5" />
                   {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
                 </button>
                 <button
                   type="button"
-                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:cursor-not-allowed disabled:opacity-40"
+                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={
                     !selectedId ||
                     !showReportPreview ||
@@ -1011,7 +1011,7 @@ export default function AdminCampaignsPage() {
                       ? `/api/admin/campaigns/${selectedId}/completion-report`
                       : "#"
                   }
-                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-accent bg-bx-accent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-bx-black hover:border-bx-black disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-primary bg-primary px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-foreground hover:border-foreground disabled:opacity-40 disabled:cursor-not-allowed"
                   target="_blank"
                   rel="noreferrer"
                   aria-disabled={!selectedId}
@@ -1023,7 +1023,7 @@ export default function AdminCampaignsPage() {
                   완료 보고서 PDF
                 </a>
               </div>
-              <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
+              <p className="font-mono text-[10px] tracking-tight text-muted-foreground">
                 {`// `}서버 PDF(완료 보고서)는 KPI·패턴·매체·일정·문서를 반영합니다. 이미지 저장은 화면 캡처용입니다.
               </p>
             </div>
@@ -1061,7 +1061,7 @@ export default function AdminCampaignsPage() {
           ) : (
             <>
               <div>
-                <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-bx-black dark:text-bx-white">
+                <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-foreground">
                   <Link2 className="h-4 w-4" />
                   연결된 견적 요청
                 </h3>
@@ -1124,7 +1124,7 @@ export default function AdminCampaignsPage() {
               </div>
 
               <div>
-                <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-bx-black dark:text-bx-white">
+                <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-foreground">
                   <Camera className="h-4 w-4" />
                   송출 증빙 사진
                 </h3>
@@ -1149,7 +1149,7 @@ export default function AdminCampaignsPage() {
                   />
                 </label>
                 {proofMsg ? (
-                  <p className="mb-2 text-xs text-bx-black dark:text-bx-white">{proofMsg}</p>
+                  <p className="mb-2 text-xs text-foreground">{proofMsg}</p>
                 ) : null}
                 <ul className="flex flex-wrap gap-2">
                   {proofs.length === 0 ? (
@@ -1183,7 +1183,7 @@ export default function AdminCampaignsPage() {
 
               {/* 집행 매체 연결 */}
               <div>
-                <h3 className="mb-2 text-sm font-semibold text-bx-black dark:text-bx-white">집행 매체 연결</h3>
+                <h3 className="mb-2 text-sm font-semibold text-foreground">집행 매체 연결</h3>
                 <div className="space-y-2">
                   <div className="relative">
                     <Input
@@ -1203,7 +1203,7 @@ export default function AdminCampaignsPage() {
                             }}
                           >
                             <div>
-                              <p className="font-semibold text-bx-black dark:text-bx-white">{m.name}</p>
+                              <p className="font-semibold text-foreground">{m.name}</p>
                               <p className="text-muted-foreground">{m.location}</p>
                             </div>
                             {m.dailyFootfall && <span className="ml-auto text-muted-foreground">{m.dailyFootfall.toLocaleString()}명/일</span>}
@@ -1225,7 +1225,7 @@ export default function AdminCampaignsPage() {
                     </div>
                   )}
                   {bookingForm.mediaId && (
-                    <Button type="button" size="sm" disabled={bookingBusy || !bookingForm.startsAt || !bookingForm.endsAt} onClick={() => void addMediaBooking()} className="gap-1.5 border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white">
+                    <Button type="button" size="sm" disabled={bookingBusy || !bookingForm.startsAt || !bookingForm.endsAt} onClick={() => void addMediaBooking()} className="gap-1.5 border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground">
                       {bookingBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
                       매체 연결 추가
                     </Button>
@@ -1235,7 +1235,7 @@ export default function AdminCampaignsPage() {
                       {mediaBookings.map((b, i) => (
                         <div key={b.id ?? i} className="flex items-center gap-2 rounded-lg border border-navy/10 bg-slate-50/60 px-3 py-2 text-xs">
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-bx-black dark:text-bx-white">{b.media?.name ?? b.title}</p>
+                            <p className="font-semibold text-foreground">{b.media?.name ?? b.title}</p>
                             <p className="text-muted-foreground">{b.startsAt?.slice(0,10)} ~ {b.endsAt?.slice(0,10)} {b.media?.dailyFootfall ? `· ${b.media.dailyFootfall.toLocaleString()}명/일` : ""}</p>
                           </div>
                           {b.id && (
@@ -1251,7 +1251,7 @@ export default function AdminCampaignsPage() {
               </div>
 
               <div>
-                <h3 className="mb-2 text-sm font-semibold text-bx-black dark:text-bx-white">
+                <h3 className="mb-2 text-sm font-semibold text-foreground">
                   송출·일정
                 </h3>
                 <div className="mb-2 grid gap-2 sm:grid-cols-2">
@@ -1313,7 +1313,7 @@ export default function AdminCampaignsPage() {
               </div>
 
               <div>
-                <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-bx-black dark:text-bx-white">
+                <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-foreground">
                   <FileText className="h-4 w-4" />
                   견적 / 계약 / 청구
                 </h3>

@@ -29,7 +29,7 @@ export function PlannerStepper({
       role="group"
       aria-label={stepOfLabel}
     >
-      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
         [ {stepOfLabel} ]
       </p>
       <ol className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
@@ -47,10 +47,10 @@ export function PlannerStepper({
                   aria-label={label ? `${s}. ${label}` : `Step ${s}`}
                   onClick={() => onStepClick?.(s)}
                   className={cn(
-                    "flex h-10 w-10 items-center justify-center border-2 font-mono text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bx-accent",
+                    "flex h-10 w-10 items-center justify-center border-2 font-mono text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     isCurrent
-                      ? "border-bx-accent bg-bx-accent text-bx-white cursor-default"
-                      : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white cursor-pointer",
+                      ? "border-primary bg-primary text-primary-foreground cursor-default"
+                      : "border-border bg-card text-foreground hover:bg-foreground hover:text-background cursor-pointer",
                   )}
                 >
                   {isComplete ? <Check className="h-4 w-4" aria-hidden /> : s}
@@ -62,10 +62,10 @@ export function PlannerStepper({
                   className={cn(
                     "flex h-10 w-10 items-center justify-center border-2 font-mono text-sm font-bold",
                     isCurrent
-                      ? "border-bx-accent bg-bx-accent text-bx-white"
+                      ? "border-primary bg-primary text-primary-foreground"
                       : isComplete
-                        ? "border-bx-black bg-bx-white text-bx-black"
-                        : "border-bx-black bg-bx-off text-bx-gray-dim",
+                        ? "border-border bg-card text-foreground"
+                        : "border-border bg-muted text-muted-foreground",
                   )}
                 >
                   {isComplete ? <Check className="h-4 w-4" aria-hidden /> : s}
@@ -76,7 +76,7 @@ export function PlannerStepper({
                   aria-hidden
                   className={cn(
                     "hidden h-[2px] w-8 sm:block sm:w-10",
-                    isComplete ? "bg-bx-accent" : "bg-bx-black",
+                    isComplete ? "bg-primary" : "bg-border",
                   )}
                 />
               ) : null}

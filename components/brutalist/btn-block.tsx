@@ -27,7 +27,7 @@ const variantClass: Record<BtnBlockVariant, string> = {
   dark: "bg-bx-black text-bx-white border-bx-black hover:bg-bx-gray-dim hover:border-bx-gray-dim",
   /* accent: 주황 배경은 라이트/다크 모두 동일 (브랜드 색). 텍스트는 항상 흰색 유지. */
   accent:
-    "bg-bx-accent text-white border-bx-accent hover:bg-bx-black hover:border-bx-black hover:text-bx-white",
+    "bg-bx-accent text-white border-bx-accent hover:bg-bx-black hover:border-bx-black hover:text-bx-white hover:shadow-[0_0_32px_rgba(255,98,0,0.4)] active:scale-[0.98]",
 };
 
 const sizeClass: Record<BtnBlockSize, string> = {

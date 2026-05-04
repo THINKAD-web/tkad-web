@@ -179,10 +179,10 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
     <div className="mx-auto max-w-6xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
             [ MEDIA JSON EDIT ]
           </p>
-          <h1 className="mt-2 text-xl font-bold tracking-tight text-bx-black dark:text-bx-white">
+          <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground">
             JSON으로 매체 수정
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -206,7 +206,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="min-h-0 lg:col-span-1">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base text-bx-black dark:text-bx-white">JSON</CardTitle>
+            <CardTitle className="text-base text-foreground">JSON</CardTitle>
           </CardHeader>
           <CardContent>
             <Textarea
@@ -221,7 +221,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base text-bx-black dark:text-bx-white">미리보기</CardTitle>
+            <CardTitle className="text-base text-foreground">미리보기</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {!preview.ok ? (
@@ -232,7 +232,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
                   <p className="text-xs font-medium text-muted-foreground">
                     매체명
                   </p>
-                  <p className="font-semibold text-bx-black dark:text-bx-white">{preview.name}</p>
+                  <p className="font-semibold text-foreground">{preview.name}</p>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">
@@ -243,21 +243,21 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
                 {preview.priceOptions && preview.priceOptions.length > 0 ? (
                   <div>
                     <p className="mb-1 text-xs font-medium text-muted-foreground">가격 옵션</p>
-                    <div className="overflow-hidden rounded-lg border-2 border-bx-black text-xs dark:border-bx-white">
+                    <div className="overflow-hidden rounded-lg border-2 border-border text-xs border-border">
                       <table className="w-full">
                         <thead>
-                          <tr className="bg-bx-off dark:bg-bx-gray-dim/30">
-                            <th className="px-2 py-1.5 text-left font-semibold text-bx-black dark:text-bx-white">구분</th>
-                            <th className="px-2 py-1.5 text-right font-semibold text-bx-black dark:text-bx-white">금액</th>
-                            <th className="px-2 py-1.5 text-right font-semibold text-bx-black dark:text-bx-white">기간</th>
-                            <th className="px-2 py-1.5 text-left font-semibold text-bx-black dark:text-bx-white">설명</th>
+                          <tr className="bg-muted bg-muted/60">
+                            <th className="px-2 py-1.5 text-left font-semibold text-foreground">구분</th>
+                            <th className="px-2 py-1.5 text-right font-semibold text-foreground">금액</th>
+                            <th className="px-2 py-1.5 text-right font-semibold text-foreground">기간</th>
+                            <th className="px-2 py-1.5 text-left font-semibold text-foreground">설명</th>
                           </tr>
                         </thead>
                         <tbody>
                           {preview.priceOptions.map((opt, i) => (
-                            <tr key={i} className={i % 2 === 0 ? "bg-bx-white dark:bg-bx-black" : "bg-bx-off dark:bg-bx-gray-dim/30"}>
-                              <td className="px-2 py-1.5 font-semibold text-bx-black dark:text-bx-white">{opt.label}</td>
-                              <td className="px-2 py-1.5 text-right tabular-nums text-bx-accent">₩{opt.price.toLocaleString("ko-KR")}</td>
+                            <tr key={i} className={i % 2 === 0 ? "bg-card" : "bg-muted bg-muted/60"}>
+                              <td className="px-2 py-1.5 font-semibold text-foreground">{opt.label}</td>
+                              <td className="px-2 py-1.5 text-right tabular-nums text-primary">₩{opt.price.toLocaleString("ko-KR")}</td>
                               <td className="px-2 py-1.5 text-right text-muted-foreground">{opt.period ?? "month"}</td>
                               <td className="max-w-[10rem] px-2 py-1.5 text-left text-[11px] text-muted-foreground">
                                 {opt.description?.trim() ? opt.description : "—"}
@@ -273,7 +273,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
                     <p className="text-xs font-medium text-muted-foreground">
                       월 가격(원)
                     </p>
-                    <p className="font-semibold text-bx-black dark:text-bx-white">
+                    <p className="font-semibold text-foreground">
                       ₩{preview.price.toLocaleString("ko-KR")}
                     </p>
                   </div>
@@ -306,7 +306,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
       <div className="flex flex-wrap gap-2 border-t pt-4">
         <Button
           type="button"
-          className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+          className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
           disabled={saving}
           onClick={() => void save()}
         >

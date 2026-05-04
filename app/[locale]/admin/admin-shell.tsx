@@ -34,7 +34,7 @@ function SignOutButton({ locale, label }: { locale: string; label: string }) {
         await fetch("/api/admin/auth/logout", { method: "POST" });
         window.location.href = `/${locale}/admin/login`;
       }}
-      className="inline-flex shrink-0 items-center gap-1.5 border-2 border-bx-black bg-bx-white px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-white dark:hover:text-bx-black"
+      className="inline-flex shrink-0 items-center gap-1.5 border-2 border-border bg-card px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
     >
       <LogOut className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">{label}</span>
@@ -94,12 +94,12 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   };
 
   const sidebar = (
-    <div className="flex h-full flex-col border-r-2 border-bx-black bg-bx-white text-bx-black dark:border-bx-white dark:bg-bx-black dark:text-bx-white">
-      <div className="flex h-16 items-center gap-2 border-b-2 border-bx-black px-5 dark:border-bx-white">
-        <span className="text-lg font-extrabold tracking-tight">
-          THINK<span className="text-bx-accent">AD</span>
+    <div className="flex h-full flex-col border-r-2 border-border bg-card text-card-foreground">
+      <div className="flex h-16 items-center gap-2 border-b-2 border-border px-5">
+        <span className="text-lg font-black tracking-tight">
+          THINK<span className="text-hermes">AD</span>
         </span>
-        <span className="border-2 border-bx-black bg-bx-accent px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white dark:border-bx-white">
+        <span className="border-2 border-foreground/20 bg-hermes px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_0_16px_rgba(255,98,0,0.35)]">
           ADMIN
         </span>
       </div>
@@ -114,10 +114,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
               href={`/${locale}${item.href}`}
               onClick={() => setSidebarOpen(false)}
               className={[
-                "flex items-center gap-3 border-2 border-bx-black px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] transition-colors dark:border-bx-white",
+                "flex items-center gap-3 border-2 border-border px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] transition-all",
                 active
-                  ? "bg-bx-black text-bx-white dark:bg-bx-white dark:text-bx-black"
-                  : "bg-bx-white text-bx-black hover:bg-bx-off dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30",
+                  ? "border-hermes/60 bg-hermes/15 text-foreground shadow-[inset_0_0_0_1px_rgba(255,98,0,0.35)]"
+                  : "bg-card text-foreground hover:border-hermes/40 hover:bg-muted/80",
               ].join(" ")}
             >
               <Icon className="h-[18px] w-[18px] shrink-0" />
@@ -127,10 +127,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         })}
       </nav>
 
-      <div className="border-t-2 border-bx-black p-3 dark:border-bx-white">
+      <div className="border-t-2 border-border p-3">
         <Link
           href={`/${locale}`}
-          className="flex items-center gap-2 border-2 border-bx-black bg-bx-white px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-bx-black transition-colors hover:bg-bx-off dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30"
+          className="flex items-center gap-2 border-2 border-border bg-background px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-foreground transition-colors hover:border-hermes/50 hover:bg-muted/60"
         >
           <ArrowLeft className="h-4 w-4" />
           {tNav("backToSite")}
@@ -140,13 +140,13 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="admin-dashboard-root flex min-h-screen bg-bx-off text-bx-black dark:bg-bx-black dark:text-bx-white">
+    <div className="admin-dashboard-root flex min-h-screen bg-background text-foreground">
       <aside className="hidden w-60 shrink-0 md:block">{sidebar}</aside>
 
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-bx-black/50"
+            className="absolute inset-0 bg-black/55 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
           <div className="relative h-full w-60">{sidebar}</div>
@@ -154,18 +154,18 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       )}
 
       <div className="flex flex-1 flex-col">
-        <header className="flex h-14 items-center gap-3 border-b-2 border-bx-black bg-bx-white px-4 dark:border-bx-white dark:bg-bx-black md:px-6">
+        <header className="flex h-14 items-center gap-3 border-b-2 border-border bg-card px-4 md:px-6">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="border-2 border-bx-black bg-bx-white p-1.5 text-bx-black transition-colors hover:bg-bx-off dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-gray-dim/30 md:hidden"
+            className="border-2 border-border bg-background p-1.5 text-foreground transition-colors hover:border-hermes/50 hover:bg-muted/60 md:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>
           <h1 className="min-w-0 flex-1 truncate font-mono text-[12px] font-bold uppercase tracking-[0.18em]">
             {navItems.find((n) => isActive(n.href))?.label ?? "관리자"}
           </h1>
-          <ThemeToggle className="inline-flex h-9 w-9 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white dark:border-bx-white dark:bg-bx-black dark:text-bx-white dark:hover:bg-bx-white dark:hover:text-bx-black" />
+          <ThemeToggle />
           <SignOutButton locale={locale} label={tNav("signOut")} />
         </header>
         <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>

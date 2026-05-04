@@ -276,16 +276,14 @@ export default function ContactInquiryForm() {
       );
     }
     return (
-      <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
+      <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-destructive">
         {`// `}{tForm(`errors.${field}` as "errors.name")}
       </p>
     );
   };
 
   const inputErrorClass = (field: keyof FormFields) =>
-    touched[field] && errors[field]
-      ? "border-bx-accent"
-      : "";
+    touched[field] && errors[field] ? "border-destructive" : "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -361,39 +359,39 @@ export default function ContactInquiryForm() {
   };
 
   const inputClass = cn(
-    "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black",
-    "placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none",
+    "h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground",
+    "placeholder:text-muted-foreground focus:border-primary focus:outline-none",
   );
 
   if (submitted) {
     return (
       <div className="flex flex-col items-center gap-4 py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white">
+        <div className="flex h-14 w-14 items-center justify-center border-2 border-primary bg-primary text-primary-foreground">
           <CheckCircle className="h-8 w-8" aria-hidden />
         </div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ SUCCESS ]
         </p>
-        <p className="text-lg font-bold tracking-tight text-bx-black">
+        <p className="text-lg font-bold tracking-tight text-foreground">
           {tForm("successTitle")}
         </p>
-        <p className="font-mono text-[12px] tracking-tight text-bx-gray-dim">
+        <p className="font-mono text-[12px] tracking-tight text-muted-foreground">
           {tForm("successBody")}
         </p>
 
-        <div className="mt-4 w-full max-w-sm border-2 border-bx-black bg-bx-white p-5">
-          <div className="flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="mt-4 w-full max-w-sm border-2 border-border bg-card p-5">
+          <div className="flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             <MessageCircle className="h-4 w-4" aria-hidden />
             [ {tForm("kakaoLead")} ]
           </div>
-          <p className="mt-2 text-center font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+          <p className="mt-2 text-center font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
             {tForm("kakaoDesc")}
           </p>
           <a
             href={KAKAO_CHANNEL_PUBLIC_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 border-2 border-bx-black px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 border-2 border-border px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
             style={{ backgroundColor: "#FEE500" }}
           >
             <MessageCircle className="h-4 w-4" aria-hidden />
@@ -407,32 +405,32 @@ export default function ContactInquiryForm() {
   return (
     <form className="relative space-y-5" onSubmit={handleSubmit} noValidate>
       {publishedCaseRef ? (
-        <div className="border-2 border-bx-accent bg-bx-white p-4 text-sm text-bx-black">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="border-2 border-primary bg-card p-4 text-sm text-foreground">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ CASE REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("caseRefBanner")}</p>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
             {`// `}{isKo
               ? publishedCaseRef.titleKo
               : publishedCaseRef.titleEn ?? publishedCaseRef.titleKo}
           </p>
           <Link
             href={`/cases/${publishedCaseRef.id}`}
-            className="mt-3 inline-flex border-b-2 border-bx-black pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent"
+            className="mt-3 inline-flex border-b-2 border-foreground/30 pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary hover:text-primary"
           >
             {t("caseRefViewCase")} →
           </Link>
         </div>
       ) : academyTopic ? (
-        <div className="border-2 border-bx-black bg-bx-off p-4 text-sm text-bx-black">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="border-2 border-border bg-muted p-4 text-sm text-foreground">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ ACADEMY REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("academyRefBanner")}</p>
           <Link
             href="/academy"
-            className="mt-3 inline-flex border-b-2 border-bx-black pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent"
+            className="mt-3 inline-flex border-b-2 border-foreground/30 pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary hover:text-primary"
           >
             {t("academyRefBack")} →
           </Link>
@@ -455,10 +453,10 @@ export default function ContactInquiryForm() {
       <div>
         <label
           htmlFor="contact-name"
-          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent"
+          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary"
         >
           {tForm("nameLabel")}{" "}
-          <span className="text-bx-accent" aria-hidden>
+          <span className="text-primary" aria-hidden>
             *
           </span>
         </label>
@@ -478,10 +476,10 @@ export default function ContactInquiryForm() {
       <div>
         <label
           htmlFor="contact-phone"
-          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent"
+          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary"
         >
           {tForm("phoneLabel")}{" "}
-          <span className="text-bx-accent" aria-hidden>
+          <span className="text-primary" aria-hidden>
             *
           </span>
         </label>
@@ -503,10 +501,10 @@ export default function ContactInquiryForm() {
       <div>
         <label
           htmlFor="contact-inquiry-type"
-          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent"
+          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary"
         >
           {tForm("inquiryTypeLabel")}{" "}
-          <span className="text-bx-accent" aria-hidden>
+          <span className="text-primary" aria-hidden>
             *
           </span>
         </label>
@@ -532,10 +530,10 @@ export default function ContactInquiryForm() {
       <div>
         <label
           htmlFor="contact-budget"
-          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent"
+          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary"
         >
           {tForm("budgetLabel")}{" "}
-          <span className="text-bx-accent" aria-hidden>
+          <span className="text-primary" aria-hidden>
             *
           </span>
         </label>
@@ -561,10 +559,10 @@ export default function ContactInquiryForm() {
       <div>
         <label
           htmlFor="contact-message"
-          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent"
+          className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary"
         >
           {tForm("messageLabel")}{" "}
-          <span className="text-bx-accent" aria-hidden>
+          <span className="text-primary" aria-hidden>
             *
           </span>
         </label>
@@ -586,7 +584,7 @@ export default function ContactInquiryForm() {
       </div>
 
       {!siteKey ? (
-        <p className="border-2 border-bx-accent bg-bx-white px-3 py-2 font-mono text-[11px] tracking-tight text-bx-accent">
+        <p className="border-2 border-primary bg-card px-3 py-2 font-mono text-[11px] tracking-tight text-primary">
           {`// `}{tForm("turnstileConfigHint")}
         </p>
       ) : (

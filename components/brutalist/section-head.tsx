@@ -41,22 +41,22 @@ export function SectionHead({
     <header
       className={cn(
         "mb-10",
-        divider && "border-b-2 border-bx-black pb-6",
+        divider && "border-b-2 border-border pb-6",
         align === "center" && "text-center",
         className,
       )}
     >
-      <div className="font-mono text-[12px] uppercase tracking-[0.22em] text-bx-gray-dim">
-        <span className="text-bx-black">[{number}]</span>
+      <div className="font-mono text-[12px] uppercase tracking-[0.2em] text-muted-foreground">
+        <span className="font-semibold text-hermes">[{number}]</span>
         {category ? (
-          <span className="ml-2">/ {category}</span>
+          <span className="ml-2 text-muted-foreground">/ {category}</span>
         ) : null}
       </div>
-      <h2 className="mt-4 text-3xl font-bold leading-[1.05] tracking-tight text-bx-black sm:text-4xl lg:text-6xl">
+      <h2 className="mt-4 text-3xl font-black leading-[1.08] tracking-tight text-foreground sm:text-4xl lg:text-6xl">
         {title}
       </h2>
       {meta ? (
-        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           // {meta}
         </p>
       ) : null}

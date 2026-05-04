@@ -10,7 +10,7 @@ import { MediaFavoriteButton } from "@/components/media-favorite-button";
 const KakaoMapView = dynamic(() => import("./kakao-map-view"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-sm text-gray-500">
+    <div className="flex h-full w-full items-center justify-center bg-muted text-sm text-muted-foreground">
       지도 로딩 중…
     </div>
   ),

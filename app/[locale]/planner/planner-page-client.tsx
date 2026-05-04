@@ -32,6 +32,7 @@ import {
   reachSplitForGoal,
   comparePlansByDuration,
   portfolioFromManualSelection,
+  matchesPlannerCategory,
 } from "@/lib/planner-logic";
 import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { useToast } from "@/components/toast-provider";
@@ -181,6 +182,22 @@ export default function PlannerPageClient({
     () => filterPlannerMediaMulti(catalog, selectedRegions, categories),
     [catalog, selectedRegions, categories],
   );
+
+  /** Step4 AI 추천: 엄격 필터 결과가 비어도 등록 매체가 보이도록 완화 풀 (직접 탐색은 기존 `catalog`) */
+  const recommendationCatalog = useMemo(() => {
+    if (filtered.length > 0) return filtered;
+    if (selectedRegions.size > 0) {
+      const byRegion = catalog.filter((m) => selectedRegions.has(m.region));
+      if (byRegion.length > 0) return byRegion;
+    }
+    if (categories.size > 0) {
+      const byCat = catalog.filter((m) =>
+        [...categories].some((c) => matchesPlannerCategory(m, c)),
+      );
+      if (byCat.length > 0) return byCat;
+    }
+    return catalog;
+  }, [filtered, catalog, selectedRegions, categories]);
 
   const selectedMediaForSimulation = useMemo(() => {
     if (campaignMediaIds.length === 0) return [];
@@ -466,36 +483,36 @@ export default function PlannerPageClient({
 
   if (databaseEmpty && catalog.length === 0) {
     return (
-      <div className="min-h-screen bg-bx-white">
-        <section className="bg-bx-black py-24 text-bx-white">
+      <div className="min-h-screen bg-background">
+        <section className="bg-hero-void py-24 text-hero-fg">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
               {`// 05 / Planner`}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-bx-white">
+              <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-primary-foreground">
                 THINKAD Planner
               </span>
-              <span className="border-2 border-bx-white bg-bx-black/60 px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-bx-white">
+              <span className="border-2 border-hero-fg/30 bg-hero-fg/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-hero-fg">
                 BETA
               </span>
             </div>
             <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               {t("title")}
             </h1>
-            <p className="mt-4 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+            <p className="mt-4 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
               {t("subtitle")}
             </p>
           </div>
         </section>
         <div className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ EMPTY CATALOG ]
           </p>
-          <p className="mt-3 text-lg font-bold tracking-tight text-bx-black">
+          <p className="mt-3 text-lg font-bold tracking-tight text-foreground">
             {t("preparingMedia")}
           </p>
-          <p className="mt-2 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+          <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
             {t("preparingMediaDesc")}
           </p>
           <div className="mt-8 inline-block">
@@ -509,24 +526,24 @@ export default function PlannerPageClient({
   }
 
   return (
-    <div className="min-h-screen bg-bx-white">
-      <section className="bg-bx-black py-20 text-bx-white sm:py-24">
+    <div className="min-h-screen bg-background">
+      <section className="bg-hero-void py-20 text-hero-fg sm:py-24">
         <div className="mx-auto flex max-w-7xl flex-col items-center px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
             {`// 05 / Planner`}
           </p>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
-            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-bx-white">
+            <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-primary-foreground">
               THINKAD Planner
             </span>
-            <span className="border-2 border-bx-white bg-bx-black/60 px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-bx-white">
+            <span className="border-2 border-hero-fg/30 bg-hero-fg/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-hero-fg">
               BETA
             </span>
           </div>
           <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             {t("title")}
           </h1>
-          <p className="mt-4 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+          <p className="mt-4 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {t("subtitle")}
           </p>
         </div>
@@ -575,27 +592,27 @@ export default function PlannerPageClient({
             {wizardStep === 2 ? (
               <div className="space-y-6">
                 <div className="space-y-2 text-center sm:text-left">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ STEP 2 / TARGET + REGION ]
                   </p>
-                  <h2 className="text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+                  <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                     {t("stepRegionTitle")}
                   </h2>
-                  <p className="text-sm leading-relaxed text-bx-gray-dim">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {t("stepRegionDesc")}
                   </p>
                 </div>
 
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ CATEGORY ]
                     </p>
-                    <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-bx-black">
-                      <Layers className="h-5 w-5 text-bx-accent" />
+                    <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+                      <Layers className="h-5 w-5 text-primary" />
                       {t("category")}
                     </h3>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                       {t("mediaMixHint")}
                     </p>
                   </div>
@@ -608,8 +625,8 @@ export default function PlannerPageClient({
                         className={cn(
                           "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors touch-manipulation",
                           categories.has(key)
-                            ? "border-bx-accent bg-bx-accent text-bx-white"
-                            : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-card text-foreground hover:bg-muted",
                         )}
                       >
                         {t(labelKey)}
@@ -628,9 +645,9 @@ export default function PlannerPageClient({
                   countLabel={(n) => t("mapCount", { count: n })}
                 />
 
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("packagesTitle")} ]
                     </p>
                   </div>
@@ -646,10 +663,10 @@ export default function PlannerPageClient({
                         key={id}
                         type="button"
                         onClick={() => applyPreset(id)}
-                        className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4 text-left transition-colors hover:bg-bx-off"
+                        className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 text-left transition-colors hover:bg-muted"
                       >
-                        <p className="font-bold tracking-tight text-bx-black">{t(titleKey)}</p>
-                        <p className="mt-2 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                        <p className="font-bold tracking-tight text-foreground">{t(titleKey)}</p>
+                        <p className="mt-2 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                           {t(descKey)}
                         </p>
                       </button>
@@ -659,7 +676,7 @@ export default function PlannerPageClient({
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
-                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("ageLabel")} ]
                     </p>
                     <div className="flex flex-wrap gap-0">
@@ -671,8 +688,8 @@ export default function PlannerPageClient({
                           className={cn(
                             "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                             ageKey === k
-                              ? "border-bx-accent bg-bx-accent text-bx-white"
-                              : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-card text-foreground hover:bg-muted",
                           )}
                         >
                           {t(k)}
@@ -681,7 +698,7 @@ export default function PlannerPageClient({
                     </div>
                   </div>
                   <div>
-                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("industryLabel")} ]
                     </p>
                     <div className="flex flex-wrap gap-0">
@@ -693,8 +710,8 @@ export default function PlannerPageClient({
                           className={cn(
                             "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                             industryKey === k
-                              ? "border-bx-accent bg-bx-accent text-bx-white"
-                              : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-card text-foreground hover:bg-muted",
                           )}
                         >
                           {t(k)}
@@ -708,22 +725,22 @@ export default function PlannerPageClient({
 
             {/* Step 3 — 예산 · 기간 */}
             {wizardStep === 3 ? (
-              <div className="border-2 border-bx-black bg-bx-white">
-                <div className="border-b-2 border-bx-black p-5">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <div className="border-2 border-border bg-card">
+                <div className="border-b-2 border-border p-5">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ STEP 3 / BUDGET + PERIOD ]
                   </p>
-                  <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-bx-black">
-                    <Wallet className="h-5 w-5 text-bx-accent" />
+                  <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+                    <Wallet className="h-5 w-5 text-primary" />
                     {t("stepBudgetTitle")}
                   </h3>
-                  <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                  <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                     {t("stepBudgetDesc")}
                   </p>
                 </div>
                 <div className="space-y-6 p-5">
                   <div>
-                    <div className="mb-3 flex justify-between font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+                    <div className="mb-3 flex justify-between font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                       <span>{t("budgetSliderMin")}</span>
                       <span>{t("budgetSliderMax")}</span>
                     </div>
@@ -734,13 +751,13 @@ export default function PlannerPageClient({
                       step={500}
                       value={budgetNum}
                       onChange={(e) => setBudget(e.target.value)}
-                      className="h-3 w-full cursor-pointer appearance-none border-2 border-bx-black bg-bx-white"
-                      style={{ accentColor: "#FF6600" }}
+                      className="h-3 w-full cursor-pointer appearance-none border-2 border-border bg-card"
+                      style={{ accentColor: "#ff6200" }}
                       aria-label={t("budget")}
                     />
                     <div className="mt-4 flex flex-wrap items-end gap-3">
                       <div className="flex-1 min-w-[8rem]">
-                        <label className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        <label className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                           [ {t("budget")} ]
                         </label>
                         <input
@@ -749,18 +766,18 @@ export default function PlannerPageClient({
                           onChange={(e) =>
                             setBudget(e.target.value.replace(/[^\d]/g, ""))
                           }
-                          className="mt-1 h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono font-bold text-bx-black focus:border-bx-accent focus:outline-none"
+                          className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono font-bold text-foreground focus:border-primary focus:outline-none"
                         />
                       </div>
-                      <p className="pb-1 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+                      <p className="pb-1 font-mono text-[12px] tracking-tight text-muted-foreground">
                         {t("budgetPerMonthSummary", {
                           amount: Math.round(budgetNum / Math.max(months, 1)),
                         })}
                       </p>
                     </div>
                     {blurbParts ? (
-                      <p className="mt-4 border-2 border-bx-accent bg-bx-white px-4 py-3 font-mono text-[11px] leading-relaxed tracking-tight text-bx-black">
-                        <span className="mr-1 font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <p className="mt-4 border-2 border-primary bg-card px-4 py-3 font-mono text-[11px] leading-relaxed tracking-tight text-foreground">
+                        <span className="mr-1 font-bold uppercase tracking-[0.22em] text-primary">
                           {`// `}
                         </span>
                         {t("budgetBlurb", {
@@ -772,7 +789,7 @@ export default function PlannerPageClient({
                     ) : null}
                   </div>
                   <div>
-                    <p className="mb-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                    <p className="mb-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       <CalendarRange className="h-4 w-4" />
                       [ {t("period")} ]
                     </p>
@@ -787,8 +804,8 @@ export default function PlannerPageClient({
                             className={cn(
                               "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                               selected
-                                ? "border-bx-accent bg-bx-accent text-bx-white"
-                                : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-card text-foreground hover:bg-muted",
                             )}
                           >
                             {t(opt.labelKey)}
@@ -805,31 +822,31 @@ export default function PlannerPageClient({
             {wizardStep === 4 ? (
               <div className="space-y-6">
                 <div className="space-y-2 text-center sm:text-left">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ STEP 4 / MEDIA SELECTION ]
                   </p>
-                  <h2 className="text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+                  <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                     {t("stepMediaTitle")}
                   </h2>
-                  <p className="text-sm leading-relaxed text-bx-gray-dim">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {t("stepMediaDesc")}
                   </p>
                 </div>
 
                 <PlannerRecommendationPanel
-                  catalog={filtered}
+                  catalog={recommendationCatalog}
                   isKo={isKo}
                   regionLabel={mediaRegionLabel}
                 />
 
-                <div className="space-y-2 border-t-2 border-bx-black pt-6">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="space-y-2 border-t-2 border-border pt-6">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ MANUAL BROWSE ]
                   </p>
-                  <h3 className="text-base font-bold tracking-tight text-bx-black">
+                  <h3 className="text-base font-bold tracking-tight text-foreground">
                     {t("recommendBrowseTitle")}
                   </h3>
-                  <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                  <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
                     {t("recommendBrowseDesc")}
                   </p>
                 </div>
@@ -874,7 +891,7 @@ export default function PlannerPageClient({
               />
             ) : null}
 
-            <div className="flex flex-col-reverse gap-3 border-t-2 border-bx-black pt-6 sm:flex-row sm:justify-between">
+            <div className="flex flex-col-reverse gap-3 border-t-2 border-border pt-6 sm:flex-row sm:justify-between">
               <BtnBlock
                 variant="secondary"
                 size="md"
@@ -950,10 +967,10 @@ export default function PlannerPageClient({
 
             {shareUrl ? (
               <div
-                className="border-2 border-bx-accent bg-bx-white px-4 py-3"
+                className="border-2 border-primary bg-card px-4 py-3"
                 role="status"
               >
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                   [ {t("shareBannerTitle")} ]
                 </p>
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -961,7 +978,7 @@ export default function PlannerPageClient({
                     readOnly
                     value={shareUrl}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="min-w-0 flex-1 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-xs text-bx-black focus:border-bx-accent focus:outline-none"
+                    className="min-w-0 flex-1 border-2 border-border bg-card px-3 py-1.5 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
                   />
                   <BtnBlock
                     variant="accent"
@@ -983,15 +1000,15 @@ export default function PlannerPageClient({
                     {t("shareCopy")}
                   </BtnBlock>
                 </div>
-                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                   {`// `}{t("shareBannerExpiry")}
                 </p>
               </div>
             ) : null}
 
             {filtered.length === 0 ? (
-              <div className="border-2 border-bx-black bg-bx-off py-12 text-center">
-                <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              <div className="border-2 border-border bg-muted py-12 text-center">
+                <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
                   {`// `}{t("emptyFilter")}
                 </p>
                 <div className="mt-6 flex justify-center">
@@ -1005,8 +1022,8 @@ export default function PlannerPageClient({
                 </div>
               </div>
             ) : budgetNum < PLANNER_BUDGET_MIN ? (
-              <div className="border-2 border-bx-accent bg-bx-white py-10 text-center text-bx-black">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <div className="border-2 border-primary bg-card py-10 text-center text-foreground">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                   [ NEED BUDGET ]
                 </p>
                 <p className="mt-3 font-bold tracking-tight">
@@ -1015,9 +1032,9 @@ export default function PlannerPageClient({
               </div>
             ) : metrics ? (
               <>
-                <div className="flex flex-col gap-2 border-2 border-bx-accent bg-bx-white px-4 py-3 text-sm text-bx-black sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-2 border-2 border-primary bg-card px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+                    <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground">
                       {t("estimatedModelBadge")}
                     </span>
                     <span className="min-w-0 text-left text-xs leading-relaxed sm:text-sm">
@@ -1026,8 +1043,8 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <p className="border-2 border-bx-black bg-bx-white px-4 py-3 text-sm text-bx-black">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <p className="border-2 border-border bg-card px-4 py-3 text-sm text-foreground">
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ {t("targetSummaryLabel")} ]
                   </span>{" "}
                   {(() => {
@@ -1055,48 +1072,48 @@ export default function PlannerPageClient({
                       : 0;
                   return (
                     <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("kpiImpressions")} ]
                         </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-accent">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-primary">
                           {metrics.estimatedTotalImpressions.toLocaleString()}
                         </p>
-                        <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiImpressionsHint")}
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("kpiReach")} ]
                         </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
                           {estReach.toLocaleString()}
                         </p>
-                        <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiReachHint")}
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("kpiCpm")} ]
                         </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
                           ₩{estCpm.toLocaleString()}
                         </p>
-                        <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiCpmHint")}
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-black p-4 text-bx-white">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-hero-void p-4 text-hero-fg">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                           [ {t("kpiRoi")} ]
                         </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-accent">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-primary">
                           {metrics.roiExpected}
                           {t("roiUnit")}
                         </p>
-                        <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-white/65">
+                        <p className="mt-1 font-mono text-[10px] tracking-tight text-hero-fg/65">
                           {t("kpiRoiHint")}
                         </p>
                       </div>
@@ -1104,15 +1121,15 @@ export default function PlannerPageClient({
                   );
                 })()}
 
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ PORTFOLIO ]
                     </p>
-                    <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+                    <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
                       {t("comboTitle")}
                     </h3>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                       {manualIntersectedPortfolio.length > 0
                         ? t("comboHintManual")
                         : t("comboHint")}
@@ -1123,7 +1140,7 @@ export default function PlannerPageClient({
                       <Link
                         key={m.id}
                         href={mediaItemDetailPath(m.id)}
-                        className="group -mt-[2px] -ml-[2px] flex flex-col gap-2 border-2 border-bx-black bg-bx-white p-3 transition-colors hover:bg-bx-off"
+                        className="group -mt-[2px] -ml-[2px] flex flex-col gap-2 border-2 border-border bg-card p-3 transition-colors hover:bg-muted"
                       >
                         <CompositePreview
                           mediaImageUrl={getPrimaryMediaImageUrl(m)}
@@ -1138,18 +1155,18 @@ export default function PlannerPageClient({
                           missingLabel={t("mediaPhotoMissing")}
                         />
                         <div>
-                          <p className="line-clamp-2 text-sm font-bold tracking-tight text-bx-black">
+                          <p className="line-clamp-2 text-sm font-bold tracking-tight text-foreground">
                             {isKo ? m.name : (m.nameEn || m.name) || m.name}
                           </p>
-                          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                             {`// `}{tm(`regions.${m.region}`)} ·{" "}
                             {isKo
                               ? m.location.slice(0, 40)
                               : (m.locationEn || m.location).slice(0, 40)}
                           </p>
-                          <p className="mt-2 font-mono text-sm font-bold tabular-nums text-bx-accent">
+                          <p className="mt-2 font-mono text-sm font-bold tabular-nums text-primary">
                             ₩{m.price.toLocaleString()}
-                            <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-bx-gray-dim">
+                            <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                               {isKo ? "만/월" : "₩10K/mo"}
                             </span>
                           </p>
@@ -1157,7 +1174,7 @@ export default function PlannerPageClient({
                             const badge = priceOptionBadge(m);
                             if (!badge) return null;
                             return (
-                              <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+                              <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                                 [ {badge} ]
                               </p>
                             );
@@ -1169,47 +1186,47 @@ export default function PlannerPageClient({
                 </div>
 
                 <div className="grid gap-0 lg:grid-cols-2">
-                  <div className="border-2 border-bx-black bg-bx-white">
-                    <div className="border-b-2 border-bx-black p-5">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <div className="border-2 border-border bg-card">
+                    <div className="border-b-2 border-border p-5">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ {t("results")} ]
                       </p>
                     </div>
                     <div className="grid grid-cols-1 gap-0 p-4 sm:grid-cols-2">
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("matchedMedia")} ]
                         </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
                           {filtered.length}
-                          <span className="ml-1 text-base text-bx-gray-dim">
+                          <span className="ml-1 text-base text-muted-foreground">
                             {t("countUnit")}
                           </span>
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("avgMonthlySlot")} ]
                         </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
                           {Math.round(metrics.avgMonthlyPrice).toLocaleString()}
-                          <span className="ml-1 text-sm text-bx-gray-dim">
+                          <span className="ml-1 text-sm text-muted-foreground">
                             {isKo ? "만원/월" : "₩10K/mo"}
                           </span>
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4 sm:col-span-2">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 sm:col-span-2">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("estMonthlyImp")} ]
                         </p>
-                        <p className="mt-2 font-mono text-xl font-bold tabular-nums text-bx-black">
+                        <p className="mt-2 font-mono text-xl font-bold tabular-nums text-foreground">
                           {metrics.estimatedMonthlyImpressions.toLocaleString()}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="-ml-[2px] border-2 border-bx-black bg-bx-white p-6 lg:mt-0">
+                  <div className="-ml-[2px] border-2 border-border bg-card p-6 lg:mt-0">
                     <PlannerReachDonutChart
                       corePct={reachSplit.corePct}
                       extendedPct={reachSplit.extendedPct}
@@ -1220,9 +1237,9 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartDailyBarTitle")} ]
                     </p>
                   </div>
@@ -1236,16 +1253,16 @@ export default function PlannerPageClient({
                 </div>
 
                 <div className="grid gap-0 lg:grid-cols-2">
-                  <div className="border-2 border-bx-black bg-bx-white p-6">
+                  <div className="border-2 border-border bg-card p-6">
                     <PlannerBudgetPieChart
                       data={pieSlices}
                       title={t("chartBudgetPieTitle")}
                       unitLabel={t("chartBudgetPieUnit")}
                     />
                   </div>
-                  <div className="-ml-[2px] border-2 border-bx-black bg-bx-white lg:mt-0">
-                    <div className="border-b-2 border-bx-black p-5">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <div className="-ml-[2px] border-2 border-border bg-card lg:mt-0">
+                    <div className="border-b-2 border-border p-5">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ {t("chartCpmTitle")} ]
                       </p>
                     </div>
@@ -1259,9 +1276,9 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartMonthCompareTitle")} ]
                     </p>
                   </div>
@@ -1281,13 +1298,13 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ ROI ]
                     </p>
-                    <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-bx-black">
-                      <TrendingUp className="h-5 w-5 text-bx-accent" />
+                    <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+                      <TrendingUp className="h-5 w-5 text-primary" />
                       {t("roiTitle")}
                     </h3>
                   </div>
@@ -1301,17 +1318,17 @@ export default function PlannerPageClient({
                     ).map(([labelKey, val]) => (
                       <div key={labelKey}>
                         <div className="mb-1 flex justify-between text-sm">
-                          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black">
+                          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
                             {t(labelKey)}
                           </span>
-                          <span className="font-mono font-bold tabular-nums text-bx-accent">
+                          <span className="font-mono font-bold tabular-nums text-primary">
                             {val}
                             {t("roiUnit")}
                           </span>
                         </div>
-                        <div className="h-3 w-full border-2 border-bx-black bg-bx-white">
+                        <div className="h-3 w-full border-2 border-border bg-card">
                           <div
-                            className="h-full bg-bx-accent transition-all duration-500"
+                            className="h-full bg-primary transition-all duration-500"
                             style={{
                               width: `${Math.min(100, (val / roiMax) * 100)}%`,
                             }}
@@ -1322,12 +1339,12 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartImpLineTitle")} ]
                     </p>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                       {t("chartImpTitle")}
                     </p>
                   </div>
@@ -1340,12 +1357,12 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-bx-black bg-bx-white">
-                  <div className="border-b-2 border-bx-black p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartRoiLineTitle")} ]
                     </p>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                       {t("chartRoiLineHint")}
                     </p>
                   </div>
@@ -1363,16 +1380,16 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-bx-black bg-bx-black p-6 text-bx-white sm:p-8">
+                <div className="border-2 border-border bg-hero-void p-6 text-hero-fg sm:p-8">
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="max-w-xl space-y-2">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ NEXT STEP ]
                       </p>
-                      <h3 className="text-xl font-bold tracking-tight text-bx-white sm:text-2xl">
+                      <h3 className="text-xl font-bold tracking-tight sm:text-2xl">
                         {t("ctaBannerTitle")}
                       </h3>
-                      <p className="text-sm leading-relaxed text-bx-white/75">
+                      <p className="text-sm leading-relaxed text-hero-fg/75">
                         {t("ctaBannerDesc")}
                       </p>
                     </div>

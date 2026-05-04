@@ -474,26 +474,25 @@ export default function MediaBrowseClient({
   return (
     <>
       {hideHero ? null : (
-        <section className="bg-bx-black py-24">
+        <section className="bg-gradient-to-b from-hero-void via-hero-void to-[#0c0c10] py-20 text-hero-fg sm:py-24">
           <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
-              {`// 01 / Media Search`}
+            <p className="text-xs font-semibold tracking-wide text-hermes sm:text-sm">
+              {isKo ? "매체 검색" : "Media search"}
             </p>
-            <div className="mt-4 flex items-center justify-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <h1 className="text-3xl font-black leading-[1.12] tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
                 {t("media.title")}
               </h1>
-              <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-bx-white">
+              <span className="border border-hermes/70 bg-hermes/10 px-2.5 py-1 text-xs font-semibold text-hermes">
                 BETA
               </span>
             </div>
-            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.22em] text-bx-white/70">
-              {`// `}
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-hero-fg/85 sm:text-lg">
               {t("media.subtitle")}
             </p>
             <div className="relative mx-auto mt-10 max-w-2xl">
               <Search
-                className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-bx-gray-dim"
+                className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-silver-500 sm:left-5"
                 aria-hidden
               />
               <input
@@ -503,7 +502,7 @@ export default function MediaBrowseClient({
                 placeholder={
                   isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
                 }
-                className="h-14 w-full border-2 border-bx-white bg-bx-white pl-14 pr-5 font-mono text-sm tracking-tight text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none sm:h-16 sm:text-base"
+                className="h-14 w-full border-2 border-white/25 bg-white pl-12 pr-4 text-base text-navy shadow-md placeholder:text-silver-500 focus:border-hermes focus:outline-none focus:ring-2 focus:ring-hermes/50 sm:h-16 sm:pl-14 sm:pr-5 sm:text-[1.05rem]"
                 aria-label={isKo ? "매체 검색" : "Search media"}
               />
             </div>
@@ -519,31 +518,38 @@ export default function MediaBrowseClient({
       <section className="bg-bx-white py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {mainTab === "search" ? (
-            <p className="mb-6 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
-              {`// `}
+            <p className="mb-6 text-center text-sm font-medium text-silver-600 sm:text-base">
               {t("media.resultsSectionEyebrow")}
             </p>
           ) : null}
           <div className="mb-10 flex justify-center">
-            <div className="inline-flex border-2 border-bx-black bg-bx-white">
+            <div
+              className="inline-flex border-2 border-navy/20 bg-silver-50 shadow-xs"
+              role="tablist"
+              aria-label={isKo ? "매체 탐색 방식" : "Browse mode"}
+            >
               <button
                 type="button"
+                role="tab"
+                aria-selected={mainTab === "search"}
                 onClick={() => setMainTab("search")}
-                className={`touch-manipulation px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors sm:px-10 ${
+                className={`touch-manipulation px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5 ${
                   mainTab === "search"
-                    ? "bg-bx-black text-bx-white"
-                    : "text-bx-black hover:bg-bx-off"
+                    ? "bg-navy text-bx-white"
+                    : "text-navy hover:bg-white"
                 }`}
               >
                 {t("media.ai.tabSearch")}
               </button>
               <button
                 type="button"
+                role="tab"
+                aria-selected={mainTab === "ai"}
                 onClick={() => setMainTab("ai")}
-                className={`touch-manipulation border-l-2 border-bx-black px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors sm:px-10 ${
+                className={`touch-manipulation border-l-2 border-navy/15 px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5 ${
                   mainTab === "ai"
-                    ? "bg-bx-accent text-bx-white"
-                    : "text-bx-black hover:bg-bx-off"
+                    ? "bg-gold text-navy"
+                    : "text-navy hover:bg-white"
                 }`}
               >
                 {t("media.ai.tabAi")}
@@ -645,12 +651,15 @@ export default function MediaBrowseClient({
               </Sheet>
 
               <div className="min-w-0">
-                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-bx-black">
-                      {t("media.results")}: {gridDisplayList.length}
+                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="text-base font-semibold text-navy sm:text-lg">
+                      {t("media.results")}:{" "}
+                      <span className="tabular-nums text-gold-dark">
+                        {gridDisplayList.length}
+                      </span>
                       {catalogMinPadActive ? (
-                        <span className="ml-2 font-normal text-bx-gray-dim">
+                        <span className="ml-2 text-sm font-normal text-silver-500">
                           {tMedia("catalogMinPadCountHint", {
                             matched: sortedFiltered.length,
                           })}
@@ -658,8 +667,8 @@ export default function MediaBrowseClient({
                       ) : null}
                     </span>
                     {debouncedCatalogSearch.trim() ? (
-                      <span className="inline-flex max-w-full items-center gap-1.5 border-2 border-bx-accent bg-bx-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
-                        <Search className="size-3 shrink-0" aria-hidden />
+                      <span className="inline-flex max-w-full items-center gap-1.5 border border-gold/50 bg-gold/10 px-3 py-1.5 text-xs font-medium text-navy sm:text-sm">
+                        <Search className="size-3.5 shrink-0 text-gold-dark" aria-hidden />
                         <span className="min-w-0 truncate">
                           {t("media.activeKeywordLabel")}: {debouncedCatalogSearch}
                         </span>
@@ -667,12 +676,12 @@ export default function MediaBrowseClient({
                     ) : null}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <label className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-black">
-                      <span className="text-bx-gray-dim">
+                    <label className="inline-flex items-center gap-2 border border-navy/20 bg-silver-50 px-3 py-2 text-sm text-navy">
+                      <span className="shrink-0 text-silver-500">
                         {t("media.sortLabel")}
                       </span>
                       <select
-                        className="max-w-[10rem] border-l-2 border-bx-black bg-bx-white pl-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] focus:outline-none"
+                        className="max-w-[11rem] min-w-0 border-l border-navy/15 bg-transparent pl-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gold/40"
                         value={sortBy}
                         onChange={(e) =>
                           setSortBy(
@@ -767,8 +776,8 @@ export default function MediaBrowseClient({
                         </BtnBlock>
                       </>
                     ) : null}
-                    <div className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-black px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-accent">
-                      <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+                    <div className="inline-flex items-center gap-2 border border-navy/25 bg-navy px-3 py-2 text-xs font-medium text-gold sm:text-sm">
+                      <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
                       <span>{tMedia("browseCatalogVerifiedBadge")}</span>
                     </div>
                   </div>
@@ -1021,7 +1030,7 @@ export default function MediaBrowseClient({
                   </div>
                     )}
                     {catalogPageCount > 1 ? (
-                      <div className="mt-8 flex flex-wrap items-center justify-center gap-4 border-t-2 border-bx-black pt-6">
+                      <div className="mt-8 flex flex-wrap items-center justify-center gap-4 border-t border-navy/10 pt-6">
                         <BtnBlock
                           disabled={catalogPage <= 1}
                           onClick={() =>
@@ -1032,7 +1041,7 @@ export default function MediaBrowseClient({
                         >
                           ← {t("media.pagePrev")}
                         </BtnBlock>
-                        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                        <span className="text-sm text-silver-600">
                           {t("media.pageSummary", {
                             from:
                               gridDisplayList.length === 0

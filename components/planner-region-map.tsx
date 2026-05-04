@@ -61,14 +61,14 @@ export function PlannerRegionMap({
   return (
     <div className="space-y-3">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ {title} ]
         </p>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
           {hint}
         </p>
       </div>
-      <div className="border-2 border-bx-black bg-bx-off p-3">
+      <div className="border-2 border-border bg-muted p-3">
         <svg
           viewBox="0 0 340 380"
           className="mx-auto h-auto w-full max-w-md touch-manipulation"
@@ -81,7 +81,7 @@ export function PlannerRegionMap({
             x="170"
             y="36"
             textAnchor="middle"
-            className="fill-bx-gray-dim text-[11px] font-bold tracking-[0.22em]"
+            className="fill-muted-foreground text-[11px] font-bold tracking-[0.22em]"
             style={{ fontFamily: "JetBrains Mono, monospace" }}
           >
             [ KOREA ]
@@ -96,8 +96,8 @@ export function PlannerRegionMap({
                   className={cn(
                     "cursor-pointer transition-colors",
                     on
-                      ? "fill-bx-accent stroke-bx-black stroke-[3]"
-                      : "fill-bx-white stroke-bx-black stroke-[2] hover:fill-bx-off",
+                      ? "fill-primary stroke-border stroke-[3]"
+                      : "fill-card stroke-border stroke-[2] hover:fill-muted",
                   )}
                   onClick={() => onToggle(z.id)}
                 />
@@ -107,7 +107,7 @@ export function PlannerRegionMap({
                   textAnchor="middle"
                   className={cn(
                     "pointer-events-none text-[11px] font-bold",
-                    on ? "fill-bx-white" : "fill-bx-black",
+                    on ? "fill-card" : "fill-foreground",
                   )}
                 >
                   {labelFor(z.id)}
@@ -118,7 +118,7 @@ export function PlannerRegionMap({
                   textAnchor="middle"
                   className={cn(
                     "pointer-events-none text-[9px] font-bold tracking-[0.18em]",
-                    on ? "fill-bx-white" : "fill-bx-gray-dim",
+                    on ? "fill-card" : "fill-muted-foreground",
                   )}
                   style={{ fontFamily: "JetBrains Mono, monospace" }}
                 >
@@ -137,15 +137,15 @@ export function PlannerRegionMap({
                 className={cn(
                   "border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                   selected.has(r)
-                    ? "border-bx-accent bg-bx-accent text-bx-white"
-                    : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted",
                 )}
               >
                 {labelFor(r)}
                 <span
                   className={cn(
                     "ml-2 tabular-nums",
-                    selected.has(r) ? "text-bx-white/85" : "text-bx-gray-dim",
+                    selected.has(r) ? "text-primary-foreground/85" : "text-muted-foreground",
                   )}
                 >
                   ({counts[r] ?? 0})

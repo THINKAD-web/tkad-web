@@ -1,50 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
+/**
+ * 클라이언트 라우트 전환 시 상단 인디터미넌트 바만 표시.
+ * 전역 블러·스피너는 제거해 깜빡임·답답함을 줄임 (요즘 SaaS/대시보드 흐름).
+ * 최초 진입 한 번은 스킵 (풀 리로드 시 불필요한 플래시 방지).
+ */
 export default function TopLoader() {
   const pathname = usePathname();
-  const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const firstPath = useRef(true);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- progress bar animation on route change
-    setLoading(true);
-    setProgress(70);
-    const t1 = setTimeout(() => setProgress(90), 200);
-    const t2 = setTimeout(() => {
-      setProgress(100);
-      setTimeout(() => {
-        setLoading(false);
-        setProgress(0);
-      }, 200);
-    }, 400);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
+    if (firstPath.current) {
+      firstPath.current = false;
+      return;
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 라우트 변경 시 한 번 펄스
+    setVisible(true);
+    const hide = setTimeout(() => setVisible(false), 720);
+    return () => clearTimeout(hide);
   }, [pathname]);
 
-  if (!loading && progress === 0) return null;
-
   return (
-    <>
-      <div
-        className="fixed top-0 left-0 z-[100] h-[3px] bg-gradient-to-r from-navy via-cta to-gold shadow-[0_0_10px_rgba(26,42,108,0.35)] transition-all duration-300 ease-out"
-        style={{ width: `${progress}%`, opacity: progress === 100 ? 0 : 1 }}
-      />
-      <div
-        className="pointer-events-none fixed inset-0 z-[99] flex items-center justify-center bg-background/25 backdrop-blur-[2px] motion-reduce:hidden"
-        style={{ opacity: progress === 100 ? 0 : 1, transition: "opacity 0.25s ease-out" }}
-        aria-hidden
-      >
-        <div
-          className="h-9 w-9 rounded-full border-2 border-navy/15 border-t-navy motion-safe:animate-spin"
-          role="status"
-          aria-label="Loading"
-        />
+    <div
+      className={cn(
+        "pointer-events-none fixed inset-x-0 top-0 z-[100] h-[2px] transition-opacity duration-500 ease-out",
+        visible ? "opacity-100" : "opacity-0",
+      )}
+      aria-hidden
+    >
+      <div className="relative h-full w-full overflow-hidden">
+        <div className="absolute inset-0 bg-border/30 dark:bg-border/50" />
+        <div className="nav-loading-capsule absolute inset-y-0 left-0 h-full w-[min(32vw,12rem)] bg-gradient-to-r from-transparent via-cta to-transparent shadow-[0_0_12px_rgba(255,98,0,0.42)]" />
       </div>
-    </>
+    </div>
   );
 }

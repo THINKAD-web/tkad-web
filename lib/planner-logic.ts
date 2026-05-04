@@ -2,6 +2,48 @@ import type { MediaItem } from "@/lib/media-data";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
 
+/** DB `Media.type` · 레거시 값 → 플래너 유형 (매칭용) */
+export type PlannerMediaKind = "digital" | "static" | "mobile" | "network";
+
+export function normalizeMediaTypeForPlanner(
+  type: string | undefined | null,
+): PlannerMediaKind | null {
+  if (type == null || typeof type !== "string") return null;
+  const t = type.trim().toLowerCase().replace(/\s+/g, "_");
+  if (t === "network") return "network";
+  if (
+    t === "digital" ||
+    t === "ooh_digital" ||
+    t === "led" ||
+    t === "signage" ||
+    t === "digital_signage" ||
+    t === "electronic" ||
+    t === "screen"
+  ) {
+    return "digital";
+  }
+  if (
+    t === "static" ||
+    t === "billboard" ||
+    t === "outdoor" ||
+    t === "wallscape" ||
+    t === "print"
+  ) {
+    return "static";
+  }
+  if (
+    t === "mobile" ||
+    t === "transit" ||
+    t === "bus" ||
+    t === "subway" ||
+    t === "transport" ||
+    t === "vehicle"
+  ) {
+    return "mobile";
+  }
+  return null;
+}
+
 /** 지도·다중 선택용 (전국 패널은 `national`) */
 export const PLANNER_MAP_REGIONS = [
   "seoul",
@@ -23,10 +65,11 @@ export function matchesPlannerCategory(
   item: MediaItem,
   cat: PlannerCategory,
 ): boolean {
+  const norm = normalizeMediaTypeForPlanner(item.type);
   if (cat === "digital")
-    return item.type === "digital" || item.type === "network";
-  if (cat === "static") return item.type === "static";
-  if (cat === "mobile") return item.type === "mobile";
+    return norm === "digital" || norm === "network";
+  if (cat === "static") return norm === "static";
+  if (cat === "mobile") return norm === "mobile";
   return false;
 }
 

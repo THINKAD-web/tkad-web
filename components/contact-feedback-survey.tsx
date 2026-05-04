@@ -9,9 +9,9 @@ import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
 
 const inputCls =
-  "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+  "h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 const textareaCls =
-  "w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+  "w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -114,30 +114,30 @@ export function ContactFeedbackSurvey() {
     return (
       <div className="space-y-6 py-4">
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex h-14 w-14 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white">
+          <div className="flex h-14 w-14 items-center justify-center border-2 border-primary bg-primary text-primary-foreground">
             <CheckCircle className="h-8 w-8" />
           </div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ THANKS ]
           </p>
-          <p className="text-lg font-bold tracking-tight text-bx-black">
+          <p className="text-lg font-bold tracking-tight text-foreground">
             {t("thankTitle")}
           </p>
-          <p className="font-mono text-[12px] tracking-tight text-bx-gray-dim">
+          <p className="font-mono text-[12px] tracking-tight text-muted-foreground">
             {t("thankDesc")}
           </p>
         </div>
 
-        <div className="border-2 border-bx-accent bg-bx-white p-6">
-          <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="border-2 border-primary bg-card p-6">
+          <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             <Gift className="h-4 w-4" />
             [ {t("couponTitle")} ]
           </div>
-          <p className="mt-2 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="mt-2 font-mono text-[11px] tracking-tight text-muted-foreground">
             {t("couponHint")}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <code className="border-2 border-bx-black bg-bx-black px-4 py-2 font-mono text-lg font-bold tracking-[0.22em] text-bx-accent">
+            <code className="border-2 border-border bg-hero-void px-4 py-2 font-mono text-lg font-bold tracking-[0.22em] text-primary">
               {couponCode}
             </code>
             <BtnBlock variant="secondary" size="sm" onClick={copyCoupon}>
@@ -145,7 +145,7 @@ export function ContactFeedbackSurvey() {
               {t("copyCode")}
             </BtnBlock>
           </div>
-          <p className="mt-4 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+          <p className="mt-4 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
             {`// `}{t("couponTerms")}
           </p>
         </div>
@@ -170,14 +170,14 @@ export function ContactFeedbackSurvey() {
         />
       </div>
 
-      <p className="font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+      <p className="font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
         {`// `}{t("intro")}
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-            [ {t("email")} ] <span className="text-bx-accent">*</span>
+          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            [ {t("email")} ] <span className="text-primary">*</span>
           </label>
           <input
             type="email"
@@ -189,7 +189,7 @@ export function ContactFeedbackSurvey() {
           />
         </div>
         <div>
-          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ {t("name")} ]
           </label>
           <input
@@ -199,7 +199,7 @@ export function ContactFeedbackSurvey() {
           />
         </div>
         <div>
-          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ {t("company")} ]
           </label>
           <input
@@ -211,8 +211,8 @@ export function ContactFeedbackSurvey() {
       </div>
 
       <fieldset className="space-y-3">
-        <legend className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-          [ {t("qService")} ] <span className="text-bx-accent">*</span>
+        <legend className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ {t("qService")} ] <span className="text-primary">*</span>
         </legend>
         <div className="flex flex-wrap gap-0">
           {[1, 2, 3, 4, 5].map((n) => (
@@ -223,22 +223,22 @@ export function ContactFeedbackSurvey() {
               className={cn(
                 "-mt-[2px] -ml-[2px] inline-flex h-10 min-w-[40px] items-center justify-center border-2 px-3 font-mono text-sm font-bold transition-colors",
                 serviceSatisfaction === n
-                  ? "border-bx-accent bg-bx-accent text-bx-white"
-                  : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted",
               )}
             >
               {n}
             </button>
           ))}
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           {`// `}{t("scale15")}
         </p>
       </fieldset>
 
       <fieldset className="space-y-3">
-        <legend className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-          [ {t("qNps")} ] <span className="text-bx-accent">*</span>
+        <legend className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ {t("qNps")} ] <span className="text-primary">*</span>
         </legend>
         <div className="flex flex-wrap gap-0">
           {Array.from({ length: 11 }, (_, i) => i).map((n) => (
@@ -249,22 +249,22 @@ export function ContactFeedbackSurvey() {
               className={cn(
                 "-mt-[2px] -ml-[2px] inline-flex h-9 min-w-[36px] items-center justify-center border-2 px-2 font-mono text-sm font-bold transition-colors",
                 nps === n
-                  ? "border-bx-accent bg-bx-accent text-bx-white"
-                  : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted",
               )}
             >
               {n}
             </button>
           ))}
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           {`// `}{t("npsHint")}
         </p>
       </fieldset>
 
       <fieldset className="space-y-3">
-        <legend className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-          [ {t("qCampaign")} ] <span className="text-bx-accent">*</span>
+        <legend className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ {t("qCampaign")} ] <span className="text-primary">*</span>
         </legend>
         <div className="flex flex-wrap gap-0">
           {(
@@ -284,8 +284,8 @@ export function ContactFeedbackSurvey() {
               className={cn(
                 "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                 campaign === v
-                  ? "border-bx-accent bg-bx-accent text-bx-white"
-                  : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted",
               )}
             >
               {label}
@@ -295,8 +295,8 @@ export function ContactFeedbackSurvey() {
       </fieldset>
 
       {campaign === "yes" ? (
-        <div className="space-y-3 border-2 border-bx-accent bg-bx-off p-4">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="space-y-3 border-2 border-primary bg-muted p-4">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ {t("qCampaignResult")} ]
           </p>
           <div className="flex flex-wrap gap-0">
@@ -308,8 +308,8 @@ export function ContactFeedbackSurvey() {
                 className={cn(
                   "-mt-[2px] -ml-[2px] inline-flex h-10 min-w-[40px] items-center justify-center border-2 px-3 font-mono text-sm font-bold transition-colors",
                   campaignResult === n
-                    ? "border-bx-accent bg-bx-accent text-bx-white"
-                    : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted",
                 )}
               >
                 {n}
@@ -317,7 +317,7 @@ export function ContactFeedbackSurvey() {
             ))}
           </div>
           <div>
-            <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ {t("campaignComment")} ]
             </label>
             <textarea
@@ -332,7 +332,7 @@ export function ContactFeedbackSurvey() {
       ) : null}
 
       <div>
-        <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ {t("qImprove")} ]
         </label>
         <textarea
@@ -344,7 +344,7 @@ export function ContactFeedbackSurvey() {
         />
       </div>
 
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
         {`// `}{t("timeHint")}
       </p>
 

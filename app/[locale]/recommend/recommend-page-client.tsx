@@ -125,7 +125,7 @@ export default function RecommendPageClient({
 
   if (catalog.length === 0) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-bx-gray-dim">
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
         {`// `}{t("media.ai.emptyCatalog")}
       </div>
     );
@@ -133,20 +133,20 @@ export default function RecommendPageClient({
 
   return (
     <>
-      <section className="bg-bx-black py-24">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
             {`// 04 / AI Media Explorer`}
           </p>
           <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
               {isKo ? "TKAD Bot과 함께 매체 탐험 시작!" : tr("heroTitle")}
             </h1>
-            <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-bx-white">
+            <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.2em] text-primary-foreground">
               BETA
             </span>
           </div>
-          <p className="mx-auto mt-6 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+          <p className="mx-auto mt-6 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {isKo
               ? "몇 가지 정보만 알려주시면, TKAD Bot이 캠페인에 꼭 맞는 매체들을 찾아드려요."
               : tr("heroSubtitle")}
@@ -154,7 +154,7 @@ export default function RecommendPageClient({
         </div>
       </section>
 
-      <section className="bg-bx-off py-16 sm:py-20">
+      <section className="bg-muted py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {phase === "form" && (
             <MediaAiRecommendForm
@@ -164,7 +164,7 @@ export default function RecommendPageClient({
           )}
 
           {phase === "loading" && (
-            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-bx-white/95 backdrop-blur-md">
+            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-background/95 backdrop-blur-md">
               <LoadingOverlay isKo={isKo} />
             </div>
           )}
@@ -185,11 +185,11 @@ export default function RecommendPageClient({
           )}
 
           {phase === "noResults" && (
-            <div className="mx-auto max-w-lg border-2 border-bx-black bg-bx-white p-8 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <div className="mx-auto max-w-lg border-2 border-border bg-card p-8 text-center">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                 [ NO RESULTS ]
               </p>
-              <p className="mt-4 text-sm font-medium leading-relaxed text-bx-black">
+              <p className="mt-4 text-sm font-medium leading-relaxed text-foreground">
                 {t("media.ai.emptyResult")}
               </p>
               <div className="mt-6 flex justify-center">
@@ -211,12 +211,12 @@ export default function RecommendPageClient({
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ FULL LIST ]
                   </p>
-                  <h2 className="mt-1 text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+                  <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                     {t("media.ai.results")}{" "}
-                    <span className="font-mono text-bx-gray-dim">({fullList.length})</span>
+                    <span className="font-mono text-muted-foreground">({fullList.length})</span>
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -241,11 +241,11 @@ export default function RecommendPageClient({
               </div>
 
               {top3.length > 0 && (
-                <div className="border-2 border-bx-accent bg-bx-white px-5 py-4">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                <div className="border-2 border-primary bg-card px-5 py-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ TOP 3 PICKS ]
                   </p>
-                  <p className="mt-1 text-sm font-bold tracking-tight text-bx-black">
+                  <p className="mt-1 text-sm font-bold tracking-tight text-foreground">
                     {isKo
                       ? "TKAD bot의 TOP 3 강추 발견"
                       : "TKAD bot's TOP 3 picks"}
@@ -254,17 +254,17 @@ export default function RecommendPageClient({
                     {top3.map((s, i) => (
                       <li
                         key={s.item.id}
-                        className="flex items-center justify-between gap-2 border-t-2 border-bx-black pt-2"
+                        className="flex items-center justify-between gap-2 border-t-2 border-border pt-2"
                       >
                         <span className="inline-flex min-w-0 items-center gap-2">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent font-mono text-[10px] font-bold text-bx-white">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-border bg-primary font-mono text-[10px] font-bold text-primary-foreground">
                             {i + 1}
                           </span>
-                          <span className="line-clamp-1 text-sm font-bold tracking-tight text-bx-black">
+                          <span className="line-clamp-1 text-sm font-bold tracking-tight text-foreground">
                             {isKo ? s.item.name : s.item.nameEn}
                           </span>
                         </span>
-                        <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-accent">
+                        <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                           {isKo ? `${s.score}점 궁합` : `MATCH ${s.score}`}
                         </span>
                       </li>
@@ -277,22 +277,22 @@ export default function RecommendPageClient({
                 {fullList.map((s) => (
                   <li
                     key={s.item.id}
-                    className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-5 transition-colors hover:bg-bx-off"
+                    className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-5 transition-colors hover:bg-muted"
                   >
-                    <p className="text-base font-bold leading-tight tracking-tight text-bx-black">
+                    <p className="text-base font-bold leading-tight tracking-tight text-foreground">
                       {isKo ? s.item.name : s.item.nameEn}
                     </p>
-                    <p className="mt-2 line-clamp-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                    <p className="mt-2 line-clamp-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                       {`// `}{isKo ? s.item.location : s.item.locationEn}
                     </p>
-                    <ul className="mt-3 space-y-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                    <ul className="mt-3 space-y-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                       {s.reasons.slice(0, 3).map((r, i) => (
                         <li key={i}>· {isKo ? r.ko : r.en}</li>
                       ))}
                     </ul>
                     <Link
                       href={mediaItemDetailPath(s.item.id)}
-                      className="mt-4 inline-flex items-center gap-1 border-b-2 border-bx-black pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent"
+                      className="mt-4 inline-flex items-center gap-1 border-b-2 border-border pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:text-primary hover:border-primary"
                     >
                       {isKo ? "상세 보기" : "Details"} →
                     </Link>
@@ -354,29 +354,29 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
   return (
     <div className="w-full max-w-md space-y-6 px-6">
       <div className="flex flex-col items-center gap-3">
-        <div className="relative flex h-20 w-20 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
+        <div className="relative flex h-20 w-20 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
           <span className="text-3xl" aria-hidden>
             🤖
           </span>
-          <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-bx-black bg-bx-black px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-primary">
             TKAD bot
           </span>
         </div>
-        <p className="mt-6 text-center font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
+        <p className="mt-6 text-center font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
           [ {isKo
             ? "EXPLORING MEDIA UNIVERSE"
             : "EXPLORING MEDIA UNIVERSE"} ]
         </p>
-        <p className="text-center text-sm font-bold leading-snug tracking-tight text-bx-black">
+        <p className="text-center text-sm font-bold leading-snug tracking-tight text-foreground">
           {isKo
             ? "TKAD bot이 매체 탐험을 진행 중입니다..."
             : "TKAD bot is exploring the media universe for you..."}
         </p>
       </div>
-      <div className="space-y-3 border-2 border-bx-black bg-bx-white p-6">
-        <div className="h-3 w-full overflow-hidden border-2 border-bx-black bg-bx-white">
+      <div className="space-y-3 border-2 border-border bg-card p-6">
+        <div className="h-3 w-full overflow-hidden border-2 border-border bg-card">
           <motion.div
-            className="h-full w-2/5 bg-bx-accent"
+            className="h-full w-2/5 bg-primary"
             animate={{ x: ["-30%", "220%"] }}
             transition={{
               duration: 1.35,
@@ -386,12 +386,12 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           />
         </div>
         <div className="space-y-2">
-          <div className="h-3 bg-bx-off" />
-          <div className="h-3 w-4/5 bg-bx-off" />
-          <div className="h-3 w-3/5 bg-bx-off" />
+          <div className="h-3 bg-muted" />
+          <div className="h-3 w-4/5 bg-muted" />
+          <div className="h-3 w-3/5 bg-muted" />
         </div>
       </div>
-      <p className="text-center font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+      <p className="text-center font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
         {`// `}{messages[step]}
       </p>
     </div>

@@ -40,14 +40,14 @@ export function MediaLandingLinksFooter({
   const areas = (availableAreas ?? []).slice(0, 16);
 
   return (
-    <section className="border-t-2 border-bx-black bg-bx-off py-12">
+    <section className="border-t border-navy/10 bg-silver-50 py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-2">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-              [ {isKo ? "지역별 매체 찾기" : "BROWSE BY REGION"} ]
+            <p className="text-xs font-semibold text-gold-dark sm:text-sm">
+              {isKo ? "지역별 매체 찾기" : "Browse by region"}
             </p>
-            <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+            <h2 className="mt-2 text-xl font-bold tracking-tight text-navy sm:text-2xl">
               {isKo ? "지역으로 찾기" : "Find by region"}
             </h2>
             <ul className="mt-4 flex flex-wrap gap-2">
@@ -55,7 +55,7 @@ export function MediaLandingLinksFooter({
                 <li key={slug}>
                   <Link
                     href={`/media/region/${slug}`}
-                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                    className="inline-flex items-center gap-1.5 border border-navy/15 bg-bx-white px-4 py-2.5 text-sm font-medium text-navy shadow-xs transition-colors hover:border-navy/30 hover:bg-silver-50"
                   >
                     {regionLabel(slug, locale)}
                   </Link>
@@ -65,10 +65,10 @@ export function MediaLandingLinksFooter({
           </div>
 
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-              [ {isKo ? "유형별 매체 찾기" : "BROWSE BY TYPE"} ]
+            <p className="text-xs font-semibold text-gold-dark sm:text-sm">
+              {isKo ? "유형별 매체 찾기" : "Browse by type"}
             </p>
-            <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+            <h2 className="mt-2 text-xl font-bold tracking-tight text-navy sm:text-2xl">
               {isKo ? "유형으로 찾기" : "Find by type"}
             </h2>
             <ul className="mt-4 flex flex-wrap gap-2">
@@ -76,7 +76,7 @@ export function MediaLandingLinksFooter({
                 <li key={slug}>
                   <Link
                     href={`/media/type/${slug}`}
-                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                    className="inline-flex items-center gap-1.5 border border-navy/15 bg-bx-white px-4 py-2.5 text-sm font-medium text-navy shadow-xs transition-colors hover:border-navy/30 hover:bg-silver-50"
                   >
                     {typeLabel(slug, locale)}
                   </Link>
@@ -87,11 +87,11 @@ export function MediaLandingLinksFooter({
         </div>
 
         {areas.length > 0 ? (
-          <div className="mt-10 border-t-2 border-bx-black/15 pt-8">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-              [ {isKo ? "지구·구역별 매체 찾기" : "BROWSE BY DISTRICT"} ]
+          <div className="mt-10 border-t border-navy/10 pt-8">
+            <p className="text-xs font-semibold text-gold-dark sm:text-sm">
+              {isKo ? "지구·구역별 매체 찾기" : "Browse by district"}
             </p>
-            <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-black sm:text-2xl">
+            <h2 className="mt-2 text-xl font-bold tracking-tight text-navy sm:text-2xl">
               {isKo ? "지구·구역으로 찾기" : "Find by district"}
             </h2>
             <ul className="mt-4 flex flex-wrap gap-2">
@@ -99,7 +99,7 @@ export function MediaLandingLinksFooter({
                 <li key={area}>
                   <Link
                     href={`/media/area/${encodeURIComponent(area)}`}
-                    className="inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-4 py-2 font-mono text-[11px] font-bold tracking-[0.04em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+                    className="inline-flex items-center gap-1.5 border border-navy/15 bg-bx-white px-4 py-2.5 text-sm font-medium text-navy shadow-xs transition-colors hover:border-navy/30 hover:bg-silver-50"
                   >
                     {area}
                   </Link>

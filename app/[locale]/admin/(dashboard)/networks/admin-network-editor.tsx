@@ -599,7 +599,7 @@ export default function AdminNetworkEditor(props: Props) {
           onClick={() => setActiveTab("form")}
           className={`flex-1 rounded-md px-3 py-1.5 ${
             activeTab === "form"
-              ? "border-2 border-bx-black bg-bx-white text-bx-black shadow-sm dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
+              ? "border-2 border-border bg-card text-foreground shadow-sm"
               : "text-slate-500 hover:bg-slate-100"
           }`}
         >
@@ -613,7 +613,7 @@ export default function AdminNetworkEditor(props: Props) {
           }}
           className={`flex-1 rounded-md px-3 py-1.5 ${
             activeTab === "json"
-              ? "border-2 border-bx-black bg-bx-white text-bx-black shadow-sm dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
+              ? "border-2 border-border bg-card text-foreground shadow-sm"
               : "text-slate-500 hover:bg-slate-100"
           }`}
         >

@@ -195,15 +195,15 @@ export default function AdminMediaQuickAddPage() {
         <div>
           <Link
             href="/admin/medias"
-            className="mb-2 inline-flex items-center gap-1 border-b-2 border-bx-black pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:text-bx-accent hover:border-bx-accent dark:border-bx-white dark:text-bx-white"
+            className="mb-2 inline-flex items-center gap-1 border-b-2 border-border pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             매체 목록
           </Link>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
             [ MEDIA QUICK ADD ]
           </p>
-          <h2 className="mt-2 text-xl font-bold tracking-tight text-bx-black dark:text-bx-white">
+          <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground">
             매체 간편 등록 (JSON)
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -236,7 +236,7 @@ export default function AdminMediaQuickAddPage() {
         </Button>
       </div>
 
-      <Card className="border-2 border-bx-black bg-bx-white dark:border-bx-white dark:bg-bx-black">
+      <Card className="border-2 border-border bg-card">
         <CardHeader>
           <CardTitle className="text-base">기존 매체 유형 재분류</CardTitle>
         </CardHeader>
@@ -247,7 +247,7 @@ export default function AdminMediaQuickAddPage() {
             <code className="rounded bg-slate-100 px-1">nw_*</code>)는 대상이 아닙니다.
           </p>
           {reclassifyMsg ? (
-            <p className="border-2 border-bx-black bg-bx-off px-3 py-2 font-mono text-[11px] tracking-tight text-bx-black dark:border-bx-white dark:bg-bx-gray-dim/30 dark:text-bx-white">
+            <p className="border-2 border-border bg-muted/60 px-3 py-2 font-mono text-[11px] tracking-tight text-foreground">
               {reclassifyMsg}
             </p>
           ) : null}
@@ -269,7 +269,7 @@ export default function AdminMediaQuickAddPage() {
             <Button
               type="button"
               size="sm"
-              className="border-2 border-bx-black bg-bx-black text-bx-white transition-colors hover:bg-bx-accent hover:border-bx-accent dark:border-bx-white dark:bg-bx-white dark:text-bx-black dark:hover:bg-bx-accent dark:hover:border-bx-accent dark:hover:text-bx-white"
+              className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
               disabled={reclassifyLoading}
               onClick={() => {
                 if (
@@ -326,7 +326,7 @@ export default function AdminMediaQuickAddPage() {
           )}
           <Button
             type="button"
-            className="border-2 border-bx-black bg-bx-accent font-semibold text-bx-white transition-colors hover:bg-bx-black hover:border-bx-black dark:border-bx-white dark:hover:border-bx-white"
+            className="border-2 border-border bg-primary font-semibold text-primary-foreground transition-colors hover:bg-foreground hover:border-border"
             disabled={parseState.kind !== "ok" || submitting}
             onClick={onSubmit}
           >
@@ -344,7 +344,7 @@ export default function AdminMediaQuickAddPage() {
 
       {parseState.kind === "ok" && (
         <div>
-          <h3 className="mb-1 text-sm font-semibold text-bx-black dark:text-bx-white">
+          <h3 className="mb-1 text-sm font-semibold text-foreground">
             등록 미리보기 (자동 유형·태그)
           </h3>
           <p className="mb-3 text-xs text-muted-foreground">
@@ -426,15 +426,15 @@ function PreviewCard({
         <p className="text-[10px] font-semibold uppercase text-muted-foreground">
           #{index + 1}
         </p>
-        <p className="font-bold text-bx-black dark:text-bx-white">{item.media_name}</p>
+        <p className="font-bold text-foreground">{item.media_name}</p>
         <p className="flex items-start gap-1 text-xs text-muted-foreground">
           <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
           {preview.location}
         </p>
-        <div className="rounded-lg border-2 border-bx-black bg-bx-off px-3 py-2 text-xs dark:border-bx-white dark:bg-bx-gray-dim/30">
-          <p className="font-semibold text-bx-black dark:text-bx-white">
+        <div className="rounded-lg border-2 border-border bg-muted px-3 py-2 text-xs border-border bg-muted/60">
+          <p className="font-semibold text-foreground">
             저장 유형:{" "}
-            <span className="text-bx-accent">{preview.type}</span>{" "}
+            <span className="text-primary">{preview.type}</span>{" "}
             <span className="font-normal text-muted-foreground">
               ({typeLabelKo(preview.type)})
             </span>
@@ -443,7 +443,7 @@ function PreviewCard({
             유형 덮어쓰기 (선택)
           </label>
           <select
-            className="mt-1 w-full rounded-md border-2 border-bx-black bg-bx-white px-2 py-1.5 text-xs text-bx-black dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
+            className="mt-1 w-full rounded-md border-2 border-border bg-card px-2 py-1.5 text-xs text-foreground"
             value={typeValue}
             onChange={(e) => onTypeChange(e.target.value)}
           >
@@ -470,7 +470,7 @@ function PreviewCard({
               {preview.tags.slice(0, 16).map((t) => (
                 <span
                   key={t}
-                  className="rounded-full border-2 border-bx-black bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-bx-black dark:border-bx-white dark:bg-bx-black dark:text-bx-white"
+                  className="rounded-full border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-foreground"
                 >
                   {t}
                 </span>
@@ -483,7 +483,7 @@ function PreviewCard({
             </div>
           )}
         </div>
-        <p className="text-sm font-semibold text-bx-black dark:text-bx-white">
+        <p className="text-sm font-semibold text-foreground">
           ₩{Math.round(item.price_per_month).toLocaleString()}
           <span className="text-xs font-normal text-muted-foreground"> /월</span>
         </p>
