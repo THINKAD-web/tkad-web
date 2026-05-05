@@ -75,7 +75,7 @@ const TKAD_CLUSTER_STYLES: Array<Record<string, string>> = (() => {
   ];
 })();
 
-function orangePinMarkerImage(kakao: {
+type KakaoMapsForImage = {
   maps: {
     MarkerImage: new (
       src: string,
@@ -85,13 +85,25 @@ function orangePinMarkerImage(kakao: {
     Size: new (w: number, h: number) => unknown;
     Point: new (x: number, y: number) => unknown;
   };
-}) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44"><path fill="#ff6200" stroke="#020202" stroke-width="2" stroke-linejoin="round" d="M16 2C9.4 2 4 7.4 4 14c0 7.5 12 28 12 28s12-20.5 12-28C28 7.4 22.6 2 16 2z"/><circle fill="#f4f2ef" cx="16" cy="14" r="5"/></svg>`;
-  const src = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+};
+
+const TKAD_MAP_PIN_W = 40;
+const TKAD_MAP_PIN_H = 48;
+
+/**
+ * 클러스터와 동일 톤의 브랜드 핀 — `public/images/tkad-media-map-pin.svg` 를 절대 URL로 로드.
+ * (data: SVG + MarkerClusterer 조합은 렌더가 깨지는 경우가 있어 정적 자산 사용)
+ */
+function tkadSitePinMarkerImage(kakao: KakaoMapsForImage) {
+  const base =
+    typeof window !== "undefined" && window.location?.origin
+      ? window.location.origin
+      : "";
+  const src = `${base}/images/tkad-media-map-pin.svg`;
   return new kakao.maps.MarkerImage(
     src,
-    new kakao.maps.Size(32, 44),
-    { offset: new kakao.maps.Point(16, 44) },
+    new kakao.maps.Size(TKAD_MAP_PIN_W, TKAD_MAP_PIN_H),
+    { offset: new kakao.maps.Point(TKAD_MAP_PIN_W / 2, TKAD_MAP_PIN_H) },
   );
 }
 
@@ -338,22 +350,16 @@ export default function KakaoMapView({
         }
       }
 
-      const pinImage = clusterer ? null : orangePinMarkerImage(kakao.maps);
+      const pinImage = tkadSitePinMarkerImage(kakao.maps);
       const toAdd: unknown[] = [];
       for (const mk of markers) {
         if (existing.has(mk.id)) continue;
         if (!Number.isFinite(mk.lat) || !Number.isFinite(mk.lng)) continue;
-        // MarkerClusterer 경로: 공식 샘플처럼 map·image 없이 생성해야 클러스터/숫자가 정상 표시됨
-        const marker = pinImage
-          ? new kakao.maps.Marker({
-              position: new kakao.maps.LatLng(mk.lat, mk.lng),
-              title: mk.name,
-              image: pinImage,
-            })
-          : new kakao.maps.Marker({
-              position: new kakao.maps.LatLng(mk.lat, mk.lng),
-              title: mk.name,
-            });
+        const marker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(mk.lat, mk.lng),
+          title: mk.name,
+          image: pinImage,
+        });
         kakao.maps.event.addListener(marker, "click", () => onSelectRef.current(mk.id));
         existing.set(mk.id, marker);
         if (clusterer) toAdd.push(marker);
