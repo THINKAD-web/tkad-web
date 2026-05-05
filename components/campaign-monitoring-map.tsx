@@ -143,6 +143,11 @@ export function CampaignMonitoringMap({
     pinsRef.current = pins;
   }, [pins]);
 
+  const onSelectPinRef = useRef(onSelectPin);
+  useLayoutEffect(() => {
+    onSelectPinRef.current = onSelectPin;
+  }, [onSelectPin]);
+
   const mountGoogle = useCallback(() => {
     const el = containerRef.current;
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -228,7 +233,7 @@ export function CampaignMonitoringMap({
           map,
           title: isKo ? p.spotNameKo : p.spotNameEn,
         });
-        marker.addListener("click", () => onSelectPin(p.id));
+        marker.addListener("click", () => onSelectPinRef.current(p.id));
         markers.push(marker);
       }
 
@@ -257,7 +262,6 @@ export function CampaignMonitoringMap({
     centerOverride,
     zoomOverride,
     isKo,
-    onSelectPin,
     pinLayoutKey,
     bumpMapEpoch,
   ]);
@@ -315,6 +319,7 @@ export function CampaignMonitoringMap({
 
       K.load(() => {
         if (cancelled || !containerRef.current) return;
+        containerRef.current.innerHTML = "";
         const map = new K.Map(el, {
           center: new K.LatLng(center.lat, center.lng),
           level:
@@ -356,7 +361,7 @@ export function CampaignMonitoringMap({
             map,
             title: isKo ? p.spotNameKo : p.spotNameEn,
           });
-          K.event.addListener(marker, "click", () => onSelectPin(p.id));
+          K.event.addListener(marker, "click", () => onSelectPinRef.current(p.id));
           markers.push(marker);
         }
       });
@@ -386,7 +391,6 @@ export function CampaignMonitoringMap({
     centerOverride,
     zoomOverride,
     isKo,
-    onSelectPin,
     pinLayoutKey,
     bumpMapEpoch,
   ]);

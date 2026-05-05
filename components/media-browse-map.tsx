@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { CampaignMonitoringMap } from "@/components/campaign-monitoring-map";
 import { mediaItemsToCampaignPins } from "@/lib/media-data";
 import type { MediaItem } from "@/lib/media-data";
@@ -33,11 +33,17 @@ export default function MediaBrowseMap({
 }) {
   const isKo = locale === "ko";
   const pins = useMemo(() => mediaItemsToCampaignPins(items), [items]);
+  const handleSelectPin = useCallback(
+    (id: string | null) => {
+      onSelectId(id);
+    },
+    [onSelectId],
+  );
   return (
     <CampaignMonitoringMap
       pins={pins}
       selectedId={selectedId}
-      onSelectPin={(id) => onSelectId(id)}
+      onSelectPin={handleSelectPin}
       isKo={isKo}
       className={className}
       fixedMapHeightPx={fixedMapHeightPx}
