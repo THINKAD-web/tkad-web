@@ -969,8 +969,12 @@ export default function AdminMediasClient({
       try {
         const url = await uploadFileToBunny(file);
         setForm((f) => ({ ...f, image: url }));
-      } catch {
-        setSaveError("대표 이미지 업로드에 실패했습니다.");
+      } catch (e) {
+        setSaveError(
+          e instanceof Error
+            ? `대표 이미지 업로드 실패: ${e.message}`
+            : "대표 이미지 업로드에 실패했습니다.",
+        );
       } finally {
         setFormImageUploadBusy(false);
       }
@@ -999,8 +1003,12 @@ export default function AdminMediasClient({
             extractedImagesText: cur ? `${cur}\n${added}` : added,
           };
         });
-      } catch {
-        setSaveError("추가 이미지 업로드에 실패했습니다.");
+      } catch (e) {
+        setSaveError(
+          e instanceof Error
+            ? `추가 이미지 업로드 실패: ${e.message}`
+            : "추가 이미지 업로드에 실패했습니다.",
+        );
       } finally {
         setFormImageUploadBusy(false);
       }
