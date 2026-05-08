@@ -345,39 +345,19 @@ export default function AdminNetworkEditor(props: Props) {
     }
   }, []);
 
-  const uploadFileToCloudinary = useCallback(async (file: File): Promise<string> => {
-    const sigRes = await fetch("/api/admin/upload/cloudinary", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (!sigRes.ok) {
-      throw new Error("Cloudinary 서명 실패");
-    }
-    const sig = (await sigRes.json()) as {
-      timestamp: number;
-      signature: string;
-      folder: string;
-      cloudName: string;
-      apiKey: string;
-    };
+  const uploadFileToBunny = useCallback(async (file: File): Promise<string> => {
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("api_key", sig.apiKey);
-    fd.append("timestamp", String(sig.timestamp));
-    fd.append("signature", sig.signature);
-    fd.append("folder", sig.folder);
-    const up = await fetch(
-      `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-      { method: "POST", body: fd },
-    );
-    const upJson = (await up.json()) as {
-      secure_url?: string;
-      error?: { message: string };
-    };
-    if (!up.ok || !upJson.secure_url) {
-      throw new Error(upJson.error?.message ?? "업로드 실패");
+    const up = await fetch("/api/admin/upload/bunny", {
+      method: "POST",
+      credentials: "include",
+      body: fd,
+    });
+    const upJson = (await up.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!up.ok || !upJson.url) {
+      throw new Error(upJson.error ?? "업로드 실패");
     }
-    return upJson.secure_url;
+    return upJson.url;
   }, []);
 
   const onPrimaryImageFile = useCallback(
@@ -386,7 +366,7 @@ export default function AdminNetworkEditor(props: Props) {
       setImageUploadBusy(true);
       setError(null);
       try {
-        const url = await uploadFileToCloudinary(file);
+        const url = await uploadFileToBunny(file);
         setImage(url);
       } catch (e) {
         setError(
@@ -398,7 +378,7 @@ export default function AdminNetworkEditor(props: Props) {
         setImageUploadBusy(false);
       }
     },
-    [uploadFileToCloudinary],
+    [uploadFileToBunny],
   );
 
   const onGalleryFiles = useCallback(
@@ -416,7 +396,7 @@ export default function AdminNetworkEditor(props: Props) {
         // 각 파일을 하나씩 업로드하되, 하나 실패해도 나머지는 계속 진행
         for (const file of images) {
           try {
-            const url = await uploadFileToCloudinary(file);
+            const url = await uploadFileToBunny(file);
             urls.push(url);
           } catch (fileError) {
             errors.push(
@@ -453,7 +433,7 @@ export default function AdminNetworkEditor(props: Props) {
         setImageUploadBusy(false);
       }
     },
-    [uploadFileToCloudinary],
+    [uploadFileToBunny],
   );
 
   const onCsv = useCallback(

@@ -171,7 +171,7 @@ export default function PlannerSimulationStep3({
       return URL.createObjectURL(file);
     });
 
-    // 백그라운드 Cloudinary 업로드
+    // 백그라운드 Bunny 업로드
     setUpload({ status: "uploading", pct: 0 });
     try {
       const result = await uploadPlannerCreative(file, {

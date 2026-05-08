@@ -34,7 +34,7 @@ function SignOutButton({ locale, label }: { locale: string; label: string }) {
         await fetch("/api/admin/auth/logout", { method: "POST" });
         window.location.href = `/${locale}/admin/login`;
       }}
-      className="inline-flex shrink-0 items-center gap-1.5 border-2 border-border bg-card px-2.5 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card"
     >
       <LogOut className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">{label}</span>
@@ -94,17 +94,23 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   };
 
   const sidebar = (
-    <div className="flex h-full flex-col border-r-2 border-border bg-card text-card-foreground">
-      <div className="flex h-16 items-center gap-2 border-b-2 border-border px-5">
+    <div className="tkad-admin-shell relative flex h-full flex-col overflow-hidden border-r border-border/60 bg-card/70 text-card-foreground backdrop-blur">
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_80%_70%,rgba(168,85,247,0.14),transparent_60%),radial-gradient(circle_at_40%_90%,rgba(236,72,153,0.10),transparent_65%)]"
+      />
+
+      <div className="relative flex h-16 items-center gap-2 border-b border-border/60 px-5">
         <span className="text-lg font-black tracking-tight">
-          THINK<span className="text-hermes">AD</span>
+          THINK<span className="tkad-home-accent-text">AD</span>
         </span>
-        <span className="border-2 border-foreground/20 bg-hermes px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_0_16px_rgba(255,98,0,0.35)]">
+        <span className="rounded-2xl border border-border/60 bg-card/70 px-2 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur">
           ADMIN
         </span>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="relative flex-1 space-y-1.5 px-3 py-4">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -114,23 +120,23 @@ export default function AdminShell({ children }: { children: ReactNode }) {
               href={`/${locale}${item.href}`}
               onClick={() => setSidebarOpen(false)}
               className={[
-                "flex items-center gap-3 border-2 border-border px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] transition-all",
+                "group flex items-center gap-3 rounded-[14px] border border-border/70 bg-card/60 px-3 py-2.5 font-mono text-[12px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-[1px] hover:border-border",
                 active
-                  ? "border-hermes/60 bg-hermes/15 text-foreground shadow-[inset_0_0_0_1px_rgba(255,98,0,0.35)]"
-                  : "bg-card text-foreground hover:border-hermes/40 hover:bg-muted/80",
+                  ? "border-white/14 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] shadow-[0_18px_70px_rgba(0,0,0,0.18)]"
+                  : "",
               ].join(" ")}
             >
-              <Icon className="h-[18px] w-[18px] shrink-0" />
+              <Icon className="h-[18px] w-[18px] shrink-0 text-foreground/80 transition-colors group-hover:text-foreground" />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t-2 border-border p-3">
+      <div className="relative border-t border-border/60 p-3">
         <Link
           href={`/${locale}`}
-          className="flex items-center gap-2 border-2 border-border bg-background px-3 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-foreground transition-colors hover:border-hermes/50 hover:bg-muted/60"
+          className="flex items-center gap-2 rounded-[14px] border border-border/70 bg-card/60 px-3 py-2.5 font-mono text-[12px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card"
         >
           <ArrowLeft className="h-4 w-4" />
           {tNav("backToSite")}
@@ -140,32 +146,33 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="admin-dashboard-root flex min-h-screen bg-background text-foreground">
-      <aside className="hidden w-60 shrink-0 md:block">{sidebar}</aside>
+    <div className="admin-dashboard-root tkad-landing-neon tkad-planner-neon flex min-h-screen bg-background text-foreground">
+      <aside className="hidden w-72 shrink-0 md:block">{sidebar}</aside>
 
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-black/55 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/55 backdrop-blur-md"
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="relative h-full w-60">{sidebar}</div>
+          <div className="relative h-full w-72">{sidebar}</div>
         </div>
       )}
 
       <div className="flex flex-1 flex-col">
-        <header className="flex h-14 items-center gap-3 border-b-2 border-border bg-card px-4 md:px-6">
+        <header className="relative flex h-14 items-center gap-3 border-b border-border/60 bg-card/70 px-4 backdrop-blur md:px-6">
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid" />
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="border-2 border-border bg-background p-1.5 text-foreground transition-colors hover:border-hermes/50 hover:bg-muted/60 md:hidden"
+            className="rounded-full border border-border/70 bg-card/70 p-2 text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card md:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>
           <h1 className="min-w-0 flex-1 truncate font-mono text-[12px] font-bold uppercase tracking-[0.18em]">
             {navItems.find((n) => isActive(n.href))?.label ?? "관리자"}
           </h1>
-          <ThemeToggle />
+          <ThemeToggle className="rounded-full border border-border/70 bg-card/70 shadow-sm backdrop-blur" />
           <SignOutButton locale={locale} label={tNav("signOut")} />
         </header>
         <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>

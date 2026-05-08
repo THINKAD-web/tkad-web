@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const defaultToggleClass =
-  "inline-flex h-10 w-10 shrink-0 items-center justify-center border-2 border-border/25 bg-muted text-foreground transition-all duration-300 hover:border-hermes hover:bg-foreground hover:text-white hover:shadow-[0_0_28px_rgba(255,98,0,0.35)] dark:border-white/15 dark:bg-muted dark:text-foreground dark:hover:border-hermes dark:hover:bg-hermes dark:hover:text-white dark:hover:shadow-[0_0_32px_rgba(255,98,0,0.45)]";
+  "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card/70 text-foreground shadow-sm backdrop-blur transition-all duration-300 hover:bg-card hover:shadow-[0_18px_60px_rgba(0,0,0,0.16)] dark:border-white/14 dark:bg-black/30 dark:text-white/85 dark:hover:bg-black/40 dark:hover:shadow-[0_22px_70px_rgba(0,0,0,0.55)]";
 
 /**
  * Light / Dark 토글. next-themes 의 resolvedTheme 는 SSR 과 첫 클라이언트 틱에서

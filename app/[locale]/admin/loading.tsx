@@ -5,26 +5,26 @@
 export default function AdminLoading() {
   return (
     <div className="space-y-6 p-6">
-      <div className="border-2 border-border bg-card p-5">
+      <div className="tkad-glass-surface relative overflow-hidden rounded-[22px] p-5">
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           {`// LOADING…`}
         </p>
         <div className="skeleton-shimmer mt-3 h-7 w-40" />
         <div className="skeleton-shimmer mt-3 h-4 w-64" />
-        {/* 좌→우 슬라이딩 주황 진행 막대 */}
-        <div className="mt-5 h-1 w-48 overflow-hidden border-2 border-primary">
-          <div className="h-full w-1/3 bg-primary loading-slide" />
+        <div className="mt-5 h-2 w-48 overflow-hidden rounded-full border border-border/70 bg-card/60">
+          <div className="h-full w-1/3 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)] loading-slide" />
         </div>
       </div>
       <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="skeleton-shimmer -mt-[2px] -ml-[2px] h-24 border-2 border-border"
+            className="skeleton-shimmer -mt-[2px] -ml-[2px] h-24 rounded-[22px] border border-border/70 bg-card/60"
           />
         ))}
       </div>
-      <div className="skeleton-shimmer h-96 border-2 border-border" />
+      <div className="skeleton-shimmer h-96 rounded-[22px] border border-border/70 bg-card/60" />
     </div>
   );
 }

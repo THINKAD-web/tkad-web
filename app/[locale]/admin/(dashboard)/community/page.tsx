@@ -158,27 +158,32 @@ export default function AdminCommunityPage() {
 
   return (
     <div className="space-y-6">
-      <header className="border-2 border-border bg-foreground p-6 text-background">
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+      <header className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6">
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_80%_70%,rgba(168,85,247,0.14),transparent_60%),radial-gradient(circle_at_40%_90%,rgba(236,72,153,0.10),transparent_65%)]"
+        />
+        <p className="relative font-mono text-[11px] font-black uppercase tracking-[0.22em] text-muted-foreground">
           [ ADMIN · COMMUNITY MODERATION ]
         </p>
-        <h1 className="mt-2 text-2xl font-extrabold tracking-tight">
+        <h1 className="relative mt-2 text-2xl font-black tracking-tight text-foreground">
           커뮤니티 모더레이션
         </h1>
-        <p className="mt-2 font-mono text-[11px] tracking-tight text-background/65">
+        <p className="relative mt-2 font-mono text-[11px] tracking-tight text-muted-foreground">
           {`// `}신고된 글 / 댓글 검토 · 복구 · 영구 삭제 / 신고 사유 확인
         </p>
       </header>
 
       {/* 탭 */}
-      <div className="flex flex-wrap gap-0">
+      <div className="flex w-fit flex-wrap gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm backdrop-blur">
         <button
           type="button"
           onClick={() => setTab("posts")}
-          className={`-ml-[2px] inline-flex items-center gap-2 border-2 border-border px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-mono text-[11px] font-black uppercase tracking-[0.22em] transition-colors ${
             tab === "posts"
-              ? "bg-foreground text-background"
-              : "bg-card text-foreground hover:bg-foreground hover:text-background"
+              ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <MessageSquare className="h-3.5 w-3.5" />
@@ -187,10 +192,10 @@ export default function AdminCommunityPage() {
         <button
           type="button"
           onClick={() => setTab("comments")}
-          className={`-ml-[2px] inline-flex items-center gap-2 border-2 border-border px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-mono text-[11px] font-black uppercase tracking-[0.22em] transition-colors ${
             tab === "comments"
-              ? "bg-foreground text-background"
-              : "bg-card text-foreground hover:bg-foreground hover:text-background"
+              ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <MessageSquare className="h-3.5 w-3.5" />
@@ -199,22 +204,22 @@ export default function AdminCommunityPage() {
       </div>
 
       {/* 필터 */}
-      <div className="flex flex-wrap items-center gap-3 border-2 border-border bg-muted p-4">
+      <div className="tkad-glass-surface flex flex-wrap items-center gap-3 rounded-[22px] p-4">
         <div className="flex items-center gap-2">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             상태
           </p>
-          <div className="flex gap-0">
+          <div className="flex w-fit gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm backdrop-blur">
             {(["all", "published", "hidden", "deleted"] as StatusFilter[]).map(
               (s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setStatusFilter(s)}
-                  className={`-ml-[2px] border-2 border-border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors ${
+                  className={`rounded-full px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] transition-colors ${
                     statusFilter === s
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card text-foreground hover:bg-foreground hover:text-background"
+                      ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {STATUS_LABELS[s]}
@@ -229,16 +234,16 @@ export default function AdminCommunityPage() {
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               카테고리
             </p>
-            <div className="flex gap-0">
+            <div className="flex w-fit gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm backdrop-blur">
               {(["all", ...COMMUNITY_CATEGORIES] as const).map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setCategoryFilter(c as CommunityCategory | "all")}
-                  className={`-ml-[2px] border-2 border-border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors ${
+                  className={`rounded-full px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] transition-colors ${
                     categoryFilter === c
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card text-foreground hover:bg-foreground hover:text-background"
+                      ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {c === "all" ? "전체" : COMMUNITY_CATEGORY_LABELS[c].ko}
@@ -253,7 +258,7 @@ export default function AdminCommunityPage() {
             type="checkbox"
             checked={reportsOnly}
             onChange={(e) => setReportsOnly(e.target.checked)}
-            className="h-4 w-4 border-2 border-border"
+            className="h-4 w-4 rounded border border-border/70 accent-cta"
           />
           신고된 항목만
         </label>
@@ -262,7 +267,7 @@ export default function AdminCommunityPage() {
           type="button"
           onClick={() => void load()}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -275,7 +280,7 @@ export default function AdminCommunityPage() {
 
       {/* 에러 */}
       {error ? (
-        <p className="border-2 border-primary bg-card px-4 py-3 font-mono text-[11px] tracking-tight text-primary">
+        <p className="tkad-glass-surface rounded-[18px] border border-border/70 px-4 py-3 font-mono text-[11px] tracking-tight text-foreground">
           {`// `}
           {error}
         </p>

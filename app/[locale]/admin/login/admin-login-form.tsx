@@ -64,7 +64,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full max-w-sm space-y-4 border-2 border-border bg-card p-8"
+      className="w-full max-w-sm space-y-4"
     >
       <div>
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
@@ -91,7 +91,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
           autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:outline focus-visible:outline-2 focus-visible:ring-2 focus-visible:ring-ring"
+          className="tkad-auth-input h-11 w-full rounded-[18px] border border-border/70 bg-card/80 px-4 text-sm font-semibold text-foreground shadow-sm backdrop-blur outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
         />
       </div>
 
@@ -109,12 +109,15 @@ export function AdminLoginForm({ locale }: { locale: string }) {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus-visible:outline focus-visible:outline-2 focus-visible:ring-2 focus-visible:ring-ring"
+          className="tkad-auth-input h-11 w-full rounded-[18px] border border-border/70 bg-card/80 px-4 text-sm font-semibold text-foreground shadow-sm backdrop-blur outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
         />
       </div>
 
       {error ? (
-        <p className="border-2 border-border bg-primary px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-primary-foreground" role="alert">
+        <p
+          className="rounded-[18px] border border-border/70 bg-card/80 px-4 py-3 font-mono text-[11px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
@@ -122,7 +125,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full border-2 border-border bg-foreground py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground disabled:opacity-60"
+        className="w-full rounded-[18px] border border-white/12 bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(168,85,247,0.92)_52%,rgba(236,72,153,0.88)_100%)] py-3 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition-colors hover:brightness-105 disabled:opacity-60"
       >
         {loading ? t("submitting") : t("submit")}
       </button>
