@@ -1616,11 +1616,11 @@ export default function AdminMediasClient({
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/20 backdrop-blur-[2px] dark:bg-black/60"
             onClick={() => setModalOpen(false)}
             aria-hidden
           />
-          <Card className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col animate-fade-in-up overflow-hidden">
+          <Card className="tkad-glass-surface relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col animate-fade-in-up overflow-hidden border border-border/70 bg-card/95 shadow-[0_28px_120px_rgba(0,0,0,0.18)] backdrop-blur dark:border-white/12 dark:bg-black/45 dark:text-white dark:shadow-[0_28px_120px_rgba(0,0,0,0.65)]">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between">
               <CardTitle className="text-lg text-foreground">
                 {editing ? "매체 수정" : "매체 추가"}
@@ -2510,11 +2510,11 @@ export default function AdminMediasClient({
       {uploadModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/20 backdrop-blur-[2px] dark:bg-black/60"
             onClick={() => setUploadModalOpen(false)}
             aria-hidden
           />
-          <Card className="relative z-10 flex max-h-[85vh] w-full max-w-2xl animate-fade-in-up flex-col overflow-hidden">
+          <Card className="tkad-glass-surface relative z-10 flex max-h-[85vh] w-full max-w-2xl animate-fade-in-up flex-col overflow-hidden border border-border/70 bg-card/95 shadow-[0_28px_120px_rgba(0,0,0,0.18)] backdrop-blur dark:border-white/12 dark:bg-black/45 dark:text-white dark:shadow-[0_28px_120px_rgba(0,0,0,0.65)]">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between">
               <CardTitle className="text-lg text-foreground">
                 매체 사진 일괄 업로드
