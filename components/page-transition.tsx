@@ -30,7 +30,7 @@ export default function PageTransition({ children }: { children: ReactNode }) {
   return (
     <div
       className={cn(
-        "ease-out motion-reduce:transition-none motion-reduce:translate-y-0",
+        "flex min-h-0 flex-1 flex-col ease-out motion-reduce:transition-none motion-reduce:translate-y-0",
         "origin-top transition-[opacity,transform] duration-200",
         show
           ? "translate-y-0 opacity-100"

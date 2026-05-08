@@ -56,7 +56,8 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
   return (
     <nav
       className={cn(
-        "tkad-nav-chrome sticky top-0 z-50 border-b border-border/60 bg-background/75 text-foreground backdrop-blur-xl supports-[backdrop-filter]:bg-background/45 dark:border-white/10 dark:bg-[#05050a]/65 dark:text-white dark:supports-[backdrop-filter]:bg-[#05050a]/45",
+        /* 다크: backdrop-filter 사용 시 /45 로 더 투명해지면 낮 랜딩(밝은 본문)이 비쳐 흰 메뉴 글자가 사라짐 — 불투명도 고정 */
+        "tkad-nav-chrome sticky top-0 z-50 border-b border-border/60 bg-background/80 text-foreground backdrop-blur-xl supports-[backdrop-filter]:bg-background/55 dark:border-white/10 dark:bg-[#05050a]/96 dark:text-white dark:supports-[backdrop-filter]:bg-[#05050a]/96",
         className,
       )}
     >
@@ -232,22 +233,22 @@ function BrutalNavDropdown({ entry }: { entry: BrutalNavGroup }) {
       {open && (
         <div
           role="menu"
-          className="absolute left-1/2 top-full z-50 mt-4 w-64 max-w-[calc(100vw-2.5rem)] -translate-x-1/2 overflow-hidden rounded-2xl border border-border/70 bg-card/90 py-1 text-foreground shadow-[0_30px_120px_rgba(0,0,0,0.28)] backdrop-blur dark:border-white/10 dark:bg-black/55 dark:text-white dark:shadow-[0_30px_120px_rgba(0,0,0,0.78)]"
+          className="absolute left-1/2 top-full z-50 mt-4 w-64 max-w-[calc(100vw-2.5rem)] -translate-x-1/2 overflow-hidden rounded-2xl border border-border bg-popover py-1 text-popover-foreground shadow-[0_30px_120px_rgba(0,0,0,0.18)] dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50 dark:shadow-[0_30px_120px_rgba(0,0,0,0.78)]"
         >
-          <ul className="divide-y divide-border/60 dark:divide-white/10">
+          <ul className="divide-y divide-border dark:divide-white/10">
             {entry.items.map((leaf) => (
               <li key={leaf.href}>
                 <Link
                   href={leaf.href}
                   role="menuitem"
                   onClick={() => setOpen(false)}
-                  className="block px-4 py-3 transition-colors hover:bg-muted/60 dark:hover:bg-white/6"
+                  className="block px-4 py-3 text-popover-foreground transition-colors hover:bg-muted/70 dark:hover:bg-white/10"
                 >
-                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-foreground dark:text-white">
+                  <span className="block text-xs font-semibold uppercase tracking-[0.18em]">
                     {leaf.label}
                   </span>
                   {leaf.desc ? (
-                    <span className="mt-1 block text-[11px] leading-snug tracking-tight text-muted-foreground dark:text-white/65">
+                    <span className="mt-1 block text-[11px] leading-snug tracking-tight text-muted-foreground dark:text-zinc-400">
                       {leaf.desc}
                     </span>
                   ) : null}

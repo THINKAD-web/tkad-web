@@ -137,7 +137,9 @@ export function MediaCard({
             ) : (
               <span />
             )}
-            {type ? <span>[ {type} ]</span> : null}
+            {type ? (
+              <span className="font-semibold text-foreground/90">[ {type} ]</span>
+            ) : null}
           </div>
         )}
         <h3

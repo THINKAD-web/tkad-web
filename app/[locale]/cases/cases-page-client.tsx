@@ -69,7 +69,7 @@ export default function CasesPageClient({ initialCases }: Props) {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon">
+      <div className="tkad-landing-neon tkad-planner-neon">
         <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
@@ -113,7 +113,7 @@ export default function CasesPageClient({ initialCases }: Props) {
           </div>
         </section>
 
-        <NeonSection>
+        <NeonSection className="pb-0 pt-40 sm:pb-0 sm:pt-48">
           {empty ? (
             <div className="space-y-14">
               <p className="mx-auto max-w-3xl text-center text-lg font-bold leading-relaxed text-foreground sm:text-xl">

@@ -462,8 +462,10 @@ body {
 /* ── 홈 낮 모드: 에디토리얼 라이트 — 섹션 카드 분리·여백 리듬 ── */
 .tkad-home-appearance[data-appearance="day"] {
   min-height: 100dvh;
-  color-scheme: light;
-  padding-bottom: clamp(2rem, 6vw, 4rem);
+  /* html.dark 와 동시에 쓰일 때 native / color-mix 가 밝은 글자로 고정되는 경우 방지 */
+  color-scheme: light dark;
+  /* 하단 clamp padding 은 main(body) 회색이 비치는 띠로 보일 수 있어 0 — 섹션 내부 여백으로 조절 */
+  padding-bottom: 0;
   /* 토큰: 히어로·카드에서 공유 (Tailwind와 병행, 낮 모드 전용) */
   --home-ink: #020617;
   --home-ink-soft: #1e293b;
@@ -586,6 +588,35 @@ body {
     radial-gradient(90% 55% at 100% 8%, rgba(13, 148, 136, 0.06), transparent 48%),
     radial-gradient(75% 42% at 50% 100%, rgba(15, 23, 42, 0.015), transparent 52%),
     linear-gradient(180deg, #ffffff 0%, #f7f8ff 44%, #ffffff 100%);
+}
+
+/* 라이트 랜딩: `main` 기본 배경이 `body --background`(회색)일 때 푸터 직전에 가로 띠로 노출됨 */
+main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(115% 70% at 0% -6%, rgba(99, 102, 241, 0.07), transparent 50%),
+    radial-gradient(90% 55% at 100% 8%, rgba(13, 148, 136, 0.06), transparent 48%),
+    radial-gradient(75% 42% at 50% 100%, rgba(15, 23, 42, 0.015), transparent 52%),
+    linear-gradient(180deg, #ffffff 0%, #f7f8ff 44%, #ffffff 100%);
+}
+
+.tkad-home-appearance[data-appearance="day"] > .tkad-landing-neon {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+/* 랜딩 밤 + 루트에 planner-neon(아카데미·인사이트·사례 목록 등): 사이트 라이트일 때 크림 body 가 비치면 밤(밝은 글자) 토큰이 전부 묻음 */
+.tkad-home-appearance[data-appearance="night"] > .tkad-landing-neon.tkad-planner-neon {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  background: #05050a;
+  color-scheme: dark;
 }
 
 /* 공통 포인트 텍스트 (홈/섹션 헤드에서 재사용) */
@@ -953,6 +984,26 @@ body {
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+
+  /* 본문 기본 글자 — text-* 유틸 없는 노드도 대비 */
+  color: rgb(248 250 252 / 0.92) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 사이트 다크 + 랜딩 낮: 루트 --foreground(밝은색) 잔류로 밝은 main 배경 위에서 글자가 사라지는 경우 차단 */
+html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon {
+  color: var(--home-body) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground {
+  color: var(--home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-muted-foreground {
+  color: var(--home-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-primary-foreground {
@@ -1104,9 +1155,35 @@ body {
 /* Planner: 작은 태그/힌트 텍스트 */
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-muted-foreground {
   color: rgb(255 255 255 / 0.62) !important;
+  -webkit-text-fill-color: currentColor !important;
 }
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground {
   color: rgb(255 255 255 / 0.92) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/40 {
+  color: rgb(255 255 255 / 0.37) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/70 {
+  color: rgb(255 255 255 / 0.64) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/75 {
+  color: rgb(255 255 255 / 0.69) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/80 {
+  color: rgb(255 255 255 / 0.74) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/85 {
+  color: rgb(255 255 255 / 0.78) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/90 {
+  color: rgb(255 255 255 / 0.83) !important;
+  -webkit-text-fill-color: currentColor !important;
 }
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .bg-card {
   background-color: rgb(255 255 255 / 0.05) !important;
@@ -2026,16 +2103,13 @@ html:not(.dark) .group:hover .tkad-catalog-card-shell {
   translate: none !important;
   box-shadow: none !important;
 }
-html:not(.dark) .tkad-nav-chrome {
-  background: color-mix(in srgb, var(--background) 94%, transparent);
-}
-.dark .tkad-nav-chrome {
-  background: color-mix(in srgb, var(--background) 92%, transparent);
-}
+/* 배경색은 BrutalNav(`components/brutalist/nav.tsx`) 유틸에 맡김.
+   전역 color-mix 가 다크 모드에서 바를 너무 투명하게 만들어 낮 랜딩 위에서 흰 메뉴 글자가 묻힘. */
 
-/* Header text safety: some classNames include `dark:text-white...` which still
-   matches `[class*="text-white"]` selectors and can leak white text into day mode. */
-html:not(.dark) .tkad-nav-chrome [class*="text-white"] {
+/* Header text safety: `text-white` 유틸만 보정. `dark:text-white*` 는 클래스 문자열에
+   `text-white`가 포함돼 매칭되지만 라이트 모드에선 비활성 — 여기까지 덮으면
+   반투명 드롭다운 위에서 글자만 선명한 잉크로 고정돼 배경과 충돌한다. */
+html:not(.dark) .tkad-nav-chrome [class*="text-white"]:not([class*="dark:text-white"]) {
   color: var(--foreground) !important;
   -webkit-text-fill-color: var(--foreground) !important;
 }
