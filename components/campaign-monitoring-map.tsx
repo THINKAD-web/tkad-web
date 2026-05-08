@@ -286,7 +286,12 @@ export function CampaignMonitoringMap({
                 position: { lat: number; lng: number };
                 map: unknown;
                 title?: string;
-              }) => { setMap: (m: null) => void; addListener: (ev: string, fn: () => void) => void };
+                icon?: { url: string; scaledSize?: unknown };
+              }) => {
+                setMap: (m: null) => void;
+                setIcon?: (i: unknown) => void;
+                addListener: (ev: string, fn: () => void) => void;
+              };
               Size?: new (w: number, h: number) => unknown;
             };
           };
@@ -409,7 +414,12 @@ export function CampaignMonitoringMap({
                 size: unknown,
                 opts?: { offset?: unknown },
               ) => unknown;
-              Marker: new (opts: { position: unknown; map: unknown; title?: string }) => {
+              Marker: new (opts: {
+                position: unknown;
+                map: unknown;
+                title?: string;
+                image?: unknown;
+              }) => {
                 setMap: (m: null) => void;
                 setImage?: (img: unknown) => void;
               };

@@ -135,6 +135,13 @@ type KakaoSdk = {
       setMap: (map: unknown | null) => void;
       setImage: (img: unknown) => void;
     };
+    MarkerImage: new (
+      src: string,
+      size: unknown,
+      opts?: { offset?: unknown },
+    ) => unknown;
+    Size: new (w: number, h: number) => unknown;
+    Point: new (x: number, y: number) => unknown;
     MarkerClusterer?: new (opts: {
       map: unknown;
       averageCenter?: boolean;
@@ -615,7 +622,7 @@ export default function KakaoMapView({
 
       for (const [id, m] of existing) {
         if (!nextIds.has(id)) {
-          if (clusterer) clusterer.removeMarker(m);
+          if (clusterer?.removeMarker) clusterer.removeMarker(m);
           else (m as { setMap: (map: unknown | null) => void }).setMap(null);
           existing.delete(id);
         }
@@ -698,7 +705,7 @@ export default function KakaoMapView({
         }
       }
 
-      if (clusterer && toAdd.length) {
+      if (clusterer?.addMarkers && toAdd.length) {
         clusterer.addMarkers(toAdd);
         requestAnimationFrame(() => {
           try {
@@ -736,7 +743,10 @@ export default function KakaoMapView({
       const lng = m ? Number(m.lng) : NaN;
       if (!m || !Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-      map.panTo(new kakao.maps.LatLng(lat, lng));
+      const panTo = (map as { panTo?: (pos: unknown) => void } | null)?.panTo;
+      if (typeof panTo === "function") {
+        panTo(new kakao.maps.LatLng(lat, lng));
+      }
     } catch (e) {
       console.error("[KakaoMapView] panTo failed", e);
     }
