@@ -584,8 +584,8 @@ body {
   background:
     radial-gradient(115% 70% at 0% -6%, rgba(99, 102, 241, 0.07), transparent 50%),
     radial-gradient(90% 55% at 100% 8%, rgba(13, 148, 136, 0.06), transparent 48%),
-    radial-gradient(75% 42% at 50% 100%, rgba(15, 23, 42, 0.04), transparent 52%),
-    linear-gradient(180deg, #fafbff 0%, #eef1f8 44%, #f4f5f9 100%);
+    radial-gradient(75% 42% at 50% 100%, rgba(15, 23, 42, 0.015), transparent 52%),
+    linear-gradient(180deg, #ffffff 0%, #f7f8ff 44%, #ffffff 100%);
 }
 
 /* 공통 포인트 텍스트 (홈/섹션 헤드에서 재사용) */
