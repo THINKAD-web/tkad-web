@@ -2269,7 +2269,7 @@ export default function AdminMediasClient({
                   </Button>
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Cloudinary에 올린 뒤 URL이 대표 이미지에 채워집니다. 저장을 눌러
+                  Bunny CDN에 업로드한 뒤 URL이 대표 이미지에 채워집니다. 저장을 눌러
                   반영하세요.
                 </p>
                 {form.image && (
@@ -2542,7 +2542,7 @@ export default function AdminMediasClient({
                     이미지를 드래그하거나 클릭하여 선택
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    JPG, PNG, WebP 지원 · Cloudinary 연동
+                    JPG, PNG, WebP 지원 · Bunny CDN 업로드
                   </p>
                 </div>
                 <input
@@ -2597,7 +2597,7 @@ export default function AdminMediasClient({
                             </div>
                           ) : item.status === "error" ? (
                             <p className="text-xs text-red-600">
-                              실패 · Cloudinary 설정을 확인하세요
+                              실패 · Bunny 설정을 확인하세요
                             </p>
                           ) : item.status === "uploading" ? (
                             <div className="space-y-1">

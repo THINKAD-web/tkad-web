@@ -450,9 +450,8 @@ export default function AdminMediaHubPage() {
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight">매체 허브 (DB)</h2>
         <p className="text-sm text-muted-foreground">
-          가용 상태, Cloudinary 이미지, 월별 가격 이력, 예약 캘린더, 광고주 집행
-          이력을 관리합니다. 목록·간편 등록은 &quot;매체 관리&quot;와 동일 DB를
-          사용합니다.
+          가용 상태, 이미지(Bunny CDN), 월별 가격 이력, 예약 캘린더, 광고주 집행 이력을
+          관리합니다. 목록·간편 등록은 &quot;매체 관리&quot;와 동일 DB를 사용합니다.
         </p>
         <Link
           href="/admin/medias/quick-add"
@@ -623,7 +622,7 @@ export default function AdminMediaHubPage() {
                 <div>
                   <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
                     <CloudUpload className="h-4 w-4" />
-                    Cloudinary 업로드
+                    Bunny 업로드
                   </h3>
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded border border-dashed border-slate-300 px-3 py-2 text-xs hover:bg-slate-50">
                     <ImageIcon className="h-4 w-4" />
