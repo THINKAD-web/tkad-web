@@ -118,7 +118,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       </MediaCatalogThumbnail>
       <div className="flex flex-col gap-2.5 p-5 text-card-foreground">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground sm:text-sm">
+          <span className="text-xs font-semibold text-foreground/85 sm:text-sm">
             {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
           </span>
         </div>

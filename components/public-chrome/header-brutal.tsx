@@ -59,7 +59,9 @@ export function HeaderBrutal() {
     pathname === "/services" ||
     pathname === "/contact" ||
     pathname === "/cases" ||
+    pathname.startsWith("/cases/") ||
     pathname === "/insights" ||
+    pathname.startsWith("/insights/") ||
     pathname === "/academy" ||
     pathname === "/recommend" ||
     pathname === "/planner" ||

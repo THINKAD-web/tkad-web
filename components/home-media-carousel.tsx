@@ -290,9 +290,13 @@ export function HomeMediaCarousel({
         </div>
 
         <div className={cn("relative flex min-w-0 flex-1 flex-col gap-2", compact ? "p-5" : "p-6")}>
-          <div className="flex items-center justify-between font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
-            <span>{typeLabel}</span>
-            {location ? <span className="truncate text-white/45">{location}</span> : <span />}
+          <div className="flex items-center justify-between font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/75 dark:text-white/70">
+            <span className="text-foreground/90 dark:text-white/85">{typeLabel}</span>
+            {location ? (
+              <span className="truncate text-muted-foreground dark:text-white/45">{location}</span>
+            ) : (
+              <span />
+            )}
           </div>
           <h3 className={cn("font-black leading-tight tracking-tight text-white", compact ? "text-base sm:text-lg" : "text-lg sm:text-xl")}>
             {name}

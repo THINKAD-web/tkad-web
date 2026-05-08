@@ -22,7 +22,7 @@ export function HomeLandingDayNight({ children }: Props) {
 
   return (
     <div
-      className="tkad-home-appearance min-h-[100dvh]"
+      className="tkad-home-appearance flex min-h-[100dvh] flex-1 flex-col"
       data-appearance={appearance}
       suppressHydrationWarning
     >

@@ -59,9 +59,9 @@ export default function InsightsPageClient({
   const [formCompany, setFormCompany] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formIndustry, setFormIndustry] = useState("");
-  const [formPeriodPref, setFormPeriodPref] = useState<"monthly" | "quarterly" | "both">(
-    "both",
-  );
+  const [formPeriodPref, setFormPeriodPref] = useState<
+    "monthly" | "quarterly" | "both"
+  >("both");
   const [formNotes, setFormNotes] = useState("");
   const [formSubmitting, setFormSubmitting] = useState(false);
 
@@ -163,11 +163,17 @@ export default function InsightsPageClient({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon">
+      <div className="tkad-landing-neon tkad-planner-neon">
         <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-20 tkad-neon-grid"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+          />
           <div
             aria-hidden
             className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
@@ -197,304 +203,326 @@ export default function InsightsPageClient({
           </div>
         </section>
 
-      <section className="bg-card py-10">
-        <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
-          <a
-            href="#reports"
-            className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
-              <CalendarRange className="h-6 w-6" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold tracking-tight">{t("valueStripTrends")}</p>
-              <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
-                {`// `}{t("valueStripTrendsDesc")}
-              </p>
-            </div>
-          </a>
-          <a
-            href="#reports"
-            className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
-              <Download className="h-6 w-6" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold tracking-tight">{t("valueStripPdf")}</p>
-              <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
-                {`// `}{t("valueStripPdfDesc")}
-              </p>
-            </div>
-          </a>
-          <a
-            href="#custom-report"
-            className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
-              <Send className="h-6 w-6" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold tracking-tight">{t("valueStripCustom")}</p>
-              <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
-                {`// `}{t("valueStripCustomDesc")}
-              </p>
-            </div>
-          </a>
-        </div>
-      </section>
-
-      <section className="bg-muted py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
-          <div id="reports" className="scroll-mt-24 space-y-2">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-              [ REPORTS ]
-            </p>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              {t("reportsSectionTitle")}
-            </h2>
-            <p className="max-w-2xl font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
-              {`// `}{t("reportsSectionDesc")}
-            </p>
+        <section className="bg-card py-10 text-foreground">
+          <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
+            <a
+              href="#reports"
+              className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
+                <CalendarRange className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-bold tracking-tight text-foreground">
+                  {t("valueStripTrends")}
+                </p>
+                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                  {`// `}
+                  {t("valueStripTrendsDesc")}
+                </p>
+              </div>
+            </a>
+            <a
+              href="#reports"
+              className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
+                <Download className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-bold tracking-tight text-foreground">
+                  {t("valueStripPdf")}
+                </p>
+                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                  {`// `}
+                  {t("valueStripPdfDesc")}
+                </p>
+              </div>
+            </a>
+            <a
+              href="#custom-report"
+              className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
+                <Send className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-bold tracking-tight text-foreground">
+                  {t("valueStripCustom")}
+                </p>
+                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                  {`// `}
+                  {t("valueStripCustomDesc")}
+                </p>
+              </div>
+            </a>
           </div>
+        </section>
 
-          {!hasLibrary ? (
-            <div className="border-2 border-border bg-card py-12 text-center">
+        <section className="bg-muted pb-0 pt-16 text-foreground sm:pt-20">
+          <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+            <div id="reports" className="scroll-mt-24 space-y-2">
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                [ PREPARING ]
+                [ REPORTS ]
               </p>
-              <p className="mt-3 text-base font-bold text-foreground">{t("preparingContent")}</p>
-              <p className="mx-auto mt-3 max-w-md font-mono text-[12px] tracking-tight text-muted-foreground">
-                {t("preparingContentDesc")}
+              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                {t("reportsSectionTitle")}
+              </h2>
+              <p className="max-w-2xl font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                {`// `}
+                {t("reportsSectionDesc")}
               </p>
             </div>
-          ) : (
-            <>
-              <div className="space-y-3">
-                <p className={labelCls}>
-                  [ {t("periodLabel")} ]
+
+            {!hasLibrary ? (
+              <div className="border-2 border-border bg-card py-12 text-center">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  [ PREPARING ]
                 </p>
-                <div className="flex flex-wrap gap-0">
-                  {periodTabs.map((tab) => (
-                    <button
-                      key={tab.value}
-                      type="button"
-                      onClick={() => setPeriod(tab.value)}
-                      className={cn(
-                        "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
-                        period === tab.value
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-card text-foreground hover:bg-muted",
-                      )}
-                    >
-                      <CalendarRange className="h-3.5 w-3.5" />
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <p className={labelCls}>
-                  [ {t("verticalLabel")} ]
+                <p className="mt-3 text-base font-bold text-foreground">
+                  {t("preparingContent")}
                 </p>
-                <div className="flex flex-wrap gap-0">
-                  {verticalTabs.map((tab) => (
-                    <button
-                      key={tab.value}
-                      type="button"
-                      onClick={() => setVertical(tab.value)}
-                      className={cn(
-                        "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
-                        vertical === tab.value
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-card text-foreground hover:bg-muted",
-                      )}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                {`// `}{t("resultsCount", { count: filtered.length })}
-              </p>
-
-              <div className="grid gap-0 md:grid-cols-2">
-                {filtered.map((report) => (
-                  <ReportCard
-                    key={report.id}
-                    report={report}
-                    isKo={isKo}
-                    downloading={downloadingId === report.id}
-                    onDownload={() => handleDownload(report)}
-                    onView={() => handleViewOnline(report)}
-                  />
-                ))}
-              </div>
-
-              {filtered.length === 0 ? (
-                <p className="py-8 text-center font-mono text-[12px] tracking-tight text-muted-foreground">
-                  {`// `}{t("empty")}
+                <p className="mx-auto mt-3 max-w-md font-mono text-[12px] tracking-tight text-muted-foreground">
+                  {t("preparingContentDesc")}
                 </p>
-              ) : null}
-            </>
-          )}
-
-          <div
-            className="scroll-mt-24 border-2 border-border bg-card"
-            id="custom-report"
-          >
-            <div className="border-b-2 border-border p-5">
-              <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
-                  <Send className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ {t("customSectionEyebrow")} ]
-                  </p>
-                  <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
-                    {t("formTitle")}
-                  </h3>
-                  <p className="mt-1 font-mono text-[12px] tracking-tight text-muted-foreground">
-                    {`// `}{t("formDesc")}
-                  </p>
-                </div>
               </div>
-            </div>
-            <div className="p-5">
-              <form className="grid gap-4 sm:grid-cols-2" onSubmit={submitCustomRequest}>
-                <div className="sm:col-span-1">
-                  <label className={labelCls} htmlFor="ins-company">
-                    [ {t("formCompany")} ]
-                  </label>
-                  <input
-                    id="ins-company"
-                    value={formCompany}
-                    onChange={(e) => setFormCompany(e.target.value)}
-                    className={cn(inputCls, "mt-2")}
-                    placeholder={t("formCompanyPh")}
-                  />
-                </div>
-                <div className="sm:col-span-1">
-                  <label className={labelCls} htmlFor="ins-email">
-                    [ {t("formEmail")} ] <span className="text-primary">*</span>
-                  </label>
-                  <input
-                    id="ins-email"
-                    type="email"
-                    required
-                    value={formEmail}
-                    onChange={(e) => setFormEmail(e.target.value)}
-                    className={cn(inputCls, "mt-2")}
-                    placeholder="name@company.com"
-                  />
-                </div>
-                <div className="sm:col-span-1">
-                  <label className={labelCls} htmlFor="ins-industry">
-                    [ {t("formIndustry")} ]
-                  </label>
-                  <select
-                    id="ins-industry"
-                    className={cn(inputCls, "mt-2")}
-                    value={formIndustry}
-                    onChange={(e) => setFormIndustry(e.target.value)}
-                  >
-                    {industryOptions.map((o) => (
-                      <option key={o.value || "empty"} value={o.value}>
-                        {o.label}
-                      </option>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  <p className={labelCls}>[ {t("periodLabel")} ]</p>
+                  <div className="flex flex-wrap gap-0">
+                    {periodTabs.map((tab) => (
+                      <button
+                        key={tab.value}
+                        type="button"
+                        onClick={() => setPeriod(tab.value)}
+                        className={cn(
+                          "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                          period === tab.value
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-card text-foreground hover:bg-muted",
+                        )}
+                      >
+                        <CalendarRange className="h-3.5 w-3.5" />
+                        {tab.label}
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
-                <div className="sm:col-span-1">
-                  <label className={labelCls} htmlFor="ins-pref">
-                    [ {t("formPeriodPref")} ]
-                  </label>
-                  <select
-                    id="ins-pref"
-                    className={cn(inputCls, "mt-2")}
-                    value={formPeriodPref}
-                    onChange={(e) =>
-                      setFormPeriodPref(e.target.value as "monthly" | "quarterly" | "both")
-                    }
-                  >
-                    <option value="monthly">{t("filterMonthly")}</option>
-                    <option value="quarterly">{t("filterQuarterly")}</option>
-                    <option value="both">{t("formPeriodBoth")}</option>
-                  </select>
+
+                <div className="space-y-3">
+                  <p className={labelCls}>[ {t("verticalLabel")} ]</p>
+                  <div className="flex flex-wrap gap-0">
+                    {verticalTabs.map((tab) => (
+                      <button
+                        key={tab.value}
+                        type="button"
+                        onClick={() => setVertical(tab.value)}
+                        className={cn(
+                          "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                          vertical === tab.value
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-card text-foreground hover:bg-muted",
+                        )}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="sm:col-span-2">
-                  <label className={labelCls} htmlFor="ins-notes">
-                    [ {t("formNotes")} ]
-                  </label>
-                  <textarea
-                    id="ins-notes"
-                    value={formNotes}
-                    onChange={(e) => setFormNotes(e.target.value)}
-                    className={cn(textareaCls, "mt-2")}
-                    placeholder={t("formNotesPh")}
-                  />
+
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {`// `}
+                  {t("resultsCount", { count: filtered.length })}
+                </p>
+
+                <div className="grid gap-0 md:grid-cols-2">
+                  {filtered.map((report) => (
+                    <ReportCard
+                      key={report.id}
+                      report={report}
+                      isKo={isKo}
+                      downloading={downloadingId === report.id}
+                      onDownload={() => handleDownload(report)}
+                      onView={() => handleViewOnline(report)}
+                    />
+                  ))}
                 </div>
-                <div className="sm:col-span-2 flex flex-wrap gap-2">
-                  <BtnBlock
-                    type="submit"
-                    variant="dark"
-                    size="md"
-                    disabled={formSubmitting}
-                  >
-                    {formSubmitting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Mail className="h-4 w-4" />
-                    )}
-                    {t("formSubmit")}
-                  </BtnBlock>
-                  <BtnBlock href="/contact" variant="secondary" size="md">
-                    {t("formContactInstead")}
-                  </BtnBlock>
+
+                {filtered.length === 0 ? (
+                  <p className="py-8 text-center font-mono text-[12px] tracking-tight text-muted-foreground">
+                    {`// `}
+                    {t("empty")}
+                  </p>
+                ) : null}
+              </>
+            )}
+
+            <div
+              className="scroll-mt-24 border-2 border-border bg-card"
+              id="custom-report"
+            >
+              <div className="border-b-2 border-border p-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
+                    <Send className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("customSectionEyebrow")} ]
+                    </p>
+                    <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+                      {t("formTitle")}
+                    </h3>
+                    <p className="mt-1 font-mono text-[12px] tracking-tight text-muted-foreground">
+                      {`// `}
+                      {t("formDesc")}
+                    </p>
+                  </div>
                 </div>
-              </form>
+              </div>
+              <div className="p-5">
+                <form
+                  className="grid gap-4 sm:grid-cols-2"
+                  onSubmit={submitCustomRequest}
+                >
+                  <div className="sm:col-span-1">
+                    <label className={labelCls} htmlFor="ins-company">
+                      [ {t("formCompany")} ]
+                    </label>
+                    <input
+                      id="ins-company"
+                      value={formCompany}
+                      onChange={(e) => setFormCompany(e.target.value)}
+                      className={cn(inputCls, "mt-2")}
+                      placeholder={t("formCompanyPh")}
+                    />
+                  </div>
+                  <div className="sm:col-span-1">
+                    <label className={labelCls} htmlFor="ins-email">
+                      [ {t("formEmail")} ]{" "}
+                      <span className="text-primary">*</span>
+                    </label>
+                    <input
+                      id="ins-email"
+                      type="email"
+                      required
+                      value={formEmail}
+                      onChange={(e) => setFormEmail(e.target.value)}
+                      className={cn(inputCls, "mt-2")}
+                      placeholder="name@company.com"
+                    />
+                  </div>
+                  <div className="sm:col-span-1">
+                    <label className={labelCls} htmlFor="ins-industry">
+                      [ {t("formIndustry")} ]
+                    </label>
+                    <select
+                      id="ins-industry"
+                      className={cn(inputCls, "mt-2")}
+                      value={formIndustry}
+                      onChange={(e) => setFormIndustry(e.target.value)}
+                    >
+                      {industryOptions.map((o) => (
+                        <option key={o.value || "empty"} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <label className={labelCls} htmlFor="ins-pref">
+                      [ {t("formPeriodPref")} ]
+                    </label>
+                    <select
+                      id="ins-pref"
+                      className={cn(inputCls, "mt-2")}
+                      value={formPeriodPref}
+                      onChange={(e) =>
+                        setFormPeriodPref(
+                          e.target.value as "monthly" | "quarterly" | "both",
+                        )
+                      }
+                    >
+                      <option value="monthly">{t("filterMonthly")}</option>
+                      <option value="quarterly">{t("filterQuarterly")}</option>
+                      <option value="both">{t("formPeriodBoth")}</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelCls} htmlFor="ins-notes">
+                      [ {t("formNotes")} ]
+                    </label>
+                    <textarea
+                      id="ins-notes"
+                      value={formNotes}
+                      onChange={(e) => setFormNotes(e.target.value)}
+                      className={cn(textareaCls, "mt-2")}
+                      placeholder={t("formNotesPh")}
+                    />
+                  </div>
+                  <div className="sm:col-span-2 flex flex-wrap gap-2">
+                    <BtnBlock
+                      type="submit"
+                      variant="dark"
+                      size="md"
+                      disabled={formSubmitting}
+                    >
+                      {formSubmitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Mail className="h-4 w-4" />
+                      )}
+                      {t("formSubmit")}
+                    </BtnBlock>
+                    <BtnBlock href="/contact" variant="secondary" size="md">
+                      {t("formContactInstead")}
+                    </BtnBlock>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <Modal
-        open={viewerOpen}
-        onClose={closeViewer}
-        className="max-w-5xl"
-        ariaLabel={t("viewerTitle")}
-        ariaLabelledBy="insights-viewer-title"
-      >
-        <div className="border-2 border-border bg-card p-6 pt-12">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            [ VIEWER ]
-          </p>
-          <h2 id="insights-viewer-title" className="mt-2 pr-8 text-lg font-bold tracking-tight text-foreground">
-            {viewerTitle}
-          </h2>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-            {`// `}{t("viewerHint")}
-          </p>
-          <div className="mt-4 min-h-[60vh] overflow-hidden border-2 border-border bg-muted">
-            {viewerLoading ? (
-              <div className="flex min-h-[60vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                {`// `}{t("viewerLoading")}
-              </div>
-            ) : viewerUrl ? (
-              <iframe
-                title={viewerTitle}
-                src={viewerUrl}
-                className="h-[70vh] w-full min-h-[320px] border-0"
-              />
-            ) : null}
+        <Modal
+          open={viewerOpen}
+          onClose={closeViewer}
+          className="max-w-5xl"
+          ariaLabel={t("viewerTitle")}
+          ariaLabelledBy="insights-viewer-title"
+        >
+          <div className="border-2 border-border bg-card p-6 pt-12">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              [ VIEWER ]
+            </p>
+            <h2
+              id="insights-viewer-title"
+              className="mt-2 pr-8 text-lg font-bold tracking-tight text-foreground"
+            >
+              {viewerTitle}
+            </h2>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+              {`// `}
+              {t("viewerHint")}
+            </p>
+            <div className="mt-4 min-h-[60vh] overflow-hidden border-2 border-border bg-muted">
+              {viewerLoading ? (
+                <div className="flex min-h-[60vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  {`// `}
+                  {t("viewerLoading")}
+                </div>
+              ) : viewerUrl ? (
+                <iframe
+                  title={viewerTitle}
+                  src={viewerUrl}
+                  className="h-[70vh] w-full min-h-[320px] border-0"
+                />
+              ) : null}
+            </div>
           </div>
-        </div>
-      </Modal>
+        </Modal>
       </div>
     </HomeLandingDayNight>
   );
@@ -516,7 +544,9 @@ function ReportCard({
   const t = useTranslations("insights");
   const periodBadge =
     report.period === "monthly" ? t("badgeMonthly") : t("badgeQuarterly");
-  const tags = report.verticalTags.filter((x) => x !== "general") as InsightVerticalTag[];
+  const tags = report.verticalTags.filter(
+    (x) => x !== "general",
+  ) as InsightVerticalTag[];
 
   return (
     <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card">
@@ -561,8 +591,7 @@ function ReportCard({
 
         <div className="border-2 border-border bg-muted p-3 text-xs">
           <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            <MonitorPlay className="h-3.5 w-3.5" />
-            [ {t("previewDooh")} ]
+            <MonitorPlay className="h-3.5 w-3.5" />[ {t("previewDooh")} ]
           </p>
           <p className="mt-2 leading-relaxed text-foreground">
             {(isKo ? report.doohKo : report.doohEn)[0]}
@@ -571,14 +600,19 @@ function ReportCard({
 
         <div className="border-2 border-border bg-muted p-3 text-xs">
           <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            <BookOpen className="h-3.5 w-3.5" />
-            [ {t("previewVertical")} ]
+            <BookOpen className="h-3.5 w-3.5" />[ {t("previewVertical")} ]
           </p>
           <p className="mt-2 font-bold text-foreground">
-            {isKo ? report.verticalBlocks[0]?.labelKo : report.verticalBlocks[0]?.labelEn}
+            {isKo
+              ? report.verticalBlocks[0]?.labelKo
+              : report.verticalBlocks[0]?.labelEn}
           </p>
           <p className="mt-1 text-foreground/75">
-            {(isKo ? report.verticalBlocks[0]?.bulletsKo : report.verticalBlocks[0]?.bulletsEn)?.[0]}
+            {
+              (isKo
+                ? report.verticalBlocks[0]?.bulletsKo
+                : report.verticalBlocks[0]?.bulletsEn)?.[0]
+            }
           </p>
         </div>
 

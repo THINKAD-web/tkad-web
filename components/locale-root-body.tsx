@@ -29,7 +29,7 @@ export default function LocaleRootBody({ skipLinkLabel, children }: Props) {
         <TopLoader />
         <HeaderBrutal />
       </ConditionalPublicChrome>
-      <main id="main-content" className="flex-1">
+      <main id="main-content" className="flex min-h-0 flex-1 flex-col">
         <PageTransition>{children}</PageTransition>
       </main>
       <ConditionalPublicChrome>
