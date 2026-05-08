@@ -283,7 +283,7 @@ export default function MediaMapPageClient() {
       pricePeriod: (it.pricePeriod as MediaItem["pricePeriod"]) ?? "month",
       lat: it.lat,
       lng: it.lng,
-      dailyFootTraffic: null,
+      dailyFootTraffic: 0,
       sampleImages: it.image ? [it.image] : [],
     });
     const base = items.map(fromItem);
