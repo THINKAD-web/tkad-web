@@ -42,14 +42,12 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
   const Logo = (
     <Link
       href="/"
-      className="font-mono text-[16px] font-black uppercase tracking-[0.18em] text-foreground dark:text-white sm:text-[18px]"
+      className="text-[18px] font-black tracking-tight text-foreground sm:text-[20px] dark:text-white"
     >
       {logo ?? (
         <>
-          THINK
-          <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
-            AD
-          </span>
+          <span className="font-black">THINK</span>
+          <span className="tkad-home-accent-text font-black">AD</span>
         </>
       )}
     </Link>
@@ -58,7 +56,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
   return (
     <nav
       className={cn(
-        "tkad-nav-chrome sticky top-0 z-50 border-b border-white/10 bg-background/70 text-foreground backdrop-blur-xl supports-[backdrop-filter]:bg-background/40 dark:bg-[#05050a]/65 dark:text-white dark:supports-[backdrop-filter]:bg-[#05050a]/45",
+        "tkad-nav-chrome sticky top-0 z-50 border-b border-border/60 bg-background/75 text-foreground backdrop-blur-xl supports-[backdrop-filter]:bg-background/45 dark:border-white/10 dark:bg-[#05050a]/65 dark:text-white dark:supports-[backdrop-filter]:bg-[#05050a]/45",
         className,
       )}
     >
@@ -75,7 +73,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
               <li key={entry.href}>
                 <Link
                   href={entry.href}
-                  className="inline-flex h-10 items-center rounded-xl px-4 font-mono text-[14px] font-semibold uppercase tracking-[0.17em] text-foreground/75 transition-colors hover:bg-foreground/5 hover:text-foreground dark:text-white/72 dark:hover:bg-white/5 dark:hover:text-white"
+                  className="inline-flex h-10 items-center rounded-xl px-4 text-[13px] font-semibold tracking-tight text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground dark:text-white/80 dark:hover:bg-white/6 dark:hover:text-white"
                 >
                   {entry.label}
                 </Link>
@@ -108,7 +106,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/6 text-white backdrop-blur transition-all duration-300 hover:border-white/22 hover:bg-white/10"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-card/70 text-foreground backdrop-blur transition-all duration-300 hover:border-border hover:bg-card dark:border-white/12 dark:bg-white/6 dark:text-white dark:hover:border-white/22 dark:hover:bg-white/10"
           >
             {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
@@ -117,7 +115,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
 
       {/* 모바일 패널 — 그룹은 모든 leaf 펼침 */}
       {mobileOpen && (
-        <div className="border-t border-white/10 bg-[#05050a] text-white md:hidden">
+        <div className="border-t border-border/60 bg-background text-foreground md:hidden dark:border-white/10 dark:bg-[#05050a] dark:text-white">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-15 tkad-neon-grid" />
           <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.06] mix-blend-overlay" />
@@ -134,7 +132,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
                         <Link
                           href={leaf.href}
                           onClick={() => setMobileOpen(false)}
-                          className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-white transition-colors hover:bg-white/6"
+                          className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-foreground transition-colors hover:bg-muted/60 dark:text-white dark:hover:bg-white/6"
                         >
                           {leaf.label}
                         </Link>
@@ -147,7 +145,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
                   <Link
                     href={entry.href}
                     onClick={() => setMobileOpen(false)}
-                    className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-white transition-colors hover:bg-white/6"
+                    className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-foreground transition-colors hover:bg-muted/60 dark:text-white dark:hover:bg-white/6"
                   >
                     {entry.label}
                   </Link>
@@ -218,7 +216,7 @@ function BrutalNavDropdown({ entry }: { entry: BrutalNavGroup }) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex h-10 items-center gap-1 rounded-xl px-4 font-mono text-[14px] font-semibold uppercase tracking-[0.17em] text-foreground/75 transition-colors hover:bg-foreground/5 hover:text-foreground dark:text-white/72 dark:hover:bg-white/5 dark:hover:text-white",
+          "inline-flex h-10 items-center gap-1 rounded-xl px-4 text-[13px] font-semibold tracking-tight text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground dark:text-white/80 dark:hover:bg-white/6 dark:hover:text-white",
           open && "text-foreground dark:text-white",
         )}
       >
