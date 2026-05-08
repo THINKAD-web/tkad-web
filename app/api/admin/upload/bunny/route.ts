@@ -25,26 +25,32 @@ export async function POST(request: NextRequest) {
     return json({ error: "Bunny not configured" }, 503);
   }
 
-  const form = await request.formData().catch(() => null);
-  const file = form?.get("file");
-  if (!(file instanceof File)) {
-    return json({ error: "Missing file" }, 400);
+  try {
+    const form = await request.formData().catch(() => null);
+    const file = form?.get("file");
+    if (!(file instanceof File)) {
+      return json({ error: "Missing file" }, 400);
+    }
+
+    const bytes = await file.arrayBuffer();
+    const ext = extFromType(file.type);
+    const now = new Date();
+    const yyyy = String(now.getUTCFullYear());
+    const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+    const rand = crypto.randomUUID();
+    const path = `tkad/admin/${yyyy}/${mm}/${rand}.${ext}`;
+
+    const out = await uploadToBunnyStorage({
+      path,
+      bytes,
+      contentType: file.type || "application/octet-stream",
+    });
+
+    return json({ url: out.publicUrl });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Upload failed";
+    console.error("[admin upload bunny]", msg, e);
+    return json({ error: msg }, 502);
   }
-
-  const bytes = await file.arrayBuffer();
-  const ext = extFromType(file.type);
-  const now = new Date();
-  const yyyy = String(now.getUTCFullYear());
-  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const rand = crypto.randomUUID();
-  const path = `tkad/admin/${yyyy}/${mm}/${rand}.${ext}`;
-
-  const out = await uploadToBunnyStorage({
-    path,
-    bytes,
-    contentType: file.type || "application/octet-stream",
-  });
-
-  return json({ url: out.publicUrl });
 }
 
