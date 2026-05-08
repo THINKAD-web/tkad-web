@@ -430,7 +430,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
+    <div className="w-full max-w-none">
       <div className="border-2 border-border bg-card text-foreground">
         <div className="border-b-2 border-border p-6">
           <div className="flex items-start justify-between gap-3">
@@ -450,11 +450,19 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   : tr("form.panelSubtitle")}
               </p>
             </div>
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
-              <span className="text-2xl" aria-hidden>
+            <div className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-[22px] border border-border/80 bg-card/80 text-foreground shadow-[0_24px_80px_rgba(0,0,0,0.18)] backdrop-blur">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.16),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.12),transparent_58%),linear-gradient(165deg,rgba(255,255,255,0.10)_0%,transparent_52%)]"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid"
+              />
+              <span className="relative z-10 text-[28px] leading-none" aria-hidden>
                 🤖
               </span>
-              <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-accent">
+              <span className="pointer-events-none absolute -bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-border/80 bg-card/80 px-2.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-xs backdrop-blur">
                 TKAD bot
               </span>
             </div>
@@ -796,12 +804,12 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           <div className="pt-2">
             <BtnBlock
               variant="accent"
-              size="lg"
+              size="md"
               disabled={!canSubmit}
               onClick={handleSubmit}
-              className="w-full"
+              className="w-full py-3 text-[15px]"
             >
-              <Sparkles className="h-5 w-5" aria-hidden />
+              <Sparkles className="h-4.5 w-4.5" aria-hidden />
               {isKo ? "TKAD bot과 함께 탐험 시작!" : tr("form.submit")}
             </BtnBlock>
           </div>

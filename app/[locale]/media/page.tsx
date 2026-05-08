@@ -5,6 +5,7 @@ import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import MediaBrowseClient from "@/components/media-browse-client";
 import { MediaLandingLinksFooter } from "@/components/media-landing-links-footer";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -24,14 +25,16 @@ export default async function MediaPage({ params }: Props) {
   }
 
   return (
-    <>
-      <MediaBrowseClient catalog={catalog} />
-      <MediaLandingLinksFooter
-        locale={locale}
-        availableRegions={Array.from(regionSet)}
-        availableTypes={Array.from(typeSet)}
-        availableAreas={Array.from(areaSet)}
-      />
-    </>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <MediaBrowseClient catalog={catalog} />
+        <MediaLandingLinksFooter
+          locale={locale}
+          availableRegions={Array.from(regionSet)}
+          availableTypes={Array.from(typeSet)}
+          availableAreas={Array.from(areaSet)}
+        />
+      </div>
+    </HomeLandingDayNight>
   );
 }

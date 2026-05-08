@@ -48,7 +48,7 @@ export function MediaCatalogGridCompactToggle({
   return (
     <div
       className={cn(
-        "inline-flex border-2 border-border bg-card",
+        "inline-flex h-10 border-2 border-border bg-card",
         className,
       )}
     >
@@ -56,7 +56,7 @@ export function MediaCatalogGridCompactToggle({
         type="button"
         onClick={() => onLayoutChange("grid")}
         className={cn(
-          "inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
+          "inline-flex h-10 items-center gap-1.5 px-3 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
           layout === "grid"
             ? "bg-hero-void text-hero-fg"
             : "text-foreground hover:bg-muted",
@@ -69,7 +69,7 @@ export function MediaCatalogGridCompactToggle({
         type="button"
         onClick={() => onLayoutChange("compact")}
         className={cn(
-          "inline-flex items-center gap-1.5 border-l-2 border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
+          "inline-flex h-10 items-center gap-1.5 border-l-2 border-border px-3 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
           layout === "compact"
             ? "bg-hero-void text-hero-fg"
             : "text-foreground hover:bg-muted",

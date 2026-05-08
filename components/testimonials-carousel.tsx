@@ -56,11 +56,11 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
           {items.map((t) => (
             <article
               key={t.id}
-              className="relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden border-2 border-border bg-card p-5 sm:p-6 md:basis-[48%] lg:basis-[32%]"
+              className="group relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden rounded-[28px] bg-white/6 p-7 backdrop-blur transition-all duration-300 hover:-translate-y-1 tkad-neon-border tkad-neon-glow sm:p-8 md:basis-[48%] lg:basis-[32%]"
             >
               <Quote
                 aria-hidden
-                className="absolute right-5 top-5 h-8 w-8 text-accent/20"
+                className="absolute right-5 top-5 h-10 w-10 text-white/10 transition-colors group-hover:text-white/16"
                 strokeWidth={1.5}
                 fill="currentColor"
               />
@@ -71,24 +71,24 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
                   <img
                     src={t.avatarUrl}
                     alt=""
-                    className="h-12 w-12 shrink-0 border-2 border-border object-cover"
+                    className="h-14 w-14 shrink-0 rounded-2xl border border-border/60 object-cover"
                   />
                 ) : (
                   <span
                     aria-hidden
-                    className="inline-flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-hero-void text-sm font-extrabold text-hero-fg"
+                    className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-hero-void text-base font-extrabold text-hero-fg"
                   >
                     {t.initials}
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-bold tracking-tight text-foreground">
+                  <div className="truncate text-sm font-bold tracking-tight text-white">
                     {isKo ? t.nameKo : t.nameEn}
                   </div>
-                  <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">
                     {isKo ? t.roleKo : t.roleEn}
                   </div>
-                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] tracking-tight text-muted-foreground">
+                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] tracking-tight text-white/65">
                     {t.logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={t.logoUrl} alt="" className="h-4 w-auto" />
@@ -96,7 +96,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
                     <span className="truncate">
                       {isKo ? t.companyKo : t.companyEn}
                     </span>
-                    <span className="text-foreground/30">·</span>
+                    <span className="text-white/20">·</span>
                     <span className="truncate">
                       {isKo ? t.industryKo : t.industryEn}
                     </span>
@@ -105,28 +105,28 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
               </header>
 
               <div
-                className="mb-4 inline-flex w-fit items-center gap-2 border-2 border-accent bg-accent px-3 py-1.5 text-accent-foreground"
+                className="mb-6 inline-flex w-fit items-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-3 py-1.5 text-white shadow-[0_18px_72px_rgba(0,0,0,0.65)] backdrop-blur"
                 aria-label={isKo ? "성과 수치" : "Key outcome"}
               >
                 <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em]">
                   {isKo ? "RESULT" : "RESULT"}
                 </span>
-                <span className="text-sm font-extrabold tracking-tight">
+                <span className="text-sm font-extrabold tracking-tight bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_45%,#ec4899_100%)] bg-clip-text text-transparent">
                   {isKo ? t.metricKo : t.metricEn}
                 </span>
               </div>
 
-              <p className="flex-1 text-sm leading-relaxed text-foreground">
+              <p className="flex-1 text-[15px] leading-relaxed text-white/82">
                 &ldquo;{isKo ? t.bodyKo : t.bodyEn}&rdquo;
               </p>
 
-              <footer className="mt-4 flex items-center justify-between gap-3 border-t-2 border-border/10 pt-3">
+              <footer className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
                 <div className="flex items-center gap-0.5" aria-label={`별점 ${t.rating}`}>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
                       className={`h-3.5 w-3.5 ${
-                        i < t.rating ? "fill-accent text-accent" : "text-foreground/15"
+                        i < t.rating ? "fill-white text-white" : "text-white/14"
                       }`}
                       strokeWidth={1.5}
                     />
@@ -135,7 +135,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
                 {t.caseHref && (
                   <Link
                     href={t.caseHref}
-                    className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent hover:text-foreground"
+                    className="font-mono text-[11px] font-black uppercase tracking-[0.18em] text-white/80 hover:text-white"
                   >
                     {isKo ? "사례 →" : "Case →"}
                   </Link>
@@ -152,7 +152,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
           onClick={scrollPrev}
           disabled={!canPrev}
           aria-label="이전 후기"
-          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
+          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center border border-white/12 bg-white/6 text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:border-white/22 hover:bg-white/10 disabled:opacity-40"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -161,7 +161,7 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
           onClick={scrollNext}
           disabled={!canNext}
           aria-label="다음 후기"
-          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
+          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center border border-white/12 bg-white/6 text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:border-white/22 hover:bg-white/10 disabled:opacity-40"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -177,8 +177,8 @@ export function TestimonialsCarousel({ items, isKo }: Props) {
             aria-current={selected === i}
             className={`h-2 transition-all ${
               selected === i
-                ? "w-8 bg-accent"
-                : "w-2 bg-hero-void/20 hover:bg-hero-void/40"
+                ? "w-8 bg-[linear-gradient(90deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)]"
+                : "w-2 bg-white/12 hover:bg-white/22"
             }`}
           />
         ))}

@@ -7,6 +7,7 @@ import { useToast } from "@/components/toast-provider";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
 } from "@/components/media-ai-recommend-form";
@@ -135,33 +136,56 @@ export default function RecommendPageClient({
   }
 
   return (
-    <>
-      <section className="bg-gradient-to-b from-hero-void via-hero-void to-[#0c0c10] py-20 text-hero-fg sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold tracking-wide text-hermes sm:text-sm">
-            {isKo ? "AI 매체 추천" : "AI media recommendation"}
-          </p>
-          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.22em] text-hero-fg/70">
-            {`// 04 / AI Media Explorer`}
-          </p>
-          <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-            <h1 className="text-3xl font-black leading-[1.12] tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
-              {isKo ? "TKAD Bot과 함께 매체 탐험 시작!" : tr("heroTitle")}
-            </h1>
-            <span className="border border-hermes/70 bg-hermes/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-hermes">
-              BETA
-            </span>
-          </div>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-hero-fg/85 sm:text-lg">
-            {isKo
-              ? "몇 가지 정보만 알려주시면, TKAD Bot이 캠페인에 꼭 맞는 매체들을 찾아드려요."
-              : tr("heroSubtitle")}
-          </p>
-        </div>
-      </section>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+          <div
+            aria-hidden
+            className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
 
-      <section className="border-t-2 border-border bg-card py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="tkad-recommend-hero relative mx-auto max-w-7xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-28 lg:px-8 lg:pb-36 lg:pt-32">
+            <p className="tkad-recommend-hero__eyebrow font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              {`// 04 / AI Media Explorer`}
+            </p>
+            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+              <h1 className="text-balance text-[clamp(40px,5.2vw,72px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+                {isKo ? "TKAD Bot과 함께 매체 탐험 시작!" : tr("heroTitle")}
+              </h1>
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">BETA</span>
+              </span>
+            </div>
+            <p className="tkad-recommend-hero__subtitle mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+              {isKo
+                ? "몇 가지 정보만 알려주시면, TKAD Bot이 캠페인에 꼭 맞는 매체들을 찾아드려요."
+                : tr("heroSubtitle")}
+            </p>
+            <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/media"
+                className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              >
+                {isKo ? "매체 검색으로 먼저 보기" : "Browse media catalog"}
+              </Link>
+              <Link
+                href="/planner"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              >
+                {isKo ? "플래너로 설계하기" : "Plan with Planner"}
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="tkad-media-browse-main border-t border-border/60 bg-card py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {phase === "form" && (
             <MediaAiRecommendForm
               locale={locale}
@@ -170,7 +194,7 @@ export default function RecommendPageClient({
           )}
 
           {phase === "loading" && (
-            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-background/95 backdrop-blur-md">
+            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-black/65 backdrop-blur-md">
               <LoadingOverlay isKo={isKo} />
             </div>
           )}
@@ -247,7 +271,7 @@ export default function RecommendPageClient({
               </div>
 
               {top3.length > 0 && (
-                <div className="border-2 border-accent bg-muted px-5 py-4">
+                <div className="rounded-[24px] border-2 border-accent bg-muted/60 px-5 py-4 shadow-sm backdrop-blur">
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                     [ TOP 3 PICKS ]
                   </p>
@@ -263,7 +287,7 @@ export default function RecommendPageClient({
                         className="flex items-center justify-between gap-2 border-t-2 border-border pt-2"
                       >
                         <span className="inline-flex min-w-0 items-center gap-2">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-border bg-accent font-mono text-[10px] font-bold text-accent-foreground">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/14 bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] font-mono text-[11px] font-black text-white shadow-[0_18px_60px_rgba(0,0,0,0.25)]">
                             {i + 1}
                           </span>
                           <span className="line-clamp-1 text-sm font-bold tracking-tight text-foreground">
@@ -321,7 +345,8 @@ export default function RecommendPageClient({
       />
 
       {cartItems.length > 0 && <div className="h-20" />}
-    </>
+      </div>
+    </HomeLandingDayNight>
   );
 }
 
@@ -360,29 +385,51 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
   return (
     <div className="w-full max-w-md space-y-6 px-6">
       <div className="flex flex-col items-center gap-3">
-        <div className="relative flex h-20 w-20 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
-          <span className="text-3xl" aria-hidden>
-            🤖
-          </span>
-          <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-hermes">
-            TKAD bot
-          </span>
+        <div className="relative">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-6 rounded-[44px] bg-[radial-gradient(closest-side,rgba(168,85,247,0.22),transparent_70%)] blur-xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-6 rounded-[44px] bg-[radial-gradient(closest-side,rgba(34,211,238,0.16),transparent_70%)] blur-xl"
+          />
+
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-[32px] border border-white/16 bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] text-white shadow-[0_32px_140px_rgba(0,0,0,0.78)] backdrop-blur">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 rounded-[32px] bg-[radial-gradient(120%_90%_at_15%_10%,rgba(168,85,247,0.28),transparent_55%),radial-gradient(110%_85%_at_90%_25%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(95%_75%_at_45%_95%,rgba(236,72,153,0.12),transparent_60%)]"
+            />
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 rounded-[32px] border border-white/10"
+              animate={{ opacity: [0.35, 0.65, 0.35] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <span className="relative z-10 text-[44px]" aria-hidden>
+              🤖
+            </span>
+          </div>
+
+          <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2">
+            <div className="rounded-2xl border border-white/16 bg-black/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/85 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
+              TKAD BOT
+            </div>
+          </div>
         </div>
-        <p className="mt-6 text-center font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
-          [ {isKo
-            ? "EXPLORING MEDIA UNIVERSE"
-            : "EXPLORING MEDIA UNIVERSE"} ]
+        <p className="mt-6 text-center font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/80">
+          [ {isKo ? "EXPLORING MEDIA UNIVERSE" : "EXPLORING MEDIA UNIVERSE"} ]
         </p>
-        <p className="text-center text-sm font-bold leading-snug tracking-tight text-foreground">
+        <p className="text-center text-sm font-bold leading-snug tracking-tight text-white">
           {isKo
             ? "TKAD bot이 매체 탐험을 진행 중입니다..."
             : "TKAD bot is exploring the media universe for you..."}
         </p>
       </div>
-      <div className="space-y-3 border-2 border-border bg-card p-6">
-        <div className="h-3 w-full overflow-hidden border-2 border-border bg-card">
+      <div className="space-y-3 rounded-[28px] border border-white/14 bg-white/6 p-6 text-white shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur">
+        <div className="h-3 w-full overflow-hidden rounded-full border border-white/14 bg-black/30">
           <motion.div
-            className="h-full w-2/5 bg-hermes"
+            className="h-full w-2/5 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]"
             animate={{ x: ["-30%", "220%"] }}
             transition={{
               duration: 1.35,
@@ -392,12 +439,12 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           />
         </div>
         <div className="space-y-2">
-          <div className="h-3 bg-muted" />
-          <div className="h-3 w-4/5 bg-muted" />
-          <div className="h-3 w-3/5 bg-muted" />
+          <div className="h-3 rounded-full bg-white/10" />
+          <div className="h-3 w-4/5 rounded-full bg-white/10" />
+          <div className="h-3 w-3/5 rounded-full bg-white/10" />
         </div>
       </div>
-      <p className="text-center font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+      <p className="text-center font-mono text-[11px] leading-relaxed tracking-tight text-white/70">
         {`// `}{messages[step]}
       </p>
     </div>

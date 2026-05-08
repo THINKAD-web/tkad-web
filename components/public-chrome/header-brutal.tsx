@@ -8,7 +8,7 @@
  *   - 매체 검색 그룹 (4): /media, /media/map, /recommend, /planner
  *   - 트렌드 & 학습 그룹 (3): /cases, /insights, /academy
  *   - CTA: /contact
- *   - extras: HeaderUserMenu, LanguageToggle, ThemeToggle
+ *   - extras: HeaderUserMenu, LanguageToggle, 홈·서비스: HomeAppearanceToggle(랜딩 낮/밤) — 그 외는 ThemeToggle
  */
 
 import { useTranslations, useLocale } from "next-intl";
@@ -17,6 +17,7 @@ import { useRouter, usePathname } from "@/i18n/navigation";
 import { Globe } from "lucide-react";
 import { BrutalNav, type BrutalNavEntry } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
+import { HomeAppearanceToggle } from "@/components/home-appearance-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 function LanguageToggle() {
@@ -50,6 +51,19 @@ function LanguageToggle() {
 
 export function HeaderBrutal() {
   const t = useTranslations();
+  const pathname = usePathname();
+  /** 네온 랜딩 낮/밤(`data-appearance`) — 홈·서비스 동일 토글 */
+  const isLandingNeon =
+    pathname === "/" ||
+    pathname === "" ||
+    pathname === "/services" ||
+    pathname === "/contact" ||
+    pathname === "/cases" ||
+    pathname === "/insights" ||
+    pathname === "/academy" ||
+    pathname === "/recommend" ||
+    pathname === "/planner" ||
+    pathname.startsWith("/media");
 
   const links: BrutalNavEntry[] = [
     { href: "/", label: t("nav.home") },
@@ -81,7 +95,7 @@ export function HeaderBrutal() {
         <>
           <HeaderUserMenu />
           <LanguageToggle />
-          <ThemeToggle />
+          {isLandingNeon ? <HomeAppearanceToggle /> : <ThemeToggle />}
         </>
       }
     />

@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Eye,
   FileCheck,
+  Play,
   Search,
   Camera,
   Database,
@@ -22,7 +23,13 @@ import { TestimonialsCarousel } from "@/components/testimonials-carousel";
 import { HomeMediaCarousel } from "@/components/home-media-carousel";
 import { testimonials } from "@/data/testimonials";
 import { Link } from "@/i18n/navigation";
-import { BtnBlock, SectionHead } from "@/components/brutalist";
+import { HomeClientLogos } from "@/components/home-client-logos";
+import { FloatingCta } from "@/components/floating-cta";
+import { HomeVerificationSteps } from "@/components/home-verification-steps";
+import { HomeHeroNeo } from "@/components/home-hero-neo";
+import { NeonSection } from "@/components/landing/neon/neon-section";
+import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 /**
@@ -84,224 +91,73 @@ function HomeContent({
     .slice(0, 12);
 
   return (
-    <>
+    <HomeLandingDayNight>
+    <div className="tkad-landing-neon">
       {/* Hero */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-hero-void text-hero-fg">
-        {/* Ken Burns 배경 — 내부에서 가독성 그라디언트/accent 오버레이까지 함께 적용 */}
-        <HeroKenBurns />
-
-        <div className="relative z-10 mx-auto max-w-5xl px-4 text-center">
-          <div className="hero-fade-in hero-fade-in-seq-0 mb-8 inline-flex items-center gap-2 border-2 border-hermes/80 bg-black/50 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.22em] text-hermes backdrop-blur-sm">
-            <span className="h-1.5 w-1.5 bg-hermes shadow-[0_0_12px_rgba(255,98,0,0.9)]" />
-            {isKo ? "대한민국 No.1 OOH 광고 에이전시" : "Korea's #1 OOH Ad Agency"}
-          </div>
-
-          <h1 className="text-5xl leading-[1.05] font-black tracking-tight text-hero-fg lg:text-7xl">
-            {isKo ? (
-              <>
-                <span className="hero-fade-in hero-fade-in-seq-1 block">
-                  생각하는 광고회사
-                </span>
-                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block text-hermes drop-shadow-[0_0_40px_rgba(255,98,0,0.35)]">
-                  싱커드
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="hero-fade-in hero-fade-in-seq-1 block">
-                  The Thinking Ad Agency
-                </span>
-                <span className="hero-fade-in hero-fade-in-seq-2 mt-1 block text-hermes drop-shadow-[0_0_40px_rgba(255,98,0,0.35)]">
-                  THINKAD
-                </span>
-              </>
-            )}
-          </h1>
-
-          <p className="hero-fade-in hero-fade-in-seq-3 mx-auto mt-8 max-w-2xl text-base leading-relaxed text-hero-fg/88 sm:text-lg">
-            {t("hero.subtitle")}
-          </p>
-
-          <p className="hero-fade-in hero-fade-in-seq-4 mx-auto mt-4 font-mono text-[11px] uppercase tracking-[0.22em] text-hermes">
-            {`// `}
-            {isKo
-              ? "싱커드가 직접 검증하고 관리하는 매체만"
-              : "Only media verified and managed by THINKAD"}
-          </p>
-
-          <div className="hero-fade-in hero-fade-in-seq-5 mx-auto mt-10 flex w-full max-w-md flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
-            <BtnBlock href="/contact" variant="accent" size="lg">
-              {isKo ? "무료 상담 신청" : "Free Consultation"}
-              <ArrowRight className="h-4 w-4" />
-            </BtnBlock>
-            <BtnBlock href="/media" variant="secondary" size="lg">
-              {t("hero.cta")}
-              <ArrowRight className="h-4 w-4" />
-            </BtnBlock>
-          </div>
-          <p className="hero-fade-in hero-fade-in-seq-6 mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-hero-fg/45">
-            {isKo
-              ? "// 30초 만에 신청 완료 · 24시간 내 전문 컨설턴트 연락"
-              : "// Apply in 30 seconds · Consultant contacts within 24h"}
-          </p>
-
-          <div className="hero-fade-in hero-fade-in-seq-7 mt-12 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-hero-fg/78">
-            {[
-              { value: "500+", label: isKo ? "검증 매체" : "Verified media" },
-              { value: "15년", label: isKo ? "OOH 경력" : "Years of OOH" },
-              { value: "100+", label: isKo ? "대기업 파트너" : "Enterprise partners" },
-            ].map((s) => (
-              <div key={s.label} className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-hermes sm:text-3xl">
-                  {s.value}
-                </span>
-                <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-hero-fg/50">
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div
-          className="hero-fade-in hero-fade-in-seq-7 absolute bottom-8 left-1/2 -translate-x-1/2 motion-reduce:animate-none"
-          aria-hidden
-        >
-          <ChevronDown className="hero-chevron-bounce h-6 w-6 text-hero-fg/45 motion-reduce:animate-none" />
-        </div>
-      </section>
+      <HomeHeroNeo isKo={isKo} />
 
       {/* Verification Process */}
-      <section className="bg-background py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <SectionHead
-              number="01"
-              category={isKo ? "Verification" : "Verification"}
-              title={
-                isKo ? (
-                  <>
-                    싱커드만의 <span className="text-accent">4단계</span> 매체 검증
-                  </>
-                ) : (
-                  <>
-                    THINKAD&apos;s <span className="text-accent">4-Step</span> Media Verification
-                  </>
-                )
-              }
-              meta={
-                isKo
-                  ? "every media verified before registration"
-                  : "every media verified before registration"
-              }
-            />
-          </ScrollAnimate>
+      <NeonSection>
+        <ScrollAnimate>
+          <NeonSectionHead
+            number="01"
+            kicker={isKo ? "Verification" : "Verification"}
+            title={
+              isKo ? (
+                <>
+                  싱커드만의 <span className="tkad-home-accent-text">4단계</span>{" "}
+                  매체 검증
+                </>
+              ) : (
+                <>
+                  THINKAD&apos;s{" "}
+                  <span className="tkad-home-accent-text">
+                    4-Step
+                  </span>{" "}
+                  Media Verification
+                </>
+              )
+            }
+            meta={isKo ? "verified before registration" : "verified before registration"}
+          />
+        </ScrollAnimate>
 
-          <div className="mt-12 grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4 lg:divide-x-2 lg:divide-border">
-            {[
-              {
-                icon: Search,
-                step: "01",
-                image: "/images/process/step-1-site-visit.jpg",
-                title: isKo ? "현장 방문" : "Site Visit",
-                desc: isKo
-                  ? "담당자가 직접 매체 현장을 방문하여 설치 환경과 주변 유동인구를 확인합니다."
-                  : "Our team personally visits the media site to check installation conditions and surrounding foot traffic.",
-              },
-              {
-                icon: Camera,
-                step: "02",
-                image: "/images/process/step-2-measurement.jpg",
-                title: isKo ? "촬영 및 실측" : "Photo & Measurement",
-                desc: isKo
-                  ? "매체 크기, 시인성, 조도를 정밀 측정하고 다각도 촬영으로 기록합니다."
-                  : "We precisely measure media size, visibility, and illumination with multi-angle photography.",
-              },
-              {
-                icon: Database,
-                step: "03",
-                image: "/images/process/step-3-data-review.jpg",
-                title: isKo ? "데이터 검증" : "Data Verification",
-                desc: isKo
-                  ? "유동인구 데이터, 차량 통행량, 노출 빈도를 분석하여 매체 효과를 검증합니다."
-                  : "We analyze foot traffic, vehicle flow, and exposure frequency to verify media effectiveness.",
-              },
-              {
-                icon: ClipboardCheck,
-                step: "04",
-                image: "/images/process/step-4-registration.jpg",
-                title: isKo ? "매체 등록" : "Media Registration",
-                desc: isKo
-                  ? "검증을 통과한 매체만 싱커드 플랫폼에 등록되어 광고주에게 제안됩니다."
-                  : "Only verified media are registered on the THINKAD platform and proposed to advertisers.",
-              },
-            ].map((item, index) => (
-              <ScrollAnimate key={item.step} delay={index * 120}>
-                <div className="group relative h-full border-2 border-border bg-card lg:border-0 lg:border-t-2">
-                  <div className="relative flex min-h-[120px] items-center justify-center overflow-hidden border-b-2 border-border bg-muted/25 sm:min-h-[128px]">
-                    <div
-                      className="pointer-events-none absolute inset-0 opacity-[0.18] dark:opacity-[0.28]"
-                      aria-hidden
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(90deg, var(--border) 1px, transparent 1px), linear-gradient(var(--border) 1px, transparent 1px)",
-                        backgroundSize: "18px 18px",
-                      }}
-                    />
-                    <div className="relative flex size-[3.25rem] items-center justify-center border-2 border-border bg-card text-hermes shadow-[0_1px_0_var(--border)] transition-[border-color,box-shadow] duration-300 group-hover:border-hermes/50 group-hover:shadow-[0_0_0_1px_color-mix(in_srgb,var(--hermes)_35%,transparent)] sm:size-14">
-                      <item.icon
-                        className="size-7 sm:size-[1.85rem]"
-                        strokeWidth={1.85}
-                        aria-hidden
-                      />
-                    </div>
-                    <span className="absolute left-0 top-0 inline-flex items-center border-b-2 border-r-2 border-border bg-hermes px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white sm:text-[10px] sm:tracking-[0.22em]">
-                      STEP {item.step}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-2 p-6">
-                    <h3 className="text-lg font-black tracking-tight text-foreground sm:text-xl">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      {item.desc}
-                    </p>
-                  </div>
-                </div>
-              </ScrollAnimate>
-            ))}
-          </div>
-        </div>
-      </section>
+        <HomeVerificationSteps isKo={isKo} />
+      </NeonSection>
+
+      <HomeClientLogos isKo={isKo} />
 
       {/* 싱커드 추천 매체 — 표시 개수와 무관하게 'TOP 3' 표기 제거 */}
-      <section className="bg-muted/30 py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <SectionHead
-              number="02"
-              category="Recommended"
-              title={
-                isKo ? (
-                  <>
-                    싱커드 <span className="text-accent">추천</span> 매체
-                  </>
-                ) : (
-                  <>
-                    THINKAD <span className="text-accent">Recommended</span> Media
-                  </>
-                )
-              }
-              meta={
-                isKo
-                  ? "curated from verified data"
-                  : "curated from verified data"
-              }
-            />
-          </ScrollAnimate>
+      <NeonSection className="pt-40 pb-[calc(10rem+14px)] sm:pt-48 sm:pb-[calc(12rem+14px)]">
+        <ScrollAnimate>
+          <NeonSectionHead
+            number="02"
+            kicker="Recommended"
+            title={
+              isKo ? (
+                <>
+                  싱커드{" "}
+                  <span className="tkad-home-accent-text">
+                    추천
+                  </span>{" "}
+                  매체
+                </>
+              ) : (
+                <>
+                  THINKAD{" "}
+                  <span className="tkad-home-accent-text">
+                    Recommended
+                  </span>{" "}
+                  Media
+                </>
+              )
+            }
+            meta={isKo ? "curated from verified data" : "curated from verified data"}
+          />
+        </ScrollAnimate>
 
           {featuredItems.length === 0 ? (
-            <p className="mt-8 text-center font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="mt-8 text-center font-mono text-[12px] font-bold uppercase tracking-[0.22em] text-white/60">
               {isKo
                 ? "// 추천 매체 준비 중"
                 : "// featured media coming soon"}
@@ -316,187 +172,208 @@ function HomeContent({
               />
             </div>
           )}
-        </div>
-      </section>
+      </NeonSection>
 
       {/* 인기 매체 — 추천과 별개로 관리 (isPopular / popularOrder) */}
       {popularItems.length > 0 && (
-        <section className="bg-background py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <ScrollAnimate>
-              <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-                <SectionHead
-                  number="03"
-                  category="Popular"
-                  title={
-                    isKo ? (
-                      <>
-                        지금 가장 <span className="text-accent">주목</span>받는 매체
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-accent">Trending</span> Right Now
-                      </>
-                    )
-                  }
-                  meta={isKo ? "hand-picked by our team" : "hand-picked by our team"}
-                  className="mb-0 flex-1"
-                />
-                <Link
-                  href="/media"
-                  className="group inline-flex items-center gap-2 self-end border-b-2 border-foreground/25 pb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground transition-colors hover:border-hermes hover:text-hermes"
-                >
-                  {isKo ? "전체 매체" : "View all"}
-                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-            </ScrollAnimate>
-            <div className="mt-10">
-              <HomeMediaCarousel
-                items={popularItems}
-                isKo={isKo}
-                variant="popular"
+        <NeonSection className="pt-[calc(10rem+14px)] pb-40 sm:pt-[calc(12rem+14px)] sm:pb-48">
+          <ScrollAnimate>
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+              <NeonSectionHead
+                number="03"
+                kicker="Popular"
+                title={
+                  isKo ? (
+                    <>
+                      지금 가장{" "}
+                      <span className="tkad-home-accent-text">
+                        주목
+                      </span>
+                      받는 매체
+                    </>
+                  ) : (
+                    <>
+                      <span className="tkad-home-accent-text">
+                        Trending
+                      </span>{" "}
+                      Right Now
+                    </>
+                  )
+                }
+                meta={isKo ? "hand-picked by our team" : "hand-picked by our team"}
+                className="mb-0 flex-1"
               />
+              <Link
+                href="/media"
+                className="tkad-home-section-cta group inline-flex items-center gap-2 self-end border-b border-white/25 pb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 transition-colors hover:border-white/45 hover:text-white"
+              >
+                {isKo ? "전체 매체" : "View all"}
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+              </Link>
             </div>
+          </ScrollAnimate>
+          <div className="mt-10">
+            <HomeMediaCarousel
+              items={popularItems}
+              isKo={isKo}
+              variant="popular"
+            />
           </div>
-        </section>
+        </NeonSection>
       )}
 
       {/* Why THINKAD */}
-      <section className="bg-muted/30 py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <SectionHead
-              number="04"
-              category={isKo ? "Why us" : "Why us"}
-              title={
-                isKo ? (
-                  <>
-                    왜 <span className="text-accent">싱커드</span>인가?
-                  </>
-                ) : (
-                  <>
-                    Why <span className="text-accent">THINKAD</span>?
-                  </>
-                )
-              }
-              meta={
-                isKo
-                  ? "don't waste budget on unverified media"
-                  : "don't waste budget on unverified media"
-              }
-            />
-          </ScrollAnimate>
-          <div className="mt-12 grid grid-cols-1 gap-0 lg:grid-cols-3">
-            {[
-              {
-                icon: Eye,
-                title: isKo ? "직접 현장 검증" : "On-Site Verification",
-                desc: isKo
-                  ? "모든 매체를 담당자가 직접 방문하여 실제 노출 환경, 시인성, 유동인구를 확인합니다. 사진과 리포트로 기록된 검증 데이터를 제공합니다."
-                  : "Our team personally visits every media location to verify actual exposure, visibility, and foot traffic. We provide verification data documented with photos and reports.",
-                highlight: isKo ? "100% 현장 방문" : "100% Site Visits",
-              },
-              {
-                icon: BarChart3,
-                title: isKo ? "1년 이상 효과 데이터" : "1+ Year Performance Data",
-                desc: isKo
-                  ? "단기 캠페인이 아닌, 1년 이상 축적된 매체별 효과 데이터를 기반으로 최적의 매체를 추천합니다. 실제 ROI로 검증된 매체만 제안합니다."
-                  : "We recommend optimal media based on 1+ years of accumulated performance data per media, not short-term campaigns. We only propose media verified by actual ROI.",
-                highlight: isKo ? "데이터 기반 추천" : "Data-Driven",
-              },
-              {
-                icon: FileCheck,
-                title: isKo ? "계약~사후관리 책임" : "Contract to Post-Care",
-                desc: isKo
-                  ? "계약, 설치, 집행, 모니터링, 리포팅, 사후관리까지 전 과정을 싱커드가 책임집니다. 중간 단계 없이 원스톱으로 관리합니다."
-                  : "THINKAD takes full responsibility from contract, installation, execution, monitoring, reporting, to post-campaign management. One-stop management with no middlemen.",
-                highlight: isKo ? "원스톱 관리" : "One-Stop",
-              },
-            ].map((item, i) => (
-              <ScrollAnimate key={item.title} delay={i * 100}>
-                <div className="group relative h-full border-2 border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-hermes/50 hover:shadow-[0_20px_48px_rgba(255,98,0,0.12)] dark:hover:shadow-[0_24px_56px_rgba(255,98,0,0.18)] lg:border-r-0 lg:last:border-r-2">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                      [{String(i + 1).padStart(2, "0")}]
-                    </span>
-                    <item.icon
-                      className="h-7 w-7 text-foreground transition-colors group-hover:text-hermes"
-                      strokeWidth={1.75}
-                      aria-hidden
-                    />
-                  </div>
-                  <h3 className="text-xl font-black tracking-tight text-foreground">
-                    {item.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                    {item.desc}
-                  </p>
-                  <div className="mt-6 inline-flex items-center gap-2 border-2 border-hermes bg-hermes px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white shadow-[0_0_20px_rgba(255,98,0,0.35)]">
-                    {item.highlight}
-                  </div>
+      <NeonSection>
+        <ScrollAnimate>
+          <NeonSectionHead
+            number="04"
+            kicker={isKo ? "Why us" : "Why us"}
+            title={
+              isKo ? (
+                <>
+                  왜{" "}
+                  <span className="tkad-home-accent-text">
+                    싱커드
+                  </span>
+                  인가?
+                </>
+              ) : (
+                <>
+                  Why{" "}
+                  <span className="tkad-home-accent-text">
+                    THINKAD
+                  </span>
+                  ?
+                </>
+              )
+            }
+            meta={isKo ? "don’t waste budget on unverified media" : "don’t waste budget on unverified media"}
+          />
+        </ScrollAnimate>
+
+        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
+          {[
+            {
+              icon: Eye,
+              title: isKo ? "직접 현장 검증" : "On-Site Verification",
+              desc: isKo
+                ? "담당자가 직접 방문해 실제 노출 환경·시인성·유동을 확인합니다. 사진/리포트로 검증 데이터를 제공합니다."
+                : "We verify exposure, visibility, and foot traffic on-site, documented with photos and reports.",
+              highlight: isKo ? "100% 현장 방문" : "100% Site Visits",
+            },
+            {
+              icon: BarChart3,
+              title: isKo ? "누적 성과 데이터" : "Performance Signals",
+              desc: isKo
+                ? "단기 느낌이 아니라, 축적된 지표로 성과를 예측 가능한 영역으로 가져옵니다."
+                : "Not guesswork—signals turn performance into something you can forecast.",
+              highlight: isKo ? "데이터 기반" : "Data-Driven",
+            },
+            {
+              icon: FileCheck,
+              title: isKo ? "집행까지 책임" : "Execution, End-to-End",
+              desc: isKo
+                ? "견적·계약·설치·모니터링·리포팅까지 원스톱으로 운영합니다."
+                : "From quote to reporting, we run the campaign end-to-end.",
+              highlight: isKo ? "원스톱 운영" : "One-Stop",
+            },
+          ].map((item, i) => (
+            <ScrollAnimate key={item.title} delay={i * 100}>
+              <div className="group relative h-full rounded-[28px] bg-white/6 p-8 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border tkad-neon-glow">
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                    [{String(i + 1).padStart(2, "0")}]
+                  </span>
+                  <item.icon
+                    className="h-7 w-7 text-white/80 transition-colors group-hover:text-white"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
                 </div>
-              </ScrollAnimate>
-            ))}
-          </div>
+                <h3 className="text-xl font-black tracking-tight text-white">
+                  {item.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/76">
+                  {item.desc}
+                </p>
+                <div className="mt-6 inline-flex items-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white shadow-[0_18px_72px_rgba(0,0,0,0.65)] backdrop-blur">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#22d3ee]" aria-hidden />
+                  {item.highlight}
+                </div>
+              </div>
+            </ScrollAnimate>
+          ))}
         </div>
-      </section>
+      </NeonSection>
 
       {/* Testimonials (캐러셀 — data/testimonials.ts 에서 관리) */}
-      <section className="bg-background py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <SectionHead
-              number="05"
-              category={isKo ? "Testimonials" : "Testimonials"}
-              title={
-                isKo ? (
-                  <>
-                    광고주가 직접 전하는 <span className="text-accent">이야기</span>
-                  </>
-                ) : (
-                  <>
-                    What Our <span className="text-accent">Clients</span> Say
-                  </>
-                )
-              }
-              meta={
-                isKo
-                  ? "real stories from partners"
-                  : "real stories from partners"
-              }
-            />
-          </ScrollAnimate>
-          <div className="mt-10">
-            <TestimonialsCarousel items={testimonials} isKo={isKo} />
-          </div>
+      <NeonSection>
+        <ScrollAnimate>
+          <NeonSectionHead
+            number="05"
+            kicker={isKo ? "Testimonials" : "Testimonials"}
+            title={
+              isKo ? (
+                <>
+                  광고주가 직접 전하는{" "}
+                  <span className="tkad-home-accent-text">
+                    이야기
+                  </span>
+                </>
+              ) : (
+                <>
+                  What Our{" "}
+                  <span className="tkad-home-accent-text">
+                    Clients
+                  </span>{" "}
+                  Say
+                </>
+              )
+            }
+            meta={isKo ? "real stories from partners" : "real stories from partners"}
+          />
+        </ScrollAnimate>
+        <div className="mt-10">
+          <TestimonialsCarousel items={testimonials} isKo={isKo} />
         </div>
-      </section>
+      </NeonSection>
 
       {/* CTA Banner */}
-      <section className="relative overflow-hidden bg-hero-void py-24 text-hero-fg">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,98,0,0.12),transparent_55%)]"
-        />
-        <ScrollAnimate className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-hermes">
+      <NeonSection innerClassName="text-center">
+        <ScrollAnimate className="mx-auto max-w-4xl">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-white/65">
             {`// ${isKo ? "지금 시작하세요" : "Get started now"}`}
           </p>
-          <h2 className="mt-4 text-3xl font-black leading-[1.08] tracking-tight text-hero-fg sm:text-4xl lg:text-6xl">
+          <h2 className="tkad-neon-text mt-6 text-balance text-4xl font-black leading-[1.02] tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
             {t("ctaBanner.title")}
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-hero-fg/78 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
             {t("ctaBanner.description")}
           </p>
-          <div className="mt-10 flex justify-center">
-            <BtnBlock href="/contact" variant="accent" size="lg">
+          <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <Link
+              href="/contact"
+              className="tkad-neon-cta group inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+            >
               {t("ctaBanner.cta")}
-              <ArrowRight className="h-4 w-4" />
-            </BtnBlock>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/media"
+              className="group inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+            >
+              {isKo ? "매체 먼저 보기" : "Explore media first"}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
           </div>
+          <p className="mx-auto mt-7 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+            {isKo ? "// 검증 매체 기반 · 예산에 맞는 조합 제안" : "// Verified media · Budget-fit plan"}
+          </p>
         </ScrollAnimate>
-      </section>
-    </>
+      </NeonSection>
+
+      <FloatingCta isKo={isKo} />
+    </div>
+    </HomeLandingDayNight>
   );
 }

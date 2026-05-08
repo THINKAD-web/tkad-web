@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { NeonSection } from "@/components/landing/neon/neon-section";
 import {
   ArrowRight,
   Layers,
@@ -66,28 +68,52 @@ export default function CasesPageClient({ initialCases }: Props) {
   ];
 
   return (
-    <>
-      <section className="bg-hero-void py-24">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
-            {`// 08 / Cases`}
-          </p>
-          <div className="mt-3 inline-flex flex-wrap items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
-              {empty ? t("cases.reportHeroTitle") : t("cases.title")}
-            </h1>
-            <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-primary-foreground">
-              BETA
-            </span>
-          </div>
-          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
-            {empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
-          </p>
-        </div>
-      </section>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
 
-      <section className="bg-muted py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              {`// 08 / Cases`}
+            </p>
+            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+              <h1 className="text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+                {empty ? t("cases.reportHeroTitle") : t("cases.title")}
+              </h1>
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">BETA</span>
+              </span>
+            </div>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+              {empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
+            </p>
+            <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/quote"
+                className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              >
+                {t("cases.reportCtaQuote")}
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              >
+                {isKo ? "무료 상담" : "Free consult"}
+                <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <NeonSection>
           {empty ? (
             <div className="space-y-14">
               <p className="mx-auto max-w-3xl text-center text-lg font-bold leading-relaxed text-foreground sm:text-xl">
@@ -305,8 +331,8 @@ export default function CasesPageClient({ initialCases }: Props) {
               </div>
             </>
           )}
-        </div>
-      </section>
-    </>
+        </NeonSection>
+      </div>
+    </HomeLandingDayNight>
   );
 }

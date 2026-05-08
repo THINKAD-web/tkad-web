@@ -14,7 +14,11 @@ export type RecommendReasonKey =
   | "highVisibility"
   | "budgetEfficient"
   | "ageMatch"
-  | "goalFit";
+  | "goalFit"
+  | "landmarkHotspot"
+  | "transitHotspot"
+  | "retailHotspot"
+  | "neighborhoodHotspot";
 
 export type RecommendReason = { key: RecommendReasonKey; weight: number };
 
@@ -69,6 +73,170 @@ const GOAL_TYPE_AFFINITY: Record<
   local: { digital: 0.7, static: 1, mobile: 0.9, network: 0.85 },
 };
 
+/**
+ * 목표별 텍스트 힌트(규칙 기반).
+ * 매체 데이터가 빈약해도(=targetAge/description 없음) 최소한의 “맥락 차이”를 만들기 위한 신호.
+ */
+const GOAL_HINTS: Record<PlannerCampaignGoal, string[]> = {
+  brand: [
+    "랜드마크",
+    "대형",
+    "프리미엄",
+    "미디어월",
+    "led",
+    "media wall",
+    "광장",
+    "스퀘어",
+    "메가",
+    "타워",
+    "센터",
+    "airport",
+    "인천공항",
+  ],
+  launch: [
+    "신규",
+    "오픈",
+    "런칭",
+    "launch",
+    "grand",
+    "opening",
+    "신제품",
+    "팝업",
+    "pop-up",
+    "미디어월",
+    "전광판",
+  ],
+  event: [
+    "행사",
+    "페스티벌",
+    "festival",
+    "콘서트",
+    "concert",
+    "경기장",
+    "stadium",
+    "전시",
+    "exhibition",
+    "역",
+    "환승",
+    "터미널",
+    "terminal",
+    "버스",
+    "지하철",
+  ],
+  sales: [
+    "쇼핑",
+    "매장",
+    "리테일",
+    "백화점",
+    "마트",
+    "아울렛",
+    "mall",
+    "department",
+    "mart",
+    "outlet",
+    "store",
+    "프로모션",
+    "coupon",
+    "쿠폰",
+  ],
+  local: [
+    "동네",
+    "주거",
+    "아파트",
+    "학원",
+    "병원",
+    "시장",
+    "community",
+    "residential",
+    "neighborhood",
+    "역세권",
+    "로데오",
+  ],
+};
+
+const LANDMARK_HINTS = [
+  "랜드마크",
+  "광장",
+  "스퀘어",
+  "타워",
+  "센터",
+  "미디어월",
+  "전광판",
+  "airport",
+  "인천공항",
+  "터미널",
+  "terminal",
+];
+
+const TRANSIT_HINTS = [
+  "역",
+  "지하철",
+  "환승",
+  "버스",
+  "정류장",
+  "terminal",
+  "터미널",
+  "station",
+  "subway",
+  "bus",
+];
+
+const RETAIL_HINTS = [
+  "백화점",
+  "마트",
+  "아울렛",
+  "쇼핑",
+  "상권",
+  "mall",
+  "department",
+  "mart",
+  "outlet",
+  "shopping",
+];
+
+const NEIGHBORHOOD_HINTS = [
+  "주거",
+  "아파트",
+  "학원",
+  "병원",
+  "시장",
+  "동네",
+  "residential",
+  "apartment",
+  "neighborhood",
+];
+
+function haystackForHints(media: MediaItem): string {
+  return [
+    media.name,
+    media.nameEn,
+    media.location,
+    media.locationEn,
+    media.subCategory,
+    ...(media.tags ?? []),
+    media.nearbyFacilities,
+    media.nearbyFacilitiesEn,
+    media.nearbyStations,
+    media.nearbyLandmarks,
+    media.features,
+    media.featuresEn,
+    media.description,
+    media.descriptionEn,
+    media.catalogDescription,
+    media.catalogDescriptionEn,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function hintHitCount(hay: string, hints: string[]): number {
+  if (!hay.trim()) return 0;
+  let hits = 0;
+  for (const h of hints) if (hay.includes(h.toLowerCase())) hits += 1;
+  return hits;
+}
+
 function regionScore(media: MediaItem, regions: string[]): number {
   if (regions.length === 0) return 0.5;
   if (regions.includes(media.region)) return 1;
@@ -117,13 +285,50 @@ function goalFitScore(
   goal: PlannerCampaignGoal | null,
   industryKey: PlannerIndustryKey | null,
 ): number {
+  const goalHintScore = (() => {
+    if (!goal) return 0.6;
+    const hints = GOAL_HINTS[goal] ?? [];
+    if (hints.length === 0) return 0.6;
+    const hay = [
+      media.name,
+      media.nameEn,
+      media.location,
+      media.locationEn,
+      media.subCategory,
+      ...(media.tags ?? []),
+      media.nearbyFacilities,
+      media.nearbyFacilitiesEn,
+      media.nearbyStations,
+      media.nearbyLandmarks,
+      media.features,
+      media.featuresEn,
+      media.description,
+      media.descriptionEn,
+      media.catalogDescription,
+      media.catalogDescriptionEn,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    if (!hay.trim()) return 0.55;
+    let hits = 0;
+    for (const h of hints) {
+      if (hay.includes(h.toLowerCase())) hits += 1;
+    }
+    // 0~1: 0 hits -> 0.45, 1~ -> 상승, 상한
+    if (hits <= 0) return 0.45;
+    return Math.min(1, 0.55 + 0.15 * hits);
+  })();
+
   const typeFit = (() => {
     if (!goal) return 0.6;
     const affinity = GOAL_TYPE_AFFINITY[goal];
     return affinity[media.type] ?? 0.5;
   })();
   const ind = industryFitScore(media, industryKey);
-  return Math.min(1, typeFit * (0.72 + 0.28 * ind));
+  const base = typeFit * (0.68 + 0.32 * ind);
+  // 목표 힌트는 “결정적” 신호가 아니라 보조. base를 해치지 않게 완만히 반영.
+  return Math.max(0, Math.min(1, base * (0.85 + 0.15 * goalHintScore)));
 }
 
 function visibilityScore(media: MediaItem): number {
@@ -288,6 +493,27 @@ export function scoreMedia(
 
   const score = parts.reduce((a, p) => a + p.weighted, 0);
 
+  const hay = haystackForHints(media);
+  const extraReasonKeys: RecommendReasonKey[] = (() => {
+    const goal = ctx.goal;
+    if (!goal) return [];
+    // pick one strongest “goal-like” extra reason to avoid clutter
+    if (goal === "sales") {
+      return hintHitCount(hay, RETAIL_HINTS) >= 1 ? ["retailHotspot"] : [];
+    }
+    if (goal === "event") {
+      return hintHitCount(hay, TRANSIT_HINTS) >= 1 ? ["transitHotspot"] : [];
+    }
+    if (goal === "local") {
+      const districtSignal =
+        typeof media.district === "string" && media.district.trim() ? 1 : 0;
+      const hits = hintHitCount(hay, NEIGHBORHOOD_HINTS);
+      return districtSignal || hits >= 1 ? ["neighborhoodHotspot"] : [];
+    }
+    // brand/launch: landmark-ish
+    return hintHitCount(hay, LANDMARK_HINTS) >= 1 ? ["landmarkHotspot"] : [];
+  })();
+
   let reasons = parts
     .filter((p) => p.raw >= 0.55)
     .sort((a, b) => b.weighted - a.weighted)
@@ -298,6 +524,13 @@ export function scoreMedia(
     if (top && top.raw > 0.12) {
       reasons = [{ key: top.key, weight: top.weighted }];
     }
+  }
+
+  // inject goal-specific extra reason (UI clarity), without inflating score.
+  for (const k of extraReasonKeys) {
+    if (reasons.some((r) => r.key === k)) continue;
+    if (reasons.length >= 3) break;
+    reasons.push({ key: k, weight: 0.00001 });
   }
 
   return { media, score, reasons };
@@ -365,14 +598,45 @@ export function recommendPlannerMedia(
   catalog: readonly MediaItem[],
   ctx: RecommendationContext,
   limit = 5,
+  seed = 0,
 ): ScoredMedia[] {
   const effFn = efficiencyScoreFactory(catalog);
-  const filtered = catalog.filter((m) => {
+  const filteredByCategory = catalog.filter((m) => {
     if (ctx.categories.length === 0) return true;
     return (ctx.categories as readonly PlannerCategory[]).some((c) =>
       matchesPlannerCategory(m, c),
     );
   });
+  // Region is a primary intent signal for planner. Prefer strict matching when provided,
+  // but keep a safe fallback to avoid empty recommendations.
+  const filtered =
+    ctx.regions.length > 0
+      ? (() => {
+          const strict = filteredByCategory.filter(
+            (m) => regionScore(m, ctx.regions) > 0,
+          );
+          return strict.length > 0 ? strict : filteredByCategory;
+        })()
+      : filteredByCategory;
+
+  const seededTiebreak = (id: string) => {
+    // deterministic per refresh; avoids “등록 순” when scores tie.
+    let h = 2166136261 ^ seed;
+    for (let i = 0; i < id.length; i++) {
+      h ^= id.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  };
+  const seeded01 = (id: string) => {
+    // 0..1 deterministic pseudo-rand per seed + id
+    const x = seededTiebreak(id);
+    // mulberry32-ish mix
+    let t = x + 0x6d2b79f5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
   const emptyReasonLast = (a: ScoredMedia, b: ScoredMedia) => {
     const ae = a.reasons.length === 0 ? 1 : 0;
     const be = b.reasons.length === 0 ? 1 : 0;
@@ -382,13 +646,18 @@ export function recommendPlannerMedia(
   const scored = filtered
     .map((m) => scoreMedia(m, ctx, effFn))
     .sort((a, b) => {
-      const d = b.score - a.score;
+      // Refresh should explore near-ties, not only exact ties.
+      // Apply tiny deterministic jitter (±2.5%) so close scores can reshuffle,
+      // while clearly better items remain on top.
+      const aj = a.score * (0.975 + 0.05 * seeded01(a.media.id));
+      const bj = b.score * (0.975 + 0.05 * seeded01(b.media.id));
+      const d = bj - aj;
       if (Math.abs(d) > 1e-6) return d;
       const e = emptyReasonLast(a, b);
       if (e !== 0) return e;
       const ft = (b.media.dailyFootTraffic ?? 0) - (a.media.dailyFootTraffic ?? 0);
       if (ft !== 0) return ft;
-      return a.media.id.localeCompare(b.media.id);
+      return seededTiebreak(a.media.id) - seededTiebreak(b.media.id);
     });
   return pickDiverseTop(scored, limit);
 }

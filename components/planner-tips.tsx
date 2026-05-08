@@ -63,7 +63,7 @@ export default function PlannerTips({
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ TIP ]
         </p>
-        <p className="mt-1 leading-relaxed">{t(tipKey)}</p>
+        <p className="mt-1 leading-relaxed text-foreground">{t(tipKey)}</p>
       </div>
     </div>
   );

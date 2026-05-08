@@ -6,7 +6,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import {
   ArrowLeft,
-  Calculator,
   CircleDollarSign,
   Eye,
   MapPin,
@@ -15,8 +14,6 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   buildCaseStudyGalleryItems,
   getAllMediaIds,
@@ -68,6 +65,8 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import MediaDetailHeroGallery from "@/components/media-detail-hero-gallery";
 import { MediaDetailAddToCart } from "@/components/media-detail-add-to-cart";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
+import { SectionHead } from "@/components/brutalist/section-head";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
@@ -146,7 +145,7 @@ export default async function MediaDetailPage({ params }: Props) {
   const primaryPricePeriodLabel = primaryPriceOption?.period
     ? t(
         mediaDetailPricePeriodTranslationKey(
-          primaryPriceOption.period as any,
+          primaryPriceOption.period as unknown as string,
         ),
       )
     : periodLabel;
@@ -215,19 +214,22 @@ export default async function MediaDetailPage({ params }: Props) {
           __html: JSON.stringify([placeJsonLd, breadcrumbJsonLd]),
         }}
       />
-      {/* 메인 이미지 + 히어로 오버레이 (네트워크 매체와 유사 구조) */}
-      <MediaDetailHeroGallery
-        images={galleryImages}
-        heroSrc={heroImage}
-        altBase={isKo ? media.name : (media.nameEn || media.name)}
-        labels={{
-          close: t("galleryLightboxClose"),
-          prev: t("galleryLightboxPrev"),
-          next: t("galleryLightboxNext"),
-          expand: t("galleryExpand"),
-          clickHint: t("galleryClickHint"),
-        }}
-      >
+
+      <HomeLandingDayNight>
+        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+          {/* 메인 이미지 + 히어로 오버레이 (네트워크 매체와 유사 구조) */}
+          <MediaDetailHeroGallery
+            images={galleryImages}
+            heroSrc={heroImage}
+            altBase={isKo ? media.name : (media.nameEn || media.name)}
+            labels={{
+              close: t("galleryLightboxClose"),
+              prev: t("galleryLightboxPrev"),
+              next: t("galleryLightboxNext"),
+              expand: t("galleryExpand"),
+              clickHint: t("galleryClickHint"),
+            }}
+          >
         <div className="mx-auto flex h-full w-full max-w-6xl flex-col justify-between gap-4">
           <div className="flex items-start justify-between gap-3">
             <Link
@@ -240,13 +242,13 @@ export default async function MediaDetailPage({ params }: Props) {
             <MediaDetailAdminActions />
           </div>
 
-          <div className="grid gap-6 pb-2 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.3fr)] lg:items-end">
-            <div className="min-w-0 space-y-4 text-hero-fg">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
-                [ MEDIA / {typeLabel?.toUpperCase() ?? "OOH"} ]
+          <div className="grid gap-8 pb-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1.35fr)] lg:items-end">
+            <div className="min-w-0 space-y-5 text-white">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+                {`// MEDIA · ${typeLabel?.toUpperCase() ?? "OOH"}`}
               </p>
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <h1 className="break-words text-2xl font-bold leading-[1.1] tracking-tight sm:text-3xl md:text-4xl">
+                <h1 className="text-balance break-words text-[clamp(30px,3.7vw,48px)] font-[950] leading-[1.02] tracking-[-0.055em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
                   {isKo ? media.name : (media.nameEn || media.name)}
                 </h1>
                 <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -254,18 +256,18 @@ export default async function MediaDetailPage({ params }: Props) {
                     <span
                       className={
                         media.availability === "reserved"
-                          ? "border-2 border-accent bg-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent-foreground"
-                          : "border-2 border-hero-fg bg-hero-void/60 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg"
+                          ? "rounded-xl border border-white/18 bg-white/10 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur"
+                          : "rounded-xl border border-white/18 bg-black/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/85 backdrop-blur"
                       }
                     >
                       {t(`availability.${media.availability}`)}
                     </span>
                   ) : media.availability === "available" ? (
-                    <span className="border-2 border-accent bg-hero-void/60 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+                    <span className="rounded-xl border border-white/18 bg-black/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/85 backdrop-blur">
                       {t("availability.available")}
                     </span>
                   ) : null}
-                  <span className="inline-flex items-center gap-1.5 border-2 border-hero-fg bg-hero-void/60 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg">
+                  <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/18 bg-black/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/90 backdrop-blur">
                     <Eye className="h-3.5 w-3.5" aria-hidden />
                     {t("visibilityBadge", {
                       score: performanceMetrics.visibilityScore,
@@ -273,40 +275,43 @@ export default async function MediaDetailPage({ params }: Props) {
                   </span>
                 </div>
               </div>
+
               {heroTags.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {heroTags.map((tag) => (
                     <span
                       key={tag}
-                      className="border-2 border-hero-fg/40 bg-hero-void/30 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg"
+                      className="rounded-full border border-white/14 bg-white/8 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/80 backdrop-blur"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
               ) : null}
-              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.18em] text-hero-fg/80 sm:text-[12px]">
+
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.18em] text-white/80 sm:text-[12px]">
                 <span className="inline-flex items-center gap-2">
                   <MapPin className="h-4 w-4 shrink-0" aria-hidden />
                   {formatMediaLocationShort(media, isKo)}
                 </span>
                 {typeLabel ? (
                   <>
-                    <span className="hidden text-hero-fg/40 sm:inline" aria-hidden>
+                    <span className="hidden text-white/35 sm:inline" aria-hidden>
                       ·
                     </span>
-                    <span className="text-accent">{typeLabel}</span>
+                    <span className="tkad-home-accent-text">{typeLabel}</span>
                   </>
                 ) : null}
               </p>
+
               {featuresText ? (
-                <p className="max-w-2xl text-sm leading-relaxed text-hero-fg/85">
+                <p className="max-w-2xl text-sm leading-relaxed text-white/82 sm:text-[15px]">
                   {featuresText}
                 </p>
               ) : null}
             </div>
 
-            <aside className="min-w-0 border-2 border-hero-fg bg-hero-void/60 p-5 text-sm text-hero-fg backdrop-blur-md sm:p-6">
+            <aside className="tkad-neon-border tkad-neon-glow min-w-0 rounded-[28px] border border-white/12 bg-white/6 p-5 text-sm text-white shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur-md sm:p-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <CoreFact
                   icon={CircleDollarSign}
@@ -315,53 +320,47 @@ export default async function MediaDetailPage({ params }: Props) {
                     media.keywordFilter ? (
                       <>
                         {hasPriceOptions && primaryPriceOption ? (
-                          <span className="block font-mono text-lg font-bold tabular-nums text-accent">
-                            {formatCatalogPriceFieldWon(
-                              primaryPriceOption.price,
-                            )}
+                          <span className="block font-mono text-lg font-black tabular-nums text-white">
+                            {formatCatalogPriceFieldWon(primaryPriceOption.price)}
                           </span>
                         ) : (
-                          <span className="block font-mono text-base font-bold tabular-nums text-accent sm:text-lg">
-                            {formatMediaPriceWonWithSymbol(
-                              media.keywordFilter.budgetMin,
-                            )}{" "}
-                            <span className="text-hero-fg/70">~</span>{" "}
-                            {formatMediaPriceWonWithSymbol(
-                              media.keywordFilter.budgetMax,
-                            )}
+                          <span className="block font-mono text-base font-black tabular-nums text-white sm:text-lg">
+                            {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMin)}{" "}
+                            <span className="text-white/55">~</span>{" "}
+                            {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMax)}
                           </span>
                         )}
-                        <span className="mt-1 block font-mono text-[11px] tracking-tight text-accent/90">
+                        <span className="mt-1 block font-mono text-[11px] tracking-tight text-white/75">
                           {media.keywordFilter.priceText}
                         </span>
                         {hasPriceOptions ? (
-                          <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-hero-fg/65">
+                          <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
                             {t("priceOptionsSummaryHint")}
                           </span>
                         ) : (
-                          <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-hero-fg/65">
+                          <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
                             {periodLabel}
                           </span>
                         )}
                       </>
                     ) : hasPriceOptions && primaryPriceOption ? (
                       <>
-                        <span className="block font-mono text-lg font-bold tabular-nums text-accent">
+                        <span className="block font-mono text-lg font-black tabular-nums text-white">
                           {formatCatalogPriceFieldWon(primaryPriceOption.price)}
                         </span>
-                        <span className="mt-0.5 block font-mono text-[11px] tracking-tight text-hero-fg/85">
+                        <span className="mt-0.5 block font-mono text-[11px] tracking-tight text-white/75">
                           {primaryPricePeriodLabel} · {primaryPriceOption.label}
                         </span>
-                        <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-hero-fg/65">
+                        <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
                           {t("priceOptionsSummaryHint")}
                         </span>
                       </>
                     ) : (
                       <>
-                        <span className="block font-mono text-lg font-bold tabular-nums text-accent">
+                        <span className="block font-mono text-lg font-black tabular-nums text-white">
                           {formatCatalogPriceFieldWon(media.price)}
                         </span>
-                        <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-hero-fg/65">
+                        <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
                           {periodLabel}
                         </span>
                       </>
@@ -372,14 +371,14 @@ export default async function MediaDetailPage({ params }: Props) {
                   icon={Users}
                   label={t("footTrafficTitle")}
                   value={
-                    <span className="block font-mono text-lg font-bold tabular-nums text-hero-fg">
+                    <span className="block font-mono text-lg font-black tabular-nums text-white">
                       {monthly.toLocaleString()}
                     </span>
                   }
                 />
               </div>
 
-              <div className="mt-6 border-t-2 border-hero-fg/30 pt-5">
+              <div className="mt-6 border-t border-white/12 pt-5">
                 <MediaStickyCta
                   mediaId={media.id}
                   mediaName={media.name}
@@ -390,12 +389,14 @@ export default async function MediaDetailPage({ params }: Props) {
             </aside>
           </div>
         </div>
-      </MediaDetailHeroGallery>
+          </MediaDetailHeroGallery>
 
-      <div className="sticky top-[72px] z-30 border-b-2 border-border bg-card sm:static">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
+      <div className="sticky top-[72px] z-30 sm:static">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[22px] border border-border/70 bg-card/75 px-4 py-3 shadow-sm backdrop-blur sm:rounded-[24px] sm:px-5 sm:py-3.5">
+        <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="hidden h-7 w-7 shrink-0 items-center justify-center border-2 border-border bg-accent text-accent-foreground sm:inline-flex">
+            <span className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-2xl border border-border/80 bg-muted/50 text-foreground shadow-xs backdrop-blur sm:inline-flex">
               ✓
             </span>
             <p className="truncate font-mono text-[11px] uppercase tracking-[0.18em] text-foreground sm:text-[12px]">
@@ -408,6 +409,8 @@ export default async function MediaDetailPage({ params }: Props) {
               mediaName={isKo ? media.name : (media.nameEn || media.name)}
             />
             <MediaDetailAddToCart mediaId={media.id} mediaName={isKo ? media.name : (media.nameEn || media.name)} />
+          </div>
+        </div>
           </div>
         </div>
       </div>
@@ -473,13 +476,15 @@ export default async function MediaDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          <div className="mt-12">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
-              [ CORE INFO ]
-            </p>
-            <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              {t("coreInfoTitle")}
-            </h2>
+          <div className="mt-16">
+            <SectionHead
+              number="01"
+              category={isKo ? "Core" : "Core"}
+              title={t("coreInfoTitle")}
+              meta={isKo ? "핵심 지표를 한 번에" : "Key facts at a glance"}
+              divider={false}
+              className="mb-6"
+            />
           </div>
           <div className="mt-4 border-2 border-border bg-card p-6 sm:p-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
@@ -540,7 +545,7 @@ export default async function MediaDetailPage({ params }: Props) {
                         {primaryPriceOption.label} ·{" "}
                         {t(
                           mediaDetailPricePeriodTranslationKey(
-                            (primaryPriceOption.period as any) ??
+                            (primaryPriceOption.period as unknown as string) ??
                               media.pricePeriod,
                           ),
                         )}
@@ -587,21 +592,14 @@ export default async function MediaDetailPage({ params }: Props) {
               aria-labelledby="media-detail-price-options-heading"
               className="mt-10"
             >
-              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
-                    [ PRICE OPTIONS ]
-                  </p>
-                  <h2
-                    id="media-detail-price-options-heading"
-                    className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
-                  >
-                    {t("priceOptionsSectionTitle")}
-                  </h2>
-                </div>
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                  {`// THINKAD · OOH`}
-                </p>
+              <div id="media-detail-price-options-heading" className="mb-6">
+                <SectionHead
+                  number="02"
+                  category={isKo ? "Pricing" : "Pricing"}
+                  title={t("priceOptionsSectionTitle")}
+                  meta="THINKAD · OOH"
+                  className="mb-5"
+                />
               </div>
               {media.keywordFilter?.priceText ? (
                 <div className="mb-6 border-2 border-accent bg-card px-5 py-4">
@@ -651,13 +649,14 @@ export default async function MediaDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          <div className="mt-12">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
-              [ SPECS ]
-            </p>
-            <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              {t("specsTitle")}
-            </h2>
+          <div className="mt-16">
+            <SectionHead
+              number="03"
+              category={isKo ? "Specs" : "Specs"}
+              title={t("specsTitle")}
+              meta={isKo ? "규격·운영·타깃" : "Specs, hours, audience"}
+              className="mb-6"
+            />
           </div>
           <dl className="mt-4 grid gap-6 border-2 border-border bg-card p-6 sm:grid-cols-2 sm:p-8">
             {media.keywordFilter ? (
@@ -718,15 +717,19 @@ export default async function MediaDetailPage({ params }: Props) {
             aria-labelledby="media-detail-description-heading"
             className="mt-12 border-t-2 border-border py-12"
           >
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
-              [ DESCRIPTION ]
-            </p>
             <h2
               id="media-detail-description-heading"
-              className="mt-2 mb-10 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+              className="sr-only"
             >
               {t("detailDescriptionTitle")}
             </h2>
+            <SectionHead
+              number="04"
+              category={isKo ? "Details" : "Details"}
+              title={t("detailDescriptionTitle")}
+              meta={isKo ? "설명·히스토리·주변" : "Overview, history, nearby"}
+              className="mb-8"
+            />
             <div className="space-y-12">
               {overviewBody?.trim() ? (
                 <div>
@@ -845,7 +848,9 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </section>
 
-      <MediaDetailStickyCta media={media} compareHref={compareHref} />
+          <MediaDetailStickyCta media={media} compareHref={compareHref} />
+        </div>
+      </HomeLandingDayNight>
     </>
   );
 }

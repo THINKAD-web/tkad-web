@@ -10,6 +10,7 @@ import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
+  catalogPriceFieldToWon,
   formatMediaPriceWonWithSymbol,
   getCheapestMediaPriceOption,
   mediaPricePeriodTranslationKey,
@@ -58,7 +59,8 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
     : getCheapestMediaPriceOption(media);
   // cheapest.priceWon 은 이미 원(₩) 단위 — formatMediaPriceWonWithSymbol 에 그대로 전달.
   // priceMan / media.price 폴백은 기존 동작 유지 (호출부 데이터 단위에 의존).
-  const priceNum = cheapest?.priceWon ?? props.priceMan ?? media.price;
+  const rawPrice = cheapest?.priceWon ?? props.priceMan ?? media.price;
+  const priceWon = cheapest?.priceWon ?? catalogPriceFieldToWon(rawPrice);
   const displayPeriod = cheapest?.period ?? media.pricePeriod;
   const tl = typeLabels[media.type];
   // 가장 저렴한 옵션 사용 시에는 단가 단위(월/주/일) 명시 — 비교 혼동 방지
@@ -66,17 +68,17 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
 
   const thumbnailOverlays = (
     <>
-      {media.catalogSource !== "network" ? (
+      {media.catalogSource !== "network" && media.isVerified ? (
         <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hermes px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-[0_0_20px_rgba(255,98,0,0.45)]">
           Verified
         </div>
-      ) : (
+      ) : media.catalogSource === "network" ? (
         <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hero-void px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-hero-fg">
           {tMedia("networkSitesBadge", {
             count: media.networkTotalLocations ?? 0,
           })}
         </div>
-      )}
+      ) : null}
       {props.variant === "link" ? props.topLeftSlot : null}
       {props.variant === "selectable" ? (
         <div
@@ -127,7 +129,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           {formatMediaLocationShort(media, isKo)}
         </p>
         <p className="mt-0.5 break-words text-lg font-black tabular-nums leading-snug">
-          {formatMediaPriceWonWithSymbol(priceNum)}
+          {formatMediaPriceWonWithSymbol(priceWon)}
           {showPricePeriod ? (
             <span className="ml-1.5 text-sm font-normal text-muted-foreground">
               · {tMedia(mediaPricePeriodTranslationKey(displayPeriod))}

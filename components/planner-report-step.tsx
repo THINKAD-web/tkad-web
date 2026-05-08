@@ -274,18 +274,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   }, [
     loading,
     error,
-    props.isKo,
-    props.goalTitle,
-    props.budgetNum,
-    props.regionsText,
-    props.categoriesText,
-    props.ageText,
-    props.industryText,
-    props.portfolio,
-    props.metrics,
-    props.reachCorePct,
-    props.reachExtendedPct,
-    derived,
     t,
     tCommon,
     toast,
@@ -402,7 +390,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8">
+    <div className="mx-auto w-full max-w-7xl space-y-8">
       <div className="space-y-2 text-center">
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ STEP 6 / REPORT ]
@@ -581,18 +569,6 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
       setDownloading(false);
     }
   }, [
-    props.isKo,
-    props.goalTitle,
-    props.budgetNum,
-    props.regionsText,
-    props.categoriesText,
-    props.ageText,
-    props.industryText,
-    props.portfolio,
-    props.metrics,
-    props.reachCorePct,
-    props.reachExtendedPct,
-    derived,
     t,
     tCommon,
     toast,

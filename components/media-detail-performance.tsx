@@ -40,7 +40,7 @@ export default function MediaDetailPerformance({
   return (
     <section
       aria-labelledby="media-detail-performance-heading"
-      className="mt-12 border-2 border-border bg-card p-6 sm:p-8"
+      className="mt-12 rounded-[28px] border border-border/80 bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8"
     >
       <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -60,7 +60,7 @@ export default function MediaDetailPerformance({
       </div>
 
       <div className="grid grid-cols-1 gap-0 sm:grid-cols-2">
-        <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-muted px-6 py-7">
+        <div className="-mt-[2px] -ml-[2px] rounded-[22px] border border-border/80 bg-muted/40 px-6 py-7 shadow-xs backdrop-blur">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
             [ {t("performanceStatMonthly")} ]
           </p>
@@ -68,7 +68,7 @@ export default function MediaDetailPerformance({
             {format.number(metrics.monthlyImpressions)}
           </p>
         </div>
-        <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-muted px-6 py-7">
+        <div className="-mt-[2px] -ml-[2px] rounded-[22px] border border-border/80 bg-muted/40 px-6 py-7 shadow-xs backdrop-blur">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
             [ {t("performanceStatDaily")} ]
           </p>
@@ -151,7 +151,7 @@ export default function MediaDetailPerformance({
         </div>
       </div>
 
-      <div className="mt-10 border-2 border-border bg-hero-void px-6 py-7 text-hero-fg sm:px-7 sm:py-8">
+      <div className="mt-10 rounded-[24px] border border-border/80 bg-muted/30 px-6 py-7 text-foreground shadow-xs backdrop-blur sm:px-7 sm:py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {t("performanceVisibilityTitle")} ]
@@ -160,8 +160,8 @@ export default function MediaDetailPerformance({
             <span
               className={
                 metrics.visibilityScore >= 90
-                  ? "border-2 border-accent bg-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground"
-                  : "border-2 border-hero-fg px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hero-fg"
+                  ? "rounded-xl border border-accent bg-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground"
+                  : "rounded-xl border border-border/80 bg-card/70 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-foreground shadow-xs backdrop-blur"
               }
             >
               {visibilityBadge}
@@ -177,7 +177,7 @@ export default function MediaDetailPerformance({
           </span>
         </div>
         <div
-          className="mt-4 h-4 w-full border-2 border-hero-fg bg-hero-void"
+          className="mt-4 h-4 w-full overflow-hidden rounded-full border border-border/80 bg-card/60"
           role="progressbar"
           aria-valuenow={metrics.visibilityScore}
           aria-valuemin={0}
@@ -191,7 +191,7 @@ export default function MediaDetailPerformance({
         </div>
       </div>
 
-      <p className="mt-8 border-2 border-border bg-muted px-5 py-4 text-sm font-medium leading-relaxed text-foreground sm:px-6">
+      <p className="mt-8 rounded-[22px] border border-border/80 bg-muted/40 px-5 py-4 text-sm font-medium leading-relaxed text-foreground shadow-xs backdrop-blur sm:px-6">
         <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
           {`// NOTE`}
         </span>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import localFont from "next/font/local";
@@ -7,15 +7,8 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
 import { defaultOgImages, pageAlternates, siteUrl } from "@/lib/seo";
 import { buildStructuredDataGraph } from "@/lib/structured-data";
-import { HeaderBrutal } from "@/components/public-chrome/header-brutal";
-import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
-import DeferredPublicWidgets from "@/components/deferred-public-widgets";
-import TopLoader from "@/components/top-loader";
-import PageTransition from "@/components/page-transition";
-import ConditionalPublicChrome from "@/components/conditional-public-chrome";
-import ToastProvider from "@/components/toast-provider";
 import { ThemeProvider } from "@/components/theme-provider";
-import PwaRegister from "@/components/pwa-register";
+import LocaleRootBody from "@/components/locale-root-body";
 import "../globals.css";
 
 const geistSans = localFont({
@@ -188,24 +181,18 @@ export default async function LocaleLayout({ children, params }: Props) {
           }}
         />
         <ThemeProvider>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <ToastProvider>
-              <a href="#main-content" className="skip-link">
-                {locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"}
-              </a>
-              <ConditionalPublicChrome>
-                <TopLoader />
-                <HeaderBrutal />
-              </ConditionalPublicChrome>
-              <main id="main-content" className="flex-1">
-                <PageTransition>{children}</PageTransition>
-              </main>
-              <ConditionalPublicChrome>
-                <FooterBrutal />
-                <DeferredPublicWidgets />
-              </ConditionalPublicChrome>
-              <PwaRegister />
-            </ToastProvider>
+          <NextIntlClientProvider
+            locale={locale}
+            messages={messages}
+            timeZone="Asia/Seoul"
+          >
+            <LocaleRootBody
+              skipLinkLabel={
+                locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"
+              }
+            >
+              {children}
+            </LocaleRootBody>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

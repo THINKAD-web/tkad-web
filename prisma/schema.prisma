@@ -140,6 +140,8 @@ model Media {
   nearbyLandmarks  String?  @map("nearby_landmarks")
   /** 카카오 주소검색 등으로 좌표·행정구역이 확인된 경우 */
   addressVerified  Boolean  @default(false) @map("address_verified")
+  /** 운영이 공개 카탈로그에 THINKAD Verified 리본을 붙일지 (관리자 수동) */
+  isVerified       Boolean  @default(false) @map("is_verified")
   /** 주변 시설 등 자동 수집이 수행된 시각 */
   autoPopulatedAt  DateTime? @map("auto_populated_at")
 

@@ -40,24 +40,34 @@ export function SectionHead({
   return (
     <header
       className={cn(
-        "mb-10",
-        divider && "border-b-2 border-border pb-6",
+        "mb-12",
+        divider &&
+          "border-b border-border/60 pb-7 [border-image:linear-gradient(to_right,transparent,var(--border),transparent)_1]",
         align === "center" && "text-center",
         className,
       )}
     >
-      <div className="font-mono text-[12px] uppercase tracking-[0.2em] text-muted-foreground">
-        <span className="font-semibold text-hermes">[{number}]</span>
-        {category ? (
-          <span className="ml-2 text-muted-foreground">/ {category}</span>
-        ) : null}
+      <div
+        className={cn(
+          "flex flex-wrap items-center gap-2",
+          align === "center" ? "justify-center" : "justify-start",
+        )}
+      >
+        <span className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-card/70 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground shadow-[0_14px_44px_rgba(0,0,0,0.08)] backdrop-blur dark:shadow-[0_18px_60px_rgba(0,0,0,0.45)]">
+          <span className="text-accent">[{number}]</span>
+          {category ? <span className="text-muted-foreground">/ {category}</span> : null}
+        </span>
       </div>
-      <h2 className="mt-4 text-3xl font-black leading-[1.08] tracking-tight text-foreground sm:text-4xl lg:text-6xl">
+
+      <h2 className="mt-6 text-4xl font-black leading-[1.02] tracking-[-0.05em] text-foreground sm:text-5xl lg:text-6xl">
         {title}
       </h2>
       {meta ? (
-        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-          // {meta}
+        <p className="mt-4 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <span aria-hidden className="mr-1.5">
+            /
+          </span>
+          {meta}
         </p>
       ) : null}
     </header>

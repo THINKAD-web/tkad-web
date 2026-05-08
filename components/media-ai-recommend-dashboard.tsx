@@ -89,11 +89,19 @@ export default function MediaAiRecommendDashboard({
             </p>
           </div>
           <div className="flex shrink-0 items-center justify-center">
-            <div className="relative flex h-20 w-20 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
-              <span className="text-3xl" aria-hidden>
+            <div className="relative grid h-20 w-20 place-items-center overflow-hidden rounded-[26px] border border-border/80 bg-card/80 text-foreground shadow-[0_28px_100px_rgba(0,0,0,0.20)] backdrop-blur">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.14),transparent_58%),linear-gradient(165deg,rgba(255,255,255,0.10)_0%,transparent_52%)]"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid"
+              />
+              <span className="relative z-10 text-[34px] leading-none" aria-hidden>
                 🤖
               </span>
-              <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-accent">
+              <span className="pointer-events-none absolute -bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-border/80 bg-card/80 px-2.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-xs backdrop-blur">
                 TKAD bot
               </span>
             </div>
@@ -443,49 +451,65 @@ function Top3DashCard({
   return (
     <div
       className={cn(
-        "flex flex-col border-2 border-border bg-card p-4",
-        accentRank && "bg-accent text-accent-foreground",
+        "relative flex flex-col overflow-hidden rounded-[24px] border-2 border-border bg-card p-4",
+        accentRank &&
+          "border-white/14 bg-[#05050a] text-white shadow-[0_28px_120px_rgba(0,0,0,0.55)]",
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2">
+      {accentRank ? (
+        <>
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-0 tkad-neon-depth" />
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-0 opacity-25 tkad-neon-grid" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-0 tkad-hero-noise opacity-[0.08] mix-blend-overlay"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(165deg,rgba(168,85,247,0.24)_0%,rgba(34,211,238,0.08)_40%,rgba(236,72,153,0.10)_100%)]"
+          />
+        </>
+      ) : null}
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "flex h-8 w-8 shrink-0 items-center justify-center font-mono text-sm font-black",
+                accentRank
+                  ? "rounded-full border border-white/22 bg-white/12 text-white shadow-[0_18px_60px_rgba(0,0,0,0.25)] backdrop-blur"
+                  : "border-2 border-border bg-accent text-accent-foreground",
+              )}
+            >
+              {rank}
+            </span>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-[0.18em]",
+                accentRank
+                  ? "rounded-xl border border-white/22 bg-black/25 text-white backdrop-blur"
+                  : "border-2 border-border bg-hero-void text-accent",
+              )}
+            >
+              <Trophy className="h-3 w-3" />
+              {tr("resultRank", { n: rank })}
+            </span>
+          </div>
           <span
             className={cn(
-              "flex h-8 w-8 shrink-0 items-center justify-center border-2 font-mono text-sm font-bold",
+              "px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-[0.18em]",
               accentRank
-                ? "border-hero-fg bg-card text-accent"
-                : "border-border bg-accent text-accent-foreground",
+                ? "rounded-xl border border-white/22 bg-white/10 text-white shadow-[0_18px_60px_rgba(0,0,0,0.2)] backdrop-blur"
+                : "border-2 border-accent bg-accent text-accent-foreground",
             )}
           >
-            {rank}
-          </span>
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em]",
-              accentRank
-                ? "border-hero-fg text-hero-fg"
-                : "border-border bg-hero-void text-accent",
-            )}
-          >
-            <Trophy className="h-3 w-3" />
-            {tr("resultRank", { n: rank })}
+            {goldBadge}
           </span>
         </div>
-        <span
-          className={cn(
-            "border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em]",
-            accentRank
-              ? "border-hero-fg text-hero-fg"
-              : "border-accent bg-accent text-accent-foreground",
-          )}
-        >
-          {goldBadge}
-        </span>
-      </div>
       <p
         className={cn(
           "mt-3 line-clamp-2 text-sm font-bold leading-snug tracking-tight",
-          accentRank ? "text-hero-fg" : "text-foreground",
+          accentRank ? "text-white" : "text-foreground",
         )}
       >
         {isKo ? m.name : (m.nameEn || m.name)}
@@ -493,7 +517,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-1 font-mono text-[11px] uppercase tracking-[0.18em]",
-          accentRank ? "text-hero-fg/80" : "text-muted-foreground",
+          accentRank ? "text-white/80" : "text-muted-foreground",
         )}
       >
         [ {isKo ? tl.ko : tl.en} ]
@@ -503,7 +527,7 @@ function Top3DashCard({
         <div
           className={cn(
             "flex items-center justify-between gap-2 font-mono text-[11px] tracking-tight",
-            accentRank ? "text-hero-fg/85" : "text-muted-foreground",
+            accentRank ? "text-white/85" : "text-muted-foreground",
           )}
         >
           <span className="inline-flex items-center gap-1">
@@ -513,7 +537,7 @@ function Top3DashCard({
           <span
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-hero-fg" : "text-accent",
+              accentRank ? "text-white" : "text-accent",
             )}
           >
             {scoreLabel}
@@ -523,12 +547,17 @@ function Top3DashCard({
           className={cn(
             "h-3 w-full border-2",
             accentRank
-              ? "border-hero-fg bg-accent"
+              ? "border-white/18 bg-black/20"
               : "border-border bg-card",
           )}
         >
           <div
-            className={cn("h-full", accentRank ? "bg-card" : "bg-accent")}
+            className={cn(
+              "h-full",
+              accentRank
+                ? "bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]"
+                : "bg-accent",
+            )}
             style={{ width: `${Math.min(100, Math.max(0, scored.score))}%` }}
           />
         </div>
@@ -537,7 +566,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-3 font-mono text-[11px] leading-relaxed tracking-tight",
-          accentRank ? "text-hero-fg/90" : "text-muted-foreground",
+          accentRank ? "text-white/90" : "text-muted-foreground",
         )}
       >
         {`// `}{maddyTagline}
@@ -546,30 +575,30 @@ function Top3DashCard({
       <dl
         className={cn(
           "mt-4 space-y-2 border-t-2 pt-3 font-mono text-xs",
-          accentRank ? "border-hero-fg/40" : "border-border",
+          accentRank ? "border-white/18" : "border-border",
         )}
       >
         <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "text-hero-fg/70" : "text-muted-foreground"}>
+          <dt className={accentRank ? "text-white/70" : "text-muted-foreground"}>
             {tr("resultEstImpressions")}
           </dt>
           <dd
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-hero-fg" : "text-foreground",
+              accentRank ? "text-white" : "text-foreground",
             )}
           >
             {monthly > 0 ? monthly.toLocaleString() : "—"}
           </dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "text-hero-fg/70" : "text-muted-foreground"}>
+          <dt className={accentRank ? "text-white/70" : "text-muted-foreground"}>
             {tr("resultCpmLabel")}
           </dt>
           <dd
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-hero-fg" : "text-foreground",
+              accentRank ? "text-white" : "text-foreground",
             )}
           >
             {cpm != null && Number.isFinite(cpm)
@@ -578,17 +607,22 @@ function Top3DashCard({
           </dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "text-hero-fg/70" : "text-muted-foreground"}>
+          <dt className={accentRank ? "text-white/70" : "text-muted-foreground"}>
             {isKo ? "가격" : "Price"}
           </dt>
           <dd
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-hero-fg" : "text-foreground",
+              accentRank ? "text-white" : "text-foreground",
             )}
           >
             {formatMediaPriceWonWithSymbol(m.price)}
-            <span className={cn("ml-1 text-[10px] font-normal", accentRank ? "text-hero-fg/60" : "text-muted-foreground")}>
+            <span
+              className={cn(
+                "ml-1 text-[10px] font-normal",
+                accentRank ? "text-white/60" : "text-muted-foreground",
+              )}
+            >
               · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
             </span>
           </dd>
@@ -598,7 +632,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-3 flex items-start gap-1 font-mono text-[11px] uppercase tracking-[0.18em]",
-          accentRank ? "text-hero-fg/80" : "text-muted-foreground",
+          accentRank ? "text-white/80" : "text-muted-foreground",
         )}
       >
         <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
@@ -612,13 +646,14 @@ function Top3DashCard({
         className={cn(
           "mt-4 inline-flex w-fit items-center gap-1 border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
           accentRank
-            ? "border-hero-fg bg-card text-accent hover:bg-foreground hover:text-background hover:border-border"
+            ? "border-white/22 bg-white/10 text-white backdrop-blur hover:border-white/30 hover:bg-white/16"
             : "border-border bg-card text-foreground hover:bg-foreground hover:text-background",
         )}
       >
         {isKo ? "상세 보기" : "Details"}
         <span aria-hidden>→</span>
       </Link>
+      </div>
     </div>
   );
 }

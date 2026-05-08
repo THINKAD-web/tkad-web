@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
   CheckCircle,
   Images,
@@ -50,10 +51,8 @@ import {
   MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
   MediaCatalogGridCompactToggle,
 } from "@/components/media-catalog-shared";
-import MediaCatalogFiltersBar from "@/components/media-catalog-filters-bar";
 import { PerPageSelect } from "@/components/per-page-select";
 import { useMediaCatalogFilters } from "@/lib/use-media-catalog-filters";
-import { buildMediaRegionFilterOptions } from "@/lib/media-region-filter-options";
 import { cn } from "@/lib/utils";
 import {
   computeCatalogBounds,
@@ -64,7 +63,6 @@ import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
   catalogPriceFieldToPriceMan,
   formatCatalogPriceFieldWon,
-  formatMediaPriceWonWithSymbol,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { useToast } from "@/components/toast-provider";
@@ -118,9 +116,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [mediaPage, setMediaPage] = useState(1);
   const [mediaPageSize, setMediaPageSize] = useState(12);
   const [mediaTextFilter, setMediaTextFilter] = useState("");
-  const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
-  const [mediaRegionFilter, setMediaRegionFilter] = useState("all");
-  const [quoteSearchFieldKey, setQuoteSearchFieldKey] = useState(0);
   const [networkQuoteOptions, setNetworkQuoteOptions] = useState<
     Record<string, { units: number; regionScope: string }>
   >({});
@@ -242,56 +237,33 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     [catalog, selectedIds],
   );
 
-  const regionFilterOptions = useMemo(
-    () => buildMediaRegionFilterOptions(catalog, (key) => tMedia(key)),
-    [catalog, tMedia],
-  );
-
   const bounds = useMemo(() => computeCatalogBounds(catalog), [catalog]);
   const defaultAdvanced = useMemo(
     () => defaultAdvancedFilterState(bounds),
     [bounds],
   );
 
-  const [budgetMin, setBudgetMin] = useState(() => bounds.minPrice);
-  const [budgetMax, setBudgetMax] = useState(() => bounds.maxPrice);
-  const {
-    filters,
-    toggleFilter,
-    resetFilters,
-    clearCategory,
-    selectAllInCategory,
-  } = useMediaCatalogFilters();
-
-  useEffect(() => {
-    setBudgetMin(bounds.minPrice);
-    setBudgetMax(bounds.maxPrice);
-  }, [bounds.minPrice, bounds.maxPrice]);
-
+  const { filters } = useMediaCatalogFilters();
   const targetAgePick = filters.targetAge;
 
   const filterState = useMemo(
     () => ({
       ...defaultAdvanced,
-      priceMin: budgetMin,
-      priceMax: budgetMax,
+      priceMin: bounds.minPrice,
+      priceMax: bounds.maxPrice,
       targetAgePick,
     }),
-    [defaultAdvanced, budgetMin, budgetMax, targetAgePick],
+    [defaultAdvanced, bounds.maxPrice, bounds.minPrice, targetAgePick],
   );
 
   const filteredCatalog = useMemo(() => {
     const q = mediaTextFilter.trim().toLowerCase();
     return catalog.filter((m) => {
       if (!passesMediaAdvancedFilters(m, filterState, bounds)) return false;
-      if (mediaRegionFilter !== "all" && (m.region ?? "") !== mediaRegionFilter)
-        return false;
-      if (mediaTypeFilter !== "all" && (m.type ?? "") !== mediaTypeFilter)
-        return false;
       if (q.length > 0 && !matchesMediaTextQuery(m, q)) return false;
       return true;
     });
-  }, [catalog, mediaRegionFilter, mediaTypeFilter, mediaTextFilter, filterState, bounds]);
+  }, [catalog, mediaTextFilter, filterState, bounds]);
 
   const sortedCatalog = useMemo(() => {
     const arr = [...filteredCatalog];
@@ -318,17 +290,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     const start = (mediaPage - 1) * mediaPageSize;
     return sortedCatalog.slice(start, start + mediaPageSize);
   }, [sortedCatalog, mediaPage, mediaPageSize]);
-
-  const resetQuoteMediaFilters = useCallback(() => {
-    setMediaTextFilter("");
-    setMediaTypeFilter("all");
-    setMediaRegionFilter("all");
-    setBudgetMin(bounds.minPrice);
-    setBudgetMax(bounds.maxPrice);
-    resetFilters();
-    setMediaPage(1);
-    setQuoteSearchFieldKey((k) => k + 1);
-  }, [bounds.minPrice, bounds.maxPrice, resetFilters]);
 
   const monthlyCost = useMemo(
     () =>
@@ -710,33 +671,45 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     selectedMedia.length > 0 ? selectedMedia : quoteFloatingStashRef.current;
 
   return (
-    <>
-      <section className="bg-hero-void py-24">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
+      <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] py-20 text-white sm:py-24">
+        <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+        <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+        <div
+          aria-hidden
+          className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+        />
+
+        <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
             {`// 07 / Quote`}
           </p>
-          <div className="mt-3 inline-flex flex-wrap items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
+          <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+            <h1 className="text-balance text-[clamp(40px,4.8vw,68px)] font-[950] leading-[0.95] tracking-[-0.06em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
               {t("quote.title")}
             </h1>
-            <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-accent-foreground">
-              BETA
+            <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+              <span className="tkad-home-accent-text">BETA</span>
             </span>
           </div>
-          <p className="mt-5 font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
             {t("quote.subtitle")}
           </p>
-          <p className="mx-auto mt-3 max-w-xl font-mono text-[11px] uppercase tracking-[0.18em] text-hero-fg/55">
+          <p className="mx-auto mt-3 max-w-xl font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
             {`// `}{t("quote.wizardSubtitle")}
           </p>
         </div>
       </section>
 
-      <section className="bg-muted py-10">
+      <section className="border-t border-border/60 bg-transparent py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10">
-            <p className="mb-4 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="mb-4 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
               [ {t("quote.wizardTitle")} ]
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
@@ -758,12 +731,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     className={cn(
-                      "flex h-10 w-10 items-center justify-center border-2 font-mono text-sm font-bold transition-colors",
+                      "flex h-10 w-10 items-center justify-center rounded-2xl border border-white/12 bg-white/6 font-mono text-sm font-black backdrop-blur transition-colors",
                       step === n
-                        ? "border-accent bg-accent text-accent-foreground"
+                        ? "border-white/16 bg-white/12 text-white shadow-[0_0_0_1px_rgba(34,211,238,0.24),0_24px_80px_rgba(0,0,0,0.45)]"
                         : step > n
-                          ? "border-border bg-card text-foreground hover:bg-foreground hover:text-background"
-                          : "border-border bg-muted text-muted-foreground",
+                          ? "text-white/80 hover:bg-white/10"
+                          : "text-white/40",
                     )}
                   >
                     {step > n ? "✓" : n}
@@ -771,7 +744,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   <span
                     className={cn(
                       "hidden max-w-[100px] font-mono text-[10px] font-bold uppercase tracking-[0.18em] sm:block",
-                      step === n ? "text-accent" : "text-muted-foreground",
+                      step === n ? "text-foreground" : "text-muted-foreground",
                     )}
                   >
                     {stepLabels[n - 1]}
@@ -789,17 +762,18 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
           <div className="flex flex-col gap-6">
             <div className="order-2">
-              <div className="min-h-[320px] border-2 border-border bg-card">
-                <div className="border-b-2 border-border p-5">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              <div className="tkad-glass-surface relative min-h-[320px] overflow-hidden rounded-[26px]">
+                <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                <div className="relative border-b border-white/10 p-5">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                     [ STEP {step} / 4 ]
                   </p>
                   <h3 className="mt-2 flex items-center gap-2 text-xl font-bold tracking-tight text-foreground">
-                    <StepHeaderIcon className="h-5 w-5 text-accent" aria-hidden />
+                    <StepHeaderIcon className="h-5 w-5 text-primary" aria-hidden />
                     {stepLabels[step - 1]}
                   </h3>
                 </div>
-                <div className="p-5">
+                <div className="relative p-5">
                   {step === 1 && (
                     <>
                       {touched.media && errors.media ? (
@@ -816,7 +790,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             [ {t("common.search")} ]
                           </label>
                           <MediaSearchAutocomplete
-                            key={quoteSearchFieldKey}
                             locale={locale}
                             catalog={catalog}
                             onSelect={(m) => toggleMedia(m.id)}
@@ -829,24 +802,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             searchButtonLabel={t("media.searchButton")}
                           />
                         </div>
-                        <MediaCatalogFiltersBar
-                          mediaTypeFilter={mediaTypeFilter}
-                          onMediaTypeFilterChange={setMediaTypeFilter}
-                          mediaRegionFilter={mediaRegionFilter}
-                          onMediaRegionFilterChange={setMediaRegionFilter}
-                          regionOptions={regionFilterOptions}
-                          bounds={bounds}
-                          budgetMin={budgetMin}
-                          budgetMax={budgetMax}
-                          onBudgetMinChange={setBudgetMin}
-                          onBudgetMaxChange={setBudgetMax}
-                          filters={filters}
-                          onToggleFilter={toggleFilter}
-                          onReset={resetQuoteMediaFilters}
-                          clearCategory={clearCategory}
-                          selectAllInCategory={selectAllInCategory}
-                        />
-
                         <div className="min-w-0">
                           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div className="text-sm text-muted-foreground">
@@ -1143,7 +1098,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                         </span>
                                       </p>
                                       <p className="min-w-0 break-words font-mono text-[13px] font-bold tabular-nums leading-tight text-accent sm:text-sm sm:leading-none">
-                                        {formatMediaPriceWonWithSymbol(displayPrice)}
+                                        {formatCatalogPriceFieldWon(displayPrice)}
                                         <span className="ml-1 font-normal text-[9px] uppercase tracking-[0.18em] text-muted-foreground sm:text-[10px]">
                                           ·{" "}
                                           {tMedia(
@@ -1912,6 +1867,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       {quoteBarOpen ? (
         <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
       ) : null}
-    </>
+      </div>
+    </HomeLandingDayNight>
   );
 }

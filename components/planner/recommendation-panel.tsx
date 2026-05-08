@@ -20,8 +20,13 @@ const REASON_COLORS: Record<RecommendReasonKey, string> = {
   matchRegion: "border-border bg-card text-foreground",
   ageMatch: "border-primary bg-primary text-primary-foreground",
   budgetEfficient: "border-border bg-muted text-foreground",
-  goalFit: "border-border bg-foreground text-primary",
+  /** was bg-foreground + text-primary → 라이트에서 잉크 배경에 잉크 글자, 플래너 토큰에서도 대비 붕괴 */
+  goalFit: "border-primary/55 bg-primary/12 text-primary",
   highVisibility: "border-primary bg-card text-primary",
+  landmarkHotspot: "border-[#ff6200] bg-[#ff6200]/10 text-[#ff6200]",
+  transitHotspot: "border-accent bg-accent/10 text-accent",
+  retailHotspot: "border-emerald-500 bg-emerald-500/10 text-emerald-700",
+  neighborhoodHotspot: "border-border bg-muted text-foreground",
 };
 
 type Props = {
@@ -66,8 +71,9 @@ export function PlannerRecommendationPanel({
           months,
         },
         limit,
+        refreshTick,
       ),
-    [catalog, goal, regions, categories, ageKey, industryKey, budgetMan, months, limit],
+    [catalog, goal, regions, categories, ageKey, industryKey, budgetMan, months, limit, refreshTick],
   );
 
   // 분석 애니메이션 (UX 몰입용 1.2초). 입력이 바뀌거나 refresh 시 loading 재개.

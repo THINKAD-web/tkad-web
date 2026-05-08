@@ -16,7 +16,10 @@ import {
 } from "@/lib/structured-data";
 import { pageAlternates } from "@/lib/seo";
 import MediaBrowseClient from "@/components/media-browse-client";
-import { ArrowRight, Layers } from "lucide-react";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
+import { MediaKeywordLandingEmpty } from "@/components/media-keyword-landing-empty";
+import { Layers } from "lucide-react";
 
 type Props = {
   params: Promise<{ locale: string; type: string }>;
@@ -121,82 +124,62 @@ export default async function TypeLandingPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify([itemListLd, breadcrumbLd]) }}
       />
 
-      <section className="bg-hero-void py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
-            [ {isKo ? "유형별 매체" : "BY TYPE"} ]
-          </p>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl lg:text-5xl">
-            <Layers
-              className="mr-3 inline-block h-8 w-8 text-accent"
-              aria-hidden
-            />
-            {title}
-          </h1>
-          <p className="mt-6 max-w-3xl text-base leading-relaxed text-hero-fg/80 sm:text-lg">
-            {description}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/media"
-              className="inline-flex items-center gap-2 border-2 border-hero-fg bg-transparent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-hero-fg transition-colors hover:bg-card hover:text-foreground"
-            >
-              {isKo ? "전체 매체 보기" : "All media"}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <Link
-              href="/recommend"
-              className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border"
-            >
-              {isKo ? "AI 매체 추천" : "AI recommend"}
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HomeLandingDayNight>
+        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+          <MediaKeywordLandingHero
+            eyebrow={`// ${isKo ? "유형별 매체" : "BY TYPE"}`}
+            title={title}
+            description={description}
+            icon={<Layers className="size-7 text-white/90" aria-hidden />}
+            primaryCta={{
+              href: "/media",
+              label: isKo ? "전체 매체 보기" : "All media",
+            }}
+            secondaryCta={{
+              href: "/recommend",
+              label: isKo ? "AI 매체 추천" : "AI recommendations",
+            }}
+          />
 
-      {filtered.length === 0 ? (
-        <section className="bg-card py-12 sm:py-16">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="border-2 border-border bg-muted p-12 text-center">
-              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
-                {`// `}
-                {isKo
+          {filtered.length === 0 ? (
+            <MediaKeywordLandingEmpty
+              message={
+                isKo
                   ? `현재 ${label} 유형의 매체가 없습니다.`
-                  : `No ${label.toLowerCase()} media currently available.`}
-              </p>
-              <Link
-                href="/media"
-                className="mt-6 inline-flex items-center gap-2 border-2 border-border bg-hero-void px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-hero-fg transition-colors hover:bg-accent hover:border-accent"
-              >
-                {isKo ? "전체 매체 보기" : "Browse all media"}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
-        </section>
-      ) : (
-        <MediaBrowseClient catalog={filtered} hideHero />
-      )}
+                  : `No ${label.toLowerCase()} media currently available.`
+              }
+              ctaLabel={isKo ? "전체 매체 보기" : "Browse all media"}
+            />
+          ) : (
+            <MediaBrowseClient catalog={filtered} hideHero />
+          )}
 
-      <section className="border-t-2 border-border bg-muted py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
-            [ {isKo ? "다른 유형으로 찾기" : "BROWSE OTHER TYPES"} ]
-          </p>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {KNOWN_TYPE_SLUGS.filter((s) => s !== decodedType).map((slug) => (
-              <li key={slug}>
-                <Link
-                  href={`/media/type/${slug}`}
-                  className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
-                >
-                  {typeLabel(slug, locale)}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <section className="tkad-media-links-footer border-t border-border/80 bg-muted py-12 text-foreground sm:py-16">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <p className="text-xs font-semibold text-muted-foreground sm:text-sm">
+                {isKo ? "다른 유형으로 찾기" : "Browse other formats"}
+              </p>
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                {isKo ? "OOH 매체 유형" : "OOH media types"}
+              </h2>
+              <ul className="mt-5 flex flex-wrap gap-2">
+                {KNOWN_TYPE_SLUGS.filter((s) => s !== decodedType).map(
+                  (slug) => (
+                    <li key={slug}>
+                      <Link
+                        href={`/media/type/${slug}`}
+                        className="inline-flex items-center gap-1.5 rounded-2xl border-2 border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground shadow-xs transition-colors hover:border-accent hover:bg-muted"
+                      >
+                        {typeLabel(slug, locale)}
+                      </Link>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          </section>
         </div>
-      </section>
+      </HomeLandingDayNight>
     </>
   );
 }

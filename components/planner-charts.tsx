@@ -114,8 +114,8 @@ export function PlannerImpressionsLineChart({
             y={p.y - 4}
             width={8}
             height={8}
-            fill="#FF6600"
-            stroke="#000000"
+            fill="#22d3ee"
+            stroke="var(--foreground)"
             strokeWidth={2}
           />
         ))}
@@ -232,7 +232,7 @@ export function PlannerRoiLineChart({
         <path
           d={line("optimistic")}
           fill="none"
-          stroke="#FF6600"
+          stroke="#22d3ee"
           strokeWidth={2.5}
         />
         {data.map((d, i) => (
@@ -322,7 +322,7 @@ export function PlannerDailyReachBarChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 2)}
-                fill="#000000"
+                fill="var(--foreground)"
               />
               <text
                 x={x + barW / 2}
@@ -391,13 +391,13 @@ export function PlannerReachDonutChart({
           <circle
             r={r}
             fill="none"
-            stroke="#f5f5f5"
+            stroke="var(--muted)"
             strokeWidth={stroke}
           />
           <circle
             r={r}
             fill="none"
-            stroke="#000000"
+            stroke="var(--foreground)"
             strokeWidth={stroke}
             strokeDasharray={`${coreLen} ${c}`}
             strokeLinecap="butt"
@@ -405,7 +405,7 @@ export function PlannerReachDonutChart({
           <circle
             r={r}
             fill="none"
-            stroke="#FF6600"
+            stroke="#22d3ee"
             strokeWidth={stroke}
             strokeDasharray={`${extLen} ${c}`}
             strokeDashoffset={-coreLen}
@@ -423,7 +423,7 @@ export function PlannerReachDonutChart({
           <span className="font-bold tabular-nums text-foreground">{corePct}%</span>
         </div>
         <div className="flex items-center gap-2 font-mono text-xs">
-          <span className="h-3 w-3 shrink-0 bg-primary" />
+          <span className="h-3 w-3 shrink-0 bg-[#22d3ee]" />
           <span className="text-muted-foreground">{extendedLabel}</span>
           <span className="font-bold tabular-nums text-foreground">{extendedPct}%</span>
         </div>
@@ -434,7 +434,7 @@ export function PlannerReachDonutChart({
 
 const PIE_COLORS = [
   "#000000", // bx-black
-  "#ff6200", // primary / Hermès
+  "#22d3ee", // neon accent
   "#737373", // bx-gray-dim
   "#d4d4d4", // bx-gray
   "#f5f5f5", // bx-off (with bx-black border via stroke)
@@ -566,7 +566,7 @@ export function PlannerCpmCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 2)}
-                fill="#FF6600"
+                fill="#22d3ee"
               />
               <text
                 x={x + barW / 2}
@@ -676,7 +676,7 @@ export function PlannerMonthCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 3)}
-                fill={isCurrent ? "#FF6600" : "#000000"}
+                fill={isCurrent ? "#22d3ee" : "var(--foreground)"}
               />
               <text
                 x={x + barW / 2}

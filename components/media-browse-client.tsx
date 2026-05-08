@@ -15,11 +15,14 @@ import {
   ChevronDown,
   ChevronUp,
   Search,
+  ArrowRight,
 } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
 import { BtnBlock } from "@/components/brutalist";
+import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 import {
   useState,
   useMemo,
@@ -304,12 +307,6 @@ export default function MediaBrowseClient({
     precisionSelectionsActive &&
     advancedFiltered.length > 0;
 
-  const browseLenientSearchTier =
-    strictPrecisionFiltered.length === 0 &&
-    !precisionFilterRelaxed &&
-    searchFiltered.length > 0 &&
-    effectiveCatalog.length > 0;
-
   /** 정밀 → 고급 → 검색 순으로 적용하되, 모두 0건이면 전체 목록 */
   const filtered = useMemo(() => {
     if (strictPrecisionFiltered.length > 0) return strictPrecisionFiltered;
@@ -474,25 +471,34 @@ export default function MediaBrowseClient({
   return (
     <>
       {hideHero ? null : (
-        <section className="bg-gradient-to-b from-hero-void via-hero-void to-[#0c0c10] py-20 text-hero-fg sm:py-24">
-          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-            <p className="text-xs font-semibold tracking-wide text-hermes sm:text-sm">
-              {isKo ? "매체 검색" : "Media search"}
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
+
+          <div className="tkad-media-hero relative mx-auto max-w-7xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-28 lg:px-8 lg:pb-36 lg:pt-32">
+            <p className="tkad-media-hero__eyebrow font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              {`// ${t("media.heroEyebrow")}`}
             </p>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-              <h1 className="text-3xl font-black leading-[1.12] tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
+            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+              <h1 className="text-balance text-[clamp(40px,5.2vw,72px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
                 {t("media.title")}
               </h1>
-              <span className="border border-hermes/70 bg-hermes/10 px-2.5 py-1 text-xs font-semibold text-hermes">
-                BETA
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">BETA</span>
               </span>
             </div>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-hero-fg/85 sm:text-lg">
+            <p className="tkad-media-hero__subtitle mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
               {t("media.subtitle")}
             </p>
-            <div className="relative mx-auto mt-10 max-w-2xl">
+
+            <div className="tkad-media-hero-search relative mx-auto mt-10 max-w-2xl">
               <Search
-                className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-silver-500 sm:left-5"
+                className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-white/45 sm:left-5 sm:size-[1.35rem]"
                 aria-hidden
               />
               <input
@@ -502,29 +508,37 @@ export default function MediaBrowseClient({
                 placeholder={
                   isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
                 }
-                className="h-14 w-full border-2 border-white/25 bg-white pl-12 pr-4 text-base text-navy shadow-md placeholder:text-silver-500 focus:border-hermes focus:outline-none focus:ring-2 focus:ring-hermes/50 sm:h-16 sm:pl-14 sm:pr-5 sm:text-[1.05rem]"
+                className="h-14 w-full rounded-[20px] border border-white/18 bg-white/8 pl-12 pr-4 text-base text-white shadow-[0_24px_80px_rgba(0,0,0,0.45)] placeholder:text-white/45 backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 sm:h-16 sm:pl-14 sm:pr-5 sm:text-[1.05rem]"
                 aria-label={isKo ? "매체 검색" : "Search media"}
               />
             </div>
-            <div className="mt-8">
-              <BtnBlock href="/contact" variant="accent" size="md">
+
+            <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/contact"
+                className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              >
                 {isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
-              </BtnBlock>
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              <Link
+                href="/planner"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              >
+                {isKo ? "AI 캠페인 설계" : "AI campaign planner"}
+                <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
+              </Link>
             </div>
           </div>
         </section>
       )}
 
-      <section className="bg-card py-12">
+      <section className="tkad-media-browse-main border-t border-border/60 bg-card py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {mainTab === "search" ? (
-            <p className="mb-6 text-center text-sm font-medium text-muted-foreground sm:text-base">
-              {t("media.resultsSectionEyebrow")}
-            </p>
-          ) : null}
+          {/* removed: "검색 결과 · 보기 옵션" */}
           <div className="mb-10 flex justify-center">
             <div
-              className="inline-flex border-2 border-border bg-card shadow-xs"
+              className="tkad-media-main-tabs inline-flex rounded-2xl border border-border/80 bg-muted/60 p-1 shadow-sm backdrop-blur-md"
               role="tablist"
               aria-label={isKo ? "매체 탐색 방식" : "Browse mode"}
             >
@@ -533,11 +547,12 @@ export default function MediaBrowseClient({
                 role="tab"
                 aria-selected={mainTab === "search"}
                 onClick={() => setMainTab("search")}
-                className={`touch-manipulation px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5 ${
+                className={cn(
+                  "touch-manipulation rounded-[14px] px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5",
                   mainTab === "search"
-                    ? "bg-hero-void text-hero-fg"
-                    : "text-foreground hover:bg-muted"
-                }`}
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-foreground hover:bg-background/70",
+                )}
               >
                 {t("media.ai.tabSearch")}
               </button>
@@ -546,11 +561,12 @@ export default function MediaBrowseClient({
                 role="tab"
                 aria-selected={mainTab === "ai"}
                 onClick={() => setMainTab("ai")}
-                className={`touch-manipulation border-l-2 border-border px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5 ${
+                className={cn(
+                  "touch-manipulation rounded-[14px] px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5",
                   mainTab === "ai"
-                    ? "bg-accent text-accent-foreground"
-                    : "text-foreground hover:bg-muted"
-                }`}
+                    ? "bg-accent text-accent-foreground shadow-sm"
+                    : "text-foreground hover:bg-background/70",
+                )}
               >
                 {t("media.ai.tabAi")}
               </button>
@@ -676,36 +692,36 @@ export default function MediaBrowseClient({
                     ) : null}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <label className="inline-flex items-center gap-2 border-2 border-border bg-card px-3 py-2 text-sm text-foreground">
-                      <span className="shrink-0 text-muted-foreground">
-                        {t("media.sortLabel")}
-                      </span>
-                      <select
-                        className="max-w-[11rem] min-w-0 border-l border-border bg-transparent pl-2 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
-                        value={sortBy}
-                        onChange={(e) =>
-                          setSortBy(
-                            e.target.value as typeof sortBy,
-                          )
-                        }
-                      >
-                        <option value="default">
-                          {t("media.sortDefault")}
-                        </option>
-                        <option value="newest">
-                          {t("media.sortNewest")}
-                        </option>
-                        <option value="priceAsc">
-                          {t("media.sortPriceAsc")}
-                        </option>
-                        <option value="priceDesc">
-                          {t("media.sortPriceDesc")}
-                        </option>
-                        <option value="trafficDesc">
-                          {t("media.sortTrafficDesc")}
-                        </option>
-                      </select>
-                    </label>
+                    {browseMode === "list" ? (
+                      <label className="inline-flex h-10 items-center gap-2 border-2 border-border bg-card px-3 text-sm text-foreground">
+                        <span className="shrink-0 text-muted-foreground">
+                          {t("media.sortLabel")}
+                        </span>
+                        <select
+                          className="h-10 max-w-[11rem] min-w-0 border-l border-border bg-transparent pl-2 pr-1 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+                          value={sortBy}
+                          onChange={(e) =>
+                            setSortBy(e.target.value as typeof sortBy)
+                          }
+                        >
+                          <option value="default">
+                            {t("media.sortDefault")}
+                          </option>
+                          <option value="newest">
+                            {t("media.sortNewest")}
+                          </option>
+                          <option value="priceAsc">
+                            {t("media.sortPriceAsc")}
+                          </option>
+                          <option value="priceDesc">
+                            {t("media.sortPriceDesc")}
+                          </option>
+                          <option value="trafficDesc">
+                            {t("media.sortTrafficDesc")}
+                          </option>
+                        </select>
+                      </label>
+                    ) : null}
                     {/* #MEDIA-1: 목록/지도 뷰 토글 진입점 숨김 (코드 보존) */}
                     <div className="hidden border-2 border-border bg-card">
                       <button
@@ -776,9 +792,19 @@ export default function MediaBrowseClient({
                         </BtnBlock>
                       </>
                     ) : null}
-                    <div className="inline-flex items-center gap-2 border-2 border-border bg-hero-void px-3 py-2 text-xs font-medium text-hero-fg sm:text-sm">
-                      <ShieldCheck className="h-4 w-4 shrink-0 text-hermes" aria-hidden />
-                      <span>{tMedia("browseCatalogVerifiedBadge")}</span>
+                    <div className="flex min-w-0 max-w-full items-start gap-2 border-2 border-border bg-card px-3 py-2 sm:max-w-[24rem]">
+                      <ShieldCheck
+                        className="mt-0.5 h-4 w-4 shrink-0 text-hermes"
+                        aria-hidden
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-foreground sm:text-sm">
+                          {tMedia("browseCatalogVerifiedBadge")}
+                        </p>
+                        <p className="mt-1 text-[10px] leading-snug text-muted-foreground sm:text-[11px]">
+                          {tMedia("browseCatalogVerifiedListHint")}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

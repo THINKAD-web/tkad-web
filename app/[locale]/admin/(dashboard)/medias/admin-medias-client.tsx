@@ -32,6 +32,7 @@ import {
   AlertCircle,
   Star,
   Flame,
+  ShieldCheck,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
@@ -113,6 +114,8 @@ type AdminMediaForm = {
   nearbyStations: string;
   nearbyLandmarks: string;
   addressVerified: boolean;
+  /** 공개 카탈로그 THINKAD Verified 리본 */
+  isVerified: boolean;
   /** ISO, display-only (서버 자동 수집 시각) */
   autoPopulatedAt: string;
   dailyFootfall: string;
@@ -157,6 +160,7 @@ const emptyForm: AdminMediaForm = {
   nearbyStations: "",
   nearbyLandmarks: "",
   addressVerified: false,
+  isVerified: false,
   autoPopulatedAt: "",
   dailyFootfall: "",
   weekdayFootfall: "",
@@ -294,6 +298,7 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     nearbyStations: m.nearbyStations ?? "",
     nearbyLandmarks: m.nearbyLandmarks ?? "",
     addressVerified: m.addressVerified ?? false,
+    isVerified: m.isVerified ?? false,
     autoPopulatedAt: m.autoPopulatedAt ?? "",
     dailyFootfall:
       m.dailyFootfall != null ? String(m.dailyFootfall) : "",
@@ -386,6 +391,7 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     nearbyStations: form.nearbyStations.trim() || null,
     nearbyLandmarks: form.nearbyLandmarks.trim() || null,
     addressVerified: form.addressVerified,
+    isVerified: form.isVerified,
     latitude: parseOptFloat(form.latitude),
     longitude: parseOptFloat(form.longitude),
     priceNote: form.priceNote.trim() || null,
@@ -795,6 +801,31 @@ export default function AdminMediasClient({
     }
   }, []);
 
+  const toggleCatalogVerified = useCallback(async (m: AdminMediaDto) => {
+    listFetchGenRef.current += 1;
+    const next = !m.isVerified;
+    try {
+      const result = await adminFetchJson(`/api/admin/medias/${m.id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isVerified: next }),
+      });
+      if (!result.ok) {
+        setListError(result.message);
+        return;
+      }
+      const data = result.data as { media?: unknown };
+      const row = data.media ? normalizeAdminMediaRow(data.media) : null;
+      if (row) {
+        setMedias((prev) => prev.map((x) => (x.id === m.id ? row : x)));
+        setListError(null);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const patchFeaturedFields = useCallback(
     async (
       m: AdminMediaDto,
@@ -844,6 +875,7 @@ export default function AdminMediasClient({
       "이미지수",
       "가용상태",
       "활성(목록)",
+      "THINKAD검증(공개)",
       "추천(홈)",
       "추천순서",
     ];
@@ -863,6 +895,7 @@ export default function AdminMediasClient({
       String((m.extractedImages ?? []).length),
       m.availability,
       m.isActive ? "활성" : "비활성",
+      m.isVerified ? "Y" : "",
       m.isFeatured ? "Y" : "",
       m.featuredOrder != null ? String(m.featuredOrder) : "",
     ]);
@@ -1258,6 +1291,30 @@ export default function AdminMediasClient({
                           />
                         </button>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          title={
+                            media.isVerified
+                              ? "공개 Verified 해제"
+                              : "공개 카탈로그에 Verified 표시"
+                          }
+                          onClick={() => void toggleCatalogVerified(media)}
+                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-card text-foreground transition-colors hover:bg-orange-50"
+                        >
+                          <ShieldCheck
+                            className={`h-4 w-4 ${
+                              media.isVerified
+                                ? "text-[#ff6200]"
+                                : "text-slate-300"
+                            }`}
+                            aria-hidden
+                          />
+                        </button>
+                        <span className="text-[11px] text-muted-foreground">
+                          공개 Verified
+                        </span>
+                      </div>
                       <div className="flex flex-wrap items-center gap-2">
                         <Button
                           variant="outline"
@@ -1295,6 +1352,7 @@ export default function AdminMediasClient({
                     <th className="px-4 py-3">유형</th>
                     <th className="px-4 py-3">가격(원)</th>
                     <th className="px-4 py-3 text-center">상태</th>
+                    <th className="px-4 py-3 text-center">검증</th>
                     <th className="px-4 py-3 text-center">추천</th>
                     <th className="px-4 py-3 text-center w-[5.5rem]">순서</th>
                     <th className="px-4 py-3 text-center">인기</th>
@@ -1306,7 +1364,7 @@ export default function AdminMediasClient({
                   {listLoading ? (
                     <tr>
                       <td
-                        colSpan={8}
+                        colSpan={11}
                         className="px-4 py-12 text-center text-muted-foreground"
                       >
                         <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
@@ -1316,7 +1374,7 @@ export default function AdminMediasClient({
                   ) : paginated.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={8}
+                        colSpan={11}
                         className="px-4 py-12 text-center text-muted-foreground"
                       >
                         {medias.length === 0
@@ -1372,6 +1430,27 @@ export default function AdminMediasClient({
                                   ? "translate-x-[18px]"
                                   : "translate-x-0.5"
                               } mt-0.5`}
+                            />
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            type="button"
+                            title={
+                              media.isVerified
+                                ? "공개 Verified 해제"
+                                : "공개 카탈로그에 Verified 표시"
+                            }
+                            onClick={() => void toggleCatalogVerified(media)}
+                            className="inline-flex touch-manipulation rounded-full p-1.5 transition-colors hover:bg-orange-50"
+                          >
+                            <ShieldCheck
+                              className={`h-5 w-5 ${
+                                media.isVerified
+                                  ? "text-[#ff6200]"
+                                  : "text-slate-300"
+                              }`}
+                              aria-hidden
                             />
                           </button>
                         </td>
@@ -1782,6 +1861,16 @@ export default function AdminMediasClient({
                   }
                 />
                 주소·좌표 카카오 검증 완료 (addressVerified)
+              </label>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={form.isVerified}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, isVerified: e.target.checked }))
+                  }
+                />
+                공개 카탈로그 Verified 리본 (isVerified)
               </label>
               {form.autoPopulatedAt.trim() ? (
                 <p className="text-[11px] text-muted-foreground">
