@@ -194,6 +194,9 @@ export async function POST(request: NextRequest) {
   if (typeof body.isActive === "boolean") {
     data.isActive = body.isActive;
   }
+  if (typeof body.isVerified === "boolean") {
+    data.isVerified = body.isVerified;
+  }
 
   try {
     const filled = await enrichNewMediaLocationFromKakao({

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "오프라인 | THINKAD",
@@ -64,11 +65,11 @@ export default function OfflinePage() {
               margin: "0 0 2rem",
             }}
           >
-            // 인터넷 연결이 끊겼습니다. 연결 후 다시 시도해주세요.
+            인터넷 연결이 끊겼습니다. 연결 후 다시 시도해주세요.
           </p>
 
           <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <a
+            <Link
               href="/"
               style={{
                 display: "inline-flex",
@@ -87,7 +88,7 @@ export default function OfflinePage() {
               }}
             >
               다시 시도 →
-            </a>
+            </Link>
           </div>
 
           <p

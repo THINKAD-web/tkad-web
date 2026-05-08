@@ -31,15 +31,28 @@ export async function GET(req: Request) {
     const priceMin = parseIntOrNull(sp.get("priceMin"));
     const priceMax = parseIntOrNull(sp.get("priceMax"));
     const q = sp.get("q")?.trim().toLowerCase() || null;
+    const sort = sp.get("sort")?.trim() || "default";
 
     const all = await fetchPublicMediaCatalog();
 
-    const items = all
-      .filter((m) => typeof m.lat === "number" && typeof m.lng === "number")
-      .filter((m) => {
+    const itemsRaw = all
+      .map((m) => {
+        const lat = Number(m.lat);
+        const lng = Number(m.lng);
+        return { m, lat, lng };
+      })
+      .filter(
+        (row) =>
+          Number.isFinite(row.lat) &&
+          Number.isFinite(row.lng) &&
+          Math.abs(row.lat) <= 90 &&
+          Math.abs(row.lng) <= 180,
+      )
+      .filter((row) => {
+        const { m, lat, lng } = row;
         if (swLat != null && neLat != null && swLng != null && neLng != null) {
-          if ((m.lat as number) < swLat || (m.lat as number) > neLat) return false;
-          if ((m.lng as number) < swLng || (m.lng as number) > neLng) return false;
+          if (lat < swLat || lat > neLat) return false;
+          if (lng < swLng || lng > neLng) return false;
         }
         if (type && m.type !== type) return false;
         if (region && m.region !== region && m.city !== region && m.district !== region)
@@ -56,7 +69,7 @@ export async function GET(req: Request) {
         }
         return true;
       })
-      .map((m) => ({
+      .map(({ m, lat, lng }) => ({
         id: m.id,
         name: m.name,
         location: m.location,
@@ -67,12 +80,34 @@ export async function GET(req: Request) {
         subCategory: m.subCategory ?? null,
         price: catalogPriceFieldToWon(m.price ?? 0),
         pricePeriod: m.pricePeriod ?? "month",
-        lat: m.lat as number,
-        lng: m.lng as number,
+        createdAt: m.createdAt ?? null,
+        lat,
+        lng,
         image: m.sampleImages?.[0] ?? null,
         availability: m.availability ?? null,
         visibilityScore: m.visibilityScore ?? 0,
       }));
+
+    const items = (() => {
+      const arr = [...itemsRaw];
+      switch (sort) {
+        case "newest":
+          return arr.sort((a, b) => {
+            const at = a.createdAt ? Date.parse(a.createdAt) : 0;
+            const bt = b.createdAt ? Date.parse(b.createdAt) : 0;
+            return bt - at;
+          });
+        case "priceAsc":
+          return arr.sort((a, b) => a.price - b.price);
+        case "priceDesc":
+          return arr.sort((a, b) => b.price - a.price);
+        case "trafficDesc":
+          // map API는 traffic 지표가 없으므로 visibilityScore를 근사치로 사용한다.
+          return arr.sort((a, b) => b.visibilityScore - a.visibilityScore);
+        default:
+          return arr;
+      }
+    })();
 
     const distinctRegions = Array.from(
       new Set(all.map((m) => m.region).filter((v): v is string => !!v)),

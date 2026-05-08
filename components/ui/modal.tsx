@@ -29,7 +29,7 @@ export default function Modal({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function Modal({
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-4">
       <div
         className={cn(
-          "absolute inset-0 bg-navy-dark/50 backdrop-blur-sm transition-opacity duration-300",
+          "absolute inset-0 bg-black/55 backdrop-blur-md transition-opacity duration-300",
           open ? "opacity-100" : "opacity-0",
         )}
         onClick={() => !locked && onClose()}
@@ -69,15 +69,20 @@ export default function Modal({
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
         className={cn(
-          "relative w-full max-h-[min(92dvh,920px)] animate-fade-in-up overflow-y-auto overscroll-contain rounded-2xl border border-navy/10 bg-white shadow-2xl sm:max-h-[90vh]",
+          "tkad-glass-surface relative w-full max-h-[min(92dvh,920px)] animate-fade-in-up overflow-y-auto overscroll-contain rounded-[28px] border border-white/12 bg-black/45 text-white shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:max-h-[90vh]",
           className ?? "max-w-lg",
         )}
       >
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_58%),radial-gradient(circle_at_55%_110%,rgba(236,72,153,0.12),transparent_60%)]"
+        />
         <button
           type="button"
           onClick={onClose}
           disabled={locked}
-          className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-navy disabled:pointer-events-none disabled:opacity-50 sm:top-4 sm:right-4 sm:h-8 sm:w-8"
+          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/20 text-white/75 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-50 sm:right-4 sm:top-4 sm:h-8 sm:w-8"
           aria-label="Close"
         >
           <X className="h-4 w-4" />

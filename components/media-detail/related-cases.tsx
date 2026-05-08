@@ -19,8 +19,8 @@ export function RelatedCases({ cases, isKo }: Props) {
   if (cases.length === 0) return null;
 
   return (
-    <section className="border-2 border-border bg-card">
-      <header className="border-b-2 border-border px-6 py-5">
+    <section className="overflow-hidden rounded-[28px] border border-border/80 bg-card/80 shadow-sm backdrop-blur">
+      <header className="border-b border-border/70 px-6 py-5">
         <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           <Briefcase className="h-3.5 w-3.5" aria-hidden />
           [ RELATED CASES ]
@@ -40,10 +40,10 @@ export function RelatedCases({ cases, isKo }: Props) {
               <li key={c.id} className="-mt-[2px] -ml-[2px]">
                 <Link
                   href={`/cases/${c.id}`}
-                  className="group flex h-full flex-col gap-2 border-2 border-border bg-card p-4 transition-colors hover:bg-muted"
+                  className="group flex h-full flex-col gap-2 rounded-[22px] border border-border/80 bg-card/80 p-4 shadow-xs backdrop-blur transition-colors hover:bg-muted/50"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
+                    <span className="rounded-xl border border-border/80 bg-card/70 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-foreground shadow-xs backdrop-blur">
                       {c.industry}
                     </span>
                     <ArrowRight

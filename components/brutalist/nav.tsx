@@ -14,7 +14,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
-import { BtnBlock } from "@/components/brutalist/btn-block";
 import { cn } from "@/lib/utils";
 
 export type BrutalNavLeaf = { href: string; label: string; desc?: string };
@@ -43,11 +42,14 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
   const Logo = (
     <Link
       href="/"
-      className="font-mono text-base font-black uppercase tracking-[0.22em] text-foreground"
+      className="font-mono text-[16px] font-black uppercase tracking-[0.18em] text-foreground dark:text-white sm:text-[18px]"
     >
       {logo ?? (
         <>
-          THINK<span className="text-hermes">AD</span>
+          THINK
+          <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
+            AD
+          </span>
         </>
       )}
     </Link>
@@ -56,16 +58,16 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
   return (
     <nav
       className={cn(
-        "tkad-nav-chrome sticky top-0 z-50 border-b-2 border-border text-foreground",
+        "tkad-nav-chrome sticky top-0 z-50 border-b border-white/10 bg-background/70 text-foreground backdrop-blur-xl supports-[backdrop-filter]:bg-background/40 dark:bg-[#05050a]/65 dark:text-white dark:supports-[backdrop-filter]:bg-[#05050a]/45",
         className,
       )}
     >
       {/* 데스크톱: 3컬 그리드 */}
-      <div className="hidden grid-cols-[auto_1fr_auto] items-stretch md:grid">
-        <div className="flex items-center border-r-2 border-border px-6 py-4">
+      <div className="hidden h-16 grid-cols-[auto_1fr_auto] items-center md:grid">
+        <div className="flex h-16 items-center px-6">
           {Logo}
         </div>
-        <ul className="flex items-center justify-center gap-1 px-3 py-2">
+        <ul className="flex h-16 items-center justify-center gap-1 px-3">
           {links.map((entry, i) =>
             isGroup(entry) ? (
               <BrutalNavDropdown key={`g-${i}`} entry={entry} />
@@ -73,7 +75,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
               <li key={entry.href}>
                 <Link
                   href={entry.href}
-                  className="inline-block px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground/90 transition-colors hover:text-hermes"
+                  className="inline-flex h-10 items-center rounded-xl px-4 font-mono text-[14px] font-semibold uppercase tracking-[0.17em] text-foreground/75 transition-colors hover:bg-foreground/5 hover:text-foreground dark:text-white/72 dark:hover:bg-white/5 dark:hover:text-white"
                 >
                   {entry.label}
                 </Link>
@@ -81,20 +83,23 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
             ),
           )}
         </ul>
-        <div className="flex items-center justify-end gap-2 border-l-2 border-border px-4 py-2.5">
+        <div className="flex h-16 items-center justify-end gap-2 px-6">
           {extras ? (
             <div className="flex items-center gap-1">{extras}</div>
           ) : null}
           {cta ? (
-            <BtnBlock href={cta.href} variant="primary" size="sm">
+            <Link
+              href={cta.href}
+              className="tkad-neon-cta-clean inline-flex h-10 items-center justify-center rounded-xl px-4 font-mono text-[12px] font-black uppercase tracking-[0.2em] text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+            >
               {cta.label}
-            </BtnBlock>
+            </Link>
           ) : null}
         </div>
       </div>
 
       {/* 모바일: 로고 + extras + 햄버거 */}
-      <div className="flex items-center justify-between gap-2 px-5 py-4 md:hidden">
+      <div className="flex h-16 items-center justify-between gap-2 px-5 md:hidden">
         {Logo}
         <div className="flex items-center gap-1.5">
           {extras ? <div className="flex items-center gap-1">{extras}</div> : null}
@@ -103,7 +108,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center border-2 border-border bg-card text-foreground transition-all duration-300 hover:border-hermes hover:bg-foreground hover:text-background hover:shadow-[0_0_24px_rgba(255,98,0,0.25)]"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/6 text-white backdrop-blur transition-all duration-300 hover:border-white/22 hover:bg-white/10"
           >
             {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
@@ -112,21 +117,24 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
 
       {/* 모바일 패널 — 그룹은 모든 leaf 펼침 */}
       {mobileOpen && (
-        <div className="border-t-2 border-border bg-card md:hidden">
-          <ul className="divide-y-2 divide-border">
+        <div className="border-t border-white/10 bg-[#05050a] text-white md:hidden">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-15 tkad-neon-grid" />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.06] mix-blend-overlay" />
+          <ul className="relative divide-y divide-white/10">
             {links.map((entry, i) =>
               isGroup(entry) ? (
                 <li key={`mg-${i}`}>
-                  <p className="bg-muted/60 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/65">
                     {entry.label}
                   </p>
-                  <ul className="divide-y-2 divide-border">
+                  <ul className="divide-y divide-white/10">
                     {entry.items.map((leaf) => (
                       <li key={leaf.href}>
                         <Link
                           href={leaf.href}
                           onClick={() => setMobileOpen(false)}
-                          className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-foreground transition-colors hover:bg-muted/70 hover:text-hermes"
+                          className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-white transition-colors hover:bg-white/6"
                         >
                           {leaf.label}
                         </Link>
@@ -139,7 +147,7 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
                   <Link
                     href={entry.href}
                     onClick={() => setMobileOpen(false)}
-                    className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-foreground transition-colors hover:bg-muted/70 hover:text-hermes"
+                    className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-white transition-colors hover:bg-white/6"
                   >
                     {entry.label}
                   </Link>
@@ -148,15 +156,14 @@ export function BrutalNav({ logo, links, cta, extras, className }: BrutalNavProp
             )}
           </ul>
           {cta ? (
-            <div className="border-t-2 border-border p-4">
-              <BtnBlock
+            <div className="relative border-t border-white/10 p-4">
+              <Link
                 href={cta.href}
-                variant="primary"
-                size="md"
-                className="w-full"
+                onClick={() => setMobileOpen(false)}
+                className="tkad-neon-cta-clean inline-flex h-12 w-full items-center justify-center rounded-2xl px-6 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white transition-colors"
               >
                 {cta.label}
-              </BtnBlock>
+              </Link>
             </div>
           ) : null}
         </div>
@@ -211,8 +218,8 @@ function BrutalNavDropdown({ entry }: { entry: BrutalNavGroup }) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex items-center gap-1 px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground/90 transition-colors hover:text-hermes",
-          open && "text-hermes",
+          "inline-flex h-10 items-center gap-1 rounded-xl px-4 font-mono text-[14px] font-semibold uppercase tracking-[0.17em] text-foreground/75 transition-colors hover:bg-foreground/5 hover:text-foreground dark:text-white/72 dark:hover:bg-white/5 dark:hover:text-white",
+          open && "text-foreground dark:text-white",
         )}
       >
         {entry.label}
@@ -227,22 +234,22 @@ function BrutalNavDropdown({ entry }: { entry: BrutalNavGroup }) {
       {open && (
         <div
           role="menu"
-          className="absolute left-1/2 top-full z-50 mt-1 w-72 -translate-x-1/2 border-2 border-border bg-card py-1 shadow-[0_24px_64px_rgba(0,0,0,0.18)] ring-1 ring-black/5 dark:shadow-[0_28px_72px_rgba(0,0,0,0.55)] dark:ring-white/10"
+          className="absolute left-1/2 top-full z-50 mt-4 w-64 max-w-[calc(100vw-2.5rem)] -translate-x-1/2 overflow-hidden rounded-2xl border border-border/70 bg-card/90 py-1 text-foreground shadow-[0_30px_120px_rgba(0,0,0,0.28)] backdrop-blur dark:border-white/10 dark:bg-black/55 dark:text-white dark:shadow-[0_30px_120px_rgba(0,0,0,0.78)]"
         >
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-border/60 dark:divide-white/10">
             {entry.items.map((leaf) => (
               <li key={leaf.href}>
                 <Link
                   href={leaf.href}
                   role="menuitem"
                   onClick={() => setOpen(false)}
-                  className="block px-4 py-3 transition-colors hover:bg-muted/80 hover:text-foreground"
+                  className="block px-4 py-3 transition-colors hover:bg-muted/60 dark:hover:bg-white/6"
                 >
-                  <span className="block text-xs font-semibold uppercase tracking-[0.18em]">
+                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-foreground dark:text-white">
                     {leaf.label}
                   </span>
                   {leaf.desc ? (
-                    <span className="mt-1 block text-[11px] leading-snug tracking-tight text-muted-foreground">
+                    <span className="mt-1 block text-[11px] leading-snug tracking-tight text-muted-foreground dark:text-white/65">
                       {leaf.desc}
                     </span>
                   ) : null}

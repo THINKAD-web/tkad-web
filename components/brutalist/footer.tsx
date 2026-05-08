@@ -46,11 +46,16 @@ export function BrutalFooter({
   return (
     <footer
       className={cn(
-        "border-t-2 border-border bg-background text-foreground",
+        "relative overflow-hidden border-t border-white/10 bg-[#05050a] text-white",
         className,
       )}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+      <div aria-hidden className="absolute inset-0 opacity-15 tkad-neon-grid" />
+      <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.06] mix-blend-overlay" />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* 1번 셀 — 브랜드 컬럼 또는 일반 컬럼 0번 */}
         {useBrandCell ? (
           <BrandCell
@@ -70,22 +75,14 @@ export function BrutalFooter({
             cellIdx={i + 1}
           />
         ))}
+        </div>
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-hermes/25 bg-hero-void px-6 py-5 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-hero-fg/80">
+
+      <div className="relative border-t border-white/10 bg-black/30 px-6 py-5 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65 backdrop-blur">
         <span>{copyright ?? "© 2026 THINKAD — All rights reserved"}</span>
-        {legal ? <span className="text-hero-fg/50">{legal}</span> : null}
+        {legal ? <span className="ml-4 text-white/45">{legal}</span> : null}
       </div>
     </footer>
-  );
-}
-
-function cellBorders(idx: number): string {
-  return cn(
-    "border-border p-6 sm:p-8",
-    idx > 0 && "border-t-2 sm:border-t-0",
-    idx > 0 && "sm:border-l-0 lg:border-l-2",
-    idx >= 2 && "sm:border-t-2 lg:border-t-0",
-    idx % 2 === 1 && "sm:border-l-2 lg:border-l-2",
   );
 }
 
@@ -99,17 +96,20 @@ function BrandCell({
   cellIdx: number;
 }) {
   return (
-    <div className={cellBorders(cellIdx)}>
+    <div className="rounded-[28px] bg-white/5 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">
       <Link
         href="/"
-        className="inline-block font-mono text-base font-black uppercase tracking-[0.22em] text-foreground transition-colors hover:text-hermes"
+        className="inline-block font-mono text-[12px] font-black uppercase tracking-[0.22em] text-white"
       >
-        THINK<span className="text-hermes">AD</span>
+        THINK
+        <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
+          AD
+        </span>
       </Link>
-      <div className="mt-4 max-w-xs space-y-3 text-sm leading-relaxed text-muted-foreground">
-        <p className="font-medium text-foreground/90">{description}</p>
+      <div className="mt-4 max-w-xs space-y-3 text-sm leading-relaxed text-white/72">
+        <p className="font-medium text-white/82">{description}</p>
         {brandMeta ? (
-          <div className="font-mono text-[11px] text-muted-foreground/90">
+          <div className="font-mono text-[11px] text-white/60">
             {brandMeta}
           </div>
         ) : null}
@@ -126,14 +126,14 @@ function ColumnCell({
   cellIdx: number;
 }) {
   return (
-    <div className={cellBorders(cellIdx)}>
-      <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-hermes/90">
+    <div className="rounded-[28px] bg-white/5 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">
+      <h3 className="mb-4 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white/78">
         {col.title}
       </h3>
       <ul className="space-y-2.5">
         {col.items.map((it, i) => {
           const cls =
-            "text-sm font-medium tracking-tight text-foreground/90 transition-colors hover:text-hermes";
+            "text-sm font-medium tracking-tight text-white/80 transition-colors hover:text-white";
           if (!it.href) {
             return (
               <li key={i} className={cls}>

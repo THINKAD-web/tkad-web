@@ -86,7 +86,7 @@ export default function MediaSimilarCarousel({
 
   return (
     <section
-      className="mt-12 border-t-2 border-border pt-10"
+      className="mt-12 border-t border-border/70 pt-12"
       aria-labelledby="media-similar-heading"
     >
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -106,7 +106,7 @@ export default function MediaSimilarCarousel({
             <div
               role="group"
               aria-label={t("similarSortLabel")}
-              className="inline-flex border-2 border-border bg-card"
+              className="inline-flex rounded-2xl border border-border/80 bg-muted/50 p-1 shadow-xs backdrop-blur"
             >
               {(
                 [
@@ -115,18 +115,17 @@ export default function MediaSimilarCarousel({
                   ["price", t("similarSortPrice")],
                   ["visibility", t("similarSortVisibility")],
                 ] as const
-              ).map(([key, label], i) => (
+              ).map(([key, label]) => (
                 <button
                   key={key}
                   type="button"
                   aria-pressed={sortBy === key}
                   onClick={() => setSortBy(key)}
                   className={cn(
-                    "px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
-                    i > 0 && "border-l-2 border-border",
+                    "rounded-[14px] px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     sortBy === key
-                      ? "bg-hero-void text-hero-fg"
-                      : "text-foreground hover:bg-muted",
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-foreground hover:bg-background/70",
                   )}
                 >
                   {label}
@@ -141,7 +140,7 @@ export default function MediaSimilarCarousel({
                 disabled={!canPrev}
                 aria-label={t("similarCarouselPrev")}
                 onClick={() => scrollByDir(-1)}
-                className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-border/80 bg-card/80 text-foreground shadow-xs backdrop-blur transition-colors hover:bg-muted disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -150,7 +149,7 @@ export default function MediaSimilarCarousel({
                 disabled={!canNext}
                 aria-label={t("similarCarouselNext")}
                 onClick={() => scrollByDir(1)}
-                className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-40"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-border/80 bg-card/80 text-foreground shadow-xs backdrop-blur transition-colors hover:bg-muted disabled:opacity-40"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -179,15 +178,15 @@ export default function MediaSimilarCarousel({
               key={m.id}
               href={`/media/${m.id}`}
               className={cn(
-                "group -ml-[2px] flex snap-start flex-col overflow-hidden border-2 border-border bg-card",
+                "group -ml-[2px] flex snap-start flex-col overflow-hidden rounded-[24px] border border-border/80 bg-card/80 shadow-xs backdrop-blur",
                 "w-[min(100%,280px)] shrink-0 sm:w-[268px]",
-                "transition-colors hover:bg-muted",
+                "transition-colors hover:bg-muted/50",
               )}
             >
               <MediaCatalogThumbnail
                 media={m}
                 placeholderLabel={tMedia("imagePreparing")}
-                className="relative aspect-[4/3] w-full border-b-2 border-border"
+                className="relative aspect-[4/3] w-full border-b border-border/70"
                 imgClassName="grayscale transition-[filter,transform] duration-500 ease-out group-hover:grayscale-0 group-hover:scale-[1.02]"
                 bottomGradientClassName={null}
                 placeholderSize="xs"

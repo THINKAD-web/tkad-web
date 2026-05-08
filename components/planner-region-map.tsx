@@ -76,12 +76,12 @@ export function PlannerRegionMap({
           aria-label={title}
         >
           <title>{title}</title>
-          <rect width="340" height="380" fill="#f5f5f5" />
+          <rect width="340" height="380" className="tkad-planner-map-bg" />
           <text
             x="170"
             y="36"
             textAnchor="middle"
-            className="fill-muted-foreground text-[11px] font-bold tracking-[0.22em]"
+            className="tkad-planner-map-korea text-[11px] font-bold tracking-[0.22em]"
             style={{ fontFamily: "JetBrains Mono, monospace" }}
           >
             [ KOREA ]
@@ -96,8 +96,8 @@ export function PlannerRegionMap({
                   className={cn(
                     "cursor-pointer transition-colors",
                     on
-                      ? "fill-primary stroke-border stroke-[3]"
-                      : "fill-card stroke-border stroke-[2] hover:fill-muted",
+                      ? "tkad-planner-map-zone-on fill-primary stroke-[3]"
+                      : "tkad-planner-map-zone-off stroke-2",
                   )}
                   onClick={() => onToggle(z.id)}
                 />
@@ -107,7 +107,7 @@ export function PlannerRegionMap({
                   textAnchor="middle"
                   className={cn(
                     "pointer-events-none text-[11px] font-bold",
-                    on ? "fill-card" : "fill-foreground",
+                    on ? "tkad-planner-map-label-active" : "tkad-planner-map-label-idle",
                   )}
                 >
                   {labelFor(z.id)}
@@ -118,7 +118,7 @@ export function PlannerRegionMap({
                   textAnchor="middle"
                   className={cn(
                     "pointer-events-none text-[9px] font-bold tracking-[0.18em]",
-                    on ? "fill-card" : "fill-muted-foreground",
+                    on ? "tkad-planner-map-count-active" : "tkad-planner-map-count-idle",
                   )}
                   style={{ fontFamily: "JetBrains Mono, monospace" }}
                 >

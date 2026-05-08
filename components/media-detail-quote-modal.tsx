@@ -50,45 +50,51 @@ function MediaDetailQuoteModalBody({
   const primaryLinkClass = cn(
     btnBlockBase,
     "px-6 py-3 text-xs",
-    "bg-accent text-white border-accent hover:bg-foreground hover:border-border hover:text-background",
     "h-12 sm:h-14",
+    "rounded-[22px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95",
   );
   const secondaryLinkClass = cn(
     btnBlockBase,
     "px-6 py-3 text-xs",
-    "bg-card text-foreground border-border hover:bg-foreground hover:text-background",
-    "h-11",
+    "h-12",
+    "rounded-[18px] border border-white/14 bg-white/8 text-white shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12",
   );
 
   return (
-    <div className="px-4 pb-5 pt-9 sm:px-6 sm:pb-6 sm:pt-10">
-      <div className="mb-4 flex items-start gap-3 border-b-2 border-border pb-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
+    <div className="relative px-4 pb-5 pt-9 text-white sm:px-6 sm:pb-6 sm:pt-10">
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
+      />
+
+      <div className="relative mb-4 flex items-start gap-3 border-b border-white/10 pb-4">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-white/14 bg-white/8 text-white shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur">
           <Sparkles className="h-5 w-5" strokeWidth={1.75} aria-hidden />
         </span>
         <div className="min-w-0">
           <h2
             id="media-quote-modal-title"
-            className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground"
+            className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/65"
           >
             [ {t("quoteModalTitle")} ]
           </h2>
-          <p className="mt-1.5 text-base font-bold leading-snug text-foreground sm:text-lg">
+          <p className="mt-1.5 text-base font-black leading-snug text-white sm:text-lg">
             {mediaTitle}
           </p>
         </div>
       </div>
-      <p className="mb-4 text-sm leading-relaxed text-foreground/80">
+      <p className="relative mb-4 text-sm leading-relaxed text-white/75">
         {t("quoteModalDescription")}
       </p>
 
       {hasOpts ? (
         <div
-          className="mb-5 border-2 border-border bg-muted p-3 sm:p-4"
+          className="relative mb-5 rounded-[22px] border border-white/12 bg-black/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:p-4"
           role="radiogroup"
           aria-label={t("quoteModalPriceOptionLabel")}
         >
-          <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/55">
             [ {t("quoteModalPriceOptionLabel")} ]
           </p>
           <div className="flex max-h-[min(52vh,22rem)] flex-col gap-2 overflow-y-auto pr-0.5">
@@ -102,31 +108,31 @@ function MediaDetailQuoteModalBody({
                   aria-checked={selectedCard}
                   onClick={() => setOptIdx(i)}
                   className={cn(
-                    "relative w-full border-2 p-3 text-left transition-colors sm:p-3.5",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2",
+                    "relative w-full rounded-[22px] border p-3 text-left transition-all sm:p-3.5",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/18 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
                     selectedCard
-                      ? "border-accent bg-card"
-                      : "border-border/15 bg-card hover:border-border/30",
+                      ? "border-white/22 bg-white/10"
+                      : "border-white/10 bg-black/20 hover:border-white/16 hover:bg-black/25",
                   )}
                 >
                   <span
                     className={cn(
-                      "absolute right-2.5 top-2.5 flex size-5 items-center justify-center border-2 text-[9px] font-bold",
+                      "absolute right-2.5 top-2.5 flex size-6 items-center justify-center rounded-xl border text-[9px] font-black",
                       selectedCard
-                        ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border/20 bg-card text-transparent",
+                        ? "border-white/18 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white"
+                        : "border-white/12 bg-white/6 text-transparent",
                     )}
                     aria-hidden
                   >
                     <Check className="size-2.5 stroke-[4]" />
                   </span>
-                  <span className="block pr-8 text-sm font-bold leading-snug text-foreground">
+                  <span className="block pr-10 text-sm font-black leading-snug text-white">
                     {o.label}
                   </span>
-                  <span className="mt-1.5 block text-lg font-bold tabular-nums tracking-tight text-accent sm:text-xl">
+                  <span className="mt-1.5 block text-lg font-black tabular-nums tracking-tight text-white sm:text-xl">
                     {formatCatalogPriceKrwLong(o.price, locale)}
                   </span>
-                  <span className="mt-1.5 font-mono text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <span className="mt-1.5 font-mono text-[9px] font-bold uppercase tracking-wider text-white/55">
                     {t(
                       mediaDetailPricePeriodTranslationKey(
                         o.period ?? media.pricePeriod,
@@ -134,7 +140,7 @@ function MediaDetailQuoteModalBody({
                     )}
                   </span>
                   {o.description?.trim() ? (
-                    <span className="mt-2 block border-t-2 border-border/5 pt-2 text-[11px] leading-relaxed text-foreground/70">
+                    <span className="mt-2 block border-t border-white/10 pt-2 text-[11px] leading-relaxed text-white/65">
                       {o.description}
                     </span>
                   ) : null}
@@ -143,11 +149,11 @@ function MediaDetailQuoteModalBody({
             })}
           </div>
           {selected ? (
-            <p className="mt-3 border-t-2 border-border/10 pt-3 text-sm text-foreground">
-              <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mt-3 border-t border-white/10 pt-3 text-sm text-white/80">
+              <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-white/55">
                 {t("quoteModalSelectedPriceLine")}{" "}
               </span>
-              <span className="font-bold text-foreground">
+              <span className="font-black text-white">
                 {selected.label} ·{" "}
                 {formatCatalogPriceKrwLong(selected.price, locale)}
               </span>
@@ -155,18 +161,18 @@ function MediaDetailQuoteModalBody({
           ) : null}
         </div>
       ) : media.keywordFilter?.priceText ? (
-        <p className="mb-5 border-2 border-accent/40 bg-muted px-3 py-2.5 text-sm font-bold text-foreground">
+        <p className="mb-5 rounded-[18px] border border-white/12 bg-black/20 px-3 py-2.5 text-sm font-semibold text-white/85 backdrop-blur">
           {media.keywordFilter.priceText}
         </p>
       ) : (
-        <div className="mb-5 border-2 border-border bg-card px-3 py-3">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+        <div className="mb-5 rounded-[18px] border border-white/12 bg-black/20 px-3 py-3 text-white backdrop-blur">
+          <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-white/55">
             {isKo ? "기준 요금" : "Base rate"}
           </p>
-          <p className="mt-1.5 text-lg font-bold tabular-nums text-accent">
+          <p className="mt-1.5 text-lg font-black tabular-nums text-white">
             {formatCatalogPriceKrwLong(media.price, locale)}
           </p>
-          <p className="mt-0.5 font-mono text-[9px] text-muted-foreground">
+          <p className="mt-0.5 font-mono text-[9px] text-white/55">
             {t(
               mediaDetailPricePeriodTranslationKey(media.pricePeriod),
             )}
@@ -209,7 +215,7 @@ export default function MediaDetailQuoteModal({
     <Modal
       open={open}
       onClose={onClose}
-      className="max-w-lg border-2 border-border bg-card"
+      className="tkad-glass-surface max-w-lg overflow-hidden"
       ariaLabelledBy="media-quote-modal-title"
     >
       {open ? (

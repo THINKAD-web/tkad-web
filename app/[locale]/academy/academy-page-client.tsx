@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
   Calendar,
   Download,
@@ -131,29 +132,38 @@ export default function AcademyPageClient({
   };
 
   return (
-    <>
-      <section className="bg-hero-void py-24">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
-            {`// 10 / Academy`}
-          </p>
-          <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-2">
-            <span className="inline-flex items-center gap-2 border-2 border-primary bg-primary px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
-              <GraduationCap className="h-4 w-4" />
-              {t("heroBadge")}
-            </span>
-            <span className="border-2 border-hero-fg bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-foreground">
-              BETA
-            </span>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
+
+          <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              {`// 10 / Academy`}
+            </p>
+            <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-2">
+              <span className="tkad-neon-border inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <GraduationCap className="h-4 w-4" />
+                <span className="tkad-home-accent-text">{t("heroBadge")}</span>
+              </span>
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">BETA</span>
+              </span>
+            </div>
+            <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+              {t("heroTitle")}
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+              {t("heroSubtitle")}
+            </p>
           </div>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
-            {t("heroTitle")}
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
-            {t("heroSubtitle")}
-          </p>
-        </div>
-      </section>
+        </section>
 
       <section className="bg-card py-8">
         <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-6 lg:px-8">
@@ -556,6 +566,7 @@ export default function AcademyPageClient({
           </div>
         </div>
       </Modal>
-    </>
+      </div>
+    </HomeLandingDayNight>
   );
 }

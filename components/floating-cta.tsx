@@ -1,40 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale } from "next-intl";
-import { PhoneCall } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
-export default function FloatingCta() {
-  const locale = useLocale();
-  const isKo = locale === "ko";
+export function FloatingCta({ isKo }: { isKo: boolean }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPercent =
-        window.scrollY /
-        (document.documentElement.scrollHeight - window.innerHeight);
-      setVisible(scrollPercent >= 0.8);
+    const onScroll = () => {
+      const y = window.scrollY || 0;
+      setVisible(y > 420);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (!visible) return null;
-
   return (
-    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-fade-in-up">
-      <Link href="/contact" aria-label={isKo ? "무료 상담 신청하기" : "Request Free Consultation"}>
-        <Button
-          size="lg"
-          className="h-14 rounded-full bg-gold px-8 text-base font-bold text-navy shadow-2xl shadow-gold/30 hover:bg-gold-dark hover:shadow-gold/40"
-        >
-          <PhoneCall className="mr-2 h-5 w-5" />
-          {isKo ? "무료 상담 신청하기" : "Request Free Consultation"}
-        </Button>
-      </Link>
+    <div
+      className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
+      }`}
+    >
+      <div className="w-[360px] max-w-[calc(100vw-48px)]">
+        <div className="tkad-home-floating-cta flex items-center justify-between gap-3 rounded-[22px] bg-white/5 px-4 py-3 backdrop-blur tkad-neon-border tkad-neon-glow">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-white">
+              {isKo ? "검증된 광고매체로 캠페인을 시작하세요" : "Start with verified media"}
+            </p>
+            <p className="mt-0.5 hidden truncate font-mono text-[11px] uppercase tracking-[0.2em] text-white/55 sm:block">
+              {isKo ? "// 견적·집행까지 원스톱" : "// Quote to execution, one-stop"}
+            </p>
+          </div>
+          <Link
+            href="/contact"
+            className="tkad-neon-cta inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-black text-white transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+          >
+            {isKo ? "상담 신청" : "Contact"}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,10 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import type { ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
   ChevronLeft,
   ChevronRight,
@@ -78,6 +87,47 @@ import {
   formatPricePeriodShortLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
+import {
+  getHomeAppearanceServerSnapshot,
+  readHomeAppearance,
+  subscribeHomeAppearance,
+  type HomeAppearance,
+} from "@/lib/home-appearance";
+
+/** 밤: 메인 NeonSection 과 동일한 #05050a + 네온 뎁스(히어로 아래 본문만 밝은 페이지 배경이 비지 않도록) */
+function PlannerNeonPageBody({
+  appearance,
+  className,
+  children,
+}: {
+  appearance: HomeAppearance;
+  className?: string;
+  children: ReactNode;
+}) {
+  const inner = (
+    <div className={cn("tkad-planner-neon", className)}>{children}</div>
+  );
+  if (appearance === "night") {
+    return (
+      <div className="relative overflow-hidden bg-[#05050a] text-white">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 tkad-neon-depth"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+        />
+        <div className="relative">{inner}</div>
+      </div>
+    );
+  }
+  return inner;
+}
 
 const GOALS: {
   key: PlannerCampaignGoal;
@@ -114,6 +164,11 @@ export default function PlannerPageClient({
   const locale = useLocale();
   const isKo = locale === "ko";
   const { toast } = useToast();
+  const landingAppearance = useSyncExternalStore(
+    subscribeHomeAppearance,
+    readHomeAppearance,
+    getHomeAppearanceServerSnapshot,
+  );
 
   const priceOptionBadge = useCallback(
     (m: MediaItem): string | null => {
@@ -483,73 +538,99 @@ export default function PlannerPageClient({
 
   if (databaseEmpty && catalog.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        <section className="bg-hero-void py-24 text-hero-fg">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
-              {`// 05 / Planner`}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-primary-foreground">
-                THINKAD Planner
-              </span>
-              <span className="border-2 border-hero-fg/30 bg-hero-fg/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-hero-fg">
-                BETA
-              </span>
+      <HomeLandingDayNight>
+        <div className="tkad-landing-neon">
+          <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+            <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+            <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+            <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+            />
+
+            <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+                {`// 05 / Planner`}
+              </p>
+              <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+                <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                  <span className="tkad-home-accent-text">THINKAD Planner</span>
+                </span>
+                <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                  <span className="tkad-home-accent-text">BETA</span>
+                </span>
+              </div>
+              <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+                {t("title")}
+              </h1>
+              <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+                {t("subtitle")}
+              </p>
             </div>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              {t("title")}
-            </h1>
-            <p className="mt-4 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
-              {t("subtitle")}
+          </section>
+
+          <PlannerNeonPageBody
+            appearance={landingAppearance}
+            className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6"
+          >
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-foreground/70">
+              [ EMPTY CATALOG ]
             </p>
-          </div>
-        </section>
-        <div className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            [ EMPTY CATALOG ]
-          </p>
-          <p className="mt-3 text-lg font-bold tracking-tight text-foreground">
-            {t("preparingMedia")}
-          </p>
-          <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
-            {t("preparingMediaDesc")}
-          </p>
-          <div className="mt-8 inline-block">
-            <BtnBlock href="/media" variant="accent" size="md">
-              {t("browseMedia")}
-            </BtnBlock>
-          </div>
+            <p className="mt-3 text-lg font-bold tracking-tight text-foreground">
+              {t("preparingMedia")}
+            </p>
+            <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
+              {t("preparingMediaDesc")}
+            </p>
+            <div className="mt-8 inline-block">
+              <BtnBlock href="/media" variant="accent" size="md">
+                {t("browseMedia")}
+              </BtnBlock>
+            </div>
+          </PlannerNeonPageBody>
         </div>
-      </div>
+      </HomeLandingDayNight>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <section className="bg-hero-void py-20 text-hero-fg sm:py-24">
-        <div className="mx-auto flex max-w-7xl flex-col items-center px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
-            {`// 05 / Planner`}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
-            <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-primary-foreground">
-              THINKAD Planner
-            </span>
-            <span className="border-2 border-hero-fg/30 bg-hero-fg/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.22em] text-hero-fg">
-              BETA
-            </span>
-          </div>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-            {t("title")}
-          </h1>
-          <p className="mt-4 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
-            {t("subtitle")}
-          </p>
-        </div>
-      </section>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
 
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+          <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              {`// 05 / Planner`}
+            </p>
+            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">THINKAD Planner</span>
+              </span>
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">BETA</span>
+              </span>
+            </div>
+            <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+              {t("title")}
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+              {t("subtitle")}
+            </p>
+          </div>
+        </section>
+
+        <PlannerNeonPageBody
+          appearance={landingAppearance}
+          className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
+        >
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
           <PlannerStepper
             currentStep={wizardStep}
@@ -567,7 +648,7 @@ export default function PlannerPageClient({
               "mx-auto space-y-8",
               // 매체 선택·소재 업로드·보고서 단계는 넓은 캔버스 필요
               wizardStep === 4 || wizardStep === 5 || wizardStep === 6
-                ? "max-w-6xl"
+                ? "max-w-7xl"
                 : "max-w-3xl",
             )}
           >
@@ -752,7 +833,7 @@ export default function PlannerPageClient({
                       value={budgetNum}
                       onChange={(e) => setBudget(e.target.value)}
                       className="h-3 w-full cursor-pointer appearance-none border-2 border-border bg-card"
-                      style={{ accentColor: "#ff6200" }}
+                      style={{ accentColor: "#22d3ee" }}
                       aria-label={t("budget")}
                     />
                     <div className="mt-4 flex flex-wrap items-end gap-3">
@@ -958,7 +1039,12 @@ export default function PlannerPageClient({
                   <GitCompare className="h-4 w-4" />
                   {t("ctaCompareSelection")}
                 </BtnBlock>
-                <BtnBlock href={quoteHref} variant="accent" size="md">
+                <BtnBlock
+                  href={quoteHref}
+                  variant="accent"
+                  size="md"
+                  className="!text-white"
+                >
                   <Send className="h-4 w-4" />
                   {t("ctaQuoteWithPlan")}
                 </BtnBlock>
@@ -1032,9 +1118,10 @@ export default function PlannerPageClient({
               </div>
             ) : metrics ? (
               <>
-                <div className="flex flex-col gap-2 border-2 border-primary bg-card px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
+                <div className="tkad-glass-surface relative flex flex-col gap-2 overflow-hidden rounded-[22px] px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground">
+                    <span className="rounded-full border border-white/14 bg-white/10 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-foreground backdrop-blur">
                       {t("estimatedModelBadge")}
                     </span>
                     <span className="min-w-0 text-left text-xs leading-relaxed sm:text-sm">
@@ -1043,8 +1130,8 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <p className="border-2 border-border bg-card px-4 py-3 text-sm text-foreground">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                <p className="tkad-glass-surface rounded-[22px] px-4 py-3 text-sm text-foreground">
+                  <span className="font-mono text-[10px] font-black uppercase tracking-[0.22em] tkad-home-accent-text">
                     [ {t("targetSummaryLabel")} ]
                   </span>{" "}
                   {(() => {
@@ -1072,18 +1159,18 @@ export default function PlannerPageClient({
                       : 0;
                   return (
                     <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
                         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("kpiImpressions")} ]
                         </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-primary">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-[#22d3ee]">
                           {metrics.estimatedTotalImpressions.toLocaleString()}
                         </p>
                         <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiImpressionsHint")}
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
                         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("kpiReach")} ]
                         </p>
@@ -1094,7 +1181,7 @@ export default function PlannerPageClient({
                           {t("kpiReachHint")}
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
                         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("kpiCpm")} ]
                         </p>
@@ -1105,15 +1192,15 @@ export default function PlannerPageClient({
                           {t("kpiCpmHint")}
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-hero-void p-4 text-hero-fg">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] tkad-home-accent-text">
                           [ {t("kpiRoi")} ]
                         </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-primary">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-[#22d3ee]">
                           {metrics.roiExpected}
                           {t("roiUnit")}
                         </p>
-                        <p className="mt-1 font-mono text-[10px] tracking-tight text-hero-fg/65">
+                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiRoiHint")}
                         </p>
                       </div>
@@ -1121,8 +1208,9 @@ export default function PlannerPageClient({
                   );
                 })()}
 
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ PORTFOLIO ]
                     </p>
@@ -1135,12 +1223,12 @@ export default function PlannerPageClient({
                         : t("comboHint")}
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 gap-0 p-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
                     {portfolio.map((m) => (
                       <Link
                         key={m.id}
                         href={mediaItemDetailPath(m.id)}
-                        className="group -mt-[2px] -ml-[2px] flex flex-col gap-2 border-2 border-border bg-card p-3 transition-colors hover:bg-muted"
+                        className="group tkad-glass-surface flex flex-col gap-2 rounded-[22px] p-3 transition-all hover:-translate-y-0.5 hover:bg-white/10"
                       >
                         <CompositePreview
                           mediaImageUrl={getPrimaryMediaImageUrl(m)}
@@ -1185,15 +1273,16 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="grid gap-0 lg:grid-cols-2">
-                  <div className="border-2 border-border bg-card">
-                    <div className="border-b-2 border-border p-5">
+                <div className="grid gap-3 lg:grid-cols-2">
+                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                    <div className="relative border-b border-white/10 p-5">
                       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ {t("results")} ]
                       </p>
                     </div>
-                    <div className="grid grid-cols-1 gap-0 p-4 sm:grid-cols-2">
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                    <div className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+                      <div className="tkad-glass-surface rounded-[22px] p-4">
                         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("matchedMedia")} ]
                         </p>
@@ -1204,7 +1293,7 @@ export default function PlannerPageClient({
                           </span>
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                      <div className="tkad-glass-surface rounded-[22px] p-4">
                         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("avgMonthlySlot")} ]
                         </p>
@@ -1215,7 +1304,7 @@ export default function PlannerPageClient({
                           </span>
                         </p>
                       </div>
-                      <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 sm:col-span-2">
+                      <div className="tkad-glass-surface rounded-[22px] p-4 sm:col-span-2">
                         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                           [ {t("estMonthlyImp")} ]
                         </p>
@@ -1226,7 +1315,8 @@ export default function PlannerPageClient({
                     </div>
                   </div>
 
-                  <div className="-ml-[2px] border-2 border-border bg-card p-6 lg:mt-0">
+                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6">
+                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                     <PlannerReachDonutChart
                       corePct={reachSplit.corePct}
                       extendedPct={reachSplit.extendedPct}
@@ -1237,13 +1327,14 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartDailyBarTitle")} ]
                     </p>
                   </div>
-                  <div className="p-5">
+                  <div className="relative p-5">
                     <PlannerDailyReachBarChart
                       data={dailyBars}
                       title={t("chartDailyBarTitle")}
@@ -1252,21 +1343,23 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="grid gap-0 lg:grid-cols-2">
-                  <div className="border-2 border-border bg-card p-6">
+                <div className="grid gap-3 lg:grid-cols-2">
+                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6">
+                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                     <PlannerBudgetPieChart
                       data={pieSlices}
                       title={t("chartBudgetPieTitle")}
                       unitLabel={t("chartBudgetPieUnit")}
                     />
                   </div>
-                  <div className="-ml-[2px] border-2 border-border bg-card lg:mt-0">
-                    <div className="border-b-2 border-border p-5">
+                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                    <div className="relative border-b border-white/10 p-5">
                       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ {t("chartCpmTitle")} ]
                       </p>
                     </div>
-                    <div className="p-5">
+                    <div className="relative p-5">
                       <PlannerCpmCompareChart
                         data={cpmBars}
                         title={t("chartCpmTitle")}
@@ -1276,13 +1369,14 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartMonthCompareTitle")} ]
                     </p>
                   </div>
-                  <div className="p-5">
+                  <div className="relative p-5">
                     <PlannerMonthCompareChart
                       data={monthCompare.map((x) => ({
                         months: x.months,
@@ -1298,8 +1392,9 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ ROI ]
                     </p>
@@ -1308,7 +1403,7 @@ export default function PlannerPageClient({
                       {t("roiTitle")}
                     </h3>
                   </div>
-                  <div className="space-y-4 p-5">
+                  <div className="relative space-y-4 p-5">
                     {(
                       [
                         ["roiConservative", metrics.roiConservative],
@@ -1326,7 +1421,7 @@ export default function PlannerPageClient({
                             {t("roiUnit")}
                           </span>
                         </div>
-                        <div className="h-3 w-full border-2 border-border bg-card">
+                        <div className="h-3 w-full overflow-hidden rounded-full border border-white/10 bg-black/10">
                           <div
                             className="h-full bg-primary transition-all duration-500"
                             style={{
@@ -1339,8 +1434,9 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartImpLineTitle")} ]
                     </p>
@@ -1348,7 +1444,7 @@ export default function PlannerPageClient({
                       {t("chartImpTitle")}
                     </p>
                   </div>
-                  <div className="p-5">
+                  <div className="relative p-5">
                     <PlannerImpressionsLineChart
                       data={metrics.cumulativeByMonth}
                       isKo={isKo}
@@ -1357,8 +1453,9 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartRoiLineTitle")} ]
                     </p>
@@ -1366,7 +1463,7 @@ export default function PlannerPageClient({
                       {t("chartRoiLineHint")}
                     </p>
                   </div>
-                  <div className="p-5">
+                  <div className="relative p-5">
                     <PlannerRoiLineChart
                       data={metrics.roiByMonth}
                       isKo={isKo}
@@ -1380,7 +1477,9 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <div className="border-2 border-border bg-hero-void p-6 text-hero-fg sm:p-8">
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6 sm:p-8">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12] tkad-neon-grid" />
+                  <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_58%),radial-gradient(circle_at_55%_110%,rgba(236,72,153,0.12),transparent_60%)]" />
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="max-w-xl space-y-2">
                       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
@@ -1389,7 +1488,7 @@ export default function PlannerPageClient({
                       <h3 className="text-xl font-bold tracking-tight sm:text-2xl">
                         {t("ctaBannerTitle")}
                       </h3>
-                      <p className="text-sm leading-relaxed text-hero-fg/75">
+                      <p className="text-sm leading-relaxed text-muted-foreground">
                         {t("ctaBannerDesc")}
                       </p>
                     </div>
@@ -1398,7 +1497,7 @@ export default function PlannerPageClient({
                         href={quoteHref}
                         variant="accent"
                         size="lg"
-                        className="w-full"
+                        className="w-full !text-white"
                       >
                         <Send className="h-4 w-4" />
                         {t("ctaQuoteWithPlan")}
@@ -1446,7 +1545,8 @@ export default function PlannerPageClient({
             </p>
           </div>
         )}
+        </PlannerNeonPageBody>
       </div>
-    </div>
+    </HomeLandingDayNight>
   );
 }

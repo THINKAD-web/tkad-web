@@ -4,6 +4,7 @@ import { useLocale } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
   ArrowRight,
   BadgeCheck,
@@ -87,7 +88,7 @@ function conicGradientForDonut(): string {
 }
 
 const inputCls =
-  "h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none";
+  "tkad-auth-input h-11 w-full rounded-[18px] border border-white/12 bg-black/28 px-4 text-[15px] font-semibold text-white placeholder:text-white/55 shadow-sm outline-none ring-0 backdrop-blur focus:border-white/18 focus:bg-black/34";
 
 export default function ToolsPage() {
   const locale = useLocale();
@@ -143,36 +144,52 @@ export default function ToolsPage() {
   const items = MEDIA_BY_REGION[region];
 
   return (
-    <>
-      <section className="relative overflow-hidden bg-hero-void py-24">
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
+      <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] py-20 text-white sm:py-24">
+        <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+        <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+        <div
+          aria-hidden
+          className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+        />
+
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
                 {`// 18 / Tools`}
               </p>
-              <div className="mt-3 inline-flex items-center gap-2 border-2 border-accent bg-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
+              <div className="mt-3 inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/85 backdrop-blur">
                 <Zap className="h-3.5 w-3.5" />
                 {isKo ? "PREVIEW" : "PREVIEW"}
                 <Lock className="h-3 w-3" />
               </div>
-              <h1 className="mt-4 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
+              <h1 className="mt-4 text-balance text-[clamp(40px,4.8vw,68px)] font-[950] leading-[0.95] tracking-[-0.06em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
                 {isKo ? "미디어 플래닝 툴" : "Media Planning Tool"}
               </h1>
-              <p className="mt-5 font-mono text-sm leading-relaxed tracking-tight text-hero-fg/75 sm:text-base">
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
                 {isKo
                   ? "지역·매체 유형·노출 규모를 한 화면에서 비교하고, 캠페인에 맞는 추천 조합을 빠르게 탐색하세요. 전체 분석·예약 연동은 정식 버전에서 제공됩니다."
                   : "Compare region, format, and reach in one view and explore recommended mixes for your campaign. Full analytics and booking connect in the production release."}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <BtnBlock variant="accent" size="lg" onClick={openModal}>
+              <button
+                type="button"
+                onClick={openModal}
+                className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              >
                 {isKo ? "전체 기능 이용하기" : "Use full features"}
                 <ArrowRight className="h-4 w-4" />
-              </BtnBlock>
+              </button>
               <Link
                 href="/media"
-                className="inline-flex items-center gap-2 border-2 border-hero-fg bg-transparent px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-hero-fg transition-colors hover:bg-card hover:text-foreground"
+                className="inline-flex h-16 items-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
               >
                 <Monitor className="h-4 w-4" />
                 {isKo ? "매체 카탈로그" : "Media catalog"}
@@ -182,7 +199,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <section className="bg-card py-20 sm:py-24">
+      <section className="border-t border-border/60 bg-card/0 py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -207,7 +224,7 @@ export default function ToolsPage() {
                 id="tools-region"
                 value={region}
                 onChange={(e) => setRegion(e.target.value as RegionKey)}
-                className="min-w-[180px] border-2 border-border bg-card px-4 py-2.5 font-mono text-sm font-bold text-foreground focus:border-accent focus:outline-none"
+                className="h-12 min-w-[180px] rounded-full border border-white/12 bg-black/25 px-4 font-mono text-sm font-bold text-white shadow-sm backdrop-blur focus:border-white/18 focus:outline-none"
               >
                 {regionOptions.map((r) => (
                   <option key={r.value} value={r.value}>
@@ -222,24 +239,25 @@ export default function ToolsPage() {
             {items.map((item) => (
               <article
                 key={`${region}-${item.nameKo}`}
-                className="-mt-[2px] -ml-[2px] border-2 border-border bg-card"
+                className="tkad-glass-surface group -mt-[2px] -ml-[2px] overflow-hidden rounded-[26px] transition-all hover:-translate-y-0.5 hover:bg-white/10"
               >
-                <header className="border-b-2 border-border p-5">
+                <header className="relative border-b border-white/10 p-5">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="text-lg font-bold leading-snug tracking-tight text-foreground">
                       {isKo ? item.nameKo : item.nameEn}
                     </h3>
-                    <div className="flex shrink-0 items-center gap-1 border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent-foreground">
+                    <div className="flex shrink-0 items-center gap-1 rounded-full border border-white/12 bg-white/8 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/85 backdrop-blur">
                       <BadgeCheck className="h-3 w-3" />
                       Verified
                     </div>
                   </div>
-                  <span className="mt-3 inline-flex border-2 border-border bg-muted px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
+                  <span className="mt-3 inline-flex rounded-full border border-white/12 bg-white/8 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/85 backdrop-blur">
                     {TYPE_LABELS[item.typeKey][isKo ? "ko" : "en"]}
                   </span>
                 </header>
                 <div className="space-y-4 p-5">
-                  <div className="grid grid-cols-2 gap-3 border-2 border-border bg-muted p-3">
+                  <div className="grid grid-cols-2 gap-3 rounded-[22px] border border-white/12 bg-white/6 p-3 backdrop-blur">
                     <div>
                       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                         [ {isKo ? "일 노출" : "DAILY"} ]
@@ -255,7 +273,7 @@ export default function ToolsPage() {
                       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                         [ ROI ]
                       </p>
-                      <p className="mt-1 flex items-center gap-1 font-mono text-lg font-bold tabular-nums text-accent">
+                      <p className="mt-1 flex items-center gap-1 font-mono text-lg font-bold tabular-nums text-foreground">
                         <TrendingUp className="h-4 w-4" />
                         {item.roi}x
                       </p>
@@ -362,8 +380,14 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <section className="bg-muted py-20 sm:py-24">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+      <section className="mt-12 border-t border-border/70 pt-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-8 text-center sm:p-10">
+            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_58%),radial-gradient(circle_at_55%_110%,rgba(236,72,153,0.12),transparent_60%)]"
+            />
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ NEXT STEP ]
           </p>
@@ -376,10 +400,15 @@ export default function ToolsPage() {
               : "Our team will help structure your media mix and estimates."}
           </p>
           <div className="mt-8 inline-flex">
-            <BtnBlock variant="accent" size="lg" onClick={openModal}>
+            <button
+              type="button"
+              onClick={openModal}
+              className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+            >
               {isKo ? "전체 기능 이용하기" : "Use full features"}
               <ArrowRight className="h-5 w-5" />
-            </BtnBlock>
+            </button>
+          </div>
           </div>
         </div>
       </section>
@@ -391,23 +420,23 @@ export default function ToolsPage() {
         ariaLabel={isKo ? "도입 상담 요청" : "Request a consultation"}
         className="max-w-md"
       >
-        <div className="border-2 border-border bg-card p-6">
+        <div className="relative p-6 text-white">
           {!leadSubmitted ? (
             <>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              <p className="font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/65">
                 [ CONSULTATION ]
               </p>
-              <h3 className="mt-2 pr-10 text-xl font-bold tracking-tight text-foreground">
+              <h3 className="mt-2 pr-10 text-xl font-black tracking-tight text-white">
                 {isKo ? "도입 상담 요청" : "Request a consultation"}
               </h3>
-              <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
+              <p className="mt-2 text-sm leading-relaxed text-white/72">
                 {`// `}{isKo
                   ? "아래 정보를 남겨 주시면 연락드리겠습니다."
                   : "Leave your details and we will reach out."}
               </p>
               <form onSubmit={handleLeadSubmit} className="mt-6 space-y-4">
                 <div>
-                  <label htmlFor="lead-company" className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                  <label htmlFor="lead-company" className="mb-2 block font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/65">
                     [ {isKo ? "회사명" : "Company"} ]
                   </label>
                   <input
@@ -419,7 +448,7 @@ export default function ToolsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="lead-name" className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                  <label htmlFor="lead-name" className="mb-2 block font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/65">
                     [ {isKo ? "이름" : "Name"} ]
                   </label>
                   <input
@@ -431,7 +460,7 @@ export default function ToolsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="lead-email" className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                  <label htmlFor="lead-email" className="mb-2 block font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/65">
                     [ {isKo ? "이메일" : "Email"} ]
                   </label>
                   <input
@@ -444,7 +473,7 @@ export default function ToolsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="lead-phone" className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                  <label htmlFor="lead-phone" className="mb-2 block font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/65">
                     [ {isKo ? "전화번호" : "Phone"} ]
                   </label>
                   <input
@@ -459,9 +488,9 @@ export default function ToolsPage() {
                 <BtnBlock
                   type="submit"
                   variant="accent"
-                  size="lg"
+                  size="md"
                   disabled={leadLoading}
-                  className="mt-2 w-full"
+                  className="mt-2 w-full rounded-[18px] py-3 !text-white"
                 >
                   {leadLoading ? (
                     <>
@@ -479,17 +508,22 @@ export default function ToolsPage() {
             </>
           ) : (
             <div className="py-8 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center border-2 border-accent bg-accent text-accent-foreground">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] border border-white/12 bg-white/8 text-white shadow-sm backdrop-blur">
                 <CheckCircle className="h-8 w-8" />
               </div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              <p className="font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/65">
                 [ SUBMITTED ]
               </p>
-              <p className="mt-2 text-lg font-bold tracking-tight text-foreground">
+              <p className="mt-2 text-lg font-black tracking-tight text-white">
                 {isKo ? "담당자가 24시간 내 연락드립니다" : "We will contact you within 24 hours"}
               </p>
               <div className="mt-6 inline-flex">
-                <BtnBlock variant="secondary" size="md" onClick={closeModal}>
+                <BtnBlock
+                  variant="secondary"
+                  size="md"
+                  onClick={closeModal}
+                  className="rounded-[18px]"
+                >
                   {isKo ? "닫기" : "Close"}
                 </BtnBlock>
               </div>
@@ -497,6 +531,7 @@ export default function ToolsPage() {
           )}
         </div>
       </Modal>
-    </>
+      </div>
+    </HomeLandingDayNight>
   );
 }

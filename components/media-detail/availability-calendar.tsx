@@ -122,7 +122,7 @@ export function MediaAvailabilityCalendar({
   }, [mediaId, today, refreshTick]);
 
   const cells = useMemo(() => buildMonthCells(viewMonth), [viewMonth]);
-  const blockedRanges = data?.blockedRanges ?? [];
+  const blockedRanges = useMemo(() => data?.blockedRanges ?? [], [data]);
   const isCurrentMonth =
     viewMonth.getFullYear() === today.getFullYear() &&
     viewMonth.getMonth() === today.getMonth();
@@ -162,7 +162,7 @@ export function MediaAvailabilityCalendar({
   return (
     <section
       aria-labelledby="availability-calendar-heading"
-      className="mt-12 border-t-2 border-border py-10"
+      className="mt-12 border-t border-border/70 pt-12"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -186,7 +186,7 @@ export function MediaAvailabilityCalendar({
         </div>
 
         {/* 월 네비게이션 */}
-        <div className="inline-flex items-center gap-1 border-2 border-border bg-card">
+        <div className="inline-flex items-center gap-1 rounded-2xl border border-border/80 bg-muted/50 p-1 shadow-xs backdrop-blur">
           <button
             type="button"
             disabled={!canGoBack || loading}
@@ -195,12 +195,12 @@ export function MediaAvailabilityCalendar({
                 new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1),
               )
             }
-            className="px-3 py-2 text-foreground transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-foreground"
+            className="rounded-[14px] px-2.5 py-1.5 text-foreground transition-colors hover:bg-background/70 disabled:cursor-not-allowed disabled:opacity-30"
             aria-label={t("prevMonth")}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <span className="min-w-[110px] text-center font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-foreground">
+          <span className="min-w-[96px] text-center font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
             {viewMonth.getFullYear()}.
             {String(viewMonth.getMonth() + 1).padStart(2, "0")}
           </span>
@@ -212,7 +212,7 @@ export function MediaAvailabilityCalendar({
                 new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1),
               )
             }
-            className="px-3 py-2 text-foreground transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-foreground"
+            className="rounded-[14px] px-2.5 py-1.5 text-foreground transition-colors hover:bg-background/70 disabled:cursor-not-allowed disabled:opacity-30"
             aria-label={t("nextMonth")}
           >
             <ChevronRight className="h-4 w-4" />
@@ -222,25 +222,25 @@ export function MediaAvailabilityCalendar({
 
       <div className="mt-6">
         {loading ? (
-          <div className="flex items-center justify-center gap-2 border-2 border-border bg-muted px-4 py-12 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="flex items-center justify-center gap-2 rounded-[24px] border border-border/80 bg-muted/40 px-4 py-12 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur">
             <Loader2 className="h-4 w-4 animate-spin" />
             {t("loading")}
           </div>
         ) : error ? (
-          <p className="border-2 border-accent bg-card px-4 py-3 font-mono text-[11px] tracking-tight text-accent">
+          <p className="rounded-[22px] border border-accent/60 bg-card/80 px-4 py-3 font-mono text-[11px] tracking-tight text-accent shadow-xs backdrop-blur">
             {`// `}
             {t("error")}
           </p>
         ) : (
           <>
-            {/* 모바일: 가로 스크롤 가능 (overflow-x-auto), 데스크탑: 정상 그리드 */}
+            {/* 모바일: 가로 스크롤 가능, 데스크탑: max-width로 컴팩트 */}
             <div className="overflow-x-auto">
-              <div className="min-w-[460px]">
-                <div className="grid grid-cols-7 gap-1 text-center">
+              <div className="mx-auto min-w-[320px] max-w-[360px]">
+                <div className="grid grid-cols-7 gap-0.5 text-center">
                   {weekdays.map((d, i) => (
                     <div
                       key={d}
-                      className={`font-mono text-[10px] font-bold uppercase tracking-[0.2em] ${
+                      className={`font-mono text-[8px] font-black uppercase tracking-[0.2em] ${
                         i === 6
                           ? "text-accent"
                           : i === 5
@@ -252,7 +252,7 @@ export function MediaAvailabilityCalendar({
                     </div>
                   ))}
                 </div>
-                <div className="mt-2 grid grid-cols-7 gap-1">
+                <div className="mt-1.5 grid grid-cols-7 gap-[3px]">
                   {cells.map((cell, idx) => {
                     if (!cell) {
                       return <div key={idx} className="aspect-square" />;
@@ -263,7 +263,7 @@ export function MediaAvailabilityCalendar({
                     const blocked = !isPast && dayIsBlocked(cell.date, blockedRanges);
 
                     let cls =
-                      "relative flex aspect-square items-center justify-center border-2 text-sm font-bold tabular-nums transition-colors";
+                      "relative flex aspect-square items-center justify-center rounded-[10px] border text-[11px] font-black tabular-nums transition-colors";
                     if (isPast) {
                       cls +=
                         " border-transparent bg-transparent text-muted-foreground/40";
@@ -271,10 +271,10 @@ export function MediaAvailabilityCalendar({
                       cls +=
                         " border-accent bg-accent/15 text-accent";
                     } else {
-                      cls += " border-border bg-card text-foreground";
+                      cls += " border-border bg-card/80 text-foreground";
                     }
                     if (isToday) {
-                      cls += " ring-2 ring-foreground ring-offset-1";
+                      cls += " ring-1 ring-foreground/70 ring-offset-1";
                     }
 
                     return (
@@ -311,25 +311,25 @@ export function MediaAvailabilityCalendar({
             </div>
 
             {/* 범례 + 통계 + CTA */}
-            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
               <span className="inline-flex items-center gap-2">
-                <span className="inline-block h-3 w-3 border-2 border-border bg-card" />
+                <span className="inline-block h-3 w-3 border border-border bg-card" />
                 {t("legendAvailable")}
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="inline-block h-3 w-3 border-2 border-accent bg-accent/15" />
+                <span className="inline-block h-3 w-3 border border-accent bg-accent/15" />
                 {t("legendBlocked")}
               </span>
               {isCurrentMonth ? (
                 <span className="inline-flex items-center gap-2">
-                  <span className="inline-block h-3 w-3 border-2 border-border ring-2 ring-foreground ring-offset-1" />
+                  <span className="inline-block h-3 w-3 border border-border ring-1 ring-foreground ring-offset-1" />
                   {t("legendToday")}
                 </span>
               ) : null}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/15 pt-4">
-              <p className="text-sm leading-relaxed text-foreground">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border/15 pt-3">
+              <p className="text-[12.5px] leading-relaxed text-foreground">
                 {t("statsAvailable", { n: stats.availableDays })}
                 {stats.blockedDays > 0
                   ? `  ·  ${t("statsBlocked", { n: stats.blockedDays })}`
@@ -338,7 +338,7 @@ export function MediaAvailabilityCalendar({
               <button
                 type="button"
                 onClick={() => setModalOpen(true)}
-                className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border"
+                className="inline-flex items-center gap-2 rounded-[14px] border border-accent bg-accent px-3.5 py-2 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:opacity-95"
               >
                 {t("ctaRequest")}
               </button>

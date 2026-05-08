@@ -43,7 +43,7 @@ export default function CompareBar({ items, locale, onClear }: Props) {
   const canCompare = count >= 2;
 
   const blockClass =
-    "w-full min-h-12 min-w-0 justify-center px-2 text-[10px] sm:min-h-10 sm:px-3 sm:text-[11px]";
+    "w-full min-h-12 min-w-0 justify-center px-2 text-[11px] sm:min-h-10 sm:px-4 sm:text-[12px]";
 
   return (
     <FloatingSelectionBar
@@ -111,7 +111,13 @@ export default function CompareBar({ items, locale, onClear }: Props) {
             href={quoteHref}
             variant="accent"
             size="sm"
-            className={blockClass}
+            className={cn(
+              blockClass,
+              "min-w-[104px] whitespace-nowrap !text-white",
+              "!border-white/12 !bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(168,85,247,0.92)_52%,rgba(236,72,153,0.88)_100%)]",
+              "hover:!bg-[linear-gradient(135deg,rgba(34,211,238,1)_0%,rgba(168,85,247,0.98)_52%,rgba(236,72,153,0.96)_100%)]",
+              "shadow-[0_18px_60px_rgba(0,0,0,0.55)]",
+            )}
           >
             {t("compareQuoteCta")}
           </BtnBlock>
