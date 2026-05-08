@@ -944,39 +944,19 @@ export default function AdminMediasClient({
     [],
   );
 
-  const uploadFileToCloudinary = useCallback(async (file: File): Promise<string> => {
-    const sigRes = await fetch("/api/admin/upload/cloudinary", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (!sigRes.ok) {
-      throw new Error("Cloudinary 서명 실패");
-    }
-    const sig = (await sigRes.json()) as {
-      timestamp: number;
-      signature: string;
-      folder: string;
-      cloudName: string;
-      apiKey: string;
-    };
+  const uploadFileToBunny = useCallback(async (file: File): Promise<string> => {
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("api_key", sig.apiKey);
-    fd.append("timestamp", String(sig.timestamp));
-    fd.append("signature", sig.signature);
-    fd.append("folder", sig.folder);
-    const up = await fetch(
-      `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-      { method: "POST", body: fd },
-    );
-    const upJson = (await up.json()) as {
-      secure_url?: string;
-      error?: { message: string };
-    };
-    if (!up.ok || !upJson.secure_url) {
-      throw new Error(upJson.error?.message ?? "업로드 실패");
+    const up = await fetch("/api/admin/upload/bunny", {
+      method: "POST",
+      credentials: "include",
+      body: fd,
+    });
+    const upJson = (await up.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!up.ok || !upJson.url) {
+      throw new Error(upJson.error ?? "업로드 실패");
     }
-    return upJson.secure_url;
+    return upJson.url;
   }, []);
 
   const handleFormPrimaryImagePicked = useCallback(
@@ -987,7 +967,7 @@ export default function AdminMediasClient({
       setFormImageUploadBusy(true);
       setSaveError(null);
       try {
-        const url = await uploadFileToCloudinary(file);
+        const url = await uploadFileToBunny(file);
         setForm((f) => ({ ...f, image: url }));
       } catch {
         setSaveError("대표 이미지 업로드에 실패했습니다.");
@@ -995,7 +975,7 @@ export default function AdminMediasClient({
         setFormImageUploadBusy(false);
       }
     },
-    [uploadFileToCloudinary],
+    [uploadFileToBunny],
   );
 
   const handleFormGalleryImagePicked = useCallback(
@@ -1008,7 +988,7 @@ export default function AdminMediasClient({
       try {
         const urls: string[] = [];
         for (const file of files) {
-          const url = await uploadFileToCloudinary(file);
+          const url = await uploadFileToBunny(file);
           urls.push(url);
         }
         setForm((f) => {
@@ -1025,7 +1005,7 @@ export default function AdminMediasClient({
         setFormImageUploadBusy(false);
       }
     },
-    [uploadFileToCloudinary],
+    [uploadFileToBunny],
   );
 
   const removeUploadItem = useCallback((index: number) => {
@@ -1050,7 +1030,7 @@ export default function AdminMediasClient({
         ),
       );
       try {
-        const secureUrl = await uploadFileToCloudinary(item.file);
+        const secureUrl = await uploadFileToBunny(item.file);
         const mid = item.mediaId!;
         const detailRes = await fetch(`/api/admin/medias/${mid}`, {
           credentials: "include",
@@ -1095,7 +1075,7 @@ export default function AdminMediasClient({
       }
     }
     setUploadRunning(false);
-  }, [uploadItems, uploadFileToCloudinary]);
+  }, [uploadItems, uploadFileToBunny]);
 
   const allMapped =
     uploadItems.length > 0 && uploadItems.every((i) => i.mediaId !== null);

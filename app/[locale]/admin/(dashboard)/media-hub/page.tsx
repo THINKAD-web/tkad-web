@@ -416,39 +416,16 @@ export default function AdminMediaHubPage() {
     e.target.value = "";
     if (!file || !sel) return;
     setUploadMsg(null);
-    const sigRes = await fetch("/api/admin/upload/cloudinary", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (!sigRes.ok) {
-      setUploadMsg("Cloudinary 미설정 또는 서명 실패");
-      return;
-    }
-    const sig = (await sigRes.json()) as {
-      timestamp: number;
-      signature: string;
-      folder: string;
-      cloudName: string;
-      apiKey: string;
-    };
-
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("api_key", sig.apiKey);
-    fd.append("timestamp", String(sig.timestamp));
-    fd.append("signature", sig.signature);
-    fd.append("folder", sig.folder);
-
-    const up = await fetch(
-      `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-      { method: "POST", body: fd },
-    );
-    const upJson = (await up.json()) as {
-      secure_url?: string;
-      error?: { message: string };
-    };
-    if (!up.ok || !upJson.secure_url) {
-      setUploadMsg(upJson.error?.message ?? "업로드 실패");
+    const up = await fetch("/api/admin/upload/bunny", {
+      method: "POST",
+      credentials: "include",
+      body: fd,
+    });
+    const upJson = (await up.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!up.ok || !upJson.url) {
+      setUploadMsg(upJson.error ?? "업로드 실패");
       return;
     }
 
@@ -456,10 +433,10 @@ export default function AdminMediaHubPage() {
       method: "PATCH",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: upJson.secure_url }),
+      body: JSON.stringify({ image: upJson.url }),
     });
     setUploadMsg("이미지 URL이 저장되었습니다.");
-    const updated = { ...sel, image: upJson.secure_url };
+    const updated = { ...sel, image: upJson.url };
     setSel(updated);
     await loadDetail(updated);
     await loadList();

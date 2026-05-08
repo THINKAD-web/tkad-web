@@ -33,15 +33,15 @@ export default function AdminQuotesHubClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2 border-b-2 border-border pb-2 dark:border-hero-fg">
+      <div className="flex w-fit flex-wrap gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm backdrop-blur">
         <button
           type="button"
           onClick={() => setTab("sales")}
           className={cn(
-            "border-2 border-border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors dark:border-hero-fg",
+            "rounded-full px-4 py-2 font-mono text-[11px] font-black uppercase tracking-[0.18em] transition-colors",
             tab === "sales"
-              ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground"
-              : "bg-card text-foreground hover:bg-muted dark:bg-hero-void dark:text-hero-fg dark:hover:bg-muted/50",
+              ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           {t("tabSales")}
@@ -50,10 +50,10 @@ export default function AdminQuotesHubClient() {
           type="button"
           onClick={() => setTab("booking")}
           className={cn(
-            "border-2 border-border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors dark:border-hero-fg",
+            "rounded-full px-4 py-2 font-mono text-[11px] font-black uppercase tracking-[0.18em] transition-colors",
             tab === "booking"
-              ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground"
-              : "bg-card text-foreground hover:bg-muted dark:bg-hero-void dark:text-hero-fg dark:hover:bg-muted/50",
+              ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           {t("tabBooking")}

@@ -211,17 +211,41 @@ html:not(.dark) .admin-dashboard-root {
   --foreground: #0a0a0c;
   --card: #ffffff;
   --card-foreground: #0a0a0c;
-  --primary: #0a0a0c;
-  --primary-foreground: #fafafa;
+  /* Neon admin palette (day) */
+  --primary: #22d3ee;
+  --primary-foreground: #041018;
   --secondary: #e6e4df;
   --secondary-foreground: #0a0a0c;
   --muted: #dcd9d3;
   --muted-foreground: #4a4a50;
-  --accent: #ff6200;
-  --accent-foreground: #ffffff;
+  --accent: #a855f7;
+  --accent-foreground: #0a0a0c;
   --border: #c8c4bc;
   --input: #a8a49c;
-  --ring: #ff6200;
+  --ring: rgba(34, 211, 238, 0.45);
+  --cta: #22d3ee;
+  --cta-hover: #06b6d4;
+}
+
+/* Admin dashboard only (dark): override global orange tokens */
+.dark .admin-dashboard-root {
+  --background: #07070a;
+  --foreground: rgba(248, 250, 252, 0.96);
+  --card: rgba(0, 0, 0, 0.35);
+  --card-foreground: rgba(248, 250, 252, 0.96);
+  --primary: #22d3ee;
+  --primary-foreground: #05050a;
+  --secondary: rgba(255, 255, 255, 0.06);
+  --secondary-foreground: rgba(248, 250, 252, 0.96);
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: rgba(248, 250, 252, 0.62);
+  --accent: #a855f7;
+  --accent-foreground: #05050a;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: rgba(168, 85, 247, 0.45);
+  --cta: #22d3ee;
+  --cta-hover: #67e8f9;
 }
 
 .dark {
@@ -2327,6 +2351,89 @@ html {
   0% { transform: translateX(-60%); opacity: 0.55; }
   50% { transform: translateX(60%); opacity: 1; }
   100% { transform: translateX(160%); opacity: 0.55; }
+}
+
+/* =========================
+   Admin (*/admin) — premium neon/glass overrides
+   Scope via .admin-dashboard-root so public UI is unaffected
+   ========================= */
+
+.admin-dashboard-root {
+  position: relative;
+}
+
+.admin-dashboard-root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(34, 211, 238, 0.12), transparent 55%),
+    radial-gradient(circle at 82% 22%, rgba(168, 85, 247, 0.12), transparent 58%),
+    radial-gradient(circle at 45% 92%, rgba(236, 72, 153, 0.08), transparent 62%),
+    linear-gradient(180deg, rgba(6, 6, 10, 0.0) 0%, rgba(6, 6, 10, 0.06) 100%);
+}
+
+.dark .admin-dashboard-root::before {
+  background:
+    radial-gradient(circle at 18% 10%, rgba(34, 211, 238, 0.16), transparent 55%),
+    radial-gradient(circle at 82% 22%, rgba(168, 85, 247, 0.16), transparent 58%),
+    radial-gradient(circle at 45% 92%, rgba(236, 72, 153, 0.10), transparent 62%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.10) 0%, rgba(0, 0, 0, 0.30) 100%);
+}
+
+/* Card */
+.admin-dashboard-root [data-slot="card"] {
+  border-radius: 22px;
+  border: 1px solid hsl(var(--border) / 0.7);
+  background: hsl(var(--card) / 0.82);
+  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.10);
+  backdrop-filter: blur(12px);
+}
+.dark .admin-dashboard-root [data-slot="card"] {
+  background: rgba(0, 0, 0, 0.32);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 28px 110px rgba(0, 0, 0, 0.55);
+}
+
+/* Button */
+.admin-dashboard-root [data-slot="button"][data-variant="outline"] {
+  border-width: 1px;
+  border-color: hsl(var(--border) / 0.7);
+  background: hsl(var(--card) / 0.78);
+  backdrop-filter: blur(10px);
+}
+.dark .admin-dashboard-root [data-slot="button"][data-variant="outline"] {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.admin-dashboard-root [data-slot="button"][data-variant="default"] {
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.16);
+}
+
+/* Input */
+.admin-dashboard-root [data-slot="input"] {
+  border-color: hsl(var(--border) / 0.7);
+  background: hsl(var(--card) / 0.72);
+  backdrop-filter: blur(10px);
+}
+.dark .admin-dashboard-root [data-slot="input"] {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+/* Badge */
+.admin-dashboard-root [data-slot="badge"][data-variant="outline"] {
+  border-color: hsl(var(--border) / 0.7);
+  background: hsl(var(--card) / 0.72);
+  backdrop-filter: blur(10px);
+}
+.dark .admin-dashboard-root [data-slot="badge"][data-variant="outline"] {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
 }
 
 /* ── Focus-visible for keyboard navigation ── */

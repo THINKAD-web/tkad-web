@@ -450,42 +450,18 @@ export default function AdminCampaignsPage() {
   const uploadProofImage = async (file: File) => {
     if (!selectedId) return;
     setProofMsg(null);
-    const sigRes = await fetch("/api/admin/upload/cloudinary", {
-      method: "POST",
-    });
-    if (!sigRes.ok) {
-      setProofMsg("Cloudinary 미설정");
-      return;
-    }
-    const sig = (await sigRes.json()) as {
-      timestamp: number;
-      signature: string;
-      folder: string;
-      cloudName: string;
-      apiKey: string;
-    };
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("api_key", sig.apiKey);
-    fd.append("timestamp", String(sig.timestamp));
-    fd.append("signature", sig.signature);
-    fd.append("folder", sig.folder);
-    const up = await fetch(
-      `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-      { method: "POST", body: fd },
-    );
-    const upJson = (await up.json()) as {
-      secure_url?: string;
-      error?: { message: string };
-    };
-    if (!up.ok || !upJson.secure_url) {
-      setProofMsg(upJson.error?.message ?? "업로드 실패");
+    const up = await fetch("/api/admin/upload/bunny", { method: "POST", credentials: "include", body: fd });
+    const upJson = (await up.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!up.ok || !upJson.url) {
+      setProofMsg(upJson.error ?? "업로드 실패");
       return;
     }
     const post = await fetch(`/api/admin/campaigns/${selectedId}/proofs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imageUrl: upJson.secure_url }),
+      body: JSON.stringify({ imageUrl: upJson.url }),
     });
     if (!post.ok) {
       setProofMsg("증빙 저장 실패");
