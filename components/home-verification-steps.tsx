@@ -46,7 +46,7 @@ export function HomeVerificationSteps({ isKo }: Props) {
   const items = steps(isKo);
 
   return (
-    <div className="tkad-home-verification-steps relative mt-12">
+    <div className="tkad-home-verification-steps relative mt-6 sm:mt-10 lg:mt-12">
       {/* Track line (desktop) */}
       <div
         aria-hidden
@@ -66,7 +66,11 @@ export function HomeVerificationSteps({ isKo }: Props) {
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "0px 0px -80px 0px" }}
-              transition={{ duration: 0.55, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                duration: 0.55,
+                delay: idx * 0.08,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               whileHover={{ y: -3 }}
               className="group relative h-full rounded-[26px] bg-white/5 p-7 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border shadow-[0_28px_120px_rgba(0,0,0,0.78)] hover:shadow-[0_34px_140px_rgba(0,0,0,0.82)]"
             >
@@ -123,7 +127,11 @@ export function HomeVerificationSteps({ isKo }: Props) {
                   initial={{ width: "0%" }}
                   whileInView={{ width: "100%" }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.9, delay: 0.12 + idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{
+                    duration: 0.9,
+                    delay: 0.12 + idx * 0.08,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
                 />
               </div>
             </motion.div>
@@ -133,4 +141,3 @@ export function HomeVerificationSteps({ isKo }: Props) {
     </div>
   );
 }
-

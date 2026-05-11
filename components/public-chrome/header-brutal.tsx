@@ -11,12 +11,13 @@
  *   - extras: HeaderUserMenu, LanguageToggle, 홈·서비스: HomeAppearanceToggle(랜딩 낮/밤) — 그 외는 ThemeToggle
  */
 
+import { Suspense, useTransition } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useTransition } from "react";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { Globe } from "lucide-react";
 import { BrutalNav, type BrutalNavEntry } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
+import { HeaderMediaSearch } from "@/components/header-media-search";
 import { HomeAppearanceToggle } from "@/components/home-appearance-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -92,6 +93,18 @@ export function HeaderBrutal() {
   return (
     <BrutalNav
       links={links}
+      search={
+        <Suspense
+          fallback={
+            <div
+              className="h-10 w-full rounded-xl border-2 border-border/30 bg-muted/25 dark:border-white/10 dark:bg-white/5"
+              aria-hidden
+            />
+          }
+        >
+          <HeaderMediaSearch />
+        </Suspense>
+      }
       cta={{ href: "/contact", label: t("nav.contact") }}
       extras={
         <>

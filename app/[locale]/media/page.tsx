@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+import { Suspense } from "react";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import MediaBrowseClient from "@/components/media-browse-client";
@@ -27,7 +28,9 @@ export default async function MediaPage({ params }: Props) {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
-        <MediaBrowseClient catalog={catalog} />
+        <Suspense fallback={null}>
+          <MediaBrowseClient catalog={catalog} />
+        </Suspense>
         <MediaLandingLinksFooter
           locale={locale}
           availableRegions={Array.from(regionSet)}

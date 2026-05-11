@@ -61,7 +61,10 @@
     "quote": "견적 요청",
     "contact": "문의하기",
     "planner": "미디어 플래너",
-    "recommend": "AI 매체 추천"
+    "recommend": "AI 매체 추천",
+    "searchPlaceholder": "매체명·지역 검색",
+    "searchAria": "매체 검색",
+    "searchSubmit": "검색"
   },
   "hero": {
     "title": "한국 OOH 광고의 모든 것",

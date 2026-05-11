@@ -32,6 +32,7 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   getCompareCartEntries,
   setCompareCartEntries,
@@ -120,6 +121,8 @@ export default function MediaBrowseClient({
   const tMedia = useTranslations("media");
   const locale = useLocale();
   const isKo = locale === "ko";
+  const searchParams = useSearchParams();
+  const qFromUrl = searchParams.get("q") ?? "";
 
   const [mainTab, setMainTab] = useState<"search" | "ai">("search");
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
@@ -201,6 +204,12 @@ export default function MediaBrowseClient({
     }, KEYWORD_FILTER_SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(t);
   }, [catalogSearchQuery]);
+
+  useEffect(() => {
+    const next = qFromUrl.trim();
+    setCatalogSearchQuery(next);
+    setDebouncedCatalogSearch(next);
+  }, [qFromUrl]);
 
   const filterState = useMemo(
     () => ({

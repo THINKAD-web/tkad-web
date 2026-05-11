@@ -2070,10 +2070,70 @@ html:not(.dark) .group:hover .tkad-catalog-card-shell {
     0 0 60px rgba(255, 98, 0, 0.22);
 }
 
-/* 공개 헤더 — 살짝 글래스 */
-.tkad-nav-chrome {
+/* 공개 헤더 — 글래스/블러는 다크만 (라이트에선 본문이 비쳐 메뉴 글자가 뭉개짐) */
+.dark .tkad-nav-chrome {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  /* 링크·토큰이 어두운 잉크로 남으면 바 배경(#05050a)과 겹침 — 기본 글자색만 고정.
+     -webkit-text-fill-color 는 자식에 상속되며 WebKit에서 color 와 충돌해 글자가 사라질 수 있어 쓰지 않음 */
+  color: rgb(248 250 252 / 0.96) !important;
+}
+
+/* 라이트: 헤더 기본 잉크 (반투명 상속 방지) */
+html:not(.dark) .tkad-nav-chrome {
+  color: var(--foreground);
+}
+
+/* 로고 "AD" — 기본 네온 그라데이션 클립은 다크 바에서 대비 부족 → 밝은 스펙트럼으로 재지정 */
+.dark .tkad-nav-chrome .tkad-home-accent-text {
+  background-image: linear-gradient(
+    92deg,
+    rgb(196 181 253) 0%,
+    rgb(125 211 252) 48%,
+    rgb(251 207 232) 100%
+  ) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* 드롭다운 항목: 유틸 조합이 꼬여도 제목/설명 대비 유지 */
+.dark .tkad-nav-chrome [role="menuitem"] span:first-of-type {
+  color: rgb(252 252 252) !important;
+}
+
+.dark .tkad-nav-chrome [role="menuitem"] span + span {
+  color: rgb(212 212 220) !important;
+}
+
+.dark .tkad-nav-chrome .tkad-neon-cta-clean {
+  color: rgb(255 255 255) !important;
+}
+
+/* 헤더 안 `text-foreground` 유틸이 테마 토큰 꼬임으로 어두워지는 경우 밝은 잉크로 통일 */
+.dark .tkad-nav-chrome .text-foreground {
+  color: rgb(248 250 252 / 0.96) !important;
+}
+
+.dark .tkad-nav-chrome .text-foreground\/70,
+.dark .tkad-nav-chrome .text-foreground\/75,
+.dark .tkad-nav-chrome .text-foreground\/80 {
+  color: rgb(248 250 252 / 0.82) !important;
+}
+
+.dark .tkad-nav-chrome .text-muted-foreground {
+  color: rgb(203 213 225 / 0.9) !important;
+}
+
+.dark .tkad-nav-chrome input[type="search"] {
+  color: rgb(248 250 252 / 0.94) !important;
+}
+
+.dark .tkad-nav-chrome input[type="search"]::placeholder {
+  color: rgb(148 163 184 / 0.9) !important;
 }
 
 /* Header chrome: prevent hover "lift" jitter */

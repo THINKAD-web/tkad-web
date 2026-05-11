@@ -61,7 +61,10 @@
     "quote": "Get Quote",
     "contact": "Contact",
     "planner": "Media Planner",
-    "recommend": "AI media picks"
+    "recommend": "AI media picks",
+    "searchPlaceholder": "Search media or area",
+    "searchAria": "Search media",
+    "searchSubmit": "Search"
   },
   "hero": {
     "title": "Everything About Korean OOH Advertising",

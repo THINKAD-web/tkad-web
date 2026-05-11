@@ -61,10 +61,16 @@ export function HomeHeroNeo({ isKo }: Props) {
     >
       <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
       <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-      <div aria-hidden className="tkad-hero-noise absolute inset-0 opacity-[0.07] mix-blend-overlay" />
-      <div aria-hidden className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.18),rgba(0,0,0,0.62),rgba(0,0,0,0.92))]" />
+      <div
+        aria-hidden
+        className="tkad-hero-noise absolute inset-0 opacity-[0.07] mix-blend-overlay"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.18),rgba(0,0,0,0.62),rgba(0,0,0,0.92))]"
+      />
 
-      <div className="relative mx-auto min-w-0 max-w-7xl px-4 pb-32 pt-28 sm:px-6 sm:pb-44 sm:pt-40 lg:px-8 lg:pb-56 lg:pt-48">
+      <div className="relative mx-auto min-w-0 max-w-7xl px-4 pb-24 pt-16 sm:px-6 sm:pb-36 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40 xl:pb-48">
         <div className="mx-auto min-w-0 w-full max-w-6xl">
           {/* Top live signals */}
           <div className="flex flex-col gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4">
@@ -79,7 +85,11 @@ export function HomeHeroNeo({ isKo }: Props) {
                   <span className="h-1.5 w-1.5 rounded-full bg-[#a855f7] shadow-[0_0_16px_rgba(168,85,247,0.55)]" />
                   LIVE
                 </span>
-                <span className={cn(isDay ? "text-slate-400" : "text-white/25")}>•</span>
+                <span
+                  className={cn(isDay ? "text-slate-400" : "text-white/25")}
+                >
+                  •
+                </span>
                 <span
                   className={cn(
                     "font-mono text-[11px] font-bold uppercase tracking-[0.22em]",
@@ -105,7 +115,11 @@ export function HomeHeroNeo({ isKo }: Props) {
                 )}
               >
                 <span>{isKo ? "활성 브랜드" : "Active brands"}</span>
-                <span className={cn(isDay ? "text-slate-400" : "text-white/25")}>—</span>
+                <span
+                  className={cn(isDay ? "text-slate-400" : "text-white/25")}
+                >
+                  —
+                </span>
                 <span className={cn(isDay ? "text-slate-900" : "text-white")}>
                   {liveActiveBrands}+
                 </span>
@@ -118,8 +132,14 @@ export function HomeHeroNeo({ isKo }: Props) {
                 )}
               >
                 <span>{isKo ? "평균 응답" : "Avg. response"}</span>
-                <span className={cn(isDay ? "text-slate-400" : "text-white/25")}>—</span>
-                <span className={cn(isDay ? "text-slate-900" : "text-white")}>24h</span>
+                <span
+                  className={cn(isDay ? "text-slate-400" : "text-white/25")}
+                >
+                  —
+                </span>
+                <span className={cn(isDay ? "text-slate-900" : "text-white")}>
+                  24h
+                </span>
               </div>
             </div>
 
@@ -148,7 +168,9 @@ export function HomeHeroNeo({ isKo }: Props) {
                   isDay ? "text-slate-500" : "text-white/60",
                 )}
               >
-                {isKo ? "// Premium OOH Marketplace" : "// Premium OOH Marketplace"}
+                {isKo
+                  ? "// Premium OOH Marketplace"
+                  : "// Premium OOH Marketplace"}
               </p>
 
               <h1
@@ -162,18 +184,13 @@ export function HomeHeroNeo({ isKo }: Props) {
                 {isKo ? (
                   <>
                     검증된{" "}
-                    <span className="tkad-home-accent-text">
-                      광고매체
-                    </span>
+                    <span className="tkad-home-accent-text">광고매체</span>
                     .
                     <br className="hidden sm:block" /> 예측 가능한 성과.
                   </>
                 ) : (
                   <>
-                    Verified{" "}
-                    <span className="tkad-home-accent-text">
-                      OOH
-                    </span>
+                    Verified <span className="tkad-home-accent-text">OOH</span>
                     .
                     <br className="hidden sm:block" /> Predictable outcomes.
                   </>
@@ -207,12 +224,22 @@ export function HomeHeroNeo({ isKo }: Props) {
                     isDay ? "text-slate-900" : "text-white",
                   )}
                 >
-                  <Play className={cn("h-5 w-5", isDay ? "text-slate-600" : "text-white/80")} />
+                  <Play
+                    className={cn(
+                      "h-5 w-5",
+                      isDay ? "text-slate-600" : "text-white/80",
+                    )}
+                  />
                   {isKo ? "2분 데모 보기" : "Watch 2‑min demo"}
                 </Link>
               </div>
 
-              <div className={cn("mt-7 flex flex-wrap items-center gap-2", isDay ? "text-slate-500" : "text-white/60")}>
+              <div
+                className={cn(
+                  "mt-7 flex flex-wrap items-center gap-2",
+                  isDay ? "text-slate-500" : "text-white/60",
+                )}
+              >
                 {[
                   isKo ? "4단계 검증" : "4-step verification",
                   isKo ? "가격·입지 비교" : "Price & location",
@@ -264,7 +291,9 @@ export function HomeHeroNeo({ isKo }: Props) {
                           isDay ? "text-slate-600" : "text-white/72",
                         )}
                       >
-                        {isKo ? "이번 주 추천 매체 예상 노출" : "Est. impressions (recommended this week)"}
+                        {isKo
+                          ? "이번 주 추천 매체 예상 노출"
+                          : "Est. impressions (recommended this week)"}
                       </p>
                     </div>
                     <div
@@ -285,7 +314,10 @@ export function HomeHeroNeo({ isKo }: Props) {
                       { k: isKo ? "평균 응답" : "Response", v: "24h" },
                       { k: isKo ? "집행 지원" : "Execution", v: "E2E" },
                     ].map((s) => (
-                      <div key={s.k} className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
+                      <div
+                        key={s.k}
+                        className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3"
+                      >
                         <p
                           className={cn(
                             "font-mono text-[10px] font-bold uppercase tracking-[0.22em]",
@@ -321,7 +353,9 @@ export function HomeHeroNeo({ isKo }: Props) {
                         isDay ? "text-slate-700" : "text-white/82",
                       )}
                     >
-                      {isKo ? "도심 디지털 · 교통 거점" : "Urban digital · transit hubs"}
+                      {isKo
+                        ? "도심 디지털 · 교통 거점"
+                        : "Urban digital · transit hubs"}
                     </p>
                   </div>
                 </div>
@@ -333,4 +367,3 @@ export function HomeHeroNeo({ isKo }: Props) {
     </section>
   );
 }
-

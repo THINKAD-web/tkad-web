@@ -57,14 +57,20 @@ export function HomeClientLogos({ isKo }: { isKo: boolean }) {
           <NeonSectionHead
             number="00"
             kicker="Trust"
-            title={isKo ? "검증된 데이터로 선택받는 플랫폼" : "Trusted by modern B2B teams"}
-            meta={isKo ? "100+ enterprise partners" : "100+ enterprise partners"}
+            title={
+              isKo
+                ? "검증된 데이터로 선택받는 플랫폼"
+                : "Trusted by modern B2B teams"
+            }
+            meta={
+              isKo ? "100+ enterprise partners" : "100+ enterprise partners"
+            }
             className="mb-0 flex-1"
           />
         </div>
       </ScrollAnimate>
 
-      <div className="relative mt-12 overflow-hidden rounded-[28px] bg-white/5 backdrop-blur tkad-neon-border tkad-neon-glow">
+      <div className="relative mt-5 overflow-hidden rounded-[28px] bg-white/5 backdrop-blur tkad-neon-border tkad-neon-glow sm:mt-8 lg:mt-12">
         <div
           aria-hidden
           className={cn(
@@ -94,12 +100,17 @@ export function HomeClientLogos({ isKo }: { isKo: boolean }) {
                       ? "text-slate-600 group-hover:text-slate-900"
                       : "text-white/72 group-hover:text-white",
                     needsChip.has(label) ? "rounded-md px-2 py-1" : "",
-                    needsChip.has(label) ? "bg-white/10 [text-shadow:0_0_0.5px_rgba(0,0,0,0.45)]" : "",
+                    needsChip.has(label)
+                      ? "bg-white/10 [text-shadow:0_0_0.5px_rgba(0,0,0,0.45)]"
+                      : "",
                   )}
                   style={{
                     fontFamily:
                       'var(--font-display), "General Sans", "Satoshi", "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial',
-                    color: idx < logos.length ? (brandColor[label] ?? "currentColor") : undefined,
+                    color:
+                      idx < logos.length
+                        ? (brandColor[label] ?? "currentColor")
+                        : undefined,
                   }}
                 >
                   {label}
