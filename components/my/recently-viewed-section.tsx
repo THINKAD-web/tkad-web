@@ -66,8 +66,8 @@ export function RecentlyViewedSection() {
   return (
     <section className="mb-8">
       <div className="mb-4 flex items-center gap-2">
-        <Clock className="h-4 w-4 text-bx-accent" />
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <Clock className="h-4 w-4 text-accent" />
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ RECENTLY VIEWED / {items.length} ]
         </p>
       </div>
@@ -76,9 +76,9 @@ export function RecentlyViewedSection() {
           <Link
             key={m.id}
             href={`/media/${m.id}`}
-            className="group -ml-[2px] w-40 flex-shrink-0 snap-start border-2 border-bx-black bg-bx-white p-2 transition-colors hover:bg-bx-off"
+            className="group -ml-[2px] w-40 flex-shrink-0 snap-start border-2 border-border bg-card p-2 transition-colors hover:bg-muted"
           >
-            <div className="mb-2 aspect-[4/3] overflow-hidden border-2 border-bx-black bg-bx-off">
+            <div className="mb-2 aspect-[4/3] overflow-hidden border-2 border-border bg-muted">
               {m.image ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
@@ -88,10 +88,10 @@ export function RecentlyViewedSection() {
                 />
               ) : null}
             </div>
-            <div className="truncate text-xs font-bold tracking-tight text-bx-black group-hover:text-bx-accent">
+            <div className="truncate text-xs font-bold tracking-tight text-foreground group-hover:text-accent">
               {m.name}
             </div>
-            <div className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+            <div className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}{m.region} · {m.type}
             </div>
           </Link>

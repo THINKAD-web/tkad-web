@@ -84,6 +84,8 @@ export interface MediaItem {
   targetAge?: string;
   /** 가시성 점수 0–100 (DB `visibility_score`) */
   visibilityScore?: number;
+  /** 공개 카탈로그 Verified 리본 (DB `is_verified`, 관리자 지정) */
+  isVerified?: boolean;
   features?: string;
   featuresEn?: string;
   dailyExposure?: string;

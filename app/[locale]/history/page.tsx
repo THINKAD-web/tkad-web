@@ -93,17 +93,17 @@ export default function HistoryPage() {
 
   return (
     <>
-      <section className="bg-bx-black py-24">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
                 {`// 16 / History`}
               </p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
                 {isKo ? "THINKAD 연혁 타임라인" : "THINKAD History Timeline"}
               </h1>
-              <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+              <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
                 {isKo
                   ? "2016년 설립부터 AI 기반 OOH 플랫폼까지, 싱커드가 걸어온 길을 연도별로 살펴보세요."
                   : "Explore THlNKAD's journey from its founding in 2016 to the launch of its AI-powered OOH platform."}
@@ -112,7 +112,7 @@ export default function HistoryPage() {
             <div className="hidden sm:block">
               <Link
                 href="/about"
-                className="inline-flex items-center gap-1 border-2 border-bx-white bg-transparent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-white transition-colors hover:bg-bx-white hover:text-bx-black"
+                className="inline-flex items-center gap-1 border-2 border-hero-fg bg-transparent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-hero-fg transition-colors hover:bg-card hover:text-foreground"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 {isKo ? "About" : "Back to About"}
@@ -122,7 +122,7 @@ export default function HistoryPage() {
         </div>
       </section>
 
-      <section className="bg-bx-off py-20 sm:py-24">
+      <section className="bg-muted py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Timeline rail */}
           <div className="mb-10 overflow-x-auto">
@@ -141,17 +141,17 @@ export default function HistoryPage() {
                         className={cn(
                           "flex h-12 w-12 items-center justify-center border-2 font-mono text-sm font-bold transition-all",
                           isActive
-                            ? "border-bx-accent bg-bx-accent text-bx-white"
-                            : "border-bx-black bg-bx-white text-bx-black",
+                            ? "border-accent bg-accent text-accent-foreground"
+                            : "border-border bg-card text-foreground",
                         )}
                       >
                         {item.year.slice(2)}
                       </div>
                       {index < historyData.length - 1 && (
-                        <div className="absolute left-1/2 top-1/2 h-0.5 w-[220%] -translate-y-1/2 translate-x-[60%] bg-bx-black" />
+                        <div className="absolute left-1/2 top-1/2 h-0.5 w-[220%] -translate-y-1/2 translate-x-[60%] bg-hero-void" />
                       )}
                     </div>
-                    <span className={cn("font-mono text-[10px] font-bold uppercase tracking-[0.18em]", isActive ? "text-bx-accent" : "text-bx-gray-dim")}>
+                    <span className={cn("font-mono text-[10px] font-bold uppercase tracking-[0.18em]", isActive ? "text-accent" : "text-muted-foreground")}>
                       {isKo ? item.labelKo : item.labelEn}
                     </span>
                   </button>
@@ -162,46 +162,46 @@ export default function HistoryPage() {
 
           {/* Active card */}
           <div className="grid gap-0 lg:grid-cols-[2fr,1fr]">
-            <article className="-ml-[2px] border-2 border-bx-black bg-bx-white">
-              <header className="flex flex-row items-center justify-between gap-4 border-b-2 border-bx-black p-5">
+            <article className="-ml-[2px] border-2 border-border bg-card">
+              <header className="flex flex-row items-center justify-between gap-4 border-b-2 border-border p-5">
                 <div>
-                  <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                  <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
                     [ {isKo ? "주요 전환점" : "KEY MILESTONE"} ]
                   </span>
-                  <h2 className="mt-3 text-xl font-bold tracking-tight text-bx-black">
+                  <h2 className="mt-3 text-xl font-bold tracking-tight text-foreground">
                     {isKo ? activeItem.titleKo : activeItem.titleEn}
                   </h2>
-                  <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                     {`// `}{isKo ? "THINKAD 연혁" : "THINKAD History"}
                   </p>
                 </div>
                 <div className="flex flex-col items-end text-right">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                     [ {isKo ? "YEAR" : "YEAR"} ]
                   </span>
-                  <span className="font-mono text-3xl font-bold tabular-nums text-bx-black">
+                  <span className="font-mono text-3xl font-bold tabular-nums text-foreground">
                     {activeItem.year}
                   </span>
                 </div>
               </header>
               <div className="p-5">
-                <p className="text-sm leading-relaxed text-bx-black">
+                <p className="text-sm leading-relaxed text-foreground">
                   {isKo ? activeItem.descriptionKo : activeItem.descriptionEn}
                 </p>
               </div>
             </article>
 
-            <article className="-ml-[2px] border-2 border-bx-black bg-bx-off">
-              <header className="border-b-2 border-bx-black p-5">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <article className="-ml-[2px] border-2 border-border bg-muted">
+              <header className="border-b-2 border-border p-5">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                   [ JOURNEY ]
                 </p>
-                <h3 className="mt-2 flex items-center gap-2 text-sm font-bold tracking-tight text-bx-black">
-                  <Clock className="h-4 w-4 text-bx-accent" />
+                <h3 className="mt-2 flex items-center gap-2 text-sm font-bold tracking-tight text-foreground">
+                  <Clock className="h-4 w-4 text-accent" />
                   {isKo ? "THINKAD 성장 여정" : "THINKAD Growth Journey"}
                 </h3>
               </header>
-              <div className="space-y-4 p-5 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+              <div className="space-y-4 p-5 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                 <p>
                   {`// `}{isKo
                     ? "설립 이후 싱커드는 국내 OOH 핵심 거점을 기반으로 매체 네트워크를 확장하며 한국 OOH 미디어랩 전문 회사로 성장해왔습니다."
@@ -235,7 +235,7 @@ export default function HistoryPage() {
               <ArrowLeft className="h-3.5 w-3.5" />
               {isKo ? "이전 연혁" : "Previous"}
             </BtnBlock>
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}
               {historyData.findIndex((item) => item.year === activeItem.year) +
                 1}{" "}

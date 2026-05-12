@@ -176,6 +176,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     brightness: undefined,
     targetAge: m.targetAge ?? undefined,
     visibilityScore: m.visibilityScore,
+    isVerified: m.isVerified,
     features: m.effectMemo ?? m.description ?? undefined,
     featuresEn: m.effectMemo ?? m.description ?? undefined,
     catalogDescription: m.description?.trim() || undefined,

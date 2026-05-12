@@ -196,9 +196,12 @@ export default function AdminCrmRecordsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-foreground">
       <div>
-        <h2 className="text-lg font-bold text-navy">CRM · 고객 히스토리</h2>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          [ CRM RECORDS ]
+        </p>
+        <h2 className="mt-2 text-lg font-bold tracking-tight">CRM · 고객 히스토리</h2>
         <p className="text-sm text-muted-foreground">
           연락 기록, 메모, 팔로업(일정).           마감일이 서울 기준 오늘인 팔로업은{" "}
           <code className="text-xs">/api/cron/followup-reminders</code>가
@@ -240,7 +243,11 @@ export default function AdminCrmRecordsPage() {
               setNewAcc((a) => ({ ...a, phone: e.target.value }))
             }
           />
-          <Button type="button" className="bg-navy" onClick={createAccount}>
+          <Button
+            type="button"
+            className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
+            onClick={createAccount}
+          >
             저장
           </Button>
         </CardContent>
@@ -266,10 +273,12 @@ export default function AdminCrmRecordsPage() {
                   type="button"
                   onClick={() => loadOne(a.id)}
                   className={`w-full rounded-lg border p-3 text-left ${
-                    sel === a.id ? "border-gold bg-gold/5" : "border-slate-200"
+                    sel === a.id
+                      ? "border-primary bg-muted bg-muted/60"
+                      : "border-slate-200"
                   }`}
                 >
-                  <div className="flex items-center gap-2 font-semibold text-navy">
+                  <div className="flex items-center gap-2 font-semibold text-foreground">
                     <UserRound className="h-4 w-4" />
                     {a.company}
                   </div>
@@ -301,8 +310,10 @@ export default function AdminCrmRecordsPage() {
               </p>
             ) : (
               <>
-                <div className="flex flex-wrap items-center gap-2 rounded border border-slate-100 bg-slate-50/80 p-3">
-                  <span className="text-sm font-semibold text-navy">고객 등급</span>
+                <div className="flex flex-wrap items-center gap-2 rounded border-2 border-border bg-muted p-3 border-border bg-muted/60">
+                  <span className="text-sm font-semibold text-foreground">
+                    고객 등급
+                  </span>
                   <select
                     className="rounded border border-slate-200 bg-white px-2 py-1 text-sm"
                     value={accountTier}
@@ -318,7 +329,7 @@ export default function AdminCrmRecordsPage() {
 
                 {preferredMedia.length > 0 ? (
                   <div>
-                    <h3 className="mb-2 text-sm font-semibold text-navy">
+                    <h3 className="mb-2 text-sm font-semibold text-foreground">
                       선호 매체 (연결 캠페인 견적 기준)
                     </h3>
                     <ul className="space-y-1 text-xs">
@@ -327,7 +338,9 @@ export default function AdminCrmRecordsPage() {
                           key={m.id}
                           className="flex justify-between gap-2 rounded border bg-white px-2 py-1.5"
                         >
-                          <span className="font-medium text-navy">{m.name}</span>
+                          <span className="font-medium text-foreground">
+                            {m.name}
+                          </span>
                           <span className="text-muted-foreground">
                             {m.type} · {m.picks}회
                           </span>

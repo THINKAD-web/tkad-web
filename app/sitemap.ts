@@ -3,20 +3,39 @@ import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
+import { listGuideMeta } from "@/lib/guides-data";
 
-const lastModified = new Date();
+const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
 
-function sitemapEntry(path: string): MetadataRoute.Sitemap[number] {
+/** 핵심 랜딩(검색 유입·전환) 우선순위 살짝 상향 */
+function staticPathPriority(path: string): number {
+  if (path === "") return 1;
+  if (path === "/media" || path === "/planner" || path === "/quote") return 0.95;
+  if (path === "/compare" || path === "/insights" || path === "/cases") return 0.9;
+  return 0.8;
+}
+
+function sitemapEntry(
+  path: string,
+  lastModified: Date = buildTime,
+): MetadataRoute.Sitemap[number] {
   const suffix = path === "" ? "" : path;
   const ko = `${origin}/ko${suffix}`;
   const en = `${origin}/en${suffix}`;
   const isHome = path === "";
+  const priority = isHome
+    ? 1
+    : path.startsWith("/cases/") && !path.includes("//")
+      ? 0.75
+      : path.startsWith("/media/") || path.startsWith("/insights/")
+        ? 0.72
+        : staticPathPriority(path);
   return {
     url: ko,
     lastModified,
     changeFrequency: isHome ? "daily" : "weekly",
-    priority: isHome ? 1 : path.startsWith("/cases/") ? 0.75 : 0.8,
+    priority,
     alternates: {
       languages: {
         ko,
@@ -29,34 +48,108 @@ function sitemapEntry(path: string): MetadataRoute.Sitemap[number] {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPart = sitemapPaths.map((p) => sitemapEntry(p));
-  const cases = await getPublishedSuccessCases();
-  const casePart = cases.map((c) => sitemapEntry(`/cases/${c.id}`));
-  let mediaPart: MetadataRoute.Sitemap = [];
+
+  // ── Success cases — DB updatedAt 우선
+  let casePart: MetadataRoute.Sitemap = [];
   try {
-    const mediaCatalog = await fetchPublicMediaCatalog();
-    mediaPart = mediaCatalog.map((m) => sitemapEntry(`/media/${m.id}`));
+    const cases = await getPublishedSuccessCases();
+    casePart = cases.map((c) => {
+      const updated = (c as { updatedAt?: Date | string | null }).updatedAt;
+      const lastmod = updated
+        ? updated instanceof Date
+          ? updated
+          : new Date(updated)
+        : buildTime;
+      return sitemapEntry(`/cases/${c.id}`, lastmod);
+    });
   } catch {
-    // 카탈로그 fetch 실패 시 정적/사례 부분만 반환 (sitemap 자체는 살림)
+    // 사례 fetch 실패 → 사례 부분 없이 진행
   }
 
-  // PR-5: 자동 발행된 trend report (slug 있는 published 만)
+  // ── Media catalog — fetchPublicMediaCatalog 의 updatedAt 우선
+  // ── Tier 2 — region/type 키워드 랜딩 자동 생성 (DB unique values)
+  let mediaPart: MetadataRoute.Sitemap = [];
+  let regionLandingPart: MetadataRoute.Sitemap = [];
+  let typeLandingPart: MetadataRoute.Sitemap = [];
+  let areaLandingPart: MetadataRoute.Sitemap = [];
+  try {
+    const mediaCatalog = await fetchPublicMediaCatalog();
+    mediaPart = mediaCatalog.map((m) => {
+      const updated = (m as { updatedAt?: Date | string | null }).updatedAt;
+      const lastmod = updated
+        ? updated instanceof Date
+          ? updated
+          : new Date(updated)
+        : buildTime;
+      return sitemapEntry(`/media/${m.id}`, lastmod);
+    });
+
+    const regionSet = new Set<string>();
+    const typeSet = new Set<string>();
+    const areaSet = new Set<string>();
+    for (const m of mediaCatalog) {
+      if (m.region) regionSet.add(m.region);
+      if (m.type) typeSet.add(m.type);
+      const area = m.district || m.city;
+      if (area) areaSet.add(area);
+    }
+    regionLandingPart = Array.from(regionSet).map((region) =>
+      sitemapEntry(`/media/region/${encodeURIComponent(region)}`),
+    );
+    typeLandingPart = Array.from(typeSet).map((type) =>
+      sitemapEntry(`/media/type/${encodeURIComponent(type)}`),
+    );
+    areaLandingPart = Array.from(areaSet).map((area) =>
+      sitemapEntry(`/media/area/${encodeURIComponent(area)}`),
+    );
+  } catch {
+    // 카탈로그 실패 → 매체/랜딩 부분 없이 진행
+  }
+
+  // ── Trend reports — published + slug 만, updatedAt/publishedAt 우선
   let insightPart: MetadataRoute.Sitemap = [];
   if (isDatabaseConfigured()) {
     try {
       const db = getPrisma();
       const insights = await db.trendReport.findMany({
         where: { status: "published", slug: { not: null } },
-        select: { slug: true },
+        select: { slug: true, publishedAt: true, updatedAt: true },
         orderBy: { publishedAt: "desc" },
         take: 1000,
       });
       insightPart = insights
-        .filter((i): i is { slug: string } => typeof i.slug === "string")
-        .map((i) => sitemapEntry(`/insights/${i.slug}`));
+        .filter(
+          (i): i is typeof i & { slug: string } => typeof i.slug === "string",
+        )
+        .map((i) =>
+          sitemapEntry(
+            `/insights/${i.slug}`,
+            i.updatedAt ?? i.publishedAt ?? buildTime,
+          ),
+        );
     } catch {
-      // 인사이트 fetch 실패 시 다른 부분만 반환
+      // 인사이트 fetch 실패
     }
   }
 
-  return [...staticPart, ...casePart, ...mediaPart, ...insightPart];
+  // ── Guides — 비-draft 만 포함
+  const guidePart: MetadataRoute.Sitemap = listGuideMeta()
+    .filter((g) => !g.draft)
+    .map((g) =>
+      sitemapEntry(
+        `/guides/${g.slug}`,
+        new Date(g.updatedAt ?? g.publishedAt),
+      ),
+    );
+
+  return [
+    ...staticPart,
+    ...regionLandingPart,
+    ...typeLandingPart,
+    ...areaLandingPart,
+    ...casePart,
+    ...mediaPart,
+    ...insightPart,
+    ...guidePart,
+  ];
 }

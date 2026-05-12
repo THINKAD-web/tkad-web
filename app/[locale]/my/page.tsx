@@ -116,22 +116,22 @@ export default function MyDashboardPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
-      <header className="mb-6 flex items-start justify-between border-b-2 border-bx-black pb-5 sm:mb-8">
+      <header className="mb-6 flex items-start justify-between border-b-2 border-border pb-5 sm:mb-8">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ MY DASHBOARD ]
           </p>
-          <h1 className="mt-2 truncate text-xl font-bold tracking-tight text-bx-black sm:text-3xl">
+          <h1 className="mt-2 truncate text-xl font-bold tracking-tight text-foreground sm:text-3xl">
             안녕하세요, {me.name}님
           </h1>
-          <p className="mt-1 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim sm:text-[12px]">
+          <p className="mt-1 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground sm:text-[12px]">
             {`// `}{me.email}
           </p>
         </div>
         <button
           type="button"
           onClick={logout}
-          className="flex-shrink-0 inline-flex items-center gap-1 border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+          className="flex-shrink-0 inline-flex items-center gap-1 border-2 border-border bg-card px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
         >
           <LogOut className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">로그아웃</span>
@@ -194,7 +194,7 @@ function FavoritesTab({
         action={
           <Link
             href="/media/map"
-            className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+            className="inline-flex items-center gap-2 border-2 border-border bg-card px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
           >
             매체 탐색하러 가기
           </Link>
@@ -228,7 +228,7 @@ function QuotesTab({ loading, items }: { loading: boolean; items: Quote[] }) {
         action={
           <Link
             href="/media/map"
-            className="inline-flex items-center gap-2 border-2 border-bx-black bg-bx-white px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white"
+            className="inline-flex items-center gap-2 border-2 border-border bg-card px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
           >
             매체 탐색하러 가기
           </Link>

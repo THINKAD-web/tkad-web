@@ -36,8 +36,8 @@ export function DashboardTabs({ active, onChange, counts }: Props) {
               -ml-[2px] inline-flex min-w-fit flex-1 items-center justify-center gap-2 border-2 px-4 py-2.5
               font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors
               ${isActive
-                ? "border-bx-accent bg-bx-accent text-bx-white"
-                : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off"
+                ? "border-accent bg-accent text-accent-foreground"
+                : "border-border bg-card text-foreground hover:bg-muted"
               }
             `}
           >
@@ -47,8 +47,8 @@ export function DashboardTabs({ active, onChange, counts }: Props) {
               <span
                 className={`ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center border-2 px-1 font-mono text-[10px] font-bold tabular-nums ${
                   isActive
-                    ? "border-bx-white bg-bx-black text-bx-white"
-                    : "border-bx-black bg-bx-black text-bx-accent"
+                    ? "border-hero-fg bg-hero-void text-hero-fg"
+                    : "border-border bg-hero-void text-accent"
                 }`}
               >
                 {c}

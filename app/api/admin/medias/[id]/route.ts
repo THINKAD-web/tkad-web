@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { MediaAvailability } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
@@ -276,6 +277,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
     data.addressVerified = body.addressVerified;
   }
+  if (body.isVerified !== undefined) {
+    if (typeof body.isVerified !== "boolean") {
+      return json({ error: "isVerified must be boolean" }, 400);
+    }
+    data.isVerified = body.isVerified;
+  }
 
   if ("location" in body) {
     const trimmed = String(body.location ?? "").trim();
@@ -426,9 +433,27 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         name: media.name,
       });
     }
+    try {
+      for (const locale of ["ko", "en"] as const) {
+        revalidatePath(`/${locale}/compare`);
+        revalidatePath(`/${locale}/media`);
+        revalidatePath(`/${locale}/media/${id}`);
+        revalidatePath(`/${locale}/planner`);
+        revalidatePath(`/${locale}/quote`);
+      }
+    } catch {
+      /* revalidatePath는 일부 환경에서만 동작 */
+    }
     return json({ media });
-  } catch {
-    return json({ error: "Not found" }, 404);
+  } catch (err) {
+    // 기존 구현은 모든 오류를 404로 감춰서(Prisma 스키마 불일치 포함) 디버깅이 어려웠음.
+    // 운영/개발 모두에서 최소한의 힌트를 제공한다.
+    const message =
+      err instanceof Error && err.message
+        ? err.message
+        : "매체 업데이트 중 오류가 발생했습니다.";
+    // Prisma validation/unknown field 등의 경우 500이 맞다.
+    return json({ error: message }, 500);
   }
 }
 

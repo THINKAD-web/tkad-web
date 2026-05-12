@@ -64,11 +64,16 @@ export function HeaderUserMenu({ onNavigate }: { onNavigate?: () => void }) {
           <span className="max-w-[6rem] truncate">{session.name}</span>
         </Link>
       ) : (
-        <Link href="/login" onClick={onNavigate}>
-          <Button variant="ghost" size="sm" className="h-9 rounded-full">
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="h-9 rounded-full px-3 text-foreground hover:text-foreground dark:text-white dark:hover:text-white"
+        >
+          <Link href="/login" onClick={onNavigate}>
             로그인
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       )}
     </div>
   );

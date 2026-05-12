@@ -141,7 +141,7 @@ export default function MediaGallery({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={safe[idx]}
-              alt=""
+              alt={`${altBase} — ${idx + 1} / ${n}`}
               className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.05]"
               loading="lazy"
               decoding="async"

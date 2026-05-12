@@ -39,6 +39,7 @@ function LanguageToggle() {
 
   const switchLocale = (next: "ko" | "en") => {
     startTransition(() => {
+      if (pathname == null || pathname === "") return;
       router.replace(pathname, { locale: next });
     });
   };
@@ -82,7 +83,7 @@ function DesktopNavItem({
     return (
       <Link
         href={entry.href}
-        className={`nav-link rounded-md px-3 py-2 text-sm font-medium transition-colors duration-300 hover:text-primary motion-safe:hover:-translate-y-0.5 ${
+        className={`nav-link rounded-md px-3 py-2 text-sm font-medium transition-colors duration-300 hover:text-primary ${
           pathname === entry.href ? "active text-primary" : "text-muted-foreground"
         }`}
       >

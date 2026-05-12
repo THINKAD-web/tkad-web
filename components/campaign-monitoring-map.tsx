@@ -32,6 +32,99 @@ function mediaLabel(type: CampaignMapMediaType, isKo: boolean): string {
   return isKo ? m[type][0] : m[type][1];
 }
 
+function pinToneForMediaType(type: CampaignMapMediaType): "digital" | "static" | "mobile" | "network" {
+  // Map campaign-only categories onto our public media pin palette.
+  if (type === "digital") return "digital";
+  if (type === "billboard") return "static";
+  if (type === "transport") return "mobile";
+  return "network";
+}
+
+function pinColorForType(type: "digital" | "static" | "mobile" | "network"): {
+  fill: string;
+  stroke: string;
+  text: string;
+  glow: string;
+  ink: string;
+} {
+  // Keep this palette consistent with `/media/map`.
+  switch (type) {
+    case "digital":
+      return {
+        fill: "#22c55e",
+        stroke: "#a3ffcc",
+        text: "#0a0a0c",
+        glow: "rgba(34,197,94,0.55)",
+        ink: "rgba(10,10,12,0.92)",
+      };
+    case "static":
+      return {
+        fill: "#22d3ee",
+        stroke: "#bff7ff",
+        text: "#0a0a0c",
+        glow: "rgba(34,211,238,0.55)",
+        ink: "rgba(10,10,12,0.92)",
+      };
+    case "mobile":
+      return {
+        fill: "#fb7185",
+        stroke: "#ffd3db",
+        text: "#0a0a0c",
+        glow: "rgba(236,72,153,0.50)",
+        ink: "rgba(10,10,12,0.92)",
+      };
+    default:
+      return {
+        fill: "#a855f7",
+        stroke: "#ead6ff",
+        text: "#0a0a0c",
+        glow: "rgba(168,85,247,0.55)",
+        ink: "rgba(10,10,12,0.92)",
+      };
+  }
+}
+
+function pinDataUrl(type: "digital" | "static" | "mobile" | "network", selected: boolean): string {
+  const { fill, stroke, text, glow, ink } = pinColorForType(type);
+  const label = type === "digital" ? "D" : type === "static" ? "S" : type === "mobile" ? "M" : "N";
+  const w = 44;
+  const h = 52;
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 44 52">
+    <defs>
+      <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(0,0,0,0.40)"/>
+      </filter>
+      <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+        <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="${glow}"/>
+        <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="rgba(0,0,0,0.45)"/>
+      </filter>
+      <radialGradient id="core" cx="32%" cy="26%" r="76%">
+        <stop offset="0%" stop-color="rgba(255,255,255,0.96)"/>
+        <stop offset="55%" stop-color="rgba(255,255,255,0.88)"/>
+        <stop offset="100%" stop-color="rgba(255,255,255,0.72)"/>
+      </radialGradient>
+      <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="${stroke}" stop-opacity="0.95"/>
+        <stop offset="55%" stop-color="${fill}" stop-opacity="0.92"/>
+        <stop offset="100%" stop-color="${stroke}" stop-opacity="0.9"/>
+      </linearGradient>
+    </defs>
+    <g filter="${selected ? "url(#glow)" : "url(#soft)"}">
+      <path d="M22 50c9-11 14-19 14-28C36 12.6 30.3 7 22 7S8 12.6 8 22c0 9 5 17 14 28z" fill="rgba(0,0,0,0.25)"/>
+      <path d="M22 48.5c8.2-10.2 12.9-17.6 12.9-26.2C34.9 13.3 29.8 9 22 9S9.1 13.3 9.1 22.3c0 8.6 4.7 16 12.9 26.2z" fill="url(#ring)" opacity="0.95"/>
+      <path d="M22 44.7c6.6-8.7 10.2-14.9 10.2-22.1C32.2 15.8 28.2 13 22 13S11.8 15.8 11.8 22.6c0 7.2 3.6 13.4 10.2 22.1z" fill="rgba(0,0,0,0.10)"/>
+      <circle cx="22" cy="22" r="10.2" fill="url(#core)"/>
+      <circle cx="22" cy="22" r="10.2" fill="rgba(255,255,255,0.06)"/>
+      <circle cx="22" cy="22" r="10.2" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>
+      <text x="22" y="25.8" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" font-weight="900" fill="${text}" letter-spacing="0.08em">${label}</text>
+      <path d="M14 17c3.5-3.6 9.5-4.2 14-.8" fill="none" stroke="rgba(255,255,255,0.50)" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+      <path d="M16 31c3.8 2.5 9.9 2.1 12.8-.6" fill="none" stroke="${ink}" stroke-width="1.5" stroke-linecap="round" opacity="0.10"/>
+    </g>
+  </svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const existing = document.querySelector(
@@ -116,6 +209,8 @@ export function CampaignMonitoringMap({
   const cleanupRef = useRef<(() => void) | null>(null);
   const kakaoMapCtxRef = useRef<KakaoMapCtx | null>(null);
   const googleMapCtxRef = useRef<GoogleMapCtx | null>(null);
+  const markerByIdRef = useRef<Record<string, { setImage?: (img: unknown) => void }>>({});
+  const googleMarkerByIdRef = useRef<Record<string, { setIcon?: (icon: unknown) => void }>>({});
   /** Bumps when Kakao/Google map instance is ready so pan-to-selected can run. */
   const [mapEpoch, bumpMapEpoch] = useReducer((n: number) => n + 1, 0);
 
@@ -143,6 +238,11 @@ export function CampaignMonitoringMap({
     pinsRef.current = pins;
   }, [pins]);
 
+  const onSelectPinRef = useRef(onSelectPin);
+  useLayoutEffect(() => {
+    onSelectPinRef.current = onSelectPin;
+  }, [onSelectPin]);
+
   const mountGoogle = useCallback(() => {
     const el = containerRef.current;
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -150,7 +250,7 @@ export function CampaignMonitoringMap({
     if (!el || !key || pinList.length === 0) return;
 
     let cancelled = false;
-    const markers: Array<{ setMap: (m: null) => void }> = [];
+    const markers: Array<{ setMap: (m: null) => void; setIcon?: (i: unknown) => void }> = [];
 
     void (async () => {
       try {
@@ -186,7 +286,13 @@ export function CampaignMonitoringMap({
                 position: { lat: number; lng: number };
                 map: unknown;
                 title?: string;
-              }) => { setMap: (m: null) => void; addListener: (ev: string, fn: () => void) => void };
+                icon?: { url: string; scaledSize?: unknown };
+              }) => {
+                setMap: (m: null) => void;
+                setIcon?: (i: unknown) => void;
+                addListener: (ev: string, fn: () => void) => void;
+              };
+              Size?: new (w: number, h: number) => unknown;
             };
           };
         }
@@ -223,13 +329,19 @@ export function CampaignMonitoringMap({
       bumpMapEpoch();
 
       for (const p of pinList) {
+        const tone = pinToneForMediaType(p.mediaType);
+        const iconUrl = pinDataUrl(tone, false);
         const marker = new googleMaps.Marker({
           position: { lat: p.lat, lng: p.lng },
           map,
           title: isKo ? p.spotNameKo : p.spotNameEn,
+          icon: googleMaps.Size
+            ? { url: iconUrl, scaledSize: new googleMaps.Size(36, 42) }
+            : { url: iconUrl },
         });
-        marker.addListener("click", () => onSelectPin(p.id));
+        marker.addListener("click", () => onSelectPinRef.current(p.id));
         markers.push(marker);
+        googleMarkerByIdRef.current[p.id] = marker;
       }
 
       cleanupRef.current = () => {
@@ -242,6 +354,7 @@ export function CampaignMonitoringMap({
           }
         }
         googleMapCtxRef.current = null;
+        googleMarkerByIdRef.current = {};
         for (const m of markers) m.setMap(null);
         el.innerHTML = "";
       };
@@ -257,8 +370,6 @@ export function CampaignMonitoringMap({
     centerOverride,
     zoomOverride,
     isKo,
-    onSelectPin,
-    pinLayoutKey,
     bumpMapEpoch,
   ]);
 
@@ -269,7 +380,7 @@ export function CampaignMonitoringMap({
     if (!el || !appKey || pinList.length === 0) return;
 
     let cancelled = false;
-    const markers: Array<{ setMap: (m: null) => void }> = [];
+    const markers: Array<{ setMap: (m: null) => void; setImage?: (img: unknown) => void }> = [];
 
     void (async () => {
       try {
@@ -296,8 +407,21 @@ export function CampaignMonitoringMap({
               };
               LatLng: new (lat: number, lng: number) => unknown;
               LatLngBounds: new () => { extend: (p: unknown) => void };
-              Marker: new (opts: { position: unknown; map: unknown; title?: string }) => {
+              Size: new (w: number, h: number) => unknown;
+              Point: new (x: number, y: number) => unknown;
+              MarkerImage: new (
+                src: string,
+                size: unknown,
+                opts?: { offset?: unknown },
+              ) => unknown;
+              Marker: new (opts: {
+                position: unknown;
+                map: unknown;
+                title?: string;
+                image?: unknown;
+              }) => {
                 setMap: (m: null) => void;
+                setImage?: (img: unknown) => void;
               };
               event: {
                 addListener: (
@@ -315,6 +439,7 @@ export function CampaignMonitoringMap({
 
       K.load(() => {
         if (cancelled || !containerRef.current) return;
+        containerRef.current.innerHTML = "";
         const map = new K.Map(el, {
           center: new K.LatLng(center.lat, center.lng),
           level:
@@ -351,13 +476,22 @@ export function CampaignMonitoringMap({
         bumpMapEpoch();
 
         for (const p of pinList) {
+          const tone = pinToneForMediaType(p.mediaType);
+          const src = pinDataUrl(tone, false);
+          const img = new K.MarkerImage(
+            src,
+            new K.Size(40, 48),
+            { offset: new K.Point(20, 48) },
+          );
           const marker = new K.Marker({
             position: new K.LatLng(p.lat, p.lng),
             map,
             title: isKo ? p.spotNameKo : p.spotNameEn,
+            image: img,
           });
-          K.event.addListener(marker, "click", () => onSelectPin(p.id));
+          K.event.addListener(marker, "click", () => onSelectPinRef.current(p.id));
           markers.push(marker);
+          markerByIdRef.current[p.id] = marker;
         }
       });
 
@@ -371,6 +505,7 @@ export function CampaignMonitoringMap({
           }
         }
         kakaoMapCtxRef.current = null;
+        markerByIdRef.current = {};
         for (const m of markers) m.setMap(null);
         el.innerHTML = "";
       };
@@ -386,8 +521,6 @@ export function CampaignMonitoringMap({
     centerOverride,
     zoomOverride,
     isKo,
-    onSelectPin,
-    pinLayoutKey,
     bumpMapEpoch,
   ]);
 
@@ -400,6 +533,59 @@ export function CampaignMonitoringMap({
     if (provider === "kakao") return mountKakao();
     return undefined;
   }, [mountGoogle, mountKakao, pinLayoutKey, pins.length, provider]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    if (provider === "kakao") {
+      // If Kakao is ready, refresh marker images to reflect selection.
+      // (Safe no-op when MarkerImage isn't available yet.)
+      const mapsAny = (window as unknown as { kakao?: { maps?: unknown } }).kakao
+        ?.maps as
+        | {
+            MarkerImage?: new (
+              src: string,
+              size: unknown,
+              opts?: { offset?: unknown },
+            ) => unknown;
+            Size?: new (w: number, h: number) => unknown;
+            Point?: new (x: number, y: number) => unknown;
+          }
+        | undefined;
+      if (!mapsAny?.MarkerImage || !mapsAny?.Size || !mapsAny?.Point) return;
+      for (const p of pins) {
+        const mk = markerByIdRef.current[p.id];
+        if (!mk?.setImage) continue;
+        const tone = pinToneForMediaType(p.mediaType);
+        const src = pinDataUrl(tone, p.id === selectedId);
+        const img = new mapsAny.MarkerImage(
+          src,
+          new mapsAny.Size(40, 48),
+          { offset: new mapsAny.Point(20, 48) },
+        );
+        mk.setImage(img);
+      }
+      return;
+    }
+    if (provider === "google") {
+      const mapsAny = (window as unknown as { google?: { maps?: unknown } }).google
+        ?.maps as
+        | {
+            Size?: new (w: number, h: number) => unknown;
+          }
+        | undefined;
+      for (const p of pins) {
+        const mk = googleMarkerByIdRef.current[p.id];
+        if (!mk?.setIcon) continue;
+        const tone = pinToneForMediaType(p.mediaType);
+        const iconUrl = pinDataUrl(tone, p.id === selectedId);
+        mk.setIcon(
+          mapsAny?.Size
+            ? { url: iconUrl, scaledSize: new mapsAny.Size(36, 42) }
+            : { url: iconUrl },
+        );
+      }
+    }
+  }, [selectedId, pins, provider]);
 
   const prevSelectedIdRef = useRef<string | null>(null);
   const prevMapEpochRef = useRef<number>(0);

@@ -16,6 +16,8 @@ export type MediaCardProps = {
   href: string;
   imageSrc?: string | null;
   imageAlt?: string;
+  /** 이미지 비율 (기본 16:9) */
+  imageAspect?: "16/9" | "4/3";
   /** [01] 같은 인덱스 라벨 */
   index?: string | number;
   /** [ Digital ] 같은 매체 유형 라벨 */
@@ -26,6 +28,14 @@ export type MediaCardProps = {
   price?: string;
   /** 우측 상단 강조 라벨 (예: VERIFIED, NEW). bx-accent 스타일 */
   topRight?: ReactNode;
+  /** 이미지 위 hover 시 노출되는 오버레이 (예: 노출/CPM 요약) */
+  hoverOverlay?: ReactNode;
+  /** 랜딩 등 프리미엄 스타일 (rounded + soft shadow) */
+  premium?: boolean;
+  /** 컴팩트(인기 섹션 등) 텍스트 스케일 다운 */
+  density?: "default" | "compact";
+  /** 랜딩(퍼플) 등 액센트 글로우 테마 */
+  glowTheme?: "orange" | "purple";
   /** 카드 하단 추가 메타 영역 */
   footer?: ReactNode;
   className?: string;
@@ -35,61 +45,130 @@ export function MediaCard({
   href,
   imageSrc,
   imageAlt,
+  imageAspect = "16/9",
   index,
   type,
   name,
   location,
   price,
   topRight,
+  hoverOverlay,
+  premium = false,
+  density = "default",
+  glowTheme = "orange",
   footer,
   className,
 }: MediaCardProps) {
+  const compact = density === "compact";
+  const topRightClass =
+    premium && glowTheme === "purple"
+      ? "bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_45%,#ec4899_100%)] shadow-[0_0_14px_rgba(168,85,247,0.16)]"
+      : "bg-hermes shadow-[0_0_16px_rgba(255,98,0,0.35)]";
+  const neon =
+    glowTheme === "purple"
+      ? "dark:hover:shadow-[0_30px_102px_rgba(0,0,0,0.72),0_0_0_1px_rgba(124,58,237,0.26),0_0_46px_rgba(124,58,237,0.16)]"
+      : "dark:hover:shadow-[0_30px_102px_rgba(0,0,0,0.68),0_0_0_1px_rgba(255,107,0,0.3),0_0_64px_rgba(255,107,0,0.22)]";
   return (
     <Link
       href={href}
       className={cn(
-        "group relative flex h-full flex-col border-2 border-bx-black bg-bx-white transition-colors duration-200 hover:bg-bx-off",
+        "group relative flex h-full min-w-0 flex-col bg-card transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hermes/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        premium
+          ? cn(
+              "rounded-2xl border border-border/60 bg-card/85 backdrop-blur hover:-translate-y-1 hover:border-border/80 shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:shadow-[0_18px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_18px_60px_rgba(0,0,0,0.45)]",
+              neon,
+              compact && "@container/card",
+            )
+          : "border-2 border-border hover:-translate-y-0.5 hover:border-hermes/55 hover:shadow-[0_18px_55px_rgba(255,98,0,0.12)] dark:hover:shadow-[0_20px_60px_rgba(255,98,0,0.18)]",
         className,
       )}
     >
-      <div className="relative aspect-[4/3] overflow-hidden border-b-2 border-bx-black bg-bx-off">
+      <div
+        className={cn(
+          "relative overflow-hidden bg-muted/40",
+          premium ? "rounded-t-2xl border-b border-border/60" : "border-b-2 border-border",
+          imageAspect === "16/9" ? "aspect-[16/9]" : "aspect-[4/3]",
+        )}
+      >
         {imageSrc ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={imageSrc}
             alt={imageAlt ?? ""}
-            className="h-full w-full object-cover grayscale transition-[filter,transform] duration-500 ease-out group-hover:grayscale-0 group-hover:scale-[1.02]"
+            className="h-full w-full object-cover grayscale transition-[filter,transform] duration-700 ease-out group-hover:grayscale-0 group-hover:scale-[1.1] group-focus-within:grayscale-0 group-focus-within:scale-[1.1]"
             loading="lazy"
             decoding="async"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center font-mono text-[11px] uppercase tracking-[0.22em] text-bx-gray-dim">
+          <div className="flex h-full w-full items-center justify-center font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
             [ no image ]
           </div>
         )}
         {topRight ? (
-          <div className="absolute right-0 top-0 border-b-2 border-l-2 border-bx-black bg-bx-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-bx-white">
+          <div
+            className={cn(
+              "absolute right-0 top-0 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white",
+              topRightClass,
+              premium ? "rounded-bl-2xl border-b border-l border-border/60" : "border-b-2 border-l-2 border-border",
+            )}
+          >
             {topRight}
           </div>
         ) : null}
+        {hoverOverlay ? (
+          <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
+            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.94),rgba(0,0,0,0.24),transparent)]" />
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              {hoverOverlay}
+            </div>
+          </div>
+        ) : null}
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-5">
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col gap-2",
+          premium ? "p-6" : "p-5",
+        )}
+      >
         {(index !== undefined || type) && (
-          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-bx-gray-dim">
-            {index !== undefined ? <span className="text-bx-black">[{String(index).padStart(2, "0")}]</span> : <span />}
-            {type ? <span>[ {type} ]</span> : null}
+          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            {index !== undefined ? (
+              <span className="text-foreground">[{String(index).padStart(2, "0")}]</span>
+            ) : (
+              <span />
+            )}
+            {type ? (
+              <span className="font-semibold text-foreground/90">[ {type} ]</span>
+            ) : null}
           </div>
         )}
-        <h3 className="text-lg font-bold leading-tight tracking-tight text-bx-black sm:text-xl">
+        <h3
+          className={cn(
+            "font-black leading-tight tracking-tight text-foreground",
+            compact ? "text-base sm:text-lg" : "text-lg sm:text-xl",
+          )}
+        >
           {name}
         </h3>
         {location ? (
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
-            // {location}
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            {"// "}
+            {location}
           </p>
         ) : null}
         {price ? (
-          <p className="mt-1 font-mono text-sm font-bold text-bx-black">
+          <p
+            className={cn(
+              "mt-1 max-w-full font-mono font-black tabular-nums text-foreground",
+              premium
+                ? compact
+                  ? "min-w-0 break-words text-[clamp(0.8125rem,8cqi,1.625rem)] leading-[1.08] tracking-tight sm:text-[clamp(0.875rem,7.5cqi,1.75rem)]"
+                  : "text-[clamp(1.25rem,5vw,2.625rem)] leading-none sm:text-[clamp(1.35rem,4.5vw,2.625rem)]"
+                : compact
+                  ? "text-2xl sm:text-3xl"
+                  : "text-3xl sm:text-4xl",
+            )}
+          >
             {price}
           </p>
         ) : null}

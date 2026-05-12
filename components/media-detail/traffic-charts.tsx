@@ -22,10 +22,10 @@ import {
 } from "@/lib/media-traffic-estimate";
 
 /** Brutalist 차트 색상 팔레트 — 다색 유지 + bx-* 톤. */
-const CHART_PRIMARY = "#000000"; // bx-black
-const CHART_ACCENT = "#FF6600"; // bx-accent (주황) — peak/강조
-const CHART_NEUTRAL = "#737373"; // bx-gray-dim (주말)
-const CHART_GRID = "rgba(0,0,0,0.12)";
+const CHART_PRIMARY = "#e2e8f0"; // slate-200 (dark-friendly)
+const CHART_ACCENT = "#22d3ee"; // cyan-400 (neon)
+const CHART_NEUTRAL = "#94a3b8"; // slate-400 (neutral)
+const CHART_GRID = "rgba(255,255,255,0.14)";
 
 type Tab = "hourly" | "weekly" | "monthly";
 
@@ -119,33 +119,36 @@ export function TrafficCharts({
   const weeklyPeak = peakIndex(pattern.weekly);
 
   return (
-    <section className="border-2 border-bx-black bg-bx-white">
-      <header className="flex flex-col gap-3 border-b-2 border-bx-black px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+    <section className="overflow-hidden rounded-[28px] border border-border/80 bg-card/80 shadow-sm backdrop-blur">
+      <header className="flex flex-col gap-3 border-b border-border/70 px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
         <div className="space-y-1">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ TRAFFIC PATTERN ]
           </p>
-          <h3 className="text-lg font-bold tracking-tight text-bx-black sm:text-xl">
+          <h3 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
             {t("title")}
           </h3>
-          <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+          <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
             {t("desc")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {isEstimated ? (
-            <span className="border-2 border-bx-accent bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
+            <span className="rounded-xl border border-accent/70 bg-card/70 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-accent shadow-xs backdrop-blur">
               {t("estimatedBadge")}
             </span>
           ) : null}
-          <div role="tablist" className="inline-flex border-2 border-bx-black bg-bx-white">
+          <div
+            role="tablist"
+            className="inline-flex rounded-2xl border border-border/80 bg-muted/50 p-1 shadow-xs backdrop-blur"
+          >
             {(
               [
                 ["hourly", t("tabHourly")],
                 ["weekly", t("tabWeekly")],
                 ["monthly", t("tabMonthly")],
               ] as const
-            ).map(([k, label], i) => (
+            ).map(([k, label]) => (
               <button
                 key={k}
                 role="tab"
@@ -153,11 +156,10 @@ export function TrafficCharts({
                 type="button"
                 onClick={() => setTab(k)}
                 className={cn(
-                  "px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors",
-                  i > 0 && "border-l-2 border-bx-black",
+                  "rounded-[14px] px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                   tab === k
-                    ? "bg-bx-black text-bx-white"
-                    : "text-bx-black hover:bg-bx-off",
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-foreground hover:bg-background/70",
                 )}
               >
                 {label}
@@ -260,18 +262,18 @@ export function TrafficCharts({
           </ResponsiveContainer>
         </div>
 
-        <ul className="grid gap-2 border-t-2 border-bx-black pt-4 sm:grid-cols-3">
+        <ul className="grid gap-2 border-t-2 border-border pt-4 sm:grid-cols-3">
           <li className="font-mono text-[11px] tracking-tight">
-            <span className="text-bx-gray-dim">{t("insightHour")}: </span>
-            <span className="font-bold text-bx-black">{insights.peakHourLabel}</span>
+            <span className="text-muted-foreground">{t("insightHour")}: </span>
+            <span className="font-bold text-foreground">{insights.peakHourLabel}</span>
           </li>
           <li className="font-mono text-[11px] tracking-tight">
-            <span className="text-bx-gray-dim">{t("insightWeekday")}: </span>
-            <span className="font-bold text-bx-black">{insights.peakWeekdayLabel}</span>
+            <span className="text-muted-foreground">{t("insightWeekday")}: </span>
+            <span className="font-bold text-foreground">{insights.peakWeekdayLabel}</span>
           </li>
           <li className="font-mono text-[11px] tracking-tight">
-            <span className="text-bx-gray-dim">{t("insightMonth")}: </span>
-            <span className="font-bold text-bx-black">{insights.peakMonthLabel}</span>
+            <span className="text-muted-foreground">{t("insightMonth")}: </span>
+            <span className="font-bold text-foreground">{insights.peakMonthLabel}</span>
           </li>
         </ul>
       </div>

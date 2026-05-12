@@ -70,15 +70,15 @@ function DraggableCatalogRow({
     <li ref={setNodeRef} style={style} className={cn(isDragging && "opacity-40")}>
       <div
         className={cn(
-          "flex cursor-grab items-start gap-2 border-2 bg-bx-white p-3 text-left transition-colors active:cursor-grabbing",
+          "flex cursor-grab items-start gap-2 border-2 bg-card p-3 text-left transition-colors active:cursor-grabbing",
           inBasket
-            ? "border-bx-accent bg-bx-off"
-            : "border-bx-black hover:bg-bx-off",
+            ? "border-primary bg-muted"
+            : "border-border hover:bg-muted",
         )}
       >
         <button
           type="button"
-          className="mt-0.5 touch-none text-bx-gray-dim hover:text-bx-black"
+          className="mt-0.5 touch-none text-muted-foreground hover:text-foreground"
           aria-label={t("dragHint")}
           {...listeners}
           {...attributes}
@@ -86,16 +86,16 @@ function DraggableCatalogRow({
           <GripVertical className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-bx-black">
+          <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
             {isKo ? m.name : (m.nameEn || m.name) || m.name}
           </p>
-          <p className="mt-1 line-clamp-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+          <p className="mt-1 line-clamp-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{regionLabel(m.region)} ·{" "}
             {(isKo ? m.location : (m.locationEn || m.location) || m.location).slice(0, 48)}
           </p>
-          <p className="mt-1 font-mono text-xs font-bold tabular-nums text-bx-black">
+          <p className="mt-1 font-mono text-xs font-bold tabular-nums text-foreground">
             ₩{m.price.toLocaleString()}
-            <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-bx-gray-dim">
+            <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
               {isKo ? "만/월" : "₩10K/mo"}
             </span>
           </p>
@@ -108,8 +108,8 @@ function DraggableCatalogRow({
           className={cn(
             "inline-flex h-9 w-9 shrink-0 items-center justify-center border-2 transition-colors disabled:opacity-50",
             inBasket
-              ? "border-bx-accent bg-bx-accent text-bx-white"
-              : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white",
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-border bg-card text-foreground hover:bg-foreground hover:text-background",
           )}
         >
           <Plus className="h-4 w-4" />
@@ -148,10 +148,10 @@ function SortableBasketRow({
 
   return (
     <li ref={setNodeRef} style={style}>
-      <div className="flex items-start gap-2 border-2 border-bx-black bg-bx-white p-3">
+      <div className="flex items-start gap-2 border-2 border-border bg-card p-3">
         <button
           type="button"
-          className="mt-0.5 touch-none text-bx-gray-dim hover:text-bx-black"
+          className="mt-0.5 touch-none text-muted-foreground hover:text-foreground"
           aria-label={t("campaignReorderHint")}
           {...listeners}
           {...attributes}
@@ -159,10 +159,10 @@ function SortableBasketRow({
           <GripVertical className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-bx-black">
+          <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
             {isKo ? m.name : (m.nameEn || m.name) || m.name}
           </p>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{regionLabel(m.region)}
           </p>
         </div>
@@ -170,7 +170,7 @@ function SortableBasketRow({
           type="button"
           onClick={onRemove}
           aria-label={t("removeFromCampaign")}
-          className="inline-flex h-8 w-8 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-accent hover:text-bx-white hover:border-bx-accent"
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-primary hover:text-primary-foreground hover:border-primary"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -303,26 +303,26 @@ export default function PlannerMediaSelector({
       onDragCancel={onDragCancel}
     >
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] xl:grid-cols-[minmax(0,1.1fr)_minmax(0,24rem)]">
-        <div className="border-2 border-bx-black bg-bx-white">
-          <div className="border-b-2 border-bx-black p-5">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <div className="border-2 border-border bg-card">
+          <div className="border-b-2 border-border p-5">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ MEDIA LIST ]
             </p>
-            <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+            <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
               {t("mediaListTitle")}
             </h3>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
               {t("mediaListDesc")}
             </p>
             <div className="relative mt-3">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-bx-gray-dim" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t("mediaSearchPlaceholder")}
                 aria-label={t("mediaSearchPlaceholder")}
-                className="h-10 w-full border-2 border-bx-black bg-bx-white pl-9 pr-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                className="h-10 w-full border-2 border-border bg-card pl-9 pr-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
               />
             </div>
           </div>
@@ -332,7 +332,7 @@ export default function PlannerMediaSelector({
               role="list"
             >
               {listFiltered.length === 0 ? (
-                <li className="border-2 border-bx-black bg-bx-off py-10 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                <li className="border-2 border-border bg-muted py-10 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                   {`// `}{t("mediaListEmpty")}
                 </li>
               ) : (
@@ -349,7 +349,7 @@ export default function PlannerMediaSelector({
                 ))
               )}
             </ul>
-            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}{t("dragHint")}
             </p>
           </div>
@@ -357,31 +357,31 @@ export default function PlannerMediaSelector({
 
         <div
           className={cn(
-            "-ml-[2px] border-2 border-bx-black bg-bx-white transition-colors lg:mt-0",
-            isOver && "border-bx-accent bg-bx-off",
+            "-ml-[2px] border-2 border-border bg-card transition-colors lg:mt-0",
+            isOver && "border-primary bg-muted",
           )}
         >
-          <div className="border-b-2 border-bx-black p-5">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <div className="border-b-2 border-border p-5">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ CAMPAIGN BASKET ]
             </p>
             <div className="mt-2 flex items-start justify-between gap-3">
-              <h3 className="text-lg font-bold tracking-tight text-bx-black">
+              <h3 className="text-lg font-bold tracking-tight text-foreground">
                 {t("campaignPanelTitle")}
               </h3>
               <span className="text-right">
-                <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-gray-dim">
+                <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                   {t("campaignMonthlyTotalLabel")}
                 </span>
-                <span className="block font-mono text-base font-bold tabular-nums text-bx-black">
+                <span className="block font-mono text-base font-bold tabular-nums text-foreground">
                   ₩{basketMonthlyTotal.toLocaleString()}
-                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-bx-gray-dim">
+                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                     {isKo ? "만/월" : "₩10K/mo"}
                   </span>
                 </span>
               </span>
             </div>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
               {t("campaignPanelDesc")}
             </p>
           </div>
@@ -391,19 +391,19 @@ export default function PlannerMediaSelector({
               className={cn(
                 "min-h-[min(52vh,28rem)] border-2 p-3 transition-colors",
                 isOver
-                  ? "border-bx-accent bg-bx-off"
-                  : "border-bx-black bg-bx-off",
+                  ? "border-primary bg-muted"
+                  : "border-border bg-muted",
               )}
             >
               {basketItems.length === 0 ? (
                 <div className="flex h-full min-h-[12rem] flex-col items-center justify-center gap-2 px-4 text-center">
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
                     [ EMPTY ]
                   </p>
-                  <p className="text-sm font-bold tracking-tight text-bx-black">
+                  <p className="text-sm font-bold tracking-tight text-foreground">
                     {t("emptyCampaign")}
                   </p>
-                  <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                  <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
                     {`// `}{t("dropHint")}
                   </p>
                 </div>
@@ -427,7 +427,7 @@ export default function PlannerMediaSelector({
                 </SortableContext>
               )}
             </div>
-            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}{t("campaignReorderHint")}
             </p>
           </div>
@@ -436,8 +436,8 @@ export default function PlannerMediaSelector({
 
       <DragOverlay dropAnimation={null}>
         {dragPreview ? (
-          <div className="max-w-sm border-2 border-bx-accent bg-bx-white p-3">
-            <p className="line-clamp-2 text-sm font-bold tracking-tight text-bx-black">
+          <div className="max-w-sm border-2 border-primary bg-card p-3">
+            <p className="line-clamp-2 text-sm font-bold tracking-tight text-foreground">
               {isKo ? dragPreview.name : (dragPreview.nameEn || dragPreview.name) || dragPreview.name}
             </p>
           </div>

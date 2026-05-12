@@ -3,6 +3,7 @@ import type {
   AdminFormalQuotePdfParams,
   AdminFormalQuotePdfRow,
 } from "@/lib/build-admin-formal-quote-pdf";
+import { ADMIN_QUOTE_VALIDITY_DAYS } from "@/lib/pricing/constants";
 
 export const ADMIN_QUOTE_STATUSES = [
   "draft",
@@ -185,10 +186,12 @@ export function quoteToPdfParams(
   };
 }
 
-export function generateAdminQuoteNumber(): string {
-  const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `TKQ-${ymd}-${rnd}`;
+/** Admin 견적 `validUntil` 이 비어 있을 때: 오늘(UTC) + `ADMIN_QUOTE_VALIDITY_DAYS`일. */
+export function defaultAdminQuoteValidUntilDate(): Date {
+  const d = new Date();
+  d.setUTCHours(12, 0, 0, 0);
+  d.setUTCDate(d.getUTCDate() + ADMIN_QUOTE_VALIDITY_DAYS);
+  return d;
 }
 
 export function parseValidUntilDate(s: string): Date | null {

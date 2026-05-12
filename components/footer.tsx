@@ -3,6 +3,32 @@ import { Link } from "@/i18n/navigation";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench, MessageCircle } from "lucide-react";
 
+const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
+
+/**
+ * Instagram brand icon.
+ * lucide-react v1.8.0 은 상표 정책상 브랜드 로고를 export 하지 않아 인라인 SVG 로 대체.
+ */
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
 export default function Footer() {
   const t = useTranslations();
 
@@ -85,6 +111,17 @@ export default function Footer() {
                   {t("footer.kakaoChannel")}
                 </a>
               </li>
+              <li className="flex items-center gap-2">
+                <InstagramIcon className="h-4 w-4 shrink-0 text-gold/50" />
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-underline-grow hover:text-gold-light transition-colors duration-300"
+                >
+                  Instagram · @thinkad_korea
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -110,7 +147,6 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-white/10 pt-8">
           <div className="mb-4 text-center text-xs leading-relaxed text-silver/70">
-            <p>{t("footer.companyName")} | {t("footer.bizNumber")}</p>
             <p>{t("footer.ecommerce")} | {t("footer.address")}</p>
           </div>
           <div className="text-center text-sm text-silver/70">

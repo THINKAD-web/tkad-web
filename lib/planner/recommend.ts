@@ -1,17 +1,24 @@
 import type { MediaItem } from "@/lib/media-data";
+import { matchesPlannerCategory } from "@/lib/planner-logic";
 import type {
   PlannerAgeKey,
   PlannerCampaignGoal,
   PlannerCategory,
+  PlannerIndustryKey,
 } from "@/lib/planner/types";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
+import { haversineKm } from "@/lib/media-data";
 
 export type RecommendReasonKey =
   | "matchRegion"
   | "highVisibility"
   | "budgetEfficient"
   | "ageMatch"
-  | "goalFit";
+  | "goalFit"
+  | "landmarkHotspot"
+  | "transitHotspot"
+  | "retailHotspot"
+  | "neighborhoodHotspot";
 
 export type RecommendReason = { key: RecommendReasonKey; weight: number };
 
@@ -27,6 +34,8 @@ export type RecommendationContext = {
   regions: string[];
   categories: PlannerCategory[];
   ageKey: PlannerAgeKey;
+  /** Step 2 업종 — 매체 메타·설명 키워드와 느슨 매칭 */
+  industryKey: PlannerIndustryKey | null;
   /** 만원 단위 예산 */
   budgetMan: number;
   months: number;
@@ -40,15 +49,16 @@ const WEIGHTS_BY_GOAL: Record<
   PlannerCampaignGoal,
   [number, number, number, number, number]
 > = {
-  brand: [0.15, 0.15, 0.15, 0.15, 0.4],
-  launch: [0.25, 0.2, 0.15, 0.2, 0.2],
-  event: [0.4, 0.1, 0.15, 0.25, 0.1],
-  sales: [0.15, 0.15, 0.35, 0.2, 0.15],
-  local: [0.45, 0.15, 0.1, 0.2, 0.1],
+  /** 가시성 한 축(구 0.4)이 과도하면 동일 "랜드마크" 5곳이 고정됨 → 지역/연령/목표 비중 상향 */
+  brand: [0.18, 0.2, 0.18, 0.24, 0.2],
+  launch: [0.24, 0.2, 0.16, 0.22, 0.18],
+  event: [0.36, 0.12, 0.16, 0.24, 0.12],
+  sales: [0.16, 0.18, 0.32, 0.2, 0.14],
+  local: [0.42, 0.16, 0.12, 0.2, 0.1],
 };
 
 const DEFAULT_WEIGHTS: [number, number, number, number, number] = [
-  0.25, 0.15, 0.2, 0.2, 0.2,
+  0.2, 0.2, 0.2, 0.22, 0.18,
 ];
 
 /** 목표별 매체 유형 선호도 (0–1) */
@@ -63,6 +73,170 @@ const GOAL_TYPE_AFFINITY: Record<
   local: { digital: 0.7, static: 1, mobile: 0.9, network: 0.85 },
 };
 
+/**
+ * 목표별 텍스트 힌트(규칙 기반).
+ * 매체 데이터가 빈약해도(=targetAge/description 없음) 최소한의 “맥락 차이”를 만들기 위한 신호.
+ */
+const GOAL_HINTS: Record<PlannerCampaignGoal, string[]> = {
+  brand: [
+    "랜드마크",
+    "대형",
+    "프리미엄",
+    "미디어월",
+    "led",
+    "media wall",
+    "광장",
+    "스퀘어",
+    "메가",
+    "타워",
+    "센터",
+    "airport",
+    "인천공항",
+  ],
+  launch: [
+    "신규",
+    "오픈",
+    "런칭",
+    "launch",
+    "grand",
+    "opening",
+    "신제품",
+    "팝업",
+    "pop-up",
+    "미디어월",
+    "전광판",
+  ],
+  event: [
+    "행사",
+    "페스티벌",
+    "festival",
+    "콘서트",
+    "concert",
+    "경기장",
+    "stadium",
+    "전시",
+    "exhibition",
+    "역",
+    "환승",
+    "터미널",
+    "terminal",
+    "버스",
+    "지하철",
+  ],
+  sales: [
+    "쇼핑",
+    "매장",
+    "리테일",
+    "백화점",
+    "마트",
+    "아울렛",
+    "mall",
+    "department",
+    "mart",
+    "outlet",
+    "store",
+    "프로모션",
+    "coupon",
+    "쿠폰",
+  ],
+  local: [
+    "동네",
+    "주거",
+    "아파트",
+    "학원",
+    "병원",
+    "시장",
+    "community",
+    "residential",
+    "neighborhood",
+    "역세권",
+    "로데오",
+  ],
+};
+
+const LANDMARK_HINTS = [
+  "랜드마크",
+  "광장",
+  "스퀘어",
+  "타워",
+  "센터",
+  "미디어월",
+  "전광판",
+  "airport",
+  "인천공항",
+  "터미널",
+  "terminal",
+];
+
+const TRANSIT_HINTS = [
+  "역",
+  "지하철",
+  "환승",
+  "버스",
+  "정류장",
+  "terminal",
+  "터미널",
+  "station",
+  "subway",
+  "bus",
+];
+
+const RETAIL_HINTS = [
+  "백화점",
+  "마트",
+  "아울렛",
+  "쇼핑",
+  "상권",
+  "mall",
+  "department",
+  "mart",
+  "outlet",
+  "shopping",
+];
+
+const NEIGHBORHOOD_HINTS = [
+  "주거",
+  "아파트",
+  "학원",
+  "병원",
+  "시장",
+  "동네",
+  "residential",
+  "apartment",
+  "neighborhood",
+];
+
+function haystackForHints(media: MediaItem): string {
+  return [
+    media.name,
+    media.nameEn,
+    media.location,
+    media.locationEn,
+    media.subCategory,
+    ...(media.tags ?? []),
+    media.nearbyFacilities,
+    media.nearbyFacilitiesEn,
+    media.nearbyStations,
+    media.nearbyLandmarks,
+    media.features,
+    media.featuresEn,
+    media.description,
+    media.descriptionEn,
+    media.catalogDescription,
+    media.catalogDescriptionEn,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function hintHitCount(hay: string, hints: string[]): number {
+  if (!hay.trim()) return 0;
+  let hits = 0;
+  for (const h of hints) if (hay.includes(h.toLowerCase())) hits += 1;
+  return hits;
+}
+
 function regionScore(media: MediaItem, regions: string[]): number {
   if (regions.length === 0) return 0.5;
   if (regions.includes(media.region)) return 1;
@@ -71,7 +245,8 @@ function regionScore(media: MediaItem, regions: string[]): number {
 }
 
 function ageScore(ageKey: PlannerAgeKey, targetAge?: string | null): number {
-  if (ageKey === "ageAll" || !targetAge) return 0.7;
+  if (ageKey === "ageAll") return 0.62;
+  if (!targetAge) return 0.54; // 미디어 `targetAge` 없음 — 매칭 불가, 동률·가시성 편중 완화
   const lower = targetAge.replace(/\s+/g, "");
   const matches: Record<PlannerAgeKey, RegExp[]> = {
     ageAll: [],
@@ -108,18 +283,167 @@ function efficiencyScoreFactory(catalog: readonly MediaItem[]) {
 function goalFitScore(
   media: MediaItem,
   goal: PlannerCampaignGoal | null,
+  industryKey: PlannerIndustryKey | null,
 ): number {
-  if (!goal) return 0.6;
-  const affinity = GOAL_TYPE_AFFINITY[goal];
-  return affinity[media.type] ?? 0.5;
+  const goalHintScore = (() => {
+    if (!goal) return 0.6;
+    const hints = GOAL_HINTS[goal] ?? [];
+    if (hints.length === 0) return 0.6;
+    const hay = [
+      media.name,
+      media.nameEn,
+      media.location,
+      media.locationEn,
+      media.subCategory,
+      ...(media.tags ?? []),
+      media.nearbyFacilities,
+      media.nearbyFacilitiesEn,
+      media.nearbyStations,
+      media.nearbyLandmarks,
+      media.features,
+      media.featuresEn,
+      media.description,
+      media.descriptionEn,
+      media.catalogDescription,
+      media.catalogDescriptionEn,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    if (!hay.trim()) return 0.55;
+    let hits = 0;
+    for (const h of hints) {
+      if (hay.includes(h.toLowerCase())) hits += 1;
+    }
+    // 0~1: 0 hits -> 0.45, 1~ -> 상승, 상한
+    if (hits <= 0) return 0.45;
+    return Math.min(1, 0.55 + 0.15 * hits);
+  })();
+
+  const typeFit = (() => {
+    if (!goal) return 0.6;
+    const affinity = GOAL_TYPE_AFFINITY[goal];
+    return affinity[media.type] ?? 0.5;
+  })();
+  const ind = industryFitScore(media, industryKey);
+  const base = typeFit * (0.68 + 0.32 * ind);
+  // 목표 힌트는 “결정적” 신호가 아니라 보조. base를 해치지 않게 완만히 반영.
+  return Math.max(0, Math.min(1, base * (0.85 + 0.15 * goalHintScore)));
 }
 
 function visibilityScore(media: MediaItem): number {
   const v = media.visibilityScore;
   if (typeof v !== "number") return 0.5;
-  if (v >= 100) return 1;
   if (v <= 0) return 0;
-  return v / 100;
+  // DB는 0~4 척도, 레거시 목업은 0~100 — 둘 다 0~1로 정규화
+  const linear =
+    v <= 4 ? Math.min(1, v / 4) : v >= 100 ? 1 : Math.min(1, v / 100);
+  // 상위권 쏠림 완화 (동일 권역 대형 매체만 쭉 뜨는 것 완화)
+  return Math.max(0, Math.min(1, Math.pow(linear, 0.82)));
+}
+
+/** 업종 키워드(한·영) — 매체 텍스트 필드와 느슨 매칭, 규칙 기반 */
+const INDUSTRY_HINTS: Record<Exclude<PlannerIndustryKey, "indOther">, string[]> = {
+  indFb: [
+    "f&b",
+    "fb",
+    "food",
+    "beverage",
+    "cafe",
+    "coffee",
+    "restaurant",
+    "dining",
+    "식음료",
+    "카페",
+    "음식",
+    "레스토랑",
+    "주류",
+    "베이커리",
+  ],
+  indRetail: [
+    "retail",
+    "mall",
+    "department",
+    "mart",
+    "shop",
+    "store",
+    "boutique",
+    "리테일",
+    "백화점",
+    "마트",
+    "쇼핑",
+    "매장",
+    "아울렛",
+  ],
+  indTech: [
+    "tech",
+    "it",
+    "software",
+    "saas",
+    "ai",
+    "digital",
+    "electronics",
+    "smartphone",
+    "테크",
+    "소프트웨어",
+    "전자",
+    "it ",
+    "ict",
+  ],
+  indFinance: [
+    "finance",
+    "bank",
+    "insurance",
+    "fintech",
+    "investment",
+    "card",
+    "금융",
+    "은행",
+    "보험",
+    "증권",
+    "카드",
+  ],
+  indEnt: [
+    "entertainment",
+    "concert",
+    "game",
+    "esports",
+    "cinema",
+    "culture",
+    "k-pop",
+    "엔터",
+    "콘서트",
+    "게임",
+    "영화",
+    "문화",
+  ],
+};
+
+function industryFitScore(
+  media: MediaItem,
+  industryKey: PlannerIndustryKey | null,
+): number {
+  if (!industryKey || industryKey === "indOther") return 0.72;
+  const hints = INDUSTRY_HINTS[industryKey as Exclude<PlannerIndustryKey, "indOther">];
+  if (!hints?.length) return 0.72;
+  const hay = [
+    media.name,
+    media.features,
+    media.featuresEn,
+    media.description,
+    media.descriptionEn,
+    media.catalogDescription,
+    media.catalogDescriptionEn,
+    media.nearbyFacilities,
+    media.nearbyFacilitiesEn,
+    media.advertiserHistory,
+    media.advertiserHistoryEn,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  if (!hay.trim()) return 0.55;
+  return hints.some((h) => hay.includes(h.toLowerCase())) ? 1 : 0.48;
 }
 
 /** 단일 매체 스코어 + 기여도 상위 이유 추출 */
@@ -154,7 +478,7 @@ export function scoreMedia(
     },
     {
       key: "goalFit",
-      raw: goalFitScore(media, ctx.goal),
+      raw: goalFitScore(media, ctx.goal, ctx.industryKey ?? null),
       weighted: 0,
     },
     {
@@ -169,13 +493,98 @@ export function scoreMedia(
 
   const score = parts.reduce((a, p) => a + p.weighted, 0);
 
-  const reasons = parts
-    .filter((p) => p.raw >= 0.7)
+  const hay = haystackForHints(media);
+  const extraReasonKeys: RecommendReasonKey[] = (() => {
+    const goal = ctx.goal;
+    if (!goal) return [];
+    // pick one strongest “goal-like” extra reason to avoid clutter
+    if (goal === "sales") {
+      return hintHitCount(hay, RETAIL_HINTS) >= 1 ? ["retailHotspot"] : [];
+    }
+    if (goal === "event") {
+      return hintHitCount(hay, TRANSIT_HINTS) >= 1 ? ["transitHotspot"] : [];
+    }
+    if (goal === "local") {
+      const districtSignal =
+        typeof media.district === "string" && media.district.trim() ? 1 : 0;
+      const hits = hintHitCount(hay, NEIGHBORHOOD_HINTS);
+      return districtSignal || hits >= 1 ? ["neighborhoodHotspot"] : [];
+    }
+    // brand/launch: landmark-ish
+    return hintHitCount(hay, LANDMARK_HINTS) >= 1 ? ["landmarkHotspot"] : [];
+  })();
+
+  let reasons = parts
+    .filter((p) => p.raw >= 0.55)
     .sort((a, b) => b.weighted - a.weighted)
     .slice(0, 3)
     .map<RecommendReason>((p) => ({ key: p.key, weight: p.weighted }));
+  if (reasons.length === 0) {
+    const top = [...parts].sort((a, b) => b.weighted - a.weighted)[0];
+    if (top && top.raw > 0.12) {
+      reasons = [{ key: top.key, weight: top.weighted }];
+    }
+  }
+
+  // inject goal-specific extra reason (UI clarity), without inflating score.
+  for (const k of extraReasonKeys) {
+    if (reasons.some((r) => r.key === k)) continue;
+    if (reasons.length >= 3) break;
+    reasons.push({ key: k, weight: 0.00001 });
+  }
 
   return { media, score, reasons };
+}
+
+function minKmToPicked(
+  m: MediaItem,
+  picked: readonly ScoredMedia[],
+): number {
+  let d = Number.POSITIVE_INFINITY;
+  for (const p of picked) {
+    const km = haversineKm(m, p.media);
+    if (km < d) d = km;
+  }
+  return d;
+}
+
+/**
+ * 점수 상위만 자르면 같은 5대 랜드마크가 반복 → 상위 풀에서 지리·유형 다양성을 반영해 N개 선별.
+ * (MMR 느낀 규칙, LLM 아님)
+ */
+function pickDiverseTop(scored: ScoredMedia[], limit: number): ScoredMedia[] {
+  if (scored.length === 0) return [];
+  const pool = scored.slice(0, Math.min(45, scored.length));
+  if (pool.length <= limit) return pool;
+
+  const picked: ScoredMedia[] = [pool[0]!];
+  const used = new Set<string>([pool[0]!.media.id]);
+
+  while (picked.length < limit) {
+    let best: ScoredMedia | null = null;
+    let bestAdj = -1;
+    for (const c of pool) {
+      if (used.has(c.media.id)) continue;
+      const minD = minKmToPicked(c.media, picked);
+      const hasSameType = picked.some((p) => p.media.type === c.media.type);
+      const typeFactor = hasSameType ? 0.91 : 1.05;
+      const finiteD = Number.isFinite(minD) ? minD : 6;
+      const distFactor = 1 + 0.12 * Math.min(1, finiteD / 7);
+      const closeCluster =
+        Number.isFinite(minD) && minD < 0.45 && picked.length > 0
+          ? 0.8
+          : 1;
+      const adj = c.score * typeFactor * distFactor * closeCluster;
+      if (adj > bestAdj) {
+        bestAdj = adj;
+        best = c;
+      }
+    }
+    if (!best) break;
+    picked.push(best);
+    used.add(best.media.id);
+  }
+  return picked;
 }
 
 /**
@@ -189,16 +598,66 @@ export function recommendPlannerMedia(
   catalog: readonly MediaItem[],
   ctx: RecommendationContext,
   limit = 5,
+  seed = 0,
 ): ScoredMedia[] {
   const effFn = efficiencyScoreFactory(catalog);
-  const filtered = catalog.filter((m) => {
+  const filteredByCategory = catalog.filter((m) => {
     if (ctx.categories.length === 0) return true;
-    // 네트워크 매체는 type="network" 이므로 별도 허용 (카테고리 필터에 포함되지 않음)
-    if (m.type === "network") return true;
-    return (ctx.categories as readonly string[]).includes(m.type);
+    return (ctx.categories as readonly PlannerCategory[]).some((c) =>
+      matchesPlannerCategory(m, c),
+    );
   });
+  // Region is a primary intent signal for planner. Prefer strict matching when provided,
+  // but keep a safe fallback to avoid empty recommendations.
+  const filtered =
+    ctx.regions.length > 0
+      ? (() => {
+          const strict = filteredByCategory.filter(
+            (m) => regionScore(m, ctx.regions) > 0,
+          );
+          return strict.length > 0 ? strict : filteredByCategory;
+        })()
+      : filteredByCategory;
+
+  const seededTiebreak = (id: string) => {
+    // deterministic per refresh; avoids “등록 순” when scores tie.
+    let h = 2166136261 ^ seed;
+    for (let i = 0; i < id.length; i++) {
+      h ^= id.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  };
+  const seeded01 = (id: string) => {
+    // 0..1 deterministic pseudo-rand per seed + id
+    const x = seededTiebreak(id);
+    // mulberry32-ish mix
+    let t = x + 0x6d2b79f5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const emptyReasonLast = (a: ScoredMedia, b: ScoredMedia) => {
+    const ae = a.reasons.length === 0 ? 1 : 0;
+    const be = b.reasons.length === 0 ? 1 : 0;
+    if (ae !== be) return ae - be;
+    return 0;
+  };
   const scored = filtered
     .map((m) => scoreMedia(m, ctx, effFn))
-    .sort((a, b) => b.score - a.score);
-  return scored.slice(0, limit);
+    .sort((a, b) => {
+      // Refresh should explore near-ties, not only exact ties.
+      // Apply tiny deterministic jitter (±2.5%) so close scores can reshuffle,
+      // while clearly better items remain on top.
+      const aj = a.score * (0.975 + 0.05 * seeded01(a.media.id));
+      const bj = b.score * (0.975 + 0.05 * seeded01(b.media.id));
+      const d = bj - aj;
+      if (Math.abs(d) > 1e-6) return d;
+      const e = emptyReasonLast(a, b);
+      if (e !== 0) return e;
+      const ft = (b.media.dailyFootTraffic ?? 0) - (a.media.dailyFootTraffic ?? 0);
+      if (ft !== 0) return ft;
+      return seededTiebreak(a.media.id) - seededTiebreak(b.media.id);
+    });
+  return pickDiverseTop(scored, limit);
 }

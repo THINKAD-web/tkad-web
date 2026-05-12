@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
+import { generateNextAdminQuoteNumber } from "@/lib/admin-quote-number";
 import {
   isAdminQuoteStatus,
   parseQuoteItemsInput,
-  generateAdminQuoteNumber,
   serializeQuote,
   parseValidUntilDate,
+  defaultAdminQuoteValidUntilDate,
 } from "@/lib/admin-sales-quote";
 
 export const dynamic = "force-dynamic";
@@ -72,15 +73,25 @@ export async function POST(request: NextRequest) {
   const items = parseQuoteItemsInput(body.items);
   if (!items) return json({ error: "items required" }, 400);
 
-  let quoteNumber = String(body.quoteNumber ?? "").trim();
-  if (!quoteNumber) quoteNumber = generateAdminQuoteNumber();
+  const clientSuppliedNumber = String(body.quoteNumber ?? "").trim();
 
   const clientName = String(body.clientName ?? "").trim();
   if (!clientName) return json({ error: "clientName required" }, 400);
 
   const validUntilRaw = String(body.validUntil ?? "").trim();
-  const validUntil = parseValidUntilDate(validUntilRaw);
-  if (!validUntil) return json({ error: "validUntil required (YYYY-MM-DD)" }, 400);
+  let validUntil: Date;
+  if (validUntilRaw) {
+    const d = parseValidUntilDate(validUntilRaw);
+    if (!d) {
+      return json(
+        { error: "validUntil invalid (use YYYY-MM-DD)" },
+        400,
+      );
+    }
+    validUntil = d;
+  } else {
+    validUntil = defaultAdminQuoteValidUntilDate();
+  }
 
   const subtotal = Math.round(Number(body.subtotal));
   const discount = Math.max(0, Math.round(Number(body.discount)));
@@ -108,42 +119,54 @@ export async function POST(request: NextRequest) {
   const isKo = body.isKo !== false;
 
   const db = getPrisma();
-  try {
-    const created = await db.quote.create({
-      data: {
-        quoteNumber,
-        status,
-        clientName,
-        clientEmail,
-        clientPhone,
-        subtotal,
-        discount,
-        tax,
-        total,
-        validUntil,
-        isKo,
-        items: {
-          create: items.map((it) => ({
-            mediaId: it.mediaId,
-            mediaName: it.mediaName,
-            spec: it.spec,
-            period: it.period,
-            unitPrice: it.unitPrice,
-            quantity: it.quantity,
-            amount: it.amount,
-          })),
+  const maxAttempts = clientSuppliedNumber ? 1 : 5;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const quoteNumber = clientSuppliedNumber
+      ? clientSuppliedNumber
+      : await generateNextAdminQuoteNumber(db);
+    try {
+      const created = await db.quote.create({
+        data: {
+          quoteNumber,
+          status,
+          clientName,
+          clientEmail,
+          clientPhone,
+          subtotal,
+          discount,
+          tax,
+          total,
+          validUntil,
+          isKo,
+          items: {
+            create: items.map((it) => ({
+              mediaId: it.mediaId,
+              mediaName: it.mediaName,
+              spec: it.spec,
+              period: it.period,
+              unitPrice: it.unitPrice,
+              quantity: it.quantity,
+              amount: it.amount,
+            })),
+          },
         },
-      },
-      include: { items: { orderBy: { id: "asc" } } },
-    });
-    return json({ quote: serializeQuote(created) }, 201);
-  } catch (e: unknown) {
-    const code =
-      e && typeof e === "object" && "code" in e ? (e as { code?: string }).code : "";
-    if (code === "P2002") {
-      return json({ error: "quoteNumber already exists" }, 409);
+        include: { items: { orderBy: { id: "asc" } } },
+      });
+      return json({ quote: serializeQuote(created) }, 201);
+    } catch (e: unknown) {
+      const code =
+        e && typeof e === "object" && "code" in e
+          ? (e as { code?: string }).code
+          : "";
+      if (code === "P2002") {
+        if (clientSuppliedNumber) {
+          return json({ error: "quoteNumber already exists" }, 409);
+        }
+        continue;
+      }
+      console.error("[admin-quotes POST]", e);
+      return json({ error: "Failed to save" }, 500);
     }
-    console.error("[admin-quotes POST]", e);
-    return json({ error: "Failed to save" }, 500);
   }
+  return json({ error: "Could not allocate unique quote number" }, 500);
 }

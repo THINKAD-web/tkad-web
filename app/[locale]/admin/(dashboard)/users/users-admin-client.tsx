@@ -118,26 +118,26 @@ export default function UsersAdminClient() {
           ) : items.length === 0 ? (
             <div className="py-10 text-center">
               <UserCog className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">조건에 맞는 사용자가 없습니다</p>
+              <p className="text-sm text-muted-foreground">조건에 맞는 사용자가 없습니다</p>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wider">이름</th>
-                  <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wider">이메일</th>
-                  <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wider hidden md:table-cell">회사</th>
-                  <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wider hidden sm:table-cell">가입일</th>
-                  <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wider hidden lg:table-cell">마지막 로그인</th>
-                  <th className="text-left px-4 py-2.5 text-xs font-medium text-slate-500 uppercase tracking-wider">역할</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">이름</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">이메일</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider hidden md:table-cell">회사</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider hidden sm:table-cell">가입일</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider hidden lg:table-cell">마지막 로그인</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">역할</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {items.map((u) => (
                   <tr key={u.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-slate-900">{u.name}</div>
-                      {u.phone && <div className="text-xs text-slate-500 mt-0.5">{u.phone}</div>}
+                      <div className="font-medium text-foreground">{u.name}</div>
+                      {u.phone && <div className="text-xs text-muted-foreground mt-0.5">{u.phone}</div>}
                     </td>
                     <td className="px-4 py-3">
                       <div className="text-slate-700 truncate max-w-[200px]">{u.email}</div>
@@ -145,9 +145,9 @@ export default function UsersAdminClient() {
                         <span className="text-[10px] text-amber-600 font-medium">미인증</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell text-slate-600">{u.company ?? "-"}</td>
-                    <td className="px-4 py-3 hidden sm:table-cell text-slate-600 text-xs">{formatDate(u.createdAt)}</td>
-                    <td className="px-4 py-3 hidden lg:table-cell text-slate-600 text-xs">{formatDate(u.lastLoginAt)}</td>
+                    <td className="px-4 py-3 hidden md:table-cell text-foreground/90">{u.company ?? "-"}</td>
+                    <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground text-xs">{formatDate(u.createdAt)}</td>
+                    <td className="px-4 py-3 hidden lg:table-cell text-muted-foreground text-xs">{formatDate(u.lastLoginAt)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Badge className={ROLE_STYLE[u.role]}>{ROLE_LABEL[u.role]}</Badge>

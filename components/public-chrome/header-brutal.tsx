@@ -8,15 +8,17 @@
  *   - 매체 검색 그룹 (4): /media, /media/map, /recommend, /planner
  *   - 트렌드 & 학습 그룹 (3): /cases, /insights, /academy
  *   - CTA: /contact
- *   - extras: HeaderUserMenu, LanguageToggle, ThemeToggle
+ *   - extras: HeaderUserMenu, LanguageToggle, 홈·서비스: HomeAppearanceToggle(랜딩 낮/밤) — 그 외는 ThemeToggle
  */
 
+import { Suspense, useTransition } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useTransition } from "react";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { Globe } from "lucide-react";
 import { BrutalNav, type BrutalNavEntry } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
+import { HeaderMediaSearch } from "@/components/header-media-search";
+import { HomeAppearanceToggle } from "@/components/home-appearance-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 function LanguageToggle() {
@@ -33,13 +35,14 @@ function LanguageToggle() {
       type="button"
       onClick={() =>
         startTransition(() => {
+          if (pathname == null || pathname === "") return;
           router.replace(pathname, { locale: next });
         })
       }
       disabled={isPending}
       aria-label={locale === "ko" ? "Switch to English" : "한국어로 전환"}
       title={label}
-      className="inline-flex h-9 w-9 items-center justify-center border-2 border-bx-black bg-bx-white text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-50"
+      className="inline-flex h-10 w-10 shrink-0 items-center justify-center border-2 border-border/25 bg-muted text-foreground transition-all duration-300 hover:border-hermes hover:bg-foreground hover:text-white hover:shadow-[0_0_28px_rgba(255,98,0,0.35)] disabled:opacity-50 dark:border-white/15 dark:bg-muted dark:text-foreground dark:hover:border-hermes dark:hover:bg-hermes dark:hover:text-white dark:hover:shadow-[0_0_32px_rgba(255,98,0,0.45)]"
     >
       <Globe className="h-4 w-4" />
       <span className="sr-only">{label}</span>
@@ -49,6 +52,21 @@ function LanguageToggle() {
 
 export function HeaderBrutal() {
   const t = useTranslations();
+  const pathname = usePathname();
+  /** 네온 랜딩 낮/밤(`data-appearance`) — 홈·서비스 동일 토글 */
+  const isLandingNeon =
+    pathname === "/" ||
+    pathname === "" ||
+    pathname === "/services" ||
+    pathname === "/contact" ||
+    pathname === "/cases" ||
+    pathname.startsWith("/cases/") ||
+    pathname === "/insights" ||
+    pathname.startsWith("/insights/") ||
+    pathname === "/academy" ||
+    pathname === "/recommend" ||
+    pathname === "/planner" ||
+    pathname.startsWith("/media");
 
   const links: BrutalNavEntry[] = [
     { href: "/", label: t("nav.home") },
@@ -75,12 +93,24 @@ export function HeaderBrutal() {
   return (
     <BrutalNav
       links={links}
+      search={
+        <Suspense
+          fallback={
+            <div
+              className="h-10 w-full rounded-xl border-2 border-border/30 bg-muted/25 dark:border-white/10 dark:bg-white/5"
+              aria-hidden
+            />
+          }
+        >
+          <HeaderMediaSearch />
+        </Suspense>
+      }
       cta={{ href: "/contact", label: t("nav.contact") }}
       extras={
         <>
           <HeaderUserMenu />
           <LanguageToggle />
-          <ThemeToggle />
+          {isLandingNeon ? <HomeAppearanceToggle /> : <ThemeToggle />}
         </>
       }
     />

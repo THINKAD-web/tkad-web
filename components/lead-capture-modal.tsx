@@ -8,7 +8,7 @@ import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
 
 const inputCls =
-  "h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none";
+  "h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none";
 
 export type LeadData = {
   company: string;
@@ -85,22 +85,22 @@ export function LeadCaptureModal({
       ariaLabelledBy="lead-capture-modal-title"
       className="max-w-md"
     >
-      <div className="border-2 border-bx-black bg-bx-white p-6">
+      <div className="border-2 border-border bg-card p-6">
         {submitted ? (
           <div className="flex flex-col items-center py-8 text-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-bx-accent bg-bx-accent text-bx-white">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-accent bg-accent text-accent-foreground">
               <CheckCircle className="h-8 w-8" />
             </div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
               [ SUBMITTED ]
             </p>
             <h3
               id="lead-capture-modal-title"
-              className="mt-2 text-xl font-bold tracking-tight text-bx-black"
+              className="mt-2 text-xl font-bold tracking-tight text-foreground"
             >
               {isKo ? "접수되었습니다!" : "You are all set!"}
             </h3>
-            <p className="mt-3 font-mono text-[12px] tracking-tight text-bx-gray-dim">
+            <p className="mt-3 font-mono text-[12px] tracking-tight text-muted-foreground">
               {`// `}{isKo
                 ? "입력하신 이메일로 자료를 보내드립니다."
                 : "We will send the materials to the email you provided."}
@@ -109,17 +109,17 @@ export function LeadCaptureModal({
         ) : (
           <>
             <div className="mb-6">
-              <div className="mb-3 inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+              <div className="mb-3 inline-flex items-center gap-1.5 border-2 border-border bg-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
                 <Download className="h-3.5 w-3.5" />
                 {isKo ? "자료 다운로드" : "Download"}
               </div>
               <h3
                 id="lead-capture-modal-title"
-                className="text-xl font-bold tracking-tight text-bx-black"
+                className="text-xl font-bold tracking-tight text-foreground"
               >
                 {displayTitle}
               </h3>
-              <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+              <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                 {`// `}{displayDescription}
               </p>
             </div>

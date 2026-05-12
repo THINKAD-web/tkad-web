@@ -40,8 +40,8 @@ export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Pro
         onClick={handleClick}
         className={`inline-flex h-11 items-center justify-center gap-2 border-2 px-5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors ${
           inCart
-            ? "border-bx-accent bg-bx-accent text-bx-white hover:bg-bx-black hover:border-bx-black"
-            : "border-bx-black bg-bx-black text-bx-white hover:bg-bx-accent hover:border-bx-accent"
+            ? "border-accent bg-accent text-accent-foreground hover:bg-foreground hover:border-border"
+            : "border-border bg-hero-void text-hero-fg hover:bg-accent hover:border-accent"
         }`}
         aria-pressed={inCart}
       >
@@ -60,11 +60,11 @@ export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Pro
       {ids.length > 0 && (
         <Link
           href="/cart"
-          className="inline-flex h-11 items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-off sm:px-4"
+          className="inline-flex h-11 items-center gap-1.5 border-2 border-border bg-card px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted sm:px-4"
         >
           <ShoppingCart className="h-4 w-4" />
           <span className="hidden sm:inline">장바구니</span>
-          <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center bg-bx-accent px-1 text-[10px] font-bold text-bx-white">
+          <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center bg-accent px-1 text-[10px] font-bold text-accent-foreground">
             {ids.length}
           </span>
         </Link>

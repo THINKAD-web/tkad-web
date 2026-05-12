@@ -356,10 +356,13 @@ export async function captureElementAsPng(
     imageTimeout: 20_000,
     onclone: replaceUntrustedImagesInClone,
   });
-  canvas.toBlob((blob) => {
-    if (!blob) return;
-    triggerBlobDownload(blob, filename);
-  }, "image/png");
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((b) => resolve(b), "image/png");
+  });
+  if (!blob) {
+    throw new Error("captureElementAsPng: empty blob");
+  }
+  triggerBlobDownload(blob, filename);
 }
 
 export async function htmlElementToPdfBase64(

@@ -69,31 +69,39 @@ export default function MediaAiRecommendDashboard({
   }, [top3]);
 
   return (
-    <div className="border-2 border-bx-black bg-bx-white p-5 sm:p-7 lg:p-10">
+    <div className="border-2 border-border bg-card p-5 sm:p-7 lg:p-10">
       <div className="space-y-10">
         {/* 상단 헤더 — TKAD bot 테마 */}
         <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2 text-center sm:text-left">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
               [ {isKo ? "AI MEDIA EXPLORER · TKAD BOT" : "AI MEDIA EXPLORER · TKAD BOT"} ]
             </p>
-            <h2 className="text-2xl font-bold tracking-tight text-bx-black sm:text-3xl">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               {isKo
                 ? "TKAD bot의 탐험 완료!"
                 : "TKAD bot's exploration complete!"}
             </h2>
-            <p className="max-w-xl font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim sm:text-sm">
+            <p className="max-w-xl font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground sm:text-sm">
               {`// `}{isKo
                 ? "TKAD bot이 당신을 위해 특별히 골라온 매체들입니다! 아래 추천들을 살펴보고 캠페인에 딱 맞는 조합을 골라보세요."
                 : "These are the placements TKAD bot carefully picked for your campaign. Explore them and choose the combo that feels right."}
             </p>
           </div>
           <div className="flex shrink-0 items-center justify-center">
-            <div className="relative flex h-20 w-20 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
-              <span className="text-3xl" aria-hidden>
+            <div className="relative grid h-20 w-20 place-items-center overflow-hidden rounded-[26px] border border-border/80 bg-card/80 text-foreground shadow-[0_28px_100px_rgba(0,0,0,0.20)] backdrop-blur">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.14),transparent_58%),linear-gradient(165deg,rgba(255,255,255,0.10)_0%,transparent_52%)]"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid"
+              />
+              <span className="relative z-10 text-[34px] leading-none" aria-hidden>
                 🤖
               </span>
-              <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-bx-black bg-bx-black px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <span className="pointer-events-none absolute -bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-border/80 bg-card/80 px-2.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-xs backdrop-blur">
                 TKAD bot
               </span>
             </div>
@@ -103,13 +111,13 @@ export default function MediaAiRecommendDashboard({
         {/* 상단 주요 영역: 지도 + TOP3 */}
         <section className="grid gap-0 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
           {/* 지도 영역 */}
-          <div className="space-y-3 border-2 border-bx-black bg-bx-white p-5">
+          <div className="space-y-3 border-2 border-border bg-card p-5">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-                <MapPin className="h-4 w-4 text-bx-accent" />
+              <h3 className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+                <MapPin className="h-4 w-4 text-accent" />
                 [ {isKo ? "MEDIA MAP" : "MEDIA MAP"} ]
               </h3>
-              <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
+              <p className="font-mono text-[10px] tracking-tight text-muted-foreground">
                 {`// `}{isKo
                   ? "핀을 클릭하면 해당 매체의 핵심 정보를 바로 볼 수 있어요."
                   : "Tap a pin to peek at that placement's key details."}
@@ -125,8 +133,8 @@ export default function MediaAiRecommendDashboard({
             />
 
             {top3.length > 0 && (
-              <div className="mt-4 border-2 border-bx-accent bg-bx-white px-4 py-3 text-bx-black">
-                <div className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <div className="mt-4 border-2 border-border bg-muted px-4 py-3 text-foreground">
+                <div className="mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                   <Trophy className="h-3.5 w-3.5" />
                   [ TOP 3 PICKS ]
                 </div>
@@ -134,17 +142,17 @@ export default function MediaAiRecommendDashboard({
                   {top3.map((s, i) => (
                     <li
                       key={s.item.id}
-                      className="flex items-center justify-between gap-2 border-t-2 border-bx-black pt-2 first:border-t-0 first:pt-0"
+                      className="flex items-center justify-between gap-2 border-t-2 border-border pt-2 first:border-t-0 first:pt-0"
                     >
                       <span className="inline-flex min-w-0 items-center gap-2">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent font-mono text-[10px] font-bold text-bx-white">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-border bg-accent font-mono text-[10px] font-bold text-accent-foreground">
                           {i + 1}
                         </span>
-                        <span className="line-clamp-1 text-xs font-bold tracking-tight text-bx-black">
+                        <span className="line-clamp-1 text-xs font-bold tracking-tight text-foreground">
                           {isKo ? s.item.name : s.item.nameEn}
                         </span>
                       </span>
-                      <span className="shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
+                      <span className="shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
                         {isKo ? `${s.score}점` : `M${s.score}`}
                       </span>
                     </li>
@@ -155,12 +163,12 @@ export default function MediaAiRecommendDashboard({
           </div>
 
           {/* TOP 3 — 세로 스택 카드 */}
-          <div className="-ml-[2px] -mt-[2px] space-y-3 border-2 border-bx-black bg-bx-off p-5 lg:mt-0">
-            <h3 className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-              <Trophy className="h-4 w-4 text-bx-accent" />
+          <div className="-ml-[2px] -mt-[2px] space-y-3 border-2 border-border bg-muted p-5 lg:mt-0">
+            <h3 className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Trophy className="h-4 w-4 text-accent" />
               [ {isKo ? "TKAD BOT TOP 3" : "TKAD BOT TOP 3"} ]
             </h3>
-            <p className="font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+            <p className="font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
               {`// `}{isKo
                 ? "위에서부터 순서대로, 이번 탐험에서 가장 궁합이 좋았던 매체들이에요."
                 : "From top to bottom: the three strongest matches from this run."}
@@ -180,16 +188,16 @@ export default function MediaAiRecommendDashboard({
 
         {/* 나머지 추천 매체 */}
         {scored.length > 3 && (
-          <section className="border-2 border-bx-black bg-bx-white p-5">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <section className="border-2 border-border bg-card p-5">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
               [ MORE PICKS ]
             </p>
-            <h3 className="mt-2 text-base font-bold tracking-tight text-bx-black sm:text-lg">
+            <h3 className="mt-2 text-base font-bold tracking-tight text-foreground sm:text-lg">
               {isKo
                 ? "TKAD bot이 추가로 발견한 매체들"
                 : "Other media TKAD bot discovered"}
             </h3>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
               {`// `}{isKo
                 ? "TOP 3 외에도 탐험 중 눈에 띈 매체들이에요."
                 : "Beyond the TOP 3, these also stood out during exploration."}
@@ -198,25 +206,25 @@ export default function MediaAiRecommendDashboard({
               {scored.slice(3, 8).map((s) => (
                 <div
                   key={s.item.id}
-                  className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-bx-black bg-bx-white p-4 transition-colors hover:bg-bx-off"
+                  className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card p-4 transition-colors hover:bg-muted"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-bx-black">
+                    <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
                       {isKo ? s.item.name : s.item.nameEn}
                     </p>
-                    <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white">
+                    <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent-foreground">
                       {isKo ? `${s.score}점` : `M${s.score}`}
                     </span>
                   </div>
-                  <p className="mt-2 line-clamp-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+                  <p className="mt-2 line-clamp-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                     {`// `}{formatMediaLocationShort(s.item, isKo)}
                   </p>
-                  <dl className="mt-3 flex items-center justify-between border-t-2 border-bx-black pt-3 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                  <dl className="mt-3 flex items-center justify-between border-t-2 border-border pt-3 font-mono text-[11px] tracking-tight text-muted-foreground">
                     <div>
                       <dt className="sr-only">CPM</dt>
                       <dd>
                         {isKo ? "예상 CPM" : "Est. CPM"}{" "}
-                        <span className="font-bold text-bx-black">
+                        <span className="font-bold text-foreground">
                           {(() => {
                             const cpm = estimatedCpmWon(s.item);
                             return cpm != null && Number.isFinite(cpm)
@@ -228,7 +236,7 @@ export default function MediaAiRecommendDashboard({
                     </div>
                     <Link
                       href={mediaItemDetailPath(s.item.id)}
-                      className="font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:text-bx-accent"
+                      className="font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-accent"
                     >
                       {isKo ? "자세히" : "Details"} →
                     </Link>
@@ -240,42 +248,93 @@ export default function MediaAiRecommendDashboard({
         )}
 
         {/* 간단 Achievement 영역 */}
-        <section className="border-2 border-bx-accent bg-bx-white p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <section className="border-2 border-accent bg-card p-5">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ ACHIEVEMENTS ]
           </p>
-          <p className="mt-1 text-sm font-bold tracking-tight text-bx-black">
+          <p className="mt-1 text-sm font-bold tracking-tight text-foreground">
             {isKo ? "TKAD Bot의 탐험 결과" : "Maddy's achievements for this run"}
           </p>
           <div className="mt-3 flex flex-wrap gap-0">
-            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
-              <Sparkles className="h-3 w-3 text-bx-accent" />
+            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
+              <Sparkles className="h-3 w-3 text-accent" />
               {isKo ? "첫 번째 탐험" : "First exploration"}
             </span>
-            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
-              <Star className="h-3 w-3 text-bx-accent" />
+            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
+              <Star className="h-3 w-3 text-accent" />
               {isKo ? "매체 궁합 폭발" : "Perfect match vibes"}
             </span>
-            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-bx-black bg-bx-white px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
-              <MapPin className="h-3 w-3 text-bx-accent" />
+            <span className="-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 border-border bg-card px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
+              <MapPin className="h-3 w-3 text-accent" />
               {isKo ? "도심 탐험가" : "City explorer"}
             </span>
           </div>
         </section>
 
         {/* 차트 영역 */}
-        <section className="border-2 border-bx-black bg-bx-white p-5">
-          <h3 className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-            <Star className="h-4 w-4 text-bx-accent" />
+        <section className="border-2 border-border bg-card p-5">
+          <h3 className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+            <Star className="h-4 w-4 text-accent" />
             [ {tr("resultChartTitle")} ]
           </h3>
+          <div className="mt-3 grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-muted p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                [ {isKo ? "읽는 법" : "How to read"} ]
+              </p>
+              <ul className="mt-2 space-y-1 text-sm leading-relaxed text-foreground">
+                <li>
+                  - {isKo ? "오른쪽일수록 추천 점수가 높아요." : "Further right = higher fit score."}
+                </li>
+                <li>
+                  - {isKo ? "위로 갈수록 월간 노출(추정)이 커요." : "Higher up = more estimated monthly reach."}
+                </li>
+                <li>
+                  - {isKo ? "오른쪽 위에 몰릴수록 유리해요." : "Top-right cluster is generally better."}
+                </li>
+              </ul>
+            </div>
+            <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                [ {isKo ? "어려운 용어" : "Terms"} ]
+              </p>
+              <dl className="mt-2 space-y-2 text-sm text-foreground">
+                <div>
+                  <dt className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
+                    {isKo ? "추천 점수" : "Fit score"}
+                  </dt>
+                  <dd className="text-muted-foreground">
+                    {isKo ? "조건(목표·지역·예산·타깃)과의 매칭 정도(0–100)" : "How well it matches your inputs (0–100)."}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
+                    {isKo ? "월간 노출(추정)" : "Est. monthly reach"}
+                  </dt>
+                  <dd className="text-muted-foreground">
+                    {isKo ? "서로 간 상대 비교용(정확한 실측이 아닐 수 있음)" : "For relative comparison (may not be measured)."}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 sm:col-span-2 lg:col-span-1">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                [ {isKo ? "빠른 팁" : "Quick tip"} ]
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {isKo
+                  ? "차트는 ‘완벽한 답’이 아니라 후보를 빠르게 좁히기 위한 지도예요. TOP 3부터 보고, 마음에 드는 매체를 비교/견적으로 이어가세요."
+                  : "This chart helps you narrow options quickly. Start with TOP 3, then compare and request a quote."}
+              </p>
+            </div>
+          </div>
           <div className="mt-4">
             <MediaAiRecommendChart locale={locale} scored={scored} />
           </div>
         </section>
 
         {/* 하단 액션 */}
-        <div className="flex flex-col gap-4 border-t-2 border-bx-black pt-6">
+        <div className="flex flex-col gap-4 border-t-2 border-border pt-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap">
               <BtnBlock
@@ -392,49 +451,65 @@ function Top3DashCard({
   return (
     <div
       className={cn(
-        "flex flex-col border-2 border-bx-black bg-bx-white p-4",
-        accentRank && "bg-bx-accent text-bx-white",
+        "relative flex flex-col overflow-hidden rounded-[24px] border-2 border-border bg-card p-4",
+        accentRank &&
+          "border-white/14 bg-[#05050a] text-white shadow-[0_28px_120px_rgba(0,0,0,0.55)]",
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2">
+      {accentRank ? (
+        <>
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-0 tkad-neon-depth" />
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-0 opacity-25 tkad-neon-grid" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-0 tkad-hero-noise opacity-[0.08] mix-blend-overlay"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(165deg,rgba(168,85,247,0.24)_0%,rgba(34,211,238,0.08)_40%,rgba(236,72,153,0.10)_100%)]"
+          />
+        </>
+      ) : null}
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "flex h-8 w-8 shrink-0 items-center justify-center font-mono text-sm font-black",
+                accentRank
+                  ? "rounded-full border border-white/22 bg-white/12 text-white shadow-[0_18px_60px_rgba(0,0,0,0.25)] backdrop-blur"
+                  : "border-2 border-border bg-accent text-accent-foreground",
+              )}
+            >
+              {rank}
+            </span>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-[0.18em]",
+                accentRank
+                  ? "rounded-xl border border-white/22 bg-black/25 text-white backdrop-blur"
+                  : "border-2 border-border bg-hero-void text-accent",
+              )}
+            >
+              <Trophy className="h-3 w-3" />
+              {tr("resultRank", { n: rank })}
+            </span>
+          </div>
           <span
             className={cn(
-              "flex h-8 w-8 shrink-0 items-center justify-center border-2 font-mono text-sm font-bold",
+              "px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-[0.18em]",
               accentRank
-                ? "border-bx-white bg-bx-white text-bx-accent"
-                : "border-bx-black bg-bx-accent text-bx-white",
+                ? "rounded-xl border border-white/22 bg-white/10 text-white shadow-[0_18px_60px_rgba(0,0,0,0.2)] backdrop-blur"
+                : "border-2 border-accent bg-accent text-accent-foreground",
             )}
           >
-            {rank}
-          </span>
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em]",
-              accentRank
-                ? "border-bx-white text-bx-white"
-                : "border-bx-black bg-bx-black text-bx-accent",
-            )}
-          >
-            <Trophy className="h-3 w-3" />
-            {tr("resultRank", { n: rank })}
+            {goldBadge}
           </span>
         </div>
-        <span
-          className={cn(
-            "border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em]",
-            accentRank
-              ? "border-bx-white text-bx-white"
-              : "border-bx-accent bg-bx-accent text-bx-white",
-          )}
-        >
-          {goldBadge}
-        </span>
-      </div>
       <p
         className={cn(
           "mt-3 line-clamp-2 text-sm font-bold leading-snug tracking-tight",
-          accentRank ? "text-bx-white" : "text-bx-black",
+          accentRank ? "text-white" : "text-foreground",
         )}
       >
         {isKo ? m.name : (m.nameEn || m.name)}
@@ -442,7 +517,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-1 font-mono text-[11px] uppercase tracking-[0.18em]",
-          accentRank ? "text-bx-white/80" : "text-bx-gray-dim",
+          accentRank ? "text-white/80" : "text-muted-foreground",
         )}
       >
         [ {isKo ? tl.ko : tl.en} ]
@@ -452,7 +527,7 @@ function Top3DashCard({
         <div
           className={cn(
             "flex items-center justify-between gap-2 font-mono text-[11px] tracking-tight",
-            accentRank ? "text-bx-white/85" : "text-bx-gray-dim",
+            accentRank ? "text-white/85" : "text-muted-foreground",
           )}
         >
           <span className="inline-flex items-center gap-1">
@@ -462,7 +537,7 @@ function Top3DashCard({
           <span
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-bx-white" : "text-bx-accent",
+              accentRank ? "text-white" : "text-accent",
             )}
           >
             {scoreLabel}
@@ -472,12 +547,17 @@ function Top3DashCard({
           className={cn(
             "h-3 w-full border-2",
             accentRank
-              ? "border-bx-white bg-bx-accent"
-              : "border-bx-black bg-bx-white",
+              ? "border-white/18 bg-black/20"
+              : "border-border bg-card",
           )}
         >
           <div
-            className={cn("h-full", accentRank ? "bg-bx-white" : "bg-bx-accent")}
+            className={cn(
+              "h-full",
+              accentRank
+                ? "bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]"
+                : "bg-accent",
+            )}
             style={{ width: `${Math.min(100, Math.max(0, scored.score))}%` }}
           />
         </div>
@@ -486,7 +566,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-3 font-mono text-[11px] leading-relaxed tracking-tight",
-          accentRank ? "text-bx-white/90" : "text-bx-gray-dim",
+          accentRank ? "text-white/90" : "text-muted-foreground",
         )}
       >
         {`// `}{maddyTagline}
@@ -495,30 +575,30 @@ function Top3DashCard({
       <dl
         className={cn(
           "mt-4 space-y-2 border-t-2 pt-3 font-mono text-xs",
-          accentRank ? "border-bx-white/40" : "border-bx-black",
+          accentRank ? "border-white/18" : "border-border",
         )}
       >
         <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "text-bx-white/70" : "text-bx-gray-dim"}>
+          <dt className={accentRank ? "text-white/70" : "text-muted-foreground"}>
             {tr("resultEstImpressions")}
           </dt>
           <dd
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-bx-white" : "text-bx-black",
+              accentRank ? "text-white" : "text-foreground",
             )}
           >
             {monthly > 0 ? monthly.toLocaleString() : "—"}
           </dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "text-bx-white/70" : "text-bx-gray-dim"}>
+          <dt className={accentRank ? "text-white/70" : "text-muted-foreground"}>
             {tr("resultCpmLabel")}
           </dt>
           <dd
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-bx-white" : "text-bx-black",
+              accentRank ? "text-white" : "text-foreground",
             )}
           >
             {cpm != null && Number.isFinite(cpm)
@@ -527,17 +607,22 @@ function Top3DashCard({
           </dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "text-bx-white/70" : "text-bx-gray-dim"}>
+          <dt className={accentRank ? "text-white/70" : "text-muted-foreground"}>
             {isKo ? "가격" : "Price"}
           </dt>
           <dd
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-bx-white" : "text-bx-black",
+              accentRank ? "text-white" : "text-foreground",
             )}
           >
             {formatMediaPriceWonWithSymbol(m.price)}
-            <span className={cn("ml-1 text-[10px] font-normal", accentRank ? "text-bx-white/60" : "text-bx-gray-dim")}>
+            <span
+              className={cn(
+                "ml-1 text-[10px] font-normal",
+                accentRank ? "text-white/60" : "text-muted-foreground",
+              )}
+            >
               · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
             </span>
           </dd>
@@ -547,7 +632,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-3 flex items-start gap-1 font-mono text-[11px] uppercase tracking-[0.18em]",
-          accentRank ? "text-bx-white/80" : "text-bx-gray-dim",
+          accentRank ? "text-white/80" : "text-muted-foreground",
         )}
       >
         <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
@@ -561,13 +646,14 @@ function Top3DashCard({
         className={cn(
           "mt-4 inline-flex w-fit items-center gap-1 border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
           accentRank
-            ? "border-bx-white bg-bx-white text-bx-accent hover:bg-bx-black hover:text-bx-white hover:border-bx-black"
-            : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white",
+            ? "border-white/22 bg-white/10 text-white backdrop-blur hover:border-white/30 hover:bg-white/16"
+            : "border-border bg-card text-foreground hover:bg-foreground hover:text-background",
         )}
       >
         {isKo ? "상세 보기" : "Details"}
         <span aria-hidden>→</span>
       </Link>
+      </div>
     </div>
   );
 }
