@@ -75,8 +75,8 @@ export function MediaStickyCta({
       <BtnBlock
         href={`/planner?addMedia=${encodeURIComponent(mediaId)}`}
         variant="accent"
-        size="md"
-        className="w-full"
+        size="lg"
+        className="w-full tkad-neon-cta-clean rounded-[22px] border-0"
       >
         <Sparkles className="h-4 w-4" aria-hidden />
         {t("planner")}
@@ -85,7 +85,11 @@ export function MediaStickyCta({
         onClick={toggleCompare}
         variant={inCart ? "primary" : "secondary"}
         size="md"
-        className="w-full"
+        className={
+          inCart
+            ? "w-full"
+            : "tkad-media-detail-cta-secondary w-full rounded-[18px] border border-white/14 bg-white/8 text-white backdrop-blur hover:bg-white/12"
+        }
       >
         {inCart ? (
           <Check className="h-4 w-4" aria-hidden />
@@ -100,13 +104,13 @@ export function MediaStickyCta({
         href={`/quote?media=${encodeURIComponent(mediaId)}`}
         variant="secondary"
         size="md"
-        className="w-full"
+        className="tkad-media-detail-cta-secondary w-full rounded-[18px] border border-white/14 bg-white/6 text-white backdrop-blur hover:bg-white/10"
       >
         <Send className="h-4 w-4" aria-hidden />
         {t("quote")}
       </BtnBlock>
       {entries.length > 0 ? (
-        <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+        <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           {isKo
             ? `// 비교함 ${entries.length}/${COMPARE_MAX_ITEMS}`
             : `// Compare ${entries.length}/${COMPARE_MAX_ITEMS}`}

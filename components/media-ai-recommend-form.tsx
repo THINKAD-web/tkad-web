@@ -430,37 +430,45 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
-      <div className="border-2 border-bx-black bg-bx-white text-bx-black">
-        <div className="border-b-2 border-bx-black p-6">
+    <div className="w-full max-w-none">
+      <div className="border-2 border-border bg-card text-foreground">
+        <div className="border-b-2 border-border p-6">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
                 <Sparkles className="mr-1 inline h-3 w-3" aria-hidden />
                 {isKo ? "[ AI MEDIA EXPLORER · TKAD BOT ]" : "[ AI MEDIA EXPLORER · TKAD BOT ]"}
               </p>
-              <h2 className="text-lg font-bold tracking-tight text-bx-black sm:text-xl">
+              <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
                 {isKo
                   ? "TKAD bot과 함께 매체 탐험 시작!"
                   : tr("form.panelTitle")}
               </h2>
-              <p className="font-mono text-[11px] tracking-tight text-bx-gray-dim">
+              <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
                 {isKo
                   ? "원하는 분위기와 조건을 알려주세요. TKAD bot이 딱 맞는 매체를 찾아줄게요!"
                   : tr("form.panelSubtitle")}
               </p>
             </div>
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center border-2 border-bx-black bg-bx-accent text-bx-white">
-              <span className="text-2xl" aria-hidden>
+            <div className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-[22px] border border-border/80 bg-card/80 text-foreground shadow-[0_24px_80px_rgba(0,0,0,0.18)] backdrop-blur">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.16),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.12),transparent_58%),linear-gradient(165deg,rgba(255,255,255,0.10)_0%,transparent_52%)]"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid"
+              />
+              <span className="relative z-10 text-[28px] leading-none" aria-hidden>
                 🤖
               </span>
-              <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 border-2 border-bx-black bg-bx-black px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+              <span className="pointer-events-none absolute -bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-border/80 bg-card/80 px-2.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-xs backdrop-blur">
                 TKAD bot
               </span>
             </div>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-bx-black pt-4">
-            <p className="min-w-0 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim sm:text-[12px]">
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-border pt-4">
+            <p className="min-w-0 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
               {`// `}{maddyMessage}
             </p>
             <BtnBlock
@@ -475,8 +483,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         </div>
         <div className="space-y-7 p-6">
           <section className="space-y-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-              <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <MapPin className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {isKo ? "TKAD Bot 추천 지역" : tr("form.regionLabel")} ]
             </div>
             <div className="flex flex-wrap gap-0">
@@ -486,8 +494,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   className={cn(
                     "-mt-[2px] -ml-[2px] flex cursor-pointer items-center gap-2 border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     regions.has(code)
-                      ? "border-bx-accent bg-bx-accent text-bx-white"
-                      : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   <input
@@ -503,36 +511,36 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-              <Store className="h-4 w-4 shrink-0 text-bx-accent" aria-hidden />
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Store className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {isKo ? "이번 탐험 준비 현황" : "EXPLORATION SETUP"} ]
             </div>
-            <div className="border-2 border-bx-black bg-bx-off p-4 font-mono text-[11px] tracking-tight text-bx-black sm:text-xs">
+            <div className="border-2 border-border bg-muted p-4 font-mono text-[11px] tracking-tight text-foreground sm:text-xs">
               <div className="flex flex-wrap gap-y-1">
-                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-bx-accent">
+                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
                   {isKo ? "지역" : "REGION"}:
                 </span>
                 <span>{summary.region}</span>
               </div>
               <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-bx-accent">
+                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
                   {isKo ? "연령" : "AGES"}:
                 </span>
                 <span>{summary.age}</span>
               </div>
               <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-bx-accent">
+                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
                   {isKo ? "업종" : "INDUSTRY"}:
                 </span>
                 <span>{summary.industry}</span>
               </div>
               <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-bx-accent">
+                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
                   {isKo ? "기간" : "PERIOD"}:
                 </span>
                 <span>{summary.period}</span>
               </div>
-              <div className="mt-3 border-t-2 border-bx-black pt-3 text-[11px] leading-relaxed text-bx-gray-dim sm:text-xs">
+              <div className="mt-3 border-t-2 border-border pt-3 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
                 {`// `}{isKo
                   ? "이 정도면 출발 준비는 끝났어요. 마음에 안 들면 언제든 Remix로 다른 코스를 타볼 수 있어요."
                   : "Looks like we're ready to launch. You can always hit Remix later if you want a different route."}
@@ -541,8 +549,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-              <Search className="h-4 w-4 shrink-0 text-bx-accent" aria-hidden />
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Search className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {tr("form.searchLabel")} ]
             </div>
             <input
@@ -554,13 +562,13 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   ? "예: 강남 지하철, 홍대 거리 가구, 코엑스 빌보드…"
                   : tr("form.searchPlaceholder")
               }
-              className="h-12 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+              className="h-12 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
             />
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-              <Monitor className="h-4 w-4 shrink-0 text-bx-accent" aria-hidden />
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Monitor className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {isKo ? "탐험할 매체 유형" : tr("form.mediaTypeLabel")} ]
             </div>
             <div className="grid grid-cols-2 gap-0 sm:grid-cols-3">
@@ -585,8 +593,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     className={cn(
                       "-mt-[2px] -ml-[2px] flex flex-col items-start gap-1.5 border-2 px-4 py-3 text-left transition-colors",
                       selected
-                        ? "border-bx-accent bg-bx-accent text-bx-white"
-                        : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border bg-card text-foreground hover:bg-muted",
                     )}
                   >
                     <Icon className="h-4 w-4" aria-hidden />
@@ -600,8 +608,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-              <Layers className="h-4 w-4 shrink-0 text-bx-accent" aria-hidden />
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Layers className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {isKo
                 ? "TKAD Bot이 탐험할 노출 환경"
                 : tr("form.placementHintsLabel")} ]
@@ -613,8 +621,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   className={cn(
                     "-mt-[2px] -ml-[2px] flex cursor-pointer items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     placementHints.has(code)
-                      ? "border-bx-accent bg-bx-accent text-bx-white"
-                      : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   <input
@@ -639,8 +647,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-              <Target className="h-4 w-4 shrink-0 text-bx-accent" aria-hidden />
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Target className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {isKo ? "TKAD Bot이 타겟할 연령대" : tr("form.ageLabel")} ]
             </div>
             <div className="flex flex-wrap gap-0">
@@ -650,8 +658,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   className={cn(
                     "-mt-[2px] -ml-[2px] flex cursor-pointer items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     ageBands.has(code)
-                      ? "border-bx-accent bg-bx-accent text-bx-white"
-                      : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   <input
@@ -676,18 +684,18 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-              <Wallet className="h-4 w-4 shrink-0 text-bx-accent" aria-hidden />
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Wallet className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {isKo ? "예산 게이지" : tr("form.budgetLabel")} ]
             </div>
-            <div className="border-2 border-bx-black bg-bx-off p-4">
-              <div className="flex items-center justify-between font-mono text-[11px] tabular-nums text-bx-gray-dim">
+            <div className="border-2 border-border bg-muted p-4">
+              <div className="flex items-center justify-between font-mono text-[11px] tabular-nums text-muted-foreground">
                 <span>
                   {isKo
                     ? `${budgetMin.toLocaleString()}만원`
                     : `${budgetMin.toLocaleString()} (10K)`}
                 </span>
-                <span className="inline-flex items-center gap-1 border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-bold text-bx-white">
+                <span className="inline-flex items-center gap-1 border-2 border-accent bg-accent px-2 py-0.5 font-bold text-accent-foreground">
                   <Sparkles className="h-3 w-3" />
                   {isKo
                     ? `${budgetMan.toLocaleString()}만원`
@@ -708,15 +716,14 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     step={100}
                     value={budgetMan}
                     onChange={(e) => setBudgetMan(Number(e.target.value))}
-                    className="h-3 w-full cursor-pointer appearance-none border-2 border-bx-black bg-bx-white accent-bx-accent"
-                    style={{ accentColor: "#FF6600" }}
+                    className="h-3 w-full cursor-pointer appearance-none border-2 border-border bg-card accent-cta"
                     aria-valuemin={budgetMin}
                     aria-valuemax={budgetMax}
                     aria-valuenow={budgetMan}
                   />
                 </div>
               </div>
-              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 {`// `}{isKo
                   ? "게이지를 움직여서 캠페인 스케일을 정해봐요."
                   : "Slide to set how bold your campaign should be."}
@@ -725,8 +732,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-              <Building2 className="h-4 w-4 shrink-0 text-bx-accent" aria-hidden />
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Building2 className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {isKo
                 ? "어떤 업종의 모험을 떠날까요?"
                 : tr("form.industryLabel")} ]
@@ -742,8 +749,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     className={cn(
                       "-mt-[2px] -ml-[2px] flex items-center gap-2 border-2 px-4 py-3 text-left transition-colors",
                       selected
-                        ? "border-bx-accent bg-bx-accent text-bx-white"
-                        : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border bg-card text-foreground hover:bg-muted",
                     )}
                   >
                     <span className="text-base">
@@ -771,8 +778,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-black">
-              <CalendarDays className="h-4 w-4 shrink-0 text-bx-accent" aria-hidden />
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <CalendarDays className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {tr("form.periodLabel")} ]
             </div>
             <div className="flex flex-wrap gap-0">
@@ -784,8 +791,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   className={cn(
                     "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     periodWeeks === w
-                      ? "border-bx-accent bg-bx-accent text-bx-white"
-                      : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   {label}
@@ -797,12 +804,12 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           <div className="pt-2">
             <BtnBlock
               variant="accent"
-              size="lg"
+              size="md"
               disabled={!canSubmit}
               onClick={handleSubmit}
-              className="w-full"
+              className="w-full py-3 text-[15px]"
             >
-              <Sparkles className="h-5 w-5" aria-hidden />
+              <Sparkles className="h-4.5 w-4.5" aria-hidden />
               {isKo ? "TKAD bot과 함께 탐험 시작!" : tr("form.submit")}
             </BtnBlock>
           </div>

@@ -6,38 +6,38 @@ const MAP: Record<
 > = {
   draft: {
     label: "초안",
-    className: "border-bx-black bg-bx-white text-bx-black",
+    className: "border-border bg-card text-foreground",
   },
   booking_requested: {
     label: "예약 요청",
-    className: "border-bx-black bg-bx-off text-bx-black",
+    className: "border-border bg-muted text-foreground",
   },
   booking_confirmed: {
     label: "예약 확정",
-    className: "border-bx-black bg-bx-black text-bx-white",
+    className: "border-border bg-hero-void text-hero-fg",
   },
   invoice_sent: {
     label: "청구서 발송",
-    className: "border-bx-accent bg-bx-white text-bx-accent",
+    className: "border-accent bg-card text-accent",
   },
   payment_confirmed: {
     label: "결제 완료",
-    className: "border-bx-accent bg-bx-accent text-bx-white",
+    className: "border-accent bg-accent text-accent-foreground",
   },
   contract_confirmed: {
     label: "계약 확정",
-    className: "border-bx-accent bg-bx-accent text-bx-white",
+    className: "border-accent bg-accent text-accent-foreground",
   },
   cancelled: {
     label: "취소",
-    className: "border-bx-black bg-bx-white text-bx-gray-dim",
+    className: "border-border bg-card text-muted-foreground",
   },
 };
 
 export function QuoteStatusBadge({ status }: Props) {
   const m = MAP[status] ?? {
     label: status,
-    className: "border-bx-black bg-bx-white text-bx-black",
+    className: "border-border bg-card text-foreground",
   };
   return (
     <span

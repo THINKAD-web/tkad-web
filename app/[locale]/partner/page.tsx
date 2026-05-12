@@ -269,8 +269,8 @@ export default function PartnerPortalPage() {
 
   if (!hydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bx-off">
-        <Loader2 className="h-10 w-10 animate-spin text-bx-accent" />
+      <div className="flex min-h-screen items-center justify-center bg-muted">
+        <Loader2 className="h-10 w-10 animate-spin text-accent" />
       </div>
     );
   }
@@ -279,33 +279,33 @@ export default function PartnerPortalPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-100 to-white py-12">
         <div className="mx-auto max-w-md px-4">
-          <div className="border-2 border-bx-black bg-bx-white">
+          <div className="border-2 border-border bg-card">
             <header>
               <div className="mb-2 flex flex-wrap gap-2">
-                <span className="border-0 bg-bx-black/90 text-white">{t("loginBadge")}</span>
-                <span className="border-2 border-bx-black bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
+                <span className="border-0 bg-hero-void/90 text-white">{t("loginBadge")}</span>
+                <span className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
                   {t("loginPartnerOnly")}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-bx-black">
-                <ShieldCheck className="h-6 w-6 text-bx-accent" />
+              <div className="flex items-center gap-2 text-foreground">
+                <ShieldCheck className="h-6 w-6 text-accent" />
                 <h3>{t("loginTitle")}</h3>
               </div>
               <p>{t("loginSubtitle")}</p>
             </header>
             <div>
               {step === "credentials" && (
-                <ul className="mb-5 space-y-1.5 rounded-xl border border-2 border-bx-black bg-bx-off/90 px-3 py-3 text-xs text-bx-black/75">
+                <ul className="mb-5 space-y-1.5 rounded-xl border border-2 border-border bg-muted/90 px-3 py-3 text-xs text-foreground/75">
                   <li className="flex gap-2">
-                    <FileSignature className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bx-accent" />
+                    <FileSignature className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
                     {t("loginFeatureContracts")}
                   </li>
                   <li className="flex gap-2">
-                    <PanelLeft className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bx-accent" />
+                    <PanelLeft className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
                     {t("loginFeatureMedia")}
                   </li>
                   <li className="flex gap-2">
-                    <Wallet className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bx-accent" />
+                    <Wallet className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
                     {t("loginFeatureSettlement")}
                   </li>
                 </ul>
@@ -313,11 +313,11 @@ export default function PartnerPortalPage() {
               {step === "credentials" && (
                 <form className="space-y-4" onSubmit={submitCredentials}>
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-bx-black/70">
+                    <label className="mb-1 block text-xs font-semibold text-foreground/70">
                       {t("email")}
                     </label>
                     <input
-                      className="h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                      className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                       type="email"
                       autoComplete="email"
                       value={email}
@@ -326,11 +326,11 @@ export default function PartnerPortalPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-bx-black/70">
+                    <label className="mb-1 block text-xs font-semibold text-foreground/70">
                       {t("password")}
                     </label>
                     <input
-                      className="h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                      className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                       type="password"
                       autoComplete="current-password"
                       value={password}
@@ -346,7 +346,7 @@ export default function PartnerPortalPage() {
                   ) : null}
                   <BtnBlock
                     type="submit"
-                    className="w-full bg-bx-black text-white hover:bg-bx-black/90"
+                    className="w-full bg-hero-void text-white hover:bg-hero-void/90"
                     disabled={loading}
                   >
                     {loading ? (
@@ -367,13 +367,13 @@ export default function PartnerPortalPage() {
               {step === "totp" && (
                 <form className="space-y-4" onSubmit={submitTotp}>
                   <div>
-                    <p className="text-sm font-medium text-bx-black">{t("totpTitle")}</p>
+                    <p className="text-sm font-medium text-foreground">{t("totpTitle")}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {t("totpSubtitle")}
                     </p>
                   </div>
                   <input
-                      className="h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                      className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     maxLength={6}
@@ -383,7 +383,7 @@ export default function PartnerPortalPage() {
                     }
                     placeholder={t("totpPlaceholder")}
                   />
-                  <p className="text-xs font-medium text-bx-accent">
+                  <p className="text-xs font-medium text-accent">
                     {t("totpDemoHint")}
                   </p>
                   {error ? (
@@ -402,7 +402,7 @@ export default function PartnerPortalPage() {
                     >
                       {t("back")}
                     </BtnBlock>
-                    <BtnBlock type="submit" className="flex-1 bg-bx-accent font-bold text-bx-black">
+                    <BtnBlock type="submit" className="flex-1 bg-accent font-bold text-foreground">
                       <Lock className="mr-2 h-4 w-4" />
                       {t("totpVerify")}
                     </BtnBlock>
@@ -412,7 +412,7 @@ export default function PartnerPortalPage() {
             </div>
           </div>
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            <Link href="/" className="text-bx-black underline-offset-4 hover:underline">
+            <Link href="/" className="text-foreground underline-offset-4 hover:underline">
               {isKo ? "홈으로" : "Back to home"}
             </Link>
           </p>
@@ -423,10 +423,10 @@ export default function PartnerPortalPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-20">
-      <header className="border-b border-2 border-bx-black bg-white/90 backdrop-blur">
+      <header className="border-b border-2 border-border bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <div>
-            <h1 className="text-lg font-extrabold text-bx-black sm:text-xl">
+            <h1 className="text-lg font-extrabold text-foreground sm:text-xl">
               {t("portalTitle")}
             </h1>
             <p className="text-xs text-muted-foreground">
@@ -446,15 +446,15 @@ export default function PartnerPortalPage() {
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
         {portalStats ? (
           <section className="mb-8 space-y-3" aria-label={t("overviewTitle")}>
-            <h2 className="flex items-center gap-2 text-base font-extrabold text-bx-black sm:text-lg">
-              <LayoutDashboard className="h-5 w-5 text-bx-accent" />
+            <h2 className="flex items-center gap-2 text-base font-extrabold text-foreground sm:text-lg">
+              <LayoutDashboard className="h-5 w-5 text-accent" />
               {t("overviewTitle")}
             </h2>
             <div className="grid gap-4 sm:grid-cols-3">
               <div
                 role="button"
                 tabIndex={0}
-                className="cursor-pointer border-2 border-bx-black bg-bx-white py-5 transition-colors hover:bg-bx-off focus:border-bx-accent focus:outline-none"
+                className="cursor-pointer border-2 border-border bg-card py-5 transition-colors hover:bg-muted focus:border-accent focus:outline-none"
                 onClick={() => setTab("contracts")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -465,16 +465,16 @@ export default function PartnerPortalPage() {
               >
                 <header className="pb-2 pt-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-bx-black/80">
+                    <h3 className="text-sm font-semibold text-foreground/80">
                       {t("tabContracts")}
                     </h3>
-                    <FileSignature className="h-4 w-4 text-bx-accent" />
+                    <FileSignature className="h-4 w-4 text-accent" />
                   </div>
                 </header>
                 <div className="space-y-1 pb-0 pt-0">
-                  <p className="text-2xl font-extrabold text-bx-black">
+                  <p className="text-2xl font-extrabold text-foreground">
                     {portalStats.contractsActive}
-                    <span className="text-lg font-semibold text-bx-black/40">
+                    <span className="text-lg font-semibold text-foreground/40">
                       {" "}
                       / {portalStats.contractsTotal}
                     </span>
@@ -487,7 +487,7 @@ export default function PartnerPortalPage() {
                       {t("overviewRenewal", { n: portalStats.contractsRenewal })}
                     </p>
                   ) : null}
-                  <p className="pt-2 text-xs font-bold text-bx-accent">
+                  <p className="pt-2 text-xs font-bold text-accent">
                     {t("overviewOpen")} →
                   </p>
                 </div>
@@ -496,7 +496,7 @@ export default function PartnerPortalPage() {
               <div
                 role="button"
                 tabIndex={0}
-                className="cursor-pointer border-2 border-bx-black bg-bx-white py-5 transition-colors hover:bg-bx-off focus:border-bx-accent focus:outline-none"
+                className="cursor-pointer border-2 border-border bg-card py-5 transition-colors hover:bg-muted focus:border-accent focus:outline-none"
                 onClick={() => setTab("media")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -507,21 +507,21 @@ export default function PartnerPortalPage() {
               >
                 <header className="pb-2 pt-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-bx-black/80">
+                    <h3 className="text-sm font-semibold text-foreground/80">
                       {t("tabMedia")}
                     </h3>
-                    <PanelLeft className="h-4 w-4 text-bx-accent" />
+                    <PanelLeft className="h-4 w-4 text-accent" />
                   </div>
                 </header>
                 <div className="space-y-1 pb-0 pt-0">
-                  <p className="text-2xl font-extrabold text-bx-black">
+                  <p className="text-2xl font-extrabold text-foreground">
                     {portalStats.mediaTotal}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
                     {t("overviewMediaCaption")}: {portalStats.mediaLive} ·{" "}
                     {portalStats.mediaReview}
                   </p>
-                  <p className="pt-2 text-xs font-bold text-bx-accent">
+                  <p className="pt-2 text-xs font-bold text-accent">
                     {t("overviewOpen")} →
                   </p>
                 </div>
@@ -530,7 +530,7 @@ export default function PartnerPortalPage() {
               <div
                 role="button"
                 tabIndex={0}
-                className="cursor-pointer border-2 border-bx-black bg-bx-white py-5 transition-colors hover:bg-bx-off focus:border-bx-accent focus:outline-none"
+                className="cursor-pointer border-2 border-border bg-card py-5 transition-colors hover:bg-muted focus:border-accent focus:outline-none"
                 onClick={() => setTab("settlements")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -541,14 +541,14 @@ export default function PartnerPortalPage() {
               >
                 <header className="pb-2 pt-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-bx-black/80">
+                    <h3 className="text-sm font-semibold text-foreground/80">
                       {t("tabSettlements")}
                     </h3>
-                    <Wallet className="h-4 w-4 text-bx-accent" />
+                    <Wallet className="h-4 w-4 text-accent" />
                   </div>
                 </header>
                 <div className="space-y-1 pb-0 pt-0">
-                  <p className="text-2xl font-extrabold text-bx-black tabular-nums">
+                  <p className="text-2xl font-extrabold text-foreground tabular-nums">
                     {formatMan(portalStats.settlementOutstandingMan, isKo)}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
@@ -560,7 +560,7 @@ export default function PartnerPortalPage() {
                       total: portalStats.settlementRows,
                     })}
                   </p>
-                  <p className="pt-2 text-xs font-bold text-bx-accent">
+                  <p className="pt-2 text-xs font-bold text-accent">
                     {t("overviewOpen")} →
                   </p>
                 </div>
@@ -569,7 +569,7 @@ export default function PartnerPortalPage() {
           </section>
         ) : null}
 
-        <div className="mb-6 flex flex-wrap gap-2 border-b border-2 border-bx-black pb-4">
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-2 border-border pb-4">
           {tabs.map(({ id, label, icon: Icon }) => (
             <BtnBlock
               key={id}
@@ -578,7 +578,7 @@ export default function PartnerPortalPage() {
               variant={tab === id ? "dark" : "secondary"}
               onClick={() => setTab(id)}
               className={cn(
-                tab === id ? "bg-bx-black text-white" : "text-bx-black/70",
+                tab === id ? "bg-hero-void text-white" : "text-foreground/70",
               )}
             >
               <Icon className="mr-1.5 h-4 w-4" />
@@ -590,7 +590,7 @@ export default function PartnerPortalPage() {
         {tab === "contracts" && (
           <section className="space-y-4">
             <div>
-              <h2 className="text-base font-bold text-bx-black">{t("contractsTitle")}</h2>
+              <h2 className="text-base font-bold text-foreground">{t("contractsTitle")}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{t("contractsSubtitle")}</p>
             </div>
             {partner.contracts.length === 0 ? (
@@ -600,7 +600,7 @@ export default function PartnerPortalPage() {
                 {partner.contracts.map((c) => {
                   const st = contractStatusStyles[c.status];
                   return (
-                    <div key={c.id} className="border-2 border-bx-black bg-bx-white">
+                    <div key={c.id} className="border-2 border-border bg-card">
                       <header className="pb-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <p className="font-mono text-[11px] text-muted-foreground">
@@ -610,7 +610,7 @@ export default function PartnerPortalPage() {
                             {isKo ? st.labelKo : st.labelEn}
                           </span>
                         </div>
-                        <h3 className="text-base text-bx-black">
+                        <h3 className="text-base text-foreground">
                           {isKo ? c.titleKo : c.titleEn}
                         </h3>
                       </header>
@@ -623,7 +623,7 @@ export default function PartnerPortalPage() {
                             <span className="text-muted-foreground">
                               {t("period")}:{" "}
                             </span>
-                            <span className="font-medium text-bx-black">
+                            <span className="font-medium text-foreground">
                               {c.startDate} — {c.endDate}
                             </span>
                           </span>
@@ -631,7 +631,7 @@ export default function PartnerPortalPage() {
                             <span className="text-muted-foreground">
                               {t("contractValue")}:{" "}
                             </span>
-                            <span className="font-semibold text-bx-black">
+                            <span className="font-semibold text-foreground">
                               {formatMan(c.valueMan, isKo)}
                             </span>
                           </span>
@@ -649,23 +649,23 @@ export default function PartnerPortalPage() {
           <section className="space-y-4">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="text-base font-bold text-bx-black">{t("mediaTitle")}</h2>
+                <h2 className="text-base font-bold text-foreground">{t("mediaTitle")}</h2>
                 <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
                   {t("mediaSubtitle")}
                 </p>
               </div>
               <BtnBlock
                 type="button"
-                className="bg-bx-accent font-bold text-bx-black hover:bg-bx-accent"
+                className="bg-accent font-bold text-foreground hover:bg-accent"
                 onClick={openAddMedia}
               >
                 <PanelLeft className="mr-2 h-4 w-4" />
                 {t("mediaAdd")}
               </BtnBlock>
             </div>
-            <div className="overflow-x-auto rounded-xl border border-2 border-bx-black">
+            <div className="overflow-x-auto rounded-xl border border-2 border-border">
               <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="border-b border-2 border-bx-black bg-bx-off text-xs font-semibold text-bx-black/70">
+                <thead className="border-b border-2 border-border bg-muted text-xs font-semibold text-foreground/70">
                   <tr>
                     <th className="px-3 py-2">{t("mediaName")}</th>
                     <th className="px-3 py-2">{t("mediaType")}</th>
@@ -680,8 +680,8 @@ export default function PartnerPortalPage() {
                   {localMedia.map((m) => {
                     const st = mediaStatusStyles[m.status];
                     return (
-                      <tr key={m.id} className="border-b border-bx-black">
-                        <td className="px-3 py-2 font-medium text-bx-black">
+                      <tr key={m.id} className="border-b border-border">
+                        <td className="px-3 py-2 font-medium text-foreground">
                           {isKo ? m.nameKo : m.nameEn}
                         </td>
                         <td className="px-3 py-2 text-muted-foreground">
@@ -720,14 +720,14 @@ export default function PartnerPortalPage() {
         {tab === "settlements" && (
           <section className="space-y-4">
             <div>
-              <h2 className="text-base font-bold text-bx-black">{t("settlementsTitle")}</h2>
+              <h2 className="text-base font-bold text-foreground">{t("settlementsTitle")}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("settlementsSubtitle")}
               </p>
             </div>
-            <div className="overflow-x-auto rounded-xl border border-2 border-bx-black">
+            <div className="overflow-x-auto rounded-xl border border-2 border-border">
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="border-b border-2 border-bx-black bg-bx-off text-xs font-semibold text-bx-black/70">
+                <thead className="border-b border-2 border-border bg-muted text-xs font-semibold text-foreground/70">
                   <tr>
                     <th className="px-3 py-2">{t("settlementPeriod")}</th>
                     <th className="px-3 py-2">{t("settlementAmount")}</th>
@@ -741,8 +741,8 @@ export default function PartnerPortalPage() {
                   {partner.settlements.map((s) => {
                     const st = settlementStatusStyles[s.status];
                     return (
-                      <tr key={s.id} className="border-b border-bx-black">
-                        <td className="px-3 py-2 font-medium text-bx-black">
+                      <tr key={s.id} className="border-b border-border">
+                        <td className="px-3 py-2 font-medium text-foreground">
                           {isKo ? s.periodLabelKo : s.periodLabelEn}
                         </td>
                         <td className="px-3 py-2 tabular-nums font-semibold">
@@ -771,15 +771,15 @@ export default function PartnerPortalPage() {
 
         {tab === "campaigns" && (
           <section className="space-y-4">
-            <h2 className="text-base font-bold text-bx-black">{t("campaignsTitle")}</h2>
+            <h2 className="text-base font-bold text-foreground">{t("campaignsTitle")}</h2>
             <div className="grid gap-4 md:grid-cols-2">
               {partner.sharedCampaigns.map((c) => (
-                <div key={c.id} className="border-2 border-bx-black bg-bx-white">
-                  <header className="border-b-2 border-bx-black p-5">
-                    <p className="font-mono text-[11px] text-bx-gray-dim">
+                <div key={c.id} className="border-2 border-border bg-card">
+                  <header className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[11px] text-muted-foreground">
                       {c.id}
                     </p>
-                    <h3 className="text-base text-bx-black">
+                    <h3 className="text-base text-foreground">
                       {isKo ? c.titleKo : c.titleEn}
                     </h3>
                     <p>
@@ -793,18 +793,18 @@ export default function PartnerPortalPage() {
                         <span className="text-muted-foreground">
                           {t("campaignProgress")}
                         </span>
-                        <span className="font-bold text-bx-black">
+                        <span className="font-bold text-foreground">
                           {c.progressPercent}%
                         </span>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-bx-off">
+                      <div className="h-2 overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full bg-bx-accent transition-all"
+                          className="h-full rounded-full bg-accent transition-all"
                           style={{ width: `${c.progressPercent}%` }}
                         />
                       </div>
                     </div>
-                    <p className="text-sm text-bx-black/80">
+                    <p className="text-sm text-foreground/80">
                       {isKo ? c.statusKo : c.statusEn}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -819,17 +819,17 @@ export default function PartnerPortalPage() {
 
         {tab === "notices" && (
           <section className="space-y-4">
-            <h2 className="text-base font-bold text-bx-black">{t("noticesTitle")}</h2>
+            <h2 className="text-base font-bold text-foreground">{t("noticesTitle")}</h2>
             <ul className="space-y-3">
               {sortedNotices.map((n) => {
                 const open = expandedNotice === n.id;
                 return (
                   <li key={n.id}>
-                    <div className="border-2 border-bx-black bg-bx-white">
-                      <header className="border-b-2 border-bx-black p-5">
+                    <div className="border-2 border-border bg-card">
+                      <header className="border-b-2 border-border p-5">
                         <div className="flex flex-wrap items-center gap-2">
                           {n.pinned ? (
-                            <span className="bg-bx-accent text-bx-black">
+                            <span className="bg-accent text-foreground">
                               {t("noticePinned")}
                             </span>
                           ) : null}
@@ -837,7 +837,7 @@ export default function PartnerPortalPage() {
                             {n.date}
                           </span>
                         </div>
-                        <h3 className="text-base text-bx-black">
+                        <h3 className="text-base text-foreground">
                           {isKo ? n.titleKo : n.titleEn}
                         </h3>
                       </header>
@@ -853,7 +853,7 @@ export default function PartnerPortalPage() {
                         <BtnBlock
                           type="button"
                           variant="secondary"
-                          className="mt-2 h-auto p-0 text-xs text-bx-accent"
+                          className="mt-2 h-auto p-0 text-xs text-accent"
                           onClick={() =>
                             setExpandedNotice((cur) => (cur === n.id ? null : n.id))
                           }
@@ -880,16 +880,16 @@ export default function PartnerPortalPage() {
         ariaLabel={editingMedia ? t("mediaModalEditTitle") : t("mediaModalAddTitle")}
       >
         <div className="p-6 pt-10">
-          <h3 className="text-lg font-bold text-bx-black">
+          <h3 className="text-lg font-bold text-foreground">
             {editingMedia ? t("mediaModalEditTitle") : t("mediaModalAddTitle")}
           </h3>
           <div className="mt-4 space-y-3">
             <div>
-              <label className="text-xs font-semibold text-bx-black/70">
+              <label className="text-xs font-semibold text-foreground/70">
                 {t("mediaName")}
               </label>
               <input
-                      className="mt-1 h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 value={mediaForm.name}
                 onChange={(e) =>
                   setMediaForm((f) => ({ ...f, name: e.target.value }))
@@ -897,11 +897,11 @@ export default function PartnerPortalPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-bx-black/70">
+              <label className="text-xs font-semibold text-foreground/70">
                 {t("mediaType")}
               </label>
               <input
-                      className="mt-1 h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 value={mediaForm.type}
                 onChange={(e) =>
                   setMediaForm((f) => ({ ...f, type: e.target.value }))
@@ -909,11 +909,11 @@ export default function PartnerPortalPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-bx-black/70">
+              <label className="text-xs font-semibold text-foreground/70">
                 {t("mediaLocation")}
               </label>
               <textarea
-                      className="mt-1 min-h-[72px] w-full border-2 border-bx-black bg-bx-white px-3 py-2 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                      className="mt-1 min-h-[72px] w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 value={mediaForm.location}
                 onChange={(e) =>
                   setMediaForm((f) => ({ ...f, location: e.target.value }))
@@ -921,11 +921,11 @@ export default function PartnerPortalPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-bx-black/70">
+              <label className="text-xs font-semibold text-foreground/70">
                 {t("mediaPanels")}
               </label>
               <input
-                      className="mt-1 h-11 w-full border-2 border-bx-black bg-bx-white px-3 font-mono text-sm text-bx-black placeholder:text-bx-gray-dim focus:border-bx-accent focus:outline-none"
+                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 inputMode="numeric"
                 value={mediaForm.panelCount}
                 onChange={(e) =>
@@ -951,7 +951,7 @@ export default function PartnerPortalPage() {
             </BtnBlock>
             <BtnBlock
               type="button"
-              className="flex-1 bg-bx-black text-white"
+              className="flex-1 bg-hero-void text-white"
               onClick={saveMedia}
             >
               {t("mediaSave")}

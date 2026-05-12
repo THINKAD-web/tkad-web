@@ -30,8 +30,8 @@ export function MediaFavoriteButton({ mediaId, mediaName }: Props) {
         const r = await fetch("/api/my/favorites", { cache: "no-store" });
         const rd = await r.json();
         if (cancelled) return;
-        if (rd?.ok) {
-          setFavorited((rd.data.ids as string[]).includes(mediaId));
+        if (rd?.ok && rd.data && Array.isArray(rd.data.ids)) {
+          setFavorited(rd.data.ids.includes(mediaId));
         }
       } catch {
         if (!cancelled) setLoggedIn(false);
@@ -78,10 +78,10 @@ export function MediaFavoriteButton({ mediaId, mediaName }: Props) {
       type="button"
       onClick={toggle}
       disabled={pending || loggedIn === null}
-      className={`inline-flex h-11 w-11 items-center justify-center border-2 border-bx-black transition-colors disabled:opacity-50 ${
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-md border border-border transition-colors disabled:opacity-50 ${
         favorited
-          ? "bg-bx-accent text-bx-white"
-          : "bg-bx-white text-bx-black hover:bg-bx-black hover:text-bx-white"
+          ? "bg-accent text-accent-foreground"
+          : "bg-card text-foreground hover:bg-secondary/60"
       }`}
       aria-label={favorited ? "관심 매체에서 제거" : "관심 매체에 담기"}
       aria-pressed={favorited ?? false}

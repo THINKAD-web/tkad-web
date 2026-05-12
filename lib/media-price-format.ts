@@ -1,4 +1,4 @@
-import type { MediaPricePeriodKey } from "@/lib/media-data";
+import type { MediaItem, MediaPriceOption, MediaPricePeriodKey } from "@/lib/media-data";
 
 /**
  * 카탈로그/JSON 가격 숫자 해석.
@@ -131,4 +131,54 @@ export function mediaDetailPricePeriodTranslationKey(
     default:
       return "pricePeriodDisplayMonth";
   }
+}
+
+/**
+ * 매체의 priceOptions + 기본 price 중 가장 저렴한 옵션 반환.
+ *
+ * 카탈로그 (`/media`, region/type/area 랜딩, recently-viewed 등) 에서
+ * "가장 저렴한 가격부터" 노출하는 데 사용.
+ *
+ * 비교 정책:
+ *   - `media.price` 와 `media.priceOptions[].price` 를 모두 후보에 포함
+ *   - 가격 단위(catalogPriceFieldToWon) 정규화 후 *원 단위* 로 비교
+ *   - 같은 옵션 기간(period) 내 비교 — period 별 정규화는 안 함 (raw 가격 비교)
+ *     → 일별/주별/월별 상관없이 가장 작은 절대값을 표시 ("최저가부터" 컨셉)
+ *   - 후보 0건이면 null
+ *
+ * 반환 형식: priceWon(원 단위, formatMediaPriceWonWithSymbol 에 그대로 전달 가능)
+ *           + period (없으면 월 기본).
+ */
+export function getCheapestMediaPriceOption(
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
+): { priceWon: number; period: MediaPricePeriodKey } | null {
+  type Cand = { rawPrice: number; period: MediaPricePeriodKey };
+  const candidates: Cand[] = [];
+
+  if (typeof media.price === "number" && media.price > 0) {
+    candidates.push({
+      rawPrice: media.price,
+      period: normalizeMediaPricePeriod(media.pricePeriod),
+    });
+  }
+  for (const opt of media.priceOptions ?? []) {
+    if (typeof opt.price === "number" && opt.price > 0) {
+      candidates.push({
+        rawPrice: opt.price,
+        period: normalizeMediaPricePeriod(opt.period ?? media.pricePeriod),
+      });
+    }
+  }
+
+  if (candidates.length === 0) return null;
+
+  // 원 단위로 정규화 후 가장 작은 값 선택
+  candidates.sort(
+    (a, b) => catalogPriceFieldToWon(a.rawPrice) - catalogPriceFieldToWon(b.rawPrice),
+  );
+  const cheapest = candidates[0];
+  return {
+    priceWon: catalogPriceFieldToWon(cheapest.rawPrice),
+    period: cheapest.period,
+  };
 }

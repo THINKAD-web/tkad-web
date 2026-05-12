@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import localFont from "next/font/local";
@@ -7,14 +7,8 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
 import { defaultOgImages, pageAlternates, siteUrl } from "@/lib/seo";
 import { buildStructuredDataGraph } from "@/lib/structured-data";
-import { HeaderBrutal } from "@/components/public-chrome/header-brutal";
-import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
-import DeferredPublicWidgets from "@/components/deferred-public-widgets";
-import TopLoader from "@/components/top-loader";
-import PageTransition from "@/components/page-transition";
-import ConditionalPublicChrome from "@/components/conditional-public-chrome";
-import ToastProvider from "@/components/toast-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import LocaleRootBody from "@/components/locale-root-body";
 import "../globals.css";
 
 const geistSans = localFont({
@@ -43,6 +37,9 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  // PWA: 노치/홈인디케이터 영역까지 풀-블리드 (env(safe-area-inset-*) 활용)
+  viewportFit: "cover" as const,
+  themeColor: "#020202",
 };
 
 export async function generateMetadata({
@@ -62,6 +59,9 @@ export async function generateMetadata({
       ? "대한민국 No.1 OOH 광고 에이전시. 전국 500+ 검증된 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 계약~사후관리 원스톱 서비스."
       : "Korea's leading OOH agency. Search 500+ verified OOH media nationwide, data-driven campaign consulting, and end-to-end execution.";
 
+  const googleVer = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+  const naverVer = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION?.trim();
+
   return {
     title: {
       default: titleDefault,
@@ -72,11 +72,18 @@ export async function generateMetadata({
     keywords: [
       "OOH 광고",
       "옥외광고",
+      "DOOH",
+      "디지털 옥외광고",
       "빌보드 광고",
       "디지털 사이니지",
       "전광판 광고",
       "교통 광고",
+      "버스쉘터 광고",
+      "지하철 광고",
+      "OOH media Korea",
       "광고 에이전시",
+      "옥외광고 견적",
+      "미디어 플래너",
       "싱커드",
       "THINKAD",
       "코엑스 전광판",
@@ -86,8 +93,40 @@ export async function generateMetadata({
     creator: "THINKAD 싱커드",
     publisher: "THINKAD 싱커드",
     formatDetection: { telephone: true, email: true, address: true },
+    // PWA — iOS 홈 화면 추가 시 풀-스크린 모드 + 상태바 스타일.
+    // capable: true 가 모바일 사파리에서 standalone 모드 진입 신호.
+    appleWebApp: {
+      capable: true,
+      title: locale === "ko" ? "싱커드" : "THINKAD",
+      statusBarStyle: "black-translucent",
+    },
+    manifest: "/manifest.webmanifest",
     alternates: pageAlternates(locale, ""),
-    robots: { index: true, follow: true },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+    ...(googleVer || naverVer
+      ? {
+          verification: {
+            ...(googleVer ? { google: googleVer } : {}),
+            ...(naverVer
+              ? {
+                  other: {
+                    "naver-site-verification": naverVer,
+                  },
+                }
+              : {}),
+          },
+        }
+      : {}),
     openGraph: {
       type: "website",
       locale: locale === "ko" ? "ko_KR" : "en_US",
@@ -109,10 +148,8 @@ export async function generateMetadata({
       description,
     },
     other: {
-      "naver-site-verification": "",
-      "google-site-verification": "",
-      "theme-color": "#0D1B2E",
-      "msapplication-TileColor": "#0D1B2E",
+      "theme-color": "#020202",
+      "msapplication-TileColor": "#020202",
     },
   };
 }
@@ -144,23 +181,18 @@ export default async function LocaleLayout({ children, params }: Props) {
           }}
         />
         <ThemeProvider>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <ToastProvider>
-              <a href="#main-content" className="skip-link">
-                {locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"}
-              </a>
-              <ConditionalPublicChrome>
-                <TopLoader />
-                <HeaderBrutal />
-              </ConditionalPublicChrome>
-              <main id="main-content" className="flex-1">
-                <PageTransition>{children}</PageTransition>
-              </main>
-              <ConditionalPublicChrome>
-                <FooterBrutal />
-                <DeferredPublicWidgets />
-              </ConditionalPublicChrome>
-            </ToastProvider>
+          <NextIntlClientProvider
+            locale={locale}
+            messages={messages}
+            timeZone="Asia/Seoul"
+          >
+            <LocaleRootBody
+              skipLinkLabel={
+                locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"
+              }
+            >
+              {children}
+            </LocaleRootBody>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

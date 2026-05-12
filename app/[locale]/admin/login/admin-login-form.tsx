@@ -64,15 +64,25 @@ export function AdminLoginForm({ locale }: { locale: string }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full max-w-sm space-y-4 rounded-2xl border border-slate-200 bg-white p-8 shadow-lg"
+      className="w-full max-w-sm space-y-4"
     >
       <div>
-        <h1 className="text-xl font-bold text-navy">{t("title")}</h1>
-        <p className="mt-1 text-sm text-slate-500">{t("subtitle")}</p>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          [ ADMIN ACCESS ]
+        </p>
+        <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground">
+          {t("title")}
+        </h1>
+        <p className="mt-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+          {`// `}{t("subtitle")}
+        </p>
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="admin-user" className="text-xs font-medium text-slate-600">
+        <label
+          htmlFor="admin-user"
+          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground"
+        >
           {t("username")}
         </label>
         <input
@@ -81,12 +91,15 @@ export function AdminLoginForm({ locale }: { locale: string }) {
           autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none ring-navy/20 focus:ring-2"
+          className="tkad-auth-input h-11 w-full rounded-[18px] border border-border/70 bg-card/80 px-4 text-sm font-semibold text-foreground shadow-sm backdrop-blur outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
         />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="admin-pass" className="text-xs font-medium text-slate-600">
+        <label
+          htmlFor="admin-pass"
+          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground"
+        >
           {t("password")}
         </label>
         <input
@@ -96,12 +109,15 @@ export function AdminLoginForm({ locale }: { locale: string }) {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none ring-navy/20 focus:ring-2"
+          className="tkad-auth-input h-11 w-full rounded-[18px] border border-border/70 bg-card/80 px-4 text-sm font-semibold text-foreground shadow-sm backdrop-blur outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
         />
       </div>
 
       {error ? (
-        <p className="text-sm text-red-600" role="alert">
+        <p
+          className="rounded-[18px] border border-border/70 bg-card/80 px-4 py-3 font-mono text-[11px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
@@ -109,7 +125,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-navy py-2.5 text-sm font-semibold text-white transition hover:bg-navy/90 disabled:opacity-60"
+        className="w-full rounded-[18px] border border-white/12 bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(168,85,247,0.92)_52%,rgba(236,72,153,0.88)_100%)] py-3 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition-colors hover:brightness-105 disabled:opacity-60"
       >
         {loading ? t("submitting") : t("submit")}
       </button>

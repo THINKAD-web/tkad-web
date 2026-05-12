@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
+import { BtnBlock } from "@/components/brutalist";
 import { FloatingSelectionBar } from "@/components/floating-selection-bar";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import type { MediaItem } from "@/lib/media-data";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 interface Props {
   items: MediaItem[];
@@ -17,26 +17,38 @@ interface Props {
 /**
  * 매체검색 — 비교 카트가 있을 때 하단 고정 팝업.
  * ✓ N개 선택됨 · [선택해제] [비교하기] [견적받기]
+ * 브루탈리스트: 상세 하단 CTA(검정·액센트)와 톤 맞춤.
  */
 export default function CompareBar({ items, locale, onClear }: Props) {
   const t = useTranslations("media");
   const isKo = locale === "ko";
+  /** 비우기 직후 exit 애니메이션에서도 직전 선택 목록 라벨을 유지 */
   const stashRef = useRef<MediaItem[]>([]);
+  /* eslint-disable react-hooks/refs -- items=[]인 exit 프레임에서만 스냅샷 읽기 */
   if (items.length > 0) stashRef.current = items;
-
   const open = items.length > 0;
   const displayItems = open ? items : stashRef.current;
+  /* eslint-enable react-hooks/refs */
 
   const ids = displayItems.map((m) => m.id).join(",");
   const compareHref = `/compare?ids=${displayItems.map((m) => m.id).join(",")}`;
-  const quoteHref = `/quote?media=${ids}`;
+  const one = displayItems[0];
+  const onlyPo =
+    displayItems.length === 1 && (one?.priceOptions?.length ?? 0) > 0
+      ? "&po=0"
+      : "";
+  const quoteHref = `/quote?media=${ids}${onlyPo}`;
 
   const count = displayItems.length;
   const canCompare = count >= 2;
 
+  const blockClass =
+    "w-full min-h-12 min-w-0 justify-center px-2 text-[11px] sm:min-h-10 sm:px-4 sm:text-[12px]";
+
   return (
     <FloatingSelectionBar
       open={open}
+      className="border-t-2 border-accent bg-hero-void/95 px-2 pb-2 shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.5)] sm:px-4 sm:pb-3"
       ariaLabel={isKo ? "선택한 매체 작업" : "Selected media actions"}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -46,12 +58,12 @@ export default function CompareBar({ items, locale, onClear }: Props) {
           aria-atomic="true"
         >
           <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-base font-bold leading-none text-emerald-700"
+            className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-accent bg-hero-void text-sm font-bold leading-none text-accent"
             aria-hidden
           >
             ✓
           </span>
-          <span className="min-w-0 truncate text-sm font-semibold tabular-nums text-navy sm:text-base">
+          <span className="min-w-0 font-mono text-xs font-bold uppercase tabular-nums tracking-[0.12em] text-hero-fg/95 sm:text-sm">
             {t("compareFloatingSelected", { count })}
             <span className="sr-only">
               {" "}
@@ -60,49 +72,55 @@ export default function CompareBar({ items, locale, onClear }: Props) {
           </span>
         </div>
 
-        <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:justify-end sm:gap-2">
-          <Button
+        <div className="grid w-full grid-cols-3 gap-1.5 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:justify-end sm:gap-2">
+          <BtnBlock
             type="button"
-            variant="floatingSecondary"
-            size="floating"
             onClick={onClear}
-            className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
+            variant="secondary"
+            size="sm"
+            className={blockClass}
           >
             {t("compareFloatingClear")}
-          </Button>
+          </BtnBlock>
           {canCompare ? (
-            <Button
-              asChild
-              variant="floatingSecondary"
-              size="floating"
-              className="min-w-0 px-2 text-xs font-semibold sm:min-h-12 sm:px-5 sm:text-sm"
+            <BtnBlock
+              href={compareHref}
+              variant="secondary"
+              size="sm"
+              className={blockClass}
             >
-              <Link href={compareHref}>{t("compareFloatingCompare")}</Link>
-            </Button>
+              {t("compareFloatingCompare")}
+            </BtnBlock>
           ) : (
-            <Button
+            <BtnBlock
               type="button"
-              variant="floatingSecondary"
-              size="floating"
               disabled
-              className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
+              variant="secondary"
+              size="sm"
               title={
                 isKo
                   ? "비교하려면 매체를 2개 이상 선택하세요"
                   : "Select at least two media to compare"
               }
+              className={cn(blockClass, "opacity-40")}
             >
               {t("compareFloatingCompare")}
-            </Button>
+            </BtnBlock>
           )}
-          <Button
-            asChild
-            variant="floatingPrimary"
-            size="floating"
-            className="min-w-0 px-2 text-xs sm:min-h-12 sm:px-5 sm:text-sm"
+          <BtnBlock
+            href={quoteHref}
+            variant="accent"
+            size="sm"
+            className={cn(
+              blockClass,
+              "min-w-[104px] whitespace-nowrap !text-white",
+              "!border-white/12 !bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(168,85,247,0.92)_52%,rgba(236,72,153,0.88)_100%)]",
+              "hover:!bg-[linear-gradient(135deg,rgba(34,211,238,1)_0%,rgba(168,85,247,0.98)_52%,rgba(236,72,153,0.96)_100%)]",
+              "shadow-[0_18px_60px_rgba(0,0,0,0.55)]",
+            )}
           >
-            <Link href={quoteHref}>{t("compareQuoteCta")}</Link>
-          </Button>
+            {t("compareQuoteCta")}
+          </BtnBlock>
         </div>
       </div>
     </FloatingSelectionBar>

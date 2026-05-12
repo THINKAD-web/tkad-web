@@ -97,17 +97,17 @@ export default function NewsPage() {
 
   return (
     <>
-      <section className="bg-bx-black py-24">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-bx-accent">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
             {`// 15 / News`}
           </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-bx-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
             {isKo
               ? "THINKAD 뉴스·보도자료"
               : "THINKAD News & Press Releases"}
           </h1>
-          <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-bx-white/75 sm:text-sm">
+          <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {isKo
               ? "회사 소식, 보도자료, 수상 소식과 이벤트 정보를 한눈에 확인하세요."
               : "Browse press releases, awards and event updates from THINKAD."}
@@ -115,9 +115,9 @@ export default function NewsPage() {
         </div>
       </section>
 
-      <section className="bg-bx-white py-4">
+      <section className="bg-card py-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+          <div className="flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
             <Filter className="h-3.5 w-3.5" />
             [ {isKo ? "CATEGORY" : "CATEGORY"} ]
           </div>
@@ -132,8 +132,8 @@ export default function NewsPage() {
                   className={cn(
                     "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     isActive
-                      ? "border-bx-accent bg-bx-accent text-bx-white"
-                      : "border-bx-black bg-bx-white text-bx-black hover:bg-bx-off",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   {cat.getLabel(isKo)}
@@ -141,14 +141,14 @@ export default function NewsPage() {
               );
             })}
           </div>
-          <div className="ml-auto font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
+          <div className="ml-auto font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{isKo ? "TOTAL" : "TOTAL"}{" "}
-            <span className="font-bold text-bx-accent">{items.length}</span>
+            <span className="font-bold text-accent">{items.length}</span>
           </div>
         </div>
       </section>
 
-      <section className="bg-bx-off py-10">
+      <section className="bg-muted py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => {
@@ -168,29 +168,29 @@ export default function NewsPage() {
               return (
                 <article
                   key={item.id}
-                  className="group -mt-[2px] -ml-[2px] flex h-full flex-col overflow-hidden border-2 border-bx-black bg-bx-white"
+                  className="group -mt-[2px] -ml-[2px] flex h-full flex-col overflow-hidden border-2 border-border bg-card"
                 >
-                  <header className="border-b-2 border-bx-black bg-bx-black p-4">
+                  <header className="border-b-2 border-border bg-hero-void p-4">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-bx-white/85">
-                        <Calendar className="h-3.5 w-3.5 text-bx-accent" />
+                      <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-hero-fg/85">
+                        <Calendar className="h-3.5 w-3.5 text-accent" />
                         <span>{formatDate(item.date)}</span>
                       </div>
                       {categoryLabel && (
-                        <span className="border-2 border-bx-accent bg-bx-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-white">
+                        <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
                           [ {categoryLabel} ]
                         </span>
                       )}
                     </div>
-                    <h3 className="mt-3 text-sm font-bold leading-snug tracking-tight text-bx-white sm:text-base">
+                    <h3 className="mt-3 text-sm font-bold leading-snug tracking-tight text-hero-fg sm:text-base">
                       {title}
                     </h3>
                   </header>
                   <div className="flex flex-1 flex-col justify-between p-4">
-                    <p className="font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim sm:text-[12px]">
+                    <p className="font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
                       {summary}
                     </p>
-                    <div className="mt-4 flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-accent group-hover:text-bx-black">
+                    <div className="mt-4 flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent group-hover:text-foreground">
                       {item.link ? (
                         <a
                           href={item.link}
@@ -210,7 +210,7 @@ export default function NewsPage() {
                           </span>
                         </a>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-bx-gray-dim">
+                        <span className="inline-flex items-center gap-1.5 text-muted-foreground">
                           <TagIcon className="h-3.5 w-3.5" />
                           <span>
                             {isKo
@@ -227,7 +227,7 @@ export default function NewsPage() {
           </div>
 
           {items.length === 0 && (
-            <div className="mt-10 border-2 border-bx-black bg-bx-white px-6 py-10 text-center text-sm text-bx-gray-dim">
+            <div className="mt-10 border-2 border-border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
               {isKo
                 ? "선택하신 카테고리에 해당하는 소식이 없습니다. 다른 카테고리를 선택해 보세요."
                 : "No news items for the selected category."}

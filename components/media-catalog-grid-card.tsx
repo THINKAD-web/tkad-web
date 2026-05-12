@@ -10,7 +10,9 @@ import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
+  catalogPriceFieldToWon,
   formatMediaPriceWonWithSymbol,
+  getCheapestMediaPriceOption,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
@@ -21,7 +23,7 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
  * 그리드 컨테이너에서 보더 겹침 처리를 위해 -mt/-ml 사용.
  */
 export const mediaCatalogGridCardShellClass =
-  "relative -mt-[2px] -ml-[2px] block min-w-0 border-2 border-bx-black bg-bx-white transition-colors group-hover:bg-bx-off";
+  "tkad-catalog-card-shell relative -mt-[2px] -ml-[2px] block min-w-0 border-2 border-border bg-card transition-colors group-hover:bg-muted dark:group-hover:bg-muted";
 
 type Common = {
   media: MediaItem;
@@ -50,35 +52,45 @@ export type MediaCatalogGridCardProps =
 export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const tMedia = useTranslations("media");
   const { media, isKo, imagePreparingLabel, popularIds } = props;
-  const priceNum = props.priceMan ?? media.price;
+  // priceMan 명시(예: 네트워크 패키지 월 환산) 가 우선.
+  // 없으면 priceOptions + price 중 *가장 저렴한* 옵션을 표시.
+  const cheapest = props.priceMan
+    ? null
+    : getCheapestMediaPriceOption(media);
+  // cheapest.priceWon 은 이미 원(₩) 단위 — formatMediaPriceWonWithSymbol 에 그대로 전달.
+  // priceMan / media.price 폴백은 기존 동작 유지 (호출부 데이터 단위에 의존).
+  const rawPrice = cheapest?.priceWon ?? props.priceMan ?? media.price;
+  const priceWon = cheapest?.priceWon ?? catalogPriceFieldToWon(rawPrice);
+  const displayPeriod = cheapest?.period ?? media.pricePeriod;
   const tl = typeLabels[media.type];
-  const showPricePeriod = props.showPricePeriod ?? false;
+  // 가장 저렴한 옵션 사용 시에는 단가 단위(월/주/일) 명시 — 비교 혼동 방지
+  const showPricePeriod = props.showPricePeriod ?? !!cheapest;
 
   const thumbnailOverlays = (
     <>
-      {media.catalogSource !== "network" ? (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-bx-black bg-bx-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-bx-white">
+      {media.catalogSource !== "network" && media.isVerified ? (
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hermes px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-[0_0_20px_rgba(255,98,0,0.45)]">
           Verified
         </div>
-      ) : (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-bx-black bg-bx-black px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-bx-white">
+      ) : media.catalogSource === "network" ? (
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hero-void px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-hero-fg">
           {tMedia("networkSitesBadge", {
             count: media.networkTotalLocations ?? 0,
           })}
         </div>
-      )}
+      ) : null}
       {props.variant === "link" ? props.topLeftSlot : null}
       {props.variant === "selectable" ? (
         <div
-          className="pointer-events-none absolute left-2.5 top-2.5 z-20 flex size-8 items-center justify-center border-2 border-bx-black bg-bx-white"
+          className="pointer-events-none absolute left-2.5 top-2.5 z-20 flex size-8 items-center justify-center border-2 border-border bg-card"
           aria-hidden
         >
           <span
             className={cn(
               "flex h-4 w-4 items-center justify-center text-[11px] font-bold",
               props.selected
-                ? "bg-bx-accent text-bx-white"
-                : "bg-bx-white text-transparent",
+                ? "bg-accent text-accent-foreground"
+                : "bg-card text-transparent",
             )}
           >
             {props.selected ? "✓" : ""}
@@ -86,7 +98,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         </div>
       ) : null}
       {popularIds?.has(media.id) ? (
-        <div className="absolute bottom-0 right-0 z-10 flex items-center gap-1 border-l-2 border-t-2 border-bx-black bg-bx-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-bx-white">
+        <div className="absolute bottom-0 right-0 z-10 flex items-center gap-1 border-l-2 border-t-2 border-border bg-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-accent-foreground">
           <Flame className="h-3 w-3" />
           {isKo ? "인기" : "Hot"}
         </div>
@@ -99,29 +111,28 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       <MediaCatalogThumbnail
         media={media}
         placeholderLabel={imagePreparingLabel}
-        className="flex h-44 items-center justify-center border-b-2 border-bx-black bg-bx-off [&_img]:grayscale [&_img]:transition-[filter,transform] [&_img]:duration-500 group-hover:[&_img]:grayscale-0 group-hover:[&_img]:scale-[1.02] sm:h-52 lg:h-60"
+        className="flex h-44 items-center justify-center border-b-2 border-border bg-muted [&_img]:grayscale [&_img]:transition-[filter,transform] [&_img]:duration-500 group-hover:[&_img]:grayscale-0 group-hover:[&_img]:scale-[1.02] sm:h-52 lg:h-60"
         bottomGradientClassName={null}
       >
         {thumbnailOverlays}
       </MediaCatalogThumbnail>
-      <div className="flex flex-col gap-2 p-5">
-        <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-bx-gray-dim">
-          <span className="text-bx-black">
-            [ {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)} ]
+      <div className="flex flex-col gap-2.5 p-5 text-card-foreground">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-foreground/85 sm:text-sm">
+            {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
           </span>
         </div>
-        <h3 className="line-clamp-2 break-words text-base font-bold leading-tight tracking-tight text-bx-black sm:text-lg">
+        <h3 className="line-clamp-2 break-words text-base font-semibold leading-snug tracking-tight sm:text-lg">
           {isKo ? media.name : (media.nameEn || media.name)}
         </h3>
-        <p className="line-clamp-2 font-mono text-[11px] uppercase tracking-[0.18em] text-bx-gray-dim">
-          {`// `}
+        <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
           {formatMediaLocationShort(media, isKo)}
         </p>
-        <p className="mt-1 break-words font-mono text-sm font-bold tabular-nums leading-tight text-bx-black">
-          {formatMediaPriceWonWithSymbol(priceNum)}
+        <p className="mt-0.5 break-words text-lg font-black tabular-nums leading-snug">
+          {formatMediaPriceWonWithSymbol(priceWon)}
           {showPricePeriod ? (
-            <span className="ml-1 text-[11px] font-normal uppercase tracking-[0.18em] text-bx-gray-dim">
-              · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
+            <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+              · {tMedia(mediaPricePeriodTranslationKey(displayPeriod))}
             </span>
           ) : null}
         </p>
@@ -130,7 +141,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   );
 
   const wrapClass = cn(
-    "group block min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-bx-accent",
+    "group block min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-accent",
     props.className,
   );
 
@@ -150,7 +161,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
     <label
       className={cn(
         wrapClass,
-        "cursor-pointer focus-within:ring-2 focus-within:ring-bx-accent",
+        "cursor-pointer focus-within:ring-2 focus-within:ring-accent",
       )}
     >
       <input
@@ -163,7 +174,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       <div
         className={cn(
           mediaCatalogGridCardShellClass,
-          props.selected && "bg-bx-off ring-2 ring-bx-accent ring-inset",
+          props.selected && "bg-muted ring-2 ring-accent ring-inset",
         )}
       >
         {body}

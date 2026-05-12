@@ -19,16 +19,16 @@ export function RelatedCases({ cases, isKo }: Props) {
   if (cases.length === 0) return null;
 
   return (
-    <section className="border-2 border-bx-black bg-bx-white">
-      <header className="border-b-2 border-bx-black px-6 py-5">
-        <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+    <section className="overflow-hidden rounded-[28px] border border-border/80 bg-card/80 shadow-sm backdrop-blur">
+      <header className="border-b border-border/70 px-6 py-5">
+        <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           <Briefcase className="h-3.5 w-3.5" aria-hidden />
           [ RELATED CASES ]
         </div>
-        <h2 className="mt-2 text-xl font-bold tracking-tight text-bx-black">
+        <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground">
           {t("title")}
         </h2>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
           {t("desc")}
         </p>
       </header>
@@ -40,24 +40,24 @@ export function RelatedCases({ cases, isKo }: Props) {
               <li key={c.id} className="-mt-[2px] -ml-[2px]">
                 <Link
                   href={`/cases/${c.id}`}
-                  className="group flex h-full flex-col gap-2 border-2 border-bx-black bg-bx-white p-4 transition-colors hover:bg-bx-off"
+                  className="group flex h-full flex-col gap-2 rounded-[22px] border border-border/80 bg-card/80 p-4 shadow-xs backdrop-blur transition-colors hover:bg-muted/50"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="border-2 border-bx-black bg-bx-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-black">
+                    <span className="rounded-xl border border-border/80 bg-card/70 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-foreground shadow-xs backdrop-blur">
                       {c.industry}
                     </span>
                     <ArrowRight
-                      className="h-3.5 w-3.5 text-bx-gray-dim transition-colors group-hover:text-bx-accent"
+                      className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-accent"
                       aria-hidden
                     />
                   </div>
-                  <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-bx-black">
+                  <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
                     {title}
                   </p>
-                  <p className="line-clamp-3 font-mono text-[11px] leading-relaxed tracking-tight text-bx-gray-dim">
+                  <p className="line-clamp-3 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                     {c.summaryKo}
                   </p>
-                  <p className="mt-auto font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-accent">
+                  <p className="mt-auto font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
                     {`// `}
                     {c.clientName}
                   </p>

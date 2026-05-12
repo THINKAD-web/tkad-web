@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendEmailWithPdfAttachment } from "@/lib/email/client";
+import { postInternalAlert } from "@/lib/internal-webhook";
 
 export const dynamic = "force-dynamic";
 
@@ -94,6 +95,17 @@ export async function POST(request: NextRequest) {
     console.error("[quote/email-pdf]", e);
     return json({ error: "Failed to send email" }, { status: 500 });
   }
+
+  void postInternalAlert({
+    type: "quote_wizard_pdf_email",
+    title: isKo
+      ? "[싱커드] 견적 마법사 PDF 메일 발송"
+      : "[THINKAD] Quote wizard PDF emailed",
+    body: isKo
+      ? `고객 이메일: ${email}`
+      : `Recipient: ${email}`,
+    meta: { to: email, locale: isKo ? "ko" : "en" },
+  });
 
   return json({ success: true }, { status: 201 });
 }

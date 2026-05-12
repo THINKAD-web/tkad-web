@@ -1,9 +1,18 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
+/** Turbopack must not use a parent folder (e.g. ~/) that has another package-lock.json as the workspace root. */
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: projectRoot,
+  },
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   images: {
     remotePatterns: [
       {
@@ -14,6 +23,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "*.cloudinary.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.b-cdn.net",
         pathname: "/**",
       },
       {

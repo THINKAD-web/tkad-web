@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "prisma generate && next build",
     "vercel-build": "prisma generate && next build",
     "start": "next start",
@@ -14,6 +14,11 @@
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
+  },
+  "postcss": {
+    "plugins": {
+      "@tailwindcss/postcss": true
+    }
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.88.0",

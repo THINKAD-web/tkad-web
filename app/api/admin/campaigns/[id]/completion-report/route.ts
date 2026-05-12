@@ -60,6 +60,12 @@ export async function GET(request: NextRequest, { params }: Params) {
       status: b.status,
       dailyFootTraffic: b.media?.dailyFootfall ?? null,
       region: b.media?.region ?? null,
+      visibilityScore: b.media?.visibilityScore ?? null,
+      impressions: b.media?.impressions ?? null,
+      operatingHours: b.media?.operatingHours ?? null,
+      trafficPattern:
+        (b.media as { trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null } | null | undefined)
+          ?.trafficPattern ?? null,
     })),
   });
 
@@ -69,7 +75,10 @@ export async function GET(request: NextRequest, { params }: Params) {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${asciiFallbackFilename(c.id)}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
-      "Cache-Control": "no-store",
+      "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+      Pragma: "no-cache",
+      Expires: "0",
+      Vary: "*",
     },
   });
 }

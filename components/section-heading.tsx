@@ -27,20 +27,20 @@ export function SectionHeading({
       )}
     >
       {eyebrow ? (
-        <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+        <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
           [ {eyebrow} ]
         </p>
       ) : null}
       <h2
         className={cn(
-          "text-2xl font-bold tracking-tight text-bx-black sm:text-3xl lg:text-[2.25rem] lg:leading-snug",
+          "text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-[2.25rem] lg:leading-snug",
           titleClassName,
         )}
       >
         {title}
       </h2>
       {subtitle ? (
-        <p className="mt-4 font-mono text-sm leading-relaxed tracking-tight text-bx-gray-dim sm:text-base">
+        <p className="mt-4 font-mono text-sm leading-relaxed tracking-tight text-muted-foreground sm:text-base">
           {`// `}{subtitle}
         </p>
       ) : null}

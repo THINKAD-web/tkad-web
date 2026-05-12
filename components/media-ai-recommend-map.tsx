@@ -34,8 +34,8 @@ export default function MediaAiRecommendMap({
   const tr = useTranslations("recommend");
 
   return (
-    <div className="overflow-hidden border-2 border-bx-black bg-bx-white">
-      <p className="border-b-2 border-bx-black bg-bx-off px-4 py-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+    <div className="overflow-hidden border-2 border-border bg-card">
+      <p className="border-b-2 border-border bg-muted px-4 py-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
         [ {tr("resultMapHint")} ]
       </p>
       <MediaBrowseMap

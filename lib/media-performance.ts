@@ -63,9 +63,10 @@ export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMet
     monthlyImpressions: monthly,
     dailyFootfall: media.dailyFootTraffic,
     donut: [
-      { key: "peak", percent: peak, color: "#0d1b2e" },
-      { key: "standard", percent: standard, color: "#a67524" },
-      { key: "extended", percent: extended, color: "#94a3b8" },
+      // Premium neon palette (matches landing day/night)
+      { key: "peak", percent: peak, color: "#a855f7" }, // violet
+      { key: "standard", percent: standard, color: "#22d3ee" }, // cyan
+      { key: "extended", percent: extended, color: "#ec4899" }, // pink
     ],
     bars: [
       { key: "reach", value: Math.min(98, reachValue) },

@@ -114,7 +114,7 @@ export default function HeroKenBurns() {
       {/* 다크 오버레이 (텍스트 가독성) — 디자인 시스템 bx-black 으로 통일 */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-bx-black/85 via-bx-black/75 to-bx-black/95"
+        className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-black/88 via-black/76 to-black/96"
       />
 
       {/* 액센트 오버레이 — bx-accent (Pantone 165) 로 통일 */}

@@ -2,9 +2,9 @@
 
 /**
  * 플래너 로고/소재 업로드 클라이언트 헬퍼.
- * 1) `/api/planner/creative/sign` 에서 서명 수신
- * 2) Cloudinary `image/upload` 엔드포인트로 직접 multipart POST
- * 3) `secure_url` 반환
+ * Bunny Storage 업로드 프록시:
+ * 1) `/api/planner/creative/upload` 로 multipart POST
+ * 2) `{ secureUrl }` 반환
  */
 
 export const PLANNER_CREATIVE_MAX_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -42,21 +42,6 @@ export function validateCreativeFile(
   return null;
 }
 
-async function fetchSignature(): Promise<{
-  timestamp: number;
-  signature: string;
-  folder: string;
-  cloudName: string;
-  apiKey: string;
-}> {
-  const res = await fetch("/api/planner/creative/sign", { method: "POST" });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Signing failed: ${res.status} ${body}`);
-  }
-  return res.json();
-}
-
 export async function uploadPlannerCreative(
   file: File,
   opts: { onProgress?: (pct: number) => void } = {},
@@ -66,21 +51,13 @@ export async function uploadPlannerCreative(
     throw new Error(`INVALID_${validation.toUpperCase()}`);
   }
 
-  const sig = await fetchSignature();
   const form = new FormData();
   form.append("file", file);
-  form.append("api_key", sig.apiKey);
-  form.append("timestamp", String(sig.timestamp));
-  form.append("signature", sig.signature);
-  form.append("folder", sig.folder);
 
   // XHR 사용 — fetch 는 업로드 진행률을 지원하지 않음
   return new Promise<CreativeUploadResult>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open(
-      "POST",
-      `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-    );
+    xhr.open("POST", "/api/planner/creative/upload");
     xhr.upload.addEventListener("progress", (evt) => {
       if (evt.lengthComputable && opts.onProgress) {
         opts.onProgress(Math.round((evt.loaded / evt.total) * 100));
@@ -94,11 +71,7 @@ export async function uploadPlannerCreative(
       try {
         const body = JSON.parse(xhr.responseText);
         resolve({
-          secureUrl: body.secure_url,
-          width: body.width,
-          height: body.height,
-          format: body.format,
-          bytes: body.bytes,
+          secureUrl: body.secureUrl,
         });
       } catch (err) {
         reject(err);

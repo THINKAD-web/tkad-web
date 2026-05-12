@@ -41,7 +41,7 @@ export default function MediaCaseStudyGallery({
           return (
             <figure
               key={`${p.url}-${i}`}
-              className="-mt-[2px] -ml-[2px] overflow-hidden border-2 border-bx-black bg-bx-white"
+              className="-mt-[2px] -ml-[2px] overflow-hidden rounded-[24px] border border-border/80 bg-card/80 shadow-xs backdrop-blur"
             >
               <button
                 type="button"
@@ -49,7 +49,7 @@ export default function MediaCaseStudyGallery({
                   setIndex(i);
                   setOpen(true);
                 }}
-                className="group relative block aspect-[16/10] w-full cursor-zoom-in overflow-hidden border-0 bg-bx-off p-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-bx-accent"
+                className="group relative block aspect-[16/10] w-full cursor-zoom-in overflow-hidden border-0 bg-muted/40 p-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 aria-label={labels.expand}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -59,7 +59,7 @@ export default function MediaCaseStudyGallery({
                   className="h-full w-full object-cover grayscale transition-[filter,transform] duration-500 ease-out group-hover:grayscale-0 group-hover:scale-[1.02]"
                 />
                 <span
-                  className="pointer-events-none absolute bottom-0 right-0 flex items-center gap-1 border-t-2 border-l-2 border-bx-black bg-bx-accent px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-bx-white"
+                  className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-2xl border border-white/16 bg-black/35 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/90 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur"
                   aria-hidden
                 >
                   <ZoomIn className="h-3 w-3" />
@@ -67,7 +67,7 @@ export default function MediaCaseStudyGallery({
                 </span>
               </button>
               {cap ? (
-                <figcaption className="border-t-2 border-bx-black px-4 py-3 font-mono text-[12px] leading-relaxed tracking-tight text-bx-gray-dim">
+                <figcaption className="border-t border-border/70 px-4 py-3 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                   {cap}
                 </figcaption>
               ) : null}

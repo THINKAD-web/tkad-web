@@ -31,6 +31,8 @@ type Props = {
   periodLabel: string;
   /** 집행 기간 표기에 사용 (예: × 3개월) */
   periodMonths: number;
+  /** 기간 단위 라벨 (예: "2주", "주", "일"). 미지정 시 "{n}개월" 사용 */
+  periodUnitLabel?: string | null;
   rows: QuotePdfPreviewRow[];
   /** 공급가/부가세/총계 (원). 표시 직전 한 번만 만원 변환 → round 누적 손실 방지. */
   subtotalWon: number;
@@ -63,6 +65,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
       vatWon,
       grandTotalWon,
       issuedAt,
+      periodUnitLabel,
     },
     ref,
   ) {
@@ -165,7 +168,10 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
               <div className="flex gap-2">
                 <dt className="w-20 shrink-0 font-mono text-slate-500">{t("period")}</dt>
                 <dd className="font-bold text-navy">
-                  {periodLabel} · {t("pdfMonthsUnit", { n: periodMonths })}
+                  {periodLabel} ·{" "}
+                  {periodUnitLabel
+                    ? `${periodMonths}${periodUnitLabel}`
+                    : t("pdfMonthsUnit", { n: periodMonths })}
                 </dd>
               </div>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
