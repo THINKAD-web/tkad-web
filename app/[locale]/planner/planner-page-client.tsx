@@ -6,7 +6,6 @@ import {
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 import type { ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
@@ -87,12 +86,8 @@ import {
   formatPricePeriodShortLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
-import {
-  getHomeAppearanceServerSnapshot,
-  readHomeAppearance,
-  subscribeHomeAppearance,
-  type HomeAppearance,
-} from "@/lib/home-appearance";
+import type { HomeAppearance } from "@/lib/home-appearance";
+import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 
 /** 밤: 메인 NeonSection 과 동일한 #05050a + 네온 뎁스(히어로 아래 본문만 밝은 페이지 배경이 비지 않도록) */
 function PlannerNeonPageBody({
@@ -164,11 +159,7 @@ export default function PlannerPageClient({
   const locale = useLocale();
   const isKo = locale === "ko";
   const { toast } = useToast();
-  const landingAppearance = useSyncExternalStore(
-    subscribeHomeAppearance,
-    readHomeAppearance,
-    getHomeAppearanceServerSnapshot,
-  );
+  const landingAppearance = useTkadAppearance();
 
   const priceOptionBadge = useCallback(
     (m: MediaItem): string | null => {

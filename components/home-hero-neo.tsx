@@ -1,13 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Play } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import {
-  getHomeAppearanceServerSnapshot,
-  readHomeAppearance,
-  subscribeHomeAppearance,
-} from "@/lib/home-appearance";
+import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -22,11 +18,7 @@ function formatCompact(n: number) {
 }
 
 export function HomeHeroNeo({ isKo }: Props) {
-  const homeAppearance = useSyncExternalStore(
-    subscribeHomeAppearance,
-    readHomeAppearance,
-    getHomeAppearanceServerSnapshot,
-  );
+  const homeAppearance = useTkadAppearance();
   const isDay = homeAppearance === "day";
 
   // SSR/CSR hydration mismatch 방지: 첫 렌더(seed=0)는 고정, 마운트 후에만 drift 부여
@@ -34,9 +26,14 @@ export function HomeHeroNeo({ isKo }: Props) {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    setSeed(Date.now());
+    const raf = requestAnimationFrame(() => {
+      setSeed(Date.now());
+    });
     const id = window.setInterval(() => setTick((t) => (t + 1) % 10_000), 900);
-    return () => window.clearInterval(id);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearInterval(id);
+    };
   }, []);
 
   // “live” 느낌: 고정값 + tick 기반 미세 변동

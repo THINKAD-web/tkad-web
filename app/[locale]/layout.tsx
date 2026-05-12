@@ -168,12 +168,10 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html
-      lang={locale}
-      suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="flex min-h-full flex-col">
+    <html lang={locale} suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-full min-h-[100dvh] flex-col antialiased`}
+      >
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

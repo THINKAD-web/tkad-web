@@ -536,6 +536,35 @@ export function scoreMedia(
   return { media, score, reasons };
 }
 
+/**
+ * 총예산(만원) ÷ 기간(월) 대비 매체 월 단가(만원) — 추천에 반영해 예산만 바꿔도 믹스가 움직이게 함.
+ * 가격 미기입(0)이면 중립 1.
+ */
+function budgetAffordabilityMultiplier(
+  media: MediaItem,
+  budgetMan: number,
+  months: number,
+): number {
+  if (!Number.isFinite(budgetMan) || budgetMan <= 0 || months <= 0) return 1;
+  const spendPerMonth = budgetMan / months;
+  const priceMan = catalogPriceFieldToPriceMan(media.price);
+  if (!(priceMan > 0) || !(spendPerMonth > 0)) return 1;
+  const ratio = priceMan / spendPerMonth;
+  if (ratio <= 0.85) return 1.04;
+  if (ratio <= 1) return 1;
+  if (ratio <= 1.25) return 0.93;
+  if (ratio <= 1.6) return 0.82;
+  if (ratio <= 2.2) return 0.68;
+  if (ratio <= 3.5) return 0.52;
+  return Math.max(0.22, 0.75 / Math.sqrt(ratio));
+}
+
+/** 연령 타깃이 좁을수록 매체 targetAge 매칭에 더 반응 */
+function ageTargetTilt(ageKey: PlannerAgeKey, targetAge?: string | null): number {
+  if (ageKey === "ageAll") return 1;
+  return 0.9 + 0.14 * ageScore(ageKey, targetAge);
+}
+
 function minKmToPicked(
   m: MediaItem,
   picked: readonly ScoredMedia[],
@@ -551,14 +580,28 @@ function minKmToPicked(
 /**
  * 점수 상위만 자르면 같은 5대 랜드마크가 반복 → 상위 풀에서 지리·유형 다양성을 반영해 N개 선별.
  * (MMR 느낀 규칙, LLM 아님)
+ *
+ * `seed`(새로고침 틱): 정렬 상위 구간에서 첫 매체를 바꿔 같은 5곡만 반복되는 느낌을 줄임.
  */
-function pickDiverseTop(scored: ScoredMedia[], limit: number): ScoredMedia[] {
+function pickDiverseTop(
+  scored: ScoredMedia[],
+  limit: number,
+  seed: number,
+): ScoredMedia[] {
   if (scored.length === 0) return [];
   const pool = scored.slice(0, Math.min(45, scored.length));
-  if (pool.length <= limit) return pool;
+  if (pool.length <= limit) {
+    if (seed === 0 || pool.length <= 1) return pool;
+    const rot = ((seed * 1103515245) >>> 0) % pool.length;
+    return [...pool.slice(rot), ...pool.slice(0, rot)];
+  }
 
-  const picked: ScoredMedia[] = [pool[0]!];
-  const used = new Set<string>([pool[0]!.media.id]);
+  const span = Math.min(18, pool.length);
+  const firstIdx =
+    seed === 0 ? 0 : ((seed * 2654435761 + 1597334677) >>> 0) % span;
+  const first = pool[firstIdx]!;
+  const picked: ScoredMedia[] = [first];
+  const used = new Set<string>([first.media.id]);
 
   while (picked.length < limit) {
     let best: ScoredMedia | null = null;
@@ -567,12 +610,12 @@ function pickDiverseTop(scored: ScoredMedia[], limit: number): ScoredMedia[] {
       if (used.has(c.media.id)) continue;
       const minD = minKmToPicked(c.media, picked);
       const hasSameType = picked.some((p) => p.media.type === c.media.type);
-      const typeFactor = hasSameType ? 0.91 : 1.05;
+      const typeFactor = hasSameType ? 0.82 : 1.08;
       const finiteD = Number.isFinite(minD) ? minD : 6;
-      const distFactor = 1 + 0.12 * Math.min(1, finiteD / 7);
+      const distFactor = 1 + 0.18 * Math.min(1, finiteD / 7);
       const closeCluster =
         Number.isFinite(minD) && minD < 0.45 && picked.length > 0
-          ? 0.8
+          ? 0.72
           : 1;
       const adj = c.score * typeFactor * distFactor * closeCluster;
       if (adj > bestAdj) {
@@ -591,7 +634,8 @@ function pickDiverseTop(scored: ScoredMedia[], limit: number): ScoredMedia[] {
  * 매체 카탈로그에서 컨텍스트에 맞는 상위 N개 추천.
  *
  * - 카테고리 필터 적용 (선택한 유형만)
- * - 예산 미반영 (UI 단에서 "담기" 시 계산) — `limit` 만 컨트롤
+ * - 총예산·기간으로 월 가용액 대비 매체 월 단가 적합도 + 연령 타깃 틸트
+ * - 새로고침(seed>0): 정렬 상위권에서 슬라이딩 윈도우로 후보 풀을 옮겨 다른 믹스 탐색
  * - reasons 가 비어 있는 매체는 후순위로
  */
 export function recommendPlannerMedia(
@@ -644,13 +688,16 @@ export function recommendPlannerMedia(
     return 0;
   };
   const scored = filtered
-    .map((m) => scoreMedia(m, ctx, effFn))
+    .map((m) => {
+      const sm = scoreMedia(m, ctx, effFn);
+      const mult = budgetAffordabilityMultiplier(m, ctx.budgetMan, ctx.months);
+      const ageT = ageTargetTilt(ctx.ageKey, m.targetAge);
+      return { ...sm, score: sm.score * mult * ageT };
+    })
     .sort((a, b) => {
-      // Refresh should explore near-ties, not only exact ties.
-      // Apply tiny deterministic jitter (±2.5%) so close scores can reshuffle,
-      // while clearly better items remain on top.
-      const aj = a.score * (0.975 + 0.05 * seeded01(a.media.id));
-      const bj = b.score * (0.975 + 0.05 * seeded01(b.media.id));
+      // Refresh: 점수 근접 구간에서 순서가 바뀌도록 지터 확대
+      const aj = a.score * (0.94 + 0.12 * seeded01(a.media.id));
+      const bj = b.score * (0.94 + 0.12 * seeded01(b.media.id));
       const d = bj - aj;
       if (Math.abs(d) > 1e-6) return d;
       const e = emptyReasonLast(a, b);
@@ -659,5 +706,22 @@ export function recommendPlannerMedia(
       if (ft !== 0) return ft;
       return seededTiebreak(a.media.id) - seededTiebreak(b.media.id);
     });
-  return pickDiverseTop(scored, limit);
+
+  const n = scored.length;
+  if (n === 0) return [];
+
+  const maxWindowShift =
+    n <= limit ? 0 : Math.min(22, Math.max(0, n - limit - 1));
+  const windowOffset =
+    seed === 0
+      ? 0
+      : ((seed * 2654435761 + n * 17) >>> 0) % (maxWindowShift + 1);
+  const windowSize = Math.min(48, Math.max(limit + 10, n));
+  const pool = scored.slice(
+    windowOffset,
+    Math.min(n, windowOffset + windowSize),
+  );
+  if (pool.length === 0) return [];
+
+  return pickDiverseTop(pool, limit, seed);
 }

@@ -1,6 +1,6 @@
 /**
  * 라우트 스트리밍용 스켈레톤 — 시맨틱 토큰 + 쉬머 (globals.css `.skeleton-shimmer`).
- * 히어로 스트립은 항상 `hero-void` + `text-primary` 라벨.
+ * 상단 스트립: 라이트는 `bg-background`, 다크는 `hero-void` — 라벨·진행 막대는 `primary`(주황) 미사용.
  */
 
 import { cn } from "@/lib/utils";
@@ -10,13 +10,13 @@ function Bone({ className }: { className?: string }) {
 }
 
 /**
- * 페이지 상단 hero 스켈레톤 — void 배경 + 슬라이딩 액센트 막대.
+ * 페이지 상단 hero 스켈레톤 — 테마별 배경 + 네온 그라데이션 슬라이딩 막대(랜딩과 동일 계열).
  */
 export function PageHeaderSkeleton() {
   return (
-    <section className="relative overflow-hidden bg-hero-void py-20">
+    <section className="relative overflow-hidden bg-background py-20 dark:bg-hero-void">
       <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground dark:text-white/55">
           {`// LOADING…`}
         </p>
         <div className="mx-auto mt-6 h-9 w-64">
@@ -25,8 +25,8 @@ export function PageHeaderSkeleton() {
         <div className="mx-auto mt-4 h-5 w-80 max-w-full">
           <Bone className="h-full w-full" />
         </div>
-        <div className="mx-auto mt-8 h-1 w-48 overflow-hidden border-2 border-primary">
-          <div className="h-full w-1/3 bg-primary loading-slide" />
+        <div className="mx-auto mt-8 h-1 w-48 overflow-hidden rounded-full border border-border dark:border-white/18">
+          <div className="h-full w-1/3 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)] loading-slide" />
         </div>
       </div>
     </section>

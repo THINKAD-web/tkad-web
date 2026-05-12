@@ -1,24 +1,15 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import {
-  getHomeAppearanceServerSnapshot,
-  readHomeAppearance,
-  subscribeHomeAppearance,
-} from "@/lib/home-appearance";
+import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 
 type Props = {
   children: ReactNode;
 };
 
-/** 홈·서비스 루트 `data-appearance` — 토글은 `HomeAppearanceToggle`(헤더, 해당 페이지에서만) */
+/** `data-appearance` 는 ThemeToggle(전역 라이트/다크)과 동기 — 헤더·본문·푸터 토큰 일치 */
 export function HomeLandingDayNight({ children }: Props) {
-  const appearance = useSyncExternalStore(
-    subscribeHomeAppearance,
-    readHomeAppearance,
-    getHomeAppearanceServerSnapshot,
-  );
+  const appearance = useTkadAppearance();
 
   return (
     <div

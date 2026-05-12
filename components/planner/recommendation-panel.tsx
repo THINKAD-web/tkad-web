@@ -57,6 +57,32 @@ export function PlannerRecommendationPanel({
   const [loading, setLoading] = useState(true);
   const [refreshTick, setRefreshTick] = useState(0);
 
+  const depsKey = useMemo(
+    () =>
+      `${goal ?? ""}|${regions.join(",")}|${categories.join(",")}|${ageKey}|${industryKey}|${budgetMan}|${months}|${refreshTick}`,
+    [
+      goal,
+      regions,
+      categories,
+      ageKey,
+      industryKey,
+      budgetMan,
+      months,
+      refreshTick,
+    ],
+  );
+
+  useEffect(() => {
+    const show = requestAnimationFrame(() => {
+      setLoading(true);
+    });
+    const hide = window.setTimeout(() => setLoading(false), 1200);
+    return () => {
+      cancelAnimationFrame(show);
+      window.clearTimeout(hide);
+    };
+  }, [depsKey]);
+
   const recommendations = useMemo<ScoredMedia[]>(
     () =>
       recommendPlannerMedia(
@@ -73,23 +99,21 @@ export function PlannerRecommendationPanel({
         limit,
         refreshTick,
       ),
-    [catalog, goal, regions, categories, ageKey, industryKey, budgetMan, months, limit, refreshTick],
+    [
+      catalog,
+      goal,
+      regions,
+      categories,
+      ageKey,
+      industryKey,
+      budgetMan,
+      months,
+      limit,
+      refreshTick,
+    ],
   );
 
-  // 분석 애니메이션 (UX 몰입용 1.2초). 입력이 바뀌거나 refresh 시 loading 재개.
-  // render 단에서 입력 스냅샷을 추적해 effect 내부 setState 체인을 피함.
-  const depsKey = `${goal ?? ""}|${regions.join(",")}|${categories.join(
-    ",",
-  )}|${ageKey}|${industryKey}|${refreshTick}`;
-  const [loadingKey, setLoadingKey] = useState(depsKey);
-  if (loadingKey !== depsKey) {
-    setLoadingKey(depsKey);
-    setLoading(true);
-  }
-  useEffect(() => {
-    const timer = window.setTimeout(() => setLoading(false), 1200);
-    return () => window.clearTimeout(timer);
-  }, [loadingKey]);
+  // 분석 애니메이션: depsKey 변경 시 위 effect에서 로딩 재생.
 
   const isSelected = (id: string) => selectedIds.includes(id);
 

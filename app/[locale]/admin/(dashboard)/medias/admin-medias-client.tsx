@@ -71,6 +71,12 @@ function typeBadgeLabel(type: string): string {
   return type;
 }
 
+const ADMIN_MEDIA_AVAILABILITY_LABEL: Record<MediaAvailability, string> = {
+  available: "예약가능",
+  reserved: "예약중",
+  maintenance: "점검중",
+};
+
 function matchesCategoryFilter(type: string, filter: string): boolean {
   if (filter === "all") return true;
   const s = type.toLowerCase();
@@ -196,6 +202,26 @@ type PriceOptDraft = {
   description: string;
 };
 
+const PRICE_PERIOD_KEYS = ["month", "biweekly", "week", "day"] as const;
+type PricePeriodKey = (typeof PRICE_PERIOD_KEYS)[number];
+
+/** DB·레거시 JSON의 `period` 문자열을 select value와 맞춤 (예: "1개월" → month) */
+function normalizePricePeriodForSelect(raw: unknown): PricePeriodKey {
+  if (typeof raw !== "string") return "month";
+  const t = raw.trim();
+  if ((PRICE_PERIOD_KEYS as readonly string[]).includes(t))
+    return t as PricePeriodKey;
+  const lower = t.toLowerCase();
+  if ((PRICE_PERIOD_KEYS as readonly string[]).includes(lower))
+    return lower as PricePeriodKey;
+  if (/2\s*주|이주|biweek|격주/i.test(t)) return "biweekly";
+  if (/일간|매일|per\s*day|\bday\b|^일$/i.test(t)) return "day";
+  if (/주간|매주|per\s*week|\bweek\b|^주$/i.test(t) && !/2\s*주|이주/i.test(t))
+    return "week";
+  if (/개월|월\s*단|월간|per\s*month|\bmonth|^\d+\s*개월/i.test(t)) return "month";
+  return "month";
+}
+
 function newPriceOptDraft(): PriceOptDraft {
   return {
     key: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -226,10 +252,7 @@ function priceOptDraftsFromJson(jsonStr: string): PriceOptDraft[] {
             : typeof o.price === "string"
               ? o.price
               : "",
-        period:
-          typeof o.period === "string" && o.period.trim()
-            ? o.period.trim()
-            : "month",
+        period: normalizePricePeriodForSelect(o.period),
         description:
           typeof o.description === "string" ? o.description : "",
       };
@@ -425,6 +448,9 @@ type UploadItem = {
 
 const PAGE_SIZE = 8;
 
+type PublicListFilter = "all" | "public" | "hidden";
+type AvailabilityListFilter = "all" | MediaAvailability;
+
 export default function AdminMediasClient({
   initialMedias,
   initialListError,
@@ -436,7 +462,18 @@ export default function AdminMediasClient({
   const [listError, setListError] = useState<string | null>(initialListError);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [publicFilter, setPublicFilter] = useState<PublicListFilter>("all");
+  const [availabilityFilter, setAvailabilityFilter] =
+    useState<AvailabilityListFilter>("all");
   const [page, setPage] = useState(1);
+
+  const resetListFilters = useCallback(() => {
+    setTypeFilter("all");
+    setSearch("");
+    setPublicFilter("all");
+    setAvailabilityFilter("all");
+    setPage(1);
+  }, []);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<AdminMediaDto | null>(null);
@@ -623,31 +660,35 @@ export default function AdminMediasClient({
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.has("updated")) {
-        setTypeFilter("all");
-        setSearch("");
-        setPage(1);
+        resetListFilters();
         window.history.replaceState(null, "", window.location.pathname);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 초기 서버 props 기준 1회
-  }, [loadMedias]);
+  }, [loadMedias, resetListFilters]);
 
   useEffect(() => {
     const onPageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
-        setTypeFilter("all");
-        setSearch("");
-        setPage(1);
+        resetListFilters();
         void loadMedias({ showSpinner: true });
       }
     };
     window.addEventListener("pageshow", onPageShow);
     return () => window.removeEventListener("pageshow", onPageShow);
-  }, [loadMedias]);
+  }, [loadMedias, resetListFilters]);
 
   const filtered = useMemo(() => {
     return medias.filter((m) => {
       if (!matchesCategoryFilter(m.type, typeFilter)) return false;
+      if (publicFilter === "public" && !m.isActive) return false;
+      if (publicFilter === "hidden" && m.isActive) return false;
+      if (
+        availabilityFilter !== "all" &&
+        m.availability !== availabilityFilter
+      ) {
+        return false;
+      }
       if (
         search &&
         !m.name.toLowerCase().includes(search.toLowerCase()) &&
@@ -657,7 +698,7 @@ export default function AdminMediasClient({
       }
       return true;
     });
-  }, [medias, typeFilter, search]);
+  }, [medias, typeFilter, search, publicFilter, availabilityFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice(
@@ -801,6 +842,34 @@ export default function AdminMediasClient({
     }
   }, []);
 
+  const changeAvailability = useCallback(
+    async (m: AdminMediaDto, next: MediaAvailability) => {
+      if (m.availability === next) return;
+      listFetchGenRef.current += 1;
+      try {
+        const result = await adminFetchJson(`/api/admin/medias/${m.id}`, {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ availability: next }),
+        });
+        if (!result.ok) {
+          setListError(result.message);
+          return;
+        }
+        const data = result.data as { media?: unknown };
+        const row = data.media ? normalizeAdminMediaRow(data.media) : null;
+        if (row) {
+          setMedias((prev) => prev.map((x) => (x.id === m.id ? row : x)));
+          setListError(null);
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+    [],
+  );
+
   const toggleCatalogVerified = useCallback(async (m: AdminMediaDto) => {
     listFetchGenRef.current += 1;
     const next = !m.isVerified;
@@ -874,10 +943,12 @@ export default function AdminMediasClient({
       "운영시간",
       "이미지수",
       "가용상태",
-      "활성(목록)",
+      "공개목록",
       "THINKAD검증(공개)",
       "추천(홈)",
       "추천순서",
+      "인기(홈)",
+      "인기순서",
     ];
     const rows = medias.map((m) => [
       m.id,
@@ -898,6 +969,8 @@ export default function AdminMediasClient({
       m.isVerified ? "Y" : "",
       m.isFeatured ? "Y" : "",
       m.featuredOrder != null ? String(m.featuredOrder) : "",
+      m.isPopular ? "Y" : "",
+      m.popularOrder != null ? String(m.popularOrder) : "",
     ]);
     const csv = [header, ...rows]
       .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
@@ -1095,8 +1168,8 @@ export default function AdminMediasClient({
   return (
     <>
       <div className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 flex-wrap gap-1.5">
             {[
               { value: "all", label: "전체" },
               { value: "digital", label: "디지털" },
@@ -1121,8 +1194,8 @@ export default function AdminMediasClient({
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap gap-2">
-            <div className="relative flex-1 sm:w-56 sm:flex-initial">
+          <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+            <div className="relative w-full min-w-0 sm:w-56 sm:flex-none">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="매체명 검색..."
@@ -1131,16 +1204,17 @@ export default function AdminMediasClient({
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                className="pl-9"
+                className="w-full pl-9"
               />
             </div>
+            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
             <Button
               variant="outline"
               onClick={() => {
                 setUploadItems([]);
                 setUploadModalOpen(true);
               }}
-              className="shrink-0"
+              className="w-full justify-center sm:w-auto"
             >
               <ImagePlus className="h-4 w-4" />
               <span className="hidden sm:inline">사진 업로드</span>
@@ -1148,25 +1222,25 @@ export default function AdminMediasClient({
             <Button
               variant="outline"
               onClick={handleExportCSV}
-              className="shrink-0"
+              className="w-full justify-center sm:w-auto"
               disabled={medias.length === 0}
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">엑셀 다운로드</span>
             </Button>
-            <Button variant="outline" className="shrink-0" asChild>
+            <Button variant="outline" className="w-full justify-center sm:w-auto" asChild>
               <Link
                 href="/admin/medias/quick-add"
-                className="inline-flex items-center gap-2"
+                className="inline-flex items-center justify-center gap-2"
               >
                 <Code2 className="h-4 w-4" />
                 <span className="hidden sm:inline">JSON 간편 등록</span>
               </Link>
             </Button>
-            <Button variant="outline" className="shrink-0" asChild>
+            <Button variant="outline" className="w-full justify-center sm:w-auto" asChild>
               <Link
                 href="/admin/medias/bulk-import"
-                className="inline-flex items-center gap-2"
+                className="inline-flex items-center justify-center gap-2"
               >
                 <Layers className="h-4 w-4" />
                 <span className="hidden sm:inline">일괄 가져오기</span>
@@ -1174,11 +1248,86 @@ export default function AdminMediasClient({
             </Button>
             <Button
               onClick={openAdd}
-              className="shrink-0 border-2 border-border bg-primary text-primary-foreground transition-colors hover:bg-foreground hover:border-border"
+              className="col-span-2 w-full justify-center border-2 border-border bg-primary text-primary-foreground transition-colors hover:bg-foreground hover:border-border sm:col-span-1 sm:w-auto"
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">매체 추가</span>
             </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border bg-muted/15 px-2.5 py-2.5 sm:px-3">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            노출 필터
+          </p>
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:gap-6">
+            <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+              <span className="w-11 shrink-0 text-xs font-medium text-muted-foreground">
+                공개
+              </span>
+              {(
+                [
+                  { value: "all" as const, label: "전체" },
+                  { value: "public" as const, label: "공개만" },
+                  { value: "hidden" as const, label: "숨김만" },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    setPublicFilter(opt.value);
+                    setPage(1);
+                  }}
+                  className={`rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors sm:px-3.5 sm:text-xs ${
+                    publicFilter === opt.value
+                      ? "border-2 border-border bg-foreground text-background"
+                      : "border-2 border-border bg-card text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex min-w-0 flex-wrap items-center gap-1.5 sm:border-l sm:border-border sm:pl-6">
+              <span className="w-11 shrink-0 text-xs font-medium text-muted-foreground">
+                가용
+              </span>
+              {(
+                [
+                  { value: "all" as const, label: "전체" },
+                  {
+                    value: "available" as const,
+                    label: ADMIN_MEDIA_AVAILABILITY_LABEL.available,
+                  },
+                  {
+                    value: "reserved" as const,
+                    label: ADMIN_MEDIA_AVAILABILITY_LABEL.reserved,
+                  },
+                  {
+                    value: "maintenance" as const,
+                    label: ADMIN_MEDIA_AVAILABILITY_LABEL.maintenance,
+                  },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    setAvailabilityFilter(opt.value);
+                    setPage(1);
+                  }}
+                  className={`rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors sm:px-3.5 sm:text-xs ${
+                    availabilityFilter === opt.value
+                      ? "border-2 border-border bg-foreground text-background"
+                      : "border-2 border-border bg-card text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -1192,9 +1341,12 @@ export default function AdminMediasClient({
         {!listLoading &&
           medias.length > 0 &&
           filtered.length === 0 &&
-          (typeFilter !== "all" || search.trim() !== "") && (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-              <span>
+          (typeFilter !== "all" ||
+            search.trim() !== "" ||
+            publicFilter !== "all" ||
+            availabilityFilter !== "all") && (
+            <div className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+              <span className="min-w-0 leading-snug">
                 필터 또는 검색 때문에 표시되는 매체가 없습니다. (전체{" "}
                 {medias.length}건)
               </span>
@@ -1204,9 +1356,7 @@ export default function AdminMediasClient({
                 size="sm"
                 className="shrink-0 border-amber-300 bg-white"
                 onClick={() => {
-                  setTypeFilter("all");
-                  setSearch("");
-                  setPage(1);
+                  resetListFilters();
                 }}
               >
                 전체 보기
@@ -1216,9 +1366,7 @@ export default function AdminMediasClient({
 
         <Card>
           <CardContent className="p-0">
-            {/* #ADMIN-MEDIAS-1 hotfix: 모바일 전용 카드 레이아웃 (md 미만).
-                기존 테이블은 가로 스크롤 9컬럼을 거쳐야 편집 버튼 도달 → 모바일 사용 불가.
-                카드: 매체명·유형·가격·상태·수정·삭제 만 노출. 추천/인기는 데스크톱에서. */}
+            {/* #ADMIN-MEDIAS-1: 모바일 카드 — 매체명·유형·가격·노출(공개·가용·홈 추천/인기)·Verified·수정·삭제 */}
             <div className="md:hidden">
               {listLoading ? (
                 <div className="px-4 py-12 text-center text-muted-foreground">
@@ -1236,8 +1384,10 @@ export default function AdminMediasClient({
                   {paginated.map((media) => (
                     <li
                       key={media.id}
-                      className={`flex flex-col gap-3 px-4 py-3 ${
-                        isRowActive(media) ? "" : "bg-slate-50/50 opacity-60"
+                      className={`flex flex-col gap-3 border-l-[3px] px-4 py-3 ${
+                        isRowActive(media)
+                          ? "border-l-transparent"
+                          : "border-l-amber-500/75 bg-muted/35 dark:border-l-amber-400/60"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -1263,7 +1413,16 @@ export default function AdminMediasClient({
                         <button
                           type="button"
                           onClick={() => toggleActive(media)}
-                          aria-label={isRowActive(media) ? "비활성화" : "활성화"}
+                          title={
+                            isRowActive(media)
+                              ? "공개 목록·검색에서 숨기기"
+                              : "공개 목록·검색에 표시"
+                          }
+                          aria-label={
+                            isRowActive(media)
+                              ? "공개 목록 끄기"
+                              : "공개 목록 켜기"
+                          }
                           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
                             isRowActive(media)
                               ? "bg-emerald-500"
@@ -1278,6 +1437,94 @@ export default function AdminMediasClient({
                             } mt-0.5`}
                           />
                         </button>
+                      </div>
+                        <div className="rounded-md border border-border/80 bg-muted/20 px-3 py-2">
+                        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          노출
+                        </p>
+                        <p className="mb-2 text-[10px] text-muted-foreground">
+                          우측 스위치: 공개 목록·검색 표시 여부
+                        </p>
+                        <div className="flex flex-wrap items-end gap-2">
+                          <label className="min-w-0 flex-1">
+                            <span className="mb-0.5 block text-[10px] text-muted-foreground">
+                              가용 상태
+                            </span>
+                            <select
+                              className="flex h-9 w-full rounded-md border border-input bg-background px-2 text-xs"
+                              value={media.availability}
+                              aria-label="가용 상태"
+                              onChange={(e) => {
+                                const v = e.target.value as MediaAvailability;
+                                void changeAvailability(media, v);
+                              }}
+                            >
+                              {(
+                                ["available", "reserved", "maintenance"] as const
+                              ).map((key) => (
+                                <option key={key} value={key}>
+                                  {ADMIN_MEDIA_AVAILABILITY_LABEL[key]}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
+                        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-border/60 pt-2">
+                          <span className="text-[10px] text-muted-foreground">
+                            홈
+                          </span>
+                          <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            title={
+                              media.isFeatured
+                                ? "추천 해제"
+                                : "홈 추천 매체로 지정"
+                            }
+                            onClick={() =>
+                              void patchFeaturedFields(media, {
+                                isFeatured: !media.isFeatured,
+                              })
+                            }
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card transition-colors hover:bg-amber-50"
+                          >
+                            <Star
+                              className={`h-4 w-4 ${
+                                media.isFeatured
+                                  ? "fill-amber-400 text-amber-500"
+                                  : "text-slate-300"
+                              }`}
+                              aria-hidden
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            title={
+                              media.isPopular
+                                ? "인기 해제"
+                                : "홈 인기 매체로 지정"
+                            }
+                            onClick={() =>
+                              void patchFeaturedFields(media, {
+                                isPopular: !media.isPopular,
+                              })
+                            }
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card transition-colors hover:bg-rose-50"
+                          >
+                            <Flame
+                              className={`h-4 w-4 ${
+                                media.isPopular
+                                  ? "fill-rose-400 text-rose-500"
+                                  : "text-slate-300"
+                              }`}
+                              aria-hidden
+                            />
+                          </button>
+                          </div>
+                          <span className="basis-full text-[10px] leading-snug text-muted-foreground sm:basis-auto">
+                            (순서는 PC 목록에서)
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -1303,22 +1550,25 @@ export default function AdminMediasClient({
                           공개 Verified
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="grid w-full grid-cols-[1fr_auto] items-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           asChild
-                          className="flex-1 min-w-[7rem]"
+                          className="min-w-0 justify-center"
                         >
-                          <Link href={`/admin/medias/${media.id}/edit`}>
-                            <Pencil className="mr-1.5 h-3.5 w-3.5" />
-                            수정
+                          <Link
+                            href={`/admin/medias/${media.id}/edit`}
+                            className="inline-flex min-w-0 items-center justify-center gap-1.5"
+                          >
+                            <Pencil className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">수정</span>
                           </Link>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-destructive hover:text-destructive"
+                          className="shrink-0 text-destructive hover:text-destructive"
                           onClick={() => setDeleteConfirm(media.id)}
                           aria-label="삭제"
                         >
@@ -1334,12 +1584,12 @@ export default function AdminMediasClient({
             <div className="hidden overflow-x-auto md:block">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-slate-50 text-left text-xs font-medium text-muted-foreground">
+                  <tr className="border-b bg-muted/45 text-left text-xs font-medium text-foreground/80 dark:bg-muted/25 dark:text-muted-foreground">
                     <th className="px-4 py-3">매체명</th>
                     <th className="px-4 py-3 hidden sm:table-cell">위치</th>
                     <th className="px-4 py-3">유형</th>
                     <th className="px-4 py-3">가격(원)</th>
-                    <th className="px-4 py-3 text-center">상태</th>
+                    <th className="px-4 py-3 text-center min-w-[8.5rem]">노출</th>
                     <th className="px-4 py-3 text-center">검증</th>
                     <th className="px-4 py-3 text-center">추천</th>
                     <th className="px-4 py-3 text-center w-[5.5rem]">순서</th>
@@ -1367,17 +1617,17 @@ export default function AdminMediasClient({
                       >
                         {medias.length === 0
                           ? "등록된 매체가 없습니다. 추가하거나 JSON 간편 등록을 이용하세요."
-                          : "조건에 맞는 매체가 없습니다. 상단의 「전체 보기」 또는 유형·검색을 확인하세요."}
+                          : "조건에 맞는 매체가 없습니다. 상단의 「전체 보기」 또는 유형·노출 필터·검색을 확인하세요."}
                       </td>
                     </tr>
                   ) : (
                     paginated.map((media) => (
                       <tr
                         key={media.id}
-                        className={`border-b last:border-0 transition-colors ${
+                        className={`border-b last:border-0 border-l-[3px] transition-colors ${
                           isRowActive(media)
-                            ? "hover:bg-slate-50/80"
-                            : "bg-slate-50/50 opacity-60"
+                            ? "border-l-transparent hover:bg-muted/40"
+                            : "border-l-amber-500/75 bg-muted/25 hover:bg-muted/40 dark:border-l-amber-400/60"
                         }`}
                       >
                         <td className="px-4 py-3">
@@ -1402,24 +1652,62 @@ export default function AdminMediasClient({
                         <td className="px-4 py-3 font-semibold text-foreground">
                           ₩{media.price.toLocaleString()}
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => toggleActive(media)}
-                            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
-                              isRowActive(media)
-                                ? "bg-emerald-500"
-                                : "bg-slate-300"
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                                isRowActive(media)
-                                  ? "translate-x-[18px]"
-                                  : "translate-x-0.5"
-                              } mt-0.5`}
-                            />
-                          </button>
+                        <td className="px-4 py-3 text-center align-top">
+                          <div className="mx-auto flex max-w-[9rem] flex-col items-stretch gap-2 py-0.5">
+                            <div className="flex flex-col items-center gap-0.5">
+                              <span className="text-[10px] font-medium text-muted-foreground">
+                                공개
+                              </span>
+                              <button
+                                type="button"
+                                title={
+                                  isRowActive(media)
+                                    ? "공개 목록·검색에서 숨기기"
+                                    : "공개 목록·검색에 표시"
+                                }
+                                onClick={() => toggleActive(media)}
+                                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
+                                  isRowActive(media)
+                                    ? "bg-emerald-500"
+                                    : "bg-slate-300"
+                                }`}
+                              >
+                                <span
+                                  className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                                    isRowActive(media)
+                                      ? "translate-x-[18px]"
+                                      : "translate-x-0.5"
+                                  } mt-0.5`}
+                                />
+                              </button>
+                            </div>
+                            <label className="block text-left">
+                              <span className="mb-0.5 block text-center text-[10px] font-medium text-muted-foreground">
+                                가용
+                              </span>
+                              <select
+                                className="flex h-8 w-full rounded-md border border-input bg-background px-1.5 text-[11px]"
+                                value={media.availability}
+                                aria-label="가용 상태"
+                                onChange={(e) => {
+                                  const v = e.target.value as MediaAvailability;
+                                  void changeAvailability(media, v);
+                                }}
+                              >
+                                {(
+                                  [
+                                    "available",
+                                    "reserved",
+                                    "maintenance",
+                                  ] as const
+                                ).map((key) => (
+                                  <option key={key} value={key}>
+                                    {ADMIN_MEDIA_AVAILABILITY_LABEL[key]}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <button
@@ -1584,12 +1872,12 @@ export default function AdminMediasClient({
             </div>
 
             {!listLoading && totalPages > 1 && (
-              <div className="flex items-center justify-between border-t px-4 py-3">
-                <span className="text-xs text-muted-foreground">
+              <div className="flex flex-col gap-2 border-t px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:px-4">
+                <span className="min-w-0 text-center text-xs leading-snug text-muted-foreground sm:flex-1 sm:text-left">
                   총 {filtered.length}건 중 {(page - 1) * PAGE_SIZE + 1}–
                   {Math.min(page * PAGE_SIZE, filtered.length)}
                 </span>
-                <div className="flex gap-1">
+                <div className="flex shrink-0 justify-center gap-1 sm:justify-end">
                   <Button
                     variant="outline"
                     size="icon-xs"
@@ -1614,15 +1902,15 @@ export default function AdminMediasClient({
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 bg-black/20 backdrop-blur-[2px] dark:bg-black/60"
+            className="absolute inset-0 bg-zinc-900/30 dark:bg-black/60 dark:backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
             aria-hidden
           />
-          <Card className="tkad-glass-surface relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col animate-fade-in-up overflow-hidden border border-border/70 bg-card/95 shadow-[0_28px_120px_rgba(0,0,0,0.18)] backdrop-blur dark:border-white/12 dark:bg-black/45 dark:text-white dark:shadow-[0_28px_120px_rgba(0,0,0,0.65)]">
-            <CardHeader className="flex shrink-0 flex-row items-start justify-between">
-              <CardTitle className="text-lg text-foreground">
+          <Card className="relative z-10 flex max-h-[min(92dvh,900px)] w-full max-w-3xl flex-col gap-0 overflow-hidden rounded-t-2xl border-border bg-card py-0 text-card-foreground shadow-2xl ring-1 ring-black/[0.05] hover:translate-y-0 hover:shadow-2xl motion-safe:hover:translate-y-0 sm:rounded-2xl dark:border-white/12 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-white/10 dark:hover:shadow-[0_28px_80px_rgba(0,0,0,0.55)]">
+            <CardHeader className="flex shrink-0 flex-row items-start justify-between gap-2 border-b border-border/70 px-4 pb-3 pt-4 sm:px-6">
+              <CardTitle className="min-w-0 flex-1 text-lg text-foreground">
                 {editing ? "매체 수정" : "매체 추가"}
               </CardTitle>
               <Button
@@ -1633,7 +1921,7 @@ export default function AdminMediasClient({
                 <X className="h-4 w-4" />
               </Button>
             </CardHeader>
-            <CardContent className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+            <CardContent className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 pb-2 pr-3 sm:px-6 sm:pr-5">
               {saveError && (
                 <p className="text-sm text-red-600">{saveError}</p>
               )}
@@ -2181,7 +2469,7 @@ export default function AdminMediasClient({
                               기간
                             </label>
                             <select
-                              className="flex h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                              className="flex h-9 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
                               value={row.period}
                               onChange={(e) => {
                                 const v = e.target.value;
@@ -2475,13 +2763,17 @@ export default function AdminMediasClient({
                   }
                 />
               </div>
-              <div className="flex justify-end gap-2 border-t pt-4 pb-1">
-                <Button variant="outline" onClick={() => setModalOpen(false)}>
+              <div className="flex flex-col gap-2 border-t px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:flex-row sm:flex-wrap sm:justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setModalOpen(false)}
+                  className="w-full shrink-0 sm:w-auto"
+                >
                   취소
                 </Button>
                 <Button
                   onClick={() => void handleSave()}
-                  className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
+                  className="w-full shrink-0 border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground sm:w-auto"
                   disabled={
                     !form.name.trim() ||
                     !form.location.trim() ||
@@ -2508,15 +2800,15 @@ export default function AdminMediasClient({
       )}
 
       {uploadModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 bg-black/20 backdrop-blur-[2px] dark:bg-black/60"
+            className="absolute inset-0 bg-zinc-900/30 dark:bg-black/60 dark:backdrop-blur-sm"
             onClick={() => setUploadModalOpen(false)}
             aria-hidden
           />
-          <Card className="tkad-glass-surface relative z-10 flex max-h-[85vh] w-full max-w-2xl animate-fade-in-up flex-col overflow-hidden border border-border/70 bg-card/95 shadow-[0_28px_120px_rgba(0,0,0,0.18)] backdrop-blur dark:border-white/12 dark:bg-black/45 dark:text-white dark:shadow-[0_28px_120px_rgba(0,0,0,0.65)]">
-            <CardHeader className="flex shrink-0 flex-row items-start justify-between">
-              <CardTitle className="text-lg text-foreground">
+          <Card className="relative z-10 flex max-h-[min(88dvh,820px)] w-full max-w-2xl flex-col gap-0 overflow-hidden rounded-t-2xl border-border bg-card py-0 text-card-foreground shadow-2xl ring-1 ring-black/[0.05] hover:translate-y-0 hover:shadow-2xl motion-safe:hover:translate-y-0 sm:rounded-2xl dark:border-white/12 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-white/10 dark:hover:shadow-[0_28px_80px_rgba(0,0,0,0.55)]">
+            <CardHeader className="flex shrink-0 flex-row items-start justify-between gap-2 border-b border-border/70 px-4 pb-3 pt-4 sm:px-6">
+              <CardTitle className="min-w-0 flex-1 text-lg text-foreground">
                 매체 사진 일괄 업로드
               </CardTitle>
               <Button
@@ -2527,7 +2819,7 @@ export default function AdminMediasClient({
                 <X className="h-4 w-4" />
               </Button>
             </CardHeader>
-            <CardContent className="space-y-4 overflow-y-auto">
+            <CardContent className="flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto overflow-x-hidden px-4 pb-4 pr-3 sm:px-6 sm:pr-5">
               <div
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -2655,7 +2947,7 @@ export default function AdminMediasClient({
               )}
 
               {uploadItems.length > 0 && (
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex flex-col gap-2 border-t border-border/60 px-0 pt-3 sm:flex-row sm:flex-wrap sm:justify-end">
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -2664,19 +2956,20 @@ export default function AdminMediasClient({
                       );
                       setUploadItems([]);
                     }}
+                    className="w-full sm:w-auto"
                   >
                     초기화
                   </Button>
                   {allDone ? (
                     <Button
-                      className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
+                      className="w-full border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground sm:w-auto"
                       onClick={() => setUploadModalOpen(false)}
                     >
                       완료
                     </Button>
                   ) : (
                     <Button
-                      className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
+                      className="w-full border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground sm:w-auto"
                       disabled={!allMapped || uploadRunning}
                       onClick={() => void startBulkUpload()}
                     >
@@ -2701,14 +2994,14 @@ export default function AdminMediasClient({
       )}
 
       {deleteConfirm !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setDeleteConfirm(null)}
             aria-hidden
           />
-          <Card className="relative z-10 w-full max-w-sm animate-fade-in-up">
-            <CardContent className="space-y-4 pt-6 text-center">
+          <Card className="relative z-10 mx-3 mb-[max(0.75rem,env(safe-area-inset-bottom))] w-full max-w-sm animate-fade-in-up rounded-t-2xl sm:mx-0 sm:mb-0 sm:rounded-2xl">
+            <CardContent className="space-y-4 px-4 pb-6 pt-6 text-center sm:px-6">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
                 <Trash2 className="h-5 w-5 text-destructive" />
               </div>
@@ -2718,11 +3011,12 @@ export default function AdminMediasClient({
                   이 작업은 되돌릴 수 없습니다.
                 </p>
               </div>
-              <div className="flex justify-center gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
                 <Button
                   variant="outline"
                   onClick={() => setDeleteConfirm(null)}
                   disabled={deleteLoading}
+                  className="w-full sm:w-auto"
                 >
                   취소
                 </Button>
@@ -2730,6 +3024,7 @@ export default function AdminMediasClient({
                   variant="destructive"
                   disabled={deleteLoading}
                   onClick={() => void handleDelete(deleteConfirm)}
+                  className="w-full sm:w-auto"
                 >
                   {deleteLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
