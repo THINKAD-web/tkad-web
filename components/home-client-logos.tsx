@@ -1,22 +1,13 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import ScrollAnimate from "@/components/scroll-animate";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
-import {
-  getHomeAppearanceServerSnapshot,
-  readHomeAppearance,
-  subscribeHomeAppearance,
-} from "@/lib/home-appearance";
+import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { cn } from "@/lib/utils";
 
 export function HomeClientLogos({ isKo }: { isKo: boolean }) {
-  const appearance = useSyncExternalStore(
-    subscribeHomeAppearance,
-    readHomeAppearance,
-    getHomeAppearanceServerSnapshot,
-  );
+  const appearance = useTkadAppearance();
   const isDay = appearance === "day";
 
   const logos = [

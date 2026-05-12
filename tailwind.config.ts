@@ -21,4 +21,6 @@ export default {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  /** `next-themes` 는 `html.dark` 토글 — v4 기본 `dark:` 는 OS 미디어쿼리라 토글과 불일치 */
+  darkMode: "class",
 } satisfies Config;

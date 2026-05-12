@@ -10,6 +10,8 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 /* Relative import: avoids resolving `tailwindcss` from ~ when a home package.json exists */
 @import "../node_modules/tailwindcss/index.css";
+/* v4: JS 설정(darkMode: class 등)을 쓰려면 명시 필요 — 없으면 `dark:` 가 OS 미디어쿼리만 따름(일몰 후 자동 다크) */
+@config "../tailwind.config.ts";
 @plugin "@tailwindcss/typography";
 
 /* THINKAD — Hermès orange #FF6200 · 프리미엄 다크/라이트 (next-themes) */
@@ -1540,6 +1542,12 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
   z-index: 1;
 }
 
+/* `/media/[id]` 히어로 — 래퍼가 max-w-6xl 이라 위 규칙에 빠져 라이트 `::after` 베일이 상단 이미지를 덮었음 */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero.tkad-neon-surface > div.relative.max-w-6xl {
+  position: relative;
+  z-index: 1;
+}
+
 .tkad-home-appearance[data-appearance="day"] .tkad-home-hero .max-w-6xl > div:first-child > div:last-child {
   color: var(--home-panel-label) !important;
 }
@@ -2440,8 +2448,10 @@ html:not(.dark) .tkad-nav-chrome [class*="text-white"]:not([class*="dark:text-wh
 }
 
 /* ── Smooth scrolling ── */
+/* height: 루트 레이아웃 폰트 변수는 body 로 옮김 — html 에 React className 이 없어야 next-themes 가 붙인 dark/light 가 덮어써지지 않음 */
 html {
   scroll-behavior: smooth;
+  height: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2525,11 +2535,11 @@ html {
     linear-gradient(180deg, rgba(0, 0, 0, 0.10) 0%, rgba(0, 0, 0, 0.30) 100%);
 }
 
-/* Card */
+/* Card — `--card`/`--border` 는 hex 토큰; `hsl(var(--hex) / α)` 는 무효라 라이트에서 카드·입력이 깨짐 */
 .admin-dashboard-root [data-slot="card"] {
   border-radius: 22px;
-  border: 1px solid hsl(var(--border) / 0.7);
-  background: hsl(var(--card) / 0.82);
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  background: color-mix(in srgb, var(--card) 94%, var(--background) 6%);
   box-shadow: 0 18px 70px rgba(0, 0, 0, 0.10);
   backdrop-filter: blur(12px);
 }
@@ -2542,8 +2552,8 @@ html {
 /* Button */
 .admin-dashboard-root [data-slot="button"][data-variant="outline"] {
   border-width: 1px;
-  border-color: hsl(var(--border) / 0.7);
-  background: hsl(var(--card) / 0.78);
+  border-color: color-mix(in srgb, var(--border) 88%, transparent);
+  background: color-mix(in srgb, var(--card) 90%, var(--muted) 10%);
   backdrop-filter: blur(10px);
 }
 .dark .admin-dashboard-root [data-slot="button"][data-variant="outline"] {
@@ -2555,21 +2565,69 @@ html {
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.16);
 }
 
-/* Input */
-.admin-dashboard-root [data-slot="input"] {
-  border-color: hsl(var(--border) / 0.7);
-  background: hsl(var(--card) / 0.72);
+/* Input — 라이트에서 글자색·채움 명시(WebKit 상속·autofill 로 글자가 사라지는 경우 차단) */
+.admin-dashboard-root [data-slot="input"],
+.admin-dashboard-root [data-slot="textarea"] {
+  border-color: color-mix(in srgb, var(--border) 88%, transparent);
+  background: color-mix(in srgb, var(--card) 92%, var(--muted) 8%);
+  color: var(--foreground) !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
   backdrop-filter: blur(10px);
 }
-.dark .admin-dashboard-root [data-slot="input"] {
+.dark .admin-dashboard-root [data-slot="input"],
+.dark .admin-dashboard-root [data-slot="textarea"] {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.22);
+  color: var(--foreground) !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
+}
+
+.admin-dashboard-root [data-slot="input"]:autofill,
+.admin-dashboard-root [data-slot="input"]:-webkit-autofill,
+.admin-dashboard-root [data-slot="input"]:-webkit-autofill:hover,
+.admin-dashboard-root [data-slot="input"]:-webkit-autofill:focus,
+.admin-dashboard-root [data-slot="textarea"]:autofill,
+.admin-dashboard-root [data-slot="textarea"]:-webkit-autofill,
+.admin-dashboard-root [data-slot="textarea"]:-webkit-autofill:hover,
+.admin-dashboard-root [data-slot="textarea"]:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
+  box-shadow: 0 0 0 1000px color-mix(in srgb, var(--card) 94%, var(--muted) 6%) inset !important;
+  transition: background-color 99999s ease-out;
+}
+
+.dark .admin-dashboard-root [data-slot="input"]:autofill,
+.dark .admin-dashboard-root [data-slot="input"]:-webkit-autofill,
+.dark .admin-dashboard-root [data-slot="input"]:-webkit-autofill:hover,
+.dark .admin-dashboard-root [data-slot="input"]:-webkit-autofill:focus,
+.dark .admin-dashboard-root [data-slot="textarea"]:autofill,
+.dark .admin-dashboard-root [data-slot="textarea"]:-webkit-autofill,
+.dark .admin-dashboard-root [data-slot="textarea"]:-webkit-autofill:hover,
+.dark .admin-dashboard-root [data-slot="textarea"]:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--foreground) !important;
+  box-shadow: 0 0 0 1000px rgba(15, 15, 20, 0.92) inset !important;
+}
+
+html:not(.dark) .admin-dashboard-root select {
+  border-color: color-mix(in srgb, var(--border) 88%, transparent);
+  background-color: color-mix(in srgb, var(--card) 96%, var(--muted) 4%);
+  color: var(--foreground);
+  -webkit-text-fill-color: currentColor;
+}
+
+.dark .admin-dashboard-root select {
+  border-color: rgba(255, 255, 255, 0.12);
+  background-color: rgba(0, 0, 0, 0.22);
+  color: var(--foreground);
+  -webkit-text-fill-color: currentColor;
 }
 
 /* Badge */
 .admin-dashboard-root [data-slot="badge"][data-variant="outline"] {
-  border-color: hsl(var(--border) / 0.7);
-  background: hsl(var(--card) / 0.72);
+  border-color: color-mix(in srgb, var(--border) 88%, transparent);
+  background: color-mix(in srgb, var(--card) 90%, var(--muted) 10%);
   backdrop-filter: blur(10px);
 }
 .dark .admin-dashboard-root [data-slot="badge"][data-variant="outline"] {
@@ -2817,8 +2875,7 @@ img {
   }
 }
 
-/* 브루탈리스트 로딩 인디케이터 — 좌→우 슬라이딩 주황 막대.
- * skeletons.tsx 의 PageHeaderSkeleton · admin/loading 등에서 사용. */
+/* 라우트 로딩 인디케이터 — 좌→우 슬라이딩 막대(PageHeaderSkeleton 등에서 트랙 안 콘텐츠와 조합). */
 @keyframes loadingSlide {
   0%   { transform: translateX(-100%); }
   100% { transform: translateX(300%); }
@@ -2827,7 +2884,7 @@ img {
   animation: loadingSlide 1.4s ease-in-out infinite;
 }
 
-/* 라우트 전환 상단 바 — 인디터미넌트 캡슐 (Linear / Vercel 계열) */
+/* 라우트 전환 상단 바 — 인디터미넌트 캡슐(violet / cyan 글로우, Hermès 주황 미사용) */
 @keyframes navCapsule {
   0% {
     transform: translate3d(-120%, 0, 0);

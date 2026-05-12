@@ -103,7 +103,9 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
         </div>
         <div className="flex min-h-16 min-w-0 items-center justify-end gap-1.5 px-4 lg:gap-2 lg:px-6">
           {extras ? (
-            <div className="flex items-center gap-1">{extras}</div>
+            <div className="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-1">
+              {extras}
+            </div>
           ) : null}
           {cta ? (
             <Link
@@ -121,7 +123,11 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
         <div className="flex h-14 items-center justify-between gap-2 px-4 sm:h-16 sm:px-5">
           <div className="min-w-0 shrink">{Logo}</div>
           <div className="flex shrink-0 items-center gap-1">
-            {extras ? <div className="flex items-center gap-1">{extras}</div> : null}
+            {extras ? (
+              <div className="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-1">
+                {extras}
+              </div>
+            ) : null}
             <button
               type="button"
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -140,7 +146,7 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
         ) : null}
         {/* 좁은 미리보기·모바일에서도 IA 링크가 상단에 보이도록 (md 미만은 햄버거만 있으면 카테고리가 숨겨짐) */}
         <div
-          className="border-t border-border/40 bg-background px-3 py-2 dark:border-white/10 dark:bg-[#05050a]"
+          className="border-t border-zinc-200/90 bg-zinc-100 px-3 py-2 dark:border-white/10 dark:bg-[#05050a]"
           aria-label="주요 카테고리"
         >
           <ul
@@ -151,7 +157,7 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
               <li key={leaf.href} className="shrink-0">
                 <Link
                   href={leaf.href}
-                  className="inline-flex max-w-[11rem] truncate rounded-full border border-border/55 bg-card/95 px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-foreground shadow-sm dark:border-white/14 dark:bg-white/10 dark:text-white"
+                  className="inline-flex max-w-[11rem] truncate rounded-full border border-zinc-300/90 bg-white px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 dark:bg-white/10 dark:text-white"
                 >
                   {leaf.label}
                 </Link>
@@ -161,26 +167,35 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
         </div>
       </div>
 
-      {/* 모바일 패널 — 그룹은 모든 leaf 펼침 */}
+      {/* 모바일 패널 — 라이트에선 솔리드 배경(네온 레이어는 다크만). 그렇지 않으면 검정 글자가 어두운 그라데이션에 묻힘 */}
       {mobileOpen && (
-        <div className="relative overflow-hidden border-t border-border/60 bg-background text-foreground md:hidden dark:border-white/10 dark:bg-[#05050a] dark:text-white">
-          <div aria-hidden className="pointer-events-none absolute inset-0 tkad-neon-depth" />
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-15 tkad-neon-grid" />
-          <div aria-hidden className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.06] mix-blend-overlay" />
-          <ul className="relative divide-y divide-border dark:divide-white/10">
+        <div className="relative overflow-hidden border-t border-zinc-200/90 bg-zinc-50 text-zinc-950 md:hidden dark:border-white/10 dark:bg-[#05050a] dark:text-white">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 tkad-neon-depth hidden dark:block"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-15 tkad-neon-grid hidden dark:block"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.06] mix-blend-overlay hidden dark:block"
+          />
+          <ul className="relative divide-y divide-zinc-200 dark:divide-white/10">
             {links.map((entry, i) =>
               isGroup(entry) ? (
                 <li key={`mg-${i}`}>
-                  <p className="bg-muted/50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground dark:bg-white/5 dark:text-white/70">
+                  <p className="bg-zinc-200/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-600 dark:bg-white/5 dark:text-white/70">
                     {entry.label}
                   </p>
-                  <ul className="divide-y divide-border dark:divide-white/10">
+                  <ul className="divide-y divide-zinc-200 dark:divide-white/10">
                     {entry.items.map((leaf) => (
                       <li key={leaf.href}>
                         <Link
                           href={leaf.href}
                           onClick={() => setMobileOpen(false)}
-                          className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-foreground transition-colors hover:bg-muted/60 dark:text-white dark:hover:bg-white/6"
+                          className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white dark:hover:bg-white/6"
                         >
                           {leaf.label}
                         </Link>
@@ -193,7 +208,7 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
                   <Link
                     href={entry.href}
                     onClick={() => setMobileOpen(false)}
-                    className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-foreground transition-colors hover:bg-muted/60 dark:text-white dark:hover:bg-white/6"
+                    className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white dark:hover:bg-white/6"
                   >
                     {entry.label}
                   </Link>
@@ -202,7 +217,7 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
             )}
           </ul>
           {cta ? (
-            <div className="relative border-t border-border dark:border-white/10 p-4">
+            <div className="relative border-t border-zinc-200 dark:border-white/10 p-4">
               <Link
                 href={cta.href}
                 onClick={() => setMobileOpen(false)}
