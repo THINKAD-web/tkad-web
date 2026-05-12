@@ -964,6 +964,9 @@ export default function PlannerPageClient({
                 ageText={t(ageKey)}
                 industryText={t(industryKey)}
                 portfolio={portfolio}
+                matchedCount={filtered.length}
+                monthCompare={monthCompare}
+                cpmBars={cpmBars}
                 metrics={metrics}
                 reachCorePct={reachSplit.corePct}
                 reachExtendedPct={reachSplit.extendedPct}
@@ -1531,6 +1534,9 @@ export default function PlannerPageClient({
                   ageText={t(ageKey)}
                   industryText={t(industryKey)}
                   portfolio={portfolio}
+                  matchedCount={filtered.length}
+                  monthCompare={monthCompare}
+                  cpmBars={cpmBars}
                   metrics={metrics}
                   reachCorePct={reachSplit.corePct}
                   reachExtendedPct={reachSplit.extendedPct}
