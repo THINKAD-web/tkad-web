@@ -1226,6 +1226,76 @@ export default function AdminCampaignsPage() {
                 </div>
               </div>
 
+                {showReportPreview && selectedId && (
+                  <div className="mt-4">
+                    <CampaignReportPreview
+                      data={{
+                        campaignName:
+                          list.find((c) => c.id === selectedId)?.name ?? "—",
+                        clientCompany:
+                          list.find((c) => c.id === selectedId)
+                            ?.clientCompany ?? "",
+                        clientName:
+                          list.find((c) => c.id === selectedId)?.clientName ??
+                          "",
+                        clientEmail:
+                          list.find((c) => c.id === selectedId)?.clientEmail ??
+                          "",
+                        status:
+                          list.find((c) => c.id === selectedId)?.status ??
+                          "진행중",
+                        notes:
+                          list.find((c) => c.id === selectedId)?.notes ?? null,
+                        startDate:
+                          list.find((c) => c.id === selectedId)?.startDate ??
+                          null,
+                        endDate:
+                          list.find((c) => c.id === selectedId)?.endDate ??
+                          null,
+                        budgetMin:
+                          list.find((c) => c.id === selectedId)?.budgetMin ??
+                          null,
+                        budgetMax:
+                          list.find((c) => c.id === selectedId)?.budgetMax ??
+                          null,
+                        scheduleEvents: events?.map((e: { title: string; startsAt: string; endsAt: string; kind: string }) => ({
+                          title: e.title,
+                          startsAt: e.startsAt,
+                          endsAt: e.endsAt,
+                          kind: e.kind,
+                        })),
+                        proofPhotos: proofs?.map((p: { imageUrl: string; caption?: string | null }) => ({
+                          imageUrl: p.imageUrl,
+                          caption: p.caption,
+                        })),
+                        mediaBookings: mediaBookings.map((b) => ({
+                          title: b.title,
+                          mediaName: b.media?.name ?? "—",
+                          location: b.media?.location ?? "—",
+                          startsAt: b.startsAt,
+                          endsAt: b.endsAt,
+                          status: b.status,
+                          dailyFootTraffic: b.media?.dailyFootfall ?? null,
+                          type: b.media?.type ?? null,
+                          region: b.media?.region ?? null,
+                          visibilityScore: b.media?.visibilityScore ?? null,
+                          operatingHours: b.media?.operatingHours ?? null,
+                          impressions: b.media?.impressions ?? null,
+                          trafficPattern:
+                            (b.media as { trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null } | null | undefined)
+                              ?.trafficPattern ?? null,
+                        })),
+                        financialDocs: docs?.map((f: { kind: string; title: string; amountKrw?: number | null; status: string }) => ({
+                          kind: f.kind,
+                          title: f.title,
+                          amountKrw: f.amountKrw,
+                          status: f.status,
+                        })),
+                      }}
+                    />
+                  </div>
+                )}
+
               <div>
                 <h3 className="mb-2 text-sm font-semibold text-foreground">
                   송출·일정
