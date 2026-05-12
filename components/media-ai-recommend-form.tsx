@@ -17,13 +17,7 @@ import {
   TrainFront,
   Wallet,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { BtnBlock } from "@/components/brutalist";
 import { cn } from "@/lib/utils";
 import {
   PLACEMENT_HINT_KEYS,
@@ -31,7 +25,6 @@ import {
   type Industry,
   type TargetAudience,
 } from "@/lib/ai-media-recommend";
-import { Input } from "@/components/ui/input";
 
 export type RegionCheckboxCode =
   | "seoul"
@@ -437,78 +430,72 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
-      <Card className="border border-navy/20 bg-gradient-to-b from-slate-900 via-navy to-slate-900 text-slate-50 shadow-2xl">
-        <CardHeader className="border-b border-slate-700/60 pb-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="space-y-1.5">
-              <p className="inline-flex items-center gap-2 rounded-full bg-slate-800/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-gold">
-                <Sparkles className="h-3 w-3" aria-hidden />
-                <span>
-                  {isKo ? "AI 매체 탐험가 · TKAD bot" : "AI Media Explorer · TKAD bot"}
-                </span>
+    <div className="w-full max-w-none">
+      <div className="border-2 border-border bg-card text-foreground">
+        <div className="border-b-2 border-border p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 space-y-2">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                <Sparkles className="mr-1 inline h-3 w-3" aria-hidden />
+                {isKo ? "[ AI MEDIA EXPLORER · TKAD BOT ]" : "[ AI MEDIA EXPLORER · TKAD BOT ]"}
               </p>
-              <CardTitle className="mt-2 text-lg font-extrabold text-gold sm:text-xl">
+              <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
                 {isKo
-                  ? "TKAD bot과 함께 매체 탐험 시작! ✨"
+                  ? "TKAD bot과 함께 매체 탐험 시작!"
                   : tr("form.panelTitle")}
-              </CardTitle>
-              <p className="mt-1 text-xs text-slate-200 sm:text-sm">
+              </h2>
+              <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
                 {isKo
                   ? "원하는 분위기와 조건을 알려주세요. TKAD bot이 딱 맞는 매체를 찾아줄게요!"
                   : tr("form.panelSubtitle")}
               </p>
             </div>
-            <div className="relative flex h-20 w-20 items-center justify-center">
-              <div className="absolute -top-8 right-16 hidden whitespace-nowrap rounded-2xl bg-slate-800/95 px-3 py-2 text-[11px] text-slate-50 shadow-lg ring-1 ring-slate-600 sm:block">
-                <span className="block">
-                  {isKo
-                    ? "어떤 매체를 찾으러 갈까? 조건을 알려줘!"
-                    : "Tell me the vibe. I'll find your perfect screens!"}
-                </span>
-                <span className="absolute -bottom-2 right-6 h-3 w-3 rotate-45 bg-slate-800/95" />
-              </div>
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-amber-500 shadow-lg ring-2 ring-gold/70">
-                <span className="text-2xl" aria-hidden>
-                  🤖
-                </span>
-                <span className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-slate-900/95 px-2 py-0.5 text-[10px] font-semibold text-gold shadow">
-                  TKAD bot
-                </span>
-              </div>
+            <div className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-[22px] border border-border/80 bg-card/80 text-foreground shadow-[0_24px_80px_rgba(0,0,0,0.18)] backdrop-blur">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.16),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.12),transparent_58%),linear-gradient(165deg,rgba(255,255,255,0.10)_0%,transparent_52%)]"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid"
+              />
+              <span className="relative z-10 text-[28px] leading-none" aria-hidden>
+                🤖
+              </span>
+              <span className="pointer-events-none absolute -bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-border/80 bg-card/80 px-2.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-xs backdrop-blur">
+                TKAD bot
+              </span>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-[11px] text-slate-300 sm:text-xs">
-              {maddyMessage}
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-border pt-4">
+            <p className="min-w-0 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
+              {`// `}{maddyMessage}
             </p>
-            <Button
-              type="button"
-              variant="outline"
+            <BtnBlock
+              variant="accent"
               size="sm"
-              className="inline-flex items-center gap-1 rounded-full border-emerald-300/80 bg-emerald-400/10 px-3 py-1.5 text-[11px] font-semibold text-emerald-200 shadow-sm transition-transform hover:scale-[1.03] hover:bg-emerald-400/20"
               onClick={handleSurprise}
             >
               <Sparkles className="h-3 w-3" />
-              {isKo ? "랜덤 탐험 시작!" : "Surprise me"}
-            </Button>
+              {isKo ? "랜덤 탐험" : "Surprise me"}
+            </BtnBlock>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-7 pt-6">
-          <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gold">
-              <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo ? "TKAD Bot 추천 지역" : tr("form.regionLabel")}
+        </div>
+        <div className="space-y-7 p-6">
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <MapPin className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {isKo ? "TKAD Bot 추천 지역" : tr("form.regionLabel")} ]
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-0">
               {regionDef.map(({ code, label }) => (
                 <label
                   key={code}
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:text-sm",
+                    "-mt-[2px] -ml-[2px] flex cursor-pointer items-center gap-2 border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     regions.has(code)
-                      ? "border-gold/70 bg-gold/20 text-slate-950"
-                      : "border-slate-700/70 bg-slate-900/80 text-slate-200 hover:border-gold/40",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   <input
@@ -523,50 +510,50 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
             </div>
           </section>
 
-          <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-              <Store className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo ? "이번 탐험 준비 현황" : "Your exploration setup"}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Store className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {isKo ? "이번 탐험 준비 현황" : "EXPLORATION SETUP"} ]
             </div>
-            <div className="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-3 text-[11px] text-slate-200 sm:text-xs">
+            <div className="border-2 border-border bg-muted p-4 font-mono text-[11px] tracking-tight text-foreground sm:text-xs">
               <div className="flex flex-wrap gap-y-1">
-                <span className="mr-2 font-semibold text-gold">
-                  {isKo ? "지역" : "Region"}:
+                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
+                  {isKo ? "지역" : "REGION"}:
                 </span>
                 <span>{summary.region}</span>
               </div>
               <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-semibold text-gold">
-                  {isKo ? "연령" : "Ages"}:
+                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
+                  {isKo ? "연령" : "AGES"}:
                 </span>
                 <span>{summary.age}</span>
               </div>
               <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-semibold text-gold">
-                  {isKo ? "업종" : "Industry"}:
+                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
+                  {isKo ? "업종" : "INDUSTRY"}:
                 </span>
                 <span>{summary.industry}</span>
               </div>
               <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-semibold text-gold">
-                  {isKo ? "기간" : "Period"}:
+                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
+                  {isKo ? "기간" : "PERIOD"}:
                 </span>
                 <span>{summary.period}</span>
               </div>
-              <div className="mt-3 rounded-xl bg-slate-800/80 px-3 py-2 text-[11px] text-emerald-200 sm:text-xs">
-                {isKo
+              <div className="mt-3 border-t-2 border-border pt-3 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+                {`// `}{isKo
                   ? "이 정도면 출발 준비는 끝났어요. 마음에 안 들면 언제든 Remix로 다른 코스를 타볼 수 있어요."
                   : "Looks like we're ready to launch. You can always hit Remix later if you want a different route."}
               </div>
             </div>
           </section>
 
-          <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-              <Search className="h-4 w-4 shrink-0" aria-hidden />
-              {tr("form.searchLabel")}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Search className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {tr("form.searchLabel")} ]
             </div>
-            <Input
+            <input
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -575,16 +562,16 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   ? "예: 강남 지하철, 홍대 거리 가구, 코엑스 빌보드…"
                   : tr("form.searchPlaceholder")
               }
-              className="border-slate-600 bg-slate-950/80 text-slate-50 placeholder:text-slate-400"
+              className="h-12 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
             />
           </section>
 
-          <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-              <Monitor className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo ? "탐험할 매체 유형을 골라주세요" : tr("form.mediaTypeLabel")}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Monitor className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {isKo ? "탐험할 매체 유형" : tr("form.mediaTypeLabel")} ]
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-0 sm:grid-cols-3">
               {mediaTypeOptions.map((o) => {
                 const selected = mediaType === o.value;
                 const icon =
@@ -604,36 +591,38 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     type="button"
                     onClick={() => setMediaType(o.value)}
                     className={cn(
-                      "flex flex-col items-start gap-1 rounded-xl border px-3 py-2.5 text-left text-xs sm:text-sm",
+                      "-mt-[2px] -ml-[2px] flex flex-col items-start gap-1.5 border-2 px-4 py-3 text-left transition-colors",
                       selected
-                        ? "border-emerald-400 bg-emerald-400/10 text-emerald-100"
-                        : "border-slate-700/70 bg-slate-900/60 text-slate-200 hover:border-emerald-300/70",
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border bg-card text-foreground hover:bg-muted",
                     )}
                   >
-                    <Icon className="h-4 w-4 text-emerald-300" aria-hidden />
-                    <span className="font-semibold">{o.label}</span>
+                    <Icon className="h-4 w-4" aria-hidden />
+                    <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em]">
+                      {o.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
           </section>
 
-          <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-              <Layers className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo
-                ? "TKAD Bot이 탐험할 노출 환경을 골라주세요"
-                : tr("form.placementHintsLabel")}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Layers className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {isKo
+                ? "TKAD Bot이 탐험할 노출 환경"
+                : tr("form.placementHintsLabel")} ]
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-0">
               {PLACEMENT_HINT_KEYS.map((code) => (
                 <label
                   key={code}
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:text-sm",
+                    "-mt-[2px] -ml-[2px] flex cursor-pointer items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     placementHints.has(code)
-                      ? "border-emerald-400/80 bg-emerald-400/15 text-emerald-50"
-                      : "border-slate-700/70 bg-slate-900/70 text-slate-200 hover:border-emerald-300/70",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   <input
@@ -642,7 +631,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     checked={placementHints.has(code)}
                     onChange={() => togglePlacementHint(code)}
                   />
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-[10px]">
+                  <span className="text-base">
                     {code.includes("subway")
                       ? "🚇"
                       : code.includes("bus")
@@ -657,20 +646,20 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
             </div>
           </section>
 
-          <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-              <Target className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo ? "TKAD Bot이 타겟할 연령대" : tr("form.ageLabel")}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Target className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {isKo ? "TKAD Bot이 타겟할 연령대" : tr("form.ageLabel")} ]
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-0">
               {ageDef.map(({ code, label }) => (
                 <label
                   key={code}
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:text-sm",
+                    "-mt-[2px] -ml-[2px] flex cursor-pointer items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     ageBands.has(code)
-                      ? "border-gold/70 bg-gold/20 text-slate-950"
-                      : "border-slate-700/70 bg-slate-900/70 text-slate-200 hover:border-gold/40",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   <input
@@ -679,7 +668,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     checked={ageBands.has(code)}
                     onChange={() => toggleAge(code)}
                   />
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-[10px]">
+                  <span className="text-base">
                     {code === "teens"
                       ? "🔰"
                       : code === "twenties"
@@ -695,30 +684,30 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-              <Wallet className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo ? "TKAD Bot과 함께 정하는 예산 게이지" : tr("form.budgetLabel")}
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Wallet className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {isKo ? "예산 게이지" : tr("form.budgetLabel")} ]
             </div>
-            <div className="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-3">
-              <div className="flex items-center justify-between text-[11px] text-slate-300 sm:text-xs">
-                <span className="tabular-nums">
+            <div className="border-2 border-border bg-muted p-4">
+              <div className="flex items-center justify-between font-mono text-[11px] tabular-nums text-muted-foreground">
+                <span>
                   {isKo
                     ? `${budgetMin.toLocaleString()}만원`
                     : `${budgetMin.toLocaleString()} (10K)`}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-800 px-2 py-0.5 font-semibold text-gold tabular-nums">
+                <span className="inline-flex items-center gap-1 border-2 border-accent bg-accent px-2 py-0.5 font-bold text-accent-foreground">
                   <Sparkles className="h-3 w-3" />
                   {isKo
                     ? `${budgetMan.toLocaleString()}만원`
                     : `${budgetMan.toLocaleString()} (10K)`}
                 </span>
-                <span className="tabular-nums">
+                <span>
                   {isKo
                     ? `${budgetMax.toLocaleString()}만원`
                     : `${budgetMax.toLocaleString()} (10K)`}
                 </span>
               </div>
-              <div className="mt-3 flex items-center gap-3">
+              <div className="mt-4 flex items-center gap-3">
                 <div className="relative flex-1">
                   <input
                     type="range"
@@ -727,42 +716,29 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     step={100}
                     value={budgetMan}
                     onChange={(e) => setBudgetMan(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-emerald-400"
+                    className="h-3 w-full cursor-pointer appearance-none border-2 border-border bg-card accent-cta"
                     aria-valuemin={budgetMin}
                     aria-valuemax={budgetMax}
                     aria-valuenow={budgetMan}
                   />
-                  <div className="pointer-events-none absolute inset-y-0 flex items-center">
-                    <div
-                      className="h-2 rounded-full bg-gradient-to-r from-emerald-400 via-gold to-amber-500 transition-all"
-                      style={{
-                        width: `${((budgetMan - budgetMin) / (budgetMax - budgetMin)) * 100}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="hidden flex-col items-center text-[11px] text-slate-200 sm:flex">
-                  <span className="mb-1 rounded-full bg-slate-800 px-2 py-0.5">
-                    {isKo ? "TKAD Bot 분석" : "Maddy's view"}
-                  </span>
-                  <span className="text-[10px] text-slate-300">
-                    {isKo
-                      ? "게이지를 움직여서 캠페인 스케일을 정해봐요."
-                      : "Slide to set how bold your campaign should be."}
-                  </span>
                 </div>
               </div>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                {`// `}{isKo
+                  ? "게이지를 움직여서 캠페인 스케일을 정해봐요."
+                  : "Slide to set how bold your campaign should be."}
+              </p>
             </div>
           </section>
 
-          <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-              <Building2 className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <Building2 className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {isKo
                 ? "어떤 업종의 모험을 떠날까요?"
-                : tr("form.industryLabel")}
+                : tr("form.industryLabel")} ]
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-0 sm:grid-cols-3">
               {industryOptions.map((o) => {
                 const selected = industry === o.value;
                 return (
@@ -771,13 +747,13 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     type="button"
                     onClick={() => setIndustry(o.value)}
                     className={cn(
-                      "flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs sm:text-sm",
+                      "-mt-[2px] -ml-[2px] flex items-center gap-2 border-2 px-4 py-3 text-left transition-colors",
                       selected
-                        ? "border-gold/80 bg-gold/15 text-gold"
-                        : "border-slate-700/70 bg-slate-900/70 text-slate-200 hover:border-gold/60",
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border bg-card text-foreground hover:bg-muted",
                     )}
                   >
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-[11px]">
+                    <span className="text-base">
                       {o.value === "beauty"
                         ? "💄"
                         : o.value === "retail"
@@ -792,29 +768,31 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                                   ? "🎬"
                                   : "✨"}
                     </span>
-                    <span className="font-semibold">{o.label}</span>
+                    <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em]">
+                      {o.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
           </section>
 
-          <section className="space-y-2.5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-              <CalendarDays className="h-4 w-4 shrink-0" aria-hidden />
-              {tr("form.periodLabel")}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
+              <CalendarDays className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {tr("form.periodLabel")} ]
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-0">
               {periodDef.map(({ w, label }) => (
                 <button
                   key={w}
                   type="button"
                   onClick={() => setPeriodWeeks(w)}
                   className={cn(
-                    "rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:text-sm",
+                    "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                     periodWeeks === w
-                      ? "border-emerald-400/80 bg-emerald-400/15 text-emerald-50"
-                      : "border-slate-700/70 bg-slate-900/70 text-slate-200 hover:border-emerald-300/70",
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
                   {label}
@@ -824,22 +802,19 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           </section>
 
           <div className="pt-2">
-            <Button
-              type="button"
-              size="lg"
+            <BtnBlock
+              variant="accent"
+              size="md"
               disabled={!canSubmit}
-              className={cn(
-                "group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-emerald-400 via-emerald-300 to-gold text-base font-bold text-slate-950 shadow-[0_0_40px_rgba(16,185,129,0.65)] ring-2 ring-emerald-300/60 transition-transform hover:scale-[1.02] hover:shadow-[0_0_55px_rgba(16,185,129,0.8)] disabled:opacity-50",
-              )}
               onClick={handleSubmit}
+              className="w-full py-3 text-[15px]"
             >
-              <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-all duration-700 group-hover:translate-x-full group-hover:opacity-100" />
-              <Sparkles className="mr-2 h-5 w-5" aria-hidden />
-              {isKo ? "TKAD bot과 함께 탐험 시작! ✨" : tr("form.submit")}
-            </Button>
+              <Sparkles className="h-4.5 w-4.5" aria-hidden />
+              {isKo ? "TKAD bot과 함께 탐험 시작!" : tr("form.submit")}
+            </BtnBlock>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

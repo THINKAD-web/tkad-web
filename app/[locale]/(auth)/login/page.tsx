@@ -3,8 +3,9 @@
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,73 +48,101 @@ export default function LoginPage() {
     }
   }
 
+  const inputCls =
+    "tkad-auth-input h-11 w-full rounded-[18px] border border-white/12 bg-black/28 px-4 font-mono text-sm font-semibold text-white placeholder:text-white/45 outline-none backdrop-blur transition-all focus:border-white/18 focus:ring-2 focus:ring-white/12";
+
   return (
-    <div className="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-10 bg-gradient-to-b from-secondary/30 to-background">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-primary">로그인</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            THINKAD 계정으로 로그인하세요
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
+        <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
+          <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border border-white/12 bg-black/45 p-6 text-white shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
+            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
+            />
+            <div className="relative">
+              <div className="mb-6 text-center">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
+                  [ LOGIN ]
+                </p>
+                <h1 className="mt-2 text-2xl font-black tracking-tight text-white">
+                  로그인
+                </h1>
+                <p className="mt-2 font-mono text-[12px] tracking-tight text-white/55">
+                  {`// `}THINKAD 계정으로 로그인하세요
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65"
+                  >
+                    [ 이메일 ]
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65"
+                  >
+                    [ 비밀번호 ]
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    minLength={8}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+
+                {error && (
+                  <div className="rounded-[18px] border border-white/14 bg-black/35 px-3 py-2 font-mono text-[12px] tracking-tight text-white/85">
+                    {`// `}{error}
+                  </div>
+                )}
+
+                <BtnBlock
+                  type="submit"
+                  variant="accent"
+                  size="lg"
+                  disabled={loading}
+                  className="w-full rounded-[22px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
+                >
+                  {loading && <Spinner size="sm" />}
+                  {loading ? "로그인 중…" : "로그인"}
+                </BtnBlock>
+              </form>
+            </div>
+          </div>
+
+          <p className="mt-6 text-center font-mono text-[12px] tracking-tight text-white/60">
+            {`// `}계정이 없으신가요?{" "}
+            <Link
+              href="/register"
+              className="border-b border-white/20 pb-0.5 font-bold text-white transition-colors hover:border-white/35 hover:text-white"
+            >
+              회원가입
+            </Link>
           </p>
         </div>
-
-        <div className="bg-card border border-border/60 rounded-2xl shadow-sm p-6 sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label htmlFor="email" className="block text-sm font-medium text-foreground">
-                이메일
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-11 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                비밀번호
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-11 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-              />
-            </div>
-
-            {error && (
-              <div className="text-sm text-destructive bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2">
-                {error}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-11"
-            >
-              {loading && <Spinner size="sm" />}
-              {loading ? "로그인 중…" : "로그인"}
-            </Button>
-          </form>
-        </div>
-
-        <p className="mt-6 text-sm text-center text-muted-foreground">
-          계정이 없으신가요?{" "}
-          <Link href="/register" className="text-primary font-semibold hover:underline">
-            회원가입
-          </Link>
-        </p>
       </div>
-    </div>
+    </HomeLandingDayNight>
   );
 }

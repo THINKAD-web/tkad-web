@@ -27,10 +27,12 @@ import {
   ImagePlus,
   CheckCircle2,
   Code2,
+  Layers,
   Loader2,
   AlertCircle,
   Star,
   Flame,
+  ShieldCheck,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
@@ -112,6 +114,8 @@ type AdminMediaForm = {
   nearbyStations: string;
   nearbyLandmarks: string;
   addressVerified: boolean;
+  /** 공개 카탈로그 THINKAD Verified 리본 */
+  isVerified: boolean;
   /** ISO, display-only (서버 자동 수집 시각) */
   autoPopulatedAt: string;
   dailyFootfall: string;
@@ -156,6 +160,7 @@ const emptyForm: AdminMediaForm = {
   nearbyStations: "",
   nearbyLandmarks: "",
   addressVerified: false,
+  isVerified: false,
   autoPopulatedAt: "",
   dailyFootfall: "",
   weekdayFootfall: "",
@@ -293,6 +298,7 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     nearbyStations: m.nearbyStations ?? "",
     nearbyLandmarks: m.nearbyLandmarks ?? "",
     addressVerified: m.addressVerified ?? false,
+    isVerified: m.isVerified ?? false,
     autoPopulatedAt: m.autoPopulatedAt ?? "",
     dailyFootfall:
       m.dailyFootfall != null ? String(m.dailyFootfall) : "",
@@ -344,10 +350,17 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     .split(/[\n,]/)
     .map((s) => s.trim())
     .filter(Boolean);
-  const extractedImages = form.extractedImagesText
+  const galleryLines = form.extractedImagesText
     .split("\n")
     .map((s) => s.trim())
     .filter(Boolean);
+  const imageInput = form.image.trim();
+  /** 대표 URL: 입력 필드 우선, 비어 있으면 갤러리 첫 줄(공개 카탈로그가 image → extracted 순으로 병합하므로 일치시킴) */
+  const primaryImage = imageInput || galleryLines[0] || null;
+  /** 대표와 동일한 URL은 extracted 에서 제외해 DB·목록에 이중 저장되지 않게 함 */
+  const extractedImages = primaryImage
+    ? galleryLines.filter((u) => u !== primaryImage)
+    : galleryLines;
   const vis = Math.round(Number(form.visibilityScore) || 0);
   let priceOptions: unknown = null;
   const rawOpts = form.priceOptionsJson.trim();
@@ -366,7 +379,7 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     region: form.region.trim(),
     type: form.type.trim(),
     price: Math.round(form.price) || 0,
-    image: form.image.trim() || null,
+    image: primaryImage,
     width: form.width.trim() || null,
     height: form.height.trim() || null,
     description: form.description.trim() || null,
@@ -378,6 +391,7 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     nearbyStations: form.nearbyStations.trim() || null,
     nearbyLandmarks: form.nearbyLandmarks.trim() || null,
     addressVerified: form.addressVerified,
+    isVerified: form.isVerified,
     latitude: parseOptFloat(form.latitude),
     longitude: parseOptFloat(form.longitude),
     priceNote: form.priceNote.trim() || null,
@@ -787,6 +801,31 @@ export default function AdminMediasClient({
     }
   }, []);
 
+  const toggleCatalogVerified = useCallback(async (m: AdminMediaDto) => {
+    listFetchGenRef.current += 1;
+    const next = !m.isVerified;
+    try {
+      const result = await adminFetchJson(`/api/admin/medias/${m.id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isVerified: next }),
+      });
+      if (!result.ok) {
+        setListError(result.message);
+        return;
+      }
+      const data = result.data as { media?: unknown };
+      const row = data.media ? normalizeAdminMediaRow(data.media) : null;
+      if (row) {
+        setMedias((prev) => prev.map((x) => (x.id === m.id ? row : x)));
+        setListError(null);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const patchFeaturedFields = useCallback(
     async (
       m: AdminMediaDto,
@@ -836,6 +875,7 @@ export default function AdminMediasClient({
       "이미지수",
       "가용상태",
       "활성(목록)",
+      "THINKAD검증(공개)",
       "추천(홈)",
       "추천순서",
     ];
@@ -855,6 +895,7 @@ export default function AdminMediasClient({
       String((m.extractedImages ?? []).length),
       m.availability,
       m.isActive ? "활성" : "비활성",
+      m.isVerified ? "Y" : "",
       m.isFeatured ? "Y" : "",
       m.featuredOrder != null ? String(m.featuredOrder) : "",
     ]);
@@ -903,39 +944,19 @@ export default function AdminMediasClient({
     [],
   );
 
-  const uploadFileToCloudinary = useCallback(async (file: File): Promise<string> => {
-    const sigRes = await fetch("/api/admin/upload/cloudinary", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (!sigRes.ok) {
-      throw new Error("Cloudinary 서명 실패");
-    }
-    const sig = (await sigRes.json()) as {
-      timestamp: number;
-      signature: string;
-      folder: string;
-      cloudName: string;
-      apiKey: string;
-    };
+  const uploadFileToBunny = useCallback(async (file: File): Promise<string> => {
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("api_key", sig.apiKey);
-    fd.append("timestamp", String(sig.timestamp));
-    fd.append("signature", sig.signature);
-    fd.append("folder", sig.folder);
-    const up = await fetch(
-      `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-      { method: "POST", body: fd },
-    );
-    const upJson = (await up.json()) as {
-      secure_url?: string;
-      error?: { message: string };
-    };
-    if (!up.ok || !upJson.secure_url) {
-      throw new Error(upJson.error?.message ?? "업로드 실패");
+    const up = await fetch("/api/admin/upload/bunny", {
+      method: "POST",
+      credentials: "include",
+      body: fd,
+    });
+    const upJson = (await up.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!up.ok || !upJson.url) {
+      throw new Error(upJson.error ?? "업로드 실패");
     }
-    return upJson.secure_url;
+    return upJson.url;
   }, []);
 
   const handleFormPrimaryImagePicked = useCallback(
@@ -946,15 +967,19 @@ export default function AdminMediasClient({
       setFormImageUploadBusy(true);
       setSaveError(null);
       try {
-        const url = await uploadFileToCloudinary(file);
+        const url = await uploadFileToBunny(file);
         setForm((f) => ({ ...f, image: url }));
-      } catch {
-        setSaveError("대표 이미지 업로드에 실패했습니다.");
+      } catch (e) {
+        setSaveError(
+          e instanceof Error
+            ? `대표 이미지 업로드 실패: ${e.message}`
+            : "대표 이미지 업로드에 실패했습니다.",
+        );
       } finally {
         setFormImageUploadBusy(false);
       }
     },
-    [uploadFileToCloudinary],
+    [uploadFileToBunny],
   );
 
   const handleFormGalleryImagePicked = useCallback(
@@ -967,7 +992,7 @@ export default function AdminMediasClient({
       try {
         const urls: string[] = [];
         for (const file of files) {
-          const url = await uploadFileToCloudinary(file);
+          const url = await uploadFileToBunny(file);
           urls.push(url);
         }
         setForm((f) => {
@@ -978,13 +1003,17 @@ export default function AdminMediasClient({
             extractedImagesText: cur ? `${cur}\n${added}` : added,
           };
         });
-      } catch {
-        setSaveError("추가 이미지 업로드에 실패했습니다.");
+      } catch (e) {
+        setSaveError(
+          e instanceof Error
+            ? `추가 이미지 업로드 실패: ${e.message}`
+            : "추가 이미지 업로드에 실패했습니다.",
+        );
       } finally {
         setFormImageUploadBusy(false);
       }
     },
-    [uploadFileToCloudinary],
+    [uploadFileToBunny],
   );
 
   const removeUploadItem = useCallback((index: number) => {
@@ -1009,7 +1038,7 @@ export default function AdminMediasClient({
         ),
       );
       try {
-        const secureUrl = await uploadFileToCloudinary(item.file);
+        const secureUrl = await uploadFileToBunny(item.file);
         const mid = item.mediaId!;
         const detailRes = await fetch(`/api/admin/medias/${mid}`, {
           credentials: "include",
@@ -1054,7 +1083,7 @@ export default function AdminMediasClient({
       }
     }
     setUploadRunning(false);
-  }, [uploadItems, uploadFileToCloudinary]);
+  }, [uploadItems, uploadFileToBunny]);
 
   const allMapped =
     uploadItems.length > 0 && uploadItems.every((i) => i.mediaId !== null);
@@ -1084,8 +1113,8 @@ export default function AdminMediasClient({
                 }}
                 className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                   typeFilter === opt.value
-                    ? "bg-navy text-white"
-                    : "bg-slate-100 text-muted-foreground hover:bg-slate-200"
+                    ? "border-2 border-border bg-foreground text-background"
+                    : "border-2 border-border bg-card text-foreground hover:bg-muted/50"
                 }`}
               >
                 {opt.label}
@@ -1134,9 +1163,18 @@ export default function AdminMediasClient({
                 <span className="hidden sm:inline">JSON 간편 등록</span>
               </Link>
             </Button>
+            <Button variant="outline" className="shrink-0" asChild>
+              <Link
+                href="/admin/medias/bulk-import"
+                className="inline-flex items-center gap-2"
+              >
+                <Layers className="h-4 w-4" />
+                <span className="hidden sm:inline">일괄 가져오기</span>
+              </Link>
+            </Button>
             <Button
               onClick={openAdd}
-              className="bg-gold text-navy hover:bg-gold-dark shrink-0"
+              className="shrink-0 border-2 border-border bg-primary text-primary-foreground transition-colors hover:bg-foreground hover:border-border"
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">매체 추가</span>
@@ -1178,7 +1216,122 @@ export default function AdminMediasClient({
 
         <Card>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            {/* #ADMIN-MEDIAS-1 hotfix: 모바일 전용 카드 레이아웃 (md 미만).
+                기존 테이블은 가로 스크롤 9컬럼을 거쳐야 편집 버튼 도달 → 모바일 사용 불가.
+                카드: 매체명·유형·가격·상태·수정·삭제 만 노출. 추천/인기는 데스크톱에서. */}
+            <div className="md:hidden">
+              {listLoading ? (
+                <div className="px-4 py-12 text-center text-muted-foreground">
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+                  <p className="mt-2 text-sm">불러오는 중…</p>
+                </div>
+              ) : paginated.length === 0 ? (
+                <div className="px-4 py-12 text-center text-muted-foreground">
+                  {medias.length === 0
+                    ? "등록된 매체가 없습니다. 추가하거나 JSON 간편 등록을 이용하세요."
+                    : "조건에 맞는 매체가 없습니다."}
+                </div>
+              ) : (
+                <ul className="divide-y">
+                  {paginated.map((media) => (
+                    <li
+                      key={media.id}
+                      className={`flex flex-col gap-3 px-4 py-3 ${
+                        isRowActive(media) ? "" : "bg-slate-50/50 opacity-60"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-foreground">
+                            {media.name}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {media.location || "—"}
+                          </p>
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <Badge
+                              variant="secondary"
+                              className="border-2 border-border bg-card text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-foreground"
+                            >
+                              {typeBadgeLabel(media.type)}
+                            </Badge>
+                            <span className="text-xs font-semibold text-foreground">
+                              ₩{media.price.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleActive(media)}
+                          aria-label={isRowActive(media) ? "비활성화" : "활성화"}
+                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
+                            isRowActive(media)
+                              ? "bg-emerald-500"
+                              : "bg-slate-300"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                              isRowActive(media)
+                                ? "translate-x-[18px]"
+                                : "translate-x-0.5"
+                            } mt-0.5`}
+                          />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          title={
+                            media.isVerified
+                              ? "공개 Verified 해제"
+                              : "공개 카탈로그에 Verified 표시"
+                          }
+                          onClick={() => void toggleCatalogVerified(media)}
+                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-card text-foreground transition-colors hover:bg-orange-50"
+                        >
+                          <ShieldCheck
+                            className={`h-4 w-4 ${
+                              media.isVerified
+                                ? "text-[#ff6200]"
+                                : "text-slate-300"
+                            }`}
+                            aria-hidden
+                          />
+                        </button>
+                        <span className="text-[11px] text-muted-foreground">
+                          공개 Verified
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          className="flex-1 min-w-[7rem]"
+                        >
+                          <Link href={`/admin/medias/${media.id}/edit`}>
+                            <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                            수정
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDeleteConfirm(media.id)}
+                          aria-label="삭제"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-slate-50 text-left text-xs font-medium text-muted-foreground">
@@ -1187,6 +1340,7 @@ export default function AdminMediasClient({
                     <th className="px-4 py-3">유형</th>
                     <th className="px-4 py-3">가격(원)</th>
                     <th className="px-4 py-3 text-center">상태</th>
+                    <th className="px-4 py-3 text-center">검증</th>
                     <th className="px-4 py-3 text-center">추천</th>
                     <th className="px-4 py-3 text-center w-[5.5rem]">순서</th>
                     <th className="px-4 py-3 text-center">인기</th>
@@ -1198,17 +1352,17 @@ export default function AdminMediasClient({
                   {listLoading ? (
                     <tr>
                       <td
-                        colSpan={8}
+                        colSpan={11}
                         className="px-4 py-12 text-center text-muted-foreground"
                       >
-                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-navy/40" />
+                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
                         <p className="mt-2 text-sm">불러오는 중…</p>
                       </td>
                     </tr>
                   ) : paginated.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={8}
+                        colSpan={11}
                         className="px-4 py-12 text-center text-muted-foreground"
                       >
                         {medias.length === 0
@@ -1227,7 +1381,7 @@ export default function AdminMediasClient({
                         }`}
                       >
                         <td className="px-4 py-3">
-                          <div className="font-medium text-navy">
+                          <div className="font-medium text-foreground">
                             {media.name}
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -1240,12 +1394,12 @@ export default function AdminMediasClient({
                         <td className="px-4 py-3">
                           <Badge
                             variant="secondary"
-                            className="bg-navy/5 text-navy text-xs"
+                            className="border-2 border-border bg-card text-xs font-mono font-bold uppercase tracking-[0.12em] text-foreground"
                           >
                             {typeBadgeLabel(media.type)}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 font-semibold text-navy">
+                        <td className="px-4 py-3 font-semibold text-foreground">
                           ₩{media.price.toLocaleString()}
                         </td>
                         <td className="px-4 py-3 text-center">
@@ -1264,6 +1418,27 @@ export default function AdminMediasClient({
                                   ? "translate-x-[18px]"
                                   : "translate-x-0.5"
                               } mt-0.5`}
+                            />
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            type="button"
+                            title={
+                              media.isVerified
+                                ? "공개 Verified 해제"
+                                : "공개 카탈로그에 Verified 표시"
+                            }
+                            onClick={() => void toggleCatalogVerified(media)}
+                            className="inline-flex touch-manipulation rounded-full p-1.5 transition-colors hover:bg-orange-50"
+                          >
+                            <ShieldCheck
+                              className={`h-5 w-5 ${
+                                media.isVerified
+                                  ? "text-[#ff6200]"
+                                  : "text-slate-300"
+                              }`}
+                              aria-hidden
                             />
                           </button>
                         </td>
@@ -1441,13 +1616,13 @@ export default function AdminMediasClient({
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/20 backdrop-blur-[2px] dark:bg-black/60"
             onClick={() => setModalOpen(false)}
             aria-hidden
           />
-          <Card className="relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col animate-fade-in-up overflow-hidden">
+          <Card className="tkad-glass-surface relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col animate-fade-in-up overflow-hidden border border-border/70 bg-card/95 shadow-[0_28px_120px_rgba(0,0,0,0.18)] backdrop-blur dark:border-white/12 dark:bg-black/45 dark:text-white dark:shadow-[0_28px_120px_rgba(0,0,0,0.65)]">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between">
-              <CardTitle className="text-lg text-navy">
+              <CardTitle className="text-lg text-foreground">
                 {editing ? "매체 수정" : "매체 추가"}
               </CardTitle>
               <Button
@@ -1502,7 +1677,7 @@ export default function AdminMediasClient({
                   <Button
                     type="button"
                     variant="outline"
-                    className="shrink-0 border-navy/20"
+                    className="shrink-0 border-2 border-border bg-card text-foreground hover:bg-muted/50"
                     disabled={geoLookupLoading}
                     onClick={() => void onGeocodeFromAddress()}
                   >
@@ -1531,9 +1706,9 @@ export default function AdminMediasClient({
                 heightPx={260}
               />
 
-              <div className="rounded-lg border border-navy/10 bg-slate-50/80 p-3">
-                <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-navy">
-                  <MapPin className="h-3.5 w-3.5 text-gold" />
+              <div className="rounded-lg border-2 border-border bg-muted p-3 border-border bg-muted/60">
+                <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-foreground">
+                  <MapPin className="h-3.5 w-3.5 text-primary" />
                   주변 정보 미리보기
                 </div>
                 {nearbyPreviewLoading ? (
@@ -1542,7 +1717,7 @@ export default function AdminMediasClient({
                   <div className="space-y-2 text-xs">
                     {nearbyPreview.nearestSubway && (
                       <p>
-                        <span className="font-medium text-navy">인근 지하철: </span>
+                        <span className="font-medium text-foreground">인근 지하철: </span>
                         {nearbyPreview.nearestSubway.name}
                         <span className="text-muted-foreground">
                           {" "}
@@ -1551,7 +1726,7 @@ export default function AdminMediasClient({
                       </p>
                     )}
                     <p>
-                      <span className="font-medium text-navy">주변 시설 요약: </span>
+                      <span className="font-medium text-foreground">주변 시설 요약: </span>
                       {nearbyPreview.nearbyFacilities?.trim() ? (
                         <span>{nearbyPreview.nearbyFacilities}</span>
                       ) : (
@@ -1674,6 +1849,16 @@ export default function AdminMediasClient({
                   }
                 />
                 주소·좌표 카카오 검증 완료 (addressVerified)
+              </label>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={form.isVerified}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, isVerified: e.target.checked }))
+                  }
+                />
+                공개 카탈로그 Verified 리본 (isVerified)
               </label>
               {form.autoPopulatedAt.trim() ? (
                 <p className="text-[11px] text-muted-foreground">
@@ -1884,9 +2069,9 @@ export default function AdminMediasClient({
                   }
                 />
               </div>
-              <div className="rounded-xl border border-navy/10 bg-slate-50/80 p-4">
+              <div className="rounded-xl border-2 border-border bg-muted p-4 border-border bg-muted/60">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <label className="text-xs font-semibold text-navy">
+                  <label className="text-xs font-semibold text-foreground">
                     가격 옵션
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -1928,17 +2113,17 @@ export default function AdminMediasClient({
                 </p>
                 <div className="space-y-3">
                   {priceOptDrafts.length === 0 ? (
-                    <p className="rounded-lg border border-dashed border-navy/15 bg-white px-3 py-6 text-center text-xs text-muted-foreground">
+                    <p className="rounded-lg border-2 border-dashed border-border bg-card px-3 py-6 text-center text-xs text-muted-foreground">
                       옵션이 없습니다.「옵션 추가」또는 JSON을 입력하세요.
                     </p>
                   ) : (
                     priceOptDrafts.map((row, idx) => (
                       <div
                         key={row.key}
-                        className="space-y-2 rounded-lg border border-navy/10 bg-white p-3 shadow-sm"
+                        className="space-y-2 rounded-lg border-2 border-border bg-card p-3 shadow-sm"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-bold text-navy/50">
+                          <span className="text-[11px] font-bold text-muted-foreground">
                             옵션 {idx + 1}
                           </span>
                           <Button
@@ -2050,7 +2235,7 @@ export default function AdminMediasClient({
                     }
                     rows={5}
                     spellCheck={false}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono text-navy shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="w-full rounded-md border-2 border-border bg-card px-3 py-2 text-xs font-mono text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     placeholder='[{"label":"20초 기준","price":30000000,"period":"month","description":"피크 15초"}]'
                   />
                 </div>
@@ -2092,11 +2277,11 @@ export default function AdminMediasClient({
                   </Button>
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Cloudinary에 올린 뒤 URL이 대표 이미지에 채워집니다. 저장을 눌러
+                  Bunny CDN에 업로드한 뒤 URL이 대표 이미지에 채워집니다. 저장을 눌러
                   반영하세요.
                 </p>
                 {form.image && (
-                  <div className="mt-2 overflow-hidden rounded-lg border border-navy/10">
+                  <div className="mt-2 overflow-hidden rounded-lg border-2 border-border">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={form.image} alt="대표 이미지" className="h-32 w-full object-cover" />
                   </div>
@@ -2143,7 +2328,10 @@ export default function AdminMediasClient({
                 {form.extractedImagesText.trim() && (
                   <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
                     {form.extractedImagesText.trim().split("\n").filter(Boolean).map((url, i) => (
-                      <div key={i} className="group relative overflow-hidden rounded-lg border border-navy/10">
+                      <div
+                        key={i}
+                        className="group relative overflow-hidden rounded-lg border-2 border-border"
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={url} alt="" className="h-20 w-full object-cover" />
                         <button
@@ -2293,7 +2481,7 @@ export default function AdminMediasClient({
                 </Button>
                 <Button
                   onClick={() => void handleSave()}
-                  className="bg-navy text-white hover:bg-navy-light"
+                  className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
                   disabled={
                     !form.name.trim() ||
                     !form.location.trim() ||
@@ -2322,13 +2510,13 @@ export default function AdminMediasClient({
       {uploadModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/20 backdrop-blur-[2px] dark:bg-black/60"
             onClick={() => setUploadModalOpen(false)}
             aria-hidden
           />
-          <Card className="relative z-10 flex max-h-[85vh] w-full max-w-2xl animate-fade-in-up flex-col overflow-hidden">
+          <Card className="tkad-glass-surface relative z-10 flex max-h-[85vh] w-full max-w-2xl animate-fade-in-up flex-col overflow-hidden border border-border/70 bg-card/95 shadow-[0_28px_120px_rgba(0,0,0,0.18)] backdrop-blur dark:border-white/12 dark:bg-black/45 dark:text-white dark:shadow-[0_28px_120px_rgba(0,0,0,0.65)]">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between">
-              <CardTitle className="text-lg text-navy">
+              <CardTitle className="text-lg text-foreground">
                 매체 사진 일괄 업로드
               </CardTitle>
               <Button
@@ -2350,19 +2538,19 @@ export default function AdminMediasClient({
                 onClick={() => fileInputRef.current?.click()}
                 className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
                   isDragging
-                    ? "border-gold bg-gold/5"
-                    : "border-slate-200 hover:border-gold/50 hover:bg-slate-50"
+                    ? "border-primary bg-muted"
+                    : "border-slate-200 hover:border-primary hover:bg-muted"
                 }`}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy/5">
-                  <Upload className="h-6 w-6 text-navy/60" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-border bg-card">
+                  <Upload className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="font-medium text-navy">
+                  <p className="font-medium text-foreground">
                     이미지를 드래그하거나 클릭하여 선택
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    JPG, PNG, WebP 지원 · Cloudinary 연동
+                    JPG, PNG, WebP 지원 · Bunny CDN 업로드
                   </p>
                 </div>
                 <input
@@ -2407,7 +2595,7 @@ export default function AdminMediasClient({
                           className="h-12 w-12 shrink-0 rounded-md object-cover"
                         />
                         <div className="min-w-0 flex-1 space-y-1.5">
-                          <p className="truncate text-sm font-medium text-navy">
+                          <p className="truncate text-sm font-medium text-foreground">
                             {item.file.name}
                           </p>
                           {item.status === "done" ? (
@@ -2417,13 +2605,13 @@ export default function AdminMediasClient({
                             </div>
                           ) : item.status === "error" ? (
                             <p className="text-xs text-red-600">
-                              실패 · Cloudinary 설정을 확인하세요
+                              실패 · Bunny 설정을 확인하세요
                             </p>
                           ) : item.status === "uploading" ? (
                             <div className="space-y-1">
                               <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                                 <div
-                                  className="h-full rounded-full bg-gold transition-all"
+                                  className="h-full rounded-full bg-primary transition-all"
                                   style={{ width: `${item.progress}%` }}
                                 />
                               </div>
@@ -2481,14 +2669,14 @@ export default function AdminMediasClient({
                   </Button>
                   {allDone ? (
                     <Button
-                      className="bg-navy text-white hover:bg-navy-light"
+                      className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
                       onClick={() => setUploadModalOpen(false)}
                     >
                       완료
                     </Button>
                   ) : (
                     <Button
-                      className="bg-navy text-white hover:bg-navy-light"
+                      className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
                       disabled={!allMapped || uploadRunning}
                       onClick={() => void startBulkUpload()}
                     >
@@ -2525,7 +2713,7 @@ export default function AdminMediasClient({
                 <Trash2 className="h-5 w-5 text-destructive" />
               </div>
               <div>
-                <p className="font-semibold text-navy">매체를 삭제하시겠습니까?</p>
+                <p className="font-semibold text-foreground">매체를 삭제하시겠습니까?</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   이 작업은 되돌릴 수 없습니다.
                 </p>

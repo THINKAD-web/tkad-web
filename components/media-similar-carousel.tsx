@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
@@ -87,19 +86,28 @@ export default function MediaSimilarCarousel({
 
   return (
     <section
-      className="mt-12 border-t border-navy/10 pt-10"
+      className="mt-12 border-t border-border/70 pt-12"
       aria-labelledby="media-similar-heading"
     >
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <h2
-          id="media-similar-heading"
-          className="text-lg font-bold text-navy sm:text-xl"
-        >
-          {title}
-        </h2>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            [ SIMILAR MEDIA ]
+          </p>
+          <h2
+            id="media-similar-heading"
+            className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+          >
+            {title}
+          </h2>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           {sortable ? (
-            <div role="group" aria-label={t("similarSortLabel")} className="flex rounded-full border border-navy/10 bg-slate-50 p-0.5">
+            <div
+              role="group"
+              aria-label={t("similarSortLabel")}
+              className="inline-flex rounded-2xl border border-border/80 bg-muted/50 p-1 shadow-xs backdrop-blur"
+            >
               {(
                 [
                   ["score", t("similarSortScore")],
@@ -108,56 +116,52 @@ export default function MediaSimilarCarousel({
                   ["visibility", t("similarSortVisibility")],
                 ] as const
               ).map(([key, label]) => (
-                <Button
+                <button
                   key={key}
                   type="button"
-                  size="sm"
-                  variant={sortBy === key ? "default" : "ghost"}
-                  className={cn(
-                    "h-7 rounded-full px-2.5 text-[11px]",
-                    sortBy === key && "btn-gold border-0",
-                  )}
                   aria-pressed={sortBy === key}
                   onClick={() => setSortBy(key)}
+                  className={cn(
+                    "rounded-[14px] px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                    sortBy === key
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-foreground hover:bg-background/70",
+                  )}
                 >
                   {label}
-                </Button>
+                </button>
               ))}
             </div>
           ) : null}
           {displayItems.length > 1 ? (
             <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 shrink-0 border-navy/15 bg-white text-navy shadow-sm hover:bg-slate-50"
-              disabled={!canPrev}
-              aria-label={t("similarCarouselPrev")}
-              onClick={() => scrollByDir(-1)}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 shrink-0 border-navy/15 bg-white text-navy shadow-sm hover:bg-slate-50"
-              disabled={!canNext}
-              aria-label={t("similarCarouselNext")}
-              onClick={() => scrollByDir(1)}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : null}
+              <button
+                type="button"
+                disabled={!canPrev}
+                aria-label={t("similarCarouselPrev")}
+                onClick={() => scrollByDir(-1)}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-border/80 bg-card/80 text-foreground shadow-xs backdrop-blur transition-colors hover:bg-muted disabled:opacity-40"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                disabled={!canNext}
+                aria-label={t("similarCarouselNext")}
+                onClick={() => scrollByDir(1)}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-border/80 bg-card/80 text-foreground shadow-xs backdrop-blur transition-colors hover:bg-muted disabled:opacity-40"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
 
       <div
         ref={scrollerRef}
         className={cn(
-          "flex gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none]",
+          "flex gap-0 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none]",
           "snap-x snap-mandatory",
           "[&::-webkit-scrollbar]:hidden",
         )}
@@ -174,38 +178,36 @@ export default function MediaSimilarCarousel({
               key={m.id}
               href={`/media/${m.id}`}
               className={cn(
-                "group flex snap-start flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white",
+                "group -ml-[2px] flex snap-start flex-col overflow-hidden rounded-[24px] border border-border/80 bg-card/80 shadow-xs backdrop-blur",
                 "w-[min(100%,280px)] shrink-0 sm:w-[268px]",
-                "shadow-md shadow-navy/[0.07] transition duration-300",
-                "hover:-translate-y-1 hover:border-navy/20 hover:shadow-xl hover:shadow-navy/[0.12]",
-                "motion-reduce:transform-none",
+                "transition-colors hover:bg-muted/50",
               )}
             >
               <MediaCatalogThumbnail
                 media={m}
                 placeholderLabel={tMedia("imagePreparing")}
-                className="relative aspect-[4/3] w-full"
-                imgClassName="transition duration-500 ease-out group-hover:scale-105"
+                className="relative aspect-[4/3] w-full border-b border-border/70"
+                imgClassName="grayscale transition-[filter,transform] duration-500 ease-out group-hover:grayscale-0 group-hover:scale-[1.02]"
                 bottomGradientClassName={null}
                 placeholderSize="xs"
               />
-              <div className="flex flex-1 flex-col px-3 pb-3 pt-2.5">
+              <div className="flex flex-1 flex-col gap-1.5 p-4">
                 {typeLabel ? (
-                  <span className="mb-1.5 inline-flex w-fit max-w-full truncate rounded-md border border-navy/10 bg-slate-50 px-1.5 py-0.5 text-[11px] font-semibold text-navy/80">
-                    {typeLabel}
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    [ {typeLabel} ]
                   </span>
                 ) : null}
-                <p className="line-clamp-2 min-h-[2.35rem] text-sm font-bold leading-snug text-navy group-hover:text-gold-dark">
+                <p className="line-clamp-2 min-h-[2.35rem] text-sm font-bold leading-snug tracking-tight text-foreground group-hover:text-accent">
                   {isKo ? m.name : (m.nameEn || m.name)}
                 </p>
-                <p className="mt-2 text-sm font-bold tabular-nums text-gold-dark sm:text-base">
+                <p className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">
                   {formatMediaPriceWonWithSymbol(m.price)}
-                  <span className="ml-1 text-[11px] font-medium text-muted-foreground sm:text-xs">
+                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                     · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
                   </span>
                 </p>
                 {distanceKm != null && Number.isFinite(distanceKm) ? (
-                  <p className="mt-1 text-[11px] text-muted-foreground">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                     {t("similarDistance", {
                       km: distanceKm < 1 ? distanceKm.toFixed(2) : distanceKm.toFixed(1),
                     })}

@@ -9,48 +9,48 @@ type Props = {
 const cards = [
   {
     key: "favorites" as const,
-    label: "관심 매체",
+    label: "FAVORITES",
+    labelKo: "관심 매체",
     icon: Heart,
-    accent: "from-rose-50 to-white",
-    iconClass: "text-rose-500 bg-rose-100",
   },
   {
     key: "inProgress" as const,
-    label: "진행 캠페인",
+    label: "IN PROGRESS",
+    labelKo: "진행 캠페인",
     icon: Rocket,
-    accent: "from-amber-50 to-white",
-    iconClass: "text-amber-600 bg-amber-100",
   },
   {
     key: "totalQuotes" as const,
-    label: "전체 견적서",
+    label: "QUOTES",
+    labelKo: "전체 견적서",
     icon: FileText,
-    accent: "from-indigo-50 to-white",
-    iconClass: "text-indigo-600 bg-indigo-100",
   },
 ];
 
 export function SummaryCards({ favorites, inProgress, totalQuotes }: Props) {
   const values = { favorites, inProgress, totalQuotes };
   return (
-    <section className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+    <section className="mb-8 grid grid-cols-2 gap-0 sm:grid-cols-3">
       {cards.map((c) => {
         const Icon = c.icon;
         return (
-          <div
+          <article
             key={c.key}
-            className={`bg-gradient-to-b ${c.accent} border rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow`}
+            className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 transition-colors hover:bg-muted"
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-gray-600">{c.label}</span>
-              <span className={`p-1.5 rounded-lg ${c.iconClass}`}>
-                <Icon className="w-3.5 h-3.5" strokeWidth={2.5} />
+            <div className="mb-3 flex items-center justify-between">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                [ {c.label} ]
+              </span>
+              <span className="flex h-8 w-8 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
+                <Icon className="h-4 w-4" strokeWidth={2.5} />
               </span>
             </div>
-            <div className="text-3xl font-bold text-gray-900 tabular-nums">
+            <p className="text-xs font-mono text-muted-foreground mb-1">{c.labelKo}</p>
+            <div className="font-mono text-3xl font-bold tabular-nums text-foreground">
               {values[c.key]}
             </div>
-          </div>
+          </article>
         );
       })}
     </section>

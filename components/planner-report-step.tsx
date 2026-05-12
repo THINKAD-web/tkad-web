@@ -3,16 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import { useTranslations } from "next-intl";
-import { ExternalLink, FileDown, Loader2, Mail, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Camera, FileDown, Loader2, Mail, RefreshCw } from "lucide-react";
+import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
   budgetSplitByCategory,
@@ -22,6 +14,7 @@ import {
 } from "@/lib/planner-logic";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import {
+  captureElementAsPng,
   defaultPlannerPdfFilename,
   downloadPdfFromHtmlElement,
   htmlElementToPdf,
@@ -147,7 +140,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const { toast } = useToast();
   const derived = usePlannerReportDerived(props);
 
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
@@ -160,6 +152,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const [userEmail, setUserEmail] = useState("");
   const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [capturing, setCapturing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -183,7 +176,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         const nextUrl = URL.createObjectURL(blob);
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         urlRef.current = nextUrl;
-        setPdfUrl(nextUrl);
       } catch (e) {
         console.error("[planner-pdf html2canvas]", e);
         if (!cancelled) {
@@ -228,13 +220,14 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
 
   const downloadPdf = useCallback(() => {
     const asciiName = defaultPlannerPdfFilename();
+    const liveBlobUrl = urlRef.current;
 
-    /** 미리보기와 동일 Blob — 사용자 제스처 안에서 동기 다운로드(비동기 재생성 후 클릭 시 차단 방지) */
-    if (pdfUrl && !loading && !error) {
+    /** 미리보기와 동일 Blob — `urlRef`가 진실( effect 정리로 state `pdfUrl`이 revoke URL을 가질 수 있음) */
+    if (liveBlobUrl && !loading && !error) {
       setDownloading(true);
       try {
         const a = document.createElement("a");
-        a.href = pdfUrl;
+        a.href = liveBlobUrl;
         a.download = asciiName;
         a.rel = "noopener";
         document.body.appendChild(a);
@@ -279,25 +272,39 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       }
     })();
   }, [
-    pdfUrl,
     loading,
     error,
-    props.isKo,
-    props.goalTitle,
-    props.budgetNum,
-    props.regionsText,
-    props.categoriesText,
-    props.ageText,
-    props.industryText,
-    props.portfolio,
-    props.metrics,
-    props.reachCorePct,
-    props.reachExtendedPct,
-    derived,
     t,
     tCommon,
     toast,
   ]);
+
+  const captureReportPng = useCallback(async () => {
+    const el =
+      document.getElementById("planner-report-content") ?? previewRef.current;
+    if (!el) {
+      toast("error", tCommon("pdfGenerationFailed"));
+      return;
+    }
+    setCapturing(true);
+    try {
+      await new Promise<void>((r) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => r())),
+      );
+      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      const name = props.isKo
+        ? `싱커드_플래너보고서_${ymd}.png`
+        : `THINKAD_planner_${ymd}.png`;
+      await captureElementAsPng(el, name);
+      toast("success", t("reportImageSaved"));
+    } catch (e) {
+      console.error("[planner-capture]", e);
+      toast("error", tCommon("pdfGenerationFailed"));
+    } finally {
+      setCapturing(false);
+    }
+  }, [props.isKo, t, tCommon, toast]);
+
   const sendEmailReport = useCallback(async () => {
     const email = userEmail.trim();
     if (
@@ -383,15 +390,20 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8">
+    <div className="mx-auto w-full max-w-7xl space-y-8">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold text-navy sm:text-2xl">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ STEP 6 / REPORT ]
+        </p>
+        <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
           {t("stepReportTitle")}
         </h2>
-        <p className="text-sm text-muted-foreground">{t("stepReportDesc")}</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {t("stepReportDesc")}
+        </p>
       </div>
 
-      <div className="mx-auto flex w-full justify-center rounded-2xl border border-navy/10 bg-slate-50/60 p-4 shadow-inner sm:p-6 lg:p-8">
+      <div className="mx-auto flex w-full justify-center border-2 border-border bg-muted p-4 sm:p-6 lg:p-8">
         <PlannerReportPreview
           ref={previewRef}
           isKo={props.isKo}
@@ -415,42 +427,48 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         />
       </div>
 
-      <Card className="border-navy/10 shadow-lg">
-        <CardHeader className="flex flex-col gap-4 border-b border-navy/8 bg-slate-50/50 sm:flex-row sm:items-start sm:justify-between">
+      <div className="border-2 border-border bg-card">
+        <div className="flex flex-col gap-4 border-b-2 border-border p-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle className="text-navy">{t("reportPdfDocumentTitle")}</CardTitle>
-            <CardDescription>{t("reportPreviewDesc")}</CardDescription>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              [ PDF DOCUMENT ]
+            </p>
+            <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+              {t("reportPdfDocumentTitle")}
+            </h3>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+              {t("reportPreviewDesc")}
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full border-navy/20"
+            <BtnBlock
+              variant="secondary"
+              size="md"
               onClick={downloadPdf}
-              disabled={loading || downloading}
+              disabled={loading || downloading || capturing}
             >
               {downloading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <FileDown className="mr-2 h-4 w-4" />
+                <FileDown className="h-4 w-4" />
               )}
               {t("reportDownloadPdf")}
-            </Button>
-            {pdfUrl && !loading ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-navy/20"
-                asChild
-              >
-                <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  {t("reportOpenPdfNewTab")}
-                </a>
-              </Button>
-            ) : null}
+            </BtnBlock>
+            <BtnBlock
+              variant="secondary"
+              size="md"
+              onClick={() => void captureReportPng()}
+              disabled={loading || capturing || downloading}
+            >
+              {capturing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Camera className="h-4 w-4" />
+              )}
+              {t("reportCapturePng")}
+            </BtnBlock>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Input
+              <input
                 type="email"
                 placeholder={props.isKo ? "이메일 주소" : "Email address"}
                 value={userEmail}
@@ -458,60 +476,54 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                   setUserEmail(e.target.value);
                   setEmailSent(false);
                 }}
-                className="h-10 w-full min-w-[14rem] sm:w-56"
+                className="h-10 w-full min-w-[14rem] border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:w-56"
               />
-              <Button
-                type="button"
-                className="btn-gold rounded-full font-semibold"
+              <BtnBlock
+                variant="accent"
+                size="md"
                 onClick={() => void sendEmailReport()}
                 disabled={emailSending}
               >
                 {emailSending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Mail className="mr-2 h-4 w-4" />
+                  <Mail className="h-4 w-4" />
                 )}
                 {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
-              </Button>
+              </BtnBlock>
             </div>
             {error ? (
-              <Button
-                type="button"
-                variant="secondary"
-                className="rounded-full"
+              <BtnBlock
+                variant="primary"
+                size="md"
                 onClick={() => {
                   setError(null);
                   setRetryKey((k) => k + 1);
                 }}
               >
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="h-4 w-4" />
                 {t("reportRetryPdf")}
-              </Button>
+              </BtnBlock>
             ) : null}
           </div>
-        </CardHeader>
-        <CardContent className="pt-6">
-          {loading ? (
-            <div className="flex min-h-[20rem] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-navy/15 bg-slate-50/60 py-16 text-sm text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin text-gold" />
-              {t("reportGenerating")}
-            </div>
-          ) : error ? (
-            <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-10 text-center text-sm text-destructive">
-              <p>{error}</p>
-              <p className="mt-2 text-xs text-destructive/80">
-                {t("reportPdfErrorHint")}
-              </p>
-            </div>
-          ) : pdfUrl ? (
-            <iframe
-              title={t("reportPdfDocumentTitle")}
-              src={`${pdfUrl}#toolbar=1`}
-              className="mx-auto h-[min(85vh,1100px)] w-full rounded-2xl border border-navy/10 bg-white shadow-inner"
-            />
-          ) : null}
-        </CardContent>
-      </Card>
+        </div>
+        {loading ? (
+          <div className="flex min-h-[8rem] items-center justify-center gap-3 bg-muted py-8 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            {`// `}{t("reportGenerating")}
+          </div>
+        ) : error ? (
+          <div className="px-5 py-6">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              [ ERROR ]
+            </p>
+            <p className="mt-2 font-bold text-foreground">{error}</p>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+              {t("reportPdfErrorHint")}
+            </p>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -523,6 +535,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const { toast } = useToast();
   const derived = usePlannerReportDerived(props);
   const [downloading, setDownloading] = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const compactPreviewRef = useRef<HTMLDivElement>(null);
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
@@ -556,22 +569,37 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
       setDownloading(false);
     }
   }, [
-    props.isKo,
-    props.goalTitle,
-    props.budgetNum,
-    props.regionsText,
-    props.categoriesText,
-    props.ageText,
-    props.industryText,
-    props.portfolio,
-    props.metrics,
-    props.reachCorePct,
-    props.reachExtendedPct,
-    derived,
     t,
     tCommon,
     toast,
   ]);
+
+  const captureReportPngCompact = useCallback(async () => {
+    const el =
+      document.getElementById("planner-report-content") ?? compactPreviewRef.current;
+    if (!el) {
+      toast("error", tCommon("pdfGenerationFailed"));
+      return;
+    }
+    setCapturing(true);
+    try {
+      await new Promise<void>((r) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => r())),
+      );
+      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      const name = props.isKo
+        ? `싱커드_플래너보고서_${ymd}.png`
+        : `THINKAD_planner_${ymd}.png`;
+      await captureElementAsPng(el, name);
+      toast("success", t("reportImageSaved"));
+    } catch (e) {
+      console.error("[planner-capture compact]", e);
+      toast("error", tCommon("pdfGenerationFailed"));
+    } finally {
+      setCapturing(false);
+    }
+  }, [props.isKo, t, tCommon, toast]);
+
   const sendEmailReport = useCallback(async () => {
     const email = userEmail.trim();
     if (
@@ -658,13 +686,20 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <Card className="border-navy/10 shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-navy">{t("reportPreviewTitle")}</CardTitle>
-        <CardDescription>{t("reportCompactDesc")}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <div className="flex justify-center rounded-xl bg-slate-50/40 p-3 sm:p-5">
+    <div className="border-2 border-border bg-card">
+      <div className="border-b-2 border-border p-5">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ REPORT PREVIEW ]
+        </p>
+        <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+          {t("reportPreviewTitle")}
+        </h3>
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+          {t("reportCompactDesc")}
+        </p>
+      </div>
+      <div className="space-y-6 p-5">
+        <div className="flex justify-center border-2 border-border bg-muted p-3 sm:p-5">
           <PlannerReportPreview
             ref={compactPreviewRef}
             isKo={props.isKo}
@@ -687,22 +722,35 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             mediaPlacements={props.mediaPlacements}
           />
         </div>
-        <div className="flex flex-wrap gap-2 border-t border-navy/10 pt-6">
-          <Button
-            type="button"
-            className="btn-gold rounded-full font-semibold"
+        <div className="flex flex-wrap gap-2 border-t-2 border-border pt-6">
+          <BtnBlock
+            variant="accent"
+            size="md"
             onClick={() => void downloadPdf()}
-            disabled={downloading}
+            disabled={downloading || capturing}
           >
             {downloading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <FileDown className="mr-2 h-4 w-4" />
+              <FileDown className="h-4 w-4" />
             )}
             {t("reportDownloadPdf")}
-          </Button>
+          </BtnBlock>
+          <BtnBlock
+            variant="secondary"
+            size="md"
+            onClick={() => void captureReportPngCompact()}
+            disabled={downloading || capturing}
+          >
+            {capturing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Camera className="h-4 w-4" />
+            )}
+            {t("reportCapturePng")}
+          </BtnBlock>
           <div className="flex flex-wrap items-center gap-2">
-            <Input
+            <input
               type="email"
               placeholder={props.isKo ? "이메일 주소" : "Email address"}
               value={userEmail}
@@ -710,25 +758,24 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                 setUserEmail(e.target.value);
                 setEmailSent(false);
               }}
-              className="h-10 w-full min-w-[12rem] sm:w-52"
+              className="h-10 w-full min-w-[12rem] border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:w-52"
             />
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full border-navy/20"
+            <BtnBlock
+              variant="secondary"
+              size="md"
               onClick={() => void sendEmailReport()}
               disabled={emailSending}
             >
               {emailSending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Mail className="mr-2 h-4 w-4" />
+                <Mail className="h-4 w-4" />
               )}
               {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
-            </Button>
+            </BtnBlock>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

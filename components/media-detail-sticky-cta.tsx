@@ -1,12 +1,19 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import { BarChart3, Sparkles } from "lucide-react";
+import { BtnBlock } from "@/components/brutalist";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import type { MediaItem } from "@/lib/media-data";
 
+/**
+ * #MEDIA-3: 매체 상세 모바일 하단 sticky CTA.
+ * 라벨: 플래너 / 견적받기 / 비교하기 (변경 없음).
+ * 디자인 개선:
+ *   - 상단 모노 라벨 [ MEDIA ACTIONS ]
+ *   - rounded-t-lg + 오프셋 그림자 → 부드러운 모서리 + 떠있는 느낌
+ *   - 검정 배경 + 주황 보더 (브루탈리스트) + safe-area 패딩
+ */
 export default function MediaDetailStickyCta({
   media,
   compareHref,
@@ -23,34 +30,44 @@ export default function MediaDetailStickyCta({
       role="region"
       aria-label={t("stickyCtaRegionLabel")}
     >
-      <div className="pointer-events-auto mx-auto flex max-w-lg gap-2 rounded-2xl border border-white/20 bg-navy/95 px-2.5 py-2.5 shadow-[0_-8px_32px_rgba(18,26,58,0.35)] backdrop-blur-md sm:gap-3 sm:px-4">
-        <div className="min-w-0 flex-1">
-          <Button
-            asChild
-            size="sm"
-            className="btn-gold h-10 w-full text-xs font-bold"
-          >
-            <Link href={`/planner?addMedia=${encodeURIComponent(media.id)}`}>
-              <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span className="truncate">{tCta("plannerShort")}</span>
-            </Link>
-          </Button>
+      <div className="pointer-events-auto mx-auto max-w-lg overflow-hidden rounded-[22px] border border-white/14 bg-black/55 shadow-[0_-10px_60px_-20px_rgba(0,0,0,0.75)] backdrop-blur">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-25 tkad-neon-grid"
+        />
+        <div className="relative flex items-center justify-between border-b border-white/10 px-3 py-2">
+          <span className="font-mono text-[9px] font-black uppercase tracking-[0.28em] text-white/80">
+            [ MEDIA ACTIONS ]
+          </span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-white/45">
+            {`// `}3 OPTIONS
+          </span>
         </div>
-        <div className="min-w-0 flex-1">
-          <MediaQuoteCtaButton media={media} variant="sticky" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <Button
-            asChild
+        <div className="flex gap-2 p-2 sm:gap-3 sm:p-3">
+          <BtnBlock
+            href={`/planner?addMedia=${encodeURIComponent(media.id)}`}
+            variant="accent"
             size="sm"
-            variant="outline"
-            className="h-10 w-full border border-white/40 bg-white/10 text-xs font-semibold text-white shadow-none hover:bg-white/20 hover:text-white"
+            className="min-w-0 flex-1"
           >
-            <Link href={compareHref}>
-              <BarChart3 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span className="truncate">{t("stickyCtaCompare")}</span>
-            </Link>
-          </Button>
+            <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="truncate">{tCta("plannerShort")}</span>
+          </BtnBlock>
+          <div className="min-w-0 flex-1">
+            <MediaQuoteCtaButton media={media} variant="sticky" />
+          </div>
+          <BtnBlock
+            href={compareHref}
+            variant="secondary"
+            size="sm"
+            className="min-w-0 flex-1"
+          >
+            <BarChart3 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="min-w-0 truncate text-center">
+              <span className="sm:hidden">{tCta("compareShort")}</span>
+              <span className="hidden sm:inline">{t("stickyCtaCompare")}</span>
+            </span>
+          </BtnBlock>
         </div>
       </div>
     </div>

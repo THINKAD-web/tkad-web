@@ -16,7 +16,7 @@ if (!process.env.DATABASE_URL?.trim()) {
 
 다음 중 하나를 하세요:
   1) 프로젝트 루트에 .env 또는 .env.local 파일을 만들고
-     DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
+     DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=verify-full"
      형식으로 넣으세요. (Neon 대시보드에서 연결 문자열 복사 가능)
   2) 참고용: cp .env.production.example .env 후 값 수정
 

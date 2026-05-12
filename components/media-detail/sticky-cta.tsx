@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, GitCompareArrows, Send, Sparkles } from "lucide-react";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { BtnBlock } from "@/components/brutalist";
 import { useToast } from "@/components/toast-provider";
 import {
   COMPARE_CART_CHANGE_EVENT,
@@ -14,8 +13,6 @@ import {
   type CompareCartEntry,
 } from "@/lib/compare-cart-client";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
-import { cn } from "@/lib/utils";
-
 type Props = {
   mediaId: string;
   mediaName: string;
@@ -75,53 +72,48 @@ export function MediaStickyCta({
 
   return (
     <div className="hidden flex-col gap-2 md:flex">
-      <Button
-        asChild
+      <BtnBlock
+        href={`/planner?addMedia=${encodeURIComponent(mediaId)}`}
+        variant="accent"
         size="lg"
-        className="btn-gold w-full rounded-full font-semibold"
+        className="w-full tkad-neon-cta-clean rounded-[22px] border-0"
       >
-        <Link href={`/planner?addMedia=${encodeURIComponent(mediaId)}`}>
-          <Sparkles className="mr-1.5 h-4 w-4" aria-hidden />
-          {t("planner")}
-        </Link>
-      </Button>
-      <Button
-        type="button"
-        variant={inCart ? "default" : "outline"}
-        size="lg"
+        <Sparkles className="h-4 w-4" aria-hidden />
+        {t("planner")}
+      </BtnBlock>
+      <BtnBlock
         onClick={toggleCompare}
-        aria-pressed={inCart}
-        aria-label={inCart ? t("compareRemove") : t("compare")}
-        className={cn(
-          "w-full rounded-full border-navy/20",
-          inCart && "bg-navy text-white hover:bg-navy/90",
-        )}
+        variant={inCart ? "primary" : "secondary"}
+        size="md"
+        className={
+          inCart
+            ? "w-full"
+            : "tkad-media-detail-cta-secondary w-full rounded-[18px] border border-white/14 bg-white/8 text-white backdrop-blur hover:bg-white/12"
+        }
       >
         {inCart ? (
-          <Check className="mr-1.5 h-4 w-4" aria-hidden />
+          <Check className="h-4 w-4" aria-hidden />
         ) : (
-          <GitCompareArrows className="mr-1.5 h-4 w-4" aria-hidden />
+          <GitCompareArrows className="h-4 w-4" aria-hidden />
         )}
         {inCart
           ? t("compareIn", { count: entries.length })
           : t("compare")}
-      </Button>
-      <Button
-        asChild
-        variant="ghost"
-        size="lg"
-        className="w-full rounded-full font-semibold text-navy hover:bg-navy/5"
+      </BtnBlock>
+      <BtnBlock
+        href={`/quote?media=${encodeURIComponent(mediaId)}`}
+        variant="secondary"
+        size="md"
+        className="tkad-media-detail-cta-secondary w-full rounded-[18px] border border-white/14 bg-white/6 text-white backdrop-blur hover:bg-white/10"
       >
-        <Link href={`/quote?media=${encodeURIComponent(mediaId)}`}>
-          <Send className="mr-1.5 h-4 w-4" aria-hidden />
-          {t("quote")}
-        </Link>
-      </Button>
+        <Send className="h-4 w-4" aria-hidden />
+        {t("quote")}
+      </BtnBlock>
       {entries.length > 0 ? (
-        <p className="text-center text-[11px] text-muted-foreground">
+        <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           {isKo
-            ? `비교함 ${entries.length}/${COMPARE_MAX_ITEMS}`
-            : `Compare ${entries.length}/${COMPARE_MAX_ITEMS}`}
+            ? `// 비교함 ${entries.length}/${COMPARE_MAX_ITEMS}`
+            : `// Compare ${entries.length}/${COMPARE_MAX_ITEMS}`}
         </p>
       ) : null}
     </div>

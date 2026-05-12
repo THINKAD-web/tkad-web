@@ -29,15 +29,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useTranslations } from "next-intl";
 import { GripVertical, Plus, Search, Trash2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
 
@@ -79,15 +70,15 @@ function DraggableCatalogRow({
     <li ref={setNodeRef} style={style} className={cn(isDragging && "opacity-40")}>
       <div
         className={cn(
-          "flex cursor-grab items-start gap-2 rounded-xl border bg-white p-3 text-left transition active:cursor-grabbing",
+          "flex cursor-grab items-start gap-2 border-2 bg-card p-3 text-left transition-colors active:cursor-grabbing",
           inBasket
-            ? "border-gold/40 bg-gold/5"
-            : "border-navy/10 hover:border-navy/25",
+            ? "border-primary bg-muted"
+            : "border-border hover:bg-muted",
         )}
       >
         <button
           type="button"
-          className="mt-0.5 touch-none text-muted-foreground"
+          className="mt-0.5 touch-none text-muted-foreground hover:text-foreground"
           aria-label={t("dragHint")}
           {...listeners}
           {...attributes}
@@ -95,34 +86,34 @@ function DraggableCatalogRow({
           <GripVertical className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-sm font-semibold text-navy">
+          <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
             {isKo ? m.name : (m.nameEn || m.name) || m.name}
           </p>
-          <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-            {regionLabel(m.region)} ·{" "}
+          <p className="mt-1 line-clamp-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            {`// `}{regionLabel(m.region)} ·{" "}
             {(isKo ? m.location : (m.locationEn || m.location) || m.location).slice(0, 48)}
           </p>
-          <p className="mt-1 text-xs font-medium text-gold-dark">
+          <p className="mt-1 font-mono text-xs font-bold tabular-nums text-foreground">
             ₩{m.price.toLocaleString()}
-            <span className="text-navy/60">
-              {isKo ? " 만/월" : " ₩10K/mo"}
+            <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
+              {isKo ? "만/월" : "₩10K/mo"}
             </span>
           </p>
         </div>
-        <Button
+        <button
           type="button"
-          size="sm"
-          variant={inBasket ? "outline" : "default"}
-          className={cn(
-            "shrink-0 touch-manipulation",
-            !inBasket && "btn-gold border-0",
-          )}
           onClick={onAdd}
           disabled={inBasket}
           aria-label={t("addToCampaign")}
+          className={cn(
+            "inline-flex h-9 w-9 shrink-0 items-center justify-center border-2 transition-colors disabled:opacity-50",
+            inBasket
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-border bg-card text-foreground hover:bg-foreground hover:text-background",
+          )}
         >
           <Plus className="h-4 w-4" />
-        </Button>
+        </button>
       </div>
     </li>
   );
@@ -157,10 +148,10 @@ function SortableBasketRow({
 
   return (
     <li ref={setNodeRef} style={style}>
-      <div className="flex items-start gap-2 rounded-xl border border-navy/10 bg-white p-3 shadow-sm">
+      <div className="flex items-start gap-2 border-2 border-border bg-card p-3">
         <button
           type="button"
-          className="mt-0.5 touch-none text-muted-foreground"
+          className="mt-0.5 touch-none text-muted-foreground hover:text-foreground"
           aria-label={t("campaignReorderHint")}
           {...listeners}
           {...attributes}
@@ -168,23 +159,21 @@ function SortableBasketRow({
           <GripVertical className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-sm font-semibold text-navy">
+          <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
             {isKo ? m.name : (m.nameEn || m.name) || m.name}
           </p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {regionLabel(m.region)}
+          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            {`// `}{regionLabel(m.region)}
           </p>
         </div>
-        <Button
+        <button
           type="button"
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
           onClick={onRemove}
           aria-label={t("removeFromCampaign")}
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-primary hover:text-primary-foreground hover:border-primary"
         >
           <Trash2 className="h-4 w-4" />
-        </Button>
+        </button>
       </div>
     </li>
   );
@@ -313,30 +302,38 @@ export default function PlannerMediaSelector({
       onDragEnd={onDragEnd}
       onDragCancel={onDragCancel}
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] xl:grid-cols-[minmax(0,1.1fr)_minmax(0,24rem)]">
-        <Card className="border-navy/10 shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-navy">{t("mediaListTitle")}</CardTitle>
-            <CardDescription>{t("mediaListDesc")}</CardDescription>
-            <div className="relative pt-2">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
+      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] xl:grid-cols-[minmax(0,1.1fr)_minmax(0,24rem)]">
+        <div className="border-2 border-border bg-card">
+          <div className="border-b-2 border-border p-5">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              [ MEDIA LIST ]
+            </p>
+            <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+              {t("mediaListTitle")}
+            </h3>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+              {t("mediaListDesc")}
+            </p>
+            <div className="relative mt-3">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t("mediaSearchPlaceholder")}
-                className="h-10 border-navy/15 pl-9"
                 aria-label={t("mediaSearchPlaceholder")}
+                className="h-10 w-full border-2 border-border bg-card pl-9 pr-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
               />
             </div>
-          </CardHeader>
-          <CardContent className="pt-0">
+          </div>
+          <div className="p-4">
             <ul
-              className="max-h-[min(52vh,28rem)] space-y-1.5 overflow-y-auto pr-1"
+              className="max-h-[min(52vh,28rem)] space-y-2 overflow-y-auto pr-1"
               role="list"
             >
               {listFiltered.length === 0 ? (
-                <li className="rounded-lg border border-dashed border-navy/15 py-10 text-center text-sm text-muted-foreground">
-                  {t("mediaListEmpty")}
+                <li className="border-2 border-border bg-muted py-10 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {`// `}{t("mediaListEmpty")}
                 </li>
               ) : (
                 listFiltered.map((m) => (
@@ -352,48 +349,62 @@ export default function PlannerMediaSelector({
                 ))
               )}
             </ul>
-            <p className="mt-3 text-xs text-muted-foreground">{t("dragHint")}</p>
-          </CardContent>
-        </Card>
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              {`// `}{t("dragHint")}
+            </p>
+          </div>
+        </div>
 
-        <Card
+        <div
           className={cn(
-            "border-navy/10 shadow-lg transition-colors",
-            isOver && "border-gold/50 bg-gold/5 ring-1 ring-gold/30",
+            "-ml-[2px] border-2 border-border bg-card transition-colors lg:mt-0",
+            isOver && "border-primary bg-muted",
           )}
         >
-          <CardHeader>
-            <CardTitle className="flex items-start justify-between gap-3 text-navy">
-              <span>{t("campaignPanelTitle")}</span>
-              <span className="text-right text-sm font-extrabold text-gold-dark">
-                {t("campaignMonthlyTotalLabel")}
-                <span className="ml-2">
+          <div className="border-b-2 border-border p-5">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              [ CAMPAIGN BASKET ]
+            </p>
+            <div className="mt-2 flex items-start justify-between gap-3">
+              <h3 className="text-lg font-bold tracking-tight text-foreground">
+                {t("campaignPanelTitle")}
+              </h3>
+              <span className="text-right">
+                <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  {t("campaignMonthlyTotalLabel")}
+                </span>
+                <span className="block font-mono text-base font-bold tabular-nums text-foreground">
                   ₩{basketMonthlyTotal.toLocaleString()}
-                  <span className="ml-1 text-xs font-semibold text-navy/60">
-                    {isKo ? "만/월" : " ₩10K/mo"}
+                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
+                    {isKo ? "만/월" : "₩10K/mo"}
                   </span>
                 </span>
               </span>
-            </CardTitle>
-            <CardDescription>{t("campaignPanelDesc")}</CardDescription>
-          </CardHeader>
-          <CardContent>
+            </div>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+              {t("campaignPanelDesc")}
+            </p>
+          </div>
+          <div className="p-4">
             <div
               ref={setDropRef}
               className={cn(
-                "min-h-[min(52vh,28rem)] rounded-2xl border-2 border-dashed p-3 transition-colors",
+                "min-h-[min(52vh,28rem)] border-2 p-3 transition-colors",
                 isOver
-                  ? "border-gold/60 bg-gold/5"
-                  : "border-navy/15 bg-slate-50/50",
+                  ? "border-primary bg-muted"
+                  : "border-border bg-muted",
               )}
             >
               {basketItems.length === 0 ? (
                 <div className="flex h-full min-h-[12rem] flex-col items-center justify-center gap-2 px-4 text-center">
-                  <p className="text-sm font-medium text-navy">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+                    [ EMPTY ]
+                  </p>
+                  <p className="text-sm font-bold tracking-tight text-foreground">
                     {t("emptyCampaign")}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("dropHint")}
+                  <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
+                    {`// `}{t("dropHint")}
                   </p>
                 </div>
               ) : (
@@ -416,17 +427,17 @@ export default function PlannerMediaSelector({
                 </SortableContext>
               )}
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t("campaignReorderHint")}
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              {`// `}{t("campaignReorderHint")}
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <DragOverlay dropAnimation={null}>
         {dragPreview ? (
-          <div className="max-w-sm rounded-xl border border-gold/40 bg-white p-3 shadow-xl">
-            <p className="line-clamp-2 text-sm font-semibold text-navy">
+          <div className="max-w-sm border-2 border-primary bg-card p-3">
+            <p className="line-clamp-2 text-sm font-bold tracking-tight text-foreground">
               {isKo ? dragPreview.name : (dragPreview.nameEn || dragPreview.name) || dragPreview.name}
             </p>
           </div>

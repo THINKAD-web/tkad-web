@@ -1,5 +1,4 @@
 import { ExternalLink, BookOpen } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import type { InsightSource } from "@/lib/insights-reports";
 
 /**
@@ -12,47 +11,49 @@ export function SourcesSection({ sources }: { sources: InsightSource[] }) {
   return (
     <section
       aria-labelledby="insight-sources-heading"
-      className="mt-12 rounded-2xl border border-navy/10 bg-slate-50/60 p-6"
+      className="mt-12 border-2 border-border bg-muted p-6"
     >
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+        [ SOURCES / {sources.length} ]
+      </p>
       <h2
         id="insight-sources-heading"
-        className="mb-3 flex items-center gap-2 text-lg font-bold text-navy"
+        className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground"
       >
-        <BookOpen className="h-5 w-5 text-gold" aria-hidden />
+        <BookOpen className="h-5 w-5 text-accent" aria-hidden />
         참고 자료 ({sources.length})
       </h2>
-      <ul className="space-y-2">
+      <ul className="mt-4 space-y-0">
         {sources.map((s, i) => (
           <li
             key={s.url || i}
-            className="rounded-lg border border-navy/8 bg-white p-3 text-sm shadow-sm"
+            className="-mt-[2px] border-2 border-border bg-card p-3 text-sm"
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1 space-y-1">
+              <div className="min-w-0 flex-1 space-y-2">
                 <a
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="line-clamp-2 font-semibold text-navy underline-offset-2 hover:underline"
+                  className="line-clamp-2 font-bold tracking-tight text-foreground transition-colors hover:text-accent"
                 >
-                  [{i + 1}] {s.title || s.domain}
+                  <span className="font-mono text-accent">[{i + 1}]</span> {s.title || s.domain}
                 </a>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span className="font-mono">{s.domain}</span>
+                <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <span>{s.domain}</span>
                   {s.publishedAt ? <span>· {s.publishedAt}</span> : null}
                   {s.trustGrade ? (
-                    <Badge
-                      variant="outline"
+                    <span
                       className={
                         s.trustGrade === "A"
-                          ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                          ? "border-2 border-accent bg-accent px-2 py-0.5 font-bold text-accent-foreground"
                           : s.trustGrade === "B"
-                            ? "border-sky-300 bg-sky-50 text-sky-700"
-                            : "border-slate-300 bg-slate-50 text-slate-700"
+                            ? "border-2 border-border bg-hero-void px-2 py-0.5 font-bold text-hero-fg"
+                            : "border-2 border-border bg-card px-2 py-0.5 font-bold text-foreground"
                       }
                     >
-                      {s.trustGrade} 등급
-                    </Badge>
+                      [ {s.trustGrade} 등급 ]
+                    </span>
                   ) : null}
                 </div>
               </div>
@@ -64,8 +65,8 @@ export function SourcesSection({ sources }: { sources: InsightSource[] }) {
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-[11px] text-muted-foreground">
-        외부 링크는 새 창으로 열리며, THINKAD 가 해당 사이트의 정확성·견해를
+      <p className="mt-4 font-mono text-[11px] tracking-tight text-muted-foreground">
+        {`// `}외부 링크는 새 창으로 열리며, THINKAD 가 해당 사이트의 정확성·견해를
         보증하지 않습니다.
       </p>
     </section>

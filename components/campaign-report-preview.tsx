@@ -1,10 +1,20 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Camera, Download, Loader2 } from "lucide-react";
-import { captureElementAsPng, downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
+import { forwardRef } from "react";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
+import {
+  formatFinancialDocKindKo,
+  formatFinancialDocStatusKo,
+} from "@/lib/campaign-report-labels";
+import type { MediaItem } from "@/lib/media-data";
+import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
+import { PlannerDailyReachBarChart, PlannerReachDonutChart } from "@/components/planner-charts";
+import {
+  computeCampaignBaseStats,
+  computeCampaignPlannerKpis,
+  computeCampaignTotalAmount,
+  computeAvgVisibility,
+} from "@/lib/campaign-kpis";
 
 export type CampaignReportData = {
   campaignName: string;
@@ -23,6 +33,8 @@ export type CampaignReportData = {
     title: string;
     mediaName: string;
     location: string;
+    /** 매체 `image` — 미리보기 썸네일 */
+    imageUrl?: string | null;
     startsAt: string;
     endsAt: string;
     status: string;
@@ -50,101 +62,56 @@ function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 }
 
+function fmtShort(d: string) {
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return "—";
+  return dt.toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit" });
+}
+
 function fmtAmount(n: number) {
   if (n >= 100_000_000) return `₩${(n / 100_000_000).toFixed(1).replace(/\.0$/, "")}억`;
   if (n >= 10_000) return `₩${Math.round(n / 10_000).toLocaleString()}만`;
   return `₩${n.toLocaleString()}`;
 }
 
-export default function CampaignReportPreview({ data }: { data: CampaignReportData }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [busy, setBusy] = useState(false);
+const SCHEDULE_KIND_KO: Record<string, string> = {
+  broadcast: "송출",
+  install: "설치",
+  removal: "철거",
+  meeting: "미팅",
+  other: "기타",
+};
 
-  const stats = (() => {
-    if (!data.mediaBookings?.length) return null;
-    let totalExposure = 0, totalDays = 0, totalImpressions = 0;
-    for (const b of data.mediaBookings) {
-      const days = diffDays(b.startsAt, b.endsAt);
-      totalExposure += (b.dailyFootTraffic ?? 0) * days;
-      totalDays += days;
-      totalImpressions += (b.impressions ?? 0) * days;
-    }
-    const avgDaily = totalDays > 0 ? Math.round(totalExposure / totalDays) : 0;
-    const maxDays = Math.max(...data.mediaBookings.map((b) => diffDays(b.startsAt, b.endsAt)));
-    return {
-      totalExposure,
-      totalDays,
-      mediaCount: data.mediaBookings.length,
-      avgDaily,
-      maxDays,
-      totalImpressions,
-    };
-  })();
+function scheduleKindKo(kind: string): string {
+  const k = kind.trim().toLowerCase();
+  return SCHEDULE_KIND_KO[k] ?? kind;
+}
 
-  /** Planner 스타일 추정 KPI — 도달·빈도·CPM·ROI */
-  const totalAmount2 = data.financialDocs?.reduce((s, f) => s + (f.amountKrw ?? 0), 0) ?? 0;
-  const plannerKpis = (() => {
-    if (!stats) return null;
-    /** 노출 추정 (impressions 미설정 시 일유동 × 인지율 0.4 폴백) */
-    const totalImp =
-      stats.totalImpressions > 0
-        ? stats.totalImpressions
-        : Math.round(stats.totalExposure * 0.4);
-    /** 평균 빈도 추정: 6 (월 단위 OOH 통계 평균) */
-    const avgFrequency = 6;
-    /** 도달인 = 총 노출 / 빈도 */
-    const reach = totalImp > 0 ? Math.round(totalImp / avgFrequency) : 0;
-    /** 코어 도달률 — 인구 5,000만 기준 */
-    const corePopulation = 50_000_000;
-    const reachCorePct = Math.min(
-      100,
-      Math.round((reach / corePopulation) * 100 * 10) / 10,
-    );
-    const reachExtendedPct = Math.min(100, Math.round(reachCorePct * 1.6 * 10) / 10);
-    /** Blended CPM (원/1000노출) */
-    const blendedCpm =
-      totalAmount2 > 0 && totalImp > 0
-        ? Math.round((totalAmount2 / totalImp) * 1000)
-        : null;
-    /** ROI 추정: 1억당 환산 노출가치 (단순 가이드 — 실측치 아님) */
-    const roiExpected =
-      totalAmount2 > 0 ? Math.round((totalImp / totalAmount2) * 100_000_000) : null;
-    /** 일 평균 노출 */
-    const dailyImpressionsAvg =
-      stats.totalDays > 0 ? Math.round(totalImp / stats.totalDays) : 0;
-    return {
-      totalImp,
-      avgFrequency,
-      reach,
-      reachCorePct,
-      reachExtendedPct,
-      blendedCpm,
-      roiExpected,
-      dailyImpressionsAvg,
-    };
-  })();
+function thumbUrl(m: Partial<MediaItem> & { imageUrl?: string | null }): string | null {
+  // Prefer explicit imageUrl if provided; otherwise use existing media helpers (if shape matches).
+  if (m.imageUrl) return m.imageUrl;
+  try {
+    // MediaItem shape in this file is partial (from bookings), so guard.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anyM = m as any as MediaItem;
+    return getPrimaryMediaImageUrl(anyM) ?? resolveMediaGallery(anyM)[0] ?? null;
+  } catch {
+    return null;
+  }
+}
 
-  /** 매체별 효율 (단가 vs 유동인구·CPM) */
-  const mediaEfficiency = (() => {
-    if (!data.mediaBookings?.length || !data.financialDocs?.length) return null;
-    const totalDays = stats?.totalDays ?? 0;
-    const total = totalAmount2;
-    if (total <= 0 || totalDays <= 0) return null;
-    return data.mediaBookings.slice(0, 8).map((b) => {
-      const days = diffDays(b.startsAt, b.endsAt);
-      const exposure = (b.dailyFootTraffic ?? 0) * days;
-      const allocAmount = total * (days / totalDays / data.mediaBookings!.length);
-      const cpm = exposure > 0 ? Math.round((allocAmount / exposure) * 1000) : null;
-      return {
-        name: b.mediaName,
-        location: b.location,
-        days,
-        dailyFootTraffic: b.dailyFootTraffic ?? 0,
-        cpm,
-        type: b.type ?? null,
-      };
-    });
-  })();
+const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportData }>(function CampaignReportPreview(
+  { data },
+  ref,
+) {
+
+  // KPI 산식은 lib/campaign-kpis.ts 로 추출 (server PDF 와 공유, 산식 동일).
+  const stats = computeCampaignBaseStats(data.mediaBookings);
+  const totalAmount2 = computeCampaignTotalAmount(data.financialDocs);
+  const plannerKpis = computeCampaignPlannerKpis(stats, totalAmount2);
+
+  // NOTE: 규칙 준수(새 산식/평가/추천 금지)를 위해 "매체별 추정 CPM" 등
+  // 추가 계산(안분/추정) 기반 효율 분석 섹션은 표시하지 않습니다.
 
   /** 유형·지역 분포 */
   const distribution = (() => {
@@ -163,15 +130,7 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
     };
   })();
 
-  /** 평균 검증 점수 */
-  const avgVisibility = (() => {
-    const scores = (data.mediaBookings ?? [])
-      .map((b) => b.visibilityScore)
-      .filter((v): v is number => typeof v === "number" && v > 0);
-    if (scores.length === 0) return null;
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    return Math.round(avg * 10) / 10; // 1 decimal
-  })();
+  const avgVisibility = computeAvgVisibility(data.mediaBookings);
 
   const totalAmount = data.financialDocs?.reduce((s, f) => s + (f.amountKrw ?? 0), 0) ?? 0;
   const campaignPeriod = (() => {
@@ -186,80 +145,206 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
     return null;
   })();
 
-  const handleCapture = async () => {
-    if (!ref.current || busy) return;
-    setBusy(true);
-    try {
-      const d = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      await captureElementAsPng(ref.current, `싱커드_게재보고서_${d}.png`);
-    } catch (e) {
-      console.error("[campaign-report] png capture failed", e);
-      window.alert(
-        `이미지 저장에 실패했습니다.\n${e instanceof Error ? e.message : String(e)}`,
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
+  const nMedia = data.mediaBookings?.length ?? 0;
+  const nSchedule = data.scheduleEvents?.length ?? 0;
+  const nProofs = data.proofPhotos?.length ?? 0;
+  const nFinancial = data.financialDocs?.length ?? 0;
 
-  const handlePdf = async () => {
-    if (!ref.current || busy) return;
-    setBusy(true);
-    try {
-      const d = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      await downloadPdfFromHtmlElement(
-        ref.current,
-        `싱커드_게재보고서_${d}.pdf`,
-      );
-    } catch (e) {
-      console.error("[campaign-report] pdf export failed", e);
-      window.alert(
-        `PDF 생성에 실패했습니다.\n${e instanceof Error ? e.message : String(e)}`,
-      );
-    } finally {
-      setBusy(false);
+  const mediaThumbs = (() => {
+    const raw = data.mediaBookings ?? [];
+    // Try to find any plausible image URL on the booking object itself (if present).
+    const urls: string[] = [];
+    for (const b of raw) {
+      const u =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.imageUrl ??
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.thumbnailUrl ??
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.media?.imageUrl ??
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (b as any)?.media?.image ??
+        null;
+      if (typeof u === "string" && u.startsWith("http")) urls.push(u);
+      else {
+        const fallback = thumbUrl(b as unknown as Partial<MediaItem>);
+        if (fallback) urls.push(fallback);
+      }
     }
-  };
+    // Dedupe
+    return Array.from(new Set(urls)).slice(0, 9);
+  })();
+
+  const dashboardBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const byType = new Map<string, number>();
+    const byRegion = new Map<string, number>();
+    for (const b of bookings) {
+      const t = (b.type ?? "기타").toString();
+      const r = (b.region ?? b.location?.split(" ")[0] ?? "-").toString();
+      const daily = b.dailyFootTraffic ?? 0;
+      byType.set(t, (byType.get(t) ?? 0) + daily);
+      byRegion.set(r, (byRegion.get(r) ?? 0) + 1);
+    }
+    const typeBars = Array.from(byType.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k, value: v }));
+    const regionBars = Array.from(byRegion.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k, value: v }));
+    return { typeBars, regionBars };
+  })();
+
+  const topMediaBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const foot = bookings
+      .filter((b) => typeof b.dailyFootTraffic === "number" && (b.dailyFootTraffic ?? 0) > 0)
+      .sort((a, b) => (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0))
+      .slice(0, 6)
+      .map((b, i) => ({
+        key: `${b.mediaName}-${i}`,
+        label: (b.mediaName ?? "—").slice(0, 10),
+        value: b.dailyFootTraffic ?? 0,
+      }));
+    const imp = bookings
+      .filter((b) => typeof b.impressions === "number" && (b.impressions ?? 0) > 0)
+      .sort((a, b) => (b.impressions ?? 0) - (a.impressions ?? 0))
+      .slice(0, 6)
+      .map((b, i) => ({
+        key: `${b.mediaName}-${i}`,
+        label: (b.mediaName ?? "—").slice(0, 10),
+        value: b.impressions ?? 0,
+      }));
+    return { foot, imp };
+  })();
+
+  const opsBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const byBookingStatus = new Map<string, number>();
+    const byDocStatus = new Map<string, number>();
+    const visibilityTop = bookings
+      .filter((b) => typeof b.visibilityScore === "number" && (b.visibilityScore ?? 0) > 0)
+      .sort((a, b) => (b.visibilityScore ?? 0) - (a.visibilityScore ?? 0))
+      .slice(0, 6)
+      .map((b, i) => ({
+        key: `${b.mediaName}-${i}`,
+        label: (b.mediaName ?? "—").slice(0, 10),
+        value: b.visibilityScore ?? 0,
+      }));
+
+    for (const b of bookings) {
+      const k = (b.status ?? "—").toString();
+      byBookingStatus.set(k, (byBookingStatus.get(k) ?? 0) + 1);
+    }
+    for (const d of data.financialDocs ?? []) {
+      const k = `${d.kind ?? "DOC"} · ${d.status ?? "—"}`;
+      byDocStatus.set(k, (byDocStatus.get(k) ?? 0) + 1);
+    }
+    const bookingStatusBars = Array.from(byBookingStatus.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k.slice(0, 10), value: v }));
+    const docStatusBars = Array.from(byDocStatus.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => ({ key: k, label: k.slice(0, 10), value: v }));
+
+    return { bookingStatusBars, docStatusBars, visibilityTop };
+  })();
+
+  const scheduleBars = (() => {
+    const byKind = new Map<string, number>();
+    for (const e of data.scheduleEvents ?? []) {
+      const k = (e.kind ?? "EVENT").toString();
+      byKind.set(k, (byKind.get(k) ?? 0) + 1);
+    }
+    const kindBars = Array.from(byKind.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([k, v]) => ({ key: k, label: k.slice(0, 10), value: v }));
+    return { kindBars };
+  })();
+
+  const bookingMonthBars = (() => {
+    const bookings = data.mediaBookings ?? [];
+    const buckets = new Array(12).fill(0) as number[];
+    for (const b of bookings) {
+      const d = new Date(b.startsAt);
+      if (Number.isNaN(d.getTime())) continue;
+      const m = d.getMonth(); // 0~11
+      buckets[m] += 1;
+    }
+    const bars = buckets
+      .map((v, i) => ({ key: String(i + 1), label: `${i + 1}월`, value: v }))
+      .filter((p) => p.value > 0);
+    return { bars };
+  })();
+
+  const timeline = (() => {
+    const bookings = (data.mediaBookings ?? []).filter(Boolean);
+    if (bookings.length === 0) return null;
+    const points = bookings
+      .map((b) => ({
+        ...b,
+        s: new Date(b.startsAt).getTime(),
+        e: new Date(b.endsAt).getTime(),
+      }))
+      .filter((x) => Number.isFinite(x.s) && Number.isFinite(x.e) && x.e >= x.s);
+    if (points.length === 0) return null;
+    const minS = Math.min(...points.map((p) => p.s));
+    const maxE = Math.max(...points.map((p) => p.e));
+    const span = Math.max(1, maxE - minS);
+    const rows = points
+      .sort((a, b) => a.s - b.s)
+      .slice(0, 14)
+      .map((p, idx) => {
+        const left = ((p.s - minS) / span) * 100;
+        const width = ((p.e - p.s) / span) * 100;
+        return {
+          key: `${p.mediaName}-${idx}`,
+          label: (p.mediaName ?? "—").slice(0, 18),
+          left,
+          width: Math.max(1.2, width),
+          startsAt: p.startsAt,
+          endsAt: p.endsAt,
+        };
+      });
+    return {
+      minLabel: fmtShort(new Date(minS).toISOString()),
+      maxLabel: fmtShort(new Date(maxE).toISOString()),
+      rows,
+      total: points.length,
+    };
+  })();
 
   return (
-    <div className="space-y-3">
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={handleCapture} disabled={busy} className="gap-1.5">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-          이미지 저장
-        </Button>
-        <Button variant="outline" size="sm" onClick={handlePdf} disabled={busy} className="gap-1.5">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-          PDF 다운로드
-        </Button>
-      </div>
+    <div ref={ref} className="bg-white font-sans" style={{ fontFamily: "system-ui, sans-serif", border: "2px solid #000000" }}>
 
-      {/* ───── 보고서 본문 ───── */}
-      <div ref={ref} className="bg-white font-sans" style={{ fontFamily: "system-ui, sans-serif" }}>
-
-        {/* 헤더 배너 */}
-        <div style={{ background: "linear-gradient(135deg, #0d1b2e 0%, #070e18 100%)", padding: "32px 40px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div>
-              <p style={{ color: "#c8913c", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", margin: 0 }}>
-                THINKAD · 싱커드
+        {/* 헤더 배너 — brutalist */}
+        <div style={{ background: "#000000", padding: "32px 40px", borderBottom: "2px solid #000000" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "24px" }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ color: "#FF6600", fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ THINKAD · 싱커드 ]
               </p>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", margin: "2px 0 16px" }}>
-                OOH 광고 게재 완료 보고서
+              <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "10px", margin: "4px 0 16px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+                {`// `}OOH 광고 게재 완료 보고서
               </p>
-              <h1 style={{ color: "#ffffff", fontSize: "24px", fontWeight: 800, margin: "0 0 6px", lineHeight: 1.2 }}>
+              <h1 style={{ color: "#ffffff", fontSize: "24px", fontWeight: 800, margin: "0 0 6px", lineHeight: 1.2, letterSpacing: "-0.01em" }}>
                 {data.campaignName || "캠페인명"}
               </h1>
               <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "13px", margin: 0 }}>
                 {[data.clientCompany, data.clientName, data.clientEmail].filter(Boolean).join(" · ")}
               </p>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ background: "#c8913c", color: "#0d1b2e", borderRadius: "20px", padding: "4px 14px", fontSize: "11px", fontWeight: 700, display: "inline-block" }}>
-                게재 완료
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ background: "#FF6600", color: "#ffffff", padding: "6px 14px", fontSize: "10px", fontWeight: 800, display: "inline-block", border: "2px solid #FF6600", letterSpacing: "0.12em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", maxWidth: "200px" }}>
+                [ {data.status || "—"} ]
               </div>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", margin: "8px 0 0", textAlign: "right" }}>
-                발행일 {new Date().toLocaleDateString("ko-KR")}
+              <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "10px", margin: "8px 0 0", textAlign: "right", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", letterSpacing: "0.18em" }}>
+                {`// `}발행일 {new Date().toLocaleDateString("ko-KR")}
               </p>
             </div>
           </div>
@@ -267,99 +352,728 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
 
         <div style={{ padding: "32px 40px" }}>
 
-          {/* 캠페인 개요 */}
+          {/* 집행 스냅샷 — PDF 요약과 같은 데이터 축을 한눈에 */}
           <div style={{ marginBottom: "28px" }}>
-            <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-              📋 캠페인 개요
+            <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+              [ 집행 스냅샷 ]
             </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", fontSize: "12px" }}>
-              <div style={{ padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>고객사</p>
-                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 700, color: "#0d1b2e" }}>{data.clientCompany || "—"}</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#ffffff", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 집행 매체 ]</p>
+                <p style={{ margin: "6px 0 0", fontSize: "20px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
+                  {nMedia}
+                  <span style={{ marginLeft: "4px", fontSize: "12px", color: "#737373" }}>개</span>
+                </p>
               </div>
-              <div style={{ padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>담당자</p>
-                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 700, color: "#0d1b2e" }}>{data.clientName || "—"}</p>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#000000", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#FF6600", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 송출 일정 ]</p>
+                <p style={{ margin: "6px 0 0", fontSize: "20px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
+                  {nSchedule}
+                  <span style={{ marginLeft: "4px", fontSize: "12px", color: "rgba(255,255,255,0.55)" }}>건</span>
+                </p>
               </div>
-              <div style={{ padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>이메일</p>
-                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 600, color: "#0d1b2e" }}>{data.clientEmail || "—"}</p>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#ffffff", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 증빙 사진 ]</p>
+                <p style={{ margin: "6px 0 0", fontSize: "20px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
+                  {nProofs}
+                  <span style={{ marginLeft: "4px", fontSize: "12px", color: "#737373" }}>장</span>
+                </p>
               </div>
-              <div style={{ padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>캠페인 기간</p>
-                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 700, color: "#0d1b2e" }}>{campaignPeriod ?? "—"}</p>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#ffffff", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 재무 문서 ]</p>
+                <p style={{ margin: "6px 0 0", fontSize: "20px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
+                  {nFinancial}
+                  <span style={{ marginLeft: "4px", fontSize: "12px", color: "#737373" }}>건</span>
+                </p>
+              </div>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: campaignPeriod ? "#000000" : "#ffffff", border: "2px solid #000000", gridColumn: "span 2" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: campaignPeriod ? "#FF6600" : "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 캠페인·집행 기간(요약) ]</p>
+                <p style={{ margin: "6px 0 0", fontSize: "13px", fontWeight: 800, lineHeight: 1.4, color: campaignPeriod ? "#FF6600" : "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                  {campaignPeriod ?? "캘린더 일정·매체 기간이 없으면 미정"}
+                </p>
+              </div>
+            </div>
+            <p style={{ margin: "10px 0 0", fontSize: "10px", color: "#737373", lineHeight: 1.5, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+              {`// `}KPI·차트·하단 표는 이 스냅샷과 동일 DB 기준이며,「완료 보고서 PDF」와 맞춰 점검할 수 있습니다.
+            </p>
+          </div>
+
+          {/* 캠페인 개요 (연락·예산) — 상단 */}
+          <div style={{ marginBottom: "28px" }}>
+            <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+              [ 캠페인 개요 ]
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 0, fontSize: "12px" }}>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#ffffff", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 고객사 ]</p>
+                <p style={{ margin: "4px 0 0", fontSize: "13px", fontWeight: 700, color: "#000000" }}>{data.clientCompany || "—"}</p>
+              </div>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#ffffff", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 담당자 ]</p>
+                <p style={{ margin: "4px 0 0", fontSize: "13px", fontWeight: 700, color: "#000000" }}>{data.clientName || "—"}</p>
+              </div>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#ffffff", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 이메일 ]</p>
+                <p style={{ margin: "4px 0 0", fontSize: "13px", fontWeight: 600, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{data.clientEmail || "—"}</p>
+              </div>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#f5f5f5", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 캠페인 기간(등록) ]</p>
+                <p style={{ margin: "4px 0 0", fontSize: "13px", fontWeight: 700, color: "#000000" }}>{campaignPeriod ?? "—"}</p>
               </div>
               {(data.budgetMin != null || data.budgetMax != null) && (
-                <div style={{ padding: "10px 14px", background: "#fffbeb", borderRadius: "8px", border: "1px solid #fde68a", gridColumn: "span 2" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#92400e", fontWeight: 600 }}>예산 범위</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: 700, color: "#92400e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#000000", border: "2px solid #000000", gridColumn: "span 2" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#FF6600", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 예산 범위 ]</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "14px", fontWeight: 700, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {data.budgetMin != null ? fmtAmount(data.budgetMin) : "—"}
                     {" ~ "}
                     {data.budgetMax != null ? fmtAmount(data.budgetMax) : "—"}
                   </p>
                 </div>
               )}
-              {data.notes && (
-                <div style={{ padding: "10px 14px", background: "#f1f5f9", borderRadius: "8px", border: "1px solid #e2e8f0", gridColumn: "span 2" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600 }}>비고</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#334155", lineHeight: 1.5 }}>{data.notes}</p>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* 핵심 KPI */}
-          {(stats || totalAmount > 0) && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "32px" }}>
-              {stats && (<>
-                <div style={{ background: "#f8faff", borderRadius: "12px", padding: "16px", border: "1px solid #e2e8f0", textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>집행 매체</p>
-                  <p style={{ fontSize: "28px", fontWeight: 800, color: "#0d1b2e", margin: 0 }}>{stats.mediaCount}<span style={{ fontSize: "14px" }}>개</span></p>
-                </div>
-                <div style={{ background: "#f8faff", borderRadius: "12px", padding: "16px", border: "1px solid #e2e8f0", textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>집행 기간</p>
-                  <p style={{ fontSize: "28px", fontWeight: 800, color: "#0d1b2e", margin: 0 }}>{stats.totalDays}<span style={{ fontSize: "14px" }}>일</span></p>
-                </div>
-                <div style={{ background: "#0d1b2e", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#c8913c", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>누적 노출 추정</p>
-                  <p style={{ fontSize: "22px", fontWeight: 800, color: "#ffffff", margin: 0 }}>
-                    {stats.totalExposure > 0 ? `${Math.round(stats.totalExposure / 10000).toLocaleString()}만` : "—"}
-                  </p>
-                </div>
-              </>)}
-              {totalAmount > 0 && (
-                <div style={{ background: "#fffbeb", borderRadius: "12px", padding: "16px", border: "1px solid #fde68a", textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#92400e", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>총 집행 금액</p>
-                  <p style={{ fontSize: "22px", fontWeight: 800, color: "#92400e", margin: 0 }}>{fmtAmount(totalAmount)}</p>
-                </div>
-              )}
+          {/* Visual hero strip (media + proof) — preview only */}
+          {(mediaThumbs.length > 0 || (data.proofPhotos?.length ?? 0) > 0) && (
+            <div style={{ marginBottom: "28px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ VISUAL HIGHLIGHTS ]
+              </h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 0 }}>
+                {[
+                  ...mediaThumbs.slice(0, 6).map((u) => ({ url: u, tag: "MEDIA" })),
+                  ...(data.proofPhotos ?? []).slice(0, Math.max(0, 6 - mediaThumbs.slice(0, 6).length)).map((p) => ({ url: p.imageUrl, tag: "PROOF" })),
+                ].slice(0, 6).map((x, i) => (
+                  <div
+                    key={`${x.tag}-${i}`}
+                    style={{
+                      marginTop: "-2px",
+                      marginLeft: "-2px",
+                      border: "2px solid #000000",
+                      background: "#ffffff",
+                      overflow: "hidden",
+                      position: "relative",
+                    }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={x.url}
+                      alt=""
+                      crossOrigin="anonymous"
+                      style={{ width: "100%", height: "96px", objectFit: "cover", display: "block" }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        background: "#000000",
+                        color: "#FF6600",
+                        borderRight: "2px solid #000000",
+                        borderBottom: "2px solid #000000",
+                        padding: "4px 8px",
+                        fontSize: "9px",
+                        fontWeight: 800,
+                        letterSpacing: "0.18em",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                      }}
+                    >
+                      [ {x.tag} ]
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: "10px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                {`// `}미리보기에서는 집행 매체/증빙 이미지를 우선 노출합니다. (데이터가 없으면 생략)
+              </p>
             </div>
           )}
 
-          {/* 부가 KPI (일평균·최장 기간·평균 검증·예상 임프레션) */}
+          {/* Executive Summary — /planner 톤의 컴팩트 대시보드 (기존 KPI만 재배치) */}
+          {(stats || plannerKpis || totalAmount > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ EXECUTIVE SUMMARY ]
+              </h2>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
+                {[
+                  {
+                    label: "집행 매체",
+                    value: stats ? `${stats.mediaCount}` : "—",
+                    suffix: "개",
+                    invert: false,
+                  },
+                  {
+                    label: "집행 기간",
+                    value: stats ? `${stats.totalDays}` : "—",
+                    suffix: "일",
+                    invert: false,
+                  },
+                  {
+                    label: "총 노출",
+                    value: plannerKpis ? `${(plannerKpis.totalImp / 10000).toLocaleString()}만` : "—",
+                    suffix: "회",
+                    invert: true,
+                  },
+                  {
+                    label: "도달인 추정",
+                    value: plannerKpis ? `${(plannerKpis.reach / 10000).toFixed(1)}만` : "—",
+                    suffix: "명",
+                    invert: false,
+                  },
+                  {
+                    label: "코어 도달률",
+                    value: plannerKpis ? `${plannerKpis.reachCorePct}` : "—",
+                    suffix: "%",
+                    invert: false,
+                  },
+                  {
+                    label: "확장 도달률",
+                    value: plannerKpis ? `${plannerKpis.reachExtendedPct}` : "—",
+                    suffix: "%",
+                    invert: false,
+                  },
+                  {
+                    label: "BLENDED CPM",
+                    value:
+                      plannerKpis?.blendedCpm != null
+                        ? `₩${plannerKpis.blendedCpm.toLocaleString()}`
+                        : "—",
+                    suffix: " / 1,000",
+                    invert: true,
+                  },
+                  {
+                    label: "ROI 효율",
+                    value:
+                      plannerKpis?.roiExpected != null
+                        ? `${(plannerKpis.roiExpected / 10000).toFixed(0)}만`
+                        : "—",
+                    suffix: "회/1억",
+                    invert: true,
+                  },
+                ].map((c) => (
+                  <div
+                    key={c.label}
+                    style={{
+                      marginTop: "-2px",
+                      marginLeft: "-2px",
+                      background: c.invert ? "#000000" : "#ffffff",
+                      border: "2px solid #000000",
+                      padding: "14px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.22em",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                        color: c.invert ? "#FF6600" : "#737373",
+                      }}
+                    >
+                      [ {c.label} ]
+                    </p>
+                    <p
+                      style={{
+                        margin: "8px 0 0",
+                        fontSize: "20px",
+                        fontWeight: 800,
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                        fontVariantNumeric: "tabular-nums",
+                        color: c.invert ? "#FF6600" : "#000000",
+                      }}
+                    >
+                      {c.value}
+                      {c.suffix ? (
+                        <span
+                          style={{
+                            marginLeft: "4px",
+                            fontSize: "10px",
+                            color: c.invert ? "rgba(255,255,255,0.55)" : "#737373",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {c.suffix}
+                        </span>
+                      ) : null}
+                    </p>
+                  </div>
+                ))}
+                {totalAmount > 0 && (
+                  <div
+                    style={{
+                      marginTop: "-2px",
+                      marginLeft: "-2px",
+                      background: "#000000",
+                      border: "2px solid #000000",
+                      padding: "14px",
+                      gridColumn: "span 4",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "10px",
+                        color: "#FF6600",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.22em",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                      }}
+                    >
+                      [ 총 집행 금액 ]
+                    </p>
+                    <p
+                      style={{
+                        margin: "8px 0 0",
+                        fontSize: "22px",
+                        fontWeight: 900,
+                        color: "#FF6600",
+                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      {fmtAmount(totalAmount)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {distribution?.types?.length ? (
+                <div style={{ marginTop: "16px" }}>
+                  <p
+                    style={{
+                      margin: "0 0 10px",
+                      fontSize: "10px",
+                      color: "#737373",
+                      fontWeight: 700,
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    }}
+                  >
+                    [ 매체 유형 분포 (요약) ]
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                    {distribution.types.slice(0, 6).map(([label, count], i) => {
+                      const total = stats?.mediaCount ?? 0;
+                      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                      return (
+                        <div
+                          key={label}
+                          style={{
+                            marginTop: "-2px",
+                            background: "#ffffff",
+                            padding: "10px 12px",
+                            border: "2px solid #000000",
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                            <span style={{ fontSize: "11px", fontWeight: 700, color: "#000000" }}>{label}</span>
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                color: "#737373",
+                                fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                                fontVariantNumeric: "tabular-nums",
+                              }}
+                            >
+                              {count}개 · {pct}%
+                            </span>
+                          </div>
+                          <div style={{ height: "6px", background: "#f5f5f5", border: "2px solid #000000", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${pct}%`, background: i === 0 ? "#FF6600" : "#000000" }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {/* EFFECT DASHBOARD (charts) — planner chart components reused */}
+          {plannerKpis && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ EFFECT DASHBOARD ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-2">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 도달 구조 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerReachDonutChart
+                      corePct={plannerKpis.reachCorePct}
+                      extendedPct={plannerKpis.reachExtendedPct}
+                      title="도달 구조"
+                      coreLabel="Core"
+                      extendedLabel="Extended"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 유형별 일유동 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={dashboardBars.typeBars}
+                      title="유형별 일유동(합산)"
+                      valueLabel="daily"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 border-2 border-border bg-card">
+                <div className="border-b-2 border-border p-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    [ 지역 분포 ]
+                  </p>
+                </div>
+                <div className="p-4">
+                  <PlannerDailyReachBarChart
+                    data={dashboardBars.regionBars}
+                    title="지역별 집행 매체 수"
+                    valueLabel="count"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 노출 패턴 — 24h/weekday/monthly (브루탈 막대, html2canvas 안정) */}
+          {data.mediaBookings?.length ? (
+            <CampaignTrafficSection bookings={data.mediaBookings} />
+          ) : null}
+
+          {/* TOP MEDIA (bars) */}
+          {(topMediaBars.foot.length > 0 || topMediaBars.imp.length > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ TOP MEDIA (DATA) ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-2">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 매체별 일유동 TOP ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={topMediaBars.foot}
+                      title="매체별 일유동(상위)"
+                      valueLabel="daily"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 매체별 노출 TOP ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={topMediaBars.imp}
+                      title="매체별 노출(상위)"
+                      valueLabel="impressions"
+                    />
+                  </div>
+                </div>
+              </div>
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  fontSize: "10px",
+                  color: "#737373",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                {`// `}일유동/노출 값이 없는 매체는 차트에서 자동으로 제외됩니다.
+              </p>
+            </div>
+          )}
+
+          {/* OPERATIONS (more charts, no new KPIs) */}
+          {(opsBars.bookingStatusBars.length > 0 ||
+            opsBars.docStatusBars.length > 0 ||
+            opsBars.visibilityTop.length > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ OPERATIONS DASHBOARD ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-3">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 예약 상태 분포 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={opsBars.bookingStatusBars}
+                      title="예약 상태(매체 수)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 문서 상태 분포 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={opsBars.docStatusBars}
+                      title="문서 상태(건수)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 가시성 TOP ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={opsBars.visibilityTop}
+                      title="가시성 점수(상위)"
+                      valueLabel="score"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SCHEDULE (more charts) */}
+          {(scheduleBars.kindBars.length > 0 || bookingMonthBars.bars.length > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ SCHEDULE DASHBOARD ]
+              </h2>
+              <div className="grid gap-0 lg:grid-cols-2">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 일정 이벤트 종류 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={scheduleBars.kindBars}
+                      title="일정 이벤트(종류별)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+                <div className="-ml-[2px] border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 매체 시작 월 ]
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <PlannerDailyReachBarChart
+                      data={bookingMonthBars.bars}
+                      title="집행 시작 월(매체 수)"
+                      valueLabel="count"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TIMELINE (gantt-style) */}
+          {timeline?.rows.length ? (
+            <div style={{ marginBottom: "32px" }}>
+              <h2
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#FF6600",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  margin: "0 0 12px",
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                }}
+              >
+                [ TIMELINE (MEDIA) ]
+              </h2>
+              <div className="border-2 border-border bg-card">
+                <div className="border-b-2 border-border p-4">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ 매체 집행 타임라인 ]
+                    </p>
+                    <p className="font-mono text-[10px] text-muted-foreground">
+                      {`// `}표시: {timeline.rows.length}/{timeline.total} · {timeline.minLabel} → {timeline.maxLabel}
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="space-y-2">
+                    {timeline.rows.map((r) => (
+                      <div key={r.key} className="grid grid-cols-[160px_1fr] gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-mono text-[10px] font-bold text-foreground">
+                            {r.label}
+                          </p>
+                          <p className="font-mono text-[9px] text-muted-foreground">
+                            {fmtShort(r.startsAt)} ~ {fmtShort(r.endsAt)}
+                          </p>
+                        </div>
+                        <div className="relative h-8 border-2 border-border bg-[#f5f5f5]">
+                          <div
+                            className="absolute top-0 h-full border-r-2 border-border bg-hero-void"
+                            style={{
+                              left: `${Math.max(0, Math.min(98.8, r.left))}%`,
+                              width: `${Math.max(1.2, Math.min(100, r.width))}%`,
+                            }}
+                          />
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              backgroundImage:
+                                "linear-gradient(to right, rgba(0,0,0,0.10) 1px, transparent 1px)",
+                              backgroundSize: "10% 100%",
+                              pointerEvents: "none",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 font-mono text-[10px] text-muted-foreground">
+                    {`// `}집행 시작/종료 일자를 막대로만 표시합니다. (추가 계산/평가 없음)
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {/* 핵심 KPI — brutalist */}
+          {(stats || totalAmount > 0) && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ 핵심 KPI ]
+              </h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
+                {stats && (<>
+                  <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", padding: "16px", border: "2px solid #000000", textAlign: "center" }}>
+                    <p style={{ fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 6px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 집행 매체 ]</p>
+                    <p style={{ fontSize: "28px", fontWeight: 800, color: "#000000", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>{stats.mediaCount}<span style={{ fontSize: "14px" }}>개</span></p>
+                  </div>
+                  <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", padding: "16px", border: "2px solid #000000", textAlign: "center" }}>
+                    <p style={{ fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 6px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 집행 기간 ]</p>
+                    <p style={{ fontSize: "28px", fontWeight: 800, color: "#000000", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>{stats.totalDays}<span style={{ fontSize: "14px" }}>일</span></p>
+                  </div>
+                  <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#000000", padding: "16px", border: "2px solid #000000", textAlign: "center" }}>
+                    <p style={{ fontSize: "10px", color: "#FF6600", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 6px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 누적 노출 추정 ]</p>
+                    <p style={{ fontSize: "22px", fontWeight: 800, color: "#FF6600", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
+                      {stats.totalExposure > 0 ? `${Math.round(stats.totalExposure / 10000).toLocaleString()}만` : "—"}
+                    </p>
+                  </div>
+                </>)}
+                {totalAmount > 0 && (
+                  <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#000000", padding: "16px", border: "2px solid #000000", textAlign: "center" }}>
+                    <p style={{ fontSize: "10px", color: "#FF6600", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 6px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 총 집행 금액 ]</p>
+                    <p style={{ fontSize: "22px", fontWeight: 800, color: "#FF6600", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>{fmtAmount(totalAmount)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 부가 KPI — brutalist */}
           {stats && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "24px" }}>
-              <div style={{ background: "#ffffff", borderRadius: "10px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>일평균 유동</p>
-                <p style={{ margin: "2px 0 0", fontSize: "18px", fontWeight: 800, color: "#0d1b2e" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, marginBottom: "32px" }}>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", padding: "14px", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 일평균 유동 ]</p>
+                <p style={{ margin: "6px 0 0", fontSize: "18px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                   {stats.avgDaily > 0 ? `${stats.avgDaily.toLocaleString()}명` : "—"}
                 </p>
               </div>
-              <div style={{ background: "#ffffff", borderRadius: "10px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>최장 집행</p>
-                <p style={{ margin: "2px 0 0", fontSize: "18px", fontWeight: 800, color: "#0d1b2e" }}>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", padding: "14px", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 최장 집행 ]</p>
+                <p style={{ margin: "6px 0 0", fontSize: "18px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                   {stats.maxDays}일
                 </p>
               </div>
-              <div style={{ background: "#ffffff", borderRadius: "10px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>평균 검증</p>
-                <p style={{ margin: "2px 0 0", fontSize: "18px", fontWeight: 800, color: "#0d1b2e" }}>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", padding: "14px", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 평균 검증 ]</p>
+                <p style={{ margin: "6px 0 0", fontSize: "18px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                   {avgVisibility != null ? `${avgVisibility} / 4` : "—"}
                 </p>
               </div>
-              <div style={{ background: "#ffffff", borderRadius: "10px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>예상 임프레션</p>
-                <p style={{ margin: "2px 0 0", fontSize: "18px", fontWeight: 800, color: "#0d1b2e" }}>
+              <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", padding: "14px", border: "2px solid #000000" }}>
+                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 예상 임프레션 ]</p>
+                <p style={{ margin: "6px 0 0", fontSize: "18px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                   {stats.totalImpressions > 0
                     ? `${Math.round(stats.totalImpressions / 10000).toLocaleString()}만`
                     : "—"}
@@ -368,207 +1082,135 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
             </div>
           )}
 
-          {/* Planner 스타일 효과 분석 (도달·빈도·CPM·ROI) */}
+          {/* #ADMIN-CAMPAIGNS-1: 효과 분석 — /planner 효과 측정과 동일한 브루탈리스트 톤
+              (계산식·KPI 항목·라벨 텍스트는 변경 없음. 디자인 토큰만 통일) */}
           {plannerKpis && (
             <div style={{ marginBottom: "32px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                ✨ 미디어 효과 분석 (Planner 추정)
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ 미디어 효과 분석 ]
               </h2>
-              <p style={{ margin: "0 0 12px", fontSize: "11px", color: "#64748b", lineHeight: 1.6 }}>
-                실측 노출 데이터와 OOH 평균 빈도(주 6회) 가정을 결합한 추정 지표입니다. 캠페인 종료 후 실측 보정 권장.
+              <p style={{ margin: "0 0 12px", fontSize: "11px", color: "#737373", lineHeight: 1.6, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                {`// `}실측 노출 데이터와 OOH 평균 빈도(주 6회) 가정을 결합한 추정 지표입니다. 캠페인 종료 후 실측 보정 권장.
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
-                <div style={{ background: "linear-gradient(135deg, #fef3c7, #fde68a)", borderRadius: "12px", padding: "14px", border: "1px solid #fcd34d" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#92400e", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>코어 도달률</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#92400e" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 코어 도달률 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.reachCorePct}<span style={{ fontSize: "12px", marginLeft: "1px" }}>%</span>
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#92400e", opacity: 0.85 }}>전국 5천만 인구 기준</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}전국 5천만 기준</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>확장 도달률</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 확장 도달률 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.reachExtendedPct}<span style={{ fontSize: "12px", marginLeft: "1px" }}>%</span>
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>SNS·온라인 부가 도달 포함</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}SNS·온라인 부가 도달</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>평균 빈도</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 평균 빈도 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.avgFrequency}<span style={{ fontSize: "12px", marginLeft: "1px" }}>회/주</span>
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>OOH 평균 노출 빈도</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}OOH 평균 노출 빈도</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>일평균 노출</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 일평균 노출 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.dailyImpressionsAvg > 0
                       ? `${(plannerKpis.dailyImpressionsAvg / 10000).toFixed(1)}만`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>예상 일일 노출 합산</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}예상 일일 노출 합산</p>
                 </div>
-                <div style={{ background: "#0d1b2e", borderRadius: "12px", padding: "14px", border: "1px solid #0d1b2e" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#c8913c", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Blended CPM</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#ffffff" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#000000", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#FF6600", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ BLENDED CPM ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.blendedCpm != null
                       ? `₩${plannerKpis.blendedCpm.toLocaleString()}`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "rgba(255,255,255,0.55)" }}>1,000회 노출 단가</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "rgba(255,255,255,0.55)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}1,000회 노출 단가</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>도달인 추정</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 도달인 추정 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.reach > 0
                       ? `${(plannerKpis.reach / 10000).toFixed(1)}만`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>총 노출 ÷ 빈도</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}총 노출 ÷ 빈도</p>
                 </div>
-                <div style={{ background: "#ffffff", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>총 추정 노출</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#0d1b2e" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 총 추정 노출 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.totalImp > 0
                       ? `${(plannerKpis.totalImp / 10000).toLocaleString()}만`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#94a3b8" }}>실측+추정 합산</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}실측+추정 합산</p>
                 </div>
-                <div style={{ background: "#fff7ed", borderRadius: "12px", padding: "14px", border: "1px solid #fed7aa" }}>
-                  <p style={{ margin: 0, fontSize: "10px", color: "#9a3412", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>ROI 효율</p>
-                  <p style={{ margin: "2px 0 0", fontSize: "22px", fontWeight: 800, color: "#9a3412" }}>
+                <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#000000", border: "2px solid #000000", padding: "16px" }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: "#FF6600", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ ROI 효율 ]</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "22px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                     {plannerKpis.roiExpected != null
                       ? `${(plannerKpis.roiExpected / 10000).toFixed(0)}만`
                       : "—"}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "9px", color: "#9a3412", opacity: 0.85 }}>1억당 노출 환산</p>
+                  <p style={{ margin: "4px 0 0", fontSize: "10px", color: "rgba(255,255,255,0.55)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}1억당 노출 환산</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* 노출 패턴 — 시간대 · 요일 · 월별 (매체 상세와 동일 데이터 소스) */}
+          {/* 집행 매체 — brutalist */}
           {data.mediaBookings && data.mediaBookings.length > 0 && (
-            <CampaignTrafficSection bookings={data.mediaBookings} />
-          )}
-
-          {/* 매체별 효율 표 (CPM 비교) */}
-          {mediaEfficiency && mediaEfficiency.length > 0 && (
             <div style={{ marginBottom: "32px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                💡 매체별 효율 분석
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ 집행 매체 상세 ]
               </h2>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px", border: "2px solid #000000" }}>
                 <thead>
-                  <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                    {["매체", "유형", "기간", "일유동", "추정 CPM"].map((h) => (
-                      <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                        {h}
+                  <tr style={{ background: "#000000", color: "#FF6600" }}>
+                    {["매체명", "유형", "지역", "위치", "집행 기간", "일 유동", "가시성", "상태"].map((h, hi) => (
+                      <th
+                        key={h}
+                        style={{
+                          padding: "8px 8px",
+                          textAlign: "left",
+                          fontWeight: 700,
+                          fontSize: "9px",
+                          color: "#FF6600",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.12em",
+                          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                          borderRight: hi < 7 ? "2px solid #ffffff" : undefined,
+                        }}
+                      >
+                        [ {h} ]
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {mediaEfficiency.map((m, i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", background: i % 2 === 0 ? "#ffffff" : "#fafbff" }}>
-                      <td style={{ padding: "10px 12px", fontWeight: 600, color: "#0d1b2e" }}>{m.name}</td>
-                      <td style={{ padding: "10px 12px", color: "#475569" }}>{m.type ?? "—"}</td>
-                      <td style={{ padding: "10px 12px", color: "#475569" }}>{m.days}일</td>
-                      <td style={{ padding: "10px 12px", color: "#0d1b2e", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-                        {m.dailyFootTraffic > 0 ? `${m.dailyFootTraffic.toLocaleString()}명` : "—"}
-                      </td>
-                      <td style={{ padding: "10px 12px", color: "#c8913c", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-                        {m.cpm != null ? `₩${m.cpm.toLocaleString()}` : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p style={{ margin: "8px 0 0", fontSize: "9px", color: "#94a3b8", textAlign: "right" }}>
-                * 매체별 비용은 일수 비율로 안분 추정. 정확한 단가는 견적서 참고.
-              </p>
-            </div>
-          )}
-
-          {/* 유형 / 지역 분포 */}
-          {distribution && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "28px" }}>
-              <div>
-                <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 10px" }}>
-                  📊 유형 분포
-                </h2>
-                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  {distribution.types.map(([label, count]) => {
-                    const total = stats?.mediaCount ?? 0;
-                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                    return (
-                      <div key={label} style={{ background: "#f8faff", borderRadius: "8px", padding: "8px 12px", border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#0d1b2e" }}>{label}</span>
-                          <span style={{ fontSize: "11px", color: "#64748b" }}>{count}개 · {pct}%</span>
-                        </div>
-                        <div style={{ height: "4px", background: "#e2e8f0", borderRadius: "2px", overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: `${pct}%`, background: "#c8913c" }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div>
-                <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 10px" }}>
-                  🗺️ 지역 분포
-                </h2>
-                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  {distribution.regions.map(([label, count]) => {
-                    const total = stats?.mediaCount ?? 0;
-                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                    return (
-                      <div key={label} style={{ background: "#f8faff", borderRadius: "8px", padding: "8px 12px", border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#0d1b2e" }}>{label}</span>
-                          <span style={{ fontSize: "11px", color: "#64748b" }}>{count}개 · {pct}%</span>
-                        </div>
-                        <div style={{ height: "4px", background: "#e2e8f0", borderRadius: "2px", overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: `${pct}%`, background: "#0d1b2e" }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 집행 매체 */}
-          {data.mediaBookings && data.mediaBookings.length > 0 && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                📍 집행 매체 상세
-              </h2>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
-                <thead>
-                  <tr style={{ background: "#0d1b2e", color: "#ffffff" }}>
-                    {["매체명", "위치", "집행 기간", "일 유동인구", "상태"].map(h => (
-                      <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 600, fontSize: "11px" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
                   {data.mediaBookings.map((b, i) => (
-                    <tr key={i} style={{ background: i % 2 === 0 ? "#ffffff" : "#f8faff", borderBottom: "1px solid #e2e8f0" }}>
-                      <td style={{ padding: "10px 12px", fontWeight: 600, color: "#0d1b2e" }}>{b.mediaName}</td>
-                      <td style={{ padding: "10px 12px", color: "#475569" }}>{b.location}</td>
-                      <td style={{ padding: "10px 12px", color: "#475569", fontSize: "11px" }}>
+                    <tr key={i} style={{ background: i % 2 === 0 ? "#ffffff" : "#f5f5f5", borderBottom: "2px solid #000000" }}>
+                      <td style={{ padding: "8px 8px", fontWeight: 700, color: "#000000", maxWidth: "120px" }}>{b.mediaName}</td>
+                      <td style={{ padding: "8px 8px", color: "#000000", fontSize: "10px" }}>{b.type ?? "—"}</td>
+                      <td style={{ padding: "8px 8px", color: "#000000", fontSize: "10px" }}>{b.region ?? "—"}</td>
+                      <td style={{ padding: "8px 8px", color: "#000000", fontSize: "10px" }}>{b.location}</td>
+                      <td style={{ padding: "8px 8px", color: "#000000", fontSize: "10px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
                         {fmtDate(b.startsAt)} ~ {fmtDate(b.endsAt)}
-                        <span style={{ color: "#94a3b8", marginLeft: "4px" }}>({diffDays(b.startsAt, b.endsAt)}일)</span>
+                        <span style={{ color: "#737373", marginLeft: "2px" }}>({diffDays(b.startsAt, b.endsAt)}일)</span>
                       </td>
-                      <td style={{ padding: "10px 12px", color: "#0d1b2e", fontWeight: 600 }}>
-                        {b.dailyFootTraffic ? `${b.dailyFootTraffic.toLocaleString()}명` : "—"}
+                      <td style={{ padding: "8px 8px", color: "#000000", fontWeight: 600, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums", fontSize: "10px" }}>
+                        {b.dailyFootTraffic ? `${b.dailyFootTraffic.toLocaleString()}` : "—"}
                       </td>
-                      <td style={{ padding: "10px 12px" }}>
-                        <span style={{ background: "#ecfdf5", color: "#065f46", borderRadius: "20px", padding: "2px 10px", fontSize: "10px", fontWeight: 700 }}>
+                      <td style={{ padding: "8px 8px", color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums", fontSize: "10px" }}>
+                        {b.visibilityScore != null && b.visibilityScore > 0 ? `${b.visibilityScore} / 4` : "—"}
+                      </td>
+                      <td style={{ padding: "8px 6px" }}>
+                        <span style={{ background: "#FF6600", color: "#ffffff", padding: "2px 6px", fontSize: "9px", fontWeight: 700, border: "2px solid #FF6600", letterSpacing: "0.1em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
                           {b.status}
                         </span>
                       </td>
@@ -576,76 +1218,87 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
                   ))}
                 </tbody>
               </table>
+              <p style={{ margin: "8px 0 0", fontSize: "10px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                {`// `}가시성은 매체 DB 점수(0~4) 기준. 유형·지역은 Media 메타이며, PDF 본문 표와 동일 맥락입니다.
+              </p>
             </div>
           )}
 
-          {/* 게재 사진 */}
-          {data.proofPhotos && data.proofPhotos.length > 0 && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                📸 게재 증빙 사진
-              </h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
-                {data.proofPhotos.slice(0, 9).map((p, i) => (
-                  <div key={i} style={{ borderRadius: "10px", overflow: "hidden", border: "1px solid #e2e8f0" }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.imageUrl} alt={p.caption ?? ""} crossOrigin="anonymous"
-                      style={{ width: "100%", height: "160px", objectFit: "cover", display: "block" }} />
-                    {p.caption && (
-                      <p style={{ margin: 0, padding: "6px 10px", fontSize: "10px", color: "#64748b", background: "#f8faff" }}>{p.caption}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 진행 일정 */}
+          {/* 진행 일정 — brutalist */}
           {data.scheduleEvents && data.scheduleEvents.length > 0 && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                📅 진행 일정
+            <div style={{ marginBottom: "32px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ 진행 일정 ]
               </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
                 {data.scheduleEvents.map((e, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", background: "#f8faff", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#c8913c", flexShrink: 0 }} />
-                    <span style={{ flex: 1, fontSize: "12px", fontWeight: 600, color: "#0d1b2e" }}>{e.title}</span>
-                    <span style={{ fontSize: "11px", color: "#94a3b8" }}>{fmtDate(e.startsAt)}</span>
+                  <div
+                    key={i}
+                    style={{
+                      marginTop: "-2px",
+                      padding: "10px 14px",
+                      background: "#ffffff",
+                      border: "2px solid #000000",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                      <div style={{ width: "8px", height: "8px", background: "#FF6600", flexShrink: 0, marginTop: "4px" }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px" }}>
+                          <span style={{ fontSize: "12px", fontWeight: 700, color: "#000000" }}>{e.title}</span>
+                          <span
+                            style={{
+                              background: "#000000",
+                              color: "#FF6600",
+                              padding: "2px 8px",
+                              fontSize: "9px",
+                              fontWeight: 700,
+                              letterSpacing: "0.12em",
+                              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                            }}
+                          >
+                            {scheduleKindKo(e.kind || "—")}
+                          </span>
+                        </div>
+                        <p style={{ margin: "6px 0 0", fontSize: "11px", color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
+                          {fmtDate(e.startsAt)} — {fmtDate(e.endsAt)}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* 비용 내역 */}
+          {/* 비용 내역 — brutalist */}
           {data.financialDocs && data.financialDocs.length > 0 && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                💰 비용 내역
+            <div style={{ marginBottom: "32px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ 비용 내역 ]
               </h2>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", border: "2px solid #000000" }}>
                 <thead>
-                  <tr style={{ background: "#f1f5f9" }}>
+                  <tr style={{ background: "#000000" }}>
                     {["구분", "항목", "금액", "상태"].map(h => (
-                      <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#475569" }}>{h}</th>
+                      <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: "10px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", borderRight: "2px solid #ffffff" }}>[ {h} ]</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {data.financialDocs.map((f, i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #e2e8f0", background: i % 2 === 0 ? "#ffffff" : "#f8faff" }}>
-                      <td style={{ padding: "8px 12px", color: "#64748b", fontSize: "11px" }}>{f.kind}</td>
-                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "#0d1b2e" }}>{f.title}</td>
-                      <td style={{ padding: "8px 12px", fontWeight: 700, color: "#0d1b2e" }}>{f.amountKrw ? fmtAmount(f.amountKrw) : "—"}</td>
-                      <td style={{ padding: "8px 12px", fontSize: "11px", color: "#64748b" }}>{f.status}</td>
+                    <tr key={i} style={{ borderBottom: "2px solid #000000", background: i % 2 === 0 ? "#ffffff" : "#f5f5f5" }}>
+                      <td style={{ padding: "10px 12px", color: "#737373", fontSize: "11px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{formatFinancialDocKindKo(f.kind)}</td>
+                      <td style={{ padding: "10px 12px", fontWeight: 700, color: "#000000" }}>{f.title}</td>
+                      <td style={{ padding: "10px 12px", fontWeight: 700, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>{f.amountKrw ? fmtAmount(f.amountKrw) : "—"}</td>
+                      <td style={{ padding: "10px 12px", fontSize: "11px", color: "#737373" }}>{formatFinancialDocStatusKo(f.status)}</td>
                     </tr>
                   ))}
                   {totalAmount > 0 && (
-                    <tr style={{ background: "#0d1b2e" }}>
-                      <td colSpan={2} style={{ padding: "10px 12px", color: "#c8913c", fontWeight: 700, fontSize: "12px" }}>합계</td>
-                      <td style={{ padding: "10px 12px", color: "#ffffff", fontWeight: 800, fontSize: "14px" }}>{fmtAmount(totalAmount)}</td>
-                      <td style={{ padding: "10px 12px" }} />
+                    <tr style={{ background: "#000000" }}>
+                      <td colSpan={2} style={{ padding: "12px 12px", color: "#FF6600", fontWeight: 700, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 합계 ]</td>
+                      <td style={{ padding: "12px 12px", color: "#FF6600", fontWeight: 800, fontSize: "16px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>{fmtAmount(totalAmount)}</td>
+                      <td style={{ padding: "12px 12px" }} />
                     </tr>
                   )}
                 </tbody>
@@ -653,75 +1306,58 @@ export default function CampaignReportPreview({ data }: { data: CampaignReportDa
             </div>
           )}
 
-          {/* 특이사항 */}
-          {data.notes && (
-            <div style={{ marginBottom: "28px" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 12px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
-                📝 특이사항
+          {/* 게재 증빙 사진 — 일정·비용 뒤에 배치 (사실 → 증빙 흐름) */}
+          {data.proofPhotos && data.proofPhotos.length > 0 && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ 게재 증빙 사진 ]
               </h2>
-              <p style={{ background: "#f8faff", borderRadius: "8px", padding: "14px 16px", fontSize: "12px", color: "#334155", margin: 0, whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
+                {data.proofPhotos.slice(0, 9).map((p, i) => (
+                  <div key={i} style={{ marginTop: "-2px", marginLeft: "-2px", overflow: "hidden", border: "2px solid #000000", background: "#ffffff" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.imageUrl} alt={p.caption ?? ""} crossOrigin="anonymous"
+                      style={{ width: "100%", height: "160px", objectFit: "cover", display: "block" }} />
+                    {p.caption && (
+                      <p style={{ margin: 0, padding: "8px 10px", fontSize: "10px", color: "#000000", background: "#f5f5f5", borderTop: "2px solid #000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}{p.caption}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 특이사항 — brutalist */}
+          {data.notes && (
+            <div style={{ marginBottom: "32px" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                [ 특이사항 ]
+              </h2>
+              <p style={{ background: "#f5f5f5", border: "2px solid #000000", padding: "16px 18px", fontSize: "12px", color: "#000000", margin: 0, whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
                 {data.notes}
               </p>
             </div>
           )}
 
-          {/* 핵심 인사이트 (Planner 스타일) */}
-          {plannerKpis && stats && (
-            <div style={{
-              marginBottom: "28px",
-              background: "linear-gradient(135deg, rgba(200,145,60,0.08), rgba(13,27,46,0.04))",
-              borderRadius: "14px",
-              border: "1px solid rgba(200,145,60,0.25)",
-              padding: "20px 24px",
-            }}>
-              <h2 style={{ fontSize: "12px", fontWeight: 700, color: "#0d1b2e", margin: "0 0 14px", display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ background: "#c8913c", color: "#0d1b2e", borderRadius: "6px", padding: "2px 8px", fontSize: "10px", fontWeight: 800 }}>KEY INSIGHT</span>
-                캠페인 종합 평가
-              </h2>
-              <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <li style={{ fontSize: "12px", color: "#0d1b2e", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                  <span style={{ position: "absolute", left: 0, color: "#c8913c", fontWeight: 800 }}>·</span>
-                  총 <strong>{stats.mediaCount}개 매체</strong>를 <strong>{stats.totalDays}일간</strong> 집행하여 <strong>{(plannerKpis.totalImp / 10000).toLocaleString()}만회</strong>의 노출이 발생할 것으로 추정됩니다.
-                </li>
-                <li style={{ fontSize: "12px", color: "#0d1b2e", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                  <span style={{ position: "absolute", left: 0, color: "#c8913c", fontWeight: 800 }}>·</span>
-                  <strong>코어 도달률 {plannerKpis.reachCorePct}%</strong>로 약 <strong>{(plannerKpis.reach / 10000).toFixed(1)}만 명</strong>의 잠재 고객에게 메시지가 전달될 것으로 보입니다.
-                </li>
-                {plannerKpis.blendedCpm != null && (
-                  <li style={{ fontSize: "12px", color: "#0d1b2e", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                    <span style={{ position: "absolute", left: 0, color: "#c8913c", fontWeight: 800 }}>·</span>
-                    Blended CPM은 <strong>₩{plannerKpis.blendedCpm.toLocaleString()}</strong>로 OOH 평균 대비 {plannerKpis.blendedCpm < 8000 ? "효율적인" : plannerKpis.blendedCpm < 15000 ? "양호한" : "프리미엄"} 수준입니다.
-                  </li>
-                )}
-                {avgVisibility != null && (
-                  <li style={{ fontSize: "12px", color: "#0d1b2e", lineHeight: 1.65, paddingLeft: "20px", position: "relative" }}>
-                    <span style={{ position: "absolute", left: 0, color: "#c8913c", fontWeight: 800 }}>·</span>
-                    평균 매체 검증 점수 <strong>{avgVisibility} / 4</strong>로 가시성·노출 품질이 검증된 우수 매체 위주로 구성되었습니다.
-                  </li>
-                )}
-                <li style={{ fontSize: "11px", color: "#64748b", lineHeight: 1.6, paddingLeft: "20px", position: "relative", marginTop: "4px" }}>
-                  <span style={{ position: "absolute", left: 0, color: "#94a3b8" }}>※</span>
-                  본 추정치는 OOH 평균 빈도·인지율을 기반으로 한 가이드 지표이며, 실제 효과는 집행 현장·시기에 따라 달라질 수 있습니다.
-                </li>
-              </ul>
-            </div>
-          )}
+          {/* (규칙) 평가/인사이트 자동 생성 섹션 제거 */}
 
-          {/* 푸터 */}
-          <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          {/* 푸터 — brutalist */}
+          <div style={{ borderTop: "2px solid #000000", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
             <div>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: "#0d1b2e", margin: "0 0 2px" }}>주식회사 싱커드 (THINKAD)</p>
-              <p style={{ fontSize: "10px", color: "#94a3b8", margin: 0 }}>mannote@tkad.co.kr · 02-515-2772 · 서울특별시 성동구</p>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: "#000000", margin: "0 0 4px", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ THINKAD · 싱커드 ]</p>
+              <p style={{ fontSize: "10px", color: "#737373", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}mannote@tkad.co.kr · 02-515-2772 · 서울특별시 성동구</p>
             </div>
-            <p style={{ fontSize: "10px", color: "#cbd5e1", margin: 0 }}>© 2026 THINKAD. All rights reserved.</p>
+            <p style={{ fontSize: "10px", color: "#737373", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}© 2026 THINKAD. All rights reserved.</p>
           </div>
 
         </div>
       </div>
-    </div>
   );
-}
+});
 
+CampaignReportPreview.displayName = "CampaignReportPreview";
+
+export default CampaignReportPreview;
 
 const CAMP_HOUR_LABELS = ["0", "3", "6", "9", "12", "15", "18", "21"];
 const CAMP_WEEKDAY_KO = ["월", "화", "수", "목", "금", "토", "일"];
@@ -753,18 +1389,20 @@ function CampaignTrafficSection({
 
   return (
     <div style={{ marginBottom: "32px" }}>
-      <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 6px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <span>📊 노출 패턴 (시간대 · 요일 · 월별)</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "0 0 12px" }}>
+        <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+          [ 노출 패턴 (시간대 · 요일 · 월별) ]
+        </h2>
         {!agg.allReal && (
-          <span style={{ background: "#fef3c7", color: "#92400e", borderRadius: "999px", padding: "2px 8px", fontSize: "10px", fontWeight: 700, textTransform: "none", letterSpacing: 0 }}>
-            일부 추정치
+          <span style={{ background: "#FF6600", color: "#ffffff", padding: "3px 10px", fontSize: "10px", fontWeight: 700, border: "2px solid #FF6600", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+            [ 일부 추정 ]
           </span>
         )}
-      </h2>
-      <p style={{ margin: "0 0 12px", fontSize: "11px", color: "#64748b", lineHeight: 1.6 }}>
-        매체 상세의 일유동 데이터(또는 매체유형·지역 기반 추정)를 가중평균한 캠페인 전체의 노출 패턴.
+      </div>
+      <p style={{ margin: "0 0 12px", fontSize: "11px", color: "#737373", lineHeight: 1.6, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+        {`// `}매체 상세의 일유동 데이터(또는 매체유형·지역 기반 추정)를 가중평균한 캠페인 전체의 노출 패턴.
       </p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
         <CampaignTrafficBlock
           title="시간대 (24h)"
           values={agg.hourly}
@@ -806,10 +1444,10 @@ function CampaignTrafficBlock({
 }) {
   const max = Math.max(...values, 0.0001);
   return (
-    <div style={{ background: "#ffffff", borderRadius: "10px", padding: "10px 12px", border: "1px solid #e2e8f0" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
-        <p style={{ margin: 0, fontSize: "11px", fontWeight: 700, color: "#0d1b2e" }}>{title}</p>
-        <span style={{ background: "rgba(200,145,60,0.15)", color: "#7e5818", borderRadius: "999px", padding: "1px 8px", fontSize: "10px", fontWeight: 700 }}>
+    <div style={{ marginTop: "-2px", marginLeft: "-2px", background: "#ffffff", padding: "12px 14px", border: "2px solid #000000" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
+        <p style={{ margin: 0, fontSize: "10px", fontWeight: 700, color: "#000000", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ {title} ]</p>
+        <span style={{ background: "#000000", color: "#FF6600", padding: "2px 8px", fontSize: "9px", fontWeight: 700, border: "2px solid #000000", letterSpacing: "0.18em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
           {peakLabel}
         </span>
       </div>
@@ -819,14 +1457,14 @@ function CampaignTrafficBlock({
           const isPeak = i === peakIdx;
           return (
             <div key={i} style={{ flex: 1, height: `${Math.max(2, h)}%`, position: "relative" }}>
-              <div style={{ position: "absolute", inset: 0, borderRadius: "2px", background: isPeak ? "#c8913c" : "rgba(13,27,46,0.35)" }} />
+              <div style={{ position: "absolute", inset: 0, background: isPeak ? "#FF6600" : "#000000" }} />
             </div>
           );
         })}
       </div>
-      <div style={{ display: "flex", height: "12px", marginTop: "2px", gap: "2px" }}>
+      <div style={{ display: "flex", height: "12px", marginTop: "4px", gap: "2px" }}>
         {labels.map((label, i) => (
-          <div key={i} style={{ flex: 1, textAlign: "center", fontSize: "8px", fontWeight: 500, color: "#94a3b8" }}>{label}</div>
+          <div key={i} style={{ flex: 1, textAlign: "center", fontSize: "8px", fontWeight: 500, color: "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{label}</div>
         ))}
       </div>
     </div>

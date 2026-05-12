@@ -106,6 +106,45 @@ function logFontLoadFailure(candidates: string[]) {
   });
 }
 
+const SERVER_FONT_URLS = [
+  // Pretendard regular (TTF, glyf-based) — jsPDF v4 compatible
+  "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/alternative/Pretendard-Regular.ttf",
+  "https://raw.githubusercontent.com/orioncactus/pretendard/v1.3.9/packages/pretendard/dist/public/static/alternative/Pretendard-Regular.ttf",
+] as const;
+
+let cachedServerTtf: Buffer | null = null;
+
+function isValidTtf(buf: Buffer): boolean {
+  // TrueType sfnt magic: 00 01 00 00
+  return (
+    buf.length > 10_000 &&
+    buf[0] === 0x00 &&
+    buf[1] === 0x01 &&
+    buf[2] === 0x00 &&
+    buf[3] === 0x00
+  );
+}
+
+async function fetchServerTtf(): Promise<Buffer | null> {
+  if (cachedServerTtf) return cachedServerTtf;
+  for (const url of SERVER_FONT_URLS) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 3000);
+      const res = await fetch(url, { redirect: "follow", signal: ctrl.signal });
+      clearTimeout(t);
+      if (!res.ok) continue;
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (!isValidTtf(buf)) continue;
+      cachedServerTtf = buf;
+      return buf;
+    } catch {
+      // try next
+    }
+  }
+  return null;
+}
+
 /** Attach pre-read font bytes (Node Buffer). `vfsFileName` must match basename on disk. */
 export function attachNotoSansKrBuffer(
   doc: jsPDF,
@@ -191,3 +230,15 @@ export function registerNotoSansKrIfAvailable(doc: jsPDF): boolean {
 }
 
 export { krFontFamily } from "@/lib/jspdf-kr-font-constants";
+
+/**
+ * Server PDF helpers can use this to guarantee KR glyphs in Vercel,
+ * even when `public/fonts` isn't present in the runtime bundle.
+ */
+export async function ensureKrFontForServerPdf(doc: jsPDF): Promise<boolean> {
+  if (registerNotoSansKrIfAvailable(doc)) return true;
+  const buf = await fetchServerTtf();
+  if (!buf) return false;
+  // Stable VFS name (must be treated as TTF)
+  return attachNotoSansKrBuffer(doc, buf, "Pretendard-Regular.ttf");
+}

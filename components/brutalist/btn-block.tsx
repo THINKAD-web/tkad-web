@@ -21,12 +21,13 @@ export type BtnBlockSize = "sm" | "md" | "lg";
 
 const variantClass: Record<BtnBlockVariant, string> = {
   primary:
-    "bg-bx-black text-bx-white border-bx-black hover:bg-bx-accent hover:border-bx-accent",
+    "bg-hero-void text-hero-fg border-border hover:bg-accent hover:border-accent hover:text-white",
   secondary:
-    "bg-bx-white text-bx-black border-bx-black hover:bg-bx-black hover:text-bx-white",
-  dark: "bg-bx-black text-bx-white border-bx-black hover:bg-bx-gray-dim hover:border-bx-gray-dim",
+    "bg-card text-foreground border-border hover:bg-foreground hover:text-background",
+  dark: "bg-hero-void text-hero-fg border-border hover:bg-muted hover:border-border",
+  /* accent: 주황 배경은 라이트/다크 모두 동일 (브랜드 색). 텍스트는 항상 흰색 유지. */
   accent:
-    "bg-bx-accent text-bx-white border-bx-accent hover:bg-bx-black hover:border-bx-black",
+    "bg-accent text-white border-accent hover:bg-foreground hover:border-border hover:text-background hover:shadow-[0_0_32px_rgba(255,98,0,0.4)] active:scale-[0.98]",
 };
 
 const sizeClass: Record<BtnBlockSize, string> = {
@@ -40,6 +41,9 @@ type BaseProps = {
   size?: BtnBlockSize;
   className?: string;
   children: ReactNode;
+  /** 툴팁(비활성 버튼 안내 등) — button / Link 모두 전달 */
+  title?: string;
+  "aria-label"?: string;
 };
 
 type LinkProps = BaseProps & {
@@ -62,6 +66,8 @@ export function BtnBlock(props: LinkProps | ButtonProps) {
     size = "md",
     className,
     children,
+    title,
+    "aria-label": ariaLabel,
   } = props;
   const cls = cn(
     "inline-flex items-center justify-center gap-2 border-2 font-mono font-bold uppercase tracking-[0.18em] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed",
@@ -72,7 +78,12 @@ export function BtnBlock(props: LinkProps | ButtonProps) {
 
   if (props.href !== undefined) {
     return (
-      <Link href={props.href} className={cls}>
+      <Link
+        href={props.href}
+        className={cls}
+        title={title}
+        aria-label={ariaLabel}
+      >
         {children}
       </Link>
     );
@@ -83,6 +94,8 @@ export function BtnBlock(props: LinkProps | ButtonProps) {
       onClick={props.onClick}
       disabled={props.disabled}
       className={cls}
+      title={title}
+      aria-label={ariaLabel}
     >
       {children}
     </button>

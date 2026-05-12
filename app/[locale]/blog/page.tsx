@@ -3,10 +3,6 @@
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   ArrowLeft,
   Calendar,
@@ -15,6 +11,7 @@ import {
   Sparkles,
   Tag,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type BlogCategoryKey = "trend" | "case" | "news";
 
@@ -36,8 +33,7 @@ const posts: BlogPost[] = [
     slug: "2025-ooh-trend-report",
     category: "trend",
     date: "2025-01-15",
-    thumbnailColor:
-      "from-gold/20 via-gold/10 to-navy/20 bg-gradient-to-br border-gold/40",
+    thumbnailColor: "bg-accent",
     titleKo: "2025 OOH 광고 트렌드 리포트",
     titleEn: "2025 OOH Advertising Trend Report",
     summaryKo:
@@ -50,8 +46,7 @@ const posts: BlogPost[] = [
     slug: "gangnam-landmark-case-study",
     category: "case",
     date: "2024-11-03",
-    thumbnailColor:
-      "from-navy/80 via-navy/60 to-navy/90 bg-gradient-to-br border-navy/40",
+    thumbnailColor: "bg-hero-void",
     titleKo: "강남 랜드마크 빌보드 캠페인 사례",
     titleEn: "Gangnam Landmark Billboard Campaign",
     summaryKo:
@@ -64,8 +59,7 @@ const posts: BlogPost[] = [
     slug: "coex-landmark-launch",
     category: "case",
     date: "2024-07-20",
-    thumbnailColor:
-      "from-purple-500/70 via-indigo-500/70 to-navy/80 bg-gradient-to-br border-purple-400/50",
+    thumbnailColor: "bg-hero-void",
     titleKo: "코엑스 랜드마크 런칭 캠페인",
     titleEn: "COEX Landmark Launch Campaign",
     summaryKo:
@@ -78,8 +72,7 @@ const posts: BlogPost[] = [
     slug: "thinkad-company-news-2025",
     category: "news",
     date: "2025-03-01",
-    thumbnailColor:
-      "from-emerald-500/20 via-emerald-400/10 to-white bg-gradient-to-br border-emerald-300/60",
+    thumbnailColor: "bg-muted",
     titleKo: "THINKAD, AI 기반 OOH 플랫폼 공식 런칭",
     titleEn: "THINKAD Officially Launches AI-Powered OOH Platform",
     summaryKo:
@@ -92,8 +85,7 @@ const posts: BlogPost[] = [
     slug: "ooh-media-checklist",
     category: "trend",
     date: "2024-04-10",
-    thumbnailColor:
-      "from-sky-500/30 via-sky-400/20 to-white bg-gradient-to-br border-sky-300/70",
+    thumbnailColor: "bg-accent",
     titleKo: "OOH 매체 선정 체크리스트",
     titleEn: "OOH Media Selection Checklist",
     summaryKo:
@@ -107,22 +99,10 @@ const categories: {
   key: BlogCategoryKey | "all";
   getLabel: (isKo: boolean) => string;
 }[] = [
-  {
-    key: "all",
-    getLabel: (isKo) => (isKo ? "전체" : "All"),
-  },
-  {
-    key: "trend",
-    getLabel: (isKo) => (isKo ? "OOH 트렌드" : "OOH Trends"),
-  },
-  {
-    key: "case",
-    getLabel: (isKo) => (isKo ? "성공사례" : "Case Studies"),
-  },
-  {
-    key: "news",
-    getLabel: (isKo) => (isKo ? "회사소식" : "Company News"),
-  },
+  { key: "all", getLabel: (isKo) => (isKo ? "전체" : "All") },
+  { key: "trend", getLabel: (isKo) => (isKo ? "OOH 트렌드" : "OOH Trends") },
+  { key: "case", getLabel: (isKo) => (isKo ? "성공사례" : "Case Studies") },
+  { key: "news", getLabel: (isKo) => (isKo ? "회사소식" : "Company News") },
 ];
 
 export default function BlogPage() {
@@ -149,46 +129,43 @@ export default function BlogPage() {
 
   return (
     <>
-      <section className="bg-navy py-28">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold tracking-wider text-gold uppercase">
-                {isKo ? "인사이트" : "Insights"}
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
+                {`// 17 / Blog`}
               </p>
-              <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
                 {isKo ? "OOH 블로그 & 인사이트" : "OOH Blog & Insights"}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm text-slate-300">
+              <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
                 {isKo
                   ? "OOH 트렌드, 성공사례, 회사소식을 한 곳에서 확인하세요."
                   : "Explore OOH trends, case studies, and company news in one place."}
               </p>
             </div>
             <div className="hidden sm:block">
-              <Link href="/">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full border-white/20 text-xs font-semibold text-slate-200 hover:bg-white/10"
-                >
-                  <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-                  {isKo ? "메인으로 돌아가기" : "Back to Home"}
-                </Button>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1 border-2 border-hero-fg bg-transparent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-hero-fg transition-colors hover:bg-card hover:text-foreground"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                {isKo ? "Home" : "Home"}
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-10">
+      <section className="bg-muted py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Filters */}
-          <div className="flex flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-2 border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-1 items-center gap-2">
               <div className="relative w-full max-w-md">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={
@@ -196,46 +173,45 @@ export default function BlogPage() {
                       ? "키워드로 검색 (예: 코엑스, 타임스퀘어)"
                       : "Search by keyword (e.g., COEX, Times Square)"
                   }
-                  className="h-10 rounded-full border-slate-200 pl-9 text-xs sm:text-sm"
+                  className="h-10 w-full border-2 border-border bg-card pl-9 pr-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 />
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+            <div className="flex flex-wrap items-center gap-0">
+              <span className="mr-2 flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
                 <Filter className="h-3.5 w-3.5" />
                 {t("common.filter")}
               </span>
               {categories.map((cat) => {
                 const isActive = selectedCategory === cat.key;
                 return (
-                  <Button
+                  <button
                     key={cat.key}
                     type="button"
-                    variant={isActive ? "default" : "outline"}
-                    size="sm"
-                    className={`h-8 rounded-full border ${
-                      isActive
-                        ? "border-gold bg-gold text-navy hover:bg-gold-dark hover:text-navy"
-                        : "border-slate-200 bg-white text-xs text-slate-700 hover:bg-slate-50"
-                    }`}
                     onClick={() =>
                       setSelectedCategory(cat.key as BlogCategoryKey | "all")
                     }
+                    className={cn(
+                      "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                      isActive
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border bg-card text-foreground hover:bg-muted",
+                    )}
                   >
                     {cat.getLabel(isKo)}
-                  </Button>
+                  </button>
                 );
               })}
             </div>
           </div>
 
           {/* Result count */}
-          <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
+          <div className="mt-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Tag className="h-3.5 w-3.5 text-gold" />
+              <Tag className="h-3.5 w-3.5 text-accent" />
               <span>
-                {isKo ? "검색 결과" : "Results"}:{" "}
-                <span className="font-semibold text-navy">
+                {`// `}{isKo ? "Results" : "Results"}:{" "}
+                <span className="font-bold text-accent">
                   {filteredPosts.length}
                 </span>
               </span>
@@ -243,7 +219,7 @@ export default function BlogPage() {
           </div>
 
           {/* Posts */}
-          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-0 md:grid-cols-2 lg:grid-cols-3">
             {filteredPosts.map((post) => {
               const title = isKo ? post.titleKo : post.titleEn;
               const summary = isKo ? post.summaryKo : post.summaryEn;
@@ -263,52 +239,54 @@ export default function BlogPage() {
                   });
 
               return (
-                <Card
+                <article
                   key={post.id}
-                  className="group flex h-full flex-col overflow-hidden border-0 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] rounded-2xl"
+                  className="group -mt-[2px] -ml-[2px] flex h-full flex-col overflow-hidden border-2 border-border bg-card"
                 >
                   <div
-                    className={`relative h-40 border-b ${post.thumbnailColor}`}
+                    className={cn(
+                      "relative h-40 border-b-2 border-border",
+                      post.thumbnailColor,
+                    )}
                   >
-                    <div className="absolute inset-0 opacity-60" />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Sparkles className="h-10 w-10 text-white/70 drop-shadow" />
+                      <Sparkles className={cn("h-10 w-10", post.thumbnailColor === "bg-muted" ? "text-accent" : "text-hero-fg")} />
                     </div>
-                    <div className="absolute left-4 top-4 flex items-center gap-2">
+                    <div className="absolute left-3 top-3 flex items-center gap-2">
                       {categoryLabel && (
-                        <Badge className="bg-black/40 text-xs font-semibold text-white backdrop-blur">
-                          {categoryLabel}
-                        </Badge>
+                        <span className="border-2 border-hero-fg bg-hero-void px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hero-fg">
+                          [ {categoryLabel} ]
+                        </span>
                       )}
                     </div>
-                    <div className="absolute bottom-3 left-4 flex items-center gap-2 text-[11px] font-medium text-white/80">
+                    <div className="absolute bottom-3 left-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg">
                       <Calendar className="h-3.5 w-3.5" />
                       <span>{formattedDate}</span>
                     </div>
                   </div>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold text-navy sm:text-base">
+                  <header className="border-b-2 border-border p-4">
+                    <h3 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
                       {title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-1 flex-col">
-                    <p className="text-xs leading-relaxed text-slate-600 sm:text-sm">
+                    </h3>
+                  </header>
+                  <div className="flex flex-1 flex-col p-4">
+                    <p className="font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
                       {summary}
                     </p>
-                    <div className="mt-4 flex items-center justify-between text-[11px] font-semibold text-gold group-hover:text-gold-dark">
+                    <div className="mt-4 flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent group-hover:text-foreground">
                       <span>
-                        {isKo ? "자세히 보기 (준비 중)" : "Read more (coming soon)"}
+                        {isKo ? "Read more →" : "Read more →"}
                       </span>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </article>
               );
             })}
           </div>
 
           {filteredPosts.length === 0 && (
-            <div className="mt-10 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
-              {isKo
+            <div className="mt-10 border-2 border-border bg-card px-6 py-10 text-center font-mono text-sm text-muted-foreground">
+              {`// `}{isKo
                 ? "검색 조건에 맞는 인사이트가 없습니다. 다른 키워드나 카테고리로 다시 시도해보세요."
                 : "No insights match your filters. Try a different keyword or category."}
             </div>
@@ -318,4 +296,3 @@ export default function BlogPage() {
     </>
   );
 }
-

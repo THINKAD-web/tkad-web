@@ -1,57 +1,59 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+
+const defaultToggleClass =
+  "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card/70 text-foreground shadow-sm backdrop-blur transition-all duration-300 hover:bg-card hover:shadow-[0_18px_60px_rgba(0,0,0,0.16)] dark:border-white/14 dark:bg-black/30 dark:text-white/85 dark:hover:bg-black/40 dark:hover:shadow-[0_22px_70px_rgba(0,0,0,0.55)]";
 
 /**
- * Light / Dark / System 3-way 토글 — 한 번 클릭마다 system → light → dark 순으로 순회.
- *
- * 하이드레이션 전에는 스켈레톤(비어있는 원) 만 렌더해 theme 값 차이로 인한 FOUC 방지.
+ * Light / Dark 토글. next-themes 의 resolvedTheme 는 SSR 과 첫 클라이언트 틱에서
+ * 불일치할 수 있어, 마운트 전에는 동일한 박스 placeholder 만 렌더 → hydration 안전.
  */
 export function ThemeToggle({ className }: { className?: string }) {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const cycle = () => {
-    const next =
-      theme === "system" ? "light" : theme === "light" ? "dark" : "system";
-    setTheme(next);
+  const cls = cn(defaultToggleClass, className);
+
+  if (!mounted) {
+    return (
+      <span
+        className={cls}
+        aria-hidden
+        data-tkad-theme-toggle-placeholder
+      />
+    );
+  }
+
+  const isDark = resolvedTheme === "dark";
+  const toggle = () => {
+    setTheme(isDark ? "light" : "dark");
   };
 
-  const label =
-    theme === "system"
-      ? "시스템 설정"
-      : theme === "dark"
-        ? "다크 모드"
-        : "라이트 모드";
-
-  const ariaLabel = mounted ? `테마: ${label}, 다음으로 전환` : "테마 전환";
+  const label = isDark ? "라이트 모드로 전환" : "다크 모드로 전환";
 
   return (
     <button
       type="button"
-      onClick={cycle}
-      aria-label={ariaLabel}
-      title={mounted ? label : undefined}
-      className={
-        className ??
-        "inline-flex h-9 w-9 items-center justify-center rounded-full border border-primary/14 bg-white/88 text-primary/70 transition-all duration-300 hover:border-silver/55 hover:bg-white hover:text-primary dark:bg-card dark:border-border dark:text-foreground/80 dark:hover:bg-secondary/60"
-      }
+      onClick={toggle}
+      aria-label={label}
+      title={label}
+      className={cls}
     >
-      {!mounted ? (
-        <span className="block h-4 w-4 rounded-full bg-current opacity-20" />
-      ) : theme === "system" ? (
-        <Monitor className="h-4 w-4" />
-      ) : resolvedTheme === "dark" ? (
-        <Moon className="h-4 w-4" />
-      ) : (
-        <Sun className="h-4 w-4" />
-      )}
+      <span className="flex h-4 w-4 items-center justify-center" aria-hidden>
+        {isDark ? (
+          <Moon className="h-4 w-4" />
+        ) : (
+          <Sun className="h-4 w-4" />
+        )}
+      </span>
     </button>
   );
 }

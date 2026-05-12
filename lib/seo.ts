@@ -18,11 +18,26 @@ export function defaultOgImages(
   ];
 }
 
-export const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  process.env.SITE_URL ??
-  "https://tkad.co.kr"
-).replace(/\/$/, "");
+/**
+ * 절대 URL(OG, sitemap, JSON-LD, canonical)의 기준.
+ * - 운영: Vercel에 `NEXT_PUBLIC_SITE_URL`(권장) 또는 `SITE_URL` = **실제 도메인** (예: https://example.com)
+ * - 미설정 + Vercel 프리뷰: `VERCEL_URL` 기준 https://… (프리뷰용)
+ * - 로컬/폴백: tkad.co.kr
+ */
+function resolvePublicSiteUrl(): string {
+  const explicit =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.SITE_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+  const vercel = process.env.VERCEL_URL?.trim();
+  if (vercel) {
+    const host = vercel.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    return `https://${host}`;
+  }
+  return "https://tkad.co.kr";
+}
+
+export const siteUrl = resolvePublicSiteUrl();
 
 /** Public path segments (no leading locale). Home is "". */
 export const publicSeoPaths = [
@@ -47,6 +62,8 @@ export const publicSeoPaths = [
   "/blog",
   "/news",
   "/planner",
+  "/glossary",
+  "/guides",
 ] as const;
 
 export function absoluteUrl(path: string): string {

@@ -9,6 +9,8 @@ type Props = {
   /** 접근성: 스크린 리더용 영역 이름 */
   ariaLabel: string;
   children: ReactNode;
+  /** 하단 바 래퍼 (motion)에 합쳐지는 클래스 — 브루탈리스트 등 룩 오버라이드 */
+  className?: string;
 };
 
 /** 바가 열렸을 때 본문 하단에 넣는 여백(콘텐츠가 가려지지 않도록). */
@@ -20,7 +22,12 @@ export const FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS =
  * 나타날 때 슬라이드업, 사라질 때 슬라이드다운 (AnimatePresence).
  * 푸터가 보이면 자동으로 숨김.
  */
-export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
+export function FloatingSelectionBar({
+  open,
+  ariaLabel,
+  children,
+  className,
+}: Props) {
   const [footerOverlap, setFooterOverlap] = useState(0);
 
   useEffect(() => {
@@ -63,6 +70,7 @@ export function FloatingSelectionBar({ open, ariaLabel, children }: Props) {
             "bg-white/95 backdrop-blur-sm border-t border-navy/10",
             "shadow-[0_-8px_32px_-4px_rgba(15,23,42,0.12)]",
             "px-2 pb-2 sm:px-4 sm:pb-3",
+            className,
           )}
           style={{ bottom: footerOverlap }}
         >

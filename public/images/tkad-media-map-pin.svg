@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="48" viewBox="0 0 40 48" role="img" aria-label="Location">
+  <defs>
+    <linearGradient id="pinOrange" x1="30%" y1="15%" x2="70%" y2="85%">
+      <stop offset="0%" stop-color="#ff8533"/>
+      <stop offset="50%" stop-color="#ff6200"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <filter id="pinDrop" x="-50%" y="-40%" width="200%" height="190%">
+      <feDropShadow dx="0" dy="5" stdDeviation="3.5" flood-color="#020202" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <!-- 흰 바디 + 검정 라인 + 주황 코어 -->
+  <path
+    fill="#ffffff"
+    stroke="#0a0a0c"
+    stroke-width="1.75"
+    stroke-linejoin="round"
+    filter="url(#pinDrop)"
+    d="M20 3.5c-7.86 0-14.25 6.1-14.25 13.62 0 5.42 4.62 13.62 14.25 26.38 9.63-12.76 14.25-20.96 14.25-26.38C34.25 9.35 27.86 3.5 20 3.5z"
+  />
+  <circle cx="20" cy="16.35" r="5.25" fill="url(#pinOrange)" stroke="#0a0a0c" stroke-width="1.1"/>
+  <circle cx="20" cy="15.85" r="1.65" fill="#ffffff" opacity="0.55"/>
+</svg>

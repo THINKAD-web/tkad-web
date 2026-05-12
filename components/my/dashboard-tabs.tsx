@@ -20,7 +20,7 @@ export function DashboardTabs({ active, onChange, counts }: Props) {
   return (
     <nav
       role="tablist"
-      className="flex gap-1 p-1 bg-secondary/60 border border-border/60 rounded-xl mb-6 overflow-x-auto"
+      className="mb-6 flex gap-0 overflow-x-auto"
     >
       {tabs.map(({ key, label, icon: Icon }) => {
         const isActive = active === key;
@@ -33,20 +33,22 @@ export function DashboardTabs({ active, onChange, counts }: Props) {
             aria-selected={isActive}
             onClick={() => onChange(key)}
             className={`
-              flex-1 min-w-fit inline-flex items-center justify-center gap-1.5
-              px-3 py-2 rounded-lg text-sm font-medium transition-all
+              -ml-[2px] inline-flex min-w-fit flex-1 items-center justify-center gap-2 border-2 px-4 py-2.5
+              font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors
               ${isActive
-                ? "bg-white text-primary shadow-sm"
-                : "text-gray-500 hover:text-gray-800"
+                ? "border-accent bg-accent text-accent-foreground"
+                : "border-border bg-card text-foreground hover:bg-muted"
               }
             `}
           >
-            <Icon className="w-4 h-4" strokeWidth={2} />
+            <Icon className="h-4 w-4" strokeWidth={2} />
             <span>{label}</span>
             {typeof c === "number" && c > 0 && (
               <span
-                className={`ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${
-                  isActive ? "bg-primary text-white" : "bg-gray-200 text-gray-700"
+                className={`ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center border-2 px-1 font-mono text-[10px] font-bold tabular-nums ${
+                  isActive
+                    ? "border-hero-fg bg-hero-void text-hero-fg"
+                    : "border-border bg-hero-void text-accent"
                 }`}
               >
                 {c}

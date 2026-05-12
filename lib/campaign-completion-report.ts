@@ -3,16 +3,15 @@ import {
   type BuildCampaignCompletionPdfParams,
   type CompletionPdfFinancial,
 } from "@/lib/build-campaign-completion-pdf";
-import { generateCampaignCompletionReportSections } from "@/lib/ai-content-generator";
 import { getPrisma } from "@/lib/prisma";
 
 /**
- * 캠페인 데이터 + AI 4섹션 → 완료 보고서 PDF 바이너리.
+ * 캠페인 데이터 → 완료 보고서 PDF 바이너리.
+ * (규칙) AI 자동 생성 섹션은 사용하지 않습니다.
  */
 export async function buildCampaignCompletionReportPdfBuffer(
   campaignId: string,
 ): Promise<Buffer> {
-  const ai = await generateCampaignCompletionReportSections(campaignId);
   const db = getPrisma();
   const campaign = await db.campaign.findUnique({
     where: { id: campaignId },
@@ -44,6 +43,8 @@ export async function buildCampaignCompletionReportPdfBuffer(
     clientEmail: campaign.clientEmail,
     status: campaign.status,
     notes: campaign.notes,
+    startDate: campaign.startDate ?? null,
+    endDate: campaign.endDate ?? null,
     scheduleEvents: campaign.scheduleEvents.map((e) => ({
       title: e.title,
       startsAt: e.startsAt,
@@ -63,11 +64,13 @@ export async function buildCampaignCompletionReportPdfBuffer(
       startsAt: b.startsAt,
       endsAt: b.endsAt,
       status: b.status,
+      // KPI 산출용 (Executive Summary)
+      dailyFootTraffic: b.media?.dailyFootfall ?? null,
+      region: b.media?.region ?? null,
+      trafficPattern:
+        (b.media as { trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null } | null | undefined)
+          ?.trafficPattern ?? null,
     })),
-    aiOverviewKo: ai.overviewKo,
-    aiMediaDetailKo: ai.mediaDetailKo,
-    aiPerformanceKo: ai.performanceKo,
-    aiInsightsKo: ai.aiInsightsKo,
   };
 
   return campaignCompletionPdfToBuffer(params);

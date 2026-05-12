@@ -45,9 +45,17 @@ export function BrutalFooter({
 
   return (
     <footer
-      className={cn("border-t-2 border-bx-black bg-bx-white", className)}
+      className={cn(
+        "relative overflow-hidden border-t border-white/10 bg-[#05050a] text-white",
+        className,
+      )}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+      <div aria-hidden className="absolute inset-0 opacity-15 tkad-neon-grid" />
+      <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.06] mix-blend-overlay" />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* 1번 셀 — 브랜드 컬럼 또는 일반 컬럼 0번 */}
         {useBrandCell ? (
           <BrandCell
@@ -67,24 +75,14 @@ export function BrutalFooter({
             cellIdx={i + 1}
           />
         ))}
+        </div>
       </div>
-      <div className="flex flex-col items-center justify-between gap-2 border-t-2 border-bx-black bg-bx-black px-6 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-bx-white sm:flex-row">
+
+      <div className="relative border-t border-white/10 bg-black/30 px-6 py-5 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65 backdrop-blur">
         <span>{copyright ?? "© 2026 THINKAD — All rights reserved"}</span>
-        {legal ? <span className="text-bx-gray">{legal}</span> : null}
+        {legal ? <span className="ml-4 text-white/45">{legal}</span> : null}
       </div>
     </footer>
-  );
-}
-
-function cellBorders(idx: number): string {
-  // 모바일 1열: idx>0 위 2px / sm 2열: 3번째부터 위 2px, 짝수 idx 좌측 2px
-  // lg 4열: 0번 좌측보더 X, 나머지 좌측 2px, 위 보더 X
-  return cn(
-    "border-bx-black p-6",
-    idx > 0 && "border-t-2 sm:border-t-0",
-    idx > 0 && "sm:border-l-0 lg:border-l-2",
-    idx >= 2 && "sm:border-t-2 lg:border-t-0",
-    idx % 2 === 1 && "sm:border-l-2 lg:border-l-2",
   );
 }
 
@@ -98,17 +96,22 @@ function BrandCell({
   cellIdx: number;
 }) {
   return (
-    <div className={cellBorders(cellIdx)}>
+    <div className="rounded-[28px] bg-white/5 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">
       <Link
         href="/"
-        className="inline-block font-mono text-base font-bold uppercase tracking-[0.22em] text-bx-black transition-colors hover:text-bx-accent"
+        className="inline-block font-mono text-[12px] font-black uppercase tracking-[0.22em] text-white"
       >
-        THINK<span className="text-bx-accent">AD</span>
+        THINK
+        <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
+          AD
+        </span>
       </Link>
-      <div className="mt-4 max-w-xs space-y-3 font-mono text-[12px] leading-relaxed tracking-tight text-bx-black">
-        <p>{description}</p>
+      <div className="mt-4 max-w-xs space-y-3 text-sm leading-relaxed text-white/72">
+        <p className="font-medium text-white/82">{description}</p>
         {brandMeta ? (
-          <div className="text-[11px] text-bx-gray-dim">{brandMeta}</div>
+          <div className="font-mono text-[11px] text-white/60">
+            {brandMeta}
+          </div>
         ) : null}
       </div>
     </div>
@@ -123,14 +126,14 @@ function ColumnCell({
   cellIdx: number;
 }) {
   return (
-    <div className={cellBorders(cellIdx)}>
-      <h3 className="mb-4 font-mono text-[10px] uppercase tracking-[0.22em] text-bx-gray-dim">
-        [ {col.title} ]
+    <div className="rounded-[28px] bg-white/5 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">
+      <h3 className="mb-4 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white/78">
+        {col.title}
       </h3>
       <ul className="space-y-2.5">
         {col.items.map((it, i) => {
           const cls =
-            "font-mono text-[12px] tracking-tight text-bx-black transition-colors hover:text-bx-accent";
+            "text-sm font-medium tracking-tight text-white/80 transition-colors hover:text-white";
           if (!it.href) {
             return (
               <li key={i} className={cls}>

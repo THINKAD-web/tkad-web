@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import type { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
@@ -193,6 +194,9 @@ export async function POST(request: NextRequest) {
   if (typeof body.isActive === "boolean") {
     data.isActive = body.isActive;
   }
+  if (typeof body.isVerified === "boolean") {
+    data.isVerified = body.isVerified;
+  }
 
   try {
     const filled = await enrichNewMediaLocationFromKakao({
@@ -255,6 +259,18 @@ export async function POST(request: NextRequest) {
         id: media.id,
         name: media.name,
       });
+    }
+
+    try {
+      for (const locale of ["ko", "en"] as const) {
+        revalidatePath(`/${locale}/compare`);
+        revalidatePath(`/${locale}/media`);
+        revalidatePath(`/${locale}/media/${media.id}`);
+        revalidatePath(`/${locale}/planner`);
+        revalidatePath(`/${locale}/quote`);
+      }
+    } catch {
+      /* optional */
     }
 
     return json({ media }, 201);

@@ -4,8 +4,8 @@ import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import type { PublicSuccessCaseDetail } from "@/lib/success-case-public";
 import {
   ArrowLeft,
@@ -14,7 +14,6 @@ import {
   Calendar,
   Download,
   Eye,
-  MessageSquareQuote,
   Quote,
   Target,
 } from "lucide-react";
@@ -44,8 +43,12 @@ function formatPeriod(
     month: "short",
     day: "numeric",
   };
-  const a = start ? new Date(start).toLocaleDateString(isKo ? "ko-KR" : "en-US", opts) : "";
-  const b = end ? new Date(end).toLocaleDateString(isKo ? "ko-KR" : "en-US", opts) : "";
+  const a = start
+    ? new Date(start).toLocaleDateString(isKo ? "ko-KR" : "en-US", opts)
+    : "";
+  const b = end
+    ? new Date(end).toLocaleDateString(isKo ? "ko-KR" : "en-US", opts)
+    : "";
   if (a && b) return `${a} – ${b}`;
   return a || b || null;
 }
@@ -56,7 +59,7 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
   const isKo = locale === "ko";
   const [showLeadModal, setShowLeadModal] = useState(false);
 
-  const title = isKo ? row.titleKo : row.titleEn ?? row.titleKo;
+  const title = isKo ? row.titleKo : (row.titleEn ?? row.titleKo);
   const period = formatPeriod(row.periodStartIso, row.periodEndIso, isKo);
 
   const metricEntries = row.metricsJson
@@ -66,258 +69,269 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
     : [];
 
   return (
-    <>
-      <section className="relative overflow-hidden bg-navy py-28">
-        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-gold/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-sky-500/8 blur-3xl" />
-        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/cases"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 transition-colors hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("cases.detailBack")}
-          </Link>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon">
+        <section className="bg-hero-void py-24">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <Link
+              href="/cases"
+              className="group mb-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-hero-fg/65 transition-colors hover:text-primary"
+            >
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+              {t("cases.detailBack")}
+            </Link>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Badge className="text-xs bg-gold/20 text-gold">{row.industry}</Badge>
-            <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-300">
-              <BadgeCheck className="h-3.5 w-3.5" />
-              {t("cases.detailVerified")}
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
+              {`// CASE / ${row.id.slice(0, 8).toUpperCase()}`}
+            </p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
+                [ {row.industry} ]
+              </span>
+              <span className="inline-flex items-center gap-1.5 border-2 border-hero-fg bg-transparent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hero-fg">
+                <BadgeCheck className="h-3 w-3" />
+                {t("cases.detailVerified")}
+              </span>
             </div>
-          </div>
 
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            {title}
-          </h1>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
+              {title}
+            </h1>
 
-          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300/90">
-            {row.summaryKo}
-          </p>
+            <p className="mt-5 max-w-3xl font-mono text-sm leading-relaxed tracking-tight text-hero-fg/75">
+              {row.summaryKo}
+            </p>
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={`/contact?case=${encodeURIComponent(row.id)}`}>
-              <Button
+            <div className="mt-6 flex flex-wrap gap-3">
+              <BtnBlock
+                href={`/contact?case=${encodeURIComponent(row.id)}`}
+                variant="accent"
                 size="lg"
-                className="h-12 rounded-full border-0 bg-gold px-8 text-sm font-bold text-navy shadow-lg shadow-gold/25 hover:bg-gold-dark"
               >
                 {t("cases.ctaSimilar")}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+                <ArrowRight className="h-4 w-4" />
+              </BtnBlock>
+            </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-gold/35 bg-navy text-xs font-extrabold text-gold">
-                {row.clientName.slice(0, 2)}
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-hero-fg/65">
+              <span className="flex items-center gap-2">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-primary bg-hero-void font-mono text-xs font-bold tracking-tight text-primary">
+                  {row.clientName.slice(0, 2)}
+                </span>
+                <span>{row.clientName}</span>
               </span>
-              <span>{row.clientName}</span>
-            </span>
-            {period ? (
-              <span className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 text-gold/60" />
-                {period}
-              </span>
+              {period ? (
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  {period}
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-card py-20 sm:py-24">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="grid gap-0 md:grid-cols-2">
+              <div className="-mt-[2px] -ml-[2px] border-2 border-border p-6 sm:p-8">
+                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  <Target className="h-4 w-4" />[ {t("cases.challengeLabel")} ]
+                </div>
+                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-foreground sm:text-lg">
+                  {row.challengeKo}
+                </p>
+              </div>
+              <div className="-mt-[2px] -ml-[2px] border-2 border-border p-6 sm:p-8">
+                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  <Eye className="h-4 w-4" />[ {t("cases.solutionLabel")} ]
+                </div>
+                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-foreground sm:text-lg">
+                  {row.solutionKo}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-muted py-20 sm:py-24">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              <Eye className="h-4 w-4" />[ {t("cases.mediaLabel")} ]
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {row.mediaUsed.map((m) => (
+                <span
+                  key={m}
+                  className="border-2 border-border bg-card px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground"
+                >
+                  {m}
+                </span>
+              ))}
+            </div>
+
+            {row.resultsKo.length > 0 ? (
+              <div className="mt-10 border-2 border-border bg-card p-5 sm:p-6">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  [ {t("cases.resultsLabel")} ]
+                </p>
+                <ul className="mt-4 space-y-3">
+                  {row.resultsKo.map((line, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-3 text-foreground"
+                    >
+                      <span className="mt-1.5 inline-block h-2 w-2 shrink-0 bg-primary" />
+                      <span className="leading-relaxed">{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {metricEntries.length > 0 ? (
+              <div className="mt-8 grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
+                {metricEntries.map(([k, v]) => (
+                  <div
+                    key={k}
+                    className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4"
+                  >
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {k} ]
+                    </p>
+                    <p className="mt-2 font-mono text-lg font-bold tabular-nums text-foreground">
+                      {typeof v === "object" ? JSON.stringify(v) : String(v)}
+                    </p>
+                  </div>
+                ))}
+              </div>
             ) : null}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="py-28">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-12 md:grid-cols-2">
-            <div>
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gold-dark">
-                <Target className="h-4 w-4" />
-                {t("cases.challengeLabel")}
-              </div>
-              <p className="text-lg leading-relaxed text-navy/80 whitespace-pre-wrap">
-                {row.challengeKo}
+        {row.galleryUrls.length > 0 ? (
+          <section className="bg-card py-16">
+            <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+              <p className="mb-5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                [ {t("cases.galleryLabel")} ]
               </p>
-            </div>
-            <div>
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gold-dark">
-                <Eye className="h-4 w-4" />
-                {t("cases.solutionLabel")}
-              </div>
-              <p className="text-lg leading-relaxed text-navy/80 whitespace-pre-wrap">
-                {row.solutionKo}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y bg-slate-50 py-28">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 flex items-center gap-2 text-sm font-semibold text-gold-dark">
-            <Eye className="h-4 w-4" />
-            {t("cases.mediaLabel")}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {row.mediaUsed.map((m) => (
-              <Badge
-                key={m}
-                variant="secondary"
-                className="bg-navy/5 px-3 py-1 text-sm font-medium text-navy"
-              >
-                {m}
-              </Badge>
-            ))}
-          </div>
-
-          {row.resultsKo.length > 0 ? (
-            <div className="mt-10">
-              <p className="mb-3 text-sm font-semibold text-navy">
-                {t("cases.resultsLabel")}
-              </p>
-              <ul className="list-disc space-y-2 pl-5 text-navy/80">
-                {row.resultsKo.map((line, i) => (
-                  <li key={i}>{line}</li>
+              <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
+                {row.galleryUrls.map((url, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={url}
+                    alt={
+                      isKo
+                        ? `${title} 캠페인 이미지 ${i + 1}`
+                        : `${title} campaign image ${i + 1}`
+                    }
+                    className="-mt-[2px] -ml-[2px] aspect-video w-full border-2 border-border object-cover grayscale transition-all duration-500 hover:grayscale-0"
+                  />
                 ))}
-              </ul>
+              </div>
             </div>
-          ) : null}
+          </section>
+        ) : null}
 
-          {metricEntries.length > 0 ? (
-            <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {metricEntries.map(([k, v]) => (
-                <div
-                  key={k}
-                  className="rounded-2xl border bg-white p-4 shadow-sm"
-                >
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    {k}
-                  </p>
-                  <p className="mt-1 text-lg font-extrabold text-navy">
-                    {typeof v === "object" ? JSON.stringify(v) : String(v)}
+        {row.testimonialKo ? (
+          <section className="bg-muted py-20 sm:py-24">
+            <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+              <div className="border-2 border-primary bg-card p-8">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  [ {t("cases.testimonialLabel")} ]
+                </p>
+                <Quote className="mt-4 h-8 w-8 text-primary" />
+                <p className="mt-4 whitespace-pre-wrap text-lg leading-relaxed text-foreground">
+                  &ldquo;{row.testimonialKo}&rdquo;
+                </p>
+                <div className="mt-6 border-t-2 border-border pt-4">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    — {row.clientName}
                   </p>
                 </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </section>
-
-      {row.galleryUrls.length > 0 ? (
-        <section className="py-16">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <p className="mb-4 text-xs font-bold uppercase tracking-wide text-navy/45">
-              {t("cases.galleryLabel")}
-            </p>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {row.galleryUrls.map((url, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={i}
-                  src={url}
-                  alt=""
-                  className="aspect-video w-full rounded-xl border object-cover"
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {row.testimonialKo ? (
-        <section className="border-t bg-slate-50 py-28">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl bg-white p-8 shadow-md">
-              <p className="text-xs font-bold uppercase tracking-wide text-navy/45">
-                {t("cases.testimonialLabel")}
-              </p>
-              <Quote className="mt-3 h-8 w-8 text-gold/30" />
-              <p className="mt-4 text-lg leading-relaxed text-navy/80 italic whitespace-pre-wrap">
-                &ldquo;{row.testimonialKo}&rdquo;
-              </p>
-              <div className="mt-6 border-t pt-4">
-                <p className="text-xs text-muted-foreground">{row.clientName}</p>
               </div>
             </div>
-          </div>
-        </section>
-      ) : null}
+          </section>
+        ) : null}
 
-      <section className="py-28">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Button
-              size="lg"
-              onClick={() => setShowLeadModal(true)}
-              className="h-14 rounded-full bg-gold px-10 text-base font-bold text-navy shadow-lg shadow-gold/20 hover:bg-gold-dark"
-            >
-              <Download className="mr-2 h-5 w-5" />
-              {t("cases.detailDownloadPdf")}
-            </Button>
-            <Link href={`/contact?case=${encodeURIComponent(row.id)}`}>
-              <Button
+        <section className="bg-card py-20 sm:py-24">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <BtnBlock
+                variant="accent"
                 size="lg"
-                variant="outline"
-                className="h-14 rounded-full border-navy/20 px-10 text-base font-semibold text-navy hover:bg-navy hover:text-white"
+                onClick={() => setShowLeadModal(true)}
+              >
+                <Download className="h-5 w-5" />
+                {t("cases.detailDownloadPdf")}
+              </BtnBlock>
+              <BtnBlock
+                href={`/contact?case=${encodeURIComponent(row.id)}`}
+                variant="dark"
+                size="lg"
               >
                 {t("cases.detailSimilarCampaign")}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {(prev || next) && (
-        <section className="border-t bg-slate-50 py-28">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-stretch justify-between gap-4">
-              {prev ? (
-                <Link
-                  href={`/cases/${prev.id}`}
-                  className="group flex flex-1 flex-col rounded-xl border bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-                >
-                  <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-                    <ArrowLeft className="h-3 w-3" />
-                    {t("cases.detailPrev")}
-                  </span>
-                  <span className="mt-2 text-sm font-bold text-navy transition-colors group-hover:text-gold-dark">
-                    {isKo ? prev.titleKo : prev.titleEn ?? prev.titleKo}
-                  </span>
-                </Link>
-              ) : (
-                <div className="flex-1" />
-              )}
-              {next ? (
-                <Link
-                  href={`/cases/${next.id}`}
-                  className="group flex flex-1 flex-col items-end rounded-xl border bg-white p-4 text-right shadow-sm transition-shadow hover:shadow-md"
-                >
-                  <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-                    {t("cases.detailNext")}
-                    <ArrowRight className="h-3 w-3" />
-                  </span>
-                  <span className="mt-2 text-sm font-bold text-navy transition-colors group-hover:text-gold-dark">
-                    {isKo ? next.titleKo : next.titleEn ?? next.titleKo}
-                  </span>
-                </Link>
-              ) : (
-                <div className="flex-1" />
-              )}
+                <ArrowRight className="h-4 w-4" />
+              </BtnBlock>
             </div>
           </div>
         </section>
-      )}
 
-      <LeadCaptureModal
-        open={showLeadModal}
-        onClose={() => setShowLeadModal(false)}
-        onSubmit={() => setShowLeadModal(false)}
-        locale={locale}
-        title={isKo ? "문의 접수" : "Get in touch"}
-        description={
-          isKo
-            ? "담당자가 캠페인 자료 안내를 도와드립니다."
-            : "Our team can share more about this campaign."
-        }
-      />
-    </>
+        {(prev || next) && (
+          <section className="bg-muted py-20 sm:py-24">
+            <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+              <div className="flex items-stretch justify-between gap-0">
+                {prev ? (
+                  <Link
+                    href={`/cases/${prev.id}`}
+                    className="group -ml-[2px] flex flex-1 flex-col border-2 border-border bg-card p-5 transition-colors hover:bg-foreground hover:text-background"
+                  >
+                    <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      <ArrowLeft className="h-3 w-3" />[ {t("cases.detailPrev")}{" "}
+                      ]
+                    </span>
+                    <span className="mt-2 text-sm font-bold tracking-tight">
+                      {isKo ? prev.titleKo : (prev.titleEn ?? prev.titleKo)}
+                    </span>
+                  </Link>
+                ) : (
+                  <div className="flex-1" />
+                )}
+                {next ? (
+                  <Link
+                    href={`/cases/${next.id}`}
+                    className="group -ml-[2px] flex flex-1 flex-col items-end border-2 border-border bg-card p-5 text-right transition-colors hover:bg-foreground hover:text-background"
+                  >
+                    <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("cases.detailNext")} ]
+                      <ArrowRight className="h-3 w-3" />
+                    </span>
+                    <span className="mt-2 text-sm font-bold tracking-tight">
+                      {isKo ? next.titleKo : (next.titleEn ?? next.titleKo)}
+                    </span>
+                  </Link>
+                ) : (
+                  <div className="flex-1" />
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <LeadCaptureModal
+          open={showLeadModal}
+          onClose={() => setShowLeadModal(false)}
+          onSubmit={() => setShowLeadModal(false)}
+          locale={locale}
+          title={isKo ? "문의 접수" : "Get in touch"}
+          description={
+            isKo
+              ? "담당자가 캠페인 자료 안내를 도와드립니다."
+              : "Our team can share more about this campaign."
+          }
+        />
+      </div>
+    </HomeLandingDayNight>
   );
 }

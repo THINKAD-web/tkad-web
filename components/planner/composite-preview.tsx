@@ -114,7 +114,7 @@ export function CompositePreview({
     <div
       ref={frameRef}
       className={cn(
-        "relative aspect-video w-full overflow-hidden rounded-xl bg-slate-200",
+        "relative aspect-video w-full overflow-hidden border-2 border-border bg-muted",
         editable && "cursor-move select-none",
         className,
       )}
@@ -130,8 +130,8 @@ export function CompositePreview({
           draggable={false}
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
-          {missingLabel}
+        <div className="absolute inset-0 flex items-center justify-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          {`// `}{missingLabel}
         </div>
       )}
 
@@ -140,7 +140,7 @@ export function CompositePreview({
           className={cn(
             "absolute flex items-start justify-center",
             editable
-              ? "cursor-grab touch-none ring-2 ring-gold/70 ring-offset-1 ring-offset-black/30"
+              ? "cursor-grab touch-none border-2 border-primary"
               : "pointer-events-none",
           )}
           style={{
@@ -160,7 +160,7 @@ export function CompositePreview({
           />
           {editable ? (
             <div
-              className="absolute -right-2 -bottom-2 h-4 w-4 cursor-nwse-resize touch-none rounded-sm border-2 border-white bg-gold shadow-md"
+              className="absolute -right-2 -bottom-2 h-4 w-4 cursor-nwse-resize touch-none border-2 border-border bg-primary"
               role="button"
               aria-label="resize logo"
               tabIndex={-1}
@@ -170,17 +170,15 @@ export function CompositePreview({
         </div>
       ) : null}
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0" />
-
       {badgeLabel ? (
-        <div className="pointer-events-none absolute left-2 top-2 rounded-full border border-white/25 bg-black/35 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90 backdrop-blur-sm">
+        <div className="pointer-events-none absolute left-0 top-0 border-b-2 border-r-2 border-border bg-primary px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
           {badgeLabel}
         </div>
       ) : null}
 
       {!compact ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 pb-3 pt-8">
-          <p className="line-clamp-2 text-xs font-bold text-white drop-shadow sm:text-sm">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 border-t-2 border-border bg-hero-void px-3 py-2">
+          <p className="line-clamp-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-hero-fg sm:text-xs">
             {mediaName}
           </p>
         </div>

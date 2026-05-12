@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
@@ -80,6 +81,18 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
   if (isAdminAuthDebugEnabled()) {
     console.log("[admin-api] media JSON PUT", { id: media.id, name: media.name });
+  }
+
+  try {
+    for (const locale of ["ko", "en"] as const) {
+      revalidatePath(`/${locale}/compare`);
+      revalidatePath(`/${locale}/media`);
+      revalidatePath(`/${locale}/media/${id}`);
+      revalidatePath(`/${locale}/planner`);
+      revalidatePath(`/${locale}/quote`);
+    }
+  } catch {
+    /* optional */
   }
 
   const quick = mediaDbRowToQuickAddJson(media);

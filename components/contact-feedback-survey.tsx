@@ -2,12 +2,16 @@
 
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Gift, CheckCircle, Copy } from "lucide-react";
+import { BtnBlock } from "@/components/brutalist";
 import { useToast } from "@/components/toast-provider";
 import Spinner from "@/components/spinner";
+import { cn } from "@/lib/utils";
+
+const inputCls =
+  "h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
+const textareaCls =
+  "w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -110,40 +114,45 @@ export function ContactFeedbackSurvey() {
     return (
       <div className="space-y-6 py-4">
         <div className="flex flex-col items-center gap-3 text-center">
-          <CheckCircle className="h-12 w-12 text-emerald-500" />
-          <p className="text-lg font-semibold text-navy">{t("thankTitle")}</p>
-          <p className="text-sm text-muted-foreground">{t("thankDesc")}</p>
-        </div>
-
-        <div className="rounded-2xl border-2 border-dashed border-gold/60 bg-gold/10 p-6">
-          <div className="flex items-center gap-2 text-sm font-bold text-navy">
-            <Gift className="h-5 w-5 text-gold-dark" />
-            {t("couponTitle")}
+          <div className="flex h-14 w-14 items-center justify-center border-2 border-primary bg-primary text-primary-foreground">
+            <CheckCircle className="h-8 w-8" />
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">{t("couponHint")}</p>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <code className="rounded-lg bg-white px-4 py-2 font-mono text-lg font-bold tracking-wide text-navy shadow-sm">
-              {couponCode}
-            </code>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="border-navy/20"
-              onClick={copyCoupon}
-            >
-              <Copy className="mr-1.5 h-4 w-4" />
-              {t("copyCode")}
-            </Button>
-          </div>
-          <p className="mt-4 text-xs leading-relaxed text-navy/70">
-            {t("couponTerms")}
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            [ THANKS ]
+          </p>
+          <p className="text-lg font-bold tracking-tight text-foreground">
+            {t("thankTitle")}
+          </p>
+          <p className="font-mono text-[12px] tracking-tight text-muted-foreground">
+            {t("thankDesc")}
           </p>
         </div>
 
-        <Button type="button" variant="ghost" className="w-full" onClick={reset}>
+        <div className="border-2 border-primary bg-card p-6">
+          <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            <Gift className="h-4 w-4" />
+            [ {t("couponTitle")} ]
+          </div>
+          <p className="mt-2 font-mono text-[11px] tracking-tight text-muted-foreground">
+            {t("couponHint")}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <code className="border-2 border-border bg-hero-void px-4 py-2 font-mono text-lg font-bold tracking-[0.22em] text-primary">
+              {couponCode}
+            </code>
+            <BtnBlock variant="secondary" size="sm" onClick={copyCoupon}>
+              <Copy className="h-4 w-4" />
+              {t("copyCode")}
+            </BtnBlock>
+          </div>
+          <p className="mt-4 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+            {`// `}{t("couponTerms")}
+          </p>
+        </div>
+
+        <BtnBlock variant="secondary" size="md" onClick={reset} className="w-full">
           {t("again")}
-        </Button>
+        </BtnBlock>
       </div>
     );
   }
@@ -161,86 +170,103 @@ export function ContactFeedbackSurvey() {
         />
       </div>
 
-      <p className="text-sm text-muted-foreground">{t("intro")}</p>
+      <p className="font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+        {`// `}{t("intro")}
+      </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-navy">
-            {t("email")} <span className="text-red-500">*</span>
+          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            [ {t("email")} ] <span className="text-primary">*</span>
           </label>
-          <Input
+          <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t("emailPh")}
+            className={inputCls}
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-navy">
-            {t("name")}
+          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            [ {t("name")} ]
           </label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className={inputCls}
+          />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-navy">
-            {t("company")}
+          <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            [ {t("company")} ]
           </label>
-          <Input value={company} onChange={(e) => setCompany(e.target.value)} />
+          <input
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            className={inputCls}
+          />
         </div>
       </div>
 
-      <fieldset className="space-y-2">
-        <legend className="mb-2 text-sm font-semibold text-navy">
-          {t("qService")} <span className="text-red-500">*</span>
+      <fieldset className="space-y-3">
+        <legend className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ {t("qService")} ] <span className="text-primary">*</span>
         </legend>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-0">
           {[1, 2, 3, 4, 5].map((n) => (
-            <Button
+            <button
               key={n}
               type="button"
-              variant={serviceSatisfaction === n ? "default" : "outline"}
-              size="sm"
-              className={
-                serviceSatisfaction === n
-                  ? "bg-navy text-white"
-                  : "border-navy/20"
-              }
               onClick={() => setServiceSatisfaction(n)}
+              className={cn(
+                "-mt-[2px] -ml-[2px] inline-flex h-10 min-w-[40px] items-center justify-center border-2 px-3 font-mono text-sm font-bold transition-colors",
+                serviceSatisfaction === n
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted",
+              )}
             >
               {n}
-            </Button>
+            </button>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">{t("scale15")}</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          {`// `}{t("scale15")}
+        </p>
       </fieldset>
 
-      <fieldset className="space-y-2">
-        <legend className="mb-2 text-sm font-semibold text-navy">
-          {t("qNps")} <span className="text-red-500">*</span>
+      <fieldset className="space-y-3">
+        <legend className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ {t("qNps")} ] <span className="text-primary">*</span>
         </legend>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-0">
           {Array.from({ length: 11 }, (_, i) => i).map((n) => (
-            <Button
+            <button
               key={n}
               type="button"
-              variant={nps === n ? "default" : "outline"}
-              size="sm"
-              className={`min-w-9 px-2 ${nps === n ? "bg-gold text-navy" : "border-navy/20"}`}
               onClick={() => setNps(n)}
+              className={cn(
+                "-mt-[2px] -ml-[2px] inline-flex h-9 min-w-[36px] items-center justify-center border-2 px-2 font-mono text-sm font-bold transition-colors",
+                nps === n
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted",
+              )}
             >
               {n}
-            </Button>
+            </button>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">{t("npsHint")}</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          {`// `}{t("npsHint")}
+        </p>
       </fieldset>
 
-      <fieldset className="space-y-2">
-        <legend className="mb-2 text-sm font-semibold text-navy">
-          {t("qCampaign")} <span className="text-red-500">*</span>
+      <fieldset className="space-y-3">
+        <legend className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ {t("qCampaign")} ] <span className="text-primary">*</span>
         </legend>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-0">
           {(
             [
               ["yes", t("campYes")],
@@ -248,77 +274,86 @@ export function ContactFeedbackSurvey() {
               ["na", t("campNa")],
             ] as const
           ).map(([v, label]) => (
-            <Button
+            <button
               key={v}
               type="button"
-              variant={campaign === v ? "default" : "outline"}
-              size="sm"
-              className={
-                campaign === v ? "bg-navy text-white" : "border-navy/20"
-              }
               onClick={() => {
                 setCampaign(v);
                 if (v !== "yes") setCampaignResult("");
               }}
+              className={cn(
+                "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                campaign === v
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-foreground hover:bg-muted",
+              )}
             >
               {label}
-            </Button>
+            </button>
           ))}
         </div>
       </fieldset>
 
       {campaign === "yes" ? (
-        <div className="space-y-3 rounded-xl border border-navy/10 bg-slate-50/80 p-4">
-          <p className="text-sm font-semibold text-navy">{t("qCampaignResult")}</p>
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-3 border-2 border-primary bg-muted p-4">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            [ {t("qCampaignResult")} ]
+          </p>
+          <div className="flex flex-wrap gap-0">
             {[1, 2, 3, 4, 5].map((n) => (
-              <Button
+              <button
                 key={n}
                 type="button"
-                variant={campaignResult === n ? "default" : "outline"}
-                size="sm"
-                className={
-                  campaignResult === n ? "bg-navy text-white" : "border-navy/20"
-                }
                 onClick={() => setCampaignResult(n)}
+                className={cn(
+                  "-mt-[2px] -ml-[2px] inline-flex h-10 min-w-[40px] items-center justify-center border-2 px-3 font-mono text-sm font-bold transition-colors",
+                  campaignResult === n
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted",
+                )}
               >
                 {n}
-              </Button>
+              </button>
             ))}
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-navy">
-              {t("campaignComment")}
+            <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              [ {t("campaignComment")} ]
             </label>
-            <Textarea
+            <textarea
               rows={3}
               value={campaignComment}
               onChange={(e) => setCampaignComment(e.target.value)}
               placeholder={t("campaignCommentPh")}
+              className={textareaCls}
             />
           </div>
         </div>
       ) : null}
 
       <div>
-        <label className="mb-1.5 block text-sm font-semibold text-navy">
-          {t("qImprove")}
+        <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ {t("qImprove")} ]
         </label>
-        <Textarea
+        <textarea
           rows={3}
           value={improvement}
           onChange={(e) => setImprovement(e.target.value)}
           placeholder={t("improvePh")}
+          className={textareaCls}
         />
       </div>
 
-      <p className="text-xs text-muted-foreground">{t("timeHint")}</p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        {`// `}{t("timeHint")}
+      </p>
 
-      <Button
+      <BtnBlock
         type="submit"
-        className="w-full bg-gold font-semibold text-navy hover:bg-gold-dark"
+        variant="accent"
         size="lg"
         disabled={loading}
+        className="w-full"
       >
         {loading ? (
           <>
@@ -328,7 +363,7 @@ export function ContactFeedbackSurvey() {
         ) : (
           t("submit")
         )}
-      </Button>
+      </BtnBlock>
     </form>
   );
 }

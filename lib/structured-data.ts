@@ -1,5 +1,12 @@
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { siteUrl } from "@/lib/seo";
+import {
+  buildMediaSeoJsonDescription,
+  collectMediaSeoKeywordStrings,
+} from "@/lib/media-seo";
+
+/** 푸터·SNS와 동일 (Organization sameAs / E-E-A-T) */
+const INSTAGRAM_THINKAD = "https://www.instagram.com/thinkad_korea" as const;
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 
@@ -30,7 +37,7 @@ export function buildStructuredDataGraph() {
           "대한민국 No.1 OOH 광고 에이전시. 전국 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 집행 및 사후관리.",
         foundingDate: "2016",
         taxID: "319-86-00382",
-        sameAs: [KAKAO_CHANNEL_PUBLIC_URL],
+        sameAs: [KAKAO_CHANNEL_PUBLIC_URL, INSTAGRAM_THINKAD],
         contactPoint: [
           {
             "@type": "ContactPoint",
@@ -63,8 +70,7 @@ export function buildStructuredDataGraph() {
         email: "mannote@tkad.co.kr",
         address: {
           "@type": "PostalAddress",
-          streetAddress:
-            "뚝섬로17가길 48 성수에이원지식산업센터 1102호",
+          streetAddress: "뚝섬로17가길 48  1102",
           addressLocality: "성동구",
           addressRegion: "서울특별시",
           postalCode: "04799",
@@ -72,8 +78,8 @@ export function buildStructuredDataGraph() {
         },
         geo: {
           "@type": "GeoCoordinates",
-          latitude: 37.5446,
-          longitude: 127.0557,
+          latitude: 37.5407427,
+          longitude: 127.0595201,
         },
         openingHoursSpecification: {
           "@type": "OpeningHoursSpecification",
@@ -114,13 +120,7 @@ export function buildMediaPlaceJsonLd(
 ): Record<string, unknown> {
   const isKo = locale === "ko";
   const name = isKo ? media.name : media.nameEn || media.name;
-  const description = isKo
-    ? media.description ||
-      media.catalogDescription ||
-      `${media.location} 위치의 검증 OOH 매체 — 일 유동인구 ${media.dailyFootTraffic.toLocaleString()}명, 가시성 ${media.visibilityScore ?? 0}점.`
-    : media.descriptionEn ||
-      media.catalogDescriptionEn ||
-      `Verified OOH media in ${media.locationEn || media.location}. Daily footfall ${media.dailyFootTraffic.toLocaleString()}, visibility score ${media.visibilityScore ?? 0}.`;
+  const description = buildMediaSeoJsonDescription(media, locale, 1100);
   const image = getPrimaryMediaImageUrl(media);
   const url = `${siteUrl}/${locale}/media/${media.id}`;
 
@@ -158,6 +158,11 @@ export function buildMediaPlaceJsonLd(
       worstRating: 1,
       ratingCount: Math.max(1, media.visibilityScore),
     };
+  }
+
+  const kw = collectMediaSeoKeywordStrings(media, locale, 28);
+  if (kw.length) {
+    data.keywords = kw.join(", ");
   }
 
   return data;
@@ -265,5 +270,64 @@ export function buildInsightBreadcrumbJsonLd(
         item: `${siteUrl}/${locale}/insights/${report.slug}`,
       },
     ],
+  };
+}
+
+/**
+ * 범용 BreadcrumbList JSON-LD 빌더.
+ *
+ * @example
+ *   buildBreadcrumbJsonLd("ko", [
+ *     { name: "홈", path: "" },
+ *     { name: "서비스", path: "/services" },
+ *   ]);
+ *
+ * `path` 는 locale 미포함 (`/services`, `/media/region/seoul`). 빈 문자열 = 홈.
+ */
+export function buildBreadcrumbJsonLd(
+  locale: string,
+  items: { name: string; path: string }[],
+): Record<string, unknown> {
+  const origin = siteUrl.replace(/\/$/, "");
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      name: it.name,
+      item: `${origin}/${locale}${it.path}`,
+    })),
+  };
+}
+
+/**
+ * `/media` 카탈로그 ItemList JSON-LD — 검색 리치 결과 / 매체 목록 노출용.
+ * 카탈로그 전체 대신 상위 N개 ID 만 등록 (스키마 한도 + 페이로드 합리화).
+ */
+export function buildMediaCatalogItemListJsonLd(
+  locale: string,
+  items: { id: string; name: string; nameEn?: string; location: string; locationEn?: string }[],
+  limit = 30,
+): Record<string, unknown> {
+  const origin = siteUrl.replace(/\/$/, "");
+  const isKo = locale === "ko";
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    numberOfItems: items.length,
+    itemListElement: items.slice(0, limit).map((m, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      url: `${origin}/${locale}/media/${m.id}`,
+      name: isKo ? m.name : (m.nameEn || m.name),
+      ...(m.location && {
+        item: {
+          "@type": "Place",
+          name: isKo ? m.name : (m.nameEn || m.name),
+          address: isKo ? m.location : (m.locationEn || m.location),
+        },
+      }),
+    })),
   };
 }

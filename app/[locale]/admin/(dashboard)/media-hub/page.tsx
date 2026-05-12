@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { AdminBookingRequestsReviewPanel } from "@/components/admin/booking-requests-review-panel";
 
 type MediaAvailability = "available" | "reserved" | "maintenance";
 
@@ -71,6 +72,7 @@ export default function AdminMediaHubPage() {
       title: string;
       startsAt: string;
       endsAt: string;
+      /** requested | tentative | confirmed | cancelled | expired */
       status: string;
     }[]
   >([]);
@@ -96,8 +98,21 @@ export default function AdminMediaHubPage() {
     title: "",
     startsAt: "",
     endsAt: "",
-    status: "hold",
+    status: "tentative",
   });
+  /** 충돌 발견 시 서버가 반환한 충돌 booking 목록 — UI 에 강제 등록 버튼 노출용 */
+  const [bookingConflicts, setBookingConflicts] = useState<
+    {
+      id: string;
+      title: string;
+      startsAt: string;
+      endsAt: string;
+      status: string;
+      summary: string;
+    }[]
+  >([]);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [bookingBusy, setBookingBusy] = useState(false);
   const [execForm, setExecForm] = useState({
     advertiserName: "",
     campaignLabel: "",
@@ -310,21 +325,50 @@ export default function AdminMediaHubPage() {
     await loadList();
   };
 
-  const addBooking = async () => {
+  const addBooking = async ({ force = false } = {}) => {
     if (!sel || !book.title || !book.startsAt || !book.endsAt) return;
-    await fetch(`/api/admin/medias/${sel.id}/bookings`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: book.title,
-        startsAt: new Date(book.startsAt).toISOString(),
-        endsAt: new Date(book.endsAt).toISOString(),
-        status: book.status,
-      }),
-    });
-    setBook({ title: "", startsAt: "", endsAt: "", status: "hold" });
-    await loadDetail(sel);
+    setBookingBusy(true);
+    setBookingError(null);
+    if (!force) setBookingConflicts([]);
+    try {
+      const res = await fetch(`/api/admin/medias/${sel.id}/bookings`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: book.title,
+          startsAt: new Date(book.startsAt).toISOString(),
+          endsAt: new Date(book.endsAt).toISOString(),
+          status: book.status,
+          force,
+        }),
+      });
+      const data = (await res.json()) as {
+        booking?: unknown;
+        error?: string;
+        code?: string;
+        conflicts?: typeof bookingConflicts;
+      };
+      if (res.status === 409 && data.code === "BOOKING_CONFLICT") {
+        // 충돌 발견 — UI 에 충돌 목록 + 강제 등록 버튼 노출
+        setBookingConflicts(data.conflicts ?? []);
+        setBookingError(data.error ?? "예약 시간이 겹칩니다.");
+        return;
+      }
+      if (!res.ok) {
+        setBookingError(data.error ?? "예약 등록 실패");
+        return;
+      }
+      setBook({ title: "", startsAt: "", endsAt: "", status: "tentative" });
+      setBookingConflicts([]);
+      await loadDetail(sel);
+    } catch (e) {
+      setBookingError(
+        e instanceof Error ? e.message : "예약 등록 중 오류",
+      );
+    } finally {
+      setBookingBusy(false);
+    }
   };
 
   const delBooking = async (id: string) => {
@@ -372,39 +416,16 @@ export default function AdminMediaHubPage() {
     e.target.value = "";
     if (!file || !sel) return;
     setUploadMsg(null);
-    const sigRes = await fetch("/api/admin/upload/cloudinary", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (!sigRes.ok) {
-      setUploadMsg("Cloudinary 미설정 또는 서명 실패");
-      return;
-    }
-    const sig = (await sigRes.json()) as {
-      timestamp: number;
-      signature: string;
-      folder: string;
-      cloudName: string;
-      apiKey: string;
-    };
-
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("api_key", sig.apiKey);
-    fd.append("timestamp", String(sig.timestamp));
-    fd.append("signature", sig.signature);
-    fd.append("folder", sig.folder);
-
-    const up = await fetch(
-      `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-      { method: "POST", body: fd },
-    );
-    const upJson = (await up.json()) as {
-      secure_url?: string;
-      error?: { message: string };
-    };
-    if (!up.ok || !upJson.secure_url) {
-      setUploadMsg(upJson.error?.message ?? "업로드 실패");
+    const up = await fetch("/api/admin/upload/bunny", {
+      method: "POST",
+      credentials: "include",
+      body: fd,
+    });
+    const upJson = (await up.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!up.ok || !upJson.url) {
+      setUploadMsg(upJson.error ?? "업로드 실패");
       return;
     }
 
@@ -412,33 +433,37 @@ export default function AdminMediaHubPage() {
       method: "PATCH",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: upJson.secure_url }),
+      body: JSON.stringify({ image: upJson.url }),
     });
     setUploadMsg("이미지 URL이 저장되었습니다.");
-    const updated = { ...sel, image: upJson.secure_url };
+    const updated = { ...sel, image: upJson.url };
     setSel(updated);
     await loadDetail(updated);
     await loadList();
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-foreground">
       <div>
-        <h2 className="text-lg font-bold text-navy">매체 허브 (DB)</h2>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          [ MEDIA HUB ]
+        </p>
+        <h2 className="mt-2 text-lg font-bold tracking-tight">매체 허브 (DB)</h2>
         <p className="text-sm text-muted-foreground">
-          가용 상태, Cloudinary 이미지, 월별 가격 이력, 예약 캘린더, 광고주 집행
-          이력을 관리합니다. 목록·간편 등록은 &quot;매체 관리&quot;와 동일 DB를
-          사용합니다.
+          가용 상태, 이미지(Bunny CDN), 월별 가격 이력, 예약 캘린더, 광고주 집행 이력을
+          관리합니다. 목록·간편 등록은 &quot;매체 관리&quot;와 동일 DB를 사용합니다.
         </p>
         <Link
           href="/admin/medias/quick-add"
-          className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-gold hover:text-gold-dark"
+          className="mt-2 inline-flex items-center gap-1.5 border-b-2 border-border pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
         >
           <Code2 className="h-4 w-4" />
           JSON 간편 등록 (DB)
         </Link>
       </div>
       {err ? <p className="text-sm text-red-600">{err}</p> : null}
+
+      <AdminBookingRequestsReviewPanel />
 
       <Card>
         <CardHeader>
@@ -503,7 +528,7 @@ export default function AdminMediaHubPage() {
           />
           <Button
             type="button"
-            className="bg-navy"
+            className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
             onClick={createMedia}
             disabled={loading}
           >
@@ -534,11 +559,13 @@ export default function AdminMediaHubPage() {
                   type="button"
                   onClick={() => loadDetail(m)}
                   className={`w-full rounded-lg border p-3 text-left ${
-                    sel?.id === m.id ? "border-gold bg-gold/5" : "border-slate-200"
+                    sel?.id === m.id
+                      ? "border-primary bg-muted bg-muted/60"
+                      : "border-slate-200"
                   }`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold text-navy">{m.name}</p>
+                    <p className="font-semibold text-foreground">{m.name}</p>
                     {m.availability ? (
                       <Badge variant="secondary" className="text-[10px]">
                         {AVAIL_LABEL[m.availability]}
@@ -572,7 +599,9 @@ export default function AdminMediaHubPage() {
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-sm font-semibold text-navy">가용 상태</span>
+                  <span className="text-sm font-semibold text-foreground">
+                    가용 상태
+                  </span>
                   <select
                     className="rounded border border-slate-200 px-2 py-1.5 text-sm"
                     value={availability}
@@ -593,7 +622,7 @@ export default function AdminMediaHubPage() {
                 <div>
                   <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold">
                     <CloudUpload className="h-4 w-4" />
-                    Cloudinary 업로드
+                    Bunny 업로드
                   </h3>
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded border border-dashed border-slate-300 px-3 py-2 text-xs hover:bg-slate-50">
                     <ImageIcon className="h-4 w-4" />
@@ -606,7 +635,7 @@ export default function AdminMediaHubPage() {
                     />
                   </label>
                   {uploadMsg ? (
-                    <p className="mt-2 text-xs text-navy">{uploadMsg}</p>
+                    <p className="mt-2 text-xs text-foreground">{uploadMsg}</p>
                   ) : null}
                 </div>
 
@@ -627,7 +656,7 @@ export default function AdminMediaHubPage() {
                           title={`${key}: ${val.toLocaleString()}원`}
                         >
                           <div
-                            className="w-full rounded-t-sm bg-navy/80"
+                            className="w-full rounded-t-sm bg-foreground dark:bg-card"
                             style={{
                               height: `${Math.max(4, (val / maxMonthPrice) * 48)}px`,
                             }}
@@ -726,93 +755,197 @@ export default function AdminMediaHubPage() {
                       if (!cell) {
                         return <div key={idx} className="h-7" />;
                       }
-                      const busy = bookings.some((b) =>
+                      // 셀에 닿는 booking 중 가장 강한 상태 (confirmed > tentative > requested) 우선 표시
+                      const overlapping = bookings.filter((b) =>
                         bookingTouchesDay(cell.date, b.startsAt, b.endsAt),
                       );
+                      const strongest = overlapping.find(
+                        (b) => b.status === "confirmed",
+                      )
+                        ? "confirmed"
+                        : overlapping.find((b) => b.status === "tentative")
+                          ? "tentative"
+                          : overlapping.find((b) => b.status === "requested")
+                            ? "requested"
+                            : null;
+                      const cls =
+                        strongest === "confirmed"
+                          ? "bg-emerald-200 font-semibold text-emerald-900"
+                          : strongest === "tentative"
+                            ? "bg-primary/30 font-semibold text-foreground"
+                            : strongest === "requested"
+                              ? "bg-amber-100 font-semibold text-amber-900"
+                              : "bg-slate-50 text-foreground";
                       return (
                         <div
                           key={idx}
-                          className={`flex h-7 items-center justify-center rounded ${
-                            busy
-                              ? "bg-gold/30 font-semibold text-navy"
-                              : "bg-slate-50 text-navy"
-                          }`}
+                          className={`flex h-7 items-center justify-center rounded ${cls}`}
+                          title={
+                            strongest
+                              ? overlapping
+                                  .map(
+                                    (b) =>
+                                      `${b.title} (${b.status})`,
+                                  )
+                                  .join("\n")
+                              : undefined
+                          }
                         >
                           {cell.day}
                         </div>
                       );
                     })}
                   </div>
+                  {/* status 색상 범례 */}
+                  <div className="mt-2 flex flex-wrap gap-2 text-[10px]">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="inline-block h-3 w-3 rounded bg-emerald-200" />
+                      확정 (confirmed)
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="inline-block h-3 w-3 rounded bg-primary/30" />
+                      가홀드 (tentative)
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="inline-block h-3 w-3 rounded bg-amber-100" />
+                      신청 (requested)
+                    </span>
+                  </div>
 
-                  <h4 className="mb-2 mt-4 text-xs font-semibold text-navy">
+                  <h4 className="mb-2 mt-4 text-xs font-semibold text-foreground">
                     슬롯 추가
                   </h4>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <Input
                       placeholder="제목"
                       value={book.title}
-                      onChange={(e) =>
-                        setBook((b) => ({ ...b, title: e.target.value }))
-                      }
+                      onChange={(e) => {
+                        setBook((b) => ({ ...b, title: e.target.value }));
+                        setBookingConflicts([]);
+                        setBookingError(null);
+                      }}
                     />
                     <select
                       className="rounded border px-2 py-2 text-sm"
                       value={book.status}
-                      onChange={(e) =>
-                        setBook((b) => ({ ...b, status: e.target.value }))
-                      }
+                      onChange={(e) => {
+                        setBook((b) => ({ ...b, status: e.target.value }));
+                        setBookingConflicts([]);
+                        setBookingError(null);
+                      }}
                     >
-                      <option value="hold">hold</option>
-                      <option value="confirmed">confirmed</option>
-                      <option value="cancelled">cancelled</option>
+                      <option value="tentative">가홀드 (tentative)</option>
+                      <option value="confirmed">확정 (confirmed)</option>
+                      <option value="cancelled">취소 (cancelled)</option>
                     </select>
                     <Input
                       type="datetime-local"
                       value={book.startsAt}
-                      onChange={(e) =>
-                        setBook((b) => ({ ...b, startsAt: e.target.value }))
-                      }
+                      onChange={(e) => {
+                        setBook((b) => ({ ...b, startsAt: e.target.value }));
+                        setBookingConflicts([]);
+                        setBookingError(null);
+                      }}
                     />
                     <Input
                       type="datetime-local"
                       value={book.endsAt}
-                      onChange={(e) =>
-                        setBook((b) => ({ ...b, endsAt: e.target.value }))
-                      }
+                      onChange={(e) => {
+                        setBook((b) => ({ ...b, endsAt: e.target.value }));
+                        setBookingConflicts([]);
+                        setBookingError(null);
+                      }}
                     />
                   </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    className="mt-2"
-                    onClick={addBooking}
-                  >
-                    예약 추가
-                  </Button>
-                  <ul className="mt-2 space-y-2 text-xs">
-                    {bookings.map((b) => (
-                      <li
-                        key={b.id}
-                        className="flex items-center justify-between gap-2 rounded border p-2"
+
+                  {bookingConflicts.length > 0 ? (
+                    <div className="mt-2 rounded border-2 border-rose-300 bg-rose-50 p-2 text-xs text-rose-900">
+                      <p className="font-semibold">
+                        ⚠ 같은 매체에 활성 예약이 겹칩니다 ({bookingConflicts.length}건)
+                      </p>
+                      <ul className="mt-1 list-disc pl-4">
+                        {bookingConflicts.map((c) => (
+                          <li key={c.id}>{c.summary}</li>
+                        ))}
+                      </ul>
+                      <p className="mt-2 text-[11px] text-rose-700">
+                        그래도 등록하려면 "강제 등록"을 누르세요. (확정 예약과 겹치면 매체사·광고주에게 운영 사고가 될 수 있습니다)
+                      </p>
+                    </div>
+                  ) : null}
+                  {bookingError && bookingConflicts.length === 0 ? (
+                    <p className="mt-2 text-xs text-rose-700">{bookingError}</p>
+                  ) : null}
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={bookingBusy}
+                      onClick={() => void addBooking()}
+                    >
+                      {bookingBusy ? "등록 중…" : "예약 추가"}
+                    </Button>
+                    {bookingConflicts.length > 0 ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        disabled={bookingBusy}
+                        onClick={() => void addBooking({ force: true })}
                       >
-                        <div>
-                          <p className="font-medium">{b.title}</p>
-                          <p className="text-muted-foreground">
-                            {b.startsAt.replace("T", " ")} ~{" "}
-                            {b.endsAt.replace("T", " ")} · {b.status}
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-rose-600"
-                          onClick={() => delBooking(b.id)}
+                        강제 등록 (충돌 무시)
+                      </Button>
+                    ) : null}
+                  </div>
+                  <ul className="mt-2 space-y-2 text-xs">
+                    {bookings.map((b) => {
+                      const statusLabel: Record<string, string> = {
+                        requested: "신청",
+                        tentative: "가홀드",
+                        confirmed: "확정",
+                        cancelled: "취소",
+                        expired: "만료",
+                      };
+                      const statusColor: Record<string, string> = {
+                        requested: "bg-amber-100 text-amber-900",
+                        tentative: "bg-primary/30 text-foreground",
+                        confirmed: "bg-emerald-200 text-emerald-900",
+                        cancelled: "bg-slate-200 text-slate-700",
+                        expired: "bg-slate-100 text-slate-500",
+                      };
+                      return (
+                        <li
+                          key={b.id}
+                          className="flex items-center justify-between gap-2 rounded border p-2"
                         >
-                          삭제
-                        </Button>
-                      </li>
-                    ))}
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium">{b.title}</p>
+                            <p className="flex flex-wrap items-center gap-1 text-muted-foreground">
+                              <span>
+                                {b.startsAt.replace("T", " ")} ~ {b.endsAt.replace("T", " ")}
+                              </span>
+                              <span
+                                className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${
+                                  statusColor[b.status] ?? "bg-slate-100"
+                                }`}
+                              >
+                                {statusLabel[b.status] ?? b.status}
+                              </span>
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-rose-600"
+                            onClick={() => delBooking(b.id)}
+                          >
+                            삭제
+                          </Button>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
 

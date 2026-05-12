@@ -3,28 +3,27 @@
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { MapPin, BadgeCheck, Flame } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Flame } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
+  catalogPriceFieldToWon,
   formatMediaPriceWonWithSymbol,
+  getCheapestMediaPriceOption,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
-/** 매체 검색 그리드 카드와 동일한 셸 (리스트/비교/견적 공통) */
+/**
+ * 매체 검색 그리드 카드 (리스트/비교/견적 공통).
+ * Phase 3 Brutalist: 2px 검정 보더, 사각, 모노 메타, grayscale → hover 컬러.
+ * 그리드 컨테이너에서 보더 겹침 처리를 위해 -mt/-ml 사용.
+ */
 export const mediaCatalogGridCardShellClass =
-  "relative min-w-0 overflow-hidden gap-0 py-0 transition-shadow hover:shadow-lg motion-safe:hover:translate-y-0 sm:motion-safe:hover:-translate-y-[2px]";
+  "tkad-catalog-card-shell relative -mt-[2px] -ml-[2px] block min-w-0 border-2 border-border bg-card transition-colors group-hover:bg-muted dark:group-hover:bg-muted";
 
 type Common = {
   media: MediaItem;
@@ -53,36 +52,45 @@ export type MediaCatalogGridCardProps =
 export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const tMedia = useTranslations("media");
   const { media, isKo, imagePreparingLabel, popularIds } = props;
-  const priceNum = props.priceMan ?? media.price;
+  // priceMan 명시(예: 네트워크 패키지 월 환산) 가 우선.
+  // 없으면 priceOptions + price 중 *가장 저렴한* 옵션을 표시.
+  const cheapest = props.priceMan
+    ? null
+    : getCheapestMediaPriceOption(media);
+  // cheapest.priceWon 은 이미 원(₩) 단위 — formatMediaPriceWonWithSymbol 에 그대로 전달.
+  // priceMan / media.price 폴백은 기존 동작 유지 (호출부 데이터 단위에 의존).
+  const rawPrice = cheapest?.priceWon ?? props.priceMan ?? media.price;
+  const priceWon = cheapest?.priceWon ?? catalogPriceFieldToWon(rawPrice);
+  const displayPeriod = cheapest?.period ?? media.pricePeriod;
   const tl = typeLabels[media.type];
-  const showPricePeriod = props.showPricePeriod ?? false;
+  // 가장 저렴한 옵션 사용 시에는 단가 단위(월/주/일) 명시 — 비교 혼동 방지
+  const showPricePeriod = props.showPricePeriod ?? !!cheapest;
 
   const thumbnailOverlays = (
     <>
-      {media.catalogSource !== "network" ? (
-        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
-          <BadgeCheck className="h-3 w-3" />
+      {media.catalogSource !== "network" && media.isVerified ? (
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hermes px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-[0_0_20px_rgba(255,98,0,0.45)]">
           Verified
         </div>
-      ) : (
-        <div className="absolute top-2.5 right-2.5 z-10 rounded-full bg-navy/90 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+      ) : media.catalogSource === "network" ? (
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hero-void px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-hero-fg">
           {tMedia("networkSitesBadge", {
             count: media.networkTotalLocations ?? 0,
           })}
         </div>
-      )}
+      ) : null}
       {props.variant === "link" ? props.topLeftSlot : null}
       {props.variant === "selectable" ? (
         <div
-          className="pointer-events-none absolute left-2.5 top-2.5 z-20 flex size-8 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm"
+          className="pointer-events-none absolute left-2.5 top-2.5 z-20 flex size-8 items-center justify-center border-2 border-border bg-card"
           aria-hidden
         >
           <span
             className={cn(
-              "flex h-3.5 w-3.5 items-center justify-center rounded border-2 text-[9px] font-bold",
+              "flex h-4 w-4 items-center justify-center text-[11px] font-bold",
               props.selected
-                ? "border-gold bg-gold text-navy"
-                : "border-navy/20 bg-white text-transparent",
+                ? "bg-accent text-accent-foreground"
+                : "bg-card text-transparent",
             )}
           >
             {props.selected ? "✓" : ""}
@@ -90,9 +98,9 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         </div>
       ) : null}
       {popularIds?.has(media.id) ? (
-        <div className="absolute bottom-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[10px] font-bold text-navy shadow-sm">
+        <div className="absolute bottom-0 right-0 z-10 flex items-center gap-1 border-l-2 border-t-2 border-border bg-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-accent-foreground">
           <Flame className="h-3 w-3" />
-          {isKo ? "인기" : "Popular"}
+          {isKo ? "인기" : "Hot"}
         </div>
       ) : null}
     </>
@@ -103,46 +111,37 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       <MediaCatalogThumbnail
         media={media}
         placeholderLabel={imagePreparingLabel}
-        className="flex h-44 items-center justify-center sm:h-52 lg:h-60"
-        bottomGradientClassName="absolute inset-0 bg-gradient-to-t from-navy/60 via-navy/10 to-transparent"
+        className="flex h-44 items-center justify-center border-b-2 border-border bg-muted [&_img]:grayscale [&_img]:transition-[filter,transform] [&_img]:duration-500 group-hover:[&_img]:grayscale-0 group-hover:[&_img]:scale-[1.02] sm:h-52 lg:h-60"
+        bottomGradientClassName={null}
       >
         {thumbnailOverlays}
       </MediaCatalogThumbnail>
-      <CardHeader className="relative z-0 min-w-0 space-y-1.5 px-4 pb-2 pt-3 sm:px-5 sm:pb-2.5 sm:pt-3.5">
-        <div className="flex items-center justify-between gap-2">
-          <Badge
-            variant="secondary"
-            className="bg-navy/5 text-[11px] text-navy sm:text-xs"
-          >
+      <div className="flex flex-col gap-2.5 p-5 text-card-foreground">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-foreground/85 sm:text-sm">
             {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
-          </Badge>
-        </div>
-        <CardTitle className="line-clamp-2 min-w-0 break-words text-sm leading-snug sm:text-[15px]">
-          {isKo ? media.name : (media.nameEn || media.name)}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="relative z-0 min-w-0 space-y-2 px-4 pb-3.5 pt-0 sm:px-5 sm:pb-4">
-        <div className="flex min-w-0 items-start gap-1 text-[12px] leading-snug text-muted-foreground sm:text-[13px]">
-          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          <span className="min-w-0 line-clamp-2 sm:line-clamp-2">
-            {formatMediaLocationShort(media, isKo)}
           </span>
         </div>
-        <div className="min-w-0 break-words text-base font-bold tabular-nums leading-tight text-navy sm:text-lg sm:leading-normal">
-          {formatMediaPriceWonWithSymbol(priceNum)}
+        <h3 className="line-clamp-2 break-words text-base font-semibold leading-snug tracking-tight sm:text-lg">
+          {isKo ? media.name : (media.nameEn || media.name)}
+        </h3>
+        <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+          {formatMediaLocationShort(media, isKo)}
+        </p>
+        <p className="mt-0.5 break-words text-lg font-black tabular-nums leading-snug">
+          {formatMediaPriceWonWithSymbol(priceWon)}
           {showPricePeriod ? (
-            <span className="text-xs font-normal text-muted-foreground">
-              {" "}
-              · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
+            <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+              · {tMedia(mediaPricePeriodTranslationKey(displayPeriod))}
             </span>
           ) : null}
-        </div>
-      </CardContent>
+        </p>
+      </div>
     </>
   );
 
   const wrapClass = cn(
-    "block min-w-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gold/40",
+    "group block min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-accent",
     props.className,
   );
 
@@ -153,7 +152,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         aria-label={isKo ? media.name : (media.nameEn || media.name)}
         className={wrapClass}
       >
-        <Card className={mediaCatalogGridCardShellClass}>{body}</Card>
+        <div className={mediaCatalogGridCardShellClass}>{body}</div>
       </Link>
     );
   }
@@ -162,7 +161,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
     <label
       className={cn(
         wrapClass,
-        "cursor-pointer focus-within:ring-2 focus-within:ring-gold/40",
+        "cursor-pointer focus-within:ring-2 focus-within:ring-accent",
       )}
     >
       <input
@@ -172,15 +171,14 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         onChange={props.onToggleSelected}
         aria-label={props.selectionAriaLabel}
       />
-      <Card
+      <div
         className={cn(
           mediaCatalogGridCardShellClass,
-          "border-2 border-transparent",
-          props.selected && "border-gold ring-2 ring-gold/20",
+          props.selected && "bg-muted ring-2 ring-accent ring-inset",
         )}
       >
         {body}
-      </Card>
+      </div>
     </label>
   );
 }

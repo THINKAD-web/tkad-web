@@ -59,12 +59,16 @@ export function PlannerRegionMap({
   countLabel,
 }: Props) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div>
-        <p className="text-sm font-bold text-navy">{title}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          [ {title} ]
+        </p>
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+          {hint}
+        </p>
       </div>
-      <div className="rounded-2xl border border-navy/10 bg-gradient-to-b from-slate-50 to-white p-3 shadow-inner">
+      <div className="border-2 border-border bg-muted p-3">
         <svg
           viewBox="0 0 340 380"
           className="mx-auto h-auto w-full max-w-md touch-manipulation"
@@ -72,20 +76,15 @@ export function PlannerRegionMap({
           aria-label={title}
         >
           <title>{title}</title>
-          <defs>
-            <linearGradient id="plannerMapSea" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="rgb(214 222 235)" />
-              <stop offset="100%" stopColor="rgb(230 235 245)" />
-            </linearGradient>
-          </defs>
-          <rect width="340" height="380" rx="16" fill="url(#plannerMapSea)" />
+          <rect width="340" height="380" className="tkad-planner-map-bg" />
           <text
             x="170"
             y="36"
             textAnchor="middle"
-            className="fill-navy/35 text-[11px] font-semibold tracking-wide"
+            className="tkad-planner-map-korea text-[11px] font-bold tracking-[0.22em]"
+            style={{ fontFamily: "JetBrains Mono, monospace" }}
           >
-            KOREA
+            [ KOREA ]
           </text>
           {ZONES.map((z) => {
             const on = selected.has(z.id);
@@ -97,8 +96,8 @@ export function PlannerRegionMap({
                   className={cn(
                     "cursor-pointer transition-colors",
                     on
-                      ? "fill-navy/88 stroke-gold stroke-[2.5]"
-                      : "fill-white/90 stroke-navy/20 stroke-[1.5] hover:fill-white hover:stroke-navy/40",
+                      ? "tkad-planner-map-zone-on fill-primary stroke-[3]"
+                      : "tkad-planner-map-zone-off stroke-2",
                   )}
                   onClick={() => onToggle(z.id)}
                 />
@@ -108,7 +107,7 @@ export function PlannerRegionMap({
                   textAnchor="middle"
                   className={cn(
                     "pointer-events-none text-[11px] font-bold",
-                    on ? "fill-white" : "fill-navy",
+                    on ? "tkad-planner-map-label-active" : "tkad-planner-map-label-idle",
                   )}
                 >
                   {labelFor(z.id)}
@@ -118,9 +117,10 @@ export function PlannerRegionMap({
                   y={z.cy + 10}
                   textAnchor="middle"
                   className={cn(
-                    "pointer-events-none text-[9px] font-semibold",
-                    on ? "fill-gold" : "fill-muted-foreground",
+                    "pointer-events-none text-[9px] font-bold tracking-[0.18em]",
+                    on ? "tkad-planner-map-count-active" : "tkad-planner-map-count-idle",
                   )}
+                  style={{ fontFamily: "JetBrains Mono, monospace" }}
                 >
                   {countLabel(n)}
                 </text>
@@ -128,21 +128,26 @@ export function PlannerRegionMap({
             );
           })}
         </svg>
-        <ul className="mt-3 flex flex-wrap justify-center gap-2">
+        <ul className="mt-4 flex flex-wrap justify-center gap-0">
           {PLANNER_MAP_REGIONS.map((r) => (
-            <li key={r}>
+            <li key={r} className="-mt-[2px] -ml-[2px]">
               <button
                 type="button"
                 onClick={() => onToggle(r)}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors",
+                  "border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
                   selected.has(r)
-                    ? "border-gold bg-navy text-white"
-                    : "border-navy/15 bg-white text-navy hover:border-navy/30",
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted",
                 )}
               >
                 {labelFor(r)}
-                <span className="ml-1 tabular-nums text-gold/90">
+                <span
+                  className={cn(
+                    "ml-2 tabular-nums",
+                    selected.has(r) ? "text-primary-foreground/85" : "text-muted-foreground",
+                  )}
+                >
                   ({counts[r] ?? 0})
                 </span>
               </button>

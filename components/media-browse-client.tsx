@@ -4,8 +4,6 @@
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import {
   ShieldCheck,
   Calculator,
@@ -17,11 +15,14 @@ import {
   ChevronDown,
   ChevronUp,
   Search,
+  ArrowRight,
 } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
-import SolutionCtaButton from "@/components/solution-cta-button";
+import { BtnBlock } from "@/components/brutalist";
+import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 import {
   useState,
   useMemo,
@@ -31,6 +32,7 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   getCompareCartEntries,
   setCompareCartEntries,
@@ -79,12 +81,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { MediaKeywordSearchHero } from "@/components/media-keyword-search-hero";
 import {
   useMediaCatalogFilters,
 } from "@/lib/use-media-catalog-filters";
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
-import { addRecentlyViewedId } from "@/lib/recently-viewed";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
@@ -110,14 +110,19 @@ function useLgUp() {
 
 export default function MediaBrowseClient({
   catalog = [],
+  hideHero = false,
 }: {
   catalog?: MediaItem[];
+  /** region/type/area 랜딩에서 자체 hero 가 이미 있을 때 내부 hero 섹션 숨김 */
+  hideHero?: boolean;
 }) {
   // TODO: dev server restart if needed (after large UI changes)
   const t = useTranslations();
   const tMedia = useTranslations("media");
   const locale = useLocale();
   const isKo = locale === "ko";
+  const searchParams = useSearchParams();
+  const qFromUrl = searchParams.get("q") ?? "";
 
   const [mainTab, setMainTab] = useState<"search" | "ai">("search");
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
@@ -199,6 +204,12 @@ export default function MediaBrowseClient({
     }, KEYWORD_FILTER_SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(t);
   }, [catalogSearchQuery]);
+
+  useEffect(() => {
+    const next = qFromUrl.trim();
+    setCatalogSearchQuery(next);
+    setDebouncedCatalogSearch(next);
+  }, [qFromUrl]);
 
   const filterState = useMemo(
     () => ({
@@ -304,12 +315,6 @@ export default function MediaBrowseClient({
     strictPrecisionFiltered.length === 0 &&
     precisionSelectionsActive &&
     advancedFiltered.length > 0;
-
-  const browseLenientSearchTier =
-    strictPrecisionFiltered.length === 0 &&
-    !precisionFilterRelaxed &&
-    searchFiltered.length > 0 &&
-    effectiveCatalog.length > 0;
 
   /** 정밀 → 고급 → 검색 순으로 적용하되, 모두 0건이면 전체 목록 */
   const filtered = useMemo(() => {
@@ -434,14 +439,6 @@ export default function MediaBrowseClient({
     selectAllInCategory,
   };
 
-  const handleMediaView = useCallback((media: MediaItem) => {
-    addRecentlyViewedId(media.id);
-    setSearchTarget(media.id);
-    setCatalogSearchQuery("");
-    setDebouncedCatalogSearch("");
-    setMapSelectedId(media.id);
-  }, []);
-
   const toggleCompare = useCallback((media: MediaItem) => {
     setCompareItems((prev) => {
       const exists = prev.find((m) => m.id === media.id);
@@ -482,65 +479,103 @@ export default function MediaBrowseClient({
 
   return (
     <>
-      <section className="bg-navy py-28">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold text-white sm:text-4xl">
-              {t("media.title")}
-            </h1>
-            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">BETA</span>
-          </div>
-          <p className="mt-2 text-slate-300">
-            {t("media.subtitle")}
-          </p>
-          <div className="relative mx-auto mt-8 max-w-lg sm:mt-10">
-            <MediaKeywordSearchHero
-              variant="embed"
-              featured
-              value={catalogSearchQuery}
-              onChange={setCatalogSearchQuery}
-            />
-          </div>
-          <div className="mt-8 sm:mt-10">
-            <SolutionCtaButton
-              href="/contact"
-              variant="outline"
-              label={isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
-              size="lg"
-              className="h-11 border-white/35 bg-white/10 text-white shadow-none backdrop-blur-sm hover:border-white/55 hover:bg-white/18 hover:text-white"
-            />
-          </div>
-        </div>
-      </section>
+      {hideHero ? null : (
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
 
-      <section className="border-t border-border/70 bg-background py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {mainTab === "search" ? (
-            <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/80">
-              {t("media.resultsSectionEyebrow")}
+          <div className="tkad-media-hero relative mx-auto max-w-7xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-28 lg:px-8 lg:pb-36 lg:pt-32">
+            <p className="tkad-media-hero__eyebrow font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              {`// ${t("media.heroEyebrow")}`}
             </p>
-          ) : null}
-          <div className="mb-8 flex justify-center">
-            <div className="inline-flex rounded-full border border-slate-200/90 bg-white p-1 shadow-sm">
+            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+              <h1 className="text-balance text-[clamp(40px,5.2vw,72px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+                {t("media.title")}
+              </h1>
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">BETA</span>
+              </span>
+            </div>
+            <p className="tkad-media-hero__subtitle mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+              {t("media.subtitle")}
+            </p>
+
+            <div className="tkad-media-hero-search relative mx-auto mt-10 max-w-2xl">
+              <Search
+                className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-white/45 sm:left-5 sm:size-[1.35rem]"
+                aria-hidden
+              />
+              <input
+                type="search"
+                value={catalogSearchQuery}
+                onChange={(e) => setCatalogSearchQuery(e.target.value)}
+                placeholder={
+                  isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
+                }
+                className="h-14 w-full rounded-[20px] border border-white/18 bg-white/8 pl-12 pr-4 text-base text-white shadow-[0_24px_80px_rgba(0,0,0,0.45)] placeholder:text-white/45 backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 sm:h-16 sm:pl-14 sm:pr-5 sm:text-[1.05rem]"
+                aria-label={isKo ? "매체 검색" : "Search media"}
+              />
+            </div>
+
+            <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/contact"
+                className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              >
+                {isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              <Link
+                href="/planner"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              >
+                {isKo ? "AI 캠페인 설계" : "AI campaign planner"}
+                <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="tkad-media-browse-main border-t border-border/60 bg-card py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* removed: "검색 결과 · 보기 옵션" */}
+          <div className="mb-10 flex justify-center">
+            <div
+              className="tkad-media-main-tabs inline-flex rounded-2xl border border-border/80 bg-muted/60 p-1 shadow-sm backdrop-blur-md"
+              role="tablist"
+              aria-label={isKo ? "매체 탐색 방식" : "Browse mode"}
+            >
               <button
                 type="button"
+                role="tab"
+                aria-selected={mainTab === "search"}
                 onClick={() => setMainTab("search")}
-                className={`touch-manipulation rounded-full px-5 py-2.5 text-sm font-semibold transition-colors sm:px-8 ${
+                className={cn(
+                  "touch-manipulation rounded-[14px] px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5",
                   mainTab === "search"
-                    ? "bg-navy text-white shadow-sm"
-                    : "text-muted-foreground hover:bg-white"
-                }`}
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-foreground hover:bg-background/70",
+                )}
               >
                 {t("media.ai.tabSearch")}
               </button>
               <button
                 type="button"
+                role="tab"
+                aria-selected={mainTab === "ai"}
                 onClick={() => setMainTab("ai")}
-                className={`touch-manipulation rounded-full px-5 py-2.5 text-sm font-semibold transition-colors sm:px-8 ${
+                className={cn(
+                  "touch-manipulation rounded-[14px] px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5",
                   mainTab === "ai"
-                    ? "bg-gradient-to-r from-navy to-navy/90 text-white shadow-sm"
-                    : "text-muted-foreground hover:bg-white"
-                }`}
+                    ? "bg-accent text-accent-foreground shadow-sm"
+                    : "text-foreground hover:bg-background/70",
+                )}
               >
                 {t("media.ai.tabAi")}
               </button>
@@ -559,28 +594,28 @@ export default function MediaBrowseClient({
             />
           ) : (
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-3">
-                <Button
+              {/* #MEDIA-1: 정밀필터 진입점 숨김 (코드 보존) */}
+              <div className="hidden flex-col gap-3">
+                <button
                   type="button"
-                  variant="ghost"
-                  className="inline-flex h-auto w-full items-center justify-center gap-2 border border-dashed border-slate-300/80 bg-slate-50/60 py-2.5 text-xs font-medium text-muted-foreground hover:bg-slate-100/90 sm:w-auto sm:self-start sm:px-4 sm:text-sm"
                   onClick={togglePrecisionFilters}
+                  className="inline-flex w-full items-center justify-center gap-2 border-2 border-border bg-card px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background sm:w-auto sm:self-start"
                 >
                   {precisionFiltersOpen
                     ? t("media.advancedFiltersHide")
                     : t("media.advancedFiltersShow")}
                   {precisionFiltersOpen ? (
-                    <ChevronUp className="size-4 shrink-0" aria-hidden />
+                    <ChevronUp className="size-3.5 shrink-0" aria-hidden />
                   ) : (
-                    <ChevronDown className="size-4 shrink-0" aria-hidden />
+                    <ChevronDown className="size-3.5 shrink-0" aria-hidden />
                   )}
-                </Button>
+                </button>
                 {!precisionFiltersOpen ? (
-                  <div className="rounded-xl border border-slate-100 bg-white/90 px-4 py-3.5 text-left shadow-sm ring-1 ring-slate-100/80">
-                    <p className="text-[15px] font-semibold leading-snug text-navy sm:text-base">
+                  <div className="border-2 border-border bg-muted px-5 py-4 text-left">
+                    <p className="text-[15px] font-bold leading-snug tracking-tight text-foreground sm:text-base">
                       {t("media.advancedFiltersCollapsedHint")}
                     </p>
-                    <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground sm:text-sm">
+                    <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersCollapsedSubhint")}
                     </p>
                   </div>
@@ -589,14 +624,14 @@ export default function MediaBrowseClient({
 
               {lgUp && precisionFiltersOpen ? (
                 <div className="space-y-4">
-                  <div className="rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3.5 shadow-sm sm:px-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground/85">
-                      {t("media.advancedFiltersSectionLabel")}
+                  <div className="border-2 border-border bg-card px-5 py-4">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      [ {t("media.advancedFiltersSectionLabel")} ]
                     </p>
-                    <p className="mt-1 text-[11px] text-muted-foreground/85">
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersSectionSubtext")}
                     </p>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    <p className="mt-3 text-sm leading-relaxed text-foreground">
                       {tMedia("precisionFilterPanelIntro")}
                     </p>
                   </div>
@@ -611,41 +646,45 @@ export default function MediaBrowseClient({
                 <SheetContent
                   side="bottom"
                   showCloseButton
-                  className="max-h-[92vh] gap-0 overflow-y-auto rounded-t-2xl border-t-2 border-dashed border-slate-300/80 bg-slate-50/40 p-0"
+                  className="max-h-[92vh] gap-0 overflow-y-auto border-t-2 border-border bg-card p-0"
                 >
-                  <SheetHeader className="sticky top-0 z-10 border-b border-dashed border-slate-200/80 bg-background/95 px-4 pb-3 pt-2 text-left backdrop-blur-sm">
-                    <SheetTitle className="text-left text-base font-bold tracking-tight text-navy">
+                  <SheetHeader className="sticky top-0 z-10 border-b-2 border-border bg-card px-4 pb-3 pt-3 text-left">
+                    <SheetTitle className="text-left text-base font-bold tracking-tight text-foreground">
                       {t("media.advancedFiltersSectionLabel")}
                     </SheetTitle>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersSectionSubtext")}
                     </p>
-                    <p className="pt-1 text-[12px] leading-relaxed text-muted-foreground">
+                    <p className="pt-1 text-[12px] leading-relaxed text-foreground">
                       {tMedia("precisionFilterPanelIntro")}
                     </p>
                   </SheetHeader>
                   <div className="mx-3 mb-4 mt-2 sm:mx-4">
                     <MediaPrecisionFiltersAssistant {...precisionAssistantProps} />
                   </div>
-                  <div className="sticky bottom-0 border-t border-slate-200/80 bg-background/95 px-4 py-3 backdrop-blur-sm">
-                    <Button
-                      type="button"
-                      className="w-full bg-navy font-semibold text-white hover:bg-navy/90"
+                  <div className="sticky bottom-0 border-t-2 border-border bg-card p-3">
+                    <BtnBlock
                       onClick={() => setPrecisionFiltersOpen(false)}
+                      variant="primary"
+                      size="md"
+                      className="w-full"
                     >
                       필터 적용하기
-                    </Button>
+                    </BtnBlock>
                   </div>
                 </SheetContent>
               </Sheet>
 
               <div className="min-w-0">
-                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-navy">
-                      {t("media.results")}: {gridDisplayList.length}
+                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="text-base font-semibold text-foreground sm:text-lg">
+                      {t("media.results")}:{" "}
+                      <span className="tabular-nums text-accent">
+                        {gridDisplayList.length}
+                      </span>
                       {catalogMinPadActive ? (
-                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                        <span className="ml-2 text-sm font-normal text-muted-foreground">
                           {tMedia("catalogMinPadCountHint", {
                             matched: sortedFiltered.length,
                           })}
@@ -653,8 +692,8 @@ export default function MediaBrowseClient({
                       ) : null}
                     </span>
                     {debouncedCatalogSearch.trim() ? (
-                      <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-gold/35 bg-gradient-to-r from-gold/10 to-amber-50/90 px-3 py-1 text-xs font-semibold text-navy shadow-sm">
-                        <Search className="size-3.5 shrink-0 text-gold-dark" aria-hidden />
+                      <span className="inline-flex max-w-full items-center gap-1.5 border-2 border-border bg-muted px-3 py-1.5 text-xs font-medium text-foreground sm:text-sm">
+                        <Search className="size-3.5 shrink-0 text-accent" aria-hidden />
                         <span className="min-w-0 truncate">
                           {t("media.activeKeywordLabel")}: {debouncedCatalogSearch}
                         </span>
@@ -662,44 +701,45 @@ export default function MediaBrowseClient({
                     ) : null}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <label className="inline-flex items-center gap-2 rounded-full border border-navy/10 bg-white px-3 py-1.5 text-xs font-medium text-navy">
-                      <span className="text-muted-foreground">
-                        {t("media.sortLabel")}
-                      </span>
-                      <select
-                        className="max-w-[10rem] rounded-md border border-navy/15 bg-slate-50 px-2 py-0.5 text-xs font-semibold"
-                        value={sortBy}
-                        onChange={(e) =>
-                          setSortBy(
-                            e.target.value as typeof sortBy,
-                          )
-                        }
-                      >
-                        <option value="default">
-                          {t("media.sortDefault")}
-                        </option>
-                        <option value="newest">
-                          {t("media.sortNewest")}
-                        </option>
-                        <option value="priceAsc">
-                          {t("media.sortPriceAsc")}
-                        </option>
-                        <option value="priceDesc">
-                          {t("media.sortPriceDesc")}
-                        </option>
-                        <option value="trafficDesc">
-                          {t("media.sortTrafficDesc")}
-                        </option>
-                      </select>
-                    </label>
-                    <div className="inline-flex rounded-full border border-navy/15 bg-slate-50 p-0.5">
+                    {browseMode === "list" ? (
+                      <label className="inline-flex h-10 items-center gap-2 border-2 border-border bg-card px-3 text-sm text-foreground">
+                        <span className="shrink-0 text-muted-foreground">
+                          {t("media.sortLabel")}
+                        </span>
+                        <select
+                          className="h-10 max-w-[11rem] min-w-0 border-l border-border bg-transparent pl-2 pr-1 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+                          value={sortBy}
+                          onChange={(e) =>
+                            setSortBy(e.target.value as typeof sortBy)
+                          }
+                        >
+                          <option value="default">
+                            {t("media.sortDefault")}
+                          </option>
+                          <option value="newest">
+                            {t("media.sortNewest")}
+                          </option>
+                          <option value="priceAsc">
+                            {t("media.sortPriceAsc")}
+                          </option>
+                          <option value="priceDesc">
+                            {t("media.sortPriceDesc")}
+                          </option>
+                          <option value="trafficDesc">
+                            {t("media.sortTrafficDesc")}
+                          </option>
+                        </select>
+                      </label>
+                    ) : null}
+                    {/* #MEDIA-1: 목록/지도 뷰 토글 진입점 숨김 (코드 보존) */}
+                    <div className="hidden border-2 border-border bg-card">
                       <button
                         type="button"
                         onClick={() => setBrowseMode("list")}
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
                           browseMode === "list"
-                            ? "bg-white text-navy shadow-sm"
-                            : "text-muted-foreground hover:text-navy"
+                            ? "bg-hero-void text-hero-fg"
+                            : "text-foreground hover:bg-muted"
                         }`}
                       >
                         <LayoutList className="h-3.5 w-3.5" />
@@ -708,10 +748,10 @@ export default function MediaBrowseClient({
                       <button
                         type="button"
                         onClick={() => setBrowseMode("map")}
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        className={`inline-flex items-center gap-1.5 border-l-2 border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
                           browseMode === "map"
-                            ? "bg-white text-navy shadow-sm"
-                            : "text-muted-foreground hover:text-navy"
+                            ? "bg-hero-void text-hero-fg"
+                            : "text-foreground hover:bg-muted"
                         }`}
                       >
                         <MapIcon className="h-3.5 w-3.5" />
@@ -737,10 +777,7 @@ export default function MediaBrowseClient({
                     ) : null}
                     {browseMode === "list" ? (
                       <>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
+                        <BtnBlock
                           onClick={() =>
                             addManyToCompare(
                               pagedCatalog.filter(
@@ -749,23 +786,34 @@ export default function MediaBrowseClient({
                             )
                           }
                           disabled={pagedCatalog.length === 0}
+                          variant="secondary"
+                          size="sm"
                         >
                           전체선택
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
+                        </BtnBlock>
+                        <BtnBlock
                           onClick={() => setCompareItems([])}
                           disabled={compareItems.length === 0}
+                          variant="secondary"
+                          size="sm"
                         >
                           전체삭제
-                        </Button>
+                        </BtnBlock>
                       </>
                     ) : null}
-                    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
-                      <ShieldCheck className="h-4 w-4" aria-hidden />
-                      <span>{tMedia("browseCatalogVerifiedBadge")}</span>
+                    <div className="flex min-w-0 max-w-full items-start gap-2 border-2 border-border bg-card px-3 py-2 sm:max-w-[24rem]">
+                      <ShieldCheck
+                        className="mt-0.5 h-4 w-4 shrink-0 text-hermes"
+                        aria-hidden
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-foreground sm:text-sm">
+                          {tMedia("browseCatalogVerifiedBadge")}
+                        </p>
+                        <p className="mt-1 text-[10px] leading-snug text-muted-foreground sm:text-[11px]">
+                          {tMedia("browseCatalogVerifiedListHint")}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -773,48 +821,35 @@ export default function MediaBrowseClient({
                 {precisionFilterRelaxed ? (
                   <div
                     role="status"
-                    className="mb-4 flex flex-col gap-3 rounded-xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between"
+                    className="mb-4 flex flex-col gap-3 border-2 border-accent bg-card px-4 py-3 text-sm leading-relaxed text-foreground sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <p className="min-w-0 leading-relaxed">
+                    <p className="min-w-0">
+                      <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                        {`// RELAXED`}
+                      </span>
                       {tMedia("precisionFilterRelaxedBanner")}
                     </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 border-amber-300 bg-white hover:bg-amber-50"
+                    <BtnBlock
                       onClick={clearPrecisionSelections}
+                      variant="secondary"
+                      size="sm"
+                      className="shrink-0"
                     >
                       {tMedia("clearPrecisionFilters")}
-                    </Button>
+                    </BtnBlock>
                   </div>
                 ) : null}
 
-                {browseLenientSearchTier ? (
-                  <div
-                    role="status"
-                    className="mb-4 flex flex-col gap-3 rounded-xl border border-indigo-200/90 bg-indigo-50/90 px-4 py-3 text-sm text-indigo-950 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <p className="min-w-0 leading-relaxed">
-                      {tMedia("browseLenientSearchBanner")}
-                    </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 border-indigo-300 bg-white hover:bg-indigo-50"
-                      onClick={resetFilters}
-                    >
-                      {tMedia("resetAllBrowseFilters")}
-                    </Button>
-                  </div>
-                ) : null}
+                {/* (요청) LENIENT 안내 문구 숨김 처리 */}
 
                 {catalogMinPadActive ? (
                   <div
                     role="status"
-                    className="mb-4 rounded-xl border border-emerald-200/90 bg-emerald-50/90 px-4 py-3 text-sm leading-relaxed text-emerald-950"
+                    className="mb-4 border-2 border-border bg-muted px-4 py-3 text-sm leading-relaxed text-foreground"
                   >
+                    <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      {`// PADDED`}
+                    </span>
                     {tMedia("catalogMinPadBanner", {
                       matched: sortedFiltered.length,
                       shown: gridDisplayList.length,
@@ -823,21 +858,19 @@ export default function MediaBrowseClient({
                 ) : null}
 
                 {gridDisplayList.length === 0 ? (
-                  <div className="flex min-h-[32rem] flex-col items-center justify-center gap-8 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/90 px-6 py-20 text-center sm:px-10">
-                    <p className="max-w-2xl text-3xl font-bold tracking-tight text-navy sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
+                  <div className="flex min-h-[32rem] flex-col items-center justify-center gap-8 border-2 border-border bg-muted px-6 py-20 text-center sm:px-10">
+                    <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                      {`// 0 RESULTS`}
+                    </p>
+                    <p className="max-w-2xl text-3xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
                       {tMedia("catalogBrowseEmptyTitle")}
                     </p>
                     <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
                       {tMedia("catalogBrowseEmptySubtitle")}
                     </p>
-                    <Button
-                      type="button"
-                      size="lg"
-                      className="min-h-12 min-w-[14rem] px-8 text-base font-semibold shadow-md"
-                      onClick={resetFilters}
-                    >
+                    <BtnBlock onClick={resetFilters} variant="primary" size="lg">
                       {tMedia("resetAllBrowseFiltersProminent")}
-                    </Button>
+                    </BtnBlock>
                   </div>
                 ) : browseMode === "map" ? (
                   <div className="relative">
@@ -858,27 +891,26 @@ export default function MediaBrowseClient({
                               : mapSelectedMedia.nameEn
                           }
                         >
-                          <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl shadow-navy/20 ring-1 ring-black/5">
-                            <div className="flex items-start gap-3 border-b border-navy/8 p-3 sm:p-4">
-                              <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg sm:h-24 sm:w-32">
+                          <div className="overflow-hidden border-2 border-border bg-card">
+                            <div className="flex items-start gap-3 border-b-2 border-border p-3 sm:p-4">
+                              <div className="h-20 w-28 shrink-0 overflow-hidden border-2 border-border sm:h-24 sm:w-32">
                                 <MediaCatalogThumbnail
                                   media={mapSelectedMedia}
                                   placeholderLabel={t("media.imagePreparing")}
-                                  className="h-full w-full rounded-lg"
+                                  className="h-full w-full"
                                   bottomGradientClassName={null}
                                   placeholderSize="xs"
                                 />
                               </div>
                               <div className="min-w-0 flex-1 pt-0.5">
-                                <h3 className="line-clamp-2 text-base font-bold leading-snug text-navy sm:text-lg">
+                                <h3 className="line-clamp-2 text-base font-bold leading-snug tracking-tight text-foreground sm:text-lg">
                                   {isKo
                                     ? mapSelectedMedia.name
                                     : mapSelectedMedia.nameEn}
                                 </h3>
-                                <p className="mt-1.5 text-sm font-bold tabular-nums text-navy">
+                                <p className="mt-1.5 font-mono text-sm font-bold tabular-nums text-foreground">
                                   {formatMediaPriceWonWithSymbol(mapSelectedMedia.price)}
-                                  <span className="text-xs font-normal text-muted-foreground">
-                                    {" "}
+                                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                                     ·{" "}
                                     {tMedia(
                                       mediaPricePeriodTranslationKey(
@@ -887,14 +919,14 @@ export default function MediaBrowseClient({
                                     )}
                                   </span>
                                 </p>
-                                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <p className="mt-1.5 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                                   <Users
-                                    className="h-3.5 w-3.5 shrink-0 text-gold-dark"
+                                    className="h-3 w-3 shrink-0 text-accent"
                                     aria-hidden
                                   />
                                   <span>
                                     {t("media.mapPopupFootTraffic")}:{" "}
-                                    <span className="font-semibold text-navy/85">
+                                    <span className="font-bold text-foreground">
                                       {mapSelectedMedia.dailyFootTraffic.toLocaleString()}
                                     </span>
                                   </span>
@@ -903,53 +935,49 @@ export default function MediaBrowseClient({
                               <button
                                 type="button"
                                 onClick={() => setMapPopupOpen(false)}
-                                className="-m-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-slate-100 hover:text-navy"
+                                className="flex h-9 w-9 shrink-0 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background"
                                 aria-label={t("media.mapPopupClose")}
                               >
                                 <X className="h-4 w-4" />
                               </button>
                             </div>
                             <div className="flex flex-wrap gap-2 p-3 sm:p-4 sm:pt-3">
-                              <Link
-                                href={mediaItemDetailPath(
-                                  mapSelectedMedia.id,
-                                )}
+                              <BtnBlock
+                                href={mediaItemDetailPath(mapSelectedMedia.id)}
+                                variant="secondary"
+                                size="sm"
                                 className="flex-1 min-w-[8rem]"
                               >
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-10 w-full font-semibold"
-                                >
-                                  <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-                                  {t("media.mapCardDetail")}
-                                </Button>
-                              </Link>
-                              <Button
-                                size="sm"
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                {t("media.mapCardDetail")}
+                              </BtnBlock>
+                              <BtnBlock
                                 onClick={() => toggleCompare(mapSelectedMedia)}
-                                className={`h-10 flex-1 min-w-[8rem] font-semibold ${
+                                variant={
                                   isInCompare(mapSelectedMedia.id)
-                                    ? "border-2 border-gold bg-white text-gold hover:bg-gold/10"
-                                    : "bg-navy text-white hover:bg-navy/90"
-                                }`}
+                                    ? "accent"
+                                    : "primary"
+                                }
+                                size="sm"
+                                className="flex-1 min-w-[8rem]"
                               >
                                 {isInCompare(mapSelectedMedia.id)
                                   ? (isKo ? "✓ 선택됨" : "✓ Selected")
                                   : (isKo ? "+ 비교 추가" : "+ Compare")}
-                              </Button>
-                              <Link
-                                href={`/quote?media=${mapSelectedMedia.id}`}
+                              </BtnBlock>
+                              <BtnBlock
+                                href={`/quote?media=${mapSelectedMedia.id}${
+                                  (mapSelectedMedia.priceOptions?.length ?? 0) > 0
+                                    ? "&po=0"
+                                    : ""
+                                }`}
+                                variant="accent"
+                                size="sm"
                                 className="flex-1 min-w-[8rem]"
                               >
-                                <Button
-                                  size="sm"
-                                  className="h-10 w-full bg-gold font-semibold text-navy hover:bg-gold-dark"
-                                >
-                                  <Calculator className="mr-1.5 h-3.5 w-3.5" />
-                                  {t("media.mapCardQuote")}
-                                </Button>
-                              </Link>
+                                <Calculator className="h-3.5 w-3.5" />
+                                {t("media.mapCardQuote")}
+                              </BtnBlock>
                             </div>
                           </div>
                         </div>
@@ -970,7 +998,7 @@ export default function MediaBrowseClient({
                         popularIds={popularIds}
                         topLeftSlot={
                           <label
-                            className="absolute left-2.5 top-2.5 z-20 flex h-9 w-9 cursor-pointer select-none items-center justify-center rounded-full border-2 border-navy bg-white shadow-md"
+                            className="absolute left-2.5 top-2.5 z-20 flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -988,7 +1016,7 @@ export default function MediaBrowseClient({
                                   compareItems.length >= COMPARE_MAX_ITEMS)
                               }
                               aria-label={t("media.compareToggleAria")}
-                              className="h-4 w-4 rounded border-2 border-navy bg-white text-gold accent-gold"
+                              className="h-4 w-4 accent-cta"
                             />
                           </label>
                         }
@@ -1004,13 +1032,10 @@ export default function MediaBrowseClient({
                         isKo={isKo}
                         href={mediaItemDetailPath(media.id)}
                         imagePreparingLabel={t("media.imagePreparing")}
-                        pricePeriodLabel={tMedia(
-                          mediaPricePeriodTranslationKey(media.pricePeriod),
-                        )}
                         popularIds={popularIds}
                         leadingSlot={
                           <label
-                            className="flex h-9 w-9 cursor-pointer select-none items-center justify-center rounded-lg border border-navy/20 bg-white shadow-sm"
+                            className="flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -1028,7 +1053,7 @@ export default function MediaBrowseClient({
                                   compareItems.length >= COMPARE_MAX_ITEMS)
                               }
                               aria-label={t("media.compareToggleAria")}
-                              className="h-4 w-4 rounded border-2 border-navy bg-white text-gold accent-gold shadow-none"
+                              className="h-4 w-4 accent-cta"
                             />
                           </label>
                         }
@@ -1037,18 +1062,17 @@ export default function MediaBrowseClient({
                   </div>
                     )}
                     {catalogPageCount > 1 ? (
-                      <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-slate-200 pt-4">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
+                      <div className="mt-8 flex flex-wrap items-center justify-center gap-4 border-t-2 border-border pt-6">
+                        <BtnBlock
                           disabled={catalogPage <= 1}
                           onClick={() =>
                             setCatalogPage((p) => Math.max(1, p - 1))
                           }
+                          variant="secondary"
+                          size="sm"
                         >
-                          {t("media.pagePrev")}
-                        </Button>
+                          ← {t("media.pagePrev")}
+                        </BtnBlock>
                         <span className="text-sm text-muted-foreground">
                           {t("media.pageSummary", {
                             from:
@@ -1062,19 +1086,18 @@ export default function MediaBrowseClient({
                             total: gridDisplayList.length,
                           })}
                         </span>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
+                        <BtnBlock
                           disabled={catalogPage >= catalogPageCount}
                           onClick={() =>
                             setCatalogPage((p) =>
                               Math.min(catalogPageCount, p + 1),
                             )
                           }
+                          variant="secondary"
+                          size="sm"
                         >
-                          {t("media.pageNext")}
-                        </Button>
+                          {t("media.pageNext")} →
+                        </BtnBlock>
                       </div>
                     ) : null}
                   </>

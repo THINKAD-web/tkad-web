@@ -9,17 +9,7 @@ import {
 } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
 import {
   Bell,
@@ -279,8 +269,8 @@ export default function PartnerPortalPage() {
 
   if (!hydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-10 w-10 animate-spin text-gold" />
+      <div className="flex min-h-screen items-center justify-center bg-muted">
+        <Loader2 className="h-10 w-10 animate-spin text-accent" />
       </div>
     );
   }
@@ -289,33 +279,33 @@ export default function PartnerPortalPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-100 to-white py-12">
         <div className="mx-auto max-w-md px-4">
-          <Card className="border-navy/10 shadow-lg">
-            <CardHeader>
+          <div className="border-2 border-border bg-card">
+            <header>
               <div className="mb-2 flex flex-wrap gap-2">
-                <Badge className="border-0 bg-navy/90 text-white">{t("loginBadge")}</Badge>
-                <Badge variant="outline" className="border-navy/20 text-navy">
+                <span className="border-0 bg-hero-void/90 text-white">{t("loginBadge")}</span>
+                <span className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
                   {t("loginPartnerOnly")}
-                </Badge>
+                </span>
               </div>
-              <div className="flex items-center gap-2 text-navy">
-                <ShieldCheck className="h-6 w-6 text-gold" />
-                <CardTitle>{t("loginTitle")}</CardTitle>
+              <div className="flex items-center gap-2 text-foreground">
+                <ShieldCheck className="h-6 w-6 text-accent" />
+                <h3>{t("loginTitle")}</h3>
               </div>
-              <CardDescription>{t("loginSubtitle")}</CardDescription>
-            </CardHeader>
-            <CardContent>
+              <p>{t("loginSubtitle")}</p>
+            </header>
+            <div>
               {step === "credentials" && (
-                <ul className="mb-5 space-y-1.5 rounded-xl border border-navy/10 bg-slate-50/90 px-3 py-3 text-xs text-navy/75">
+                <ul className="mb-5 space-y-1.5 rounded-xl border border-2 border-border bg-muted/90 px-3 py-3 text-xs text-foreground/75">
                   <li className="flex gap-2">
-                    <FileSignature className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
+                    <FileSignature className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
                     {t("loginFeatureContracts")}
                   </li>
                   <li className="flex gap-2">
-                    <PanelLeft className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
+                    <PanelLeft className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
                     {t("loginFeatureMedia")}
                   </li>
                   <li className="flex gap-2">
-                    <Wallet className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
+                    <Wallet className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
                     {t("loginFeatureSettlement")}
                   </li>
                 </ul>
@@ -323,10 +313,11 @@ export default function PartnerPortalPage() {
               {step === "credentials" && (
                 <form className="space-y-4" onSubmit={submitCredentials}>
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-navy/70">
+                    <label className="mb-1 block text-xs font-semibold text-foreground/70">
                       {t("email")}
                     </label>
-                    <Input
+                    <input
+                      className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                       type="email"
                       autoComplete="email"
                       value={email}
@@ -335,10 +326,11 @@ export default function PartnerPortalPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-navy/70">
+                    <label className="mb-1 block text-xs font-semibold text-foreground/70">
                       {t("password")}
                     </label>
-                    <Input
+                    <input
+                      className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                       type="password"
                       autoComplete="current-password"
                       value={password}
@@ -352,9 +344,9 @@ export default function PartnerPortalPage() {
                   {error ? (
                     <p className="text-xs font-medium text-red-600">{error}</p>
                   ) : null}
-                  <Button
+                  <BtnBlock
                     type="submit"
-                    className="w-full bg-navy text-white hover:bg-navy/90"
+                    className="w-full bg-hero-void text-white hover:bg-hero-void/90"
                     disabled={loading}
                   >
                     {loading ? (
@@ -363,7 +355,7 @@ export default function PartnerPortalPage() {
                       <Mail className="mr-2 h-4 w-4" />
                     )}
                     {t("signIn")}
-                  </Button>
+                  </BtnBlock>
                   <p className="text-[11px] text-muted-foreground">
                     {isKo
                       ? "데모: partner1@example.com / partner2@example.com — 비밀번호 6자 이상"
@@ -375,12 +367,13 @@ export default function PartnerPortalPage() {
               {step === "totp" && (
                 <form className="space-y-4" onSubmit={submitTotp}>
                   <div>
-                    <p className="text-sm font-medium text-navy">{t("totpTitle")}</p>
+                    <p className="text-sm font-medium text-foreground">{t("totpTitle")}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {t("totpSubtitle")}
                     </p>
                   </div>
-                  <Input
+                  <input
+                      className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     maxLength={6}
@@ -389,18 +382,17 @@ export default function PartnerPortalPage() {
                       setTotp(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     placeholder={t("totpPlaceholder")}
-                    className="text-center font-mono text-lg tracking-[0.3em]"
                   />
-                  <p className="text-xs font-medium text-gold-dark">
+                  <p className="text-xs font-medium text-accent">
                     {t("totpDemoHint")}
                   </p>
                   {error ? (
                     <p className="text-xs font-medium text-red-600">{error}</p>
                   ) : null}
                   <div className="flex gap-2">
-                    <Button
+                    <BtnBlock
                       type="button"
-                      variant="outline"
+                      variant="secondary"
                       className="flex-1"
                       onClick={() => {
                         setStep("credentials");
@@ -409,18 +401,18 @@ export default function PartnerPortalPage() {
                       }}
                     >
                       {t("back")}
-                    </Button>
-                    <Button type="submit" className="flex-1 bg-gold font-bold text-navy">
+                    </BtnBlock>
+                    <BtnBlock type="submit" className="flex-1 bg-accent font-bold text-foreground">
                       <Lock className="mr-2 h-4 w-4" />
                       {t("totpVerify")}
-                    </Button>
+                    </BtnBlock>
                   </div>
                 </form>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            <Link href="/" className="text-navy underline-offset-4 hover:underline">
+            <Link href="/" className="text-foreground underline-offset-4 hover:underline">
               {isKo ? "홈으로" : "Back to home"}
             </Link>
           </p>
@@ -431,10 +423,10 @@ export default function PartnerPortalPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-20">
-      <header className="border-b border-navy/10 bg-white/90 backdrop-blur">
+      <header className="border-b border-2 border-border bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <div>
-            <h1 className="text-lg font-extrabold text-navy sm:text-xl">
+            <h1 className="text-lg font-extrabold text-foreground sm:text-xl">
               {t("portalTitle")}
             </h1>
             <p className="text-xs text-muted-foreground">
@@ -444,25 +436,25 @@ export default function PartnerPortalPage() {
               })}
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={logout}>
+          <BtnBlock variant="secondary" size="sm" onClick={logout}>
             <LogOut className="mr-1.5 h-4 w-4" />
             {t("logout")}
-          </Button>
+          </BtnBlock>
         </div>
       </header>
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
         {portalStats ? (
           <section className="mb-8 space-y-3" aria-label={t("overviewTitle")}>
-            <h2 className="flex items-center gap-2 text-base font-extrabold text-navy sm:text-lg">
-              <LayoutDashboard className="h-5 w-5 text-gold" />
+            <h2 className="flex items-center gap-2 text-base font-extrabold text-foreground sm:text-lg">
+              <LayoutDashboard className="h-5 w-5 text-accent" />
               {t("overviewTitle")}
             </h2>
             <div className="grid gap-4 sm:grid-cols-3">
-              <Card
+              <div
                 role="button"
                 tabIndex={0}
-                className="cursor-pointer gap-0 py-5 ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                className="cursor-pointer border-2 border-border bg-card py-5 transition-colors hover:bg-muted focus:border-accent focus:outline-none"
                 onClick={() => setTab("contracts")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -471,18 +463,18 @@ export default function PartnerPortalPage() {
                   }
                 }}
               >
-                <CardHeader className="pb-2 pt-0">
+                <header className="pb-2 pt-0">
                   <div className="flex items-center justify-between gap-2">
-                    <CardTitle className="text-sm font-semibold text-navy/80">
+                    <h3 className="text-sm font-semibold text-foreground/80">
                       {t("tabContracts")}
-                    </CardTitle>
-                    <FileSignature className="h-4 w-4 text-gold" />
+                    </h3>
+                    <FileSignature className="h-4 w-4 text-accent" />
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-1 pb-0 pt-0">
-                  <p className="text-2xl font-extrabold text-navy">
+                </header>
+                <div className="space-y-1 pb-0 pt-0">
+                  <p className="text-2xl font-extrabold text-foreground">
                     {portalStats.contractsActive}
-                    <span className="text-lg font-semibold text-navy/40">
+                    <span className="text-lg font-semibold text-foreground/40">
                       {" "}
                       / {portalStats.contractsTotal}
                     </span>
@@ -495,16 +487,16 @@ export default function PartnerPortalPage() {
                       {t("overviewRenewal", { n: portalStats.contractsRenewal })}
                     </p>
                   ) : null}
-                  <p className="pt-2 text-xs font-bold text-gold-dark">
+                  <p className="pt-2 text-xs font-bold text-accent">
                     {t("overviewOpen")} →
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card
+              <div
                 role="button"
                 tabIndex={0}
-                className="cursor-pointer gap-0 py-5 ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                className="cursor-pointer border-2 border-border bg-card py-5 transition-colors hover:bg-muted focus:border-accent focus:outline-none"
                 onClick={() => setTab("media")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -513,32 +505,32 @@ export default function PartnerPortalPage() {
                   }
                 }}
               >
-                <CardHeader className="pb-2 pt-0">
+                <header className="pb-2 pt-0">
                   <div className="flex items-center justify-between gap-2">
-                    <CardTitle className="text-sm font-semibold text-navy/80">
+                    <h3 className="text-sm font-semibold text-foreground/80">
                       {t("tabMedia")}
-                    </CardTitle>
-                    <PanelLeft className="h-4 w-4 text-gold" />
+                    </h3>
+                    <PanelLeft className="h-4 w-4 text-accent" />
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-1 pb-0 pt-0">
-                  <p className="text-2xl font-extrabold text-navy">
+                </header>
+                <div className="space-y-1 pb-0 pt-0">
+                  <p className="text-2xl font-extrabold text-foreground">
                     {portalStats.mediaTotal}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
                     {t("overviewMediaCaption")}: {portalStats.mediaLive} ·{" "}
                     {portalStats.mediaReview}
                   </p>
-                  <p className="pt-2 text-xs font-bold text-gold-dark">
+                  <p className="pt-2 text-xs font-bold text-accent">
                     {t("overviewOpen")} →
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card
+              <div
                 role="button"
                 tabIndex={0}
-                className="cursor-pointer gap-0 py-5 ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                className="cursor-pointer border-2 border-border bg-card py-5 transition-colors hover:bg-muted focus:border-accent focus:outline-none"
                 onClick={() => setTab("settlements")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -547,16 +539,16 @@ export default function PartnerPortalPage() {
                   }
                 }}
               >
-                <CardHeader className="pb-2 pt-0">
+                <header className="pb-2 pt-0">
                   <div className="flex items-center justify-between gap-2">
-                    <CardTitle className="text-sm font-semibold text-navy/80">
+                    <h3 className="text-sm font-semibold text-foreground/80">
                       {t("tabSettlements")}
-                    </CardTitle>
-                    <Wallet className="h-4 w-4 text-gold" />
+                    </h3>
+                    <Wallet className="h-4 w-4 text-accent" />
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-1 pb-0 pt-0">
-                  <p className="text-2xl font-extrabold text-navy tabular-nums">
+                </header>
+                <div className="space-y-1 pb-0 pt-0">
+                  <p className="text-2xl font-extrabold text-foreground tabular-nums">
                     {formatMan(portalStats.settlementOutstandingMan, isKo)}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
@@ -568,37 +560,37 @@ export default function PartnerPortalPage() {
                       total: portalStats.settlementRows,
                     })}
                   </p>
-                  <p className="pt-2 text-xs font-bold text-gold-dark">
+                  <p className="pt-2 text-xs font-bold text-accent">
                     {t("overviewOpen")} →
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </section>
         ) : null}
 
-        <div className="mb-6 flex flex-wrap gap-2 border-b border-navy/10 pb-4">
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-2 border-border pb-4">
           {tabs.map(({ id, label, icon: Icon }) => (
-            <Button
+            <BtnBlock
               key={id}
               type="button"
               size="sm"
-              variant={tab === id ? "default" : "ghost"}
+              variant={tab === id ? "dark" : "secondary"}
               onClick={() => setTab(id)}
               className={cn(
-                tab === id ? "bg-navy text-white" : "text-navy/70",
+                tab === id ? "bg-hero-void text-white" : "text-foreground/70",
               )}
             >
               <Icon className="mr-1.5 h-4 w-4" />
               {label}
-            </Button>
+            </BtnBlock>
           ))}
         </div>
 
         {tab === "contracts" && (
           <section className="space-y-4">
             <div>
-              <h2 className="text-base font-bold text-navy">{t("contractsTitle")}</h2>
+              <h2 className="text-base font-bold text-foreground">{t("contractsTitle")}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{t("contractsSubtitle")}</p>
             </div>
             {partner.contracts.length === 0 ? (
@@ -608,21 +600,21 @@ export default function PartnerPortalPage() {
                 {partner.contracts.map((c) => {
                   const st = contractStatusStyles[c.status];
                   return (
-                    <Card key={c.id} className="border-navy/10 shadow-sm">
-                      <CardHeader className="pb-2">
+                    <div key={c.id} className="border-2 border-border bg-card">
+                      <header className="pb-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <p className="font-mono text-[11px] text-muted-foreground">
                             {c.id}
                           </p>
-                          <Badge className={cn("border-0", st.className)}>
+                          <span className={cn("border-0", st.className)}>
                             {isKo ? st.labelKo : st.labelEn}
-                          </Badge>
+                          </span>
                         </div>
-                        <CardTitle className="text-base text-navy">
+                        <h3 className="text-base text-foreground">
                           {isKo ? c.titleKo : c.titleEn}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3 text-sm">
+                        </h3>
+                      </header>
+                      <div className="space-y-3 text-sm">
                         <p className="text-muted-foreground">
                           {isKo ? c.summaryKo : c.summaryEn}
                         </p>
@@ -631,7 +623,7 @@ export default function PartnerPortalPage() {
                             <span className="text-muted-foreground">
                               {t("period")}:{" "}
                             </span>
-                            <span className="font-medium text-navy">
+                            <span className="font-medium text-foreground">
                               {c.startDate} — {c.endDate}
                             </span>
                           </span>
@@ -639,13 +631,13 @@ export default function PartnerPortalPage() {
                             <span className="text-muted-foreground">
                               {t("contractValue")}:{" "}
                             </span>
-                            <span className="font-semibold text-navy">
+                            <span className="font-semibold text-foreground">
                               {formatMan(c.valueMan, isKo)}
                             </span>
                           </span>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
@@ -657,23 +649,23 @@ export default function PartnerPortalPage() {
           <section className="space-y-4">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="text-base font-bold text-navy">{t("mediaTitle")}</h2>
+                <h2 className="text-base font-bold text-foreground">{t("mediaTitle")}</h2>
                 <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
                   {t("mediaSubtitle")}
                 </p>
               </div>
-              <Button
+              <BtnBlock
                 type="button"
-                className="bg-gold font-bold text-navy hover:bg-gold-dark"
+                className="bg-accent font-bold text-foreground hover:bg-accent"
                 onClick={openAddMedia}
               >
                 <PanelLeft className="mr-2 h-4 w-4" />
                 {t("mediaAdd")}
-              </Button>
+              </BtnBlock>
             </div>
-            <div className="overflow-x-auto rounded-xl border border-navy/10">
+            <div className="overflow-x-auto rounded-xl border border-2 border-border">
               <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="border-b border-navy/10 bg-slate-50 text-xs font-semibold text-navy/70">
+                <thead className="border-b border-2 border-border bg-muted text-xs font-semibold text-foreground/70">
                   <tr>
                     <th className="px-3 py-2">{t("mediaName")}</th>
                     <th className="px-3 py-2">{t("mediaType")}</th>
@@ -688,8 +680,8 @@ export default function PartnerPortalPage() {
                   {localMedia.map((m) => {
                     const st = mediaStatusStyles[m.status];
                     return (
-                      <tr key={m.id} className="border-b border-slate-100">
-                        <td className="px-3 py-2 font-medium text-navy">
+                      <tr key={m.id} className="border-b border-border">
+                        <td className="px-3 py-2 font-medium text-foreground">
                           {isKo ? m.nameKo : m.nameEn}
                         </td>
                         <td className="px-3 py-2 text-muted-foreground">
@@ -700,21 +692,21 @@ export default function PartnerPortalPage() {
                         </td>
                         <td className="px-3 py-2 tabular-nums">{m.panelCount}</td>
                         <td className="px-3 py-2">
-                          <Badge className={cn("border-0 text-[10px]", st.className)}>
+                          <span className={cn("border-0 text-[10px]", st.className)}>
                             {isKo ? st.labelKo : st.labelEn}
-                          </Badge>
+                          </span>
                         </td>
                         <td className="px-3 py-2 text-xs">{m.lastUpdated}</td>
                         <td className="px-3 py-2">
-                          <Button
+                          <BtnBlock
                             type="button"
-                            variant="ghost"
+                            variant="secondary"
                             size="sm"
                             className="h-8 text-xs"
                             onClick={() => openEditMedia(m)}
                           >
                             {t("mediaEdit")}
-                          </Button>
+                          </BtnBlock>
                         </td>
                       </tr>
                     );
@@ -728,14 +720,14 @@ export default function PartnerPortalPage() {
         {tab === "settlements" && (
           <section className="space-y-4">
             <div>
-              <h2 className="text-base font-bold text-navy">{t("settlementsTitle")}</h2>
+              <h2 className="text-base font-bold text-foreground">{t("settlementsTitle")}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {t("settlementsSubtitle")}
               </p>
             </div>
-            <div className="overflow-x-auto rounded-xl border border-navy/10">
+            <div className="overflow-x-auto rounded-xl border border-2 border-border">
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="border-b border-navy/10 bg-slate-50 text-xs font-semibold text-navy/70">
+                <thead className="border-b border-2 border-border bg-muted text-xs font-semibold text-foreground/70">
                   <tr>
                     <th className="px-3 py-2">{t("settlementPeriod")}</th>
                     <th className="px-3 py-2">{t("settlementAmount")}</th>
@@ -749,17 +741,17 @@ export default function PartnerPortalPage() {
                   {partner.settlements.map((s) => {
                     const st = settlementStatusStyles[s.status];
                     return (
-                      <tr key={s.id} className="border-b border-slate-100">
-                        <td className="px-3 py-2 font-medium text-navy">
+                      <tr key={s.id} className="border-b border-border">
+                        <td className="px-3 py-2 font-medium text-foreground">
                           {isKo ? s.periodLabelKo : s.periodLabelEn}
                         </td>
                         <td className="px-3 py-2 tabular-nums font-semibold">
                           {formatMan(s.amountMan, isKo)}
                         </td>
                         <td className="px-3 py-2">
-                          <Badge className={cn("border-0 text-[10px]", st.className)}>
+                          <span className={cn("border-0 text-[10px]", st.className)}>
                             {isKo ? st.labelKo : st.labelEn}
-                          </Badge>
+                          </span>
                         </td>
                         <td className="px-3 py-2 text-xs">{s.paidDate ?? "—"}</td>
                         <td className="px-3 py-2 text-xs">
@@ -779,47 +771,47 @@ export default function PartnerPortalPage() {
 
         {tab === "campaigns" && (
           <section className="space-y-4">
-            <h2 className="text-base font-bold text-navy">{t("campaignsTitle")}</h2>
+            <h2 className="text-base font-bold text-foreground">{t("campaignsTitle")}</h2>
             <div className="grid gap-4 md:grid-cols-2">
               {partner.sharedCampaigns.map((c) => (
-                <Card key={c.id} className="border-navy/10 shadow-sm">
-                  <CardHeader className="pb-2">
+                <div key={c.id} className="border-2 border-border bg-card">
+                  <header className="border-b-2 border-border p-5">
                     <p className="font-mono text-[11px] text-muted-foreground">
                       {c.id}
                     </p>
-                    <CardTitle className="text-base text-navy">
+                    <h3 className="text-base text-foreground">
                       {isKo ? c.titleKo : c.titleEn}
-                    </CardTitle>
-                    <CardDescription>
+                    </h3>
+                    <p>
                       {t("campaignBrand")}:{" "}
                       {isKo ? c.brandKo : c.brandEn}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
+                    </p>
+                  </header>
+                  <div className="space-y-3">
                     <div>
                       <div className="mb-1 flex justify-between text-xs">
                         <span className="text-muted-foreground">
                           {t("campaignProgress")}
                         </span>
-                        <span className="font-bold text-navy">
+                        <span className="font-bold text-foreground">
                           {c.progressPercent}%
                         </span>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-2 overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full bg-gold transition-all"
+                          className="h-full rounded-full bg-accent transition-all"
                           style={{ width: `${c.progressPercent}%` }}
                         />
                       </div>
                     </div>
-                    <p className="text-sm text-navy/80">
+                    <p className="text-sm text-foreground/80">
                       {isKo ? c.statusKo : c.statusEn}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {t("campaignWindow")}: {c.startDate} — {c.endDate}
                     </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           </section>
@@ -827,29 +819,29 @@ export default function PartnerPortalPage() {
 
         {tab === "notices" && (
           <section className="space-y-4">
-            <h2 className="text-base font-bold text-navy">{t("noticesTitle")}</h2>
+            <h2 className="text-base font-bold text-foreground">{t("noticesTitle")}</h2>
             <ul className="space-y-3">
               {sortedNotices.map((n) => {
                 const open = expandedNotice === n.id;
                 return (
                   <li key={n.id}>
-                    <Card className="border-navy/10 shadow-sm">
-                      <CardHeader className="pb-2">
+                    <div className="border-2 border-border bg-card">
+                      <header className="border-b-2 border-border p-5">
                         <div className="flex flex-wrap items-center gap-2">
                           {n.pinned ? (
-                            <Badge className="bg-gold/20 text-navy">
+                            <span className="bg-accent text-foreground">
                               {t("noticePinned")}
-                            </Badge>
+                            </span>
                           ) : null}
                           <span className="text-xs text-muted-foreground">
                             {n.date}
                           </span>
                         </div>
-                        <CardTitle className="text-base text-navy">
+                        <h3 className="text-base text-foreground">
                           {isKo ? n.titleKo : n.titleEn}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
+                        </h3>
+                      </header>
+                      <div>
                         <p
                           className={cn(
                             "text-sm text-muted-foreground",
@@ -858,18 +850,18 @@ export default function PartnerPortalPage() {
                         >
                           {isKo ? n.bodyKo : n.bodyEn}
                         </p>
-                        <Button
+                        <BtnBlock
                           type="button"
-                          variant="link"
-                          className="mt-2 h-auto p-0 text-xs text-gold-dark"
+                          variant="secondary"
+                          className="mt-2 h-auto p-0 text-xs text-accent"
                           onClick={() =>
                             setExpandedNotice((cur) => (cur === n.id ? null : n.id))
                           }
                         >
                           {open ? t("noticeCollapse") : t("noticeExpand")}
-                        </Button>
-                      </CardContent>
-                    </Card>
+                        </BtnBlock>
+                      </div>
+                    </div>
                   </li>
                 );
               })}
@@ -888,16 +880,16 @@ export default function PartnerPortalPage() {
         ariaLabel={editingMedia ? t("mediaModalEditTitle") : t("mediaModalAddTitle")}
       >
         <div className="p-6 pt-10">
-          <h3 className="text-lg font-bold text-navy">
+          <h3 className="text-lg font-bold text-foreground">
             {editingMedia ? t("mediaModalEditTitle") : t("mediaModalAddTitle")}
           </h3>
           <div className="mt-4 space-y-3">
             <div>
-              <label className="text-xs font-semibold text-navy/70">
+              <label className="text-xs font-semibold text-foreground/70">
                 {t("mediaName")}
               </label>
-              <Input
-                className="mt-1"
+              <input
+                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 value={mediaForm.name}
                 onChange={(e) =>
                   setMediaForm((f) => ({ ...f, name: e.target.value }))
@@ -905,11 +897,11 @@ export default function PartnerPortalPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-navy/70">
+              <label className="text-xs font-semibold text-foreground/70">
                 {t("mediaType")}
               </label>
-              <Input
-                className="mt-1"
+              <input
+                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 value={mediaForm.type}
                 onChange={(e) =>
                   setMediaForm((f) => ({ ...f, type: e.target.value }))
@@ -917,11 +909,11 @@ export default function PartnerPortalPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-navy/70">
+              <label className="text-xs font-semibold text-foreground/70">
                 {t("mediaLocation")}
               </label>
-              <Textarea
-                className="mt-1 min-h-[72px]"
+              <textarea
+                      className="mt-1 min-h-[72px] w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 value={mediaForm.location}
                 onChange={(e) =>
                   setMediaForm((f) => ({ ...f, location: e.target.value }))
@@ -929,11 +921,11 @@ export default function PartnerPortalPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-navy/70">
+              <label className="text-xs font-semibold text-foreground/70">
                 {t("mediaPanels")}
               </label>
-              <Input
-                className="mt-1"
+              <input
+                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 inputMode="numeric"
                 value={mediaForm.panelCount}
                 onChange={(e) =>
@@ -946,9 +938,9 @@ export default function PartnerPortalPage() {
             </div>
           </div>
           <div className="mt-6 flex gap-2">
-            <Button
+            <BtnBlock
               type="button"
-              variant="outline"
+              variant="secondary"
               className="flex-1"
               onClick={() => {
                 setMediaModalOpen(false);
@@ -956,14 +948,14 @@ export default function PartnerPortalPage() {
               }}
             >
               {t("mediaCancel")}
-            </Button>
-            <Button
+            </BtnBlock>
+            <BtnBlock
               type="button"
-              className="flex-1 bg-navy text-white"
+              className="flex-1 bg-hero-void text-white"
               onClick={saveMedia}
             >
               {t("mediaSave")}
-            </Button>
+            </BtnBlock>
           </div>
         </div>
       </Modal>

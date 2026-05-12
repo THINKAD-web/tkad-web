@@ -3,18 +3,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+
+const inputCls =
+  "h-10 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
+const textareaCls =
+  "min-h-[100px] w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
+const labelCls =
+  "block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary";
 import {
   BarChart3,
   BookOpen,
@@ -61,9 +59,9 @@ export default function InsightsPageClient({
   const [formCompany, setFormCompany] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formIndustry, setFormIndustry] = useState("");
-  const [formPeriodPref, setFormPeriodPref] = useState<"monthly" | "quarterly" | "both">(
-    "both",
-  );
+  const [formPeriodPref, setFormPeriodPref] = useState<
+    "monthly" | "quarterly" | "both"
+  >("both");
   const [formNotes, setFormNotes] = useState("");
   const [formSubmitting, setFormSubmitting] = useState(false);
 
@@ -164,302 +162,369 @@ export default function InsightsPageClient({
   ];
 
   return (
-    <>
-      <section className="bg-navy py-24 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mb-4 inline-flex flex-wrap items-center justify-center gap-2">
-            <Badge className="border-0 bg-white/15 text-xs font-semibold text-gold">
-              {t("filterMonthly")} · {t("filterQuarterly")}
-            </Badge>
-            <Badge className="border-0 bg-emerald-500/25 text-xs font-semibold text-emerald-100">
-              OOH
-            </Badge>
-            <span className="rounded bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
-              BETA
-            </span>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-20 tkad-neon-grid"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
+
+          <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              {`// 09 / Insights`}
+            </p>
+            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                {t("filterMonthly")} · {t("filterQuarterly")}
+              </span>
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">OOH</span>
+              </span>
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">BETA</span>
+              </span>
+            </div>
+            <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+              {t("heroTitle")}
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+              {t("heroSubtitle")}
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">{t("heroTitle")}</h1>
-          <p className="mx-auto mt-3 max-w-2xl text-slate-300">{t("heroSubtitle")}</p>
-        </div>
-      </section>
+        </section>
 
-      <section className="border-b border-navy/8 bg-white py-10">
-        <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
-          <a
-            href="#reports"
-            className="group flex gap-4 rounded-2xl border border-navy/10 bg-slate-50/80 p-5 shadow-sm transition-all hover:border-gold/40 hover:shadow-md"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
-              <CalendarRange className="h-6 w-6" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-navy">{t("valueStripTrends")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("valueStripTrendsDesc")}</p>
-            </div>
-          </a>
-          <a
-            href="#reports"
-            className="group flex gap-4 rounded-2xl border border-navy/10 bg-slate-50/80 p-5 shadow-sm transition-all hover:border-gold/40 hover:shadow-md"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/20 text-navy group-hover:bg-gold group-hover:text-navy">
-              <Download className="h-6 w-6" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-navy">{t("valueStripPdf")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("valueStripPdfDesc")}</p>
-            </div>
-          </a>
-          <a
-            href="#custom-report"
-            className="group flex gap-4 rounded-2xl border border-navy/10 bg-slate-50/80 p-5 shadow-sm transition-all hover:border-gold/40 hover:shadow-md"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy group-hover:bg-navy group-hover:text-white">
-              <Send className="h-6 w-6" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-navy">{t("valueStripCustom")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("valueStripCustomDesc")}</p>
-            </div>
-          </a>
-        </div>
-      </section>
-
-      <section className="py-10">
-        <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
-          <div id="reports" className="scroll-mt-24 space-y-2">
-            <h2 className="text-xl font-extrabold text-navy sm:text-2xl">{t("reportsSectionTitle")}</h2>
-            <p className="max-w-2xl text-sm text-muted-foreground">{t("reportsSectionDesc")}</p>
+        <section className="bg-card py-10 text-foreground">
+          <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
+            <a
+              href="#reports"
+              className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
+                <CalendarRange className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-bold tracking-tight text-foreground">
+                  {t("valueStripTrends")}
+                </p>
+                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                  {`// `}
+                  {t("valueStripTrendsDesc")}
+                </p>
+              </div>
+            </a>
+            <a
+              href="#reports"
+              className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
+                <Download className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-bold tracking-tight text-foreground">
+                  {t("valueStripPdf")}
+                </p>
+                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                  {`// `}
+                  {t("valueStripPdfDesc")}
+                </p>
+              </div>
+            </a>
+            <a
+              href="#custom-report"
+              className="group -ml-[2px] flex gap-4 border-2 border-border bg-muted p-5 transition-colors hover:bg-foreground hover:text-background"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
+                <Send className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <p className="font-bold tracking-tight text-foreground">
+                  {t("valueStripCustom")}
+                </p>
+                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                  {`// `}
+                  {t("valueStripCustomDesc")}
+                </p>
+              </div>
+            </a>
           </div>
+        </section>
 
-          {!hasLibrary ? (
-            <Card className="border-navy/15 bg-slate-50/80 py-12 text-center shadow-sm">
-              <CardContent>
-                <p className="text-base font-semibold text-navy">{t("preparingContent")}</p>
-                <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+        <section className="bg-muted pb-0 pt-16 text-foreground sm:pt-20">
+          <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+            <div id="reports" className="scroll-mt-24 space-y-2">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                [ REPORTS ]
+              </p>
+              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                {t("reportsSectionTitle")}
+              </h2>
+              <p className="max-w-2xl font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                {`// `}
+                {t("reportsSectionDesc")}
+              </p>
+            </div>
+
+            {!hasLibrary ? (
+              <div className="border-2 border-border bg-card py-12 text-center">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  [ PREPARING ]
+                </p>
+                <p className="mt-3 text-base font-bold text-foreground">
+                  {t("preparingContent")}
+                </p>
+                <p className="mx-auto mt-3 max-w-md font-mono text-[12px] tracking-tight text-muted-foreground">
                   {t("preparingContentDesc")}
                 </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-navy/45">
-                  {t("periodLabel")}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {periodTabs.map((tab) => (
-                    <Button
-                      key={tab.value}
-                      type="button"
-                      size="sm"
-                      variant={period === tab.value ? "default" : "outline"}
-                      onClick={() => setPeriod(tab.value)}
-                      className={cn(
-                        period === tab.value
-                          ? "bg-navy text-white"
-                          : "border-navy/20 text-navy",
-                      )}
-                    >
-                      <CalendarRange className="mr-1.5 h-3.5 w-3.5" />
-                      {tab.label}
-                    </Button>
-                  ))}
-                </div>
               </div>
-
-              <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-navy/45">
-                  {t("verticalLabel")}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {verticalTabs.map((tab) => (
-                    <Button
-                      key={tab.value}
-                      type="button"
-                      size="sm"
-                      variant={vertical === tab.value ? "default" : "outline"}
-                      onClick={() => setVertical(tab.value)}
-                      className={cn(
-                        vertical === tab.value
-                          ? "bg-gold text-navy"
-                          : "border-navy/20 text-navy",
-                      )}
-                    >
-                      {tab.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <p className="text-sm text-muted-foreground">
-                {t("resultsCount", { count: filtered.length })}
-              </p>
-
-              <div className="grid gap-6 md:grid-cols-2">
-                {filtered.map((report) => (
-                  <ReportCard
-                    key={report.id}
-                    report={report}
-                    isKo={isKo}
-                    downloading={downloadingId === report.id}
-                    onDownload={() => handleDownload(report)}
-                    onView={() => handleViewOnline(report)}
-                  />
-                ))}
-              </div>
-
-              {filtered.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                  {t("empty")}
-                </p>
-              ) : null}
-            </>
-          )}
-
-          <Card
-            className="border-navy/10 shadow-md scroll-mt-24"
-            id="custom-report"
-          >
-            <CardHeader>
-              <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gold/15 text-navy">
-                  <Send className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-gold-dark">
-                    {t("customSectionEyebrow")}
-                  </p>
-                  <CardTitle className="mt-1 text-navy">{t("formTitle")}</CardTitle>
-                  <CardDescription>{t("formDesc")}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <form className="grid gap-4 sm:grid-cols-2" onSubmit={submitCustomRequest}>
-                <div className="sm:col-span-1">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-company">
-                    {t("formCompany")}
-                  </label>
-                  <Input
-                    id="ins-company"
-                    value={formCompany}
-                    onChange={(e) => setFormCompany(e.target.value)}
-                    className="mt-1"
-                    placeholder={t("formCompanyPh")}
-                  />
-                </div>
-                <div className="sm:col-span-1">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-email">
-                    {t("formEmail")} *
-                  </label>
-                  <Input
-                    id="ins-email"
-                    type="email"
-                    required
-                    value={formEmail}
-                    onChange={(e) => setFormEmail(e.target.value)}
-                    className="mt-1"
-                    placeholder="name@company.com"
-                  />
-                </div>
-                <div className="sm:col-span-1">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-industry">
-                    {t("formIndustry")}
-                  </label>
-                  <select
-                    id="ins-industry"
-                    className="mt-1 flex h-10 w-full rounded-md border border-navy/15 bg-white px-3 text-sm text-navy shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
-                    value={formIndustry}
-                    onChange={(e) => setFormIndustry(e.target.value)}
-                  >
-                    {industryOptions.map((o) => (
-                      <option key={o.value || "empty"} value={o.value}>
-                        {o.label}
-                      </option>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  <p className={labelCls}>[ {t("periodLabel")} ]</p>
+                  <div className="flex flex-wrap gap-0">
+                    {periodTabs.map((tab) => (
+                      <button
+                        key={tab.value}
+                        type="button"
+                        onClick={() => setPeriod(tab.value)}
+                        className={cn(
+                          "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                          period === tab.value
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-card text-foreground hover:bg-muted",
+                        )}
+                      >
+                        <CalendarRange className="h-3.5 w-3.5" />
+                        {tab.label}
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
-                <div className="sm:col-span-1">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-pref">
-                    {t("formPeriodPref")}
-                  </label>
-                  <select
-                    id="ins-pref"
-                    className="mt-1 flex h-10 w-full rounded-md border border-navy/15 bg-white px-3 text-sm text-navy shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
-                    value={formPeriodPref}
-                    onChange={(e) =>
-                      setFormPeriodPref(e.target.value as "monthly" | "quarterly" | "both")
-                    }
-                  >
-                    <option value="monthly">{t("filterMonthly")}</option>
-                    <option value="quarterly">{t("filterQuarterly")}</option>
-                    <option value="both">{t("formPeriodBoth")}</option>
-                  </select>
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-navy/70" htmlFor="ins-notes">
-                    {t("formNotes")}
-                  </label>
-                  <Textarea
-                    id="ins-notes"
-                    value={formNotes}
-                    onChange={(e) => setFormNotes(e.target.value)}
-                    className="mt-1 min-h-[100px]"
-                    placeholder={t("formNotesPh")}
-                  />
-                </div>
-                <div className="sm:col-span-2 flex flex-wrap gap-3">
-                  <Button
-                    type="submit"
-                    className="bg-navy text-white hover:bg-navy/90"
-                    disabled={formSubmitting}
-                  >
-                    {formSubmitting ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Mail className="mr-2 h-4 w-4" />
-                    )}
-                    {t("formSubmit")}
-                  </Button>
-                  <Button type="button" variant="outline" asChild>
-                    <Link href="/contact">{t("formContactInstead")}</Link>
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
 
-      <Modal
-        open={viewerOpen}
-        onClose={closeViewer}
-        className="max-w-5xl"
-        ariaLabel={t("viewerTitle")}
-        ariaLabelledBy="insights-viewer-title"
-      >
-        <div className="p-6 pt-12">
-          <h2 id="insights-viewer-title" className="pr-8 text-lg font-bold text-navy">
-            {viewerTitle}
-          </h2>
-          <p className="mt-1 text-xs text-muted-foreground">{t("viewerHint")}</p>
-          <div className="mt-4 min-h-[60vh] overflow-hidden rounded-xl border border-navy/10 bg-slate-100">
-            {viewerLoading ? (
-              <div className="flex min-h-[60vh] items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-6 w-6 animate-spin text-gold" />
-                {t("viewerLoading")}
+                <div className="space-y-3">
+                  <p className={labelCls}>[ {t("verticalLabel")} ]</p>
+                  <div className="flex flex-wrap gap-0">
+                    {verticalTabs.map((tab) => (
+                      <button
+                        key={tab.value}
+                        type="button"
+                        onClick={() => setVertical(tab.value)}
+                        className={cn(
+                          "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                          vertical === tab.value
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-card text-foreground hover:bg-muted",
+                        )}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {`// `}
+                  {t("resultsCount", { count: filtered.length })}
+                </p>
+
+                <div className="grid gap-0 md:grid-cols-2">
+                  {filtered.map((report) => (
+                    <ReportCard
+                      key={report.id}
+                      report={report}
+                      isKo={isKo}
+                      downloading={downloadingId === report.id}
+                      onDownload={() => handleDownload(report)}
+                      onView={() => handleViewOnline(report)}
+                    />
+                  ))}
+                </div>
+
+                {filtered.length === 0 ? (
+                  <p className="py-8 text-center font-mono text-[12px] tracking-tight text-muted-foreground">
+                    {`// `}
+                    {t("empty")}
+                  </p>
+                ) : null}
+              </>
+            )}
+
+            <div
+              className="scroll-mt-24 border-2 border-border bg-card"
+              id="custom-report"
+            >
+              <div className="border-b-2 border-border p-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center border-2 border-border bg-primary text-primary-foreground">
+                    <Send className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("customSectionEyebrow")} ]
+                    </p>
+                    <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+                      {t("formTitle")}
+                    </h3>
+                    <p className="mt-1 font-mono text-[12px] tracking-tight text-muted-foreground">
+                      {`// `}
+                      {t("formDesc")}
+                    </p>
+                  </div>
+                </div>
               </div>
-            ) : viewerUrl ? (
-              <iframe
-                title={viewerTitle}
-                src={viewerUrl}
-                className="h-[70vh] w-full min-h-[320px] border-0"
-              />
-            ) : null}
+              <div className="p-5">
+                <form
+                  className="grid gap-4 sm:grid-cols-2"
+                  onSubmit={submitCustomRequest}
+                >
+                  <div className="sm:col-span-1">
+                    <label className={labelCls} htmlFor="ins-company">
+                      [ {t("formCompany")} ]
+                    </label>
+                    <input
+                      id="ins-company"
+                      value={formCompany}
+                      onChange={(e) => setFormCompany(e.target.value)}
+                      className={cn(inputCls, "mt-2")}
+                      placeholder={t("formCompanyPh")}
+                    />
+                  </div>
+                  <div className="sm:col-span-1">
+                    <label className={labelCls} htmlFor="ins-email">
+                      [ {t("formEmail")} ]{" "}
+                      <span className="text-primary">*</span>
+                    </label>
+                    <input
+                      id="ins-email"
+                      type="email"
+                      required
+                      value={formEmail}
+                      onChange={(e) => setFormEmail(e.target.value)}
+                      className={cn(inputCls, "mt-2")}
+                      placeholder="name@company.com"
+                    />
+                  </div>
+                  <div className="sm:col-span-1">
+                    <label className={labelCls} htmlFor="ins-industry">
+                      [ {t("formIndustry")} ]
+                    </label>
+                    <select
+                      id="ins-industry"
+                      className={cn(inputCls, "mt-2")}
+                      value={formIndustry}
+                      onChange={(e) => setFormIndustry(e.target.value)}
+                    >
+                      {industryOptions.map((o) => (
+                        <option key={o.value || "empty"} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <label className={labelCls} htmlFor="ins-pref">
+                      [ {t("formPeriodPref")} ]
+                    </label>
+                    <select
+                      id="ins-pref"
+                      className={cn(inputCls, "mt-2")}
+                      value={formPeriodPref}
+                      onChange={(e) =>
+                        setFormPeriodPref(
+                          e.target.value as "monthly" | "quarterly" | "both",
+                        )
+                      }
+                    >
+                      <option value="monthly">{t("filterMonthly")}</option>
+                      <option value="quarterly">{t("filterQuarterly")}</option>
+                      <option value="both">{t("formPeriodBoth")}</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelCls} htmlFor="ins-notes">
+                      [ {t("formNotes")} ]
+                    </label>
+                    <textarea
+                      id="ins-notes"
+                      value={formNotes}
+                      onChange={(e) => setFormNotes(e.target.value)}
+                      className={cn(textareaCls, "mt-2")}
+                      placeholder={t("formNotesPh")}
+                    />
+                  </div>
+                  <div className="sm:col-span-2 flex flex-wrap gap-2">
+                    <BtnBlock
+                      type="submit"
+                      variant="dark"
+                      size="md"
+                      disabled={formSubmitting}
+                    >
+                      {formSubmitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Mail className="h-4 w-4" />
+                      )}
+                      {t("formSubmit")}
+                    </BtnBlock>
+                    <BtnBlock href="/contact" variant="secondary" size="md">
+                      {t("formContactInstead")}
+                    </BtnBlock>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
-        </div>
-      </Modal>
-    </>
+        </section>
+
+        <Modal
+          open={viewerOpen}
+          onClose={closeViewer}
+          className="max-w-5xl"
+          ariaLabel={t("viewerTitle")}
+          ariaLabelledBy="insights-viewer-title"
+        >
+          <div className="border-2 border-border bg-card p-6 pt-12">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              [ VIEWER ]
+            </p>
+            <h2
+              id="insights-viewer-title"
+              className="mt-2 pr-8 text-lg font-bold tracking-tight text-foreground"
+            >
+              {viewerTitle}
+            </h2>
+            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+              {`// `}
+              {t("viewerHint")}
+            </p>
+            <div className="mt-4 min-h-[60vh] overflow-hidden border-2 border-border bg-muted">
+              {viewerLoading ? (
+                <div className="flex min-h-[60vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  {`// `}
+                  {t("viewerLoading")}
+                </div>
+              ) : viewerUrl ? (
+                <iframe
+                  title={viewerTitle}
+                  src={viewerUrl}
+                  className="h-[70vh] w-full min-h-[320px] border-0"
+                />
+              ) : null}
+            </div>
+          </div>
+        </Modal>
+      </div>
+    </HomeLandingDayNight>
   );
 }
 
@@ -479,106 +544,116 @@ function ReportCard({
   const t = useTranslations("insights");
   const periodBadge =
     report.period === "monthly" ? t("badgeMonthly") : t("badgeQuarterly");
-  const tags = report.verticalTags.filter((x) => x !== "general") as InsightVerticalTag[];
+  const tags = report.verticalTags.filter(
+    (x) => x !== "general",
+  ) as InsightVerticalTag[];
 
   return (
-    <Card className="flex flex-col border-navy/10 shadow-md transition-shadow hover:shadow-lg">
-      <CardHeader className="pb-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge className="bg-navy/90 text-white">{periodBadge}</Badge>
-          <Badge variant="outline" className="border-navy/20 text-xs text-navy/70">
+    <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card">
+      <header className="border-b-2 border-border p-5">
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg">
+            [ {periodBadge} ]
+          </span>
+          <span className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
             {isKo ? report.labelKo : report.labelEn}
-          </Badge>
+          </span>
           {tags.map((tag) => (
-            <Badge key={tag} className="bg-gold/20 text-navy">
+            <span
+              key={tag}
+              className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground"
+            >
               {tag === "fashion"
                 ? t("verticalFashion")
                 : tag === "auto"
                   ? t("verticalAuto")
                   : t("verticalFb")}
-            </Badge>
+            </span>
           ))}
         </div>
-        <CardTitle className="text-lg text-navy">
+        <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
           {isKo ? report.titleKo : report.titleEn}
-        </CardTitle>
-        <CardDescription className="flex items-center gap-1.5 text-xs">
+        </h3>
+        <p className="mt-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
           <FileText className="h-3.5 w-3.5" />
           {report.publishedIso}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="mt-auto flex flex-1 flex-col gap-4">
-        <ul className="space-y-2 text-sm text-navy/80">
+        </p>
+      </header>
+      <div className="mt-auto flex flex-1 flex-col gap-4 p-5">
+        <ul className="space-y-2 text-sm text-foreground">
           {(isKo ? report.summaryKo : report.summaryEn).map((line, i) => (
             <li key={i} className="flex gap-2 leading-relaxed">
-              <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+              <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>{line}</span>
             </li>
           ))}
         </ul>
 
-        <div className="rounded-xl border border-navy/8 bg-slate-50/90 p-3 text-xs">
-          <p className="mb-2 flex items-center gap-1.5 font-bold text-navy">
-            <MonitorPlay className="h-3.5 w-3.5 text-gold-dark" />
-            {t("previewDooh")}
+        <div className="border-2 border-border bg-muted p-3 text-xs">
+          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            <MonitorPlay className="h-3.5 w-3.5" />[ {t("previewDooh")} ]
           </p>
-          <p className="leading-relaxed text-navy/75">
+          <p className="mt-2 leading-relaxed text-foreground">
             {(isKo ? report.doohKo : report.doohEn)[0]}
           </p>
         </div>
 
-        <div className="rounded-xl border border-navy/8 bg-navy/[0.03] p-3 text-xs">
-          <p className="mb-2 flex items-center gap-1.5 font-bold text-navy">
-            <BookOpen className="h-3.5 w-3.5 text-gold-dark" />
-            {t("previewVertical")}
+        <div className="border-2 border-border bg-muted p-3 text-xs">
+          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            <BookOpen className="h-3.5 w-3.5" />[ {t("previewVertical")} ]
           </p>
-          <p className="font-medium text-navy">
-            {isKo ? report.verticalBlocks[0]?.labelKo : report.verticalBlocks[0]?.labelEn}
+          <p className="mt-2 font-bold text-foreground">
+            {isKo
+              ? report.verticalBlocks[0]?.labelKo
+              : report.verticalBlocks[0]?.labelEn}
           </p>
-          <p className="mt-1 text-navy/70">
-            {(isKo ? report.verticalBlocks[0]?.bulletsKo : report.verticalBlocks[0]?.bulletsEn)?.[0]}
+          <p className="mt-1 text-foreground/75">
+            {
+              (isKo
+                ? report.verticalBlocks[0]?.bulletsKo
+                : report.verticalBlocks[0]?.bulletsEn)?.[0]
+            }
           </p>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            type="button"
-            className="flex-1 btn-gold font-bold text-navy hover:bg-gold-dark"
+          <BtnBlock
+            variant="accent"
+            size="md"
             onClick={onDownload}
             disabled={downloading}
+            className="flex-1"
           >
             {downloading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="h-4 w-4" />
             )}
             {t("downloadPdf")}
-          </Button>
+          </BtnBlock>
           {report.slug ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1 border-navy/25 font-semibold text-navy"
-              asChild
+            <BtnBlock
+              href={`/insights/${report.slug}`}
+              variant="secondary"
+              size="md"
+              className="flex-1"
             >
-              <Link href={`/insights/${report.slug}`}>
-                <BookOpen className="mr-2 h-4 w-4" />
-                {t("viewOnline")}
-              </Link>
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1 border-navy/25 font-semibold text-navy"
-              onClick={onView}
-            >
-              <BookOpen className="mr-2 h-4 w-4" />
+              <BookOpen className="h-4 w-4" />
               {t("viewOnline")}
-            </Button>
+            </BtnBlock>
+          ) : (
+            <BtnBlock
+              variant="secondary"
+              size="md"
+              onClick={onView}
+              className="flex-1"
+            >
+              <BookOpen className="h-4 w-4" />
+              {t("viewOnline")}
+            </BtnBlock>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </article>
   );
 }

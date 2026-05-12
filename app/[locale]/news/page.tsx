@@ -2,10 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useLocale } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Calendar, ExternalLink, Link as LinkIcon, Filter } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type NewsCategory = "press" | "award" | "event" | "all";
 
@@ -99,17 +97,17 @@ export default function NewsPage() {
 
   return (
     <>
-      <section className="bg-navy py-28">
+      <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">
-            {isKo ? "뉴스 & 보도자료" : "News & Press"}
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
+            {`// 15 / News`}
           </p>
-          <h1 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
             {isKo
               ? "THINKAD 뉴스·보도자료"
               : "THINKAD News & Press Releases"}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm text-slate-300">
+          <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {isKo
               ? "회사 소식, 보도자료, 수상 소식과 이벤트 정보를 한눈에 확인하세요."
               : "Browse press releases, awards and event updates from THINKAD."}
@@ -117,44 +115,42 @@ export default function NewsPage() {
         </div>
       </section>
 
-      <section className="border-b bg-slate-50/60 py-4">
+      <section className="bg-card py-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 text-xs font-semibold text-slate-600">
+          <div className="flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
             <Filter className="h-3.5 w-3.5" />
-            {isKo ? "카테고리" : "Category"}
+            [ {isKo ? "CATEGORY" : "CATEGORY"} ]
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-0">
             {categoryMeta.map((cat) => {
               const isActive = selectedCategory === cat.key;
               return (
-                <Button
+                <button
                   key={cat.key}
                   type="button"
-                  size="sm"
-                  variant={isActive ? "default" : "outline"}
-                  className={`h-8 rounded-full border text-xs ${
-                    isActive
-                      ? "border-gold bg-gold text-navy hover:bg-gold-dark"
-                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                  }`}
                   onClick={() => setSelectedCategory(cat.key)}
+                  className={cn(
+                    "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                    isActive
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
+                  )}
                 >
                   {cat.getLabel(isKo)}
-                </Button>
+                </button>
               );
             })}
           </div>
-          <div className="ml-auto text-xs text-slate-500">
-            {isKo ? "총" : "Total"}{" "}
-            <span className="font-semibold text-navy">{items.length}</span>
-            {isKo ? "건" : ""}
+          <div className="ml-auto font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            {`// `}{isKo ? "TOTAL" : "TOTAL"}{" "}
+            <span className="font-bold text-accent">{items.length}</span>
           </div>
         </div>
       </section>
 
-      <section className="py-10">
+      <section className="bg-muted py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => {
               const title = isKo ? item.titleKo : item.titleEn;
               const summary = isKo ? item.summaryKo : item.summaryEn;
@@ -170,31 +166,31 @@ export default function NewsPage() {
                   : Calendar;
 
               return (
-                <Card
+                <article
                   key={item.id}
-                  className="group flex h-full flex-col overflow-hidden border-0 bg-white shadow-[0_6px_24px_rgba(15,23,42,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(15,23,42,0.20)] rounded-2xl"
+                  className="group -mt-[2px] -ml-[2px] flex h-full flex-col overflow-hidden border-2 border-border bg-card"
                 >
-                  <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-navy/90 via-navy/70 to-slate-900 py-4">
+                  <header className="border-b-2 border-border bg-hero-void p-4">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 text-[11px] font-medium text-slate-200">
-                        <Calendar className="h-3.5 w-3.5 text-gold" />
+                      <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-hero-fg/85">
+                        <Calendar className="h-3.5 w-3.5 text-accent" />
                         <span>{formatDate(item.date)}</span>
                       </div>
                       {categoryLabel && (
-                        <Badge className="bg-black/40 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-100 backdrop-blur">
-                          {categoryLabel}
-                        </Badge>
+                        <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
+                          [ {categoryLabel} ]
+                        </span>
                       )}
                     </div>
-                    <CardTitle className="mt-3 text-sm font-bold leading-snug text-white sm:text-base">
+                    <h3 className="mt-3 text-sm font-bold leading-snug tracking-tight text-hero-fg sm:text-base">
                       {title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-1 flex-col justify-between p-4">
-                    <p className="text-xs leading-relaxed text-slate-700 sm:text-sm">
+                    </h3>
+                  </header>
+                  <div className="flex flex-1 flex-col justify-between p-4">
+                    <p className="font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
                       {summary}
                     </p>
-                    <div className="mt-4 flex items-center justify-between text-[11px] font-semibold text-gold group-hover:text-gold-dark">
+                    <div className="mt-4 flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent group-hover:text-foreground">
                       {item.link ? (
                         <a
                           href={item.link}
@@ -206,7 +202,7 @@ export default function NewsPage() {
                           <span>
                             {isKo
                               ? item.external
-                                ? "자세히 보기 (외부 링크)"
+                                ? "자세히 보기 (외부)"
                                 : "자세히 보기"
                               : item.external
                               ? "Read more (external)"
@@ -214,7 +210,7 @@ export default function NewsPage() {
                           </span>
                         </a>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-slate-400">
+                        <span className="inline-flex items-center gap-1.5 text-muted-foreground">
                           <TagIcon className="h-3.5 w-3.5" />
                           <span>
                             {isKo
@@ -224,14 +220,14 @@ export default function NewsPage() {
                         </span>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </article>
               );
             })}
           </div>
 
           {items.length === 0 && (
-            <div className="mt-10 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
+            <div className="mt-10 border-2 border-border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
               {isKo
                 ? "선택하신 카테고리에 해당하는 소식이 없습니다. 다른 카테고리를 선택해 보세요."
                 : "No news items for the selected category."}
@@ -242,4 +238,3 @@ export default function NewsPage() {
     </>
   );
 }
-

@@ -1,14 +1,23 @@
 /* === Brutalist redesign Phase 1 — Google Fonts (Space Grotesk + JetBrains Mono) === */
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
+/* 2026/2027 Modern stack — Inter (body) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+/* 2026/2027 Modern headings — General Sans (display). (Fallback: Satoshi-like) */
+@import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700,800,900&display=swap");
 /* Wanted Sans Variable — 2024-2025 한국 트렌드 폰트 (모던·세련된 sans, jsDelivr) */
 @import url("https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfontvariable/variable/WantedSansVariable.css");
 /* Pretendard 폴백 — Wanted Sans 미로드 시 백업 (jsDelivr CDN, subset woff2) */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
-@import "tailwindcss";
+/* Relative import: avoids resolving `tailwindcss` from ~ when a home package.json exists */
+@import "../node_modules/tailwindcss/index.css";
 @plugin "@tailwindcss/typography";
 
-/* THINKAD 2025 — Primary #0D1B2E · Accent #C8913C · Silver #B0B8C4 · Page #D6D9E6 · CTA #9B3C31 */
+/* THINKAD — Hermès orange #FF6200 · 프리미엄 다크/라이트 (next-themes) */
 @theme inline {
+  --color-hermes: var(--hermes);
+  --color-hero-void: var(--hero-void);
+  --color-hero-fg: var(--hero-fg);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -47,9 +56,9 @@
   --color-gold-200: #f0cd85;
   --color-gold-300: #e5b35a;
   --color-gold-400: #d49e44;
-  --color-gold: #c8913c;
-  --color-gold-light: #e0a85f;
-  --color-gold-dark: #a67524;
+  --color-gold: #ff6200;
+  --color-gold-light: #ff8533;
+  --color-gold-dark: #e65800;
   --color-gold-500: #c8913c;
   --color-gold-600: #a67524;
   --color-gold-700: #7e5818;
@@ -69,8 +78,8 @@
   --color-silver-800: #151922;
   --color-silver-900: #0a0d14;
 
-  --color-cta: #9b3c31;
-  --color-cta-hover: #85342a;
+  --color-cta: #ff6200;
+  --color-cta-hover: #e65800;
   --color-page: #ffffff;
   --color-brand-dark: #0a1420;
 
@@ -86,17 +95,24 @@
    * Phase 2/3 컴포넌트·페이지에서 사용.
    * 유틸리티 예: bg-bx-off · text-bx-accent · border-bx-black · text-bx-gray-dim
    * 기존 navy/gold 토큰은 Phase 3 까지 유지 (페이지 전환 안전성).
+   *
+   * 다크모드 대응: var() 참조 형태로 정의하여 .dark 셀렉터에서 --bx-* 변수
+   * 재정의 시 자동 색 전환됨. (직접 hex 면 빌드 시점에 inline 박혀 .dark 무효)
    */
-  --color-bx-black: #000000;
-  --color-bx-white: #ffffff;
-  --color-bx-off: #f5f5f5;
-  --color-bx-gray: #d4d4d4;
-  --color-bx-gray-dim: #737373;
-  --color-bx-accent: #ff4d00;
+  --color-bx-black: var(--bx-black);
+  --color-bx-white: var(--bx-white);
+  --color-bx-off: var(--bx-off);
+  --color-bx-gray: var(--bx-gray);
+  --color-bx-gray-dim: var(--bx-gray-dim);
+  --color-bx-accent: var(--bx-accent);
 
-  /* Font — Phase 1: Space Grotesk(영문) + Pretendard(한글) 우선.
-   * Wanted Sans·Geist 는 폴백으로 유지. JetBrains Mono 는 메타·라벨 전용. */
-  --font-sans: "Space Grotesk", "Pretendard Variable", "Wanted Sans Variable",
+  /* Font (2026/2027) — Body: Inter, Display: General Sans
+   * 한글은 Pretendard/Wanted Sans로 자연스럽게 폴백. */
+  --font-display: "General Sans", "Satoshi", "Space Grotesk", "Pretendard Variable",
+    "Wanted Sans Variable", "WantedSans Variable", var(--font-geist-sans),
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard,
+    "Malgun Gothic", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Inter", "Pretendard Variable", "Wanted Sans Variable",
     "WantedSans Variable", var(--font-geist-sans), -apple-system,
     BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard, "Malgun Gothic",
     Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -123,55 +139,161 @@
 :root {
   /* Phase 1: --radius 도 0. 일부 컴포넌트가 var(--radius) 를 직접 참조해도 사각이 되도록. */
   --radius: 0;
-  --background: #ffffff;
-  --foreground: #0a1420;
+  --hermes: #ff6200;
+  --hermes-muted: color-mix(in srgb, var(--hermes) 55%, white);
+  /* 히어로 등 “항상 어두운” 표면 — 라이트/다크 테마와 무관하게 고정 */
+  --hero-void: #020202;
+  --hero-fg: #f5f3f0;
+
+  --background: #f4f3f0;
+  --foreground: #08080a;
   --card: #ffffff;
-  --card-foreground: #0a1420;
-  --primary: #0d1b2e;
-  --primary-foreground: #ffffff;
-  --secondary: #e4e7f0;
-  --secondary-foreground: #0a1420;
-  --accent: #c8913c;
-  --accent-foreground: #0a1420;
-  --muted: #dfe3ec;
-  --muted-foreground: #5a6372;
+  --card-foreground: #08080a;
+  --primary: #08080a;
+  --primary-foreground: #fafafa;
+  --secondary: #e9e8e4;
+  --secondary-foreground: #08080a;
+  --accent: #ff6200;
+  --accent-foreground: #ffffff;
+  --muted: #e4e3df;
+  --muted-foreground: #5a5a5e;
   --destructive: #dc2626;
-  --border: #c1c7d4;
-  --input: #c1c7d4;
-  --ring: #0d1b2e;
-  --cta: #9b3c31;
-  --cta-hover: #85342a;
+  --border: #d8d6d0;
+  --input: #cfcac0;
+  --ring: #ff6200;
+  --cta: #ff6200;
+  --cta-hover: #e65800;
+
+  /* Brutalist 라이트 — 고급 라이트 톤 */
+  --bx-black: #08080a;
+  --bx-white: #ffffff;
+  --bx-off: #f0efeb;
+  --bx-gray: #d5d2cb;
+  --bx-gray-dim: #5c5c62;
+  --bx-accent: #ff6200;
+
+  --bx-bg-base: var(--color-bx-white);
+  --bx-bg-card: var(--color-bx-off);
+  --bx-fg-base: var(--color-bx-black);
+  --bx-fg-muted: var(--color-bx-gray-dim);
+  --bx-border: var(--color-bx-black);
+
+  /* Home accent text — default (night/neon) */
+  --home-accent-gradient: linear-gradient(
+    135deg,
+    #a855f7 0%,
+    #22d3ee 45%,
+    #ec4899 100%
+  );
+}
+
+/* ── Landing (neo) theme scope: purple accent ── */
+.tkad-landing-neo {
+  --accent: #7c3aed;
+  --accent-foreground: #ffffff;
+  --ring: #7c3aed;
+  --cta: #7c3aed;
+  --cta-hover: #6d28d9;
+}
+.dark .tkad-landing-neo {
+  --accent: #7c3aed;
+  --accent-foreground: #050505;
+  --ring: #7c3aed;
+  --cta: #7c3aed;
+  --cta-hover: #8b5cf6;
 }
 
 /* Dark mode tokens (next-themes 가 html.dark 클래스 토글 시 적용) */
-.dark {
-  --background: #0a0d14;
-  --foreground: #f5f6fa;
-  --card: #151922;
-  --card-foreground: #f5f6fa;
-  --primary: #e0a85f;
-  --primary-foreground: #0a1420;
-  --secondary: #1e232e;
-  --secondary-foreground: #f5f6fa;
-  --accent: #e0a85f;
-  --accent-foreground: #0a1420;
-  --muted: #1a1f29;
-  --muted-foreground: #a3adbb;
-  --destructive: #ef4444;
-  --border: #262c39;
-  --input: #262c39;
-  --ring: #e0a85f;
+/* 관리자 대시보드만: 라이트 모드에서 남색 primary/악센트 제거 + 본문·보조글 대비 강화
+ * (shadcn Card/Button/Input 이 --primary, --muted-foreground 등을 쓰므로 AdminShell 루트에 스코프) */
+html:not(.dark) .admin-dashboard-root {
+  --background: #f0efec;
+  --foreground: #0a0a0c;
+  --card: #ffffff;
+  --card-foreground: #0a0a0c;
+  /* Neon admin palette (day) */
+  --primary: #22d3ee;
+  --primary-foreground: #041018;
+  --secondary: #e6e4df;
+  --secondary-foreground: #0a0a0c;
+  --muted: #dcd9d3;
+  --muted-foreground: #4a4a50;
+  --accent: #a855f7;
+  --accent-foreground: #0a0a0c;
+  --border: #c8c4bc;
+  --input: #a8a49c;
+  --ring: rgba(34, 211, 238, 0.45);
+  --cta: #22d3ee;
+  --cta-hover: #06b6d4;
+}
 
-  /* Dark mode 가독성 보정 — 하드코딩된 navy/gold 색상이 어두운 배경에서 안 보이지 않도록 토큰 재매핑 */
-  --color-navy: #f5f6fa;
-  --color-navy-700: #f5f6fa;
-  --color-navy-800: #f5f6fa;
+/* Admin dashboard only (dark): override global orange tokens */
+.dark .admin-dashboard-root {
+  --background: #07070a;
+  --foreground: rgba(248, 250, 252, 0.96);
+  --card: rgba(0, 0, 0, 0.35);
+  --card-foreground: rgba(248, 250, 252, 0.96);
+  --primary: #22d3ee;
+  --primary-foreground: #05050a;
+  --secondary: rgba(255, 255, 255, 0.06);
+  --secondary-foreground: rgba(248, 250, 252, 0.96);
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: rgba(248, 250, 252, 0.62);
+  --accent: #a855f7;
+  --accent-foreground: #05050a;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: rgba(168, 85, 247, 0.45);
+  --cta: #22d3ee;
+  --cta-hover: #67e8f9;
+}
+
+.dark {
+  /* OLED black base */
+  --background: #070707;
+  --foreground: #f4f2ef;
+  --card: #0a0a0a;
+  --card-foreground: #f4f2ef;
+  --primary: #ff6200;
+  --primary-foreground: #020202;
+  --secondary: #0f0f12;
+  --secondary-foreground: #f4f2ef;
+  --accent: #ff6200;
+  --accent-foreground: #020202;
+  --muted: #0f0f12;
+  --muted-foreground: #9b9ba3;
+  --destructive: #f87171;
+  --border: #1f1f26;
+  --input: #1f1f26;
+  --ring: #ff6200;
+  --cta: #ff6200;
+  --cta-hover: #ff8533;
+
+  /* 다크에서도 남색 유틸은 “밝은 텍스트”로 (레거시 bg-navy 섹션용) */
+  --color-navy: #f4f2ef;
+  --color-navy-700: #f4f2ef;
+  --color-navy-800: #f4f2ef;
   --color-navy-900: #ffffff;
-  --color-navy-light: #c1c7d4;
-  --color-navy-dark: #f5f6fa;
-  --color-gold-dark: #f0cd85;
-  --color-gold-700: #f0cd85;
-  --color-gold-800: #e5b35a;
+  --color-navy-light: #c4c2bd;
+  --color-navy-dark: #f4f2ef;
+  --color-gold: #ff6200;
+  --color-gold-dark: #ffb38a;
+  --color-gold-700: #ff8533;
+  --color-gold-800: #ff6200;
+
+  /* Brutalist 다크 — 고대비 프리미엄 */
+  --bx-black: #f2f1ee;
+  --bx-white: #030303;
+  --bx-off: #101014;
+  --bx-gray: #2e2e36;
+  --bx-gray-dim: #9c9ca8;
+  --bx-accent: #ff6200;
+
+  --bx-bg-base: var(--color-bx-white);
+  --bx-bg-card: var(--color-bx-off);
+  --bx-fg-base: var(--color-bx-black);
+  --bx-fg-muted: var(--color-bx-gray-dim);
+  --bx-border: var(--color-bx-gray);
 }
 
 /* Hero 섹션 등 항상 어두운 배경(.bg-navy)에는 흰 글씨가 의도된 색이므로
@@ -188,13 +310,1536 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  /* Phase 1: Space Grotesk(영문) + Pretendard(한글) 우선 (--font-sans) */
+  /* 2026: Inter 기반 본문. (한글: Pretendard/Wanted Sans 폴백) */
   font-family: var(--font-sans);
   font-feature-settings: "ss06", "tnum", "cv11";
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Marquee (logos) ── */
+.tkad-marquee {
+  display: flex;
+  width: max-content;
+  gap: 12px;
+  animation: tkad-marquee 22s linear infinite;
+  will-change: transform;
+}
+.tkad-marquee:hover {
+  animation-play-state: paused;
+}
+@keyframes tkad-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tkad-marquee {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* ── Hero subtle noise texture (safe for Turbopack) ── */
+.tkad-hero-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+}
+
+/* ── Neo section depth (subtle) ── */
+.tkad-neo-depth {
+  background:
+    radial-gradient(900px 520px at 50% 8%, rgba(124, 58, 237, 0.16), transparent 60%),
+    radial-gradient(900px 520px at 18% 92%, rgba(56, 189, 248, 0.08), transparent 55%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.46), rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 1));
+}
+.tkad-neo-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 90px 90px;
+}
+
+/* ── Neon cyber (landing) ── */
+.tkad-neon-depth {
+  background:
+    radial-gradient(1200px 720px at 50% 0%, rgba(124, 58, 237, 0.30), transparent 62%),
+    radial-gradient(980px 620px at 14% 86%, rgba(34, 211, 238, 0.14), transparent 58%),
+    radial-gradient(820px 520px at 92% 62%, rgba(236, 72, 153, 0.11), transparent 58%),
+    radial-gradient(700px 520px at 72% 18%, rgba(59, 130, 246, 0.08), transparent 60%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.90), rgba(0, 0, 0, 1));
+}
+.tkad-neon-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 84px 84px;
+}
+.tkad-neon-border {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+}
+.tkad-neon-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.95),
+    rgba(34, 211, 238, 0.7),
+    rgba(236, 72, 153, 0.65),
+    rgba(59, 130, 246, 0.65)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.14;
+  pointer-events: none;
+}
+.tkad-neon-glow {
+  box-shadow:
+    0 30px 120px rgba(0, 0, 0, 0.78),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 34px rgba(124, 58, 237, 0.12),
+    0 0 26px rgba(34, 211, 238, 0.08),
+    0 0 26px rgba(236, 72, 153, 0.055);
+}
+.tkad-neon-text {
+  text-shadow:
+    0 28px 140px rgba(0, 0, 0, 0.86),
+    0 0 18px rgba(124, 58, 237, 0.12),
+    0 0 12px rgba(34, 211, 238, 0.07);
+}
+.tkad-neon-cta {
+  background: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%);
+  box-shadow:
+    0 40px 160px rgba(0, 0, 0, 0.72),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 30px rgba(168, 85, 247, 0.16),
+    0 0 18px rgba(34, 211, 238, 0.10),
+    0 0 18px rgba(236, 72, 153, 0.075);
+}
+.tkad-neon-cta:hover {
+  box-shadow:
+    0 52px 190px rgba(0, 0, 0, 0.78),
+    0 0 0 1px rgba(255, 255, 255, 0.11),
+    0 0 44px rgba(168, 85, 247, 0.26),
+    0 0 28px rgba(34, 211, 238, 0.16),
+    0 0 28px rgba(236, 72, 153, 0.12);
+}
+
+/* CTA variant — cleaner, less gradient weight */
+.tkad-neon-cta-clean {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.95) 0%, rgba(34, 211, 238, 0.9) 55%, rgba(236, 72, 153, 0.85) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 34px 140px rgba(0, 0, 0, 0.78),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 24px rgba(168, 85, 247, 0.14),
+    0 0 14px rgba(34, 211, 238, 0.09);
+}
+.tkad-neon-cta-clean:hover {
+  box-shadow:
+    0 44px 170px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 0 34px rgba(168, 85, 247, 0.22),
+    0 0 20px rgba(34, 211, 238, 0.14);
+}
+
+/* Neon landing scope: keep rest of app stable */
+.tkad-landing-neon {
+  --accent: #a855f7;
+  --cta: #22d3ee;
+  --ring: #a855f7;
+}
+
+/* ── 홈 낮 모드: 에디토리얼 라이트 — 섹션 카드 분리·여백 리듬 ── */
+.tkad-home-appearance[data-appearance="day"] {
+  min-height: 100dvh;
+  /* html.dark 와 동시에 쓰일 때 native / color-mix 가 밝은 글자로 고정되는 경우 방지 */
+  color-scheme: light dark;
+  /* 하단 clamp padding 은 main(body) 회색이 비치는 띠로 보일 수 있어 0 — 섹션 내부 여백으로 조절 */
+  padding-bottom: 0;
+  /* 토큰: 히어로·카드에서 공유 (Tailwind와 병행, 낮 모드 전용) */
+  --home-ink: #020617;
+  --home-ink-soft: #1e293b;
+  --home-muted: #64748b;
+  --home-body: #334155;
+  --home-line: rgb(15 23 42 / 0.11);
+  --home-line-soft: rgb(15 23 42 / 0.055);
+  --home-line-faint: rgb(15 23 42 / 0.045);
+  --home-signal-surface: rgb(255 255 255 / 0.97);
+  --home-signal-shadow:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 1px 2px rgb(15 23 42 / 0.028),
+    0 4px 12px rgb(15 23 42 / 0.045),
+    0 16px 36px rgb(15 23 42 / 0.055);
+  --home-chip-bg: rgb(248 250 252 / 0.98);
+  --home-chip-border: rgb(15 23 42 / 0.09);
+  /* 히어로 카드(섹션 프레임): 조용한 다층 깊이 */
+  --home-hero-shell-shadow:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 1px 2px rgb(15 23 42 / 0.025),
+    0 8px 24px rgb(15 23 42 / 0.045),
+    0 28px 64px rgb(15 23 42 / 0.06),
+    0 48px 100px rgb(15 23 42 / 0.045),
+    0 0 0 1px rgb(255 255 255 / 0.7) inset;
+  /* H1 액센트: 선명한 코어(인디고·바이올렛) + 절제된 틸·와인 끝 — 라이트 네이티브 */
+  --home-headline-gradient: linear-gradient(
+    112deg,
+    /* 라이트 배경 위에서도 “글자”가 이기는 잉크톤 그라데이션 */
+    #0b1f4a 0%,
+    #123a8a 18%,
+    #2b2aa8 38%,
+    #5b21b6 54%,
+    #0b7a6f 76%,
+    #9d174d 100%
+  );
+
+  /* 포인트 텍스트 — 다크(네온)와 동일: 보라 → 시안 → 핑크 */
+  --home-accent-gradient: linear-gradient(
+    135deg,
+    #a855f7 0%,
+    #22d3ee 45%,
+    #ec4899 100%
+  );
+  --home-panel-label: #64748b;
+  /* 히어로 우측 ‘aside’: 본문 H1보다 한 단계 부드러운 잉크 */
+  --home-panel-value: #334155;
+  --home-panel-muted: #94a3b8;
+  /* 히어로 스탯 패널 전용 — 쉘보다 낮은 대비·짧은 그림자(경쟁하지 않게) */
+  --home-panel-bg: linear-gradient(
+    165deg,
+    /* 라이트에서도 “깊이”가 느껴지도록 아주 미세한 쿨 톤 틴트 */
+    rgb(226 232 246 / 0.92) 0%,
+    rgb(236 242 252 / 0.9) 46%,
+    rgb(226 232 244 / 0.88) 100%
+  );
+  --home-panel-shadow:
+    0 1px 0 rgb(255 255 255 / 0.96) inset,
+    0 1px 2px rgb(15 23 42 / 0.012),
+    0 3px 12px rgb(15 23 42 / 0.026),
+    0 12px 28px rgb(15 23 42 / 0.032),
+    0 26px 70px rgb(15 23 42 / 0.055);
+  --home-panel-stat-surface: rgb(250 251 255 / 0.68);
+  --home-panel-stat-shadow:
+    0 1px 0 rgb(255 255 255 / 0.92) inset,
+    0 1px 2px rgb(15 23 42 / 0.022);
+  --home-secondary-shadow:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 10px 28px rgb(15 23 42 / 0.07),
+    0 2px 8px rgb(15 23 42 / 0.04);
+  /* 매체 카드·공통 엘리베이션 — 히어로와 같은 라이트 언어 */
+  --home-card-surface: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.998) 0%,
+    rgb(252 252 254 / 0.97) 45%,
+    rgb(248 250 252 / 0.96) 100%
+  );
+  --home-card-shadow:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 1px 2px rgb(15 23 42 / 0.028),
+    0 6px 20px rgb(15 23 42 / 0.05),
+    0 18px 44px rgb(15 23 42 / 0.058);
+  --home-card-shadow-hover:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 2px 6px rgb(15 23 42 / 0.035),
+    0 12px 32px rgb(15 23 42 / 0.075),
+    0 26px 56px rgb(67 56 202 / 0.09);
+  /* 4단계 검증 스텝 카드 */
+  --home-step-surface: linear-gradient(
+    165deg,
+    rgb(255 255 255 / 0.97) 0%,
+    rgb(252 253 255 / 0.94) 42%,
+    rgb(246 248 251 / 0.93) 100%
+  );
+  --home-step-shadow:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 1px 2px rgb(15 23 42 / 0.025),
+    0 5px 16px rgb(15 23 42 / 0.045),
+    0 18px 40px rgb(15 23 42 / 0.055);
+  --home-step-shadow-hover:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 3px 12px rgb(15 23 42 / 0.05),
+    0 20px 48px rgb(15 23 42 / 0.065);
+  --home-step-progress: linear-gradient(
+    90deg,
+    #312e81 0%,
+    #4338ca 40%,
+    #0f766e 78%,
+    #6b21a8 100%
+  );
+  /* NeonSection 등 본문 섹션 패널 — 카드·히어로와 같은 그림자 가족 */
+  --home-section-surface-shadow:
+    0 1px 0 rgb(255 255 255 / 0.98) inset,
+    0 1px 2px rgb(15 23 42 / 0.028),
+    0 8px 26px rgb(15 23 42 / 0.055),
+    0 26px 58px rgb(15 23 42 / 0.065),
+    0 0 0 1px rgb(255 255 255 / 0.68) inset;
+  /* 라이트 전용: 낮은 채도 액센트 + 뉴트럴 베이스 */
+  background:
+    radial-gradient(115% 70% at 0% -6%, rgba(99, 102, 241, 0.07), transparent 50%),
+    radial-gradient(90% 55% at 100% 8%, rgba(13, 148, 136, 0.06), transparent 48%),
+    radial-gradient(75% 42% at 50% 100%, rgba(15, 23, 42, 0.015), transparent 52%),
+    linear-gradient(180deg, #ffffff 0%, #f7f8ff 44%, #ffffff 100%);
+}
+
+/* 라이트 랜딩: `main` 기본 배경이 `body --background`(회색)일 때 푸터 직전에 가로 띠로 노출됨 */
+main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(115% 70% at 0% -6%, rgba(99, 102, 241, 0.07), transparent 50%),
+    radial-gradient(90% 55% at 100% 8%, rgba(13, 148, 136, 0.06), transparent 48%),
+    radial-gradient(75% 42% at 50% 100%, rgba(15, 23, 42, 0.015), transparent 52%),
+    linear-gradient(180deg, #ffffff 0%, #f7f8ff 44%, #ffffff 100%);
+}
+
+.tkad-home-appearance[data-appearance="day"] > .tkad-landing-neon {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+/* 랜딩 밤 + 루트에 planner-neon(아카데미·인사이트·사례 목록 등): 사이트 라이트일 때 크림 body 가 비치면 밤(밝은 글자) 토큰이 전부 묻음 */
+.tkad-home-appearance[data-appearance="night"] > .tkad-landing-neon.tkad-planner-neon {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  background: #05050a;
+  color-scheme: dark;
+}
+
+/* 공통 포인트 텍스트 (홈/섹션 헤드에서 재사용) */
+.tkad-home-accent-text {
+  display: inline-block;
+  background-image: var(
+    --home-accent-gradient,
+    linear-gradient(135deg, #0b1f4a 0%, #123a8a 18%, #2b2aa8 38%, #5b21b6 54%, #0b7a6f 76%, #9d174d 100%)
+  ) !important;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  -moz-text-fill-color: transparent;
+}
+
+@supports not (-webkit-background-clip: text) {
+  .tkad-home-accent-text {
+    background-image: none;
+    color: var(--home-ink, #0b1f4a);
+  }
+}
+
+/* 다크와 동일: 래퍼는 블록만. flex/gap/padding 추가 시 히어로 너비·간격이 어긋남 */
+.tkad-home-appearance[data-appearance="day"] .tkad-landing-neon {
+  background: transparent;
+  --accent: #5b21b6;
+  --cta: #0f766e;
+  --ring: #6366f1;
+}
+
+/* 각 히어로·Neon 섹션 = 떠 있는 라이트 패널 — 프리미엄 깊이(입체 그림자) */
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface {
+  position: relative;
+  overflow: hidden;
+  border-radius: clamp(1.2rem, 2.4vw, 1.85rem);
+  border: 1px solid rgb(15 23 42 / 0.08);
+  background:
+    linear-gradient(165deg, rgb(255 255 255 / 0.995) 0%, rgb(248 250 255 / 0.97) 40%, rgb(241 244 252 / 0.95) 100%) !important;
+  box-shadow: var(--home-section-surface-shadow);
+  /* 섹션 루트에 `text-white` 유틸이 있어 상속이 밝은색으로 이기는 경우 방지 */
+  color: rgb(10 10 22) !important;
+  /* 루트 text-white 의 -webkit-text-fill 로 인해 클립 그라데이션·글자색이 하얗게 남는 문제 */
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 라이트 모드: 무지개 테두리 글로우 약화(카드·패널 공통) */
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-border::before {
+  opacity: 0.04 !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface > [aria-hidden] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface [class*="text-white"] {
+  color: rgb(12 12 24) !important;
+  /* Tailwind text-white* 가 남기는 -webkit-text-fill 만 바꾸면 클립 그라데이션이 ‘하얀 덩어리’로 보임 */
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 라이트 랜딩: 브랜드 CTA(주황) 버튼은 텍스트를 항상 흰색으로 (hover bg-foreground에서도 대비 유지) */
+.tkad-home-appearance[data-appearance="day"]
+  .tkad-neon-surface
+  .bg-accent.text-white {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
+/* 라이트에서도 다크와 동일 네온 그라데이션 (변수 + 클립 명시 — 상위 fill·text-shadow 분리) */
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-home-accent-text {
+  background-image: var(--home-accent-gradient) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+}
+
+/* 그라데이션 CTA는 밝은 글자 유지 (위 규칙이 text-white 유틸까지 덮어씀) */
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean,
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean *,
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta,
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta * {
+  color: rgb(252 252 255) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface [class*="border-white"] {
+  border-color: rgb(22 22 48 / 0.12) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface [class*="bg-white/"] {
+  background-color: rgb(255 255 255 / 0.98) !important;
+  box-shadow:
+    0 14px 44px rgb(22 22 48 / 0.07),
+    0 0 0 1px rgb(22 22 48 / 0.05) !important;
+}
+
+/* 섹션 타이틀 — 낮: 흰색 text-shadow 금지(히어로 h1과 동일), 액센트 네온 클립 */
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head h2 {
+  color: var(--home-ink) !important;
+  text-shadow: none !important;
+  letter-spacing: -0.065em !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head h2 span.tkad-home-accent-text {
+  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.75))
+    drop-shadow(0 1px 2px rgb(15 23 42 / 0.08));
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head h2 span.bg-clip-text {
+  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.75))
+    drop-shadow(0 1px 2px rgb(15 23 42 / 0.08));
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head .tkad-neon-border {
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.98) 0%,
+    rgb(248 250 255 / 0.96) 50%,
+    rgb(244 246 252 / 0.95) 100%
+  ) !important;
+  border: 1px solid var(--home-line-soft) !important;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 4px 16px rgb(15 23 42 / 0.045),
+    0 14px 36px rgb(15 23 42 / 0.055) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head .tkad-neon-border span.bg-clip-text {
+  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+}
+
+.tkad-home-appearance[data-appearance="day"]
+  .tkad-neon-section-head
+  .flex.flex-wrap.items-center.gap-3
+  > span:nth-child(2) {
+  color: var(--home-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-section-cta {
+  border-color: rgb(15 23 42 / 0.18) !important;
+  color: var(--home-ink-soft) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-section-cta:hover {
+  border-color: rgb(67 56 202 / 0.45) !important;
+  color: var(--home-ink) !important;
+}
+
+/* 마지막 CTA 블록 — 라이트 카드 위 네온 글로우 텍스트 섀도 제거 */
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-text {
+  text-shadow: none !important;
+  color: var(--home-ink) !important;
+}
+
+/* /services FAQ — 낮: 답변 행 어두운 필름 제거 */
+.tkad-home-appearance[data-appearance="day"] .tkad-services-faq .tkad-services-faq-answer {
+  background: rgb(248 250 252 / 0.96) !important;
+  border-color: rgb(15 23 42 / 0.08) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-services-faq .text-cyan-200 {
+  color: rgb(8 145 178) !important;
+}
+
+/* 홈 낮: 우하단 FloatingCta — 밝은 배경 위에서 글래스+흰 글자가 사라지는 문제 */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-floating-cta {
+  background-color: rgb(255 255 255 / 0.94) !important;
+  box-shadow:
+    0 22px 70px rgb(22 22 48 / 0.12),
+    0 0 0 1px rgb(22 22 48 / 0.08) !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-home-floating-cta > .min-w-0 [class*="text-white"] {
+  color: rgb(14 14 24) !important;
+}
+
+/* ── Planner neon skin (scoped) ───────────────────────────────────────────── */
+/* 기존 Planner는 브루탈(2px border + bg-card/bg-muted) 기반. 홈 네온 랜딩(day/night) 안에서만 “글래스 카드”로 리스킨. */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.border-border.bg-card,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.border-border.bg-muted,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.border-border.bg-hero-void {
+  border-width: 1px !important;
+  border-color: var(--home-line-soft) !important;
+  background: rgb(255 255 255 / 0.98) !important;
+  box-shadow: var(--home-card-shadow) !important;
+  border-radius: 1.35rem !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-b-2.border-border {
+  border-bottom-width: 1px !important;
+  border-color: var(--home-line-soft) !important;
+}
+
+/*
+ * Planner 낮: 랜딩 day + 사이트 다크(html.dark).
+ * Tailwind v4 `.text-foreground` → `color: var(--foreground)` (빌드된 layout.css 기준).
+ * 변수 재매핑 + 아래 유틸별 !important 로 흰 글자·-webkit-text-fill 잔류까지 끊음.
+ */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon {
+  color: var(--home-body) !important;
+  -webkit-text-fill-color: currentColor !important;
+
+  --background: #f8fafc;
+  --foreground: var(--home-ink);
+  --card: rgb(255 255 255 / 0.99);
+  --card-foreground: var(--home-ink);
+  --popover: rgb(255 255 255 / 0.99);
+  --popover-foreground: var(--home-ink);
+  --muted: rgb(241 245 249 / 0.98);
+  --muted-foreground: var(--home-muted);
+  --border: rgb(15 23 42 / 0.11);
+  --input: rgb(15 23 42 / 0.12);
+  --ring: rgb(99 102 241 / 0.42);
+  --primary: #4338ca;
+  --primary-foreground: #fafafa;
+  --secondary: rgb(226 232 240 / 0.96);
+  --secondary-foreground: var(--home-ink);
+  --accent: #4338ca;
+  --accent-foreground: #fafafa;
+  --destructive: #dc2626;
+  --destructive-foreground: #fafafa;
+
+  /* @theme inline — 유틸이 var(--color-*)를 직접 쓰는 경우 동일 스코프에서 재연결 */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground {
+  color: var(--home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-muted-foreground {
+  color: var(--home-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/40 {
+  color: color-mix(in oklab, var(--home-ink) 40%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/70 {
+  color: color-mix(in oklab, var(--home-ink) 70%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/75 {
+  color: color-mix(in oklab, var(--home-ink) 75%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/80 {
+  color: color-mix(in oklab, var(--home-ink) 80%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/85 {
+  color: color-mix(in oklab, var(--home-ink) 85%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/90 {
+  color: color-mix(in oklab, var(--home-ink) 90%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+@supports not (color: color-mix(in lab, red, red)) {
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/40 {
+    color: rgb(2 6 23 / 0.4) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/70 {
+    color: rgb(2 6 23 / 0.7) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/75 {
+    color: rgb(2 6 23 / 0.75) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/80 {
+    color: rgb(2 6 23 / 0.8) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/85 {
+    color: rgb(2 6 23 / 0.85) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/90 {
+    color: rgb(2 6 23 / 0.9) !important;
+  }
+}
+
+/* Planner 밤: 랜딩 night + 사이트 라이트일 때 루트 잉크가 어두우면 글래스 카드와 충돌 가능 — 다크 UI 토큰으로 고정 */
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon {
+  --background: rgb(8 10 18 / 0.55);
+  --foreground: rgb(248 250 252 / 0.96);
+  --card: rgb(255 255 255 / 0.06);
+  --card-foreground: rgb(248 250 252 / 0.96);
+  --popover: rgb(12 14 22 / 0.94);
+  --popover-foreground: rgb(248 250 252 / 0.96);
+  --muted: rgb(255 255 255 / 0.08);
+  --muted-foreground: rgb(226 232 240 / 0.68);
+  --border: rgb(255 255 255 / 0.12);
+  --input: rgb(255 255 255 / 0.1);
+  --ring: rgb(167 139 250 / 0.45);
+  --primary: #a5b4fc;
+  --primary-foreground: #0f172a;
+  --secondary: rgb(255 255 255 / 0.08);
+  --secondary-foreground: rgb(248 250 252 / 0.92);
+  --accent: #22d3ee;
+  --accent-foreground: #0f172a;
+  --destructive: #f87171;
+  --destructive-foreground: #0f172a;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  /* 본문 기본 글자 — text-* 유틸 없는 노드도 대비 */
+  color: rgb(248 250 252 / 0.92) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 사이트 다크 + 랜딩 낮: 루트 --foreground(밝은색) 잔류로 밝은 main 배경 위에서 글자가 사라지는 경우 차단 */
+html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon {
+  color: var(--home-body) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground {
+  color: var(--home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-muted-foreground {
+  color: var(--home-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-primary-foreground {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-primary-foreground\/85 {
+  color: rgb(255 255 255 / 0.9) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .fill-foreground {
+  fill: var(--home-ink);
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon input::placeholder,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon textarea::placeholder {
+  color: var(--home-muted) !important;
+  opacity: 1;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-primary {
+  color: #4338ca !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-primary {
+  background-color: #4338ca !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-primary {
+  border-color: rgb(67 56 202 / 0.55) !important;
+}
+
+/* Planner 내부 “탭 버튼”들 (-mt/-ml로 붙는 형태): 라이트에서 카드 톤으로 정리 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-card,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-muted {
+  border-width: 1px !important;
+  border-color: var(--home-line) !important;
+  background: rgb(248 250 252 / 0.98) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-card:hover,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-muted:hover {
+  background: rgb(255 255 255 / 1) !important;
+  border-color: rgb(99 102 241 / 0.28) !important;
+}
+
+/* Night(네온) — 플래너 카드도 홈 다크 네온 톤으로 */
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.border-border.bg-card,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.border-border.bg-muted,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.border-border.bg-hero-void {
+  border-width: 1px !important;
+  border-color: rgb(255 255 255 / 0.10) !important;
+  background: rgb(255 255 255 / 0.05) !important;
+  box-shadow: 0 28px 120px rgb(0 0 0 / 0.78) !important;
+  border-radius: 1.35rem !important;
+  backdrop-filter: blur(14px);
+}
+
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-b-2.border-border {
+  border-bottom-width: 1px !important;
+  border-color: rgb(255 255 255 / 0.10) !important;
+}
+
+/* Planner: 일부 컴포넌트는 `border-2 bg-card`만 있고 border-border 클래스가 없음 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.bg-card,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.bg-muted {
+  border-width: 1px !important;
+  border-color: var(--home-line-soft) !important;
+  background: rgb(255 255 255 / 0.98) !important;
+  box-shadow: var(--home-card-shadow) !important;
+  border-radius: 1.35rem !important;
+}
+
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.bg-card,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.bg-muted {
+  border-width: 1px !important;
+  border-color: rgb(255 255 255 / 0.10) !important;
+  background: rgb(255 255 255 / 0.05) !important;
+  box-shadow: 0 28px 120px rgb(0 0 0 / 0.78) !important;
+  border-radius: 1.35rem !important;
+  backdrop-filter: blur(14px);
+}
+
+/* Planner map (SVG) */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-bg {
+  fill: rgb(248 250 252 / 1);
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-bg {
+  fill: rgb(255 255 255 / 0.04);
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .fill-muted-foreground {
+  fill: var(--home-muted);
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .fill-muted-foreground {
+  fill: rgb(255 255 255 / 0.55);
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .fill-foreground {
+  fill: rgb(255 255 255 / 0.9);
+}
+
+/* Planner 지역 맵 SVG — 미선택 path에 fill-card 유틸 쓰면 밤에 거의 흰색이 되어 라벨(흰색 상속)과 붕괴 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-zone-off {
+  fill: rgb(226 232 240 / 0.98) !important;
+  stroke: rgb(15 23 42 / 0.16) !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-zone-off:hover {
+  fill: rgb(203 213 225 / 0.98) !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-zone-off {
+  fill: rgb(255 255 255 / 0.07) !important;
+  stroke: rgb(255 255 255 / 0.18) !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-zone-off:hover {
+  fill: rgb(255 255 255 / 0.11) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-zone-on {
+  stroke: rgb(15 23 42 / 0.22) !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-zone-on {
+  stroke: rgb(255 255 255 / 0.24) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-korea,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-label-idle {
+  fill: var(--home-ink) !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-korea,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-label-idle {
+  fill: rgb(248 250 252 / 0.94) !important;
+}
+.tkad-planner-neon .tkad-planner-map-label-active {
+  fill: rgb(255 255 255) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-count-idle {
+  fill: var(--home-muted) !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-count-idle {
+  fill: rgb(226 232 240 / 0.72) !important;
+}
+.tkad-planner-neon .tkad-planner-map-count-active {
+  fill: rgb(255 255 255 / 0.88) !important;
+}
+
+/* Planner: 작은 태그/힌트 텍스트 */
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-muted-foreground {
+  color: rgb(255 255 255 / 0.62) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground {
+  color: rgb(255 255 255 / 0.92) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/40 {
+  color: rgb(255 255 255 / 0.37) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/70 {
+  color: rgb(255 255 255 / 0.64) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/75 {
+  color: rgb(255 255 255 / 0.69) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/80 {
+  color: rgb(255 255 255 / 0.74) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/85 {
+  color: rgb(255 255 255 / 0.78) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/90 {
+  color: rgb(255 255 255 / 0.83) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .bg-card {
+  background-color: rgb(255 255 255 / 0.05) !important;
+}
+
+/* Planner: 타일형(탭/그리드) -2px border 합치기 → 1px 기준으로 보정 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .-ml-\[2px\],
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .-ml-\[2px\] {
+  margin-left: -1px !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .-mt-\[2px\],
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .-mt-\[2px\] {
+  margin-top: -1px !important;
+}
+
+/* Planner: hero-void 패널도 네온 카드 톤으로 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hero-void {
+  background-color: rgb(248 250 252 / 0.92) !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg {
+  color: var(--home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 낮: hero 패널 배경은 라이트인데 `text-hero-fg/*` 는 여전히 밝은 크림(--hero-fg) → 대비 붕괴 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/40 {
+  color: color-mix(in oklab, var(--home-ink) 40%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/55 {
+  color: color-mix(in oklab, var(--home-ink) 55%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/60 {
+  color: color-mix(in oklab, var(--home-ink) 60%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/65 {
+  color: color-mix(in oklab, var(--home-ink) 65%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/70 {
+  color: color-mix(in oklab, var(--home-ink) 70%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/75 {
+  color: color-mix(in oklab, var(--home-ink) 75%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/80 {
+  color: color-mix(in oklab, var(--home-ink) 80%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/85 {
+  color: color-mix(in oklab, var(--home-ink) 85%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/90 {
+  color: color-mix(in oklab, var(--home-ink) 90%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/95 {
+  color: color-mix(in oklab, var(--home-ink) 95%, transparent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+@supports not (color: color-mix(in lab, red, red)) {
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/40 {
+    color: rgb(2 6 23 / 0.4) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/55 {
+    color: rgb(2 6 23 / 0.55) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/60 {
+    color: rgb(2 6 23 / 0.6) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/65 {
+    color: rgb(2 6 23 / 0.65) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/70 {
+    color: rgb(2 6 23 / 0.7) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/75 {
+    color: rgb(2 6 23 / 0.75) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/80 {
+    color: rgb(2 6 23 / 0.8) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/85 {
+    color: rgb(2 6 23 / 0.85) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/90 {
+    color: rgb(2 6 23 / 0.9) !important;
+  }
+  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/95 {
+    color: rgb(2 6 23 / 0.95) !important;
+  }
+}
+
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .bg-hero-void {
+  background-color: rgb(255 255 255 / 0.04) !important;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-hero-fg {
+  color: rgb(255 255 255 / 0.92) !important;
+}
+
+/* `/media` — 랜딩 night 본문과 히어로 하단 연속 */
+.tkad-home-appearance[data-appearance="night"] .tkad-media-page {
+  background: #05050a;
+}
+
+/* `/media/*` 하단 링크(매체 찾기) — 라이트에서 text-white 대비 보정 */
+.tkad-home-appearance[data-appearance="day"] .tkad-media-links-footer [class*="text-white"] {
+  color: var(--home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-links-footer [class*="text-white/"] {
+  color: var(--home-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* ── Shared Glass Surfaces (premium neon) ──
+ * Use these for panels/cards/widgets so the UI feels "finished" via consistency.
+ * Base (night): black glass. Day: white glass via data-appearance override. */
+.tkad-glass-surface {
+  position: relative;
+  border-radius: 22px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(0 0 0 / 0.45);
+  color: rgb(255 255 255 / 0.9);
+  box-shadow: 0 28px 120px rgb(0 0 0 / 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.tkad-glass-surface-soft {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid rgb(255 255 255 / 0.10);
+  background: rgb(0 0 0 / 0.26);
+  color: rgb(255 255 255 / 0.86);
+  box-shadow: 0 18px 60px rgb(0 0 0 / 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface,
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft {
+  border-color: rgb(15 23 42 / 0.14) !important;
+  background: rgb(255 255 255 / 0.94) !important;
+  color: var(--home-ink) !important;
+  box-shadow: var(--home-card-shadow) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface [class*="text-white"],
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft [class*="text-white"] {
+  color: var(--home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface [class*="text-white/"],
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft [class*="text-white/"] {
+  color: var(--home-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* `/login|/register` — auth pages match neon landing background */
+.tkad-home-appearance[data-appearance="night"] .tkad-auth-page {
+  background: #05050a;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-auth-card {
+  border-color: rgb(15 23 42 / 0.14) !important;
+  background: rgb(255 255 255 / 0.94) !important;
+  color: var(--home-ink) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-auth-card [class*="text-white"] {
+  color: var(--home-ink) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-auth-card [class*="text-white/"] {
+  color: var(--home-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-auth-input {
+  border-color: rgb(15 23 42 / 0.14) !important;
+  background: rgb(255 255 255 / 0.94) !important;
+  color: var(--home-ink) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-auth-input::placeholder {
+  color: var(--home-muted) !important;
+  opacity: 1;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-hero__eyebrow {
+  color: var(--home-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-hero__subtitle {
+  color: var(--home-body) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .tkad-media-hero-search input {
+  border-color: rgb(15 23 42 / 0.14) !important;
+  background: rgb(255 255 255 / 0.94) !important;
+  color: var(--home-ink) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .tkad-media-hero-search input::placeholder {
+  color: var(--home-muted) !important;
+  opacity: 1;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .tkad-media-hero-search svg {
+  color: var(--home-muted) !important;
+}
+
+/* `/media/map` 검색창 — 라이트 랜딩과 동일 토큰 */
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-search-input {
+  color: var(--home-ink) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-search-input::placeholder {
+  color: var(--home-muted) !important;
+  opacity: 1;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-search-pill {
+  border-color: rgb(15 23 42 / 0.14) !important;
+  background: rgb(255 255 255 / 0.94) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-search-pill svg {
+  color: var(--home-muted) !important;
+}
+
+/* `/media/map` 상단 필터 칩(정렬/타입) — 라이트 랜딩과 동일 토큰 */
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-top-filter {
+  border-color: rgb(15 23 42 / 0.14) !important;
+  background: rgb(255 255 255 / 0.92) !important;
+  color: var(--home-ink) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-top-filter span {
+  color: var(--home-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-top-filter select {
+  color: var(--home-ink) !important;
+  border-color: rgb(15 23 42 / 0.14) !important;
+}
+
+/* `/media/map` 선택 미니 팝업 — 라이트 랜딩과 동일 토큰 */
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-mini-popup {
+  border-color: rgb(15 23 42 / 0.14) !important;
+  background: rgb(255 255 255 / 0.92) !important;
+  color: var(--home-ink) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-mini-popup [class*="text-white"] {
+  color: var(--home-ink) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-map-mini-popup [class*="text-white/"] {
+  color: var(--home-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="night"] .tkad-media-main-tabs {
+  border-color: rgb(255 255 255 / 0.12) !important;
+  background: rgb(255 255 255 / 0.06) !important;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.45);
+}
+
+/* `/recommend` 히어로 — 라이트 랜딩과 동일 토큰 */
+.tkad-home-appearance[data-appearance="day"] .tkad-recommend-hero__eyebrow {
+  color: var(--home-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-recommend-hero__subtitle {
+  color: var(--home-body) !important;
+}
+
+/* `/media/[id]` 상세 히어로 CTA(보조) — 라이트에서 흰 텍스트가 사라지지 않도록 */
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-cta-secondary {
+  border-color: rgb(15 23 42 / 0.14) !important;
+  background: rgb(255 255 255 / 0.92) !important;
+  color: var(--home-ink) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-cta-secondary:hover {
+  background: rgb(255 255 255 / 1) !important;
+  border-color: rgb(99 102 241 / 0.22) !important;
+}
+
+/* `/media/region|type|area/*` 키워드 랜딩 히어로 — 라이트 랜딩과 동일 토큰 */
+.tkad-home-appearance[data-appearance="day"] .tkad-media-keyword-hero__eyebrow {
+  color: var(--home-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-keyword-hero__body {
+  color: var(--home-body) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-keyword-hero-icon {
+  border-color: rgb(15 23 42 / 0.12) !important;
+  background: rgb(255 255 255 / 0.82) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-keyword-hero-icon svg {
+  color: var(--home-ink-soft) !important;
+}
+
+/* ── 홈 라이트: 히어로 — 가독성·명암·계층 우선 (구조 훅만 사용) ── */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero.tkad-neon-surface {
+  border-color: rgb(15 23 42 / 0.055) !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  box-shadow: var(--home-hero-shell-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero.tkad-neon-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    /* Day hero should still feel "neon": mimic night gradients but on a light shell */
+    radial-gradient(120% 90% at 6% -10%, rgb(168 85 247 / 0.20), transparent 58%),
+    radial-gradient(95% 70% at 102% 6%, rgb(34 211 238 / 0.14), transparent 55%),
+    radial-gradient(120% 85% at 70% 108%, rgb(236 72 153 / 0.12), transparent 60%),
+    radial-gradient(130% 90% at 50% 118%, rgb(2 6 23 / 0.09), transparent 62%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.72) 0%, transparent 44%),
+    linear-gradient(0deg, rgb(2 6 23 / 0.075) 0%, transparent 46%);
+  opacity: 1;
+}
+
+/* 패딩·타이포는 TSX (= 다크와 동일). 오버레이 위로만 올림. */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero.tkad-neon-surface > div.relative.max-w-7xl {
+  position: relative;
+  z-index: 1;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .max-w-6xl > div:first-child > div:last-child {
+  color: var(--home-panel-label) !important;
+}
+
+/* 라이트 히어로: 그리드 간격·컬럼 폭은 TSX(다크와 동일). 과한 column-gap·우측 정렬만 히어로 카드 밖으로 밀어 보였음. */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .max-w-6xl > .grid {
+  min-width: 0;
+}
+
+/* 크기(font-size/spacing/max-width 등) 오버라이드 없음 — 다크와 동일. 라이트에서만 글자색. */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .lg\:col-span-8 > p:first-of-type {
+  color: var(--home-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .lg\:col-span-8 > p:nth-of-type(2) {
+  color: var(--home-body) !important;
+}
+
+/* 본문 H1: 그림자는 TSX에서만(낮은 흰 그림자는 클립 그라데이션을 하얗게 덮음) */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero h1 {
+  color: var(--home-ink) !important;
+}
+
+/* 히어로 액센트: 네온 그라데이션 — h1 text-shadow·부모 fill과 분리 */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero h1 span.tkad-home-accent-text {
+  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.75))
+    drop-shadow(0 1px 2px rgb(15 23 42 / 0.08));
+}
+
+/* (레거시) bg-clip-text 액센트 — 네온과 동일 */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero h1 span.bg-clip-text {
+  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.75))
+    drop-shadow(0 1px 2px rgb(15 23 42 / 0.08));
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__signals > div {
+  border: 1px solid var(--home-line) !important;
+  background: var(--home-signal-surface) !important;
+  box-shadow: var(--home-signal-shadow) !important;
+  backdrop-filter: blur(12px);
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__signals span.font-display {
+  color: var(--home-ink-soft) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__signals > div:first-child > span:nth-of-type(3) {
+  color: var(--home-panel-label) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__signals > div:first-child span.rounded-full {
+  box-shadow: none !important;
+  background: #4338ca !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .mt-7.flex.flex-wrap.gap-2 > span {
+  border: 1px solid var(--home-chip-border) !important;
+  background: var(--home-chip-bg) !important;
+  color: var(--home-ink-soft) !important;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .mt-10.flex > a:not(.tkad-neon-cta-clean) {
+  border: 1px solid var(--home-line) !important;
+  background: rgb(255 255 255 / 0.92) !important;
+  color: var(--home-ink-soft) !important;
+  box-shadow: var(--home-secondary-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .mt-10.flex > a:not(.tkad-neon-cta-clean):hover {
+  border-color: rgb(99 102 241 / 0.32) !important;
+  background: rgb(255 255 255 / 1) !important;
+}
+
+/* 스탯 패널 뒤 네온 블러 오라 제거 */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .relative:has(.tkad-home-hero__panel) > [aria-hidden] {
+  display: none !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel.tkad-neon-glow {
+  border: 1px solid rgb(15 23 42 / 0.038) !important;
+  background: var(--home-panel-bg) !important;
+  box-shadow: var(--home-panel-shadow) !important;
+  backdrop-filter: blur(16px) saturate(1.02);
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel.tkad-neon-border::before {
+  opacity: 0.012 !important;
+}
+
+/* 패널 내부: 간격·크기는 Tailwind(px-4 py-3, gap-3 등) 유지 — 색만 */
+.tkad-home-appearance[data-appearance="day"]
+  .tkad-home-hero__panel
+  > div.flex
+  > div:first-child
+  > p:nth-child(1) {
+  color: var(--home-panel-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"]
+  .tkad-home-hero__panel
+  > div.flex
+  > div:first-child
+  > p:nth-child(2) {
+  color: var(--home-panel-value) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"]
+  .tkad-home-hero__panel
+  > div.flex
+  > div:first-child
+  > p:nth-child(3) {
+  color: var(--home-panel-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel .grid > div {
+  border: 1px solid var(--home-line-faint) !important;
+  background: var(--home-panel-stat-surface) !important;
+  box-shadow: var(--home-panel-stat-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel .grid > div > p:first-child {
+  color: var(--home-panel-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel .grid > div > p:last-child {
+  color: var(--home-panel-value) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.mt-6.rounded-2xl:last-child {
+  border-color: var(--home-line-faint) !important;
+  background: rgb(255 255 255 / 0.55) !important;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.88) inset !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.mt-6.rounded-2xl:last-child > p:first-child {
+  color: var(--home-panel-muted) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.mt-6.rounded-2xl:last-child > p:last-child {
+  color: var(--home-panel-value) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.flex > div:last-child {
+  border-color: var(--home-line-faint) !important;
+  background: rgb(255 255 255 / 0.62) !important;
+  color: var(--home-panel-label) !important;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.9) inset,
+    0 1px 3px rgb(15 23 42 / 0.03) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.flex > div:last-child span.rounded-full {
+  background: #4338ca !important;
+}
+
+/* 라이트 모드 CTA: 과한 블랙·퍼플 글로우 대신 정제된 리프트 */
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean {
+  border-color: rgb(255 255 255 / 0.35) !important;
+  box-shadow:
+    0 2px 0 rgb(255 255 255 / 0.2) inset,
+    0 14px 36px rgb(91 33 182 / 0.22),
+    0 6px 14px rgb(15 118 110 / 0.14) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean:hover {
+  box-shadow:
+    0 2px 0 rgb(255 255 255 / 0.25) inset,
+    0 18px 44px rgb(91 33 182 / 0.28),
+    0 8px 18px rgb(15 118 110 / 0.18) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta {
+  border-color: rgb(255 255 255 / 0.22) !important;
+  box-shadow:
+    0 2px 0 rgb(255 255 255 / 0.18) inset,
+    0 12px 32px rgb(91 33 182 / 0.2),
+    0 4px 12px rgb(15 118 110 / 0.12) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta:hover {
+  box-shadow:
+    0 2px 0 rgb(255 255 255 / 0.22) inset,
+    0 16px 40px rgb(91 33 182 / 0.26),
+    0 6px 16px rgb(15 118 110 / 0.16) !important;
+}
+
+/* 홈 라이트: 캐러셀 매체 카드 — 히어로와 동일 --home-card-* 언어 */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel a.group.relative.flex.h-full {
+  border: 1px solid var(--home-line-soft) !important;
+  background: var(--home-card-surface) !important;
+  box-shadow: var(--home-card-shadow) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel a.group.relative.flex.h-full:hover {
+  border-color: rgb(67 56 202 / 0.2) !important;
+  box-shadow: var(--home-card-shadow-hover) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel a.group.relative.flex.h-full .rounded-t-2xl {
+  border-color: rgb(15 23 42 / 0.06) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel .absolute.right-0.top-0 {
+  border-color: rgb(15 23 42 / 0.08) !important;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.85) inset,
+    0 3px 10px rgb(15 23 42 / 0.07) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel-arrow {
+  border-color: rgb(15 23 42 / 0.1) !important;
+  background: rgb(255 255 255 / 0.95) !important;
+  color: rgb(30 41 59) !important;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 6px 16px rgb(15 23 42 / 0.08) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel-arrow:hover:not(:disabled) {
+  border-color: rgb(99 102 241 / 0.35) !important;
+  background: rgb(255 255 255 / 1) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel-arrow:disabled {
+  opacity: 0.35 !important;
+}
+
+/* ── 홈 라이트: 4단계 매체 검증 — 엘리베이션 중심, 네온 글로우 제거 ── */
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-icon-halo {
+  display: none !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps > div:nth-child(1) {
+  background: rgb(15 23 42 / 0.075) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps > div:nth-child(2) {
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(67 56 202 / 0.14),
+    transparent
+  ) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .grid > * {
+  border: 1px solid var(--home-line-faint) !important;
+  background: var(--home-step-surface) !important;
+  box-shadow: var(--home-step-shadow) !important;
+  backdrop-filter: blur(12px) saturate(1.03) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .grid > *:hover {
+  border-color: rgb(67 56 202 / 0.14) !important;
+  box-shadow: var(--home-step-shadow-hover) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .tkad-neon-border::before {
+  opacity: 0 !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .absolute.right-4.top-3 {
+  color: rgb(15 23 42 / 0.07) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps [class*="size-12"].rounded-2xl {
+  border-color: var(--home-line-soft) !important;
+  background: rgb(255 255 255 / 0.82) !important;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 1) inset,
+    0 2px 8px rgb(15 23 42 / 0.04) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps div.mt-5.h-1.w-full {
+  background: rgb(15 23 42 / 0.065) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps div.mt-5.h-1 > div {
+  background: var(--home-step-progress) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .mt-2.size-5.rounded-full {
+  border-color: var(--home-line-soft) !important;
+  background: rgb(255 255 255 / 0.95) !important;
+  box-shadow: 0 0 0 5px rgb(252 252 254 / 1) !important;
 }
 
 /* === Brutalist Phase 2 — 인라인 강조 유틸 ===
@@ -219,9 +1864,10 @@ body {
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.15;
   }
 }
 
@@ -383,20 +2029,149 @@ body {
     url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8913c' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* Hero overlays — 2025 accent (gold) + CTA + page silver */
+/* Hero overlays — brutalist 디자인 시스템 통일.
+ * accent: bx-accent (Pantone 165, #FF6600) 살짝 — 우상단 글로우.
+ * cta: bx-accent 살짝 더 — 좌하단 (CTA 영역 강조).
+ */
 .hero-radial-accent {
   background: radial-gradient(
     ellipse at top right,
-    rgba(232, 213, 181, 0.16) 0%,
-    transparent 58%
+    rgba(255, 98, 0, 0.22) 0%,
+    transparent 55%
   );
 }
 .hero-radial-cta {
   background: radial-gradient(
     ellipse at bottom left,
-    rgba(155, 60, 49, 0.12) 0%,
-    transparent 52%
+    rgba(255, 98, 0, 0.16) 0%,
+    transparent 50%
   );
+}
+
+/* 매체 카드 — 강한 리프트 + Hermès glow (그룹 호버) */
+.tkad-catalog-card-shell {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s ease,
+    border-color 0.35s ease;
+}
+html:not(.dark) .group:hover .tkad-catalog-card-shell {
+  transform: translateY(-6px);
+  box-shadow:
+    0 22px 44px rgba(8, 8, 10, 0.14),
+    0 0 0 1px rgba(255, 98, 0, 0.2),
+    0 0 36px rgba(255, 98, 0, 0.14);
+}
+.dark .group:hover .tkad-catalog-card-shell {
+  transform: translateY(-10px);
+  box-shadow:
+    0 32px 72px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 98, 0, 0.35),
+    0 0 60px rgba(255, 98, 0, 0.22);
+}
+
+/* 공개 헤더 — 글래스/블러는 다크만 (라이트에선 본문이 비쳐 메뉴 글자가 뭉개짐) */
+.dark .tkad-nav-chrome {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* 링크·토큰이 어두운 잉크로 남으면 바 배경(#05050a)과 겹침 — 기본 글자색만 고정.
+     -webkit-text-fill-color 는 자식에 상속되며 WebKit에서 color 와 충돌해 글자가 사라질 수 있어 쓰지 않음 */
+  color: rgb(248 250 252 / 0.96) !important;
+}
+
+/* 라이트: 헤더 기본 잉크 (반투명 상속 방지) */
+html:not(.dark) .tkad-nav-chrome {
+  color: var(--foreground);
+}
+
+/* 로고 "AD" — 기본 네온 그라데이션 클립은 다크 바에서 대비 부족 → 밝은 스펙트럼으로 재지정 */
+.dark .tkad-nav-chrome .tkad-home-accent-text {
+  background-image: linear-gradient(
+    92deg,
+    rgb(196 181 253) 0%,
+    rgb(125 211 252) 48%,
+    rgb(251 207 232) 100%
+  ) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* 드롭다운 항목: 유틸 조합이 꼬여도 제목/설명 대비 유지 */
+.dark .tkad-nav-chrome [role="menuitem"] span:first-of-type {
+  color: rgb(252 252 252) !important;
+}
+
+.dark .tkad-nav-chrome [role="menuitem"] span + span {
+  color: rgb(212 212 220) !important;
+}
+
+.dark .tkad-nav-chrome .tkad-neon-cta-clean {
+  color: rgb(255 255 255) !important;
+}
+
+/* 헤더 안 `text-foreground` 유틸이 테마 토큰 꼬임으로 어두워지는 경우 밝은 잉크로 통일 */
+.dark .tkad-nav-chrome .text-foreground {
+  color: rgb(248 250 252 / 0.96) !important;
+}
+
+.dark .tkad-nav-chrome .text-foreground\/70,
+.dark .tkad-nav-chrome .text-foreground\/75,
+.dark .tkad-nav-chrome .text-foreground\/80 {
+  color: rgb(248 250 252 / 0.82) !important;
+}
+
+.dark .tkad-nav-chrome .text-muted-foreground {
+  color: rgb(203 213 225 / 0.9) !important;
+}
+
+.dark .tkad-nav-chrome input[type="search"] {
+  color: rgb(248 250 252 / 0.94) !important;
+}
+
+.dark .tkad-nav-chrome input[type="search"]::placeholder {
+  color: rgb(148 163 184 / 0.9) !important;
+}
+
+/* Header chrome: prevent hover "lift" jitter */
+.tkad-nav-chrome [data-slot="button"] {
+  transform: none !important;
+}
+.tkad-nav-chrome [data-slot="button"]:hover {
+  transform: none !important;
+}
+
+/* Some components apply hover translate on <a>/<button> directly.
+   Freeze all header interactive transforms to avoid jitter. */
+.tkad-nav-chrome a,
+.tkad-nav-chrome button,
+.tkad-nav-chrome [role="menuitem"] {
+  transform: none !important;
+  translate: none !important;
+  /* Avoid perceived "lift" from box-shadow transitions */
+  box-shadow: none !important;
+  /* Prevent transition-all from feeling like movement */
+  transition-property: color, background-color, border-color, opacity !important;
+}
+.tkad-nav-chrome a:hover,
+.tkad-nav-chrome button:hover,
+.tkad-nav-chrome [role="menuitem"]:hover {
+  transform: none !important;
+  translate: none !important;
+  box-shadow: none !important;
+}
+/* 배경색은 BrutalNav(`components/brutalist/nav.tsx`) 유틸에 맡김.
+   전역 color-mix 가 다크 모드에서 바를 너무 투명하게 만들어 낮 랜딩 위에서 흰 메뉴 글자가 묻힘. */
+
+/* Header text safety: `text-white` 유틸만 보정. `dark:text-white*` 는 클래스 문자열에
+   `text-white`가 포함돼 매칭되지만 라이트 모드에선 비활성 — 여기까지 덮으면
+   반투명 드롭다운 위에서 글자만 선명한 잉크로 고정돼 배경과 충돌한다. */
+html:not(.dark) .tkad-nav-chrome [class*="text-white"]:not([class*="dark:text-white"]) {
+  color: var(--foreground) !important;
+  -webkit-text-fill-color: var(--foreground) !important;
 }
 
 /* ── Premium Service card hover ── */
@@ -431,9 +2206,18 @@ body {
   transition: opacity 0.25s ease;
 }
 .premium-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(26, 42, 108, 0.08);
-  border-color: color-mix(in srgb, var(--primary) 14%, transparent);
+  transform: translateY(-6px);
+  box-shadow:
+    0 18px 40px rgba(8, 8, 10, 0.12),
+    0 0 0 1px rgba(255, 98, 0, 0.15),
+    0 0 36px rgba(255, 98, 0, 0.12);
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.dark .premium-card:hover {
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 98, 0, 0.28),
+    0 0 48px rgba(255, 98, 0, 0.18);
 }
 .premium-card:hover::before {
   opacity: 1;
@@ -451,7 +2235,7 @@ body {
   bottom: -8px;
   width: 48px;
   height: 2px;
-  background: linear-gradient(90deg, #0d1b2e, #c8913c);
+  background: linear-gradient(90deg, #020202, #ff6200);
   border-radius: 2px;
   transform: translateX(-50%);
 }
@@ -548,7 +2332,7 @@ body {
 /* Header nav link underline + hover motion */
 .nav-link {
   position: relative;
-  transition: color 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color 0.3s ease;
 }
 .nav-link::after {
   content: "";
@@ -701,6 +2485,96 @@ html {
 .mobile-nav-item {
   opacity: 0;
   animation: mobileNavIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Neon shimmer (loading) */
+@keyframes tkadShimmer {
+  0% { transform: translateX(-60%); opacity: 0.55; }
+  50% { transform: translateX(60%); opacity: 1; }
+  100% { transform: translateX(160%); opacity: 0.55; }
+}
+
+/* =========================
+   Admin (*/admin) — premium neon/glass overrides
+   Scope via .admin-dashboard-root so public UI is unaffected
+   ========================= */
+
+.admin-dashboard-root {
+  position: relative;
+}
+
+.admin-dashboard-root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(34, 211, 238, 0.12), transparent 55%),
+    radial-gradient(circle at 82% 22%, rgba(168, 85, 247, 0.12), transparent 58%),
+    radial-gradient(circle at 45% 92%, rgba(236, 72, 153, 0.08), transparent 62%),
+    linear-gradient(180deg, rgba(6, 6, 10, 0.0) 0%, rgba(6, 6, 10, 0.06) 100%);
+}
+
+.dark .admin-dashboard-root::before {
+  background:
+    radial-gradient(circle at 18% 10%, rgba(34, 211, 238, 0.16), transparent 55%),
+    radial-gradient(circle at 82% 22%, rgba(168, 85, 247, 0.16), transparent 58%),
+    radial-gradient(circle at 45% 92%, rgba(236, 72, 153, 0.10), transparent 62%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.10) 0%, rgba(0, 0, 0, 0.30) 100%);
+}
+
+/* Card */
+.admin-dashboard-root [data-slot="card"] {
+  border-radius: 22px;
+  border: 1px solid hsl(var(--border) / 0.7);
+  background: hsl(var(--card) / 0.82);
+  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.10);
+  backdrop-filter: blur(12px);
+}
+.dark .admin-dashboard-root [data-slot="card"] {
+  background: rgba(0, 0, 0, 0.32);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 28px 110px rgba(0, 0, 0, 0.55);
+}
+
+/* Button */
+.admin-dashboard-root [data-slot="button"][data-variant="outline"] {
+  border-width: 1px;
+  border-color: hsl(var(--border) / 0.7);
+  background: hsl(var(--card) / 0.78);
+  backdrop-filter: blur(10px);
+}
+.dark .admin-dashboard-root [data-slot="button"][data-variant="outline"] {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.admin-dashboard-root [data-slot="button"][data-variant="default"] {
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.16);
+}
+
+/* Input */
+.admin-dashboard-root [data-slot="input"] {
+  border-color: hsl(var(--border) / 0.7);
+  background: hsl(var(--card) / 0.72);
+  backdrop-filter: blur(10px);
+}
+.dark .admin-dashboard-root [data-slot="input"] {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+/* Badge */
+.admin-dashboard-root [data-slot="badge"][data-variant="outline"] {
+  border-color: hsl(var(--border) / 0.7);
+  background: hsl(var(--card) / 0.72);
+  backdrop-filter: blur(10px);
+}
+.dark .admin-dashboard-root [data-slot="badge"][data-variant="outline"] {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
 }
 
 /* ── Focus-visible for keyboard navigation ── */
@@ -940,5 +2814,73 @@ img {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* 브루탈리스트 로딩 인디케이터 — 좌→우 슬라이딩 주황 막대.
+ * skeletons.tsx 의 PageHeaderSkeleton · admin/loading 등에서 사용. */
+@keyframes loadingSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+.loading-slide {
+  animation: loadingSlide 1.4s ease-in-out infinite;
+}
+
+/* 라우트 전환 상단 바 — 인디터미넌트 캡슐 (Linear / Vercel 계열) */
+@keyframes navCapsule {
+  0% {
+    transform: translate3d(-120%, 0, 0);
+  }
+  100% {
+    transform: translate3d(calc(100vw + 120%), 0, 0);
+  }
+}
+.nav-loading-capsule {
+  animation: navCapsule 0.95s cubic-bezier(0.33, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+/* 페이지 스트리밍 스켈레톤 — 펄스 대신 쉬머 하이라이트 */
+@keyframes skeletonShimmerSweep {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--muted);
+}
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 55%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 45%,
+    color-mix(in srgb, var(--foreground) 18%, transparent) 50%,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 55%,
+    transparent 100%
+  );
+  transform: translate3d(-100%, 0, 0);
+  animation: skeletonShimmerSweep 1.25s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer::after {
+    animation: none;
+    transform: none;
+    opacity: 0.35;
+  }
+  .nav-loading-capsule {
+    animation: none;
+    transform: translate3d(0, 0, 0);
+    width: 100% !important;
+    opacity: 0.55;
   }
 }

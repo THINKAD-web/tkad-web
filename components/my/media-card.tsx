@@ -22,10 +22,10 @@ export function MediaCard({
   onRemove?: (id: string) => void;
 }) {
   return (
-    <li className="group relative bg-card border border-border/60 rounded-xl p-3 flex gap-3 hover:border-primary hover:shadow-md hover:-translate-y-px transition-all duration-200">
+    <li className="group relative -mt-[2px] -ml-[2px] flex gap-3 border-2 border-border bg-card p-3 transition-colors hover:bg-muted">
       <Link
         href={`/media/${item.id}`}
-        className="absolute inset-0 rounded-xl"
+        className="absolute inset-0"
         aria-label={`${item.name} 상세 보기`}
       />
       {item.image ? (
@@ -33,19 +33,19 @@ export function MediaCard({
         <img
           src={item.image}
           alt=""
-          className="relative w-20 h-20 object-cover rounded-lg flex-shrink-0 pointer-events-none"
+          className="pointer-events-none relative h-20 w-20 flex-shrink-0 border-2 border-border object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
         />
       ) : (
-        <div className="relative w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0" />
+        <div className="relative h-20 w-20 flex-shrink-0 border-2 border-border bg-muted" />
       )}
-      <div className="relative flex-1 min-w-0">
-        <div className="text-sm font-semibold text-gray-900 truncate group-hover:text-primary transition-colors">
+      <div className="relative min-w-0 flex-1">
+        <div className="truncate text-sm font-bold tracking-tight text-foreground group-hover:text-accent">
           {item.name}
         </div>
-        <div className="text-xs text-gray-500 truncate mt-0.5">
-          {item.region} · {item.type}
+        <div className="mt-1 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          {`// `}{item.region} · {item.type}
         </div>
-        <div className="text-sm font-bold text-primary mt-1.5 tabular-nums">
+        <div className="mt-2 font-mono text-sm font-bold tabular-nums text-accent">
           {formatKRW(item.price)}
         </div>
       </div>
@@ -57,10 +57,10 @@ export function MediaCard({
             e.stopPropagation();
             onRemove(item.id);
           }}
-          className="relative self-start p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+          className="relative h-8 w-8 self-start border-2 border-border bg-card text-foreground transition-colors hover:bg-accent hover:text-background"
           aria-label="제거"
         >
-          <X className="w-4 h-4" />
+          <X className="mx-auto h-4 w-4" />
         </button>
       )}
     </li>

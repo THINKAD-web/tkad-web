@@ -1,23 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import type { ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BtnBlock } from "@/components/brutalist";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
   ChevronLeft,
   ChevronRight,
   Download,
+  GitCompare,
   Layers,
   Send,
   TrendingUp,
@@ -26,6 +27,7 @@ import {
   ArrowRight,
   MessageCircle,
 } from "lucide-react";
+import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import type { MediaItem } from "@/lib/media-data";
 import {
   filterPlannerMediaMulti,
@@ -39,6 +41,7 @@ import {
   reachSplitForGoal,
   comparePlansByDuration,
   portfolioFromManualSelection,
+  matchesPlannerCategory,
 } from "@/lib/planner-logic";
 import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { useToast } from "@/components/toast-provider";
@@ -80,6 +83,51 @@ import {
 } from "@/lib/planner/types";
 import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
 import { canProceedFromStep } from "@/lib/planner/validation";
+import {
+  formatPricePeriodShortLabel,
+  normalizeMediaPricePeriod,
+} from "@/lib/media-price-format";
+import {
+  getHomeAppearanceServerSnapshot,
+  readHomeAppearance,
+  subscribeHomeAppearance,
+  type HomeAppearance,
+} from "@/lib/home-appearance";
+
+/** 밤: 메인 NeonSection 과 동일한 #05050a + 네온 뎁스(히어로 아래 본문만 밝은 페이지 배경이 비지 않도록) */
+function PlannerNeonPageBody({
+  appearance,
+  className,
+  children,
+}: {
+  appearance: HomeAppearance;
+  className?: string;
+  children: ReactNode;
+}) {
+  const inner = (
+    <div className={cn("tkad-planner-neon", className)}>{children}</div>
+  );
+  if (appearance === "night") {
+    return (
+      <div className="relative overflow-hidden bg-[#05050a] text-white">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 tkad-neon-depth"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+        />
+        <div className="relative">{inner}</div>
+      </div>
+    );
+  }
+  return inner;
+}
 
 const GOALS: {
   key: PlannerCampaignGoal;
@@ -116,6 +164,27 @@ export default function PlannerPageClient({
   const locale = useLocale();
   const isKo = locale === "ko";
   const { toast } = useToast();
+  const landingAppearance = useSyncExternalStore(
+    subscribeHomeAppearance,
+    readHomeAppearance,
+    getHomeAppearanceServerSnapshot,
+  );
+
+  const priceOptionBadge = useCallback(
+    (m: MediaItem): string | null => {
+      const opts = m.priceOptions ?? [];
+      if (opts.length === 0) return null;
+      const periods = Array.from(
+        new Set(opts.map((o) => normalizeMediaPricePeriod(o.period))),
+      );
+      const hasNonMonth = periods.some((p) => p !== "month");
+      if (!hasNonMonth) return null;
+      const labels = periods.map((p) => formatPricePeriodShortLabel(p, locale));
+      const uniq = Array.from(new Set(labels)).join(" · ");
+      return isKo ? `옵션: ${uniq}` : `Options: ${uniq}`;
+    },
+    [locale, isKo],
+  );
 
   const wizardStep = usePlannerStore((s) => s.wizardStep);
   const campaignGoal = usePlannerStore((s) => s.campaignGoal);
@@ -168,6 +237,22 @@ export default function PlannerPageClient({
     () => filterPlannerMediaMulti(catalog, selectedRegions, categories),
     [catalog, selectedRegions, categories],
   );
+
+  /** Step4 AI 추천: 엄격 필터 결과가 비어도 등록 매체가 보이도록 완화 풀 (직접 탐색은 기존 `catalog`) */
+  const recommendationCatalog = useMemo(() => {
+    if (filtered.length > 0) return filtered;
+    if (selectedRegions.size > 0) {
+      const byRegion = catalog.filter((m) => selectedRegions.has(m.region));
+      if (byRegion.length > 0) return byRegion;
+    }
+    if (categories.size > 0) {
+      const byCat = catalog.filter((m) =>
+        [...categories].some((c) => matchesPlannerCategory(m, c)),
+      );
+      if (byCat.length > 0) return byCat;
+    }
+    return catalog;
+  }, [filtered, catalog, selectedRegions, categories]);
 
   const selectedMediaForSimulation = useMemo(() => {
     if (campaignMediaIds.length === 0) return [];
@@ -269,6 +354,12 @@ export default function PlannerPageClient({
       ? `/quote?media=${portfolio.map((m) => m.id).join(",")}`
       : "/quote";
 
+  const compareHref = useMemo(() => {
+    const ids = Array.from(campaignMediaIds).slice(0, COMPARE_MAX_ITEMS);
+    const q = ids.join(",");
+    return q ? `/compare?ids=${q}` : "/compare";
+  }, [campaignMediaIds]);
+
   const applyPreset = useCallback(
     (id: "premium" | "national" | "value") => {
       applyPresetAction(id);
@@ -322,32 +413,57 @@ export default function PlannerPageClient({
    * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
    * 기존 localStorage persist 는 유지 — DB 저장은 "공유/이메일 발송" 시점에만.
    */
-  const savePlan = useCallback(async () => {
+  const savePlan = useCallback(async (saveMode: "share" | "draft" = "share") => {
     if (saving) return;
     setSaving(true);
     try {
+      // PlannerStore 의 Set 등 직렬화 불가 타입은 JSON 변환 시 손실됨 → 안전한 형태로 평탄화.
       const state = usePlannerStore.getState();
       const planJson = {
         campaignGoal: state.campaignGoal,
-        regions: state.regions,
-        categories: state.categories,
+        regions: Array.from(state.regions),
+        categories: Array.from(state.categories),
         budget: state.budget,
         months: state.months,
         ageKey: state.ageKey,
         industryKey: state.industryKey,
-        campaignMediaIds: state.campaignMediaIds,
+        campaignMediaIds: Array.from(state.campaignMediaIds),
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
       };
+
       const res = await fetch("/api/planner/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planJson }),
+        body: JSON.stringify({ planJson, saveMode }),
       });
+
       if (!res.ok) {
-        throw new Error(`save failed: ${res.status}`);
+        // 서버 에러 응답을 가능한 만큼 읽어 콘솔에 남김 (사용자 모를 디테일 로깅).
+        let detail = "";
+        try {
+          const errBody = (await res.json()) as { error?: string; detail?: string };
+          detail = errBody?.detail || errBody?.error || "";
+        } catch {
+          try {
+            detail = await res.text();
+          } catch {
+            /* ignore */
+          }
+        }
+        console.error("[planner.save] failed", {
+          status: res.status,
+          detail,
+        });
+        throw new Error(`save failed: ${res.status}${detail ? ` — ${detail}` : ""}`);
       }
-      const data = (await res.json()) as { id: string; expiresAt: string };
+
+      const data = (await res.json()) as { id?: string; expiresAt?: string };
+      if (!data.id) {
+        console.error("[planner.save] missing id in response", data);
+        throw new Error("Invalid response: missing id");
+      }
+
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
       const url = `${origin}/${locale}/planner/shared/${data.id}`;
@@ -357,8 +473,12 @@ export default function PlannerPageClient({
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(url).catch(() => {});
       }
-      toast("success", t("savedToast"));
-    } catch {
+      toast(
+        "success",
+        saveMode === "draft" ? t("savedToastDraft24h") : t("savedToast"),
+      );
+    } catch (e) {
+      console.error("[planner.save] error", e);
       toast(
         "error",
         isKo ? "저장에 실패했습니다." : "Could not save plan.",
@@ -418,62 +538,99 @@ export default function PlannerPageClient({
 
   if (databaseEmpty && catalog.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-        <section className="relative overflow-hidden bg-navy py-28 text-white">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(232,213,181,0.12),transparent_50%)]" />
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-2">
-              <Badge className="border-gold/40 bg-gold/15 text-gold">
-                THINKAD Planner
-              </Badge>
-              <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                BETA
-              </span>
+      <HomeLandingDayNight>
+        <div className="tkad-landing-neon">
+          <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+            <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+            <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+            <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+            />
+
+            <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+                {`// 05 / Planner`}
+              </p>
+              <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+                <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                  <span className="tkad-home-accent-text">THINKAD Planner</span>
+                </span>
+                <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                  <span className="tkad-home-accent-text">BETA</span>
+                </span>
+              </div>
+              <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+                {t("title")}
+              </h1>
+              <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+                {t("subtitle")}
+              </p>
             </div>
-            <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-              {t("title")}
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
-              {t("subtitle")}
+          </section>
+
+          <PlannerNeonPageBody
+            appearance={landingAppearance}
+            className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6"
+          >
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-foreground/70">
+              [ EMPTY CATALOG ]
             </p>
-          </div>
-        </section>
-        <div className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6">
-          <p className="text-lg font-semibold text-navy">{t("preparingMedia")}</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("preparingMediaDesc")}
-          </p>
-          <Link href="/media" className="mt-8 inline-block">
-            <Button className="btn-gold rounded-full px-8">{t("browseMedia")}</Button>
-          </Link>
+            <p className="mt-3 text-lg font-bold tracking-tight text-foreground">
+              {t("preparingMedia")}
+            </p>
+            <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
+              {t("preparingMediaDesc")}
+            </p>
+            <div className="mt-8 inline-block">
+              <BtnBlock href="/media" variant="accent" size="md">
+                {t("browseMedia")}
+              </BtnBlock>
+            </div>
+          </PlannerNeonPageBody>
         </div>
-      </div>
+      </HomeLandingDayNight>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <section className="relative overflow-hidden bg-navy py-20 text-white sm:py-28">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(232,213,181,0.12),transparent_50%)]" />
-        <div className="relative mx-auto flex max-w-7xl flex-col items-center px-4 text-center sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <Badge className="border-gold/40 bg-gold/15 text-gold">
-              THINKAD Planner
-            </Badge>
-            <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-              BETA
-            </span>
-          </div>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            {t("title")}
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
-            {t("subtitle")}
-          </p>
-        </div>
-      </section>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+          <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              {`// 05 / Planner`}
+            </p>
+            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">THINKAD Planner</span>
+              </span>
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">BETA</span>
+              </span>
+            </div>
+            <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+              {t("title")}
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+              {t("subtitle")}
+            </p>
+          </div>
+        </section>
+
+        <PlannerNeonPageBody
+          appearance={landingAppearance}
+          className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
+        >
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
           <PlannerStepper
             currentStep={wizardStep}
@@ -491,7 +648,7 @@ export default function PlannerPageClient({
               "mx-auto space-y-8",
               // 매체 선택·소재 업로드·보고서 단계는 넓은 캔버스 필요
               wizardStep === 4 || wizardStep === 5 || wizardStep === 6
-                ? "max-w-6xl"
+                ? "max-w-7xl"
                 : "max-w-3xl",
             )}
           >
@@ -516,40 +673,48 @@ export default function PlannerPageClient({
             {wizardStep === 2 ? (
               <div className="space-y-6">
                 <div className="space-y-2 text-center sm:text-left">
-                  <h2 className="text-lg font-bold text-navy sm:text-xl">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    [ STEP 2 / TARGET + REGION ]
+                  </p>
+                  <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                     {t("stepRegionTitle")}
                   </h2>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {t("stepRegionDesc")}
                   </p>
                 </div>
 
-                <Card className="border-navy/10 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-navy">
-                      <Layers className="h-5 w-5 text-gold" />
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ CATEGORY ]
+                    </p>
+                    <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+                      <Layers className="h-5 w-5 text-primary" />
                       {t("category")}
-                    </CardTitle>
-                    <CardDescription>{t("mediaMixHint")}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-wrap gap-2">
+                    </h3>
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                      {t("mediaMixHint")}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-0 p-5">
                     {CATEGORIES.map(({ key, labelKey }) => (
-                      <Button
+                      <button
                         key={key}
                         type="button"
-                        variant={categories.has(key) ? "default" : "outline"}
-                        size="sm"
-                        className={cn(
-                          "rounded-full touch-manipulation",
-                          categories.has(key) && "btn-gold border-0",
-                        )}
                         onClick={() => toggleCategory(key)}
+                        className={cn(
+                          "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors touch-manipulation",
+                          categories.has(key)
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-card text-foreground hover:bg-muted",
+                        )}
                       >
                         {t(labelKey)}
-                      </Button>
+                      </button>
                     ))}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
                 <PlannerRegionMap
                   selected={selectedRegions}
@@ -561,13 +726,13 @@ export default function PlannerPageClient({
                   countLabel={(n) => t("mapCount", { count: n })}
                 />
 
-                <Card className="border-navy/10 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-sm text-navy">
-                      {t("packagesTitle")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="grid gap-3 sm:grid-cols-3">
+                <div className="border-2 border-border bg-card">
+                  <div className="border-b-2 border-border p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("packagesTitle")} ]
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-0 p-5 sm:grid-cols-3">
                     {(
                       [
                         ["premium", "pkgPremium", "pkgPremiumDesc"],
@@ -579,59 +744,59 @@ export default function PlannerPageClient({
                         key={id}
                         type="button"
                         onClick={() => applyPreset(id)}
-                        className="rounded-xl border border-navy/10 bg-slate-50/80 p-3 text-left text-xs transition hover:border-gold/40 hover:bg-white"
+                        className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 text-left transition-colors hover:bg-muted"
                       >
-                        <p className="font-bold text-navy">{t(titleKey)}</p>
-                        <p className="mt-1 text-muted-foreground">
+                        <p className="font-bold tracking-tight text-foreground">{t(titleKey)}</p>
+                        <p className="mt-2 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                           {t(descKey)}
                         </p>
                       </button>
                     ))}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
-                    <p className="mb-2 text-sm font-bold text-navy">
-                      {t("ageLabel")}
+                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("ageLabel")} ]
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-0">
                       {PLANNER_AGE_KEYS.map((k) => (
-                        <Button
+                        <button
                           key={k}
                           type="button"
-                          size="sm"
-                          variant={ageKey === k ? "default" : "outline"}
-                          className={cn(
-                            "rounded-full text-xs",
-                            ageKey === k && "btn-gold border-0",
-                          )}
                           onClick={() => setAgeKey(k)}
+                          className={cn(
+                            "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                            ageKey === k
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-card text-foreground hover:bg-muted",
+                          )}
                         >
                           {t(k)}
-                        </Button>
+                        </button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <p className="mb-2 text-sm font-bold text-navy">
-                      {t("industryLabel")}
+                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("industryLabel")} ]
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-0">
                       {PLANNER_INDUSTRY_KEYS.map((k) => (
-                        <Button
+                        <button
                           key={k}
                           type="button"
-                          size="sm"
-                          variant={industryKey === k ? "default" : "outline"}
-                          className={cn(
-                            "rounded-full text-xs",
-                            industryKey === k && "btn-gold border-0",
-                          )}
                           onClick={() => setIndustryKey(k)}
+                          className={cn(
+                            "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                            industryKey === k
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-card text-foreground hover:bg-muted",
+                          )}
                         >
                           {t(k)}
-                        </Button>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -641,17 +806,22 @@ export default function PlannerPageClient({
 
             {/* Step 3 — 예산 · 기간 */}
             {wizardStep === 3 ? (
-              <Card className="border-navy/10 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-navy">
-                    <Wallet className="h-5 w-5 text-gold" />
+              <div className="border-2 border-border bg-card">
+                <div className="border-b-2 border-border p-5">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    [ STEP 3 / BUDGET + PERIOD ]
+                  </p>
+                  <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+                    <Wallet className="h-5 w-5 text-primary" />
                     {t("stepBudgetTitle")}
-                  </CardTitle>
-                  <CardDescription>{t("stepBudgetDesc")}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
+                  </h3>
+                  <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                    {t("stepBudgetDesc")}
+                  </p>
+                </div>
+                <div className="space-y-6 p-5">
                   <div>
-                    <div className="mb-2 flex justify-between text-xs font-medium text-muted-foreground">
+                    <div className="mb-3 flex justify-between font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                       <span>{t("budgetSliderMin")}</span>
                       <span>{t("budgetSliderMax")}</span>
                     </div>
@@ -662,31 +832,35 @@ export default function PlannerPageClient({
                       step={500}
                       value={budgetNum}
                       onChange={(e) => setBudget(e.target.value)}
-                      className="h-2 w-full cursor-pointer accent-gold"
+                      className="h-3 w-full cursor-pointer appearance-none border-2 border-border bg-card"
+                      style={{ accentColor: "#22d3ee" }}
                       aria-label={t("budget")}
                     />
-                    <div className="mt-3 flex flex-wrap items-end gap-3">
+                    <div className="mt-4 flex flex-wrap items-end gap-3">
                       <div className="flex-1 min-w-[8rem]">
-                        <label className="text-xs font-semibold text-navy">
-                          {t("budget")}
+                        <label className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                          [ {t("budget")} ]
                         </label>
-                        <Input
+                        <input
                           inputMode="numeric"
                           value={budget}
                           onChange={(e) =>
                             setBudget(e.target.value.replace(/[^\d]/g, ""))
                           }
-                          className="mt-1 h-11 border-navy/15 font-semibold"
+                          className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono font-bold text-foreground focus:border-primary focus:outline-none"
                         />
                       </div>
-                      <p className="text-sm text-muted-foreground pb-1">
+                      <p className="pb-1 font-mono text-[12px] tracking-tight text-muted-foreground">
                         {t("budgetPerMonthSummary", {
                           amount: Math.round(budgetNum / Math.max(months, 1)),
                         })}
                       </p>
                     </div>
                     {blurbParts ? (
-                      <p className="mt-3 rounded-xl border border-gold/25 bg-gold/5 px-3 py-2 text-xs leading-relaxed text-navy">
+                      <p className="mt-4 border-2 border-primary bg-card px-4 py-3 font-mono text-[11px] leading-relaxed tracking-tight text-foreground">
+                        <span className="mr-1 font-bold uppercase tracking-[0.22em] text-primary">
+                          {`// `}
+                        </span>
                         {t("budgetBlurb", {
                           name: blurbParts.sampleName.slice(0, 32),
                           price: blurbParts.samplePrice,
@@ -696,58 +870,64 @@ export default function PlannerPageClient({
                     ) : null}
                   </div>
                   <div>
-                    <p className="mb-2 flex items-center gap-2 text-sm font-bold text-navy">
-                      <CalendarRange className="h-4 w-4 text-gold" />
-                      {t("period")}
+                    <p className="mb-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      <CalendarRange className="h-4 w-4" />
+                      [ {t("period")} ]
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-0">
                       {PLANNER_PERIOD_OPTIONS.map((opt) => {
                         const selected = Math.abs(months - opt.months) < 0.04;
                         return (
-                          <Button
+                          <button
                             key={opt.id}
                             type="button"
-                            variant={selected ? "default" : "outline"}
-                            size="sm"
-                            className={cn(
-                              "rounded-full",
-                              selected && "btn-gold border-0",
-                            )}
                             onClick={() => setMonths(opt.months)}
+                            className={cn(
+                              "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                              selected
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-card text-foreground hover:bg-muted",
+                            )}
                           >
                             {t(opt.labelKey)}
-                          </Button>
+                          </button>
                         );
                       })}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ) : null}
 
             {/* Step 4 — 매체 선택 (AI 추천 + 직접 탐색) */}
             {wizardStep === 4 ? (
               <div className="space-y-6">
                 <div className="space-y-2 text-center sm:text-left">
-                  <h2 className="text-lg font-bold text-navy sm:text-xl">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    [ STEP 4 / MEDIA SELECTION ]
+                  </p>
+                  <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                     {t("stepMediaTitle")}
                   </h2>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {t("stepMediaDesc")}
                   </p>
                 </div>
 
                 <PlannerRecommendationPanel
-                  catalog={catalog}
+                  catalog={recommendationCatalog}
                   isKo={isKo}
                   regionLabel={mediaRegionLabel}
                 />
 
-                <div className="space-y-2 pt-4">
-                  <h3 className="text-base font-bold text-navy">
+                <div className="space-y-2 border-t-2 border-border pt-6">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    [ MANUAL BROWSE ]
+                  </p>
+                  <h3 className="text-base font-bold tracking-tight text-foreground">
                     {t("recommendBrowseTitle")}
                   </h3>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
                     {t("recommendBrowseDesc")}
                   </p>
                 </div>
@@ -792,34 +972,29 @@ export default function PlannerPageClient({
               />
             ) : null}
 
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-navy/20"
+            <div className="flex flex-col-reverse gap-3 border-t-2 border-border pt-6 sm:flex-row sm:justify-between">
+              <BtnBlock
+                variant="secondary"
+                size="md"
                 onClick={goBack}
                 disabled={wizardStep <= 1}
               >
-                <ChevronLeft className="mr-1 h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" />
                 {t("back")}
-              </Button>
-              <Button
-                type="button"
-                className="btn-gold rounded-full px-8 font-semibold"
-                onClick={goNext}
-              >
+              </BtnBlock>
+              <BtnBlock variant="accent" size="md" onClick={goNext}>
                 {wizardStep === 6 ? (
                   <>
                     {t("viewEffectDashboard")}
-                    <ChevronRight className="ml-1 h-4 w-4" />
+                    <ChevronRight className="h-4 w-4" />
                   </>
                 ) : (
                   <>
                     {t("next")}
-                    <ChevronRight className="ml-1 h-4 w-4" />
+                    <ChevronRight className="h-4 w-4" />
                   </>
                 )}
-              </Button>
+              </BtnBlock>
             </div>
           </div>
         ) : (
@@ -832,53 +1007,68 @@ export default function PlannerPageClient({
               budgetNum={budgetNum}
             />
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full rounded-full border-navy/20 sm:w-auto"
+              <BtnBlock
+                variant="secondary"
+                size="md"
                 onClick={() => setWizardStep(2)}
+                className="w-full sm:w-auto"
               >
-                <ChevronLeft className="mr-1 h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" />
                 {t("editInputs")}
-              </Button>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full border-navy/20"
-                  onClick={savePlan}
+              </BtnBlock>
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <BtnBlock
+                  variant="primary"
+                  size="md"
+                  onClick={() => void savePlan("share")}
                   disabled={saving}
                 >
-                  <Download className="mr-2 h-4 w-4" />
+                  <Download className="h-4 w-4" />
                   {saving ? t("savingInProgress") : t("ctaSave")}
-                </Button>
-                <Button className="btn-gold rounded-full font-semibold" asChild>
-                  <Link href={quoteHref}>
-                    <Send className="mr-2 h-4 w-4" />
-                    {t("ctaQuoteWithPlan")}
-                  </Link>
-                </Button>
+                </BtnBlock>
+                <BtnBlock
+                  variant="secondary"
+                  size="md"
+                  onClick={() => void savePlan("draft")}
+                  disabled={saving}
+                >
+                  <Download className="h-4 w-4" />
+                  {t("ctaSaveDraft24h")}
+                </BtnBlock>
+                <BtnBlock href={compareHref} variant="secondary" size="md">
+                  <GitCompare className="h-4 w-4" />
+                  {t("ctaCompareSelection")}
+                </BtnBlock>
+                <BtnBlock
+                  href={quoteHref}
+                  variant="accent"
+                  size="md"
+                  className="!text-white"
+                >
+                  <Send className="h-4 w-4" />
+                  {t("ctaQuoteWithPlan")}
+                </BtnBlock>
               </div>
             </div>
 
             {shareUrl ? (
               <div
-                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950 shadow-sm"
+                className="border-2 border-primary bg-card px-4 py-3"
                 role="status"
               >
-                <p className="font-semibold">{t("shareBannerTitle")}</p>
-                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  [ {t("shareBannerTitle")} ]
+                </p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                   <input
                     readOnly
                     value={shareUrl}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="min-w-0 flex-1 rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-mono text-xs"
+                    className="min-w-0 flex-1 border-2 border-border bg-card px-3 py-1.5 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
                   />
-                  <Button
-                    type="button"
+                  <BtnBlock
+                    variant="accent"
                     size="sm"
-                    variant="outline"
-                    className="rounded-full border-emerald-300"
                     onClick={async () => {
                       try {
                         await navigator.clipboard.writeText(shareUrl);
@@ -894,55 +1084,56 @@ export default function PlannerPageClient({
                     }}
                   >
                     {t("shareCopy")}
-                  </Button>
+                  </BtnBlock>
                 </div>
-                <p className="mt-1 text-[11px] text-emerald-950/80">
-                  {t("shareBannerExpiry")}
+                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {`// `}{t("shareBannerExpiry")}
                 </p>
               </div>
             ) : null}
 
             {filtered.length === 0 ? (
-              <Card className="border-dashed border-navy/20 bg-slate-50/80">
-                <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">{t("emptyFilter")}</p>
-                  <Button
-                    type="button"
-                    className="mt-4 rounded-full"
-                    variant="outline"
+              <div className="border-2 border-border bg-muted py-12 text-center">
+                <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {`// `}{t("emptyFilter")}
+                </p>
+                <div className="mt-6 flex justify-center">
+                  <BtnBlock
+                    variant="primary"
+                    size="md"
                     onClick={() => setWizardStep(2)}
                   >
                     {t("editInputs")}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </BtnBlock>
+                </div>
+              </div>
             ) : budgetNum < PLANNER_BUDGET_MIN ? (
-              <Card className="border-dashed border-gold/30 bg-gold/5">
-                <CardContent className="py-10 text-center text-navy">
+              <div className="border-2 border-primary bg-card py-10 text-center text-foreground">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  [ NEED BUDGET ]
+                </p>
+                <p className="mt-3 font-bold tracking-tight">
                   {t("needBudget")}
-                </CardContent>
-              </Card>
+                </p>
+              </div>
             ) : metrics ? (
               <>
-                <div className="flex flex-col gap-2 rounded-xl border border-amber-200/90 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between">
+                <div className="tkad-glass-surface relative flex flex-col gap-2 overflow-hidden rounded-[22px] px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant="secondary"
-                      className="shrink-0 border-amber-300/80 bg-white font-semibold text-amber-950"
-                    >
+                    <span className="rounded-full border border-white/14 bg-white/10 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-foreground backdrop-blur">
                       {t("estimatedModelBadge")}
-                    </Badge>
-                    <span className="min-w-0 text-left text-xs leading-relaxed text-amber-950/95 sm:text-sm">
+                    </span>
+                    <span className="min-w-0 text-left text-xs leading-relaxed sm:text-sm">
                       {t("estimatedModelHint")}
                     </span>
                   </div>
                 </div>
 
-                <p className="rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy shadow-sm">
-                  <span className="font-semibold text-muted-foreground">
-                    {t("targetSummaryLabel")}
-                  </span>
-                  {": "}
+                <p className="tkad-glass-surface rounded-[22px] px-4 py-3 text-sm text-foreground">
+                  <span className="font-mono text-[10px] font-black uppercase tracking-[0.22em] tkad-home-accent-text">
+                    [ {t("targetSummaryLabel")} ]
+                  </span>{" "}
                   {(() => {
                     const g = GOALS.find((x) => x.key === campaignGoal);
                     return g ? t(g.titleKey) : "—";
@@ -967,49 +1158,49 @@ export default function PlannerPageClient({
                         )
                       : 0;
                   return (
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                      <div className="rounded-xl border border-navy/10 bg-white p-4 shadow-sm">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("kpiImpressions")}
+                    <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                          [ {t("kpiImpressions")} ]
                         </p>
-                        <p className="mt-1 text-2xl font-extrabold text-gold-dark">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-[#22d3ee]">
                           {metrics.estimatedTotalImpressions.toLocaleString()}
                         </p>
-                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiImpressionsHint")}
                         </p>
                       </div>
-                      <div className="rounded-xl border border-navy/10 bg-white p-4 shadow-sm">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("kpiReach")}
+                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                          [ {t("kpiReach")} ]
                         </p>
-                        <p className="mt-1 text-2xl font-extrabold text-navy">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
                           {estReach.toLocaleString()}
                         </p>
-                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiReachHint")}
                         </p>
                       </div>
-                      <div className="rounded-xl border border-navy/10 bg-white p-4 shadow-sm">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("kpiCpm")}
+                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                          [ {t("kpiCpm")} ]
                         </p>
-                        <p className="mt-1 text-2xl font-extrabold text-navy">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
                           ₩{estCpm.toLocaleString()}
                         </p>
-                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiCpmHint")}
                         </p>
                       </div>
-                      <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 shadow-sm">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("kpiRoi")}
+                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] tkad-home-accent-text">
+                          [ {t("kpiRoi")} ]
                         </p>
-                        <p className="mt-1 text-2xl font-extrabold text-gold-dark">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-[#22d3ee]">
                           {metrics.roiExpected}
                           {t("roiUnit")}
                         </p>
-                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiRoiHint")}
                         </p>
                       </div>
@@ -1017,21 +1208,27 @@ export default function PlannerPageClient({
                   );
                 })()}
 
-                <Card className="border-navy/10 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-navy">{t("comboTitle")}</CardTitle>
-                    <CardDescription>
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ PORTFOLIO ]
+                    </p>
+                    <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+                      {t("comboTitle")}
+                    </h3>
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
                       {manualIntersectedPortfolio.length > 0
                         ? t("comboHintManual")
                         : t("comboHint")}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    </p>
+                  </div>
+                  <div className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
                     {portfolio.map((m) => (
                       <Link
                         key={m.id}
                         href={mediaItemDetailPath(m.id)}
-                        className="group flex flex-col gap-2 rounded-xl border border-navy/10 bg-white p-3 shadow-sm transition hover:border-gold/40 hover:shadow-md"
+                        className="group tkad-glass-surface flex flex-col gap-2 rounded-[22px] p-3 transition-all hover:-translate-y-0.5 hover:bg-white/10"
                       >
                         <CompositePreview
                           mediaImageUrl={getPrimaryMediaImageUrl(m)}
@@ -1046,127 +1243,140 @@ export default function PlannerPageClient({
                           missingLabel={t("mediaPhotoMissing")}
                         />
                         <div>
-                          <p className="line-clamp-2 text-sm font-bold text-navy">
+                          <p className="line-clamp-2 text-sm font-bold tracking-tight text-foreground">
                             {isKo ? m.name : (m.nameEn || m.name) || m.name}
                           </p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {tm(`regions.${m.region}`)} ·{" "}
+                          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                            {`// `}{tm(`regions.${m.region}`)} ·{" "}
                             {isKo
                               ? m.location.slice(0, 40)
                               : (m.locationEn || m.location).slice(0, 40)}
                           </p>
-                          <p className="mt-2 text-sm font-bold text-gold-dark">
+                          <p className="mt-2 font-mono text-sm font-bold tabular-nums text-primary">
                             ₩{m.price.toLocaleString()}
-                            <span className="text-xs font-medium text-navy/60">
-                              {isKo ? "만/월" : " ₩10K/mo"}
+                            <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
+                              {isKo ? "만/월" : "₩10K/mo"}
                             </span>
                           </p>
+                          {(() => {
+                            const badge = priceOptionBadge(m);
+                            if (!badge) return null;
+                            return (
+                              <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                                [ {badge} ]
+                              </p>
+                            );
+                          })()}
                         </div>
                       </Link>
                     ))}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <Card className="border-navy/10 shadow-lg">
-                    <CardHeader>
-                      <CardTitle className="text-navy">{t("results")}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid gap-4 sm:grid-cols-2">
-                      <div className="rounded-xl border border-navy/10 bg-white p-4">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("matchedMedia")}
+                <div className="grid gap-3 lg:grid-cols-2">
+                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                    <div className="relative border-b border-white/10 p-5">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                        [ {t("results")} ]
+                      </p>
+                    </div>
+                    <div className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+                      <div className="tkad-glass-surface rounded-[22px] p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                          [ {t("matchedMedia")} ]
                         </p>
-                        <p className="mt-1 text-2xl font-extrabold text-navy">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
                           {filtered.length}
-                          <span className="ml-1 text-base font-semibold text-muted-foreground">
+                          <span className="ml-1 text-base text-muted-foreground">
                             {t("countUnit")}
                           </span>
                         </p>
                       </div>
-                      <div className="rounded-xl border border-navy/10 bg-white p-4">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("avgMonthlySlot")}
+                      <div className="tkad-glass-surface rounded-[22px] p-4">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                          [ {t("avgMonthlySlot")} ]
                         </p>
-                        <p className="mt-1 text-2xl font-extrabold text-navy">
+                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
                           {Math.round(metrics.avgMonthlyPrice).toLocaleString()}
-                          <span className="ml-1 text-sm font-medium text-muted-foreground">
+                          <span className="ml-1 text-sm text-muted-foreground">
                             {isKo ? "만원/월" : "₩10K/mo"}
                           </span>
                         </p>
                       </div>
-                      <div className="rounded-xl border border-navy/10 bg-white p-4 sm:col-span-2">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {t("estMonthlyImp")}
+                      <div className="tkad-glass-surface rounded-[22px] p-4 sm:col-span-2">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                          [ {t("estMonthlyImp")} ]
                         </p>
-                        <p className="mt-1 text-xl font-bold text-navy">
+                        <p className="mt-2 font-mono text-xl font-bold tabular-nums text-foreground">
                           {metrics.estimatedMonthlyImpressions.toLocaleString()}
                         </p>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
 
-                  <Card className="border-navy/10 shadow-lg">
-                    <CardContent className="pt-6">
-                      <PlannerReachDonutChart
-                        corePct={reachSplit.corePct}
-                        extendedPct={reachSplit.extendedPct}
-                        title={t("chartReachTitle")}
-                        coreLabel={t("reachCore")}
-                        extendedLabel={t("reachExtended")}
-                      />
-                    </CardContent>
-                  </Card>
+                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6">
+                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                    <PlannerReachDonutChart
+                      corePct={reachSplit.corePct}
+                      extendedPct={reachSplit.extendedPct}
+                      title={t("chartReachTitle")}
+                      coreLabel={t("reachCore")}
+                      extendedLabel={t("reachExtended")}
+                    />
+                  </div>
                 </div>
 
-                <Card className="border-navy/10 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-navy">
-                      {t("chartDailyBarTitle")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("chartDailyBarTitle")} ]
+                    </p>
+                  </div>
+                  <div className="relative p-5">
                     <PlannerDailyReachBarChart
                       data={dailyBars}
                       title={t("chartDailyBarTitle")}
                       valueLabel={t("chartDailyBarAxis")}
                     />
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <Card className="border-navy/10 shadow-lg">
-                    <CardContent className="pt-6">
-                      <PlannerBudgetPieChart
-                        data={pieSlices}
-                        title={t("chartBudgetPieTitle")}
-                        unitLabel={t("chartBudgetPieUnit")}
-                      />
-                    </CardContent>
-                  </Card>
-                  <Card className="border-navy/10 shadow-lg">
-                    <CardHeader>
-                      <CardTitle className="text-navy">
-                        {t("chartCpmTitle")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                <div className="grid gap-3 lg:grid-cols-2">
+                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6">
+                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                    <PlannerBudgetPieChart
+                      data={pieSlices}
+                      title={t("chartBudgetPieTitle")}
+                      unitLabel={t("chartBudgetPieUnit")}
+                    />
+                  </div>
+                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                    <div className="relative border-b border-white/10 p-5">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                        [ {t("chartCpmTitle")} ]
+                      </p>
+                    </div>
+                    <div className="relative p-5">
                       <PlannerCpmCompareChart
                         data={cpmBars}
                         title={t("chartCpmTitle")}
                         unitLabel={t("chartCpmUnit")}
                       />
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
 
-                <Card className="border-navy/10 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-navy">
-                      {t("chartMonthCompareTitle")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("chartMonthCompareTitle")} ]
+                    </p>
+                  </div>
+                  <div className="relative p-5">
                     <PlannerMonthCompareChart
                       data={monthCompare.map((x) => ({
                         months: x.months,
@@ -1179,17 +1389,21 @@ export default function PlannerPageClient({
                         t("monthCompare6"),
                       ]}
                     />
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <Card className="border-navy/10 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-navy">
-                      <TrendingUp className="h-5 w-5 text-gold" />
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ ROI ]
+                    </p>
+                    <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+                      <TrendingUp className="h-5 w-5 text-primary" />
                       {t("roiTitle")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                    </h3>
+                  </div>
+                  <div className="relative space-y-4 p-5">
                     {(
                       [
                         ["roiConservative", metrics.roiConservative],
@@ -1199,17 +1413,17 @@ export default function PlannerPageClient({
                     ).map(([labelKey, val]) => (
                       <div key={labelKey}>
                         <div className="mb-1 flex justify-between text-sm">
-                          <span className="font-medium text-navy">
+                          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
                             {t(labelKey)}
                           </span>
-                          <span className="font-bold text-gold-dark">
+                          <span className="font-mono font-bold tabular-nums text-primary">
                             {val}
                             {t("roiUnit")}
                           </span>
                         </div>
-                        <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                        <div className="h-3 w-full overflow-hidden rounded-full border border-white/10 bg-black/10">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-navy to-gold transition-all duration-500"
+                            className="h-full bg-primary transition-all duration-500"
                             style={{
                               width: `${Math.min(100, (val / roiMax) * 100)}%`,
                             }}
@@ -1217,33 +1431,39 @@ export default function PlannerPageClient({
                         </div>
                       </div>
                     ))}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <Card className="border-navy/10 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-navy">
-                      {t("chartImpLineTitle")}
-                    </CardTitle>
-                    <CardDescription>{t("chartImpTitle")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("chartImpLineTitle")} ]
+                    </p>
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                      {t("chartImpTitle")}
+                    </p>
+                  </div>
+                  <div className="relative p-5">
                     <PlannerImpressionsLineChart
                       data={metrics.cumulativeByMonth}
                       isKo={isKo}
                       title={t("chartImpLineTitle")}
                     />
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <Card className="border-navy/10 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-navy">
-                      {t("chartRoiLineTitle")}
-                    </CardTitle>
-                    <CardDescription>{t("chartRoiLineHint")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="relative border-b border-white/10 p-5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      [ {t("chartRoiLineTitle")} ]
+                    </p>
+                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                      {t("chartRoiLineHint")}
+                    </p>
+                  </div>
+                  <div className="relative p-5">
                     <PlannerRoiLineChart
                       data={metrics.roiByMonth}
                       isKo={isKo}
@@ -1254,51 +1474,51 @@ export default function PlannerPageClient({
                       legendOptimistic={t("roiOptimistic")}
                       roiUnit={t("roiUnit")}
                     />
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <Card className="overflow-hidden border-0 bg-gradient-to-br from-navy via-navy to-navy-dark text-white shadow-xl">
-                  <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6 sm:p-8">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12] tkad-neon-grid" />
+                  <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_58%),radial-gradient(circle_at_55%_110%,rgba(236,72,153,0.12),transparent_60%)]" />
+                  <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="max-w-xl space-y-2">
-                      <h3 className="text-xl font-extrabold tracking-tight text-white sm:text-2xl">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                        [ NEXT STEP ]
+                      </p>
+                      <h3 className="text-xl font-bold tracking-tight sm:text-2xl">
                         {t("ctaBannerTitle")}
                       </h3>
-                      <p className="text-sm leading-relaxed text-white/75">
+                      <p className="text-sm leading-relaxed text-muted-foreground">
                         {t("ctaBannerDesc")}
                       </p>
                     </div>
                     <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[240px]">
-                      <Button
+                      <BtnBlock
+                        href={quoteHref}
+                        variant="accent"
                         size="lg"
-                        className="h-12 w-full rounded-full bg-gold font-bold text-navy shadow-lg hover:bg-gold-light"
-                        asChild
+                        className="w-full !text-white"
                       >
-                        <Link href={quoteHref}>
-                          <Send className="mr-2 h-4 w-4" />
-                          {t("ctaQuoteWithPlan")}
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Link
+                        <Send className="h-4 w-4" />
+                        {t("ctaQuoteWithPlan")}
+                        <ArrowRight className="h-4 w-4" />
+                      </BtnBlock>
+                      <BtnBlock
                         href={
                           savedPlanId
                             ? `/contact?plan=${savedPlanId}`
                             : "/contact"
                         }
+                        variant="secondary"
+                        size="lg"
                         className="w-full"
                       >
-                        <Button
-                          size="lg"
-                          variant="outline"
-                          className="h-12 w-full rounded-full border-white/40 bg-white/10 font-semibold text-white hover:bg-white/20"
-                        >
-                          <MessageCircle className="mr-2 h-4 w-4" />
-                          {t("ctaContact")}
-                        </Button>
-                      </Link>
+                        <MessageCircle className="h-4 w-4" />
+                        {t("ctaContact")}
+                      </BtnBlock>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
                 <PlannerReportPdfCompact
                   isKo={isKo}
@@ -1325,7 +1545,8 @@ export default function PlannerPageClient({
             </p>
           </div>
         )}
+        </PlannerNeonPageBody>
       </div>
-    </div>
+    </HomeLandingDayNight>
   );
 }

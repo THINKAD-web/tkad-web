@@ -3,13 +3,6 @@
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { MonitorPlay, Sparkles } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 
@@ -43,20 +36,23 @@ export default function PlannerCampaignStep1({
   const t = useTranslations("planner");
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start">
-      <Card className="border-navy/10 shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-navy">
-            <Sparkles className="h-5 w-5 text-gold" />
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start">
+      <div className="border-2 border-border bg-card">
+        <div className="border-b-2 border-border p-6">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            [ STEP 1 / GOAL ]
+          </p>
+          <h2 className="mt-2 flex items-center gap-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+            <Sparkles className="h-5 w-5 text-primary" />
             {t("step1Title")}
-          </CardTitle>
-          <CardDescription className="text-base leading-relaxed">
+          </h2>
+          <p className="mt-2 text-base leading-relaxed text-muted-foreground">
             {t("step1Desc")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+        <div className="p-6">
           <motion.div
-            className="grid gap-3 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-0 sm:grid-cols-2"
             variants={list}
             initial="hidden"
             animate="visible"
@@ -67,41 +63,52 @@ export default function PlannerCampaignStep1({
                   type="button"
                   onClick={() => onSelectGoal(key)}
                   className={cn(
-                    "h-full w-full rounded-2xl border-2 p-4 text-left transition-all",
+                    "-mt-[2px] -ml-[2px] h-full w-full border-2 p-5 text-left transition-colors",
                     campaignGoal === key
-                      ? "border-gold bg-gold/10 shadow-md ring-1 ring-gold/30"
-                      : "border-navy/10 bg-white hover:border-navy/25",
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
                   )}
                 >
-                  <p className="font-bold text-navy">{t(titleKey)}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p
+                    className={cn(
+                      "font-bold tracking-tight",
+                      campaignGoal === key ? "text-primary-foreground" : "text-foreground",
+                    )}
+                  >
+                    {t(titleKey)}
+                  </p>
+                  <p
+                    className={cn(
+                      "mt-2 font-mono text-[11px] tracking-tight",
+                      campaignGoal === key
+                        ? "text-primary-foreground/85"
+                        : "text-muted-foreground",
+                    )}
+                  >
                     {t(descKey)}
                   </p>
                 </button>
               </motion.div>
             ))}
           </motion.div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <motion.aside
-        className="relative overflow-hidden rounded-2xl border border-navy/15 bg-gradient-to-br from-slate-950 via-navy to-slate-900 p-5 text-white shadow-xl"
+        className="border-2 border-border bg-hero-void p-5 text-hero-fg"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(232,213,181,0.14),transparent_55%)]" />
-        <div className="relative space-y-4">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold/90">
-            <MonitorPlay className="h-4 w-4" aria-hidden />
-            {t("step1VisualTitle")}
-          </div>
+        <div className="space-y-4">
+          <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            <MonitorPlay className="h-3.5 w-3.5" aria-hidden />
+            [ {t("step1VisualTitle")} ]
+          </p>
           <motion.div
             className={cn(
-              "relative overflow-hidden rounded-xl border-2 bg-black/35",
-              campaignGoal
-                ? "border-gold/60 shadow-[0_0_32px_rgba(232,213,181,0.12)]"
-                : "border-white/20",
+              "relative overflow-hidden border-2 bg-hero-void",
+              campaignGoal ? "border-primary" : "border-hero-fg/30",
             )}
             animate={
               campaignGoal
@@ -109,22 +116,22 @@ export default function PlannerCampaignStep1({
                 : {}
             }
           >
-            <div className="aspect-[2.35/1] w-full bg-gradient-to-br from-slate-800/90 via-navy/80 to-slate-900/90">
+            <div className="aspect-[2.35/1] w-full bg-hero-void">
               <div className="flex h-full flex-col items-center justify-center gap-2 px-4 py-6 sm:py-8">
-                <div className="rounded border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.2em] text-white/50">
+                <div className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
                   OOH
                 </div>
-                <p className="text-center text-sm font-semibold text-white/90 sm:text-base">
+                <p className="text-center text-sm font-bold text-hero-fg sm:text-base">
                   {t("step1VisualFrameLabel")}
                 </p>
-                <p className="max-w-[14rem] text-center text-[11px] leading-snug text-white/55 sm:text-xs">
+                <p className="max-w-[14rem] text-center font-mono text-[10px] leading-snug tracking-tight text-hero-fg/65 sm:text-xs">
                   {t("step1VisualHint")}
                 </p>
               </div>
             </div>
           </motion.div>
-          <p className="text-xs leading-relaxed text-white/65">
-            {t("step1VisualDesc")}
+          <p className="font-mono text-[11px] leading-relaxed tracking-tight text-hero-fg/70">
+            {`// `}{t("step1VisualDesc")}
           </p>
         </div>
       </motion.aside>

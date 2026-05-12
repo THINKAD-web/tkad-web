@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44" height="52" viewBox="0 0 44 52" role="img" aria-label="Selected location">
+  <defs>
+    <linearGradient id="pinSelOrange" x1="30%" y1="15%" x2="70%" y2="85%">
+      <stop offset="0%" stop-color="#ff9347"/>
+      <stop offset="45%" stop-color="#ff6200"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <filter id="pinSelDrop" x="-55%" y="-45%" width="210%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#020202" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <ellipse cx="22" cy="21" rx="19" ry="20" fill="none" stroke="#ff6200" stroke-width="2.5"/>
+  <path
+    fill="#ffffff"
+    stroke="#0a0a0c"
+    stroke-width="1.85"
+    stroke-linejoin="round"
+    filter="url(#pinSelDrop)"
+    d="M22 4.85c-8.65 0-15.7 6.72-15.7 15 0 5.98 5.08 15 15.7 29.1 10.62-14.1 15.7-23.12 15.7-29.1 0-8.28-7.05-15-15.7-15z"
+  />
+  <circle cx="22" cy="17.85" r="5.6" fill="url(#pinSelOrange)" stroke="#0a0a0c" stroke-width="1.15"/>
+  <circle cx="22" cy="17.35" r="1.75" fill="#ffffff" opacity="0.6"/>
+</svg>

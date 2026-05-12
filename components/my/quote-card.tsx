@@ -31,16 +31,19 @@ export function QuoteCard({
   variant?: "list" | "campaign";
 }) {
   return (
-    <li className="bg-card border border-border/60 rounded-xl p-4 hover:border-primary/40 hover:shadow-md hover:-translate-y-px transition-all duration-200">
-      <div className="flex items-start justify-between gap-3 mb-3">
+    <li className="-mt-[2px] border-2 border-border bg-card p-4 transition-colors hover:bg-muted">
+      <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-sm font-semibold text-gray-900 truncate">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            [ {variant === "campaign" ? "CAMPAIGN" : "QUOTE"} / {item.id.slice(-8).toUpperCase()} ]
+          </p>
+          <div className="mt-1 truncate text-sm font-bold tracking-tight text-foreground">
             {variant === "campaign"
               ? item.clientCompany ?? item.clientName
               : `견적서 #${item.id.slice(-8)}`}
           </div>
-          <div className="text-xs text-gray-500 mt-0.5">
-            {variant === "campaign"
+          <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            {`// `}{variant === "campaign"
               ? `${formatDate(item.startDate)} ~ ${formatDate(item.endDate)}`
               : formatDate(item.createdAt)}
             {" · "}
@@ -50,24 +53,24 @@ export function QuoteCard({
         </div>
         <QuoteStatusBadge status={item.status} />
       </div>
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <span className="text-base font-bold text-primary tabular-nums">
+      <div className="flex items-center justify-between border-t-2 border-border pt-3">
+        <span className="font-mono text-base font-bold tabular-nums text-accent">
           {formatKRW(item.totalAmount)}
         </span>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-0">
           <Link
             href={`/quote/${item.id}/preview`}
-            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 border border-border bg-card rounded-lg text-foreground hover:bg-secondary/60 transition-colors"
+            className="-ml-[2px] inline-flex items-center gap-1 border-2 border-border bg-card px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
           >
             상세
-            <ChevronRight className="w-3 h-3" />
+            <ChevronRight className="h-3 w-3" />
           </Link>
           {variant !== "campaign" && (
             <a
               href={`/api/quote/${item.id}/pdf`}
-              className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 bg-primary text-white rounded-lg hover:opacity-90 hover:shadow-sm transition-all"
+              className="-ml-[2px] inline-flex items-center gap-1 border-2 border-accent bg-accent px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border"
             >
-              <Download className="w-3 h-3" />
+              <Download className="h-3 w-3" />
               PDF
             </a>
           )}

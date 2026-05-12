@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BtnBlock } from "@/components/brutalist";
 import { Loader2, Eraser, FileDown, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 import type SignatureCanvas from "react-signature-canvas";
@@ -110,38 +107,52 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-muted-foreground">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="flex min-h-[40vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin text-accent" />
+        {`// LOADING`}
       </div>
     );
   }
 
   if (!session) {
     return (
-      <p className="py-16 text-center text-sm text-red-600">{t("unavailable")}</p>
+      <div className="mx-auto max-w-lg border-2 border-accent bg-card py-10 text-center">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+          [ UNAVAILABLE ]
+        </p>
+        <p className="mt-3 px-4 text-sm text-foreground">{t("unavailable")}</p>
+      </div>
     );
   }
 
   if (session.signed) {
     return (
-      <div className="mx-auto max-w-lg space-y-6 py-10 text-center">
-        <CheckCircle2 className="mx-auto h-14 w-14 text-green-600" />
-        <h1 className="text-2xl font-bold text-navy">{t("signedTitle")}</h1>
-        <p className="text-sm text-muted-foreground">{t("signedBody")}</p>
-        <Button type="button" className="bg-navy text-white" asChild>
+      <div className="mx-auto max-w-lg space-y-6 border-2 border-accent bg-card p-8 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center border-2 border-accent bg-accent text-accent-foreground">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+          [ SIGNED ]
+        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          {t("signedTitle")}
+        </h1>
+        <p className="font-mono text-[12px] tracking-tight text-muted-foreground">
+          {`// `}{t("signedBody")}
+        </p>
+        <div className="flex flex-col items-center gap-3">
           <a
             href={`/api/quote/${quoteId}/contract/signed`}
             target="_blank"
             rel="noreferrer"
+            className="inline-flex items-center gap-2 border-2 border-border bg-hero-void px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-hero-fg transition-colors hover:bg-accent hover:border-accent"
           >
-            <FileDown className="mr-2 h-4 w-4" />
+            <FileDown className="h-4 w-4" />
             {t("downloadSigned")}
           </a>
-        </Button>
-        <div>
-          <Button type="button" variant="outline" asChild>
-            <Link href={`/quote/${quoteId}`}>{t("backQuote")}</Link>
-          </Button>
+          <BtnBlock href={`/quote/${quoteId}`} variant="secondary" size="md">
+            {t("backQuote")}
+          </BtnBlock>
         </div>
       </div>
     );
@@ -149,11 +160,16 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
 
   if (!session.canSign) {
     return (
-      <div className="mx-auto max-w-lg py-10 text-center">
-        <p className="text-sm text-muted-foreground">{t("notYet")}</p>
-        <Button type="button" className="mt-4" variant="outline" asChild>
-          <Link href={`/quote/${quoteId}`}>{t("backQuote")}</Link>
-        </Button>
+      <div className="mx-auto max-w-lg border-2 border-border bg-muted py-10 text-center">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+          [ NOT READY ]
+        </p>
+        <p className="mt-3 px-4 text-sm text-foreground">{t("notYet")}</p>
+        <div className="mt-6 flex justify-center">
+          <BtnBlock href={`/quote/${quoteId}`} variant="secondary" size="md">
+            {t("backQuote")}
+          </BtnBlock>
+        </div>
       </div>
     );
   }
@@ -161,95 +177,113 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
   const previewSrc = `/api/quote/${quoteId}/contract/preview`;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 py-10">
+    <div className="mx-auto max-w-3xl space-y-6 py-10">
       <div>
-        <h1 className="text-2xl font-bold text-navy">{t("title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+          [ CONTRACT SIGN ]
+        </p>
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {t("title")}
+        </h1>
+        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+          {`// `}{t("subtitle")}
+        </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base text-navy">{t("previewTitle")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-hidden rounded-lg border bg-slate-100">
+      <div className="border-2 border-border bg-card">
+        <div className="border-b-2 border-border p-5">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            [ PREVIEW ]
+          </p>
+          <h2 className="mt-2 text-base font-bold tracking-tight text-foreground">
+            {t("previewTitle")}
+          </h2>
+        </div>
+        <div className="p-5">
+          <div className="overflow-hidden border-2 border-border bg-muted">
             <iframe
               title="contract-preview"
               src={previewSrc}
               className="h-[min(70vh,720px)] w-full"
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base text-navy">{t("signTitle")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="border-2 border-border bg-card">
+        <div className="border-b-2 border-border p-5">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            [ SIGNATURE ]
+          </p>
+          <h2 className="mt-2 text-base font-bold tracking-tight text-foreground">
+            {t("signTitle")}
+          </h2>
+        </div>
+        <div className="space-y-4 p-5">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-navy">
-                {t("signerName")}
+              <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                [ {t("signerName")} ]
               </label>
-              <Input
+              <input
                 value={signerName}
                 onChange={(e) => setSignerName(e.target.value)}
+                className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground focus:border-accent focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-navy">
-                {t("signerEmail")}
+              <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                [ {t("signerEmail")} ]
               </label>
-              <Input
+              <input
                 type="email"
                 value={signerEmail}
                 onChange={(e) => setSignerEmail(e.target.value)}
+                className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <p className="mb-2 text-xs font-medium text-navy">{t("padLabel")}</p>
-            <div className="rounded-md border border-slate-200 bg-white">
+            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              [ {t("padLabel")} ]
+            </p>
+            <div className="border-2 border-border bg-card">
               <OohSignaturePad ref={sigRef} />
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={clearSig}
-            >
-              <Eraser className="mr-1 h-3 w-3" />
-              {t("clearPad")}
-            </Button>
+            <div className="mt-2">
+              <BtnBlock variant="secondary" size="sm" onClick={clearSig}>
+                <Eraser className="h-3 w-3" />
+                {t("clearPad")}
+              </BtnBlock>
+            </div>
           </div>
 
-          <label className="flex cursor-pointer items-start gap-2 text-sm">
+          <label className="flex cursor-pointer items-start gap-3 border-2 border-border bg-muted p-3 text-sm">
             <input
               type="checkbox"
               checked={agree}
               onChange={(e) => setAgree(e.target.checked)}
-              className="mt-1"
+              className="mt-1 h-4 w-4 accent-cta"
             />
-            <span>{t("agreeLabel")}</span>
+            <span className="text-foreground">{t("agreeLabel")}</span>
           </label>
 
-          <Button
-            type="button"
-            className="w-full bg-gold text-navy hover:bg-gold/90 sm:w-auto"
+          <BtnBlock
+            variant="accent"
+            size="lg"
             disabled={submitting}
             onClick={() => void submit()}
+            className="w-full sm:w-auto"
           >
             {submitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               t("submit")
             )}
-          </Button>
-        </CardContent>
-      </Card>
+          </BtnBlock>
+        </div>
+      </div>
     </div>
   );
 }

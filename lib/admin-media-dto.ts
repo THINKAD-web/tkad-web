@@ -43,6 +43,8 @@ export type AdminMediaDto = {
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
   addressVerified: boolean;
+  /** 공개 카탈로그 THINKAD Verified 리본 */
+  isVerified: boolean;
   autoPopulatedAt: string | null;
   availability: MediaAvailability;
   /** 목록 노출·운영 on/off (예약 가용과 별개) */
@@ -211,6 +213,7 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     nearbyStations: pickStr(r, "nearbyStations", "nearby_stations"),
     nearbyLandmarks: pickStr(r, "nearbyLandmarks", "nearby_landmarks"),
     addressVerified: pickBool(r, "addressVerified", "address_verified", false),
+    isVerified: pickBool(r, "isVerified", "is_verified", false),
     autoPopulatedAt: pickIsoDateTime(
       r,
       "autoPopulatedAt",
@@ -291,6 +294,7 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     nearbyStations: m.nearbyStations,
     nearbyLandmarks: m.nearbyLandmarks,
     addressVerified: m.addressVerified,
+    isVerified: m.isVerified,
     autoPopulatedAt: m.autoPopulatedAt?.toISOString() ?? null,
     availability: m.availability as MediaAvailability,
     isActive: m.isActive,
