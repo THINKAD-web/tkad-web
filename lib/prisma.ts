@@ -1,12 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config as loadEnv } from "dotenv";
-import { resolve } from "node:path";
+import { statSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "@/lib/normalize-pg-database-url";
 
 declare global {
   var prisma: PrismaClient | undefined;
+  /** dev: 생성 시점의 `.prisma/client` 번들 mtime — `prisma generate` 후 싱글톤 무효화 */
+  var __prismaClientBundleMtimeMs: number | undefined;
 }
 
 /**
@@ -27,6 +30,15 @@ ensureLocalDatabaseEnvFromFiles();
 
 /** dev 전용: 첫 요청에 만든 Pool 이 예전 DATABASE_URL 을 물고 있으면 P1000 이 계속 남음 */
 let devPrismaDatabaseUrl: string | undefined;
+
+function readPrismaClientBundleMtimeMs(): number | null {
+  try {
+    const p = join(process.cwd(), "node_modules", ".prisma", "client", "index.js");
+    return statSync(p).mtimeMs;
+  } catch {
+    return null;
+  }
+}
 
 function createPrismaClient(): PrismaClient {
   const rawUrl = process.env.DATABASE_URL?.trim();
@@ -58,6 +70,20 @@ export function getPrisma(): PrismaClient {
       const stale = globalThis.prisma;
       globalThis.prisma = undefined;
       devPrismaDatabaseUrl = undefined;
+      globalThis.__prismaClientBundleMtimeMs = undefined;
+      void stale.$disconnect().catch(() => {});
+    }
+    const bundleMtime = readPrismaClientBundleMtimeMs();
+    const createdMtime = globalThis.__prismaClientBundleMtimeMs;
+    if (
+      globalThis.prisma &&
+      bundleMtime != null &&
+      createdMtime != null &&
+      bundleMtime > createdMtime
+    ) {
+      const stale = globalThis.prisma;
+      globalThis.prisma = undefined;
+      globalThis.__prismaClientBundleMtimeMs = undefined;
       void stale.$disconnect().catch(() => {});
     }
   }
@@ -68,6 +94,8 @@ export function getPrisma(): PrismaClient {
   globalThis.prisma = client;
   if (process.env.NODE_ENV !== "production") {
     devPrismaDatabaseUrl = process.env.DATABASE_URL?.trim();
+    const m = readPrismaClientBundleMtimeMs();
+    if (m != null) globalThis.__prismaClientBundleMtimeMs = m;
   }
   return client;
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Calculator, Sparkles } from "lucide-react";
+import { Calculator } from "lucide-react";
 import MediaDetailQuoteModal from "@/components/media-detail-quote-modal";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
@@ -25,7 +25,6 @@ export function MediaQuoteCtaButton({
   className?: string;
 }) {
   const t = useTranslations("media.detail");
-  const tCta = useTranslations("mediaDetail.cta");
   const [open, setOpen] = useState(false);
 
   return (
@@ -35,24 +34,19 @@ export function MediaQuoteCtaButton({
         onClick={() => setOpen(true)}
         className={cn(
           variant === "sticky"
-            ? "h-10 w-full border-2 border-border bg-accent text-sm font-bold tracking-tight text-accent-foreground shadow-md transition-colors hover:bg-foreground hover:text-background"
+            ? "h-11 w-full min-w-0 justify-center rounded-[15px] border-2 border-border bg-accent px-2.5 text-[10.5px] font-black tracking-[0.01em] text-accent-foreground shadow-md transition-colors hover:bg-foreground hover:text-background"
             : "h-12 min-w-[200px] border-2 border-border bg-accent px-6 text-base font-extrabold text-accent-foreground shadow-lg transition-colors hover:bg-foreground hover:text-background sm:h-14 sm:min-w-[220px] sm:text-lg",
           className,
         )}
       >
         {variant === "sticky" ? (
-          <Sparkles className="mr-2 h-5 w-5 shrink-0 opacity-90" aria-hidden />
+          <Calculator className="mr-1.5 h-4 w-4 shrink-0 opacity-90" aria-hidden />
         ) : (
           <Calculator className="mr-2 h-5 w-5 shrink-0" aria-hidden />
         )}
-        <span className="min-w-0 truncate text-left">
+        <span className="min-w-0 truncate text-center leading-none">
           {variant === "sticky" ? (
-            <>
-              <span className="sm:hidden">{tCta("quoteShort")}</span>
-              <span className="hidden sm:inline">
-                {t("stickyCtaQuoteSticky")}
-              </span>
-            </>
+            t("stickyCtaQuoteSticky")
           ) : (
             t("quoteCtaInline")
           )}

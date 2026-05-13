@@ -107,6 +107,8 @@ model Media {
   tags             String[] @default([])
   district         String?
   city             String?
+  /// 이동형(`type=mobile`) 매체 서비스 구역 — 행정구역 5자리 코드 배열 (전국 시·군·구, 예: 서울 강남 `11680`). 공개 지도 폴리곤에 사용.
+  coverageDistrictCodes String[] @default([]) @map("coverage_district_codes")
   latitude         Float?
   longitude        Float?
   priceNote        String?  @map("price_note")

@@ -140,11 +140,21 @@ export default function CartPage() {
   const labelCls =
     "mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65";
 
+  const kickerCls =
+    "whitespace-nowrap font-mono text-[10px] font-bold uppercase leading-none tracking-[0.22em] text-white/65";
+  const cartTitleCls = "text-lg font-black tracking-tight text-white";
+  const cartLeadCls = "font-mono text-[12px] leading-snug tracking-tight text-white/55";
+  const clearCartBtnCls =
+    "inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-[18px] border border-white/12 bg-white/6 px-4 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/80 transition-colors hover:bg-white/10 hover:text-white";
+
+  /** `lg` 에서 목록 열 / 폼 열 너비를 헤더·본문 두 밴드가 동일하게 쓰도록 공유 */
+  const cartLgCols = "lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-x-8";
+
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
-          <header className="mb-8">
+      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page flex min-h-0 w-full flex-1 flex-col">
+        <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-1 flex-col px-4 pt-8 pb-36 sm:px-5 sm:pt-10 sm:pb-40 lg:pt-12 lg:pb-48">
+          <header className="mb-6 min-w-0 sm:mb-8">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
               [ CART / QUOTE REQUEST ]
             </p>
@@ -157,7 +167,7 @@ export default function CartPage() {
           </header>
 
           {ids.length === 0 ? (
-            <div className="tkad-glass-surface mx-auto max-w-2xl p-8 sm:p-10">
+            <div className="tkad-glass-surface mx-auto w-full max-w-2xl p-8 sm:p-10">
               <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
               <h2 className="text-center text-xl font-black tracking-tight text-white">
                 장바구니가 비어있습니다
@@ -175,62 +185,110 @@ export default function CartPage() {
               </div>
             </div>
           ) : (
-            <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
-              <section className="tkad-glass-surface p-6 sm:p-7">
-                <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid" />
-                <div className="relative">
-                  <div className="flex items-end justify-between gap-4">
-                    <div>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
-                        [ SELECTED / {items.length} ]
-                      </p>
-                      <p className="mt-2 text-sm font-semibold text-white/80">
-                        {loading ? "불러오는 중…" : "선택된 매체 목록"}
-                      </p>
-                    </div>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-y-5">
+              {/* 모바일: 열 스택 / lg+: 같은 그리드에서 행마다 좌·우를 짝지어 상단 라인이 어긋나지 않게 함 */}
+              <div className="flex min-w-0 flex-col gap-y-5 lg:hidden">
+                <div className="min-w-0">
+                  <div className="flex min-w-0 flex-col gap-2">
+                    <p className={kickerCls}>[ SELECTED / {items.length} ]</p>
+                    <h2 className={cartTitleCls}>
+                      {loading ? "불러오는 중…" : "선택된 매체 목록"}
+                    </h2>
+                    <p className={cartLeadCls}>
+                      {loading
+                        ? `${`// `}매체 정보를 불러오는 중입니다.`
+                        : `${`// `}담긴 매체를 확인한 뒤 견적서를 요청하세요.`}
+                    </p>
+                  </div>
+                  <div className="mt-3 flex justify-end sm:mt-4">
                     <button
                       type="button"
                       onClick={() => {
                         clear();
                         toast.warning("장바구니를 비웠습니다.");
                       }}
-                      className="inline-flex h-10 items-center justify-center rounded-[18px] border border-white/12 bg-white/6 px-4 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                      className={clearCartBtnCls}
                     >
                       전체 비우기
                     </button>
                   </div>
+                </div>
+                <div className="flex min-w-0 flex-col gap-2">
+                  <p className={kickerCls}>[ CAMPAIGN INFO ]</p>
+                  <h2 className={cartTitleCls}>캠페인 정보</h2>
+                  <p className={cartLeadCls}>
+                    {`// `}기본 정보만 입력하면 PDF 견적서가 생성됩니다.
+                  </p>
+                </div>
+              </div>
 
-                  {loading ? (
-                    <div className="mt-4 flex items-center gap-2 text-white/70">
-                      <Spinner size="sm" label="불러오는 중…" />
-                      <span className="font-mono text-[11px] uppercase tracking-[0.18em]">
-                        Loading
-                      </span>
-                    </div>
-                  ) : null}
+              <div
+                className={`hidden min-w-0 lg:grid ${cartLgCols} items-start gap-y-2`}
+              >
+                <p className={`${kickerCls} min-w-0`}>[ SELECTED / {items.length} ]</p>
+                <p className={`${kickerCls} min-w-0`}>[ CAMPAIGN INFO ]</p>
+                <h2 className={`${cartTitleCls} min-w-0`}>
+                  {loading ? "불러오는 중…" : "선택된 매체 목록"}
+                </h2>
+                <h2 className={`${cartTitleCls} min-w-0`}>캠페인 정보</h2>
+                <p className={`${cartLeadCls} min-w-0`}>
+                  {loading
+                    ? `${`// `}매체 정보를 불러오는 중입니다.`
+                    : `${`// `}담긴 매체를 확인한 뒤 견적서를 요청하세요.`}
+                </p>
+                <p className={`${cartLeadCls} min-w-0`}>
+                  {`// `}기본 정보만 입력하면 PDF 견적서가 생성됩니다.
+                </p>
+                <div className="flex min-w-0 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clear();
+                      toast.warning("장바구니를 비웠습니다.");
+                    }}
+                    className={clearCartBtnCls}
+                  >
+                    전체 비우기
+                  </button>
+                </div>
+                <div className="min-h-10 min-w-0" aria-hidden />
+              </div>
 
-                  <ul className="mt-5 space-y-3">
+              <div
+                className={`grid min-w-0 grid-cols-1 content-start gap-y-5 ${cartLgCols} lg:gap-y-0 lg:items-stretch`}
+              >
+                <section
+                  aria-busy={loading}
+                  className="tkad-glass-surface flex min-h-0 min-w-0 flex-col p-5 sm:p-6 lg:h-full lg:min-h-0 lg:p-7"
+                >
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid"
+                />
+                <div className="relative flex min-h-0 flex-1 flex-col">
+                  <ul className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain">
                     {items.map((it) => (
                       <li
                         key={it.id}
-                        className="flex items-center gap-4 rounded-[22px] border border-white/12 bg-black/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur"
+                        className="flex flex-col gap-3 rounded-[22px] border border-white/12 bg-black/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:flex-row sm:items-center sm:gap-3 sm:p-4"
                       >
                         {it.image ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={it.image}
                             alt={it.name}
-                            className="h-16 w-16 flex-shrink-0 rounded-[16px] border border-white/10 object-cover"
+                            className="h-14 w-14 shrink-0 rounded-[14px] border border-white/10 object-cover sm:h-16 sm:w-16 sm:rounded-[16px]"
                           />
                         ) : (
-                          <div className="h-16 w-16 flex-shrink-0 rounded-[16px] border border-white/10 bg-black/25" />
+                          <div className="h-14 w-14 shrink-0 rounded-[14px] border border-white/10 bg-black/25 sm:h-16 sm:w-16 sm:rounded-[16px]" />
                         )}
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-black tracking-tight text-white">
+                          <div className="break-words text-sm font-black leading-snug tracking-tight text-white">
                             {it.name}
                           </div>
-                          <div className="mt-1 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
-                            {`// `}{it.region} · {it.type}
+                          <div className="mt-1 break-words font-mono text-[11px] uppercase leading-snug tracking-[0.18em] text-white/55">
+                            {`// `}
+                            {it.region} · {it.type}
                           </div>
                           <div className="mt-1 font-mono text-sm font-black tabular-nums text-white">
                             {formatKRW(it.price)}
@@ -239,7 +297,7 @@ export default function CartPage() {
                         <button
                           type="button"
                           onClick={() => handleRemove(it.id, it.name)}
-                          className="inline-flex h-10 items-center justify-center rounded-[18px] border border-white/12 bg-white/6 px-4 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                          className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-[18px] border border-white/12 bg-white/6 px-4 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/80 transition-colors hover:bg-white/10 hover:text-white sm:ml-auto sm:w-auto sm:self-center"
                         >
                           제거
                         </button>
@@ -247,7 +305,7 @@ export default function CartPage() {
                     ))}
                   </ul>
 
-                  <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+                  <div className="mt-6 flex shrink-0 items-center justify-between border-t border-white/10 pt-5">
                     <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
                       [ TOTAL ]
                     </span>
@@ -256,20 +314,16 @@ export default function CartPage() {
                     </span>
                   </div>
                 </div>
-              </section>
+                </section>
 
-              <aside className="tkad-glass-surface h-fit p-6 sm:p-7 lg:sticky lg:top-24">
-                <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid" />
-                <div className="relative">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
-                    [ CAMPAIGN INFO ]
-                  </p>
-                  <h2 className="mt-2 text-lg font-black tracking-tight text-white">캠페인 정보</h2>
-                  <p className="mt-2 font-mono text-[12px] tracking-tight text-white/55">
-                    {`// `}기본 정보만 입력하면 PDF 견적서가 생성됩니다.
-                  </p>
-
-                  <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                <aside className="tkad-glass-surface flex min-h-0 min-w-0 flex-col p-5 sm:p-6 lg:h-full lg:min-h-0 lg:p-7">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid"
+                />
+                <div className="relative flex min-h-0 flex-1 flex-col">
+                  <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+                    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-y-contain">
                     <div>
                       <label className={labelCls}>[ 담당자 이름 * ]</label>
                       <input
@@ -321,8 +375,8 @@ export default function CartPage() {
                         className={inputCls}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-2">
+                      <div className="min-w-0">
                         <label className={labelCls}>[ 시작일 ]</label>
                         <input
                           type="date"
@@ -331,7 +385,7 @@ export default function CartPage() {
                           className={inputCls}
                         />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <label className={labelCls}>[ 종료일 ]</label>
                         <input
                           type="date"
@@ -351,7 +405,9 @@ export default function CartPage() {
                         className={inputCls}
                       />
                     </div>
+                    </div>
 
+                    <div className="mt-auto flex flex-col gap-3 border-t border-white/10 pt-4">
                     {error && (
                       <div className="rounded-[18px] border border-white/14 bg-black/35 p-3 font-mono text-[11px] tracking-tight text-white/85">
                         {`// `}{error}
@@ -369,9 +425,11 @@ export default function CartPage() {
                     <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] text-white/45">
                       {`// `}{submitting ? "processing" : "secure request"}
                     </p>
+                    </div>
                   </form>
                 </div>
               </aside>
+              </div>
             </div>
           )}
         </div>

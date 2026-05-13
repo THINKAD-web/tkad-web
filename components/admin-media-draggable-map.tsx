@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCampaignMonitoringMapProvider } from "@/components/campaign-monitoring-map";
@@ -43,6 +43,8 @@ type Props = {
   onPositionChange: (lat: number, lng: number) => void;
   className?: string;
   heightPx?: number;
+  /** 이동형 — 시·군·구 코드 선택 시 근사 폴리곤 오버레이 */
+  coverageDistrictCodes?: string[];
 };
 
 export default function AdminMediaDraggableMap({
@@ -51,6 +53,7 @@ export default function AdminMediaDraggableMap({
   onPositionChange,
   className,
   heightPx = 260,
+  coverageDistrictCodes,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onDragRef = useRef(onPositionChange);
@@ -59,7 +62,11 @@ export default function AdminMediaDraggableMap({
   const [mapReady, setMapReady] = useState(false);
 
   const kakaoRef = useRef<{
-    map: { setCenter: (p: unknown) => void; setLevel: (n: number) => void };
+    map: {
+      setCenter: (p: unknown) => void;
+      setLevel: (n: number) => void;
+      setBounds?: (b: unknown, ...pad: number[]) => void;
+    };
     marker: {
       setPosition: (p: unknown) => void;
       getPosition: () => { getLat: () => number; getLng: () => number };
@@ -77,6 +84,11 @@ export default function AdminMediaDraggableMap({
 
   const cleanupRef = useRef<(() => void) | null>(null);
   const provider = getCampaignMonitoringMapProvider();
+  const coverageKey = useMemo(
+    () => [...(coverageDistrictCodes ?? [])].sort().join(","),
+    [coverageDistrictCodes],
+  );
+  const coveragePolygonsRef = useRef<Array<{ setMap: (m: unknown) => void }>>([]);
 
   const latOrDefault = latitude ?? SEOUL.lat;
   const lngOrDefault = longitude ?? SEOUL.lng;
@@ -281,6 +293,105 @@ export default function AdminMediaDraggableMap({
     });
     return () => cancelAnimationFrame(t);
   }, [latitude, longitude, mapReady, provider]);
+
+  useEffect(() => {
+    if (!mapReady || provider !== "kakao" || !kakaoRef.current) return;
+    const K = (
+      window as unknown as {
+        kakao?: {
+          maps: {
+            LatLng: new (lat: number, lng: number) => unknown;
+            LatLngBounds: new () => {
+              extend: (p: unknown) => void;
+            };
+            Polygon: new (opts: {
+              map: unknown;
+              path: unknown[];
+              strokeWeight?: number;
+              strokeColor?: string;
+              strokeOpacity?: number;
+              fillColor?: string;
+              fillOpacity?: number;
+            }) => { setMap: (m: unknown) => void };
+          };
+        };
+      }
+    ).kakao?.maps;
+    if (!K?.Polygon || !K.LatLngBounds) return;
+
+    for (const p of coveragePolygonsRef.current) {
+      try {
+        p.setMap(null);
+      } catch {
+        /* noop */
+      }
+    }
+    coveragePolygonsRef.current = [];
+
+    const codes = (coverageDistrictCodes ?? []).filter(Boolean);
+    if (!codes.length) return;
+
+    let cancelled = false;
+    const qs = encodeURIComponent(codes.join(","));
+    void fetch(`/api/geo/district-boundaries?codes=${qs}`)
+      .then((r) => r.json())
+      .then(
+        (fc: {
+          features?: Array<{
+            geometry?: { type?: string; coordinates?: [number, number][][] };
+          }>;
+        }) => {
+          if (cancelled || !kakaoRef.current || !fc?.features?.length) return;
+          const map = kakaoRef.current.map;
+          const bounds = new K.LatLngBounds();
+          for (const f of fc.features) {
+            const geom = f.geometry;
+            if (geom?.type !== "Polygon" || !geom.coordinates?.[0]) continue;
+            const ring = geom.coordinates[0];
+            if (ring.length < 3) continue;
+            const path = ring.map(
+              ([lng, lat]) => new K.LatLng(lat, lng) as unknown,
+            );
+            const poly = new K.Polygon({
+              map,
+              path,
+              strokeWeight: 2,
+              strokeColor: "#312e81",
+              strokeOpacity: 0.9,
+              fillColor: "#a855f7",
+              fillOpacity: 0.14,
+            });
+            coveragePolygonsRef.current.push(poly);
+            for (const [lng, lat] of ring) {
+              bounds.extend(new K.LatLng(lat, lng) as unknown);
+            }
+          }
+          if (!coveragePolygonsRef.current.length) return;
+          try {
+            map.setBounds?.(bounds, 40, 40, 40, 40);
+          } catch {
+            try {
+              map.setBounds?.(bounds, 48);
+            } catch {
+              /* noop */
+            }
+          }
+        },
+      )
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+      for (const p of coveragePolygonsRef.current) {
+        try {
+          p.setMap(null);
+        } catch {
+          /* noop */
+        }
+      }
+      coveragePolygonsRef.current = [];
+    };
+  }, [mapReady, provider, coverageKey]);
 
   if (provider === "fallback") {
     return (

@@ -26,6 +26,10 @@ type Props = {
   onMarkerDetail?: (id: string) => void;
   center?: { lat: number; lng: number };
   zoom?: number;
+  /** 이동형 커버리지 — `/api/geo/district-boundaries` 응답과 동일 형식 FeatureCollection */
+  coverageGeoJson?: unknown | null;
+  /** `coverageGeoJson` 이 있을 때 지도를 해당 영역에 맞춤 */
+  fitCoverageBounds?: boolean;
 };
 
 declare global {
@@ -156,6 +160,15 @@ type KakaoSdk = {
       clear: () => void;
       redraw?: () => void;
     };
+    Polygon: new (opts: {
+      map: unknown;
+      path: unknown[];
+      strokeWeight?: number;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      fillColor?: string;
+      fillOpacity?: number;
+    }) => { setMap: (map: unknown | null) => void };
     event: {
       addListener: (target: unknown, type: string, handler: (...args: unknown[]) => void) => void;
       removeListener?: (target: unknown, type: string, handler: (...args: unknown[]) => void) => void;
@@ -385,6 +398,8 @@ export default function KakaoMapView({
   onMarkerDetail,
   center = { lat: 37.5665, lng: 126.978 },
   zoom = 8,
+  coverageGeoJson = null,
+  fitCoverageBounds = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<unknown>(null);
@@ -398,6 +413,9 @@ export default function KakaoMapView({
   const [sdkError, setSdkError] = useState<string | null>(null);
   /** SDK 비동기 로드 후 지도 인스턴스가 생긴 뒤에만 true — markers effect 가 한 번 더 돌게 함 */
   const [mapReady, setMapReady] = useState(false);
+  const coveragePolygonsRef = useRef<Array<{ setMap: (m: unknown) => void }>>([]);
+  const coverageSig =
+    coverageGeoJson == null ? "" : JSON.stringify(coverageGeoJson);
 
   useEffect(() => {
     onMarkerDetailRef.current = onMarkerDetail;
@@ -593,6 +611,14 @@ export default function KakaoMapView({
         /* noop */
       }
       clustererRef.current = null;
+      for (const p of coveragePolygonsRef.current) {
+        try {
+          p.setMap(null);
+        } catch {
+          /* noop */
+        }
+      }
+      coveragePolygonsRef.current = [];
       markerObjs.clear();
       mapRef.current = null;
       infoWindowRef.current = null;
@@ -722,6 +748,74 @@ export default function KakaoMapView({
       console.error("[KakaoMapView] markers sync failed", e);
     }
   }, [markers, mapReady, selectedId]);
+
+  useEffect(() => {
+    if (!mapReady) return;
+    const map = mapRef.current;
+    const kakao = getKakaoSdk();
+    if (!map || !kakao?.maps?.Polygon) return;
+
+    for (const p of coveragePolygonsRef.current) {
+      try {
+        p.setMap(null);
+      } catch {
+        /* noop */
+      }
+    }
+    coveragePolygonsRef.current = [];
+
+    const fc = coverageGeoJson as {
+      features?: Array<{
+        geometry?: { type?: string; coordinates?: [number, number][][] };
+      }>;
+    } | null;
+    if (!fc?.features?.length) return;
+
+    const K = kakao.maps;
+    const bounds = new K.LatLngBounds();
+    for (const f of fc.features) {
+      const geom = f.geometry;
+      if (geom?.type !== "Polygon" || !geom.coordinates?.[0]) continue;
+      const ring = geom.coordinates[0];
+      if (ring.length < 3) continue;
+      const path = ring.map(([lng, lat]) => new K.LatLng(lat, lng));
+      const poly = new K.Polygon({
+        map,
+        path,
+        strokeWeight: 2,
+        strokeColor: "#3730a3",
+        strokeOpacity: 0.88,
+        fillColor: "#a855f7",
+        fillOpacity: 0.12,
+      });
+      coveragePolygonsRef.current.push(poly);
+      for (const [lng, lat] of ring) bounds.extend(new K.LatLng(lat, lng));
+    }
+
+    if (fitCoverageBounds && coveragePolygonsRef.current.length) {
+      const m = map as { setBounds?: (...args: unknown[]) => void };
+      try {
+        m.setBounds?.(bounds, 48, 48, 48, 48);
+      } catch {
+        try {
+          m.setBounds?.(bounds, 56);
+        } catch {
+          /* noop */
+        }
+      }
+    }
+
+    return () => {
+      for (const p of coveragePolygonsRef.current) {
+        try {
+          p.setMap(null);
+        } catch {
+          /* noop */
+        }
+      }
+      coveragePolygonsRef.current = [];
+    };
+  }, [mapReady, coverageSig, fitCoverageBounds]);
 
   // #MAP-1: 미니 팝업(CustomOverlay) 비활성화. 마커 선택 시 panTo만 수행.
   // 상세는 사이드 카드(media-map-page-client.tsx) 또는 onMarkerDetail 라우팅으로 노출.

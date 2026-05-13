@@ -113,7 +113,7 @@ export default function RecentlyViewedMedia({ locale }: Props) {
               href={`/media/${m.id}`}
               className={cn(
                 "group -ml-[2px] flex snap-start flex-col overflow-hidden rounded-[24px] border border-border/80 bg-card/80 shadow-xs backdrop-blur",
-                "w-[min(100%,280px)] shrink-0 sm:w-[268px]",
+                "w-[min(100%,256px)] shrink-0 sm:w-[244px]",
                 "transition-colors hover:bg-muted/50",
               )}
             >
@@ -125,12 +125,12 @@ export default function RecentlyViewedMedia({ locale }: Props) {
                 bottomGradientClassName={null}
                 placeholderSize="xs"
               >
-                <div className="pointer-events-none absolute left-2.5 top-2.5 z-20 rounded-xl border border-border/80 bg-card/80 px-2.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground shadow-xs backdrop-blur">
+                <div className="pointer-events-none absolute left-2.5 top-2.5 z-20 rounded-xl border border-border/80 bg-card/80 px-1.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground shadow-xs backdrop-blur">
                   <Clock className="mr-1 inline-block h-3 w-3" aria-hidden />
                   {isKo ? "최근" : "Recent"}
                 </div>
               </MediaCatalogThumbnail>
-              <div className="flex flex-1 flex-col gap-1.5 p-4">
+              <div className="flex flex-1 flex-col gap-1.5 p-3">
                 <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                   [ {typeLabel} ]
                 </span>

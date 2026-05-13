@@ -11,12 +11,30 @@ function bunnyStorageBaseUrl(): string {
   return host.replace(/\/+$/, "");
 }
 
+export type BunnyStorageConfigStatus = {
+  configured: boolean;
+  missingEnvVars: string[];
+};
+
+export function getBunnyStorageConfigStatus(): BunnyStorageConfigStatus {
+  const missingEnvVars: string[] = [];
+  if (!process.env.BUNNY_STORAGE_ZONE?.trim()) {
+    missingEnvVars.push("BUNNY_STORAGE_ZONE");
+  }
+  if (!process.env.BUNNY_STORAGE_API_KEY?.trim()) {
+    missingEnvVars.push("BUNNY_STORAGE_API_KEY");
+  }
+  if (!process.env.BUNNY_CDN_BASE_URL?.trim()) {
+    missingEnvVars.push("BUNNY_CDN_BASE_URL");
+  }
+  return {
+    configured: missingEnvVars.length === 0,
+    missingEnvVars,
+  };
+}
+
 export function isBunnyStorageConfigured(): boolean {
-  return Boolean(
-    process.env.BUNNY_STORAGE_ZONE?.trim() &&
-      process.env.BUNNY_STORAGE_API_KEY?.trim() &&
-      process.env.BUNNY_CDN_BASE_URL?.trim(),
-  );
+  return getBunnyStorageConfigStatus().configured;
 }
 
 export type BunnyUploadResult = {
