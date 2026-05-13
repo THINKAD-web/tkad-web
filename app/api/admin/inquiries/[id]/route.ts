@@ -63,7 +63,7 @@ export async function PATCH(req: Request, { params }: Params) {
   const status =
     parsed.data.status == null
       ? undefined
-      : parseInquiryAdminStatusCode(parsed.data.status);
+      : (parseInquiryAdminStatusCode(parsed.data.status) ?? undefined);
   if (parsed.data.status != null && !status) {
     return NextResponse.json(
       { ok: false, error: { code: "INVALID_STATUS" } },
