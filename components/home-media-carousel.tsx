@@ -113,6 +113,7 @@ export function HomeMediaCarousel({
     media,
     index,
     topRight,
+    topRightClassName,
     density,
     typeLabel,
     name,
@@ -122,6 +123,7 @@ export function HomeMediaCarousel({
     media: MediaItem;
     index?: number;
     topRight: React.ReactNode;
+    topRightClassName?: string;
     density: "default" | "compact";
     typeLabel: string;
     name: string;
@@ -160,7 +162,12 @@ export function HomeMediaCarousel({
           )}
 
           {topRight ? (
-            <div className="absolute right-3 top-3 rounded-2xl border border-white/12 bg-white/8 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.2em] text-white/85 backdrop-blur">
+            <div
+              className={cn(
+                "absolute right-3 top-3 rounded-2xl border px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.2em] text-white backdrop-blur",
+                topRightClassName,
+              )}
+            >
               {topRight}
             </div>
           ) : null}
@@ -339,6 +346,9 @@ export function HomeMediaCarousel({
                 {isKo ? "HOT" : "HOT"}
               </span>
             );
+            const topRightClassName = isFeatured
+              ? "border-cyan-200/35 bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(59,130,246,0.92)_50%,rgba(168,85,247,0.9)_100%)] shadow-[0_0_24px_rgba(34,211,238,0.2)]"
+              : "border-amber-200/40 bg-[linear-gradient(135deg,rgba(251,191,36,0.96)_0%,rgba(249,115,22,0.92)_52%,rgba(236,72,153,0.88)_100%)] shadow-[0_0_24px_rgba(251,191,36,0.22)]";
 
             return (
               <div key={media.id} className={slideClass}>
@@ -346,6 +356,7 @@ export function HomeMediaCarousel({
                   media={media}
                   index={indexLabel}
                   topRight={topRight}
+                  topRightClassName={topRightClassName}
                   density={density}
                   typeLabel={typeLabel}
                   name={name}

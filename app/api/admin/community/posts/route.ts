@@ -4,13 +4,11 @@ import {
   adminListPosts,
   type AdminListPostsOptions,
 } from "@/lib/community/admin-queries";
-import type { CommunityCategory } from "@/lib/community/types";
+import {
+  normalizeCommunityCategory,
+} from "@/lib/community/types";
 
 export const dynamic = "force-dynamic";
-
-function isCategory(s: unknown): s is CommunityCategory {
-  return s === "qa" || s === "review" || s === "recommend";
-}
 
 function isStatus(
   s: unknown,
@@ -25,7 +23,7 @@ export async function GET(request: NextRequest) {
 
   const sp = request.nextUrl.searchParams;
   const status = isStatus(sp.get("status")) ? (sp.get("status") as AdminListPostsOptions["status"]) : "all";
-  const category = isCategory(sp.get("category")) ? (sp.get("category") as CommunityCategory) : undefined;
+  const category = normalizeCommunityCategory(sp.get("category")) ?? undefined;
   const hasReports = sp.get("hasReports") === "1";
   const page = Number(sp.get("page") ?? "1");
 

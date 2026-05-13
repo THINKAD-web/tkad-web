@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
-import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
 import { getCurrentUser } from "@/lib/user-session";
 import { createCommunityComment } from "@/lib/community/queries";
 import { validateCommunityCommentInput } from "@/lib/community/validate";
-import { COMMUNITY_LIMITS } from "@/lib/community/types";
+import {
+  COMMUNITY_LIMITS,
+  fallbackCommunityRoleFromAppRole,
+  normalizeCommunityMemberRole,
+} from "@/lib/community/types";
 
 export const dynamic = "force-dynamic";
 
-const anonCommentLimiter = rateLimit({
-  limit: COMMUNITY_LIMITS.ANON_COMMENT_PER_HOUR,
-  windowMs: 60 * 60 * 1000,
-});
 const userCommentLimiter = rateLimit({
   limit: COMMUNITY_LIMITS.USER_COMMENT_PER_HOUR,
   windowMs: 60 * 60 * 1000,
@@ -45,19 +44,6 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ ok: true, id: "trap" }, { status: 201 });
   }
 
-  const turnstileToken = (body as Record<string, unknown>).turnstileToken;
-  const turnstile = await verifyTurnstileForRequest({
-    token: typeof turnstileToken === "string" ? turnstileToken : undefined,
-    remoteip: ip,
-    host: req.headers.get("host"),
-  });
-  if (!turnstile.ok) {
-    return NextResponse.json(
-      { error: "캡차 검증에 실패했습니다.", reason: turnstile.reason },
-      { status: 403 },
-    );
-  }
-
   const validated = validateCommunityCommentInput(body as Record<string, unknown>);
   if (!validated.ok) {
     return NextResponse.json(
@@ -67,33 +53,52 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   const me = await getCurrentUser();
-  const limiter = me ? userCommentLimiter : anonCommentLimiter;
-  const limiterKey = me ? `u:${me.id}` : `ip:${ip}`;
-  if (!limiter.check(limiterKey)) {
+  if (!me) {
+    return NextResponse.json(
+      { error: "로그인 후 댓글을 작성할 수 있습니다." },
+      { status: 401 },
+    );
+  }
+
+  if (!userCommentLimiter.check(`u:${me.id}`)) {
     return NextResponse.json(
       { error: "잠시 후 다시 시도해주세요. (댓글 한도 초과)" },
       { status: 429 },
     );
   }
 
-  const useAnon = validated.value.isAnonymous || !me;
-  const authorUserId = useAnon ? null : me?.id ?? null;
-  const authorEmail = useAnon ? null : me?.email ?? null;
-  const authorName = useAnon
-    ? validated.value.authorName
-    : me?.name ?? validated.value.authorName;
-
   try {
     const created = await createCommunityComment({
       postId,
       body: validated.value.body,
-      authorName,
-      authorUserId,
-      authorEmail,
-      isAnonymous: useAnon,
+      authorName: me.name,
+      authorUserId: me.id,
+      authorEmail: me.email ?? null,
       authorIp: ip,
     });
-    return NextResponse.json({ ok: true, id: created.id }, { status: 201 });
+    return NextResponse.json(
+      {
+        ok: true,
+        comment: {
+          id: created.id,
+          content: created.body,
+          createdAt: created.createdAt.toISOString(),
+          authorName: created.authorName,
+          author: created.authorUser
+            ? {
+                id: created.authorUser.id,
+                name: created.authorUser.name,
+                company: created.authorUser.company,
+                role:
+                  normalizeCommunityMemberRole(created.authorUser.communityRole) ??
+                  fallbackCommunityRoleFromAppRole(created.authorUser.role),
+                bio: created.authorUser.communityBio,
+              }
+            : null,
+        },
+      },
+      { status: 201 },
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes("not found")) {

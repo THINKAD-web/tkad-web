@@ -34,13 +34,19 @@ export async function POST(req: NextRequest, { params }: Params) {
     );
   }
   const me = await getCurrentUser();
+  if (!me) {
+    return NextResponse.json(
+      { error: "로그인 후 신고할 수 있습니다." },
+      { status: 401 },
+    );
+  }
   const ip = getRequestIp(req);
   const result = await reportCommunityTarget(
     "post",
     postId,
     validated.value.reason,
     ip,
-    me?.id ?? null,
+    me.id,
   );
   return NextResponse.json(result);
 }

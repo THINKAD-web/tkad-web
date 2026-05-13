@@ -2,9 +2,6 @@
 // 설명: Admin Overview — 실 DB 기반 통계 + 최근 활동 (목업 제거)
 
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Monitor,
   ShieldAlert,
@@ -135,28 +132,24 @@ export default async function AdminOverviewPage({ params }: Props) {
       label: "총 매체 수",
       value: s.totalMedia.toLocaleString("ko-KR"),
       icon: Monitor,
-      tone: "bg-blue-50 text-blue-600 border-blue-100",
       href: `/${locale}/admin/medias`,
     },
     {
       label: "검증 대기",
       value: s.pendingVerification.toLocaleString("ko-KR"),
       icon: ShieldAlert,
-      tone: "bg-amber-50 text-amber-700 border-amber-100",
       href: `/${locale}/admin/verification`,
     },
     {
       label: "이번 달 견적서",
       value: s.quotesThisMonth.toLocaleString("ko-KR"),
       icon: FileText,
-      tone: "bg-indigo-50 text-indigo-600 border-indigo-100",
       href: `/${locale}/admin/quotes`,
     },
     {
       label: "누적 매출 (확정)",
       value: formatKRW(s.totalRevenue),
       icon: Wallet,
-      tone: "bg-emerald-50 text-emerald-600 border-emerald-100",
       href: `/${locale}/admin/quotes`,
     },
     {
@@ -164,10 +157,6 @@ export default async function AdminOverviewPage({ params }: Props) {
       label: "검토 대기 신청",
       value: s.pendingBookingRequests.toLocaleString("ko-KR"),
       icon: CalendarClock,
-      tone:
-        s.pendingBookingRequests > 0
-          ? "bg-orange-50 text-orange-700 border-orange-200"
-          : "bg-slate-50 text-slate-500 border-slate-100",
       href: `/${locale}/admin/media-hub`,
     },
   ];
@@ -207,7 +196,7 @@ export default async function AdminOverviewPage({ params }: Props) {
       </header>
 
       <section className="grid grid-cols-1 gap-0 border-2 border-border bg-card sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map(({ label, value, icon: Icon, tone: _tone, href }, idx) => (
+        {statCards.map(({ label, value, icon: Icon, href }, idx) => (
           <Link key={label} href={href}>
             <div
               className={[
@@ -313,6 +302,7 @@ export default async function AdminOverviewPage({ params }: Props) {
         {[
           { href: `/${locale}/admin/medias`, label: "매체 관리", icon: Monitor },
           { href: `/${locale}/admin/verification`, label: "검증 큐", icon: ShieldAlert },
+          { href: `/${locale}/admin/community`, label: "커뮤니티", icon: MessageSquareText },
           { href: `/${locale}/admin/quotes`, label: "견적서", icon: FileText },
           { href: `/${locale}/admin/users`, label: "사용자", icon: Clock },
         ].map(({ href, label, icon: Icon }) => (

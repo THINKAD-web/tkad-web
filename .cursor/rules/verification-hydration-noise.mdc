@@ -1,0 +1,19 @@
+---
+description: Distinguish automation-only hydration noise from real app hydration bugs during verification
+alwaysApply: true
+---
+
+# Verification: Hydration Warning Triage
+
+- When hydration warnings appear only during browser automation and the diff shows injected attributes like `data-cursor-ref`, treat them as automation noise first, not as product bugs.
+- Do not add broad `suppressHydrationWarning` just to silence automation-only mismatches. Keep real hydration bugs visible.
+- If a hydration mismatch is suspected, verify in this order:
+  1. Manual browser reproduction
+  2. API + DB truth (`/api/...`, direct DB checks, server logs)
+  3. Automation/browser rendering evidence
+- Escalate as a real app bug only when the mismatch also appears outside automation, or when the diff shows actual content/state differences such as text, date, locale, random values, or `window`-dependent branches.
+- For end-to-end verification, prefer:
+  - manual browser for final user experience
+  - script/API checks for create/update/delete flows
+  - automation browser for public rendering and read-only checks
+- If automation is blocked by injected-attribute hydration warnings, report the broken verification boundary clearly and continue validating the same feature through API, DB, and public-render checks when possible.

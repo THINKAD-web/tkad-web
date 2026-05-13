@@ -9,14 +9,8 @@ import {
 import {
   ArrowRight,
   BarChart3,
-  ChevronDown,
   Eye,
   FileCheck,
-  Play,
-  Search,
-  Camera,
-  Database,
-  ClipboardCheck,
 } from "lucide-react";
 
 import { TestimonialsCarousel } from "@/components/testimonials-carousel";
@@ -30,20 +24,11 @@ import { HomeHeroNeo } from "@/components/home-hero-neo";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { listHomeCommunityPosts } from "@/lib/community/queries";
+import { CommunityPostCard } from "@/components/community/post-card";
+import type { CommunityPostListItem } from "@/lib/community/types";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
-/**
- * HeroKenBurns 는 "use client" 컴포넌트. Server Component(page.tsx) 안에서는
- * `ssr: false` 옵션을 쓸 수 없다(Next.js 16). 대신 그냥 code-split 만 적용하고,
- * 초기 SSR 렌더에서는 클라이언트 훅(useEffect) 없이 기본 index=0 상태로
- * 첫 이미지만 노출 → 클라이언트 하이드레이션 후 애니/캐러셀 시작.
- */
-const HeroKenBurns = dynamic(() => import("@/components/hero-ken-burns"), {
-  loading: () => (
-    <div aria-hidden className="absolute inset-0 z-0 bg-hero-void" />
-  ),
-});
-
 type Props = {
   params: Promise<{ locale: string }>;
 };
@@ -56,9 +41,10 @@ export default async function HomePage({ params }: Props) {
    * 추천 매체: Prisma `isFeatured`·`featuredOrder` (관리자에서 지정).
    * 인기 매체: Prisma `isPopular`·`popularOrder` (관리자에서 별도 지정).
    */
-  const [featuredCatalog, popularCatalog] = await Promise.all([
+  const [featuredCatalog, popularCatalog, communityPosts] = await Promise.all([
     fetchHomeFeaturedMedia(8),
     fetchHomePopularMedia(12),
+    listHomeCommunityPosts(),
   ]);
 
   return (
@@ -67,6 +53,7 @@ export default async function HomePage({ params }: Props) {
       t={t}
       featuredCatalog={featuredCatalog}
       popularCatalog={popularCatalog}
+      communityPosts={communityPosts}
     />
   );
 }
@@ -76,11 +63,13 @@ function HomeContent({
   t,
   featuredCatalog,
   popularCatalog,
+  communityPosts,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
   featuredCatalog: MediaItem[];
   popularCatalog: MediaItem[];
+  communityPosts: CommunityPostListItem[];
 }) {
   const isKo = locale === "ko";
   /** 캐러셀 — 추천 매체 전체 활용 (TOP3 라벨은 첫 3개에만) */
@@ -332,6 +321,62 @@ function HomeContent({
           </ScrollAnimate>
           <div className="mt-5 sm:mt-8 lg:mt-10">
             <TestimonialsCarousel items={testimonials} isKo={isKo} />
+          </div>
+        </NeonSection>
+
+        <NeonSection>
+          <ScrollAnimate>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+              <NeonSectionHead
+                number="06"
+                kicker="Community"
+                title={
+                  isKo ? (
+                    <>
+                      업계 <span className="tkad-home-accent-text">인사이트</span>와
+                      연결이 이어지는 공간
+                    </>
+                  ) : (
+                    <>
+                      Where OOH <span className="tkad-home-accent-text">insights</span>{" "}
+                      and industry connections meet
+                    </>
+                  )
+                }
+                meta="ooh industry network"
+                className="mb-0 flex-1"
+              />
+              <Link
+                href="/community"
+                className="tkad-home-section-cta group inline-flex items-center gap-2 self-end border-b border-white/25 pb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 transition-colors hover:border-white/45 hover:text-white"
+              >
+                {isKo ? "커뮤니티 전체 보기" : "View community"}
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </ScrollAnimate>
+
+          <div className="mt-5 grid grid-cols-1 gap-4 sm:mt-8 lg:grid-cols-3 lg:gap-5">
+            {communityPosts.length > 0 ? (
+              communityPosts.map((post, idx) => (
+                <ScrollAnimate key={post.id} delay={idx * 80}>
+                  <CommunityPostCard
+                    post={post}
+                    locale={locale}
+                    variant="home"
+                    className="h-full"
+                  />
+                </ScrollAnimate>
+              ))
+            ) : (
+              <div className="lg:col-span-3 rounded-[28px] border border-white/12 bg-white/6 p-8 text-center tkad-neon-border tkad-neon-glow">
+                <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-white/60">
+                  {isKo
+                    ? "// 커뮤니티 인기 글이 곧 노출됩니다"
+                    : "// community highlights coming soon"}
+                </p>
+              </div>
+            )}
           </div>
         </NeonSection>
 

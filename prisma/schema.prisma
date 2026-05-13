@@ -766,6 +766,13 @@ enum AppUserRole {
   admin
 }
 
+enum CommunityMemberRole {
+  ADVERTISER
+  MEDIA
+  AGENCY
+  FREELANCER
+}
+
 model User {
   id              String    @id @default(cuid())
   email           String    @unique
@@ -775,6 +782,8 @@ model User {
   company         String?
   locale          String    @default("ko")
   role            AppUserRole @default(advertiser)
+  communityRole   CommunityMemberRole? @map("community_role")
+  communityBio    String?   @map("community_bio")
   emailVerifiedAt DateTime? @map("email_verified_at")
   lastLoginAt     DateTime? @map("last_login_at")
   deletedAt       DateTime? @map("deleted_at")
@@ -783,6 +792,10 @@ model User {
 
   sessions        UserSession[]
   bookingRequests MediaBooking[] @relation("BookingRequester")
+  communityPosts      CommunityPost[]     @relation("CommunityPostAuthor")
+  communityComments   CommunityComment[]  @relation("CommunityCommentAuthor")
+  communityPostLikes  CommunityPostLike[]
+  communityBookmarks  CommunityBookmark[]
 
   @@index([email])
   @@map("users")
@@ -839,7 +852,7 @@ model UserFavoriteMedia {
 
 model CommunityPost {
   id          String   @id @default(cuid())
-  category    String   // "qa" | "review" | "recommend"
+  category    String   // "insight" | "qna" | "networking" | "review"
   title       String   @db.VarChar(200)
   body        String   @db.Text
   authorName  String   @map("author_name") @db.VarChar(50)
@@ -857,7 +870,10 @@ model CommunityPost {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  authorUser  User?    @relation("CommunityPostAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
   comments    CommunityComment[]
+  likes       CommunityPostLike[]
+  bookmarks   CommunityBookmark[]
 
   @@index([category, status, createdAt])
   @@index([status, createdAt])
@@ -878,6 +894,7 @@ model CommunityComment {
   status      String   @default("published") // published | hidden | deleted
   reportCount Int      @default(0) @map("report_count")
   createdAt   DateTime @default(now()) @map("created_at")
+  authorUser  User?    @relation("CommunityCommentAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
 
   @@index([postId, status, createdAt])
   @@index([authorUserId])
@@ -907,8 +924,26 @@ model CommunityPostLike {
   ipHash    String?  @map("ip_hash")
   createdAt DateTime @default(now()) @map("created_at")
 
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   @@unique([postId, userId], name: "post_user_unique")
   @@unique([postId, ipHash], name: "post_ip_unique")
   @@index([postId])
   @@map("community_post_likes")
+}
+
+model CommunityBookmark {
+  id        String   @id @default(cuid())
+  postId    String   @map("post_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId], name: "post_bookmark_user_unique")
+  @@index([postId])
+  @@index([userId])
+  @@map("community_bookmarks")
 }

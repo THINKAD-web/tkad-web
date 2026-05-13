@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
-import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
 import { getCurrentUser } from "@/lib/user-session";
 import {
   createCommunityPost,
@@ -14,11 +13,6 @@ import {
 
 export const dynamic = "force-dynamic";
 
-// 익명 / 사용자 별 글 작성 한도 (시간당)
-const anonPostLimiter = rateLimit({
-  limit: COMMUNITY_LIMITS.ANON_POST_PER_HOUR,
-  windowMs: 60 * 60 * 1000,
-});
 const userPostLimiter = rateLimit({
   limit: COMMUNITY_LIMITS.USER_POST_PER_HOUR,
   windowMs: 60 * 60 * 1000,
@@ -66,20 +60,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, id: "trap" }, { status: 201 });
   }
 
-  const turnstileToken =
-    (body as Record<string, unknown>).turnstileToken;
-  const turnstile = await verifyTurnstileForRequest({
-    token: typeof turnstileToken === "string" ? turnstileToken : undefined,
-    remoteip: ip,
-    host: req.headers.get("host"),
-  });
-  if (!turnstile.ok) {
-    return NextResponse.json(
-      { error: "캡차 검증에 실패했습니다.", reason: turnstile.reason },
-      { status: 403 },
-    );
-  }
-
   const validated = validateCommunityPostInput(body as Record<string, unknown>);
   if (!validated.ok) {
     return NextResponse.json(
@@ -89,35 +69,28 @@ export async function POST(req: NextRequest) {
   }
 
   const me = await getCurrentUser();
-  // rate limit — 가입 사용자: userId 키, 익명: IP 키
-  const limiter = me ? userPostLimiter : anonPostLimiter;
-  const limiterKey = me ? `u:${me.id}` : `ip:${ip}`;
-  if (!limiter.check(limiterKey)) {
+  if (!me) {
+    return NextResponse.json(
+      { error: "로그인 후 글을 작성할 수 있습니다." },
+      { status: 401 },
+    );
+  }
+
+  if (!userPostLimiter.check(`u:${me.id}`)) {
     return NextResponse.json(
       { error: "잠시 후 다시 시도해주세요. (작성 한도 초과)" },
       { status: 429 },
     );
   }
 
-  // 가입 사용자 + 익명 동시 사용 정책: isAnonymous=true 면 인증 무시
-  const useAnon = validated.value.isAnonymous || !me;
-  const authorUserId = useAnon ? null : me?.id ?? null;
-  const authorEmail = useAnon
-    ? validated.value.authorEmail
-    : me?.email ?? null;
-  const authorName = useAnon
-    ? validated.value.authorName
-    : me?.name ?? validated.value.authorName;
-
   try {
     const created = await createCommunityPost({
       category: validated.value.category,
       title: validated.value.title,
       body: validated.value.body,
-      authorName,
-      authorEmail,
-      authorUserId,
-      isAnonymous: useAnon,
+      authorName: me.name,
+      authorEmail: me.email ?? null,
+      authorUserId: me.id,
       authorIp: ip,
     });
     return NextResponse.json({ ok: true, id: created.id }, { status: 201 });
