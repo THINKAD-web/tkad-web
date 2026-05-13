@@ -476,8 +476,8 @@
       "exposureStyleTitle": "노출 유형",
       "durationOptionsTitle": "집행 기간(참고)",
       "stickyCtaRegionLabel": "빠른 작업",
-      "stickyCtaQuote": "견적 바로 받기",
-      "stickyCtaQuoteSticky": "견적 바로 받기",
+      "stickyCtaQuote": "견적받기",
+      "stickyCtaQuoteSticky": "견적받기",
       "quoteCtaInline": "견적 문의하기",
       "stickyCtaCompare": "비교하기",
       "quoteModalTitle": "견적·문의",
@@ -797,12 +797,14 @@
     "kakaoLead": "카카오톡 채널 추가하면 빠른 답변!",
     "kakaoDesc": "카카오톡 채널을 추가하시면 문의 진행 상황을 실시간으로 받아보실 수 있습니다.",
     "kakaoCta": "카카오톡 채널 추가",
-    "turnstileConfigHint": "보안 확인(Turnstile)이 아직 구성되지 않았습니다. 운영 환경에서는 NEXT_PUBLIC_TURNSTILE_SITE_KEY가 필요합니다.",
+    "turnstileConfigHint": "보안 확인이 일시적으로 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.",
     "toastValidation": "필수 항목을 모두 입력해 주세요.",
     "toastTurnstile": "보안 확인을 완료해 주세요.",
+    "toastTurnstileFailed": "보안 확인에 실패했습니다. 새로고침 후 다시 시도해 주세요.",
     "toastSuccess": "문의가 접수되었습니다.",
     "toastError": "일시적 오류가 발생했습니다. 다시 시도해 주세요.",
     "toastSaveFailed": "문의 저장에 실패했습니다. 잠시 후 다시 시도하거나 유선(02-515-2772)으로 연락 주세요.",
+    "toastServiceUnavailable": "문의 접수가 잠시 불가능합니다. 잠시 후 다시 시도하거나 유선(02-515-2772)으로 연락 주세요.",
     "toastNetworkError": "네트워크 오류가 발생했습니다. 연결을 확인한 뒤 다시 시도해 주세요.",
     "errors": {
       "name": "이름을 입력해 주세요.",
@@ -2090,9 +2092,9 @@
       "loadFailed": "로드뷰를 불러오지 못했습니다. 새 창에서 열어주세요."
     },
     "cta": {
-      "planner": "Planner로 시뮬레이션",
-      "plannerShort": "Planner",
-      "compare": "비교 담기",
+      "planner": "플랜받기",
+      "plannerShort": "플랜받기",
+      "compare": "비교하기",
       "compareShort": "비교",
       "compareIn": "담김 ({count})",
       "compareInShort": "담김",
@@ -2100,7 +2102,7 @@
       "compareRemoved": "비교함에서 제거했습니다.",
       "compareRemove": "비교함에서 제거",
       "compareFull": "비교함은 최대 {max}개입니다.",
-      "quote": "즉시 견적",
+      "quote": "견적받기",
       "quoteShort": "견적"
     }
   }

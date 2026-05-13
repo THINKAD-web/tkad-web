@@ -69,7 +69,6 @@ import {
   PRECISION_BUDGET_MIN_MAN,
 } from "@/lib/media-precision-filter-config";
 import {
-  MEDIA_CATALOG_GRID_CLASS,
   MEDIA_CATALOG_COMPACT_GRID_CLASS,
   MediaCatalogGridCompactToggle,
 } from "@/components/media-catalog-shared";
@@ -987,18 +986,19 @@ export default function MediaBrowseClient({
                 ) : (
                   <>
                     {catalogCardLayout === "grid" ? (
-                  <div className={MEDIA_CATALOG_GRID_CLASS}>
+                  <div className="grid grid-cols-2 gap-0 lg:grid-cols-3">
                     {pagedCatalog.map((media) => (
                       <MediaCatalogGridCard
                         key={media.id}
                         variant="link"
                         media={media}
                         isKo={isKo}
+                        denseMobile
                         imagePreparingLabel={t("media.imagePreparing")}
                         popularIds={popularIds}
                         topLeftSlot={
                           <label
-                            className="absolute left-2.5 top-2.5 z-20 flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
+                            className="absolute left-2 top-2 z-20 flex h-8 w-8 cursor-pointer select-none items-center justify-center border-2 border-border bg-card sm:left-2.5 sm:top-2.5 sm:h-9 sm:w-9"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -1016,7 +1016,7 @@ export default function MediaBrowseClient({
                                   compareItems.length >= COMPARE_MAX_ITEMS)
                               }
                               aria-label={t("media.compareToggleAria")}
-                              className="h-4 w-4 accent-cta"
+                              className="h-3.5 w-3.5 accent-cta sm:h-4 sm:w-4"
                             />
                           </label>
                         }

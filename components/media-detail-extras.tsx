@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { getCampaignMonitoringMapProvider } from "@/components/campaign-monitoring-map";
@@ -41,6 +41,32 @@ export default function MediaDetailExtras({
   const isKo = locale === "ko";
   const tMedia = useTranslations("media");
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(media.id);
+  const [coverageGeoJson, setCoverageGeoJson] = useState<unknown | null>(null);
+
+  const coverageCodesKey = useMemo(() => {
+    if (media.type !== "mobile" || !media.coverageDistrictCodes?.length) return "";
+    return [...media.coverageDistrictCodes].sort().join(",");
+  }, [media.type, media.coverageDistrictCodes]);
+
+  useEffect(() => {
+    if (!coverageCodesKey) {
+      setCoverageGeoJson(null);
+      return;
+    }
+    const qs = encodeURIComponent(coverageCodesKey);
+    let cancelled = false;
+    void fetch(`/api/geo/district-boundaries?codes=${qs}`)
+      .then((r) => r.json())
+      .then((fc) => {
+        if (!cancelled) setCoverageGeoJson(fc);
+      })
+      .catch(() => {
+        if (!cancelled) setCoverageGeoJson(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [coverageCodesKey]);
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(isKo ? media.name : (media.nameEn || media.name))},${media.lat},${media.lng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${media.lat},${media.lng}`;
   // map provider: keep for compatibility, but detail uses the same Kakao map UI as `/media/map`.
@@ -145,6 +171,8 @@ export default function MediaDetailExtras({
               onMarkerDetail={() => window.open(kakaoUrl, "_blank", "noopener,noreferrer")}
               center={{ lat: media.lat, lng: media.lng }}
               zoom={4}
+              coverageGeoJson={coverageGeoJson}
+              fitCoverageBounds={Boolean(media.coverageDistrictCodes?.length)}
             />
           </div>
         </div>

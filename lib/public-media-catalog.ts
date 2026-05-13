@@ -11,6 +11,7 @@ import {
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail";
 import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
+import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 
 /** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
 export type MediaWithAdvertiserExecutions = Media & {
@@ -187,6 +188,10 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
       m.trafficPattern && typeof m.trafficPattern === "object"
         ? (m.trafficPattern as MediaItem["trafficPattern"])
         : null,
+    coverageDistrictCodes:
+      Array.isArray(m.coverageDistrictCodes) && m.coverageDistrictCodes.length
+        ? [...m.coverageDistrictCodes]
+        : undefined,
     dailyExposure:
       m.impressions != null ? String(m.impressions) : undefined,
     sampleImages: imgs.length > 0 ? imgs : [],
@@ -262,7 +267,8 @@ export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
       orderBy: { updatedAt: "desc" },
       include: catalogInclude,
     });
-    const dbItems = rows.map(prismaMediaToMediaItem);
+    const rowsWithCoverage = await attachCoverageDistrictCodesById(db, rows);
+    const dbItems = rowsWithCoverage.map(prismaMediaToMediaItem);
     return appendNetworksIfAny(dbItems);
   } catch (e) {
     // CLAUDE.md: 공개 카탈로그는 DB 가 진실. 컬럼 drift·일시 장애시
@@ -292,7 +298,11 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
       include: catalogInclude,
     });
     if (featured.length > 0) {
-      const sorted = [...featured].sort((a, b) => {
+      const featuredWithCoverage = await attachCoverageDistrictCodesById(
+        db,
+        featured,
+      );
+      const sorted = [...featuredWithCoverage].sort((a, b) => {
         const ao = a.featuredOrder ?? 9999;
         const bo = b.featuredOrder ?? 9999;
         if (ao !== bo) return ao - bo;
@@ -307,7 +317,11 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
       include: catalogInclude,
     });
     if (fallback.length > 0) {
-      return fallback.map(prismaMediaToMediaItem);
+      const fallbackWithCoverage = await attachCoverageDistrictCodesById(
+        db,
+        fallback,
+      );
+      return fallbackWithCoverage.map(prismaMediaToMediaItem);
     }
     return [];
   } catch {
@@ -327,7 +341,11 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
       include: catalogInclude,
     });
     if (popular.length > 0) {
-      const sorted = [...popular].sort((a, b) => {
+      const popularWithCoverage = await attachCoverageDistrictCodesById(
+        db,
+        popular,
+      );
+      const sorted = [...popularWithCoverage].sort((a, b) => {
         const ao = a.popularOrder ?? 9999;
         const bo = b.popularOrder ?? 9999;
         if (ao !== bo) return ao - bo;
@@ -350,7 +368,11 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
       take: max,
       include: catalogInclude,
     });
-    return fallback.map(prismaMediaToMediaItem);
+    const fallbackWithCoverage = await attachCoverageDistrictCodesById(
+      db,
+      fallback,
+    );
+    return fallbackWithCoverage.map(prismaMediaToMediaItem);
   } catch {
     return [];
   }
@@ -376,8 +398,9 @@ export async function fetchPlannerMediaCatalog(): Promise<{
     if (rows.length === 0) {
       return { catalog: [], databaseEmpty: true };
     }
+    const rowsWithCoverage = await attachCoverageDistrictCodesById(db, rows);
     return {
-      catalog: rows.map(prismaMediaToMediaItem),
+      catalog: rowsWithCoverage.map(prismaMediaToMediaItem),
       databaseEmpty: false,
     };
   } catch {
@@ -410,7 +433,9 @@ export async function resolveMediaForDetail(
         },
       },
     });
-    return row ? prismaMediaToMediaItem(row) : null;
+    if (!row) return null;
+    const [rowWithCoverage] = await attachCoverageDistrictCodesById(db, [row]);
+    return prismaMediaToMediaItem(rowWithCoverage);
   } catch {
     return null;
   }

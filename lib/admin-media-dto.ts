@@ -63,6 +63,8 @@ export type AdminMediaDto = {
     period?: string;
     description?: string;
   }> | null;
+  /** 이동형 매체 서비스 구역 — 전국 시·군·구 5자리 행정구역 코드 */
+  coverageDistrictCodes: string[];
 };
 
 const AVAIL: MediaAvailability[] = ["available", "reserved", "maintenance"];
@@ -230,6 +232,11 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
       : Array.isArray((r as Record<string, unknown>).price_options)
         ? (r as Record<string, unknown>).price_options as Array<{ label: string; price: number; period?: string }>
         : null,
+    coverageDistrictCodes: pickStrArr(
+      r,
+      "coverageDistrictCodes",
+      "coverage_district_codes",
+    ),
   };
 }
 
@@ -305,5 +312,6 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     priceOptions: Array.isArray(m.priceOptions)
       ? m.priceOptions as Array<{ label: string; price: number; period?: string }>
       : null,
+    coverageDistrictCodes: m.coverageDistrictCodes ?? [],
   };
 }

@@ -91,12 +91,12 @@ export default function MediaSimilarCarousel({
     >
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-mono text-[8px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             [ SIMILAR MEDIA ]
           </p>
           <h2
             id="media-similar-heading"
-            className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+            className="mt-1 text-[17px] font-bold tracking-tight text-foreground sm:text-lg"
           >
             {title}
           </h2>
@@ -179,7 +179,7 @@ export default function MediaSimilarCarousel({
               href={`/media/${m.id}`}
               className={cn(
                 "group -ml-[2px] flex snap-start flex-col overflow-hidden rounded-[24px] border border-border/80 bg-card/80 shadow-xs backdrop-blur",
-                "w-[min(100%,280px)] shrink-0 sm:w-[268px]",
+                "w-[min(100%,256px)] shrink-0 sm:w-[244px]",
                 "transition-colors hover:bg-muted/50",
               )}
             >
@@ -191,7 +191,7 @@ export default function MediaSimilarCarousel({
                 bottomGradientClassName={null}
                 placeholderSize="xs"
               />
-              <div className="flex flex-1 flex-col gap-1.5 p-4">
+              <div className="flex flex-1 flex-col gap-1.5 p-3">
                 {typeLabel ? (
                   <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                     [ {typeLabel} ]

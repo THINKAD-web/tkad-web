@@ -34,6 +34,7 @@ type Common = {
   priceMan?: number;
   showPricePeriod?: boolean;
   className?: string;
+  denseMobile?: boolean;
 };
 
 export type MediaCatalogGridCardProps =
@@ -52,6 +53,7 @@ export type MediaCatalogGridCardProps =
 export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const tMedia = useTranslations("media");
   const { media, isKo, imagePreparingLabel, popularIds } = props;
+  const denseMobile = props.denseMobile ?? false;
   // priceMan 명시(예: 네트워크 패키지 월 환산) 가 우선.
   // 없으면 priceOptions + price 중 *가장 저렴한* 옵션을 표시.
   const cheapest = props.priceMan
@@ -69,7 +71,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const thumbnailOverlays = (
     <>
       {media.catalogSource !== "network" && media.isVerified ? (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hermes px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-[0_0_20px_rgba(255,98,0,0.45)]">
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-[linear-gradient(135deg,rgba(168,85,247,0.95)_0%,rgba(34,211,238,0.92)_55%,rgba(236,72,153,0.88)_100%)] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-[0_0_26px_rgba(168,85,247,0.28),0_0_18px_rgba(34,211,238,0.18)]">
           Verified
         </div>
       ) : media.catalogSource === "network" ? (
@@ -111,27 +113,60 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       <MediaCatalogThumbnail
         media={media}
         placeholderLabel={imagePreparingLabel}
-        className="flex h-44 items-center justify-center border-b-2 border-border bg-muted [&_img]:grayscale [&_img]:transition-[filter,transform] [&_img]:duration-500 group-hover:[&_img]:grayscale-0 group-hover:[&_img]:scale-[1.02] sm:h-52 lg:h-60"
+        className={cn(
+          "flex items-center justify-center border-b-2 border-border bg-muted [&_img]:grayscale [&_img]:transition-[filter,transform] [&_img]:duration-500 group-hover:[&_img]:grayscale-0 group-hover:[&_img]:scale-[1.02]",
+          denseMobile ? "h-30 sm:h-52 lg:h-60" : "h-44 sm:h-52 lg:h-60",
+        )}
         bottomGradientClassName={null}
       >
         {thumbnailOverlays}
       </MediaCatalogThumbnail>
-      <div className="flex flex-col gap-2.5 p-5 text-card-foreground">
+      <div
+        className={cn(
+          "flex flex-col text-card-foreground",
+          denseMobile ? "gap-1 p-3 sm:gap-2.5 sm:p-5" : "gap-2.5 p-5",
+        )}
+      >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-foreground/85 sm:text-sm">
+          <span
+            className={cn(
+              "font-semibold text-foreground/85",
+              denseMobile ? "text-[10px] sm:text-sm" : "text-xs sm:text-sm",
+            )}
+          >
             {isKo ? (tl?.ko ?? media.type) : (tl?.en ?? media.type)}
           </span>
         </div>
-        <h3 className="line-clamp-2 break-words text-base font-semibold leading-snug tracking-tight sm:text-lg">
+        <h3
+          className={cn(
+            "line-clamp-2 break-words font-semibold leading-snug tracking-tight",
+            denseMobile ? "text-sm sm:text-lg" : "text-base sm:text-lg",
+          )}
+        >
           {isKo ? media.name : (media.nameEn || media.name)}
         </h3>
-        <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+        <p
+          className={cn(
+            "line-clamp-2 leading-relaxed text-muted-foreground",
+            denseMobile ? "text-[11px] sm:text-sm" : "text-sm",
+          )}
+        >
           {formatMediaLocationShort(media, isKo)}
         </p>
-        <p className="mt-0.5 break-words text-lg font-black tabular-nums leading-snug">
+        <p
+          className={cn(
+            "mt-0.5 break-words font-black tabular-nums leading-snug",
+            denseMobile ? "text-[15px] sm:text-lg" : "text-lg",
+          )}
+        >
           {formatMediaPriceWonWithSymbol(priceWon)}
           {showPricePeriod ? (
-            <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+            <span
+              className={cn(
+                "ml-1.5 font-normal text-muted-foreground",
+                denseMobile ? "text-[11px] sm:text-sm" : "text-sm",
+              )}
+            >
               · {tMedia(mediaPricePeriodTranslationKey(displayPeriod))}
             </span>
           ) : null}

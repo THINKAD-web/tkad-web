@@ -26,7 +26,7 @@ export default function MediaDetailStickyCta({
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 pointer-events-none"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2 sm:px-3 sm:pb-[max(0.75rem,env(safe-area-inset-bottom))]"
       role="region"
       aria-label={t("stickyCtaRegionLabel")}
     >
@@ -43,30 +43,31 @@ export default function MediaDetailStickyCta({
             {`// `}3 OPTIONS
           </span>
         </div>
-        <div className="flex gap-2 p-2 sm:gap-3 sm:p-3">
+        <div className="grid grid-cols-3 gap-2 p-2.5">
           <BtnBlock
             href={`/planner?addMedia=${encodeURIComponent(media.id)}`}
-            variant="accent"
+            variant="secondary"
             size="sm"
-            className="min-w-0 flex-1"
+            className="min-h-11 min-w-0 justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
           >
             <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
             <span className="truncate">{tCta("plannerShort")}</span>
           </BtnBlock>
-          <div className="min-w-0 flex-1">
-            <MediaQuoteCtaButton media={media} variant="sticky" />
+          <div className="min-w-0">
+            <MediaQuoteCtaButton
+              media={media}
+              variant="sticky"
+              className="min-h-11 rounded-[15px] px-2 shadow-[0_12px_30px_rgba(0,0,0,0.42)]"
+            />
           </div>
           <BtnBlock
             href={compareHref}
             variant="secondary"
             size="sm"
-            className="min-w-0 flex-1"
+            className="min-h-11 min-w-0 justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
           >
             <BarChart3 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            <span className="min-w-0 truncate text-center">
-              <span className="sm:hidden">{tCta("compareShort")}</span>
-              <span className="hidden sm:inline">{t("stickyCtaCompare")}</span>
-            </span>
+            <span className="min-w-0 truncate text-center">{t("stickyCtaCompare")}</span>
           </BtnBlock>
         </div>
       </div>

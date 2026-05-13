@@ -13,6 +13,9 @@ import {
   isValidCatalogMediaType,
 } from "@/lib/media-auto-categorize";
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
+import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverage-codes";
+import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
+import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +35,8 @@ export async function GET(request: NextRequest, { params }: Params) {
     },
   });
   if (!media) return json({ error: "Not found" }, 404);
-  return json({ media });
+  const [mediaWithCoverage] = await attachCoverageDistrictCodesById(db, [media]);
+  return json({ media: mediaWithCoverage });
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {
@@ -86,6 +90,21 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return json({ error: "tags must be string[]" }, 400);
     }
     data.tags = body.tags;
+  }
+  if (body.coverageDistrictCodes !== undefined) {
+    const normalized = normalizeCoverageDistrictCodesInput(
+      body.coverageDistrictCodes,
+    );
+    if (normalized === null) {
+      return json(
+        {
+          error:
+            "coverageDistrictCodes: 전국 시·군·구 5자리 행정구역 코드 문자열 배열만 허용됩니다.",
+        },
+        400,
+      );
+    }
+    data.coverageDistrictCodes = normalized;
   }
   if (body.district !== undefined)
     data.district = String(body.district ?? "").trim() || null;
@@ -425,8 +444,34 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (est != null) data.dailyFootfall = est;
   }
 
+  const resolvedType =
+    typeof body.type === "string" ? String(body.type).trim() : existing.type;
+  if (resolvedType !== "mobile") {
+    data.coverageDistrictCodes = [];
+  }
+
+  const dataAsRecord = data as Record<string, unknown>;
+  const coverageCodesForSql = Object.prototype.hasOwnProperty.call(
+    dataAsRecord,
+    "coverageDistrictCodes",
+  )
+    ? (dataAsRecord.coverageDistrictCodes as string[])
+    : undefined;
+  if (Object.prototype.hasOwnProperty.call(dataAsRecord, "coverageDistrictCodes")) {
+    delete dataAsRecord.coverageDistrictCodes;
+  }
+
   try {
-    const media = await db.media.update({ where: { id }, data });
+    const media = await db.$transaction(async (tx) => {
+      const updated = await tx.media.update({
+        where: { id },
+        data: data as Prisma.MediaUpdateInput,
+      });
+      if (coverageCodesForSql !== undefined) {
+        await persistMediaCoverageDistrictCodes(tx, id, coverageCodesForSql);
+      }
+      return updated;
+    });
     if (isAdminAuthDebugEnabled()) {
       console.log("[admin-api] media PATCH persisted", {
         id: media.id,

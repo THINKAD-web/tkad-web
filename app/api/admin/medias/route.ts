@@ -12,6 +12,9 @@ import {
   isValidCatalogMediaType,
 } from "@/lib/media-auto-categorize";
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
+import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverage-codes";
+import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
+import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +89,8 @@ export async function GET(request: NextRequest) {
     orderBy: { updatedAt: "desc" },
     take,
   });
-  return json({ medias });
+  const mediasWithCoverage = await attachCoverageDistrictCodesById(db, medias);
+  return json({ medias: mediasWithCoverage });
 }
 
 export async function POST(request: NextRequest) {
@@ -112,6 +116,23 @@ export async function POST(request: NextRequest) {
     return json(
       {
         error: `type must be one of: ${CATALOG_MEDIA_TYPES.join(", ")}`,
+      },
+      400,
+    );
+  }
+
+  const covRaw =
+    type === "mobile"
+      ? Array.isArray(body.coverageDistrictCodes)
+        ? body.coverageDistrictCodes
+        : []
+      : [];
+  const covNorm = normalizeCoverageDistrictCodesInput(covRaw);
+  if (covNorm === null) {
+    return json(
+      {
+        error:
+          "coverageDistrictCodes: 전국 시·군·구 5자리 행정구역 코드 문자열 배열만 허용됩니다.",
       },
       400,
     );
@@ -244,7 +265,15 @@ export async function POST(request: NextRequest) {
     }
 
     const db = getPrisma();
-    const media = await db.media.create({ data });
+    const media = await db.$transaction(async (tx) => {
+      const m = await tx.media.create({ data });
+      await persistMediaCoverageDistrictCodes(
+        tx,
+        m.id,
+        type === "mobile" ? covNorm : [],
+      );
+      return m;
+    });
 
     await db.mediaPriceSnapshot.create({
       data: {

@@ -81,6 +81,12 @@ export default function ContactInquiryForm() {
   const turnstileWidgetId = useRef<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? "";
+  const isProductionDomain =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "tkad.co.kr" ||
+      window.location.hostname === "www.tkad.co.kr");
+  const turnstileEnabled = isProductionDomain && !!siteKey;
+  const showTurnstileHint = isProductionDomain && !turnstileEnabled;
 
   useEffect(() => {
     casePrefillDone.current = null;
@@ -188,7 +194,7 @@ export default function ContactInquiryForm() {
   }, [caseSlug, academyTopic, t]);
 
   useEffect(() => {
-    if (submitted || !siteKey || !turnstileRef.current) return;
+    if (submitted || !turnstileEnabled || !turnstileRef.current) return;
 
     const mountEl = turnstileRef.current;
     let cancelled = false;
@@ -243,7 +249,7 @@ export default function ContactInquiryForm() {
       }
       if (mountEl) mountEl.innerHTML = "";
     };
-  }, [siteKey, submitted]);
+  }, [siteKey, submitted, turnstileEnabled]);
 
   const updateField = useCallback((field: keyof FormFields, value: string) => {
     setForm((prev) => {
@@ -302,7 +308,7 @@ export default function ContactInquiryForm() {
       return;
     }
 
-    if (siteKey && !turnstileToken) {
+    if (turnstileEnabled && !turnstileToken) {
       toast("warning", tForm("toastTurnstile"));
       return;
     }
@@ -331,8 +337,14 @@ export default function ContactInquiryForm() {
         let errMsg = tForm("toastError");
         try {
           const j = (await res.json()) as { error?: string };
-          if (j.error === "Failed to save inquiry") {
+          if (j.error === "save_failed") {
             errMsg = tForm("toastSaveFailed");
+          } else if (j.error === "service_unavailable") {
+            errMsg = tForm("toastServiceUnavailable");
+          } else if (j.error === "turnstile_failed") {
+            errMsg = tForm("toastTurnstileFailed");
+          } else if (j.error === "validation_failed") {
+            errMsg = tForm("toastValidation");
           }
         } catch {
           /* ignore */
@@ -583,13 +595,13 @@ export default function ContactInquiryForm() {
         {fieldError("message")}
       </div>
 
-      {!siteKey ? (
+      {showTurnstileHint ? (
         <p className="border-2 border-primary bg-card px-3 py-2 font-mono text-[11px] tracking-tight text-primary">
           {`// `}{tForm("turnstileConfigHint")}
         </p>
-      ) : (
+      ) : turnstileEnabled ? (
         <div ref={turnstileRef} className="flex justify-center" />
-      )}
+      ) : null}
 
       <BtnBlock
         type="submit"
