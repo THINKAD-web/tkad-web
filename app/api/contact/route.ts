@@ -5,7 +5,7 @@ import { sendEmail } from "@/lib/email/client";
 import { getContactConfirmationEmail } from "@/lib/email/contact-confirmation";
 import { getContactAdminNotifyEmail } from "@/lib/email/contact-admin-notify";
 import { postInternalAlert } from "@/lib/internal-webhook";
-import { verifyTurnstileToken } from "@/lib/turnstile-verify";
+import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
 import {
   budgetLabel,
   composeStoredMessage,
@@ -65,9 +65,16 @@ export async function POST(request: NextRequest) {
 
   const locale = localeRaw === "en" ? "en" : "ko";
 
-  const turnstile = await verifyTurnstileToken(turnstileToken, ip);
+  const turnstile = await verifyTurnstileForRequest({
+    token: turnstileToken,
+    remoteip: ip,
+    host: request.headers.get("host"),
+  });
   if (!turnstile.ok) {
-    return json({ error: "Turnstile verification failed" }, { status: 403 });
+    return json(
+      { error: "turnstile_failed", reason: turnstile.reason },
+      { status: 403 },
+    );
   }
 
   const inquiryCode = parseInquiryTypeCode(inquiryRaw);
@@ -85,7 +92,7 @@ export async function POST(request: NextRequest) {
 
   if (errors.length > 0) {
     return json(
-      { error: "Validation failed", fields: errors },
+      { error: "validation_failed", fields: errors },
       { status: 400 },
     );
   }
@@ -104,7 +111,7 @@ export async function POST(request: NextRequest) {
 
   if (!isDatabaseConfigured()) {
     return json(
-      { error: "Service temporarily unavailable" },
+      { error: "service_unavailable" },
       { status: 503 },
     );
   }
@@ -127,6 +134,7 @@ export async function POST(request: NextRequest) {
       await db.contactInquiry.create({
         data: {
           ...base,
+          inquiryType: inquiryLbl,
           budget: budgetLbl,
           ...(hasValidEmail ? { email: emailOpt } : {}),
         },
@@ -142,12 +150,12 @@ export async function POST(request: NextRequest) {
         });
       } catch (secondErr) {
         console.error("[contact] DB error (compat row):", secondErr);
-        return json({ error: "Failed to save inquiry" }, { status: 500 });
+        return json({ error: "save_failed" }, { status: 500 });
       }
     }
   } catch (err) {
     console.error("[contact] DB error:", err);
-    return json({ error: "Failed to save inquiry" }, { status: 500 });
+    return json({ error: "save_failed" }, { status: 500 });
   }
 
   void postInternalAlert({
