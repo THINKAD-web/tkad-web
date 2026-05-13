@@ -1,36 +1,48 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { pageAlternates } from "@/lib/seo";
+import {
+  COMMUNITY_CATEGORY_LABELS,
+  normalizeCommunityCategory,
+} from "@/lib/community/types";
 import { CommunityFeedPage } from "@/components/community/feed-page";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 type Props = {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; category: string }>;
   searchParams: Promise<{ sort?: string; page?: string }>;
 };
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const locale = await resolveLocaleParam(params);
+  const { locale: rawLocale, category: rawCategory } = await params;
+  const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
+  const category = normalizeCommunityCategory(rawCategory);
+  if (!category) return { title: locale === "ko" ? "카테고리 없음" : "Not found" };
+  const label = COMMUNITY_CATEGORY_LABELS[category];
   const isKo = locale === "ko";
-  const title = isKo ? "OOH 업계 커뮤니티" : "OOH Industry Community";
-  const description = isKo
-    ? "광고주, 매체사, 대행사, 프리랜서가 함께 질문과 인사이트를 나누는 회원 중심 커뮤니티."
-    : "A members-first community for advertisers, media operators, agencies, and freelancers.";
+  const title = isKo ? `${label.ko} 커뮤니티` : `${label.en} Community`;
+  const description = isKo ? label.description.ko : label.description.en;
   return {
     title,
     description,
-    alternates: pageAlternates(locale, "/community"),
+    alternates: pageAlternates(locale, `/community/${category}`),
     openGraph: { title, description, type: "website" },
-    robots: { index: true, follow: true },
   };
 }
 
-export default async function CommunityListPage({ params, searchParams }: Props) {
-  const locale = await resolveLocaleParam(params);
+export default async function CommunityCategoryPage({
+  params,
+  searchParams,
+}: Props) {
+  const { locale: rawLocale, category: rawCategory } = await params;
+  const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
   setRequestLocale(locale);
+  const category = normalizeCommunityCategory(rawCategory);
+  if (!category) notFound();
   const sp = await searchParams;
   const activePage = Math.max(1, Number(sp.page ?? "1") || 1);
   const activeSort =
@@ -41,6 +53,7 @@ export default async function CommunityListPage({ params, searchParams }: Props)
       <div className="tkad-landing-neon tkad-planner-neon">
         <CommunityFeedPage
           locale={locale}
+          activeCategory={category}
           activeSort={activeSort}
           activePage={activePage}
         />

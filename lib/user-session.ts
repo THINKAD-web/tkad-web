@@ -134,7 +134,10 @@ export type CurrentUser = {
   id: string;
   email: string;
   name: string;
+  company: string | null;
   role: AppUserRole;
+  communityRole: string | null;
+  communityBio: string | null;
   locale: string;
   emailVerifiedAt: Date | null;
 };
@@ -151,7 +154,10 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       id: true,
       email: true,
       name: true,
+      company: true,
       role: true,
+      communityRole: true,
+      communityBio: true,
       locale: true,
       emailVerifiedAt: true,
     },

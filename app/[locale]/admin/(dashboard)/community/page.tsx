@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   AlertTriangle,
   Eye,
@@ -25,6 +26,21 @@ import type {
 
 type Tab = "posts" | "comments";
 type StatusFilter = "all" | "published" | "hidden" | "deleted";
+type AdminCommunityStats = {
+  postsTotal: number;
+  postsHidden: number;
+  postsWithReports: number;
+  commentsTotal: number;
+  commentsHidden: number;
+  commentsWithReports: number;
+};
+type AdminListResponse<T> = {
+  items?: T[];
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  error?: string;
+};
 
 const STATUS_LABELS: Record<StatusFilter, string> = {
   all: "전체",
@@ -45,6 +61,8 @@ function fmt(iso: string): string {
 }
 
 export default function AdminCommunityPage() {
+  const pathname = usePathname();
+  const locale = useMemo(() => pathname.split("/")[1] || "ko", [pathname]);
   const [tab, setTab] = useState<Tab>("posts");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<CommunityCategory | "all">("all");
@@ -53,10 +71,18 @@ export default function AdminCommunityPage() {
   const [posts, setPosts] = useState<AdminPostListItem[]>([]);
   const [comments, setComments] = useState<AdminCommentListItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState<AdminCommunityStats | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [pageSize, setPageSize] = useState(30);
   const [reportsTarget, setReportsTarget] = useState<{
     type: "post" | "comment";
     id: string;
   } | null>(null);
+
+  useEffect(() => {
+    setPage(1);
+  }, [tab, statusFilter, categoryFilter, reportsOnly]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -67,31 +93,53 @@ export default function AdminCommunityPage() {
       if (reportsOnly) qs.set("hasReports", "1");
       if (tab === "posts" && categoryFilter !== "all")
         qs.set("category", categoryFilter);
+      qs.set("page", String(page));
 
       const url =
         tab === "posts"
           ? `/api/admin/community/posts?${qs}`
           : `/api/admin/community/comments?${qs}`;
-      const res = await fetch(url, { credentials: "include" });
-      const data = await res.json();
+      const [res, statsRes] = await Promise.all([
+        fetch(url, { credentials: "include" }),
+        fetch("/api/admin/community/stats", { credentials: "include" }),
+      ]);
+      const data = (await res.json()) as AdminListResponse<
+        AdminPostListItem | AdminCommentListItem
+      >;
+      const statsData = (await statsRes.json().catch(() => ({}))) as {
+        stats?: AdminCommunityStats;
+      };
       if (!res.ok) {
         setError(data.error || "불러오지 못했습니다.");
         if (tab === "posts") setPosts([]);
         else setComments([]);
+        setTotal(0);
         return;
       }
-      if (tab === "posts") setPosts(data.items ?? []);
-      else setComments(data.items ?? []);
+      if (tab === "posts") setPosts((data.items as AdminPostListItem[]) ?? []);
+      else setComments((data.items as AdminCommentListItem[]) ?? []);
+      setTotal(data.total ?? 0);
+      setPageSize(data.pageSize ?? 30);
+      if (statsRes.ok && statsData.stats) {
+        setStats(statsData.stats);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "네트워크 오류");
     } finally {
       setLoading(false);
     }
-  }, [tab, statusFilter, categoryFilter, reportsOnly]);
+  }, [tab, statusFilter, categoryFilter, reportsOnly, page]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const pageStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const pageEnd = total === 0 ? 0 : Math.min(page * pageSize, total);
+  const reportedTotal =
+    (stats?.postsWithReports ?? 0) + (stats?.commentsWithReports ?? 0);
+  const hiddenTotal = (stats?.postsHidden ?? 0) + (stats?.commentsHidden ?? 0);
 
   const updateStatus = async (
     type: "post" | "comment",
@@ -154,8 +202,6 @@ export default function AdminCommunityPage() {
     }
   };
 
-  const list = tab === "posts" ? posts : comments;
-
   return (
     <div className="space-y-6">
       <header className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6">
@@ -173,7 +219,54 @@ export default function AdminCommunityPage() {
         <p className="relative mt-2 font-mono text-[11px] tracking-tight text-muted-foreground">
           {`// `}신고된 글 / 댓글 검토 · 복구 · 영구 삭제 / 신고 사유 확인
         </p>
+        <div className="relative mt-4 flex flex-wrap gap-2">
+          <a
+            href={`/${locale}/community`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/80 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card"
+          >
+            공개 커뮤니티 보기
+          </a>
+        </div>
       </header>
+
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[
+          {
+            label: "총 게시글",
+            value: stats?.postsTotal ?? 0,
+            tone: "text-cyan-300",
+          },
+          {
+            label: "총 댓글",
+            value: stats?.commentsTotal ?? 0,
+            tone: "text-fuchsia-300",
+          },
+          {
+            label: "신고 누적",
+            value: reportedTotal,
+            tone: "text-amber-300",
+          },
+          {
+            label: "숨김/삭제",
+            value: hiddenTotal,
+            tone: "text-emerald-300",
+          },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className="tkad-glass-surface rounded-[22px] px-4 py-3"
+          >
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              [ {item.label} ]
+            </p>
+            <p className={`mt-2 text-2xl font-black tabular-nums ${item.tone}`}>
+              {item.value.toLocaleString("ko-KR")}
+            </p>
+          </div>
+        ))}
+      </section>
 
       {/* 탭 */}
       <div className="flex w-fit flex-wrap gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm backdrop-blur">
@@ -205,6 +298,9 @@ export default function AdminCommunityPage() {
 
       {/* 필터 */}
       <div className="tkad-glass-surface flex flex-wrap items-center gap-3 rounded-[22px] p-4">
+        <div className="mr-1 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground shadow-sm backdrop-blur">
+          {tab === "posts" ? "게시글" : "댓글"} {total.toLocaleString("ko-KR")}건
+        </div>
         <div className="flex items-center gap-2">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             상태
@@ -276,6 +372,10 @@ export default function AdminCommunityPage() {
           )}
           새로고침
         </button>
+
+        <div className="ml-auto font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          {pageStart}-{pageEnd} / {total.toLocaleString("ko-KR")}
+        </div>
       </div>
 
       {/* 에러 */}
@@ -289,6 +389,7 @@ export default function AdminCommunityPage() {
       {/* 목록 */}
       {tab === "posts" ? (
         <PostsTable
+          locale={locale}
           rows={posts}
           loading={loading}
           onUpdateStatus={(id, s) => updateStatus("post", id, s)}
@@ -297,6 +398,7 @@ export default function AdminCommunityPage() {
         />
       ) : (
         <CommentsTable
+          locale={locale}
           rows={comments}
           loading={loading}
           onUpdateStatus={(id, s) => updateStatus("comment", id, s)}
@@ -312,6 +414,30 @@ export default function AdminCommunityPage() {
           onClose={() => setReportsTarget(null)}
         />
       ) : null}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-border/70 bg-card/60 px-4 py-3 shadow-sm backdrop-blur">
+        <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
+          {`// `}현재 {page} / {totalPages} 페이지
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={page <= 1 || loading}
+            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            className="rounded-full border border-border/70 bg-card/70 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-card disabled:opacity-40"
+          >
+            이전
+          </button>
+          <button
+            type="button"
+            disabled={page >= totalPages || loading}
+            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+            className="rounded-full border border-border/70 bg-card/70 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-card disabled:opacity-40"
+          >
+            다음
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -403,12 +529,14 @@ function ActionButtons({
 }
 
 function PostsTable({
+  locale,
   rows,
   loading,
   onUpdateStatus,
   onHardDelete,
   onViewReports,
 }: {
+  locale: string;
   rows: AdminPostListItem[];
   loading: boolean;
   onUpdateStatus: (id: string, s: "published" | "hidden" | "deleted") => void;
@@ -453,7 +581,7 @@ function PostsTable({
               </td>
               <td className="px-3 py-2.5 align-top">
                 <a
-                  href={`/ko/community/posts/${r.id}`}
+                  href={`/${locale}/community/post/${r.id}`}
                   target="_blank"
                   rel="noreferrer"
                   className="block font-bold text-foreground hover:text-primary"
@@ -511,12 +639,14 @@ function PostsTable({
 }
 
 function CommentsTable({
+  locale,
   rows,
   loading,
   onUpdateStatus,
   onHardDelete,
   onViewReports,
 }: {
+  locale: string;
   rows: AdminCommentListItem[];
   loading: boolean;
   onUpdateStatus: (id: string, s: "published" | "hidden" | "deleted") => void;
@@ -561,7 +691,7 @@ function CommentsTable({
               </td>
               <td className="px-3 py-2.5 align-top">
                 <a
-                  href={`/ko/community/posts/${r.postId}`}
+                  href={`/${locale}/community/post/${r.postId}`}
                   target="_blank"
                   rel="noreferrer"
                   className="line-clamp-2 font-mono text-[11px] tracking-tight text-primary hover:text-foreground"

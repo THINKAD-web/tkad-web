@@ -4,6 +4,13 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## Verification: hydration warnings
+
+- 브라우저 자동화 중 hydration warning 이 보일 때 diff 가 `data-cursor-ref` 같은 주입 속성 차이만 가리키면, 먼저 앱 버그가 아니라 automation noise 로 판단할 것.
+- 이런 경우 경고를 숨기기 위해 광범위한 `suppressHydrationWarning` 를 추가하지 말 것. 실제 hydration 버그가 가려질 수 있음.
+- 검증 순서는 `수동 브라우저 재현 -> API/DB/서버 로그 확인 -> 자동화 브라우저 확인` 을 우선할 것.
+- 텍스트, 날짜, 랜덤값, locale, `window` 분기처럼 실제 렌더 결과 차이가 보일 때만 hydration 버그로 승격할 것.
+
 ## Media catalog data source
 
 - **Keep `fetchPublicMediaCatalog` (DB-backed) as the source of truth** for public media listing and detail flows. Do not swap it for mock data, static samples, or JSON-only catalogs in production paths.
