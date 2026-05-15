@@ -55,7 +55,7 @@ const DEFAULT_ISSUER = {
   regNo:
     process.env.QUOTE_ISSUER_REG_NO?.trim() || "사업자등록번호: (등록 후 입력)",
   tel: process.env.QUOTE_ISSUER_TEL?.trim() || "02-515-2772",
-  email: process.env.QUOTE_ISSUER_EMAIL?.trim() || "mannote@tkad.co.kr",
+  email: process.env.QUOTE_ISSUER_EMAIL?.trim() || "sales@tkad.co.kr",
   bank: process.env.QUOTE_BANK_NAME?.trim() || "국민은행",
   account: process.env.QUOTE_BANK_ACCOUNT?.trim() || "000000-00-000000",
   holder: process.env.QUOTE_BANK_HOLDER?.trim() || "(주)싱커드",

@@ -29,6 +29,7 @@ type Props = {
     company: string | null;
     role: string;
     communityRole: string | null;
+    region?: string | null;
   } | null;
 };
 
@@ -61,6 +62,7 @@ function toCurrentUserAuthor(
       normalizeCommunityMemberRole(currentUser.communityRole) ??
       fallbackCommunityRoleFromAppRole(currentUser.role),
     bio: null,
+    region: currentUser.region ?? null,
   };
 }
 

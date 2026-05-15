@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { type MediaItem } from "@/lib/media-data";
 import {
   fetchHomeFeaturedMedia,
+  fetchHomeHeroVisualAssets,
   fetchHomePopularMedia,
 } from "@/lib/public-media-catalog";
 import {
@@ -24,8 +25,8 @@ import { HomeHeroNeo } from "@/components/home-hero-neo";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { HomeCommunitySection } from "@/components/home-community-section";
 import { listHomeCommunityPosts } from "@/lib/community/queries";
-import { CommunityPostCard } from "@/components/community/post-card";
 import type { CommunityPostListItem } from "@/lib/community/types";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
@@ -41,11 +42,13 @@ export default async function HomePage({ params }: Props) {
    * 추천 매체: Prisma `isFeatured`·`featuredOrder` (관리자에서 지정).
    * 인기 매체: Prisma `isPopular`·`popularOrder` (관리자에서 별도 지정).
    */
-  const [featuredCatalog, popularCatalog, communityPosts] = await Promise.all([
-    fetchHomeFeaturedMedia(8),
-    fetchHomePopularMedia(12),
-    listHomeCommunityPosts(),
-  ]);
+  const [featuredCatalog, popularCatalog, communityPosts, heroVisuals] =
+    await Promise.all([
+      fetchHomeFeaturedMedia(8),
+      fetchHomePopularMedia(12),
+      listHomeCommunityPosts(),
+      fetchHomeHeroVisualAssets(),
+    ]);
 
   return (
     <HomeContent
@@ -54,6 +57,7 @@ export default async function HomePage({ params }: Props) {
       featuredCatalog={featuredCatalog}
       popularCatalog={popularCatalog}
       communityPosts={communityPosts}
+      heroVisuals={heroVisuals}
     />
   );
 }
@@ -64,12 +68,14 @@ function HomeContent({
   featuredCatalog,
   popularCatalog,
   communityPosts,
+  heroVisuals,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
   featuredCatalog: MediaItem[];
   popularCatalog: MediaItem[];
   communityPosts: CommunityPostListItem[];
+  heroVisuals: Awaited<ReturnType<typeof fetchHomeHeroVisualAssets>>;
 }) {
   const isKo = locale === "ko";
   /** 캐러셀 — 추천 매체 전체 활용 (TOP3 라벨은 첫 3개에만) */
@@ -81,12 +87,16 @@ function HomeContent({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon">
-        {/* Hero */}
-        <HomeHeroNeo isKo={isKo} />
+      {/* Hero — NeonSection 밖, 첫 뷰포트·수직 중앙은 section + flex-1 셸에서 처리 */}
+      <HomeHeroNeo
+        isKo={isKo}
+        marqueeImageUrls={heroVisuals.marqueeImageUrls}
+        mapPins={heroVisuals.mapPins}
+      />
 
-        {/* Verification Process */}
-        <NeonSection>
+      <div className="tkad-landing-neon">
+        {/* Verification Process — 히어로와 상단 간격 제거 */}
+        <NeonSection className="mt-0 pt-0 pb-12 sm:pb-16 md:pb-24 lg:pb-32 xl:pb-40 2xl:pb-48">
           <ScrollAnimate>
             <NeonSectionHead
               number="01"
@@ -324,61 +334,13 @@ function HomeContent({
           </div>
         </NeonSection>
 
-        <NeonSection>
-          <ScrollAnimate>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-              <NeonSectionHead
-                number="06"
-                kicker="Community"
-                title={
-                  isKo ? (
-                    <>
-                      업계 <span className="tkad-home-accent-text">인사이트</span>와
-                      연결이 이어지는 공간
-                    </>
-                  ) : (
-                    <>
-                      Where OOH <span className="tkad-home-accent-text">insights</span>{" "}
-                      and industry connections meet
-                    </>
-                  )
-                }
-                meta="ooh industry network"
-                className="mb-0 flex-1"
-              />
-              <Link
-                href="/community"
-                className="tkad-home-section-cta group inline-flex items-center gap-2 self-end border-b border-white/25 pb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 transition-colors hover:border-white/45 hover:text-white"
-              >
-                {isKo ? "커뮤니티 전체 보기" : "View community"}
-                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-          </ScrollAnimate>
-
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:mt-8 lg:grid-cols-3 lg:gap-5">
-            {communityPosts.length > 0 ? (
-              communityPosts.map((post, idx) => (
-                <ScrollAnimate key={post.id} delay={idx * 80}>
-                  <CommunityPostCard
-                    post={post}
-                    locale={locale}
-                    variant="home"
-                    className="h-full"
-                  />
-                </ScrollAnimate>
-              ))
-            ) : (
-              <div className="lg:col-span-3 rounded-[28px] border border-white/12 bg-white/6 p-8 text-center tkad-neon-border tkad-neon-glow">
-                <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-white/60">
-                  {isKo
-                    ? "// 커뮤니티 인기 글이 곧 노출됩니다"
-                    : "// community highlights coming soon"}
-                </p>
-              </div>
-            )}
-          </div>
-        </NeonSection>
+        <ScrollAnimate>
+          <HomeCommunitySection
+            posts={communityPosts}
+            locale={locale}
+            isKo={isKo}
+          />
+        </ScrollAnimate>
 
         {/* CTA Banner */}
         <NeonSection innerClassName="text-center">

@@ -220,8 +220,8 @@ export default async function CommunityPolicyPage({ params }: Props) {
               </ul>
               <p>
                 {isKo
-                  ? "작성한 게시물은 본인 요청 시 삭제 가능합니다 (가입 사용자: 마이페이지, 익명: mannote@tkad.co.kr 로 게시물 ID + 작성 IP 함께 요청)."
-                  : "You may request deletion (registered: My Page; anonymous: email mannote@tkad.co.kr with post ID + IP)."}
+                  ? "작성한 게시물은 본인 요청 시 삭제 가능합니다 (가입 사용자: 마이페이지, 익명: sales@tkad.co.kr 로 게시물 ID + 작성 IP 함께 요청)."
+                  : "You may request deletion (registered: My Page; anonymous: email sales@tkad.co.kr with post ID + IP)."}
               </p>
               <p>
                 {isKo
@@ -267,10 +267,10 @@ export default async function CommunityPolicyPage({ params }: Props) {
                 ? "본 정책 / 게시물 / 신고 관련 문의: "
                 : "Questions about this policy / posts / reports: "}
               <a
-                href="mailto:mannote@tkad.co.kr"
+                href="mailto:sales@tkad.co.kr"
                 className="font-bold underline underline-offset-4 hover:text-accent"
               >
-                mannote@tkad.co.kr
+                sales@tkad.co.kr
               </a>
             </p>
           </section>

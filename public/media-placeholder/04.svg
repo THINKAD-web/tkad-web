@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="112" viewBox="0 0 192 112" role="img" aria-label="">
+  <rect width="192" height="112" fill="#101018"/>
+  <rect x="12" y="20" width="168" height="72" rx="0" fill="#181824" stroke="#2c2c3c" stroke-width="2"/>
+  <text x="96" y="64" text-anchor="middle" fill="#45455c" font-family="system-ui,sans-serif" font-size="10" font-weight="600">BILLBOARD</text>
+</svg>

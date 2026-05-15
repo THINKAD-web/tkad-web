@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     return json({ success: true }, { status: 201 });
   }
 
+  const raw = body as Record<string, string | undefined>;
   const {
     company,
     name,
@@ -60,8 +61,9 @@ export async function POST(request: NextRequest) {
     message: messageRaw,
     inquiryType: inquiryRaw,
     locale: localeRaw,
-    turnstileToken,
-  } = body as Record<string, string | undefined>;
+  } = raw;
+  /** 레거시 문의 클라이언트는 `cfTurnstileToken` 키를 사용할 수 있음 */
+  const turnstileToken = raw.turnstileToken ?? raw.cfTurnstileToken;
 
   const locale = localeRaw === "en" ? "en" : "ko";
 

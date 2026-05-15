@@ -16,12 +16,15 @@ export async function generateMetadata({
   }
   const isKo = locale === "ko";
   const title = isKo ? row.titleKo : row.titleEn ?? row.titleKo;
-  const description = row.summaryKo;
+  const description = isKo
+    ? row.summaryKo
+    : `${title} is a THINKAD case study covering campaign execution, media strategy, and measurable OOH outcomes.`;
   const ogTitle = `${title} | THINKAD`;
   return {
     title,
     description,
     alternates: pageAlternates(locale, `/cases/${slug}`),
+    robots: isKo ? { index: true, follow: true } : { index: false, follow: true },
     openGraph: {
       title: ogTitle,
       description,

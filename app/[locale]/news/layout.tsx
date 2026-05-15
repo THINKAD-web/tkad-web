@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
-import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
-import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
+import { pageAlternates, segmentOpenGraphImages, serializeJsonLd } from "@/lib/seo";
+import {
+  buildBreadcrumbJsonLd,
+  buildCollectionPageJsonLd,
+} from "@/lib/structured-data";
 
 export async function generateMetadata({
   params,
@@ -43,15 +46,25 @@ export default async function NewsLayout({
   params: Promise<{ locale: string }>;
 }) {
   const locale = await resolveLocaleParam(params);
-  const breadcrumb = buildBreadcrumbJsonLd(locale, [
-    { name: locale === "ko" ? "홈" : "Home", path: "" },
-    { name: locale === "ko" ? "뉴스 · 보도자료" : "News & Press", path: "/news" },
-  ]);
+  const isKo = locale === "ko";
+  const ld = [
+    buildBreadcrumbJsonLd(locale, [
+      { name: isKo ? "홈" : "Home", path: "" },
+      { name: isKo ? "뉴스 · 보도자료" : "News & Press", path: "/news" },
+    ]),
+    buildCollectionPageJsonLd(locale, {
+      path: "/news",
+      name: isKo ? "THINKAD 뉴스 · 보도자료" : "THINKAD News & Press",
+      description: isKo
+        ? "THINKAD의 보도자료, 수상 소식, 이벤트 업데이트 모음입니다."
+        : "A collection of THINKAD press releases, awards, and event updates.",
+    }),
+  ];
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(ld) }}
       />
       {children}
     </>

@@ -80,6 +80,14 @@ export const COMMUNITY_MEMBER_ROLES = [
 ] as const;
 export type CommunityMemberRole = (typeof COMMUNITY_MEMBER_ROLES)[number];
 
+/** 멤버 디렉터리 지역 탭 (전체 제외) */
+export const COMMUNITY_DIRECTORY_REGION_OPTIONS = [
+  "서울",
+  "부산",
+  "대구",
+  "기타",
+] as const;
+
 export const COMMUNITY_MEMBER_ROLE_LABELS: Record<
   CommunityMemberRole,
   { ko: string; en: string; accentClassName: string; surfaceClassName: string }
@@ -136,6 +144,7 @@ export type CommunityAuthorSummary = {
   company: string | null;
   role: CommunityMemberRole | null;
   bio: string | null;
+  region: string | null;
 };
 
 export type CommunityPostStatus = "published" | "hidden" | "deleted";
@@ -180,6 +189,8 @@ export type CommunityMemberListItem = CommunityAuthorSummary & {
   postCount: number;
   commentCount: number;
   latestActivityAt: string | null;
+  /** 계정 생성일 (가입일) */
+  joinedAt: string;
 };
 
 // ── 정책 상수 ──
@@ -205,4 +216,10 @@ export const COMMUNITY_LIMITS = {
   PAGE_SIZE: 20,
   /** 홈 섹션 카드 수 */
   HOME_SECTION_SIZE: 3,
+  /** 멤버 디렉터리 페이지 크기 */
+  MEMBER_DIRECTORY_PAGE_SIZE: 20,
+  /** 프로필 한 줄 소개 */
+  PROFILE_BIO_MAX: 500,
+  /** 프로필 지역 문자열 */
+  PROFILE_REGION_MAX: 40,
 } as const;

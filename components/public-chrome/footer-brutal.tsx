@@ -67,7 +67,7 @@ export function FooterBrutal() {
         </>
       }
       columns={[quickLinks, contactInfo, services]}
-      copyright="(C) 2026. THINKAD Corp. All rights reserved."
+      copyright={`(C) ${new Date().getFullYear()}. THINKAD Corp. All rights reserved.`}
     />
   );
 }

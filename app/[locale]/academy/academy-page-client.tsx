@@ -2,7 +2,6 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";

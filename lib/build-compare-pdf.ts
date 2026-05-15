@@ -204,7 +204,7 @@ function renderCompareContent(
   const disc =
     "For reference only; availability and terms require confirmation. " +
     "Korean text may be omitted above — see the website for full Korean copy. " +
-    "Contact: mannote@tkad.co.kr · +82-2-515-2772";
+    "Contact: sales@tkad.co.kr · +82-2-515-2772";
   writeLines(doc, disc, margin, y, innerW, 3.8, pageH, margin);
 }
 

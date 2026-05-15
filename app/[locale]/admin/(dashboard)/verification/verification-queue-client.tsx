@@ -99,8 +99,9 @@ export default function VerificationQueueClient() {
       if (res.ok) {
         setItems((prev) => prev.filter((x) => x.id !== mediaId));
         setNotes((prev) => {
-          const { [mediaId]: _, ...rest } = prev;
-          return rest;
+          return Object.fromEntries(
+            Object.entries(prev).filter(([id]) => id !== mediaId),
+          );
         });
       }
     } finally {

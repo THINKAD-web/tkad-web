@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
-import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
-import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
+import { pageAlternates, segmentOpenGraphImages, serializeJsonLd } from "@/lib/seo";
+import {
+  buildBreadcrumbJsonLd,
+  buildCollectionPageJsonLd,
+} from "@/lib/structured-data";
 
 export async function generateMetadata({
   params,
@@ -46,15 +49,25 @@ export default async function CasesLayout({
   params: Promise<{ locale: string }>;
 }) {
   const locale = await resolveLocaleParam(params);
-  const breadcrumb = buildBreadcrumbJsonLd(locale, [
-    { name: locale === "ko" ? "홈" : "Home", path: "" },
-    { name: locale === "ko" ? "성공 사례" : "Cases", path: "/cases" },
-  ]);
+  const isKo = locale === "ko";
+  const ld = [
+    buildBreadcrumbJsonLd(locale, [
+      { name: isKo ? "홈" : "Home", path: "" },
+      { name: isKo ? "성공 사례" : "Cases", path: "/cases" },
+    ]),
+    buildCollectionPageJsonLd(locale, {
+      path: "/cases",
+      name: isKo ? "THINKAD 성공 사례" : "THINKAD Case Studies",
+      description: isKo
+        ? "THINKAD의 OOH 캠페인 성공 사례 모음입니다."
+        : "A collection of THINKAD OOH campaign case studies.",
+    }),
+  ];
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(ld) }}
       />
       {children}
     </>

@@ -5,15 +5,18 @@ import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { pageAlternates } from "@/lib/seo";
 import { getCommunityMemberProfile } from "@/lib/community/queries";
-import { CommunityRoleBadge } from "@/components/community/role-badge";
+import { getCurrentUser } from "@/lib/user-session";
+import { RoleBadge } from "@/components/community/role-badge";
 import { CommunityPostCard } from "@/components/community/post-card";
+import { CommunityProfileEditForm } from "@/components/community/profile-edit-form";
 import {
   ArrowLeft,
   Building2,
+  Calendar,
+  Heart,
   MessageSquare,
   PenSquare,
   Sparkles,
-  Users,
 } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { NeonSection } from "@/components/landing/neon/neon-section";
@@ -24,6 +27,15 @@ type Props = {
 };
 
 export const dynamic = "force-dynamic";
+
+function fmtJoin(iso: string, locale: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString(locale === "ko" ? "ko-KR" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: rawLocale, id } = await params;
@@ -52,8 +64,10 @@ export default async function CommunityProfilePage({ params }: Props) {
   const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
   setRequestLocale(locale);
   const isKo = locale === "ko";
-  const profile = await getCommunityMemberProfile(id);
+  const [profile, me] = await Promise.all([getCommunityMemberProfile(id), getCurrentUser()]);
   if (!profile) notFound();
+
+  const isOwn = me?.id === id;
 
   return (
     <HomeLandingDayNight>
@@ -72,20 +86,16 @@ export default async function CommunityProfilePage({ params }: Props) {
               <NeonSectionHead
                 number="09"
                 kicker="Profile"
-                title={
-                  <>
-                    {profile.member.name}
-                    <span className="tkad-home-accent-text">
-                      {isKo ? " 멤버 프로필" : " profile"}
-                    </span>
-                  </>
-                }
+                title={isKo ? "멤버 프로필" : "Member profile"}
                 meta="community identity"
                 className="mb-0"
               />
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <CommunityRoleBadge role={profile.member.role} locale={locale} />
+                <h1 className="text-2xl font-black tracking-[-0.04em] text-white sm:text-3xl">
+                  {profile.member.name}
+                </h1>
+                <RoleBadge role={profile.member.role} locale={locale} />
                 {profile.member.company ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/6 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white/68">
                     <Building2 className="h-3.5 w-3.5" />
@@ -94,30 +104,52 @@ export default async function CommunityProfilePage({ params }: Props) {
                 ) : null}
               </div>
 
+              {profile.member.region ? (
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-white/52">
+                  {isKo ? "지역" : "Region"} · {profile.member.region}
+                </p>
+              ) : null}
+
               <p className="mt-6 whitespace-pre-wrap text-[15px] leading-relaxed text-white/76 sm:text-lg">
                 {profile.member.bio ??
                   (isKo
                     ? "아직 자기소개가 등록되지 않았습니다."
                     : "This member has not added a bio yet.")}
               </p>
+
+              {isOwn ? (
+                <CommunityProfileEditForm
+                  userId={id}
+                  locale={locale}
+                  initialName={profile.member.name}
+                  initialCompany={profile.member.company ?? ""}
+                  initialBio={profile.member.bio ?? ""}
+                  initialRegion={profile.member.region ?? ""}
+                />
+              ) : null}
             </div>
 
             <div className="grid gap-4">
               {[
                 {
+                  icon: Calendar,
+                  label: isKo ? "가입일" : "Joined",
+                  value: fmtJoin(profile.member.joinedAt, locale),
+                },
+                {
                   icon: PenSquare,
                   label: isKo ? "작성 글" : "Posts",
-                  value: profile.member.postCount,
+                  value: profile.member.postCount.toLocaleString(),
+                },
+                {
+                  icon: Heart,
+                  label: isKo ? "받은 좋아요" : "Likes received",
+                  value: profile.member.likesReceived.toLocaleString(),
                 },
                 {
                   icon: MessageSquare,
                   label: isKo ? "댓글" : "Comments",
-                  value: profile.member.commentCount,
-                },
-                {
-                  icon: Users,
-                  label: isKo ? "멤버 상태" : "Status",
-                  value: isKo ? "활동 중" : "Active",
+                  value: profile.member.commentCount.toLocaleString(),
                 },
               ].map((item) => (
                 <div
@@ -130,9 +162,7 @@ export default async function CommunityProfilePage({ params }: Props) {
                         {item.label}
                       </p>
                       <p className="mt-2 font-display text-2xl font-black tracking-tight text-white">
-                        {typeof item.value === "number"
-                          ? item.value.toLocaleString()
-                          : item.value}
+                        {item.value}
                       </p>
                     </div>
                     <item.icon className="h-5 w-5 text-white/68" />

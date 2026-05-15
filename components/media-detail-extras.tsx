@@ -49,10 +49,7 @@ export default function MediaDetailExtras({
   }, [media.type, media.coverageDistrictCodes]);
 
   useEffect(() => {
-    if (!coverageCodesKey) {
-      setCoverageGeoJson(null);
-      return;
-    }
+    if (!coverageCodesKey) return;
     const qs = encodeURIComponent(coverageCodesKey);
     let cancelled = false;
     void fetch(`/api/geo/district-boundaries?codes=${qs}`)
@@ -67,6 +64,7 @@ export default function MediaDetailExtras({
       cancelled = true;
     };
   }, [coverageCodesKey]);
+  const effectiveCoverageGeoJson = coverageCodesKey ? coverageGeoJson : null;
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(isKo ? media.name : (media.nameEn || media.name))},${media.lat},${media.lng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${media.lat},${media.lng}`;
   // map provider: keep for compatibility, but detail uses the same Kakao map UI as `/media/map`.
@@ -171,7 +169,7 @@ export default function MediaDetailExtras({
               onMarkerDetail={() => window.open(kakaoUrl, "_blank", "noopener,noreferrer")}
               center={{ lat: media.lat, lng: media.lng }}
               zoom={4}
-              coverageGeoJson={coverageGeoJson}
+              coverageGeoJson={effectiveCoverageGeoJson}
               fitCoverageBounds={Boolean(media.coverageDistrictCodes?.length)}
             />
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
@@ -34,11 +35,13 @@ export function AiChatbotMediaCards({
           >
             <div className="relative h-[4.25rem] w-[4.25rem] shrink-0 overflow-hidden bg-gradient-to-br from-navy/[0.07] to-gold/12 sm:h-[4.5rem] sm:w-[4.5rem]">
               {thumb ? (
-                <img
+                <Image
                   src={thumb}
                   alt=""
-                  className="h-full w-full object-cover"
-                  loading="lazy"
+                  fill
+                  sizes="72px"
+                  unoptimized
+                  className="object-cover"
                 />
               ) : (
                 <MediaImagePlaceholder

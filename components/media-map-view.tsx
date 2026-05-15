@@ -90,12 +90,16 @@ export function MediaMapView({
   toggleCompare,
   isInCompare,
 }: Props) {
+  const getInitialMapHeight = () => {
+    if (typeof window === "undefined") return 520;
+    return Math.min(Math.round(window.innerHeight * 0.72), 640);
+  };
   const t = useTranslations();
   const tMedia = useTranslations("media");
   const locale = useLocale();
   const isKo = locale === "ko";
   const [listOpen, setListOpen] = useState(false);
-  const [mapHeightPx, setMapHeightPx] = useState(520);
+  const [mapHeightPx, setMapHeightPx] = useState(getInitialMapHeight);
 
   const updateMapHeight = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -105,7 +109,6 @@ export function MediaMapView({
   }, []);
 
   useEffect(() => {
-    updateMapHeight();
     window.addEventListener("resize", updateMapHeight);
     return () => window.removeEventListener("resize", updateMapHeight);
   }, [updateMapHeight]);

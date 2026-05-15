@@ -2,7 +2,6 @@ import type { jsPDF } from "jspdf";
 import {
   krFontFamily,
   ensureKrFontForServerPdf,
-  registerNotoSansKrIfAvailable,
 } from "@/lib/jspdf-register-noto-kr";
 import {
   computeCampaignBaseStats,
@@ -335,7 +334,7 @@ function drawCoverPage(
   doc.setFontSize(8);
   setColor(doc, "text", [180, 180, 180]);
   doc.text(
-    "THINKAD · 02-515-2772 · mannote@tkad.co.kr",
+    "THINKAD · 02-515-2772 · sales@tkad.co.kr",
     MARGIN_X,
     PAGE_H - 16,
   );
@@ -1173,6 +1172,7 @@ function drawBody(
 
 // ── 모든 페이지 푸터 (page 2+) ──
 function drawFooters(doc: jsPDF, fam: string) {
+  void fam;
   const total = doc.getNumberOfPages();
   // 표지(page 1) 는 자체 푸터를 따로 그리므로 스킵.
   for (let p = 2; p <= total; p++) {
@@ -1184,7 +1184,7 @@ function drawFooters(doc: jsPDF, fam: string) {
     doc.setFontSize(7.5);
     setColor(doc, "text", C_GRAY);
     doc.text(
-      "THINKAD · 02-515-2772 · mannote@tkad.co.kr",
+      "THINKAD · 02-515-2772 · sales@tkad.co.kr",
       MARGIN_X,
       PAGE_H - 9,
     );

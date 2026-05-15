@@ -105,7 +105,19 @@ export default function ClientDashboardPage() {
       const resolved = raw
         ? (findClientByEmail(raw) ?? getDefaultDemoClient())
         : getDefaultDemoClient();
+      const initialLive: Record<string, number> = {};
+      const initialHistory: Record<string, number[]> = {};
+      for (const project of resolved.projects) {
+        if (project.status !== "in_progress" || !project.metrics) continue;
+        initialLive[project.id] = project.metrics.impressions;
+        initialHistory[project.id] = Array.from(
+          { length: 14 },
+          (_, i) => Math.max(0, project.metrics!.impressions - (13 - i) * 18_000),
+        );
+      }
       setClient(resolved);
+      setLiveImp(initialLive);
+      setImpHistory(initialHistory);
       setHydrated(true);
     });
   }, []);
@@ -119,28 +131,6 @@ export default function ClientDashboardPage() {
     for (const p of inProgress) {
       bases[p.id] = p.metrics!.impressions;
     }
-
-    setLiveImp((prev) => {
-      const next = { ...prev };
-      for (const id of Object.keys(bases)) {
-        if (next[id] === undefined) next[id] = bases[id];
-      }
-      return next;
-    });
-
-    setImpHistory((prev) => {
-      const nh = { ...prev };
-      for (const p of inProgress) {
-        const b = bases[p.id];
-        if (!nh[p.id]?.length) {
-          nh[p.id] = Array.from(
-            { length: 14 },
-            (_, i) => Math.max(0, b - (13 - i) * 18_000),
-          );
-        }
-      }
-      return nh;
-    });
 
     if (inProgress.length === 0) return;
 
@@ -173,7 +163,8 @@ export default function ClientDashboardPage() {
   useEffect(() => {
     if (chatOpen) {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      setChatUnread(0);
+      const frame = requestAnimationFrame(() => setChatUnread(0));
+      return () => cancelAnimationFrame(frame);
     }
   }, [chatMessages, chatOpen]);
 

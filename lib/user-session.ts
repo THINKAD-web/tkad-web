@@ -138,6 +138,7 @@ export type CurrentUser = {
   role: AppUserRole;
   communityRole: string | null;
   communityBio: string | null;
+  region: string | null;
   locale: string;
   emailVerifiedAt: Date | null;
 };
@@ -148,7 +149,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const result = verifyUserSessionDetails(token);
   if (!result.ok) return null;
 
-  const user = await prisma.user.findFirst({
+  const row = await prisma.user.findFirst({
     where: { id: result.userId, deletedAt: null },
     select: {
       id: true,
@@ -162,7 +163,8 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       emailVerifiedAt: true,
     },
   });
-  return user;
+  if (!row) return null;
+  return { ...row, region: null };
 }
 
 export async function createSessionRecord(params: {

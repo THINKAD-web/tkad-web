@@ -273,16 +273,19 @@ export function MediaKeywordFilterClient({
     [filtered, sortMode, items],
   );
 
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
-
   const selectionFingerprint = useMemo(
     () => JSON.stringify(selection),
     [selection],
   );
-
-  useEffect(() => {
-    setVisibleCount(Math.min(INITIAL_VISIBLE_COUNT, sorted.length));
-  }, [debouncedQuery, selectionFingerprint, sorted.length]);
+  const visibleStateKey = `${debouncedQuery}::${selectionFingerprint}`;
+  const [visibleState, setVisibleState] = useState(() => ({
+    key: visibleStateKey,
+    count: INITIAL_VISIBLE_COUNT,
+  }));
+  const visibleCount =
+    visibleState.key === visibleStateKey
+      ? visibleState.count
+      : Math.min(INITIAL_VISIBLE_COUNT, sorted.length);
 
   /**
    * --------------------------------------------------------------------------
@@ -590,11 +593,12 @@ export function MediaKeywordFilterClient({
                     variant="outline"
                     size="lg"
                     className="min-w-[12rem] rounded-xl border-2 border-navy/20 font-bold text-navy hover:bg-navy/[0.04]"
-                    onClick={() =>
-                      setVisibleCount((n) =>
-                        Math.min(n + LOAD_MORE_STEP, sorted.length),
-                      )
-                    }
+                    onClick={() => {
+                      setVisibleState({
+                        key: visibleStateKey,
+                        count: Math.min(visibleCount + LOAD_MORE_STEP, sorted.length),
+                      });
+                    }}
                   >
                     더 보기
                     <span className="ml-1.5 tabular-nums text-xs font-semibold text-muted-foreground">

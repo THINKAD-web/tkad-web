@@ -50,13 +50,17 @@ export default function HeroKenBurns() {
     if (typeof window === "undefined") return;
     const prm = window.matchMedia("(prefers-reduced-motion: reduce)");
     const mob = window.matchMedia("(max-width: 767px)");
-    setReduceMotion(prm.matches);
-    setIsMobile(mob.matches);
+    const syncState = () => {
+      setReduceMotion(prm.matches);
+      setIsMobile(mob.matches);
+    };
+    const frame = window.requestAnimationFrame(syncState);
     const onPrm = () => setReduceMotion(prm.matches);
     const onMob = () => setIsMobile(mob.matches);
     prm.addEventListener("change", onPrm);
     mob.addEventListener("change", onMob);
     return () => {
+      window.cancelAnimationFrame(frame);
       prm.removeEventListener("change", onPrm);
       mob.removeEventListener("change", onMob);
     };

@@ -139,6 +139,8 @@
 }
 
 :root {
+  /* BrutalNav: mobile h-14 (components/brutalist/nav.tsx) */
+  --nav-height: 3.5rem;
   /* Phase 1: --radius 도 0. 일부 컴포넌트가 var(--radius) 를 직접 참조해도 사각이 되도록. */
   --radius: 0;
   --hermes: #ff6200;
@@ -187,6 +189,13 @@
     #22d3ee 45%,
     #ec4899 100%
   );
+}
+
+/* BrutalNav: sm:h-16 / desktop min-h-16 (64px) */
+@media (min-width: 640px) {
+  :root {
+    --nav-height: 4rem;
+  }
 }
 
 /* ── Landing (neo) theme scope: purple accent ── */
@@ -248,6 +257,43 @@ html:not(.dark) .admin-dashboard-root {
   --ring: rgba(168, 85, 247, 0.45);
   --cta: #22d3ee;
   --cta-hover: #67e8f9;
+}
+
+/* Admin 대시보드: `tkad-glass-surface` 기본(검정 유리) 대신 테마 카드 톤 — CRM 등과 동일한 밝기 */
+.admin-dashboard-root .tkad-glass-surface {
+  position: relative;
+  border-radius: 22px;
+  border: 1px solid var(--border) !important;
+  background: color-mix(in oklab, var(--card) 94%, transparent) !important;
+  color: var(--foreground) !important;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.05),
+    0 10px 28px rgb(0 0 0 / 0.07) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.admin-dashboard-root .tkad-glass-surface-soft {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid var(--border) !important;
+  background: color-mix(in oklab, var(--card) 96%, transparent) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .admin-dashboard-root .tkad-glass-surface {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.25),
+    0 16px 48px rgb(0 0 0 / 0.45) !important;
+}
+
+html.dark .admin-dashboard-root .tkad-glass-surface-soft {
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.35) !important;
 }
 
 .dark {
@@ -342,6 +388,40 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .tkad-marquee {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* 홈 히어로 — 매체 썸네일 마퀴 (30s, 호버 정지 없음) */
+@keyframes tkad-hero-marquee-lr {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes tkad-hero-marquee-rl {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.tkad-hero-marquee-track {
+  will-change: transform;
+}
+.tkad-hero-marquee-track--lr {
+  animation: tkad-hero-marquee-lr 30s linear infinite;
+}
+.tkad-hero-marquee-track--rl {
+  animation: tkad-hero-marquee-rl 30s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tkad-hero-marquee-track--lr,
+  .tkad-hero-marquee-track--rl {
     animation: none;
     transform: none;
   }
@@ -1510,214 +1590,6 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
   color: var(--home-ink-soft) !important;
 }
 
-/* ── 홈 라이트: 히어로 — 가독성·명암·계층 우선 (구조 훅만 사용) ── */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero.tkad-neon-surface {
-  border-color: rgb(15 23 42 / 0.055) !important;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  box-shadow: var(--home-hero-shell-shadow) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero.tkad-neon-surface::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    /* Day hero should still feel "neon": mimic night gradients but on a light shell */
-    radial-gradient(120% 90% at 6% -10%, rgb(168 85 247 / 0.20), transparent 58%),
-    radial-gradient(95% 70% at 102% 6%, rgb(34 211 238 / 0.14), transparent 55%),
-    radial-gradient(120% 85% at 70% 108%, rgb(236 72 153 / 0.12), transparent 60%),
-    radial-gradient(130% 90% at 50% 118%, rgb(2 6 23 / 0.09), transparent 62%),
-    linear-gradient(180deg, rgb(255 255 255 / 0.72) 0%, transparent 44%),
-    linear-gradient(0deg, rgb(2 6 23 / 0.075) 0%, transparent 46%);
-  opacity: 1;
-}
-
-/* 패딩·타이포는 TSX (= 다크와 동일). 오버레이 위로만 올림. */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero.tkad-neon-surface > div.relative.max-w-7xl {
-  position: relative;
-  z-index: 1;
-}
-
-/* `/media/[id]` 히어로 — 래퍼가 max-w-6xl 이라 위 규칙에 빠져 라이트 `::after` 베일이 상단 이미지를 덮었음 */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero.tkad-neon-surface > div.relative.max-w-6xl {
-  position: relative;
-  z-index: 1;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .max-w-6xl > div:first-child > div:last-child {
-  color: var(--home-panel-label) !important;
-}
-
-/* 라이트 히어로: 그리드 간격·컬럼 폭은 TSX(다크와 동일). 과한 column-gap·우측 정렬만 히어로 카드 밖으로 밀어 보였음. */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .max-w-6xl > .grid {
-  min-width: 0;
-}
-
-/* 크기(font-size/spacing/max-width 등) 오버라이드 없음 — 다크와 동일. 라이트에서만 글자색. */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .lg\:col-span-8 > p:first-of-type {
-  color: var(--home-muted) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .lg\:col-span-8 > p:nth-of-type(2) {
-  color: var(--home-body) !important;
-}
-
-/* 본문 H1: 그림자는 TSX에서만(낮은 흰 그림자는 클립 그라데이션을 하얗게 덮음) */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero h1 {
-  color: var(--home-ink) !important;
-}
-
-/* 히어로 액센트: 네온 그라데이션 — h1 text-shadow·부모 fill과 분리 */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero h1 span.tkad-home-accent-text {
-  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
-  text-shadow: none !important;
-  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.75))
-    drop-shadow(0 1px 2px rgb(15 23 42 / 0.08));
-}
-
-/* (레거시) bg-clip-text 액센트 — 네온과 동일 */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero h1 span.bg-clip-text {
-  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
-  text-shadow: none !important;
-  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.75))
-    drop-shadow(0 1px 2px rgb(15 23 42 / 0.08));
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__signals > div {
-  border: 1px solid var(--home-line) !important;
-  background: var(--home-signal-surface) !important;
-  box-shadow: var(--home-signal-shadow) !important;
-  backdrop-filter: blur(12px);
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__signals span.font-display {
-  color: var(--home-ink-soft) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__signals > div:first-child > span:nth-of-type(3) {
-  color: var(--home-panel-label) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__signals > div:first-child span.rounded-full {
-  box-shadow: none !important;
-  background: #4338ca !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .mt-7.flex.flex-wrap.gap-2 > span {
-  border: 1px solid var(--home-chip-border) !important;
-  background: var(--home-chip-bg) !important;
-  color: var(--home-ink-soft) !important;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .mt-10.flex > a:not(.tkad-neon-cta-clean) {
-  border: 1px solid var(--home-line) !important;
-  background: rgb(255 255 255 / 0.92) !important;
-  color: var(--home-ink-soft) !important;
-  box-shadow: var(--home-secondary-shadow) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .mt-10.flex > a:not(.tkad-neon-cta-clean):hover {
-  border-color: rgb(99 102 241 / 0.32) !important;
-  background: rgb(255 255 255 / 1) !important;
-}
-
-/* 스탯 패널 뒤 네온 블러 오라 제거 */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .relative:has(.tkad-home-hero__panel) > [aria-hidden] {
-  display: none !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel.tkad-neon-glow {
-  border: 1px solid rgb(15 23 42 / 0.038) !important;
-  background: var(--home-panel-bg) !important;
-  box-shadow: var(--home-panel-shadow) !important;
-  backdrop-filter: blur(16px) saturate(1.02);
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel.tkad-neon-border::before {
-  opacity: 0.012 !important;
-}
-
-/* 패널 내부: 간격·크기는 Tailwind(px-4 py-3, gap-3 등) 유지 — 색만 */
-.tkad-home-appearance[data-appearance="day"]
-  .tkad-home-hero__panel
-  > div.flex
-  > div:first-child
-  > p:nth-child(1) {
-  color: var(--home-panel-muted) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"]
-  .tkad-home-hero__panel
-  > div.flex
-  > div:first-child
-  > p:nth-child(2) {
-  color: var(--home-panel-value) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"]
-  .tkad-home-hero__panel
-  > div.flex
-  > div:first-child
-  > p:nth-child(3) {
-  color: var(--home-panel-muted) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel .grid > div {
-  border: 1px solid var(--home-line-faint) !important;
-  background: var(--home-panel-stat-surface) !important;
-  box-shadow: var(--home-panel-stat-shadow) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel .grid > div > p:first-child {
-  color: var(--home-panel-muted) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel .grid > div > p:last-child {
-  color: var(--home-panel-value) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.mt-6.rounded-2xl:last-child {
-  border-color: var(--home-line-faint) !important;
-  background: rgb(255 255 255 / 0.55) !important;
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.88) inset !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.mt-6.rounded-2xl:last-child > p:first-child {
-  color: var(--home-panel-muted) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.mt-6.rounded-2xl:last-child > p:last-child {
-  color: var(--home-panel-value) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.flex > div:last-child {
-  border-color: var(--home-line-faint) !important;
-  background: rgb(255 255 255 / 0.62) !important;
-  color: var(--home-panel-label) !important;
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.9) inset,
-    0 1px 3px rgb(15 23 42 / 0.03) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero__panel > div.flex > div:last-child span.rounded-full {
-  background: #4338ca !important;
-}
-
 /* 라이트 모드 CTA: 과한 블랙·퍼플 글로우 대신 정제된 리프트 */
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean {
   border-color: rgb(255 255 255 / 0.35) !important;
@@ -2505,7 +2377,7 @@ html {
 }
 
 /* =========================
-   Admin (*/admin) — premium neon/glass overrides
+   Admin (/admin) premium neon/glass overrides
    Scope via .admin-dashboard-root so public UI is unaffected
    ========================= */
 

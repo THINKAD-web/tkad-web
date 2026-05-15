@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getGuideBySlug, GUIDES } from "@/lib/guides-data";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
-import { pageAlternates, siteUrl } from "@/lib/seo";
+import { pageAlternates, serializeJsonLd, siteUrl } from "@/lib/seo";
 import { regionLabel, typeLabel } from "@/lib/media-keyword-landing";
 import { ArrowRight, BookText, Calendar } from "lucide-react";
 
@@ -22,19 +22,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
   const guide = getGuideBySlug(slug);
   if (!guide) return { title: locale === "ko" ? "가이드 없음" : "Guide not found" };
+  const isKo = locale === "ko";
+  const title = isKo ? guide.titleKo : guide.titleEn;
+  const description = isKo ? guide.descriptionKo : guide.descriptionEn;
   return {
-    title: guide.title,
-    description: guide.description,
-    keywords: guide.keywords,
+    title,
+    description,
+    keywords: isKo ? guide.keywordsKo : guide.keywordsEn,
     alternates: pageAlternates(locale, `/guides/${slug}`),
     openGraph: {
-      title: guide.title,
-      description: guide.description,
+      title,
+      description,
       type: "article",
       publishedTime: guide.publishedAt,
       modifiedTime: guide.updatedAt ?? guide.publishedAt,
     },
-    twitter: { card: "summary_large_image", title: guide.title, description: guide.description },
+    twitter: { card: "summary_large_image", title, description },
     robots: guide.draft
       ? { index: false, follow: false }
       : { index: true, follow: true },
@@ -46,13 +49,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * publishedAt / updatedAt 으로 검색엔진 freshness 시그널 제공.
  */
 function buildGuideArticleJsonLd(guide: NonNullable<ReturnType<typeof getGuideBySlug>>, locale: string) {
+  const isKo = locale === "ko";
   const url = `${siteUrl.replace(/\/$/, "")}/${locale}/guides/${guide.slug}`;
   return {
     "@context": "https://schema.org",
     "@type": "Article",
     "@id": `${url}#article`,
-    headline: guide.title.slice(0, 110),
-    description: guide.description,
+    headline: (isKo ? guide.titleKo : guide.titleEn).slice(0, 110),
+    description: isKo ? guide.descriptionKo : guide.descriptionEn,
     url,
     datePublished: guide.publishedAt,
     dateModified: guide.updatedAt ?? guide.publishedAt,
@@ -60,20 +64,24 @@ function buildGuideArticleJsonLd(guide: NonNullable<ReturnType<typeof getGuideBy
     author: { "@id": `${siteUrl}/#organization` },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: url,
-    keywords: guide.keywords.join(", "),
+    keywords: (isKo ? guide.keywordsKo : guide.keywordsEn).join(", "),
   };
 }
 
 function buildGuideFaqJsonLd(guide: NonNullable<ReturnType<typeof getGuideBySlug>>, locale: string) {
   if (!guide.faqs?.length) return null;
+  const isKo = locale === "ko";
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     inLanguage: locale === "ko" ? "ko-KR" : "en-US",
     mainEntity: guide.faqs.map((f) => ({
       "@type": "Question",
-      name: f.question,
-      acceptedAnswer: { "@type": "Answer", text: f.answer },
+      name: isKo ? f.questionKo : f.questionEn,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: isKo ? f.answerKo : f.answerEn,
+      },
     })),
   };
 }
@@ -89,7 +97,10 @@ export default async function GuideDetailPage({ params }: Props) {
   const breadcrumb = buildBreadcrumbJsonLd(locale, [
     { name: isKo ? "홈" : "Home", path: "" },
     { name: isKo ? "가이드" : "Guides", path: "/guides" },
-    { name: guide.title.slice(0, 60), path: `/guides/${guide.slug}` },
+    {
+      name: (isKo ? guide.titleKo : guide.titleEn).slice(0, 60),
+      path: `/guides/${guide.slug}`,
+    },
   ]);
   const article = buildGuideArticleJsonLd(guide, locale);
   const faqLd = buildGuideFaqJsonLd(guide, locale);
@@ -99,7 +110,7 @@ export default async function GuideDetailPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(ld) }}
       />
 
       <article className="bg-card">
@@ -119,10 +130,10 @@ export default async function GuideDetailPage({ params }: Props) {
               </p>
             ) : null}
             <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl lg:text-5xl">
-              {guide.title}
+              {isKo ? guide.titleKo : guide.titleEn}
             </h1>
             <p className="mt-6 max-w-3xl text-base leading-relaxed text-hero-fg/80 sm:text-lg">
-              {guide.description}
+              {isKo ? guide.descriptionKo : guide.descriptionEn}
             </p>
             <p className="mt-6 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-hero-fg/55">
               <Calendar className="h-3 w-3" aria-hidden />
@@ -142,18 +153,18 @@ export default async function GuideDetailPage({ params }: Props) {
           {guide.sections.map((sec, i) => (
             <section key={i} className="mt-10 first:mt-0">
               <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                {sec.heading}
+                {isKo ? sec.headingKo : sec.headingEn}
               </h2>
               <div className="mt-5 space-y-4">
-                {sec.paragraphs.map((p, idx) => (
+                {(isKo ? sec.paragraphsKo : sec.paragraphsEn).map((p, idx) => (
                   <p key={idx} className="text-base leading-relaxed text-foreground">
                     {p}
                   </p>
                 ))}
               </div>
-              {sec.bullets && sec.bullets.length > 0 ? (
+              {(isKo ? sec.bulletsKo : sec.bulletsEn)?.length ? (
                 <ul className="mt-5 space-y-2">
-                  {sec.bullets.map((b, idx) => (
+                  {(isKo ? sec.bulletsKo : sec.bulletsEn)?.map((b, idx) => (
                     <li
                       key={idx}
                       className="flex gap-3 border-l-2 border-accent pl-4 text-base leading-relaxed text-foreground"
@@ -182,10 +193,10 @@ export default async function GuideDetailPage({ params }: Props) {
                     className="-mt-[2px] border-2 border-border bg-card p-5"
                   >
                     <dt className="text-base font-bold text-foreground">
-                      Q. {f.question}
+                      Q. {isKo ? f.questionKo : f.questionEn}
                     </dt>
                     <dd className="mt-3 text-base leading-relaxed text-foreground">
-                      {f.answer}
+                      {isKo ? f.answerKo : f.answerEn}
                     </dd>
                   </div>
                 ))}

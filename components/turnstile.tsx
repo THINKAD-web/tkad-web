@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * Cloudflare Turnstile (클라이언트 위젯).
+ *
+ * Vercel 배포 시: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` 를
+ * Project → Settings → Environment Variables 에 넣고 재배포.
+ * site key 가 없으면 위젯만 렌더하지 않으며, 문의 폼은 그대로 제출 가능하도록
+ * 상위 폼에서 처리합니다.
+ */
 import { useEffect, useRef } from "react";
 
 declare global {
@@ -47,9 +55,12 @@ export function TurnstileWidget({
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const onVerifyRef = useRef(onVerify);
-  onVerifyRef.current = onVerify;
 
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  useEffect(() => {
+    onVerifyRef.current = onVerify;
+  }, [onVerify]);
 
   useEffect(() => {
     if (!siteKey) return;

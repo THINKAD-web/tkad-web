@@ -26,8 +26,8 @@ export function CountUpValue({
     if (!el) return;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setValue(end);
-      return;
+      const frame = requestAnimationFrame(() => setValue(end));
+      return () => cancelAnimationFrame(frame);
     }
 
     let raf = 0;

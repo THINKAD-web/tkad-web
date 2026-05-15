@@ -86,7 +86,6 @@ export default function ContactInquiryForm() {
     (window.location.hostname === "tkad.co.kr" ||
       window.location.hostname === "www.tkad.co.kr");
   const turnstileEnabled = isProductionDomain && !!siteKey;
-  const showTurnstileHint = isProductionDomain && !turnstileEnabled;
 
   useEffect(() => {
     casePrefillDone.current = null;
@@ -595,11 +594,7 @@ export default function ContactInquiryForm() {
         {fieldError("message")}
       </div>
 
-      {showTurnstileHint ? (
-        <p className="border-2 border-primary bg-card px-3 py-2 font-mono text-[11px] tracking-tight text-primary">
-          {`// `}{tForm("turnstileConfigHint")}
-        </p>
-      ) : turnstileEnabled ? (
+      {turnstileEnabled ? (
         <div ref={turnstileRef} className="flex justify-center" />
       ) : null}
 

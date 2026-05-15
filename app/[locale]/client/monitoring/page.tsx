@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,7 @@ export default function ClientMonitoringPage() {
   const [client, setClient] = useState<Client | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [liveImp, setLiveImp] = useState<Record<string, number>>({});
-  const baselineImpRef = useRef<Record<string, number>>({});
+  const [baselineImp, setBaselineImp] = useState<Record<string, number>>({});
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function ClientMonitoringPage() {
           next[p.id] = p.metrics.impressions;
         }
       }
-      baselineImpRef.current = { ...next };
+      setBaselineImp(next);
       setClient(resolved);
       setLiveImp(next);
       setHydrated(true);
@@ -117,11 +117,11 @@ export default function ClientMonitoringPage() {
 
   const scaleForProject = useCallback(
     (projectId: string) => {
-      const base = baselineImpRef.current[projectId] ?? 1;
+      const base = baselineImp[projectId] ?? 1;
       const live = liveImp[projectId] ?? base;
       return base > 0 ? live / base : 1;
     },
-    [liveImp],
+    [baselineImp, liveImp],
   );
 
   const pins = useMemo(() => {

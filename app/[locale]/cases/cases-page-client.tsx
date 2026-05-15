@@ -267,7 +267,9 @@ export default function CasesPageClient({ initialCases }: Props) {
                         {isKo ? cs.titleKo : cs.titleEn ?? cs.titleKo}
                       </h3>
                       <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
-                        {cs.summaryKo}
+                        {isKo
+                          ? cs.summaryKo
+                          : "Campaign strategy, media execution, and measurable OOH outcomes from THINKAD."}
                       </p>
                       <div className="mt-4 border-2 border-border bg-muted p-3">
                         <div className="flex items-start gap-2">

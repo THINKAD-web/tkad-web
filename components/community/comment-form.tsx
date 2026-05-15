@@ -7,7 +7,7 @@ import {
   fallbackCommunityRoleFromAppRole,
   normalizeCommunityMemberRole,
 } from "@/lib/community/types";
-import { CommunityRoleBadge } from "@/components/community/role-badge";
+import { RoleBadge } from "@/components/community/role-badge";
 
 type Props = {
   postId: string;
@@ -77,6 +77,7 @@ export function CommunityCommentForm({
             company: string | null;
             role: "ADVERTISER" | "MEDIA" | "AGENCY" | "FREELANCER" | null;
             bio: string | null;
+            region?: string | null;
           } | null;
         };
       };
@@ -101,7 +102,7 @@ export function CommunityCommentForm({
 
       <div className="flex flex-wrap items-center gap-2 rounded-[20px] border border-white/12 bg-white/6 px-4 py-3 backdrop-blur tkad-neon-border">
         <span className="font-bold text-white">{currentUser.name}</span>
-        <CommunityRoleBadge role={memberRole} locale={locale} />
+        <RoleBadge role={memberRole} locale={locale} />
         {currentUser.company ? (
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/58">
             {currentUser.company}

@@ -68,7 +68,7 @@ export function HeaderBrutal() {
       label: t("nav.insights"),
       items: [
         { href: "/cases", label: t("nav.cases"), desc: "집행 사례 모음" },
-        { href: "/insights", label: t("nav.insights"), desc: "OOH 트렌드 리포트" },
+        { href: "/report", label: t("nav.insights"), desc: t("nav.insightsReportDesc") },
         { href: "/academy", label: t("nav.academy"), desc: "광고주 교육 콘텐츠" },
       ],
     },

@@ -24,7 +24,13 @@ export default async function Image({
             ? (row?.titleKo ?? "OOH 광고 성공 사례")
             : (row?.titleEn ?? row?.titleKo ?? "OOH campaign case study")
         }
-        subtitle={(row?.summaryKo ?? "").slice(0, 120) || undefined}
+        subtitle={
+          isKo
+            ? (row?.summaryKo ?? "").slice(0, 120) || undefined
+            : row?.titleEn
+              ? "Campaign strategy, media execution, and measurable OOH outcomes."
+              : "THINKAD case study"
+        }
       />
     ),
     { ...size }

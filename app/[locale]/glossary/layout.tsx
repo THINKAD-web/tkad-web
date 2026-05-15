@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates, siteUrl } from "@/lib/seo";
+import { pageAlternates, serializeJsonLd, siteUrl } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import { GLOSSARY_TERMS } from "@/lib/glossary-data";
 
@@ -93,7 +93,7 @@ export default async function GlossaryLayout({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(ld) }}
       />
       {children}
     </>

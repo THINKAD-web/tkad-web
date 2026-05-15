@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -115,30 +115,30 @@ export default function AdminNetworkEditor(props: Props) {
   const [pricePackage, setPricePackage] = useState(
     init?.pricePackage != null ? String(init.pricePackage) : "",
   );
-  const [priceNote, setPriceNote] = useState(init?.priceNote ?? "");
+  const [priceNote] = useState(init?.priceNote ?? "");
   const [minUnits, setMinUnits] = useState(String(init?.minUnits ?? 1));
   const [packageOptionsText, setPackageOptionsText] = useState(
     serializePackageOptions(init?.packageOptions),
   );
-  const [city, setCity] = useState(init?.city ?? "");
-  const [district, setDistrict] = useState(init?.district ?? "");
+  const [city] = useState(init?.city ?? "");
+  const [district] = useState(init?.district ?? "");
   const [image, setImage] = useState(init?.image ?? "");
   const [galleryText, setGalleryText] = useState(
     (init?.galleryImages ?? []).join("\n"),
   );
   const [features, setFeatures] = useState(init?.features ?? "");
-  const [visibilityScore, setVisibilityScore] = useState(
+  const [visibilityScore] = useState(
     init?.visibilityScore != null ? String(init.visibilityScore) : "",
   );
-  const [dailyFootfall, setDailyFootfall] = useState(
+  const [dailyFootfall] = useState(
     init?.dailyFootfall != null ? String(init.dailyFootfall) : "",
   );
-  const [targetAge, setTargetAge] = useState(init?.targetAge ?? "");
-  const [effectMemo, setEffectMemo] = useState(init?.effectMemo ?? "");
-  const [operatingHours, setOperatingHours] = useState(
+  const [targetAge] = useState(init?.targetAge ?? "");
+  const [effectMemo] = useState(init?.effectMemo ?? "");
+  const [operatingHours] = useState(
     init?.operatingHours ?? "",
   );
-  const [tagsText, setTagsText] = useState((init?.tags ?? []).join(", "));
+  const [tagsText] = useState((init?.tags ?? []).join(", "));
   const [isActive, setIsActive] = useState(init?.isActive ?? true);
   const [locRows, setLocRows] = useState<LocRow[]>(() => {
     if (init?.locations?.length) {

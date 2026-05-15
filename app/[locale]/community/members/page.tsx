@@ -2,27 +2,52 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { pageAlternates } from "@/lib/seo";
-import { listCommunityMembers } from "@/lib/community/queries";
+import {
+  getCommunityMemberDirectoryStats,
+  listCommunityMembersPaginated,
+} from "@/lib/community/queries";
 import { CommunityMemberCard } from "@/components/community/member-card";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, Building2, MessageSquare, PenSquare, Users } from "lucide-react";
+import {
+  COMMUNITY_DIRECTORY_REGION_OPTIONS,
+  COMMUNITY_MEMBER_ROLE_LABELS,
+  COMMUNITY_MEMBER_ROLES,
+  normalizeCommunityMemberRole,
+  type CommunityMemberRole,
+} from "@/lib/community/types";
+import { ArrowLeft, Building2, ChevronLeft, ChevronRight, MessageSquare, PenSquare, Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ role?: string; region?: string; page?: string }>;
 };
 
 export const dynamic = "force-dynamic";
 
+function directoryHref(opts: {
+  role?: CommunityMemberRole | null;
+  region?: string | null;
+  page?: number;
+}): string {
+  const p = new URLSearchParams();
+  if (opts.role) p.set("role", opts.role);
+  if (opts.region) p.set("region", opts.region);
+  if (opts.page && opts.page > 1) p.set("page", String(opts.page));
+  const qs = p.toString();
+  return qs ? `/community/members?${qs}` : "/community/members";
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const title = isKo ? "커뮤니티 멤버" : "Community Members";
+  const title = isKo ? "OOH 업계 멤버" : "OOH industry members";
   const description = isKo
-    ? "싱커드 커뮤니티에서 활동 중인 광고주, 매체사, 대행사, 프리랜서 멤버를 만나보세요."
-    : "Meet advertisers, media operators, agencies, and freelancers active in the THINKAD community.";
+    ? "광고주·매체사·대행사·프리랜서가 모여 있습니다."
+    : "Advertisers, media, agencies, and freelancers in one directory.";
   return {
     title,
     description,
@@ -31,14 +56,51 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function CommunityMembersPage({ params }: Props) {
+export default async function CommunityMembersPage({ params, searchParams }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const isKo = locale === "ko";
-  const members = await listCommunityMembers();
-  const activeAuthors = members.filter((member) => member.postCount > 0).length;
-  const activeDiscussants = members.filter((member) => member.commentCount > 0).length;
-  const companies = new Set(members.map((member) => member.company).filter(Boolean)).size;
+  const sp = await searchParams;
+
+  const roleFilter = sp.role ? normalizeCommunityMemberRole(sp.role) : null;
+  const regionRaw = sp.region?.trim();
+  const regionFilter =
+    regionRaw &&
+    regionRaw !== "전체" &&
+    regionRaw !== "all" &&
+    (COMMUNITY_DIRECTORY_REGION_OPTIONS as readonly string[]).includes(regionRaw)
+      ? regionRaw
+      : null;
+
+  const pageRaw = Number(sp.page ?? "1");
+  const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? Math.floor(pageRaw) : 1;
+
+  const [{ members, total, pageSize }, stats] = await Promise.all([
+    listCommunityMembersPaginated({
+      role: roleFilter,
+      region: regionFilter,
+      page,
+    }),
+    getCommunityMemberDirectoryStats(),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  const tabCls = (active: boolean) =>
+    cn(
+      "inline-flex items-center justify-center rounded-full border px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
+      active
+        ? "border-white/22 bg-white/12 text-white"
+        : "border-white/10 bg-black/20 text-white/58 hover:border-white/16 hover:text-white/78",
+    );
+
+  const regionTabCls = (active: boolean) =>
+    cn(
+      "inline-flex items-center justify-center rounded-full border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors sm:px-4",
+      active
+        ? "border-cyan-400/35 bg-cyan-500/10 text-cyan-100"
+        : "border-white/10 bg-black/20 text-white/58 hover:border-white/16 hover:text-white/78",
+    );
 
   return (
     <HomeLandingDayNight>
@@ -60,13 +122,11 @@ export default async function CommunityMembersPage({ params }: Props) {
                 title={
                   isKo ? (
                     <>
-                      업계를 잇는
-                      <span className="tkad-home-accent-text"> 멤버 디렉토리</span>
+                      <span className="tkad-home-accent-text">OOH 업계</span> 멤버
                     </>
                   ) : (
                     <>
-                      The industry
-                      <span className="tkad-home-accent-text"> member network</span>
+                      <span className="tkad-home-accent-text">OOH industry</span> members
                     </>
                   )
                 }
@@ -75,8 +135,8 @@ export default async function CommunityMembersPage({ params }: Props) {
               />
               <p className="mt-6 max-w-3xl text-[15px] leading-relaxed text-white/78 sm:text-lg">
                 {isKo
-                  ? "광고주, 매체사, 대행사, 프리랜서 멤버가 질문과 후기, 인사이트를 실제 프로필 기반으로 나누는 공간입니다."
-                  : "Advertisers, media operators, agencies, and freelancers sharing practical learnings under real member profiles."}
+                  ? "광고주·매체사·대행사·프리랜서가 모여 있습니다"
+                  : "Advertisers, media owners, agencies, and freelancers — all in one place."}
               </p>
             </div>
 
@@ -85,22 +145,22 @@ export default async function CommunityMembersPage({ params }: Props) {
                 {
                   icon: Users,
                   label: isKo ? "전체 멤버" : "Members",
-                  value: members.length.toLocaleString(),
+                  value: stats.totalMembers.toLocaleString(),
                 },
                 {
                   icon: PenSquare,
                   label: isKo ? "글 작성 멤버" : "Authors",
-                  value: activeAuthors.toLocaleString(),
+                  value: stats.activeAuthors.toLocaleString(),
                 },
                 {
                   icon: MessageSquare,
                   label: isKo ? "댓글 활동 멤버" : "Discussants",
-                  value: activeDiscussants.toLocaleString(),
+                  value: stats.activeDiscussants.toLocaleString(),
                 },
                 {
                   icon: Building2,
                   label: isKo ? "소속 회사" : "Companies",
-                  value: companies.toLocaleString(),
+                  value: stats.companies.toLocaleString(),
                 },
               ].map((item) => (
                 <div
@@ -131,7 +191,7 @@ export default async function CommunityMembersPage({ params }: Props) {
                 {isKo ? "// directory" : "// directory"}
               </p>
               <h2 className="mt-2 text-2xl font-black tracking-[-0.05em] text-white sm:text-3xl">
-                {isKo ? "활동 멤버" : "Active members"}
+                {isKo ? "멤버 찾기" : "Browse members"}
               </h2>
             </div>
             <Link
@@ -142,18 +202,100 @@ export default async function CommunityMembersPage({ params }: Props) {
             </Link>
           </div>
 
+          <div className="mt-6 space-y-4">
+            <div>
+              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/48">
+                {isKo ? "역할" : "Role"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Link href={directoryHref({ region: regionFilter, page: 1 })} className={tabCls(!roleFilter)}>
+                  {isKo ? "전체" : "All"}
+                </Link>
+                {COMMUNITY_MEMBER_ROLES.map((role) => (
+                  <Link
+                    key={role}
+                    href={directoryHref({ role, region: regionFilter, page: 1 })}
+                    className={tabCls(roleFilter === role)}
+                  >
+                    {isKo ? COMMUNITY_MEMBER_ROLE_LABELS[role].ko : COMMUNITY_MEMBER_ROLE_LABELS[role].en}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/48">
+                {isKo ? "지역" : "Region"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Link href={directoryHref({ role: roleFilter, page: 1 })} className={regionTabCls(!regionFilter)}>
+                  {isKo ? "전체" : "All"}
+                </Link>
+                {COMMUNITY_DIRECTORY_REGION_OPTIONS.map((r) => (
+                  <Link
+                    key={r}
+                    href={directoryHref({ role: roleFilter, region: r, page: 1 })}
+                    className={regionTabCls(regionFilter === r)}
+                  >
+                    {r}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {members.length === 0 ? (
             <div className="mt-6 rounded-[28px] border border-white/12 bg-white/6 p-12 text-center backdrop-blur tkad-neon-border">
               <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-white/58">
-                {isKo ? "// 아직 노출할 멤버가 없습니다." : "// no members yet"}
+                {isKo ? "// 조건에 맞는 멤버가 없습니다." : "// no members match these filters"}
               </p>
             </div>
           ) : (
-            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {members.map((member) => (
-                <CommunityMemberCard key={member.id} member={member} locale={locale} />
-              ))}
-            </div>
+            <>
+              <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {members.map((member) => (
+                  <CommunityMemberCard key={member.id} member={member} locale={locale} />
+                ))}
+              </div>
+
+              {totalPages > 1 ? (
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 font-mono text-[11px] text-white/72">
+                  <Link
+                    href={directoryHref({
+                      role: roleFilter,
+                      region: regionFilter,
+                      page: Math.max(1, page - 1),
+                    })}
+                    aria-disabled={page <= 1}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full border border-white/12 px-4 py-2 transition-colors",
+                      page <= 1 ? "pointer-events-none opacity-40" : "hover:bg-white/10",
+                    )}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    {isKo ? "이전" : "Prev"}
+                  </Link>
+                  <span className="tabular-nums text-white/55">
+                    {page} / {totalPages}
+                  </span>
+                  <Link
+                    href={directoryHref({
+                      role: roleFilter,
+                      region: regionFilter,
+                      page: Math.min(totalPages, page + 1),
+                    })}
+                    aria-disabled={page >= totalPages}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full border border-white/12 px-4 py-2 transition-colors",
+                      page >= totalPages ? "pointer-events-none opacity-40" : "hover:bg-white/10",
+                    )}
+                  >
+                    {isKo ? "다음" : "Next"}
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              ) : null}
+            </>
           )}
         </NeonSection>
       </div>

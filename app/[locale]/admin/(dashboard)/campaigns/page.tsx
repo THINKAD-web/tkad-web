@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,35 +35,6 @@ const DOC_KIND = [
   { value: "invoice", label: FINANCIAL_DOC_KIND_LABEL["invoice"] },
 ];
 
-/**
- * Helper function for authenticated API calls with error handling
- */
-async function apiCall<T>(
-  url: string,
-  options?: RequestInit,
-): Promise<{ ok: boolean; data?: T; error?: string }> {
-  try {
-    const res = await fetch(url, {
-      ...options,
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...options?.headers,
-      },
-    });
-
-    const data = (await res.json().catch(() => ({}))) as T & { error?: string };
-
-    if (!res.ok) {
-      return { ok: false, error: data.error ?? "요청에 실패했습니다." };
-    }
-
-    return { ok: true, data };
-  } catch (e) {
-    return { ok: false, error: "네트워크 오류가 발생했습니다." };
-  }
-}
-
 type CampaignRow = {
   id: string;
   name: string;
@@ -95,9 +65,6 @@ type LinkedQuoteRow = {
 
 
 export default function AdminCampaignsPage() {
-  const pathname = usePathname();
-  const adminLocale = pathname.split("/")[1] || "ko";
-
   const [list, setList] = useState<CampaignRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -189,7 +156,6 @@ export default function AdminCampaignsPage() {
   const [showReportPreview, setShowReportPreview] = useState(true);
   const reportCaptureRef = useRef<HTMLDivElement>(null);
   const [reportPngBusy, setReportPngBusy] = useState(false);
-  const [successCaseBusy, setSuccessCaseBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
