@@ -869,7 +869,7 @@ export default function AdminMediaHubPage() {
                         ))}
                       </ul>
                       <p className="mt-2 text-[11px] text-rose-700">
-                        그래도 등록하려면 "강제 등록"을 누르세요. (확정 예약과 겹치면 매체사·광고주에게 운영 사고가 될 수 있습니다)
+                        그래도 등록하려면 &quot;강제 등록&quot;을 누르세요. (확정 예약과 겹치면 매체사·광고주에게 운영 사고가 될 수 있습니다)
                       </p>
                     </div>
                   ) : null}

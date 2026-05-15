@@ -815,7 +815,7 @@ export default function KakaoMapView({
       }
       coveragePolygonsRef.current = [];
     };
-  }, [mapReady, coverageSig, fitCoverageBounds]);
+  }, [mapReady, coverageGeoJson, coverageSig, fitCoverageBounds]);
 
   // #MAP-1: 미니 팝업(CustomOverlay) 비활성화. 마커 선택 시 panTo만 수행.
   // 상세는 사이드 카드(media-map-page-client.tsx) 또는 onMarkerDetail 라우팅으로 노출.

@@ -4,6 +4,7 @@ export async function downloadAcademyOutlinePdf(
   lesson: AcademyLesson,
   _isKo: boolean,
 ): Promise<void> {
+  void _isKo;
   // Force English for PDF (Korean font not embedded)
   const isKo = false;
   const { default: jsPDF } = await import("jspdf");
@@ -70,6 +71,7 @@ export async function downloadAcademyAssetPdf(
   asset: AcademyDownload,
   _isKo: boolean,
 ): Promise<void> {
+  void _isKo;
   // Force English for PDF (Korean font not embedded)
   const isKo = false;
   const { default: jsPDF } = await import("jspdf");

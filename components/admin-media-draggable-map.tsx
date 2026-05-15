@@ -57,7 +57,6 @@ export default function AdminMediaDraggableMap({
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onDragRef = useRef(onPositionChange);
-  onDragRef.current = onPositionChange;
   const skipEmitRef = useRef(false);
   const [mapReady, setMapReady] = useState(false);
 
@@ -93,7 +92,14 @@ export default function AdminMediaDraggableMap({
   const latOrDefault = latitude ?? SEOUL.lat;
   const lngOrDefault = longitude ?? SEOUL.lng;
   const coordsRef = useRef({ lat: latOrDefault, lng: lngOrDefault });
-  coordsRef.current = { lat: latOrDefault, lng: lngOrDefault };
+
+  useEffect(() => {
+    onDragRef.current = onPositionChange;
+  }, [onPositionChange]);
+
+  useEffect(() => {
+    coordsRef.current = { lat: latOrDefault, lng: lngOrDefault };
+  }, [latOrDefault, lngOrDefault]);
 
   const mountKakao = useCallback(() => {
     const el = containerRef.current;
@@ -263,11 +269,11 @@ export default function AdminMediaDraggableMap({
   useEffect(() => {
     cleanupRef.current?.();
     cleanupRef.current = null;
-    setMapReady(false);
     if (provider === "fallback") return undefined;
-    if (provider === "kakao") return mountKakao();
-    return mountGoogle();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- 마운트 1회, 좌표는 coordsRef·동기화 effect
+    const cleanup = provider === "kakao" ? mountKakao() : mountGoogle();
+    return () => {
+      cleanup?.();
+    };
   }, [provider, mountKakao, mountGoogle]);
 
   useEffect(() => {
@@ -391,7 +397,7 @@ export default function AdminMediaDraggableMap({
       }
       coveragePolygonsRef.current = [];
     };
-  }, [mapReady, provider, coverageKey]);
+  }, [mapReady, provider, coverageDistrictCodes, coverageKey]);
 
   if (provider === "fallback") {
     return (

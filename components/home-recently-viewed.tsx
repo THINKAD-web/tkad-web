@@ -34,8 +34,10 @@ export default function HomeRecentlyViewed({ locale }: Props) {
   useEffect(() => {
     const ids = readRecentlyViewedIds();
     if (ids.length === 0) {
-      setReady(true);
-      return;
+      const frame = window.requestAnimationFrame(() => {
+        setReady(true);
+      });
+      return () => window.cancelAnimationFrame(frame);
     }
     let cancelled = false;
     void fetchRecentlyViewedItems()

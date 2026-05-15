@@ -61,25 +61,26 @@ export function BrutalFooter({
           <BrandCell
             description={description}
             brandMeta={brandMeta}
-            cellIdx={0}
           />
         ) : (
-          <ColumnCell col={columns[0]} cellIdx={0} />
+          <ColumnCell col={columns[0]} />
         )}
 
         {/* 나머지 셀 — useBrandCell true 면 columns 0,1,2 → 셀 1,2,3 */}
-        {(useBrandCell ? columns : columns.slice(1)).map((col, i) => (
+        {(useBrandCell ? columns : columns.slice(1)).map((col) => (
           <ColumnCell
             key={col.title}
             col={col}
-            cellIdx={i + 1}
           />
         ))}
         </div>
       </div>
 
       <div className="relative border-t border-white/10 bg-black/30 px-6 py-5 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65 backdrop-blur">
-        <span>{copyright ?? "© 2026 THINKAD — All rights reserved"}</span>
+        <span>
+          {copyright ??
+            `© ${new Date().getFullYear()} THINKAD — All rights reserved`}
+        </span>
         {legal ? <span className="ml-4 text-white/45">{legal}</span> : null}
       </div>
     </footer>
@@ -89,11 +90,9 @@ export function BrutalFooter({
 function BrandCell({
   description,
   brandMeta,
-  cellIdx,
 }: {
   description: ReactNode;
   brandMeta: ReactNode;
-  cellIdx: number;
 }) {
   return (
     <div className="rounded-[28px] bg-white/5 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">
@@ -120,10 +119,8 @@ function BrandCell({
 
 function ColumnCell({
   col,
-  cellIdx,
 }: {
   col: BrutalFooterColumn;
-  cellIdx: number;
 }) {
   return (
     <div className="rounded-[28px] bg-white/5 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">

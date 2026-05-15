@@ -16,7 +16,6 @@ import {
   useDraggable,
   useSensor,
   useSensors,
-  type DragCancelEvent,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
@@ -273,7 +272,7 @@ export default function PlannerMediaSelector({
     [setCampaignMediaIds],
   );
 
-  const onDragCancel = useCallback((_e: DragCancelEvent) => {
+  const onDragCancel = useCallback(() => {
     setActiveId(null);
   }, []);
 

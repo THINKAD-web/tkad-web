@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
@@ -214,11 +214,6 @@ export default function MediaCatalogFiltersBar({
   const durationKeys = DURATION_ITEMS.map((x) => x.key);
   const exposureKeys = EXPOSURE_ITEMS.map((x) => x.key);
   const specialKeys = SPECIAL_FEATURE_ITEMS.map((x) => x.key);
-
-  const resetBudget = useCallback(() => {
-    onBudgetMinChange(bounds.minPrice);
-    onBudgetMaxChange(bounds.maxPrice);
-  }, [bounds.minPrice, bounds.maxPrice, onBudgetMinChange, onBudgetMaxChange]);
 
   const activeCount = [
     mediaRegionFilter !== "all" ? 1 : 0,

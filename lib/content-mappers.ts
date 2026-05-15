@@ -58,6 +58,12 @@ function defaultVerticalBlock(summaryKo: string[]): VerticalStrategyBlock {
   };
 }
 
+function buildInsightEnglishSummary(titleEn: string, monthKey: string): string[] {
+  return [
+    `${titleEn} is THINKAD's market brief for ${monthKey}, covering Korea OOH demand, DOOH signals, and media planning shifts.`,
+  ];
+}
+
 /**
  * Maps a DB row to the public InsightReport shape (PDF·카드 UI용).
  *
@@ -93,7 +99,10 @@ export function trendReportToInsightReport(row: TrendReport): InsightReport {
     ? row.publishedAt.toISOString().slice(0, 10)
     : `${monthKey}-28`;
   const titleEn = row.titleEn?.trim() || row.titleKo;
-  const enSummary = row.summaryKo;
+  const enSummary =
+    row.titleEn?.trim() && row.titleEn.trim() !== row.titleKo
+      ? buildInsightEnglishSummary(titleEn, labelEn)
+      : row.summaryKo;
 
   // PR-5: sources(JSON) → InsightSource[] 매핑. shape mismatch 시 빈 배열.
   const rawSources = (row as { sources?: unknown }).sources;

@@ -14,7 +14,7 @@ import { getCurrentUser } from "@/lib/user-session";
 import { ArrowLeft, User } from "lucide-react";
 import { CommunityPostInteractions } from "@/components/community/post-interactions";
 import { CommunityCommentsSection } from "@/components/community/comments-section";
-import { CommunityRoleBadge } from "@/components/community/role-badge";
+import { RoleBadge } from "@/components/community/role-badge";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
@@ -151,7 +151,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                     <span className="font-bold text-white">{post.authorName}</span>
                   )}
                 </span>
-                <CommunityRoleBadge role={post.author?.role ?? null} locale={locale} />
+                <RoleBadge role={post.author?.role ?? null} locale={locale} />
                 {post.author?.company ? <span>{post.author.company}</span> : null}
                 <span className="tabular-nums">{fmtKoDateTime(post.createdAt, locale)}</span>
               </div>
@@ -221,7 +221,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                     <span className="text-lg font-bold tracking-tight text-white">
                       {post.authorName}
                     </span>
-                    <CommunityRoleBadge role={post.author?.role ?? null} locale={locale} />
+                    <RoleBadge role={post.author?.role ?? null} locale={locale} />
                   </div>
                   {post.author?.company ? (
                     <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/58">
@@ -278,6 +278,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                     company: me.company,
                     role: me.role,
                     communityRole: me.communityRole,
+                    region: me.region,
                   }
                 : null
             }

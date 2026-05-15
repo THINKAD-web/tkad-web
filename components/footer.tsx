@@ -150,7 +150,7 @@ export default function Footer() {
             <p>{t("footer.ecommerce")} | {t("footer.address")}</p>
           </div>
           <div className="text-center text-sm text-silver/70">
-            {t("footer.copyright")}
+            {t("footer.copyright", { year: new Date().getFullYear() })}
           </div>
         </div>
       </div>

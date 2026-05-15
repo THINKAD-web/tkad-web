@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     });
 
     await sendEmail({
-      to: "mannote@tkad.co.kr",
+      to: "sales@tkad.co.kr",
       subject: `[플래너 보고서 요청] ${userEmail} - ${goalTitle}`,
       html,
       attachments,
@@ -277,7 +277,7 @@ function buildPlannerReportHtml(data: {
 
         <div style="margin-top: 28px; padding: 16px 14px; background: #fffbeb; border-radius: 10px; border: 1px solid #f97316; text-align: center;">
           <p style="margin: 0; color: #92400e; font-size: 13px;">
-            자세한 상담은 <a href="mailto:mannote@tkad.co.kr" style="color: #b45309; font-weight: 600; text-decoration: none;">mannote@tkad.co.kr</a> 로 연락주세요.
+            자세한 상담은 <a href="mailto:sales@tkad.co.kr" style="color: #b45309; font-weight: 600; text-decoration: none;">sales@tkad.co.kr</a> 로 연락주세요.
           </p>
         </div>
 

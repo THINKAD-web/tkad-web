@@ -100,8 +100,16 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
             </h1>
 
             <p className="mt-5 max-w-3xl font-mono text-sm leading-relaxed tracking-tight text-hero-fg/75">
-              {row.summaryKo}
+              {isKo
+                ? row.summaryKo
+                : "A THINKAD case study covering campaign goals, media execution, and measurable OOH outcomes."}
             </p>
+
+            {!isKo ? (
+              <p className="mt-4 max-w-3xl font-mono text-[11px] leading-relaxed tracking-tight text-hero-fg/60">
+                {`// `}Detailed case narrative sections are currently published in Korean.
+              </p>
+            ) : null}
 
             <div className="mt-6 flex flex-wrap gap-3">
               <BtnBlock

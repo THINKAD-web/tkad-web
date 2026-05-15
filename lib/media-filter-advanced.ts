@@ -470,6 +470,7 @@ export function passesMediaAdvancedFilters(
   f: MediaAdvancedFilterState,
   bounds: CatalogBounds,
 ): boolean {
+  void bounds;
   if (f.catalogKind === "single" && m.catalogSource === "network") return false;
   if (f.catalogKind === "network" && m.catalogSource !== "network") return false;
 

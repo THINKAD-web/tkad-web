@@ -26,3 +26,6 @@ export function CommunityRoleBadge({
     </span>
   );
 }
+
+/** 커뮤니티 멤버 역할 뱃지 (`<RoleBadge role="AGENCY" />`). */
+export const RoleBadge = CommunityRoleBadge;

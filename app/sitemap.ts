@@ -12,7 +12,13 @@ const origin = siteUrl.replace(/\/$/, "");
 function staticPathPriority(path: string): number {
   if (path === "") return 1;
   if (path === "/media" || path === "/planner" || path === "/quote") return 0.95;
-  if (path === "/compare" || path === "/insights" || path === "/cases") return 0.9;
+  if (
+    path === "/compare" ||
+    path === "/insights" ||
+    path === "/cases" ||
+    path === "/report"
+  )
+    return 0.9;
   return 0.8;
 }
 
@@ -28,7 +34,9 @@ function sitemapEntry(
     ? 1
     : path.startsWith("/cases/") && !path.includes("//")
       ? 0.75
-      : path.startsWith("/media/") || path.startsWith("/insights/")
+      : path.startsWith("/media/") ||
+          path.startsWith("/insights/") ||
+          path.startsWith("/report/")
         ? 0.72
         : staticPathPriority(path);
   return {
@@ -132,6 +140,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // ── Trend reports (Report model) — published + slug
+  let reportPart: MetadataRoute.Sitemap = [];
+  if (isDatabaseConfigured()) {
+    try {
+      const db = getPrisma();
+      const reports = await db.report.findMany({
+        where: { published: true },
+        select: { slug: true, publishedAt: true, updatedAt: true },
+        orderBy: { publishedAt: "desc" },
+        take: 500,
+      });
+      reportPart = reports.map((r) =>
+        sitemapEntry(
+          `/report/${r.slug}`,
+          r.updatedAt ?? r.publishedAt ?? buildTime,
+        ),
+      );
+    } catch {
+      // 리포트 fetch 실패
+    }
+  }
+
   // ── Guides — 비-draft 만 포함
   const guidePart: MetadataRoute.Sitemap = listGuideMeta()
     .filter((g) => !g.draft)
@@ -150,6 +180,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...casePart,
     ...mediaPart,
     ...insightPart,
+    ...reportPart,
     ...guidePart,
   ];
 }

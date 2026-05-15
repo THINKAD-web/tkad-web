@@ -4,6 +4,46 @@ import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 
 export const OG_DIM = { width: 1200, height: 630 } as const;
 
+const SITE_KEYWORDS = {
+  ko: [
+    "OOH 광고",
+    "옥외광고",
+    "DOOH",
+    "디지털 옥외광고",
+    "빌보드 광고",
+    "디지털 사이니지",
+    "전광판 광고",
+    "교통 광고",
+    "버스쉘터 광고",
+    "지하철 광고",
+    "광고 에이전시",
+    "옥외광고 견적",
+    "미디어 플래너",
+    "싱커드",
+    "THINKAD",
+    "코엑스 전광판",
+    "강남 광고",
+  ],
+  en: [
+    "OOH advertising",
+    "OOH media Korea",
+    "DOOH",
+    "digital out-of-home",
+    "billboard advertising",
+    "digital signage",
+    "transit advertising",
+    "subway advertising Korea",
+    "bus shelter advertising",
+    "OOH agency Korea",
+    "outdoor advertising quote",
+    "media planner",
+    "THINKAD",
+    "Korea advertising agency",
+    "COEX billboard",
+    "Gangnam advertising",
+  ],
+} as const;
+
 /** Fallback OG when a segment has no dedicated opengraph-image route. */
 export function defaultOgImages(
   locale: string,
@@ -39,6 +79,14 @@ function resolvePublicSiteUrl(): string {
 
 export const siteUrl = resolvePublicSiteUrl();
 
+export function siteKeywords(locale: string): string[] {
+  return locale === "ko" ? [...SITE_KEYWORDS.ko] : [...SITE_KEYWORDS.en];
+}
+
+export function serializeJsonLd(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
 /** Public path segments (no leading locale). Home is "". */
 export const publicSeoPaths = [
   "",
@@ -48,6 +96,7 @@ export const publicSeoPaths = [
   "/recommend",
   "/cases",
   "/insights",
+  "/report",
   "/academy",
   "/contact",
   "/tools",

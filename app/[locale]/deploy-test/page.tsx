@@ -6,7 +6,6 @@ export default function DeployTestPage() {
   const now = new Date().toISOString();
   const dbOk = isDatabaseConfigured();
   const nodeVer = process.version;
-  const nextVer = process.env.__NEXT_VERSION ?? "unknown";
 
   const checks = [
     { label: "Server Time (UTC)", value: now, ok: true },

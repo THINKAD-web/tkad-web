@@ -2,7 +2,11 @@ import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { listGuideMeta } from "@/lib/guides-data";
-import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
+import {
+  buildBreadcrumbJsonLd,
+  buildCollectionPageJsonLd,
+} from "@/lib/structured-data";
+import { serializeJsonLd } from "@/lib/seo";
 import { ArrowRight, BookText } from "lucide-react";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -12,16 +16,33 @@ export default async function GuidesIndexPage({ params }: Props) {
   setRequestLocale(locale);
   const isKo = locale === "ko";
   const guides = listGuideMeta();
-  const breadcrumb = buildBreadcrumbJsonLd(locale, [
-    { name: isKo ? "홈" : "Home", path: "" },
-    { name: isKo ? "가이드" : "Guides", path: "/guides" },
-  ]);
+  const ld = [
+    buildBreadcrumbJsonLd(locale, [
+      { name: isKo ? "홈" : "Home", path: "" },
+      { name: isKo ? "가이드" : "Guides", path: "/guides" },
+    ]),
+    buildCollectionPageJsonLd(locale, {
+      path: "/guides",
+      name: isKo ? "THINKAD OOH 가이드" : "THINKAD OOH Guides",
+      description: isKo
+        ? "지역과 매체 유형별 OOH 광고 집행 가이드 모음입니다."
+        : "A collection of THINKAD OOH guides by region and media type.",
+      items: guides
+        .filter((guide) => !guide.draft)
+        .map((guide) => ({
+          name: isKo ? guide.titleKo : guide.titleEn,
+          path: `/guides/${guide.slug}`,
+          description: isKo ? guide.descriptionKo : guide.descriptionEn,
+          datePublished: guide.publishedAt,
+        })),
+    }),
+  ];
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(ld) }}
       />
 
       <section className="bg-hero-void py-16 sm:py-20">
@@ -66,9 +87,11 @@ export default async function GuidesIndexPage({ params }: Props) {
                         [ DRAFT ]
                       </span>
                     ) : null}
-                    <h2 className="text-xl font-bold tracking-tight">{g.title}</h2>
+                    <h2 className="text-xl font-bold tracking-tight">
+                      {isKo ? g.titleKo : g.titleEn}
+                    </h2>
                     <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground group-hover:text-hero-fg/80">
-                      {g.description}
+                      {isKo ? g.descriptionKo : g.descriptionEn}
                     </p>
                     <span className="mt-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
                       {isKo ? "읽기" : "Read"}

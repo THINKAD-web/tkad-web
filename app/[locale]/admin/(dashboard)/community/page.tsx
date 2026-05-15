@@ -23,6 +23,13 @@ import type {
   AdminCommentListItem,
   AdminReportItem,
 } from "@/lib/community/admin-queries";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 type Tab = "posts" | "comments";
 type StatusFilter = "all" | "published" | "hidden" | "deleted";
@@ -202,188 +209,155 @@ export default function AdminCommunityPage() {
     }
   };
 
+  const tabBtn = (active: boolean) =>
+    `inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+      active
+        ? "bg-background text-foreground shadow-sm"
+        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+    }`;
+
   return (
-    <div className="space-y-6">
-      <header className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6">
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_80%_70%,rgba(168,85,247,0.14),transparent_60%),radial-gradient(circle_at_40%_90%,rgba(236,72,153,0.10),transparent_65%)]"
-        />
-        <p className="relative font-mono text-[11px] font-black uppercase tracking-[0.22em] text-muted-foreground">
-          [ ADMIN · COMMUNITY MODERATION ]
-        </p>
-        <h1 className="relative mt-2 text-2xl font-black tracking-tight text-foreground">
-          커뮤니티 모더레이션
-        </h1>
-        <p className="relative mt-2 font-mono text-[11px] tracking-tight text-muted-foreground">
-          {`// `}신고된 글 / 댓글 검토 · 복구 · 영구 삭제 / 신고 사유 확인
-        </p>
-        <div className="relative mt-4 flex flex-wrap gap-2">
-          <a
-            href={`/${locale}/community`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/80 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card"
-          >
-            공개 커뮤니티 보기
-          </a>
-        </div>
-      </header>
+    <div className="space-y-6 text-foreground">
+      <Card className="py-4">
+        <CardHeader className="gap-2 pb-2">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            [ ADMIN · COMMUNITY MODERATION ]
+          </p>
+          <CardTitle className="text-2xl font-bold tracking-tight">
+            커뮤니티 모더레이션
+          </CardTitle>
+          <CardDescription className="font-mono text-xs">
+            신고된 글 / 댓글 검토 · 복구 · 영구 삭제 / 신고 사유 확인
+          </CardDescription>
+          <div className="pt-1">
+            <a
+              href={`/${locale}/community`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+            >
+              공개 커뮤니티 보기
+            </a>
+          </div>
+        </CardHeader>
+      </Card>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          {
-            label: "총 게시글",
-            value: stats?.postsTotal ?? 0,
-            tone: "text-cyan-300",
-          },
-          {
-            label: "총 댓글",
-            value: stats?.commentsTotal ?? 0,
-            tone: "text-fuchsia-300",
-          },
-          {
-            label: "신고 누적",
-            value: reportedTotal,
-            tone: "text-amber-300",
-          },
-          {
-            label: "숨김/삭제",
-            value: hiddenTotal,
-            tone: "text-emerald-300",
-          },
+          { label: "총 게시글", value: stats?.postsTotal ?? 0 },
+          { label: "총 댓글", value: stats?.commentsTotal ?? 0 },
+          { label: "신고 누적", value: reportedTotal },
+          { label: "숨김/삭제", value: hiddenTotal },
         ].map((item) => (
-          <div
-            key={item.label}
-            className="tkad-glass-surface rounded-[22px] px-4 py-3"
-          >
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-              [ {item.label} ]
-            </p>
-            <p className={`mt-2 text-2xl font-black tabular-nums ${item.tone}`}>
-              {item.value.toLocaleString("ko-KR")}
-            </p>
-          </div>
+          <Card key={item.label} className="py-0">
+            <CardContent className="py-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {item.label}
+              </p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">
+                {item.value.toLocaleString("ko-KR")}
+              </p>
+            </CardContent>
+          </Card>
         ))}
       </section>
 
-      {/* 탭 */}
-      <div className="flex w-fit flex-wrap gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm backdrop-blur">
-        <button
-          type="button"
-          onClick={() => setTab("posts")}
-          className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-mono text-[11px] font-black uppercase tracking-[0.22em] transition-colors ${
-            tab === "posts"
-              ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <MessageSquare className="h-3.5 w-3.5" />
+      <div className="flex w-fit flex-wrap gap-1 rounded-lg border border-border bg-muted/40 p-1">
+        <button type="button" onClick={() => setTab("posts")} className={tabBtn(tab === "posts")}>
+          <MessageSquare className="h-4 w-4 shrink-0" />
           게시글
         </button>
         <button
           type="button"
           onClick={() => setTab("comments")}
-          className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-mono text-[11px] font-black uppercase tracking-[0.22em] transition-colors ${
-            tab === "comments"
-              ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
+          className={tabBtn(tab === "comments")}
         >
-          <MessageSquare className="h-3.5 w-3.5" />
+          <MessageSquare className="h-4 w-4 shrink-0" />
           댓글
         </button>
       </div>
 
-      {/* 필터 */}
-      <div className="tkad-glass-surface flex flex-wrap items-center gap-3 rounded-[22px] p-4">
-        <div className="mr-1 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground shadow-sm backdrop-blur">
-          {tab === "posts" ? "게시글" : "댓글"} {total.toLocaleString("ko-KR")}건
-        </div>
-        <div className="flex items-center gap-2">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            상태
-          </p>
-          <div className="flex w-fit gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm backdrop-blur">
-            {(["all", "published", "hidden", "deleted"] as StatusFilter[]).map(
-              (s) => (
+      <Card className="py-0">
+        <CardContent className="flex flex-wrap items-center gap-3 py-4">
+          <span className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+            {tab === "posts" ? "게시글" : "댓글"} {total.toLocaleString("ko-KR")}건
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">상태</span>
+            <div className="flex w-fit flex-wrap gap-1 rounded-lg border border-border bg-background p-1">
+              {(["all", "published", "hidden", "deleted"] as StatusFilter[]).map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setStatusFilter(s)}
-                  className={`rounded-full px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] transition-colors ${
+                  className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                     statusFilter === s
-                      ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-muted text-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   }`}
                 >
                   {STATUS_LABELS[s]}
                 </button>
-              ),
-            )}
-          </div>
-        </div>
-
-        {tab === "posts" ? (
-          <div className="flex items-center gap-2">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-              카테고리
-            </p>
-            <div className="flex w-fit gap-1 rounded-full border border-border/70 bg-card/70 p-1 shadow-sm backdrop-blur">
-              {(["all", ...COMMUNITY_CATEGORIES] as const).map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCategoryFilter(c as CommunityCategory | "all")}
-                  className={`rounded-full px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] transition-colors ${
-                    categoryFilter === c
-                      ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {c === "all" ? "전체" : COMMUNITY_CATEGORY_LABELS[c].ko}
-                </button>
               ))}
             </div>
           </div>
-        ) : null}
 
-        <label className="ml-auto inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
-          <input
-            type="checkbox"
-            checked={reportsOnly}
-            onChange={(e) => setReportsOnly(e.target.checked)}
-            className="h-4 w-4 rounded border border-border/70 accent-cta"
-          />
-          신고된 항목만
-        </label>
+          {tab === "posts" ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground">카테고리</span>
+              <div className="flex w-fit max-w-full flex-wrap gap-1 rounded-lg border border-border bg-background p-1">
+                {(["all", ...COMMUNITY_CATEGORIES] as const).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCategoryFilter(c as CommunityCategory | "all")}
+                    className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      categoryFilter === c
+                        ? "bg-muted text-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    }`}
+                  >
+                    {c === "all" ? "전체" : COMMUNITY_CATEGORY_LABELS[c].ko}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
-        <button
-          type="button"
-          onClick={() => void load()}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card disabled:opacity-50"
-        >
-          {loading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <RefreshCw className="h-3.5 w-3.5" />
-          )}
-          새로고침
-        </button>
+          <label className="ml-auto inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-foreground">
+            <input
+              type="checkbox"
+              checked={reportsOnly}
+              onChange={(e) => setReportsOnly(e.target.checked)}
+              className="h-4 w-4 rounded border border-border accent-cta"
+            />
+            신고된 항목만
+          </label>
 
-        <div className="ml-auto font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          {pageStart}-{pageEnd} / {total.toLocaleString("ko-KR")}
-        </div>
-      </div>
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:opacity-50"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            새로고침
+          </button>
 
-      {/* 에러 */}
+          <span className="w-full text-right text-xs text-muted-foreground sm:ml-auto sm:w-auto">
+            {pageStart}-{pageEnd} / {total.toLocaleString("ko-KR")}
+          </span>
+        </CardContent>
+      </Card>
+
       {error ? (
-        <p className="tkad-glass-surface rounded-[18px] border border-border/70 px-4 py-3 font-mono text-[11px] tracking-tight text-foreground">
-          {`// `}
-          {error}
-        </p>
+        <Card className="border-destructive/40 bg-destructive/5 py-0">
+          <CardContent className="py-3 text-sm text-destructive">{error}</CardContent>
+        </Card>
       ) : null}
 
       {/* 목록 */}
@@ -415,43 +389,54 @@ export default function AdminCommunityPage() {
         />
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-border/70 bg-card/60 px-4 py-3 shadow-sm backdrop-blur">
-        <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
-          {`// `}현재 {page} / {totalPages} 페이지
-        </p>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            disabled={page <= 1 || loading}
-            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-            className="rounded-full border border-border/70 bg-card/70 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-card disabled:opacity-40"
-          >
-            이전
-          </button>
-          <button
-            type="button"
-            disabled={page >= totalPages || loading}
-            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-            className="rounded-full border border-border/70 bg-card/70 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-card disabled:opacity-40"
-          >
-            다음
-          </button>
-        </div>
-      </div>
+      <Card className="py-0">
+        <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            {page} / {totalPages} 페이지
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={page <= 1 || loading}
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:opacity-40"
+            >
+              이전
+            </button>
+            <button
+              type="button"
+              disabled={page >= totalPages || loading}
+              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:opacity-40"
+            >
+              다음
+            </button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    published: { label: "정상", cls: "border-border bg-card text-foreground" },
-    hidden: { label: "숨김", cls: "border-primary bg-primary text-primary-foreground" },
-    deleted: { label: "삭제", cls: "border-border bg-foreground text-background" },
+    published: {
+      label: "정상",
+      cls: "border-border bg-muted/50 text-foreground",
+    },
+    hidden: {
+      label: "숨김",
+      cls: "border-primary/40 bg-primary/10 text-foreground",
+    },
+    deleted: {
+      label: "삭제",
+      cls: "border-border bg-foreground text-background",
+    },
   };
   const cfg = map[status] ?? map.published;
   return (
     <span
-      className={`inline-flex border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] ${cfg.cls}`}
+      className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${cfg.cls}`}
     >
       {cfg.label}
     </span>
@@ -477,7 +462,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={onViewReports}
-          className="inline-flex items-center gap-1 border-2 border-primary bg-primary px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground hover:bg-foreground hover:border-foreground"
+          className="inline-flex items-center gap-1 rounded-md border border-primary bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/20"
           title="신고 사유 보기"
         >
           <Flag className="h-3 w-3" />
@@ -488,7 +473,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={() => onUpdateStatus("published")}
-          className="inline-flex items-center gap-1 border-2 border-border bg-card px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground hover:bg-foreground hover:text-background"
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
           title="복구"
         >
           <Eye className="h-3 w-3" />
@@ -499,7 +484,7 @@ function ActionButtons({
         <button
           type="button"
           onClick={() => onUpdateStatus("hidden")}
-          className="inline-flex items-center gap-1 border-2 border-border bg-card px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground hover:bg-foreground hover:text-background"
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
           title="숨김 처리"
         >
           <EyeOff className="h-3 w-3" />
@@ -509,7 +494,7 @@ function ActionButtons({
       <button
         type="button"
         onClick={() => onUpdateStatus("deleted")}
-        className="inline-flex items-center gap-1 border-2 border-border bg-card px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground hover:bg-foreground hover:text-background"
+        className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
         title="소프트 삭제 (복구 가능)"
       >
         <Trash2 className="h-3 w-3" />
@@ -518,7 +503,7 @@ function ActionButtons({
       <button
         type="button"
         onClick={onHardDelete}
-        className="inline-flex items-center gap-1 border-2 border-primary bg-card px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary hover:bg-primary hover:text-primary-foreground"
+        className="inline-flex items-center gap-1 rounded-md border border-destructive/40 bg-destructive/5 px-2 py-1 text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10"
         title="DB 영구 삭제 (복구 불가)"
       >
         <AlertTriangle className="h-3 w-3" />
@@ -544,97 +529,96 @@ function PostsTable({
   onViewReports: (id: string) => void;
 }) {
   if (loading && rows.length === 0) {
-    return <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">{`// `}로딩 중…</p>;
+    return (
+      <Card>
+        <CardContent className="py-10 text-center text-sm text-muted-foreground">불러오는 중…</CardContent>
+      </Card>
+    );
   }
   if (rows.length === 0) {
     return (
-      <div className="border-2 border-border bg-muted p-12 text-center font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
-        {`// `}조건에 맞는 게시글이 없습니다.
-      </div>
+      <Card>
+        <CardContent className="py-12 text-center text-sm text-muted-foreground">
+          조건에 맞는 게시글이 없습니다.
+        </CardContent>
+      </Card>
     );
   }
   return (
-    <div className="overflow-x-auto border-2 border-border">
-      <table className="w-full text-sm">
-        <thead className="bg-foreground text-primary">
-          <tr>
-            {["상태", "카테고리", "제목 / 발췌", "작성자", "신고", "통계", "작성", "관리"].map(
-              (h) => (
-                <th
-                  key={h}
-                  className="px-3 py-2.5 text-left font-mono text-[10px] font-bold uppercase tracking-[0.22em] border-r-2 border-border last:border-r-0"
-                >
+    <Card className="gap-0 py-0">
+      <CardContent className="overflow-x-auto px-0 pb-0 pt-0">
+        <table className="w-full min-w-[920px] text-sm">
+          <thead>
+            <tr className="border-b text-left text-xs font-medium text-muted-foreground">
+              {["상태", "카테고리", "제목 / 발췌", "작성자", "신고", "통계", "작성", "관리"].map((h) => (
+                <th key={h} className="px-4 py-3 pr-3">
                   {h}
                 </th>
-              ),
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id} className="border-t-2 border-border">
-              <td className="px-3 py-2.5 align-top">
-                <StatusBadge status={r.status} />
-              </td>
-              <td className="px-3 py-2.5 align-top font-mono text-[11px] tracking-tight">
-                {COMMUNITY_CATEGORY_LABELS[r.category].ko}
-              </td>
-              <td className="px-3 py-2.5 align-top">
-                <a
-                  href={`/${locale}/community/post/${r.id}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block font-bold text-foreground hover:text-primary"
-                >
-                  {r.title}
-                </a>
-                <p className="mt-1 line-clamp-2 font-mono text-[11px] tracking-tight text-muted-foreground">
-                  {r.bodyExcerpt}
-                </p>
-              </td>
-              <td className="px-3 py-2.5 align-top">
-                <p className="font-mono text-[11px] text-foreground">
-                  {r.isAnonymous ? "익명" : r.authorName}
-                </p>
-                {r.authorIp ? (
-                  <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
-                    IP {r.authorIp}
-                  </p>
-                ) : null}
-              </td>
-              <td className="px-3 py-2.5 align-top text-center">
-                <span
-                  className={`font-mono text-sm font-bold tabular-nums ${
-                    r.reportCount > 0 ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  {r.reportCount}
-                </span>
-              </td>
-              <td className="px-3 py-2.5 align-top font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                <div className="space-y-0.5 tabular-nums">
-                  <div>조회 {r.viewCount}</div>
-                  <div>좋아요 {r.likeCount}</div>
-                  <div>댓글 {r.commentCount}</div>
-                </div>
-              </td>
-              <td className="px-3 py-2.5 align-top font-mono text-[11px] tabular-nums text-muted-foreground">
-                {fmt(r.createdAt)}
-              </td>
-              <td className="px-3 py-2.5 align-top">
-                <ActionButtons
-                  status={r.status}
-                  reportCount={r.reportCount}
-                  onUpdateStatus={(s) => onUpdateStatus(r.id, s)}
-                  onHardDelete={() => onHardDelete(r.id)}
-                  onViewReports={() => onViewReports(r.id)}
-                />
-              </td>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id} className="border-b last:border-0">
+                <td className="px-4 py-3 align-top">
+                  <StatusBadge status={r.status} />
+                </td>
+                <td className="px-4 py-3 pr-3 align-top text-muted-foreground">
+                  {COMMUNITY_CATEGORY_LABELS[r.category].ko}
+                </td>
+                <td className="px-4 py-3 pr-3 align-top">
+                  <a
+                    href={`/${locale}/community/post/${r.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block font-semibold text-primary underline-offset-2 hover:underline"
+                  >
+                    {r.title}
+                  </a>
+                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{r.bodyExcerpt}</p>
+                </td>
+                <td className="px-4 py-3 pr-3 align-top">
+                  <p className="text-sm font-medium text-foreground">
+                    {r.isAnonymous ? "익명" : r.authorName}
+                  </p>
+                  {r.authorIp ? (
+                    <p className="mt-0.5 text-xs text-muted-foreground">IP {r.authorIp}</p>
+                  ) : null}
+                </td>
+                <td className="px-4 py-3 pr-3 align-top text-center">
+                  <span
+                    className={`text-sm font-semibold tabular-nums ${
+                      r.reportCount > 0 ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {r.reportCount}
+                  </span>
+                </td>
+                <td className="px-4 py-3 pr-3 align-top text-xs uppercase tracking-wide text-muted-foreground">
+                  <div className="space-y-0.5 tabular-nums normal-case">
+                    <div>조회 {r.viewCount}</div>
+                    <div>좋아요 {r.likeCount}</div>
+                    <div>댓글 {r.commentCount}</div>
+                  </div>
+                </td>
+                <td className="px-4 py-3 pr-3 align-top text-xs tabular-nums text-muted-foreground">
+                  {fmt(r.createdAt)}
+                </td>
+                <td className="px-4 py-3 align-top">
+                  <ActionButtons
+                    status={r.status}
+                    reportCount={r.reportCount}
+                    onUpdateStatus={(s) => onUpdateStatus(r.id, s)}
+                    onHardDelete={() => onHardDelete(r.id)}
+                    onViewReports={() => onViewReports(r.id)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -654,87 +638,88 @@ function CommentsTable({
   onViewReports: (id: string) => void;
 }) {
   if (loading && rows.length === 0) {
-    return <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">{`// `}로딩 중…</p>;
+    return (
+      <Card>
+        <CardContent className="py-10 text-center text-sm text-muted-foreground">불러오는 중…</CardContent>
+      </Card>
+    );
   }
   if (rows.length === 0) {
     return (
-      <div className="border-2 border-border bg-muted p-12 text-center font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
-        {`// `}조건에 맞는 댓글이 없습니다.
-      </div>
+      <Card>
+        <CardContent className="py-12 text-center text-sm text-muted-foreground">
+          조건에 맞는 댓글이 없습니다.
+        </CardContent>
+      </Card>
     );
   }
   return (
-    <div className="overflow-x-auto border-2 border-border">
-      <table className="w-full text-sm">
-        <thead className="bg-foreground text-primary">
-          <tr>
-            {["상태", "댓글", "원본 게시글", "작성자", "신고", "작성", "관리"].map(
-              (h) => (
-                <th
-                  key={h}
-                  className="px-3 py-2.5 text-left font-mono text-[10px] font-bold uppercase tracking-[0.22em] border-r-2 border-border last:border-r-0"
-                >
+    <Card className="gap-0 py-0">
+      <CardContent className="overflow-x-auto px-0 pb-0 pt-0">
+        <table className="w-full min-w-[720px] text-sm">
+          <thead>
+            <tr className="border-b text-left text-xs font-medium text-muted-foreground">
+              {["상태", "댓글", "원본 게시글", "작성자", "신고", "작성", "관리"].map((h) => (
+                <th key={h} className="px-4 py-3 pr-3">
                   {h}
                 </th>
-              ),
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id} className="border-t-2 border-border">
-              <td className="px-3 py-2.5 align-top">
-                <StatusBadge status={r.status} />
-              </td>
-              <td className="px-3 py-2.5 align-top">
-                <p className="line-clamp-3 text-sm text-foreground">{r.body}</p>
-              </td>
-              <td className="px-3 py-2.5 align-top">
-                <a
-                  href={`/${locale}/community/post/${r.postId}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="line-clamp-2 font-mono text-[11px] tracking-tight text-primary hover:text-foreground"
-                >
-                  {r.postTitle}
-                </a>
-              </td>
-              <td className="px-3 py-2.5 align-top">
-                <p className="font-mono text-[11px] text-foreground">
-                  {r.isAnonymous ? "익명" : r.authorName}
-                </p>
-                {r.authorIp ? (
-                  <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
-                    IP {r.authorIp}
-                  </p>
-                ) : null}
-              </td>
-              <td className="px-3 py-2.5 align-top text-center">
-                <span
-                  className={`font-mono text-sm font-bold tabular-nums ${
-                    r.reportCount > 0 ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  {r.reportCount}
-                </span>
-              </td>
-              <td className="px-3 py-2.5 align-top font-mono text-[11px] tabular-nums text-muted-foreground">
-                {fmt(r.createdAt)}
-              </td>
-              <td className="px-3 py-2.5 align-top">
-                <ActionButtons
-                  status={r.status}
-                  reportCount={r.reportCount}
-                  onUpdateStatus={(s) => onUpdateStatus(r.id, s)}
-                  onHardDelete={() => onHardDelete(r.id)}
-                  onViewReports={() => onViewReports(r.id)}
-                />
-              </td>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id} className="border-b last:border-0">
+                <td className="px-4 py-3 align-top">
+                  <StatusBadge status={r.status} />
+                </td>
+                <td className="px-4 py-3 pr-3 align-top">
+                  <p className="line-clamp-3 text-sm text-foreground">{r.body}</p>
+                </td>
+                <td className="px-4 py-3 pr-3 align-top">
+                  <a
+                    href={`/${locale}/community/post/${r.postId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="line-clamp-2 text-sm font-semibold text-primary underline-offset-2 hover:underline"
+                  >
+                    {r.postTitle}
+                  </a>
+                </td>
+                <td className="px-4 py-3 pr-3 align-top">
+                  <p className="text-sm font-medium text-foreground">
+                    {r.isAnonymous ? "익명" : r.authorName}
+                  </p>
+                  {r.authorIp ? (
+                    <p className="mt-0.5 text-xs text-muted-foreground">IP {r.authorIp}</p>
+                  ) : null}
+                </td>
+                <td className="px-4 py-3 pr-3 align-top text-center">
+                  <span
+                    className={`text-sm font-semibold tabular-nums ${
+                      r.reportCount > 0 ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {r.reportCount}
+                  </span>
+                </td>
+                <td className="px-4 py-3 pr-3 align-top text-xs tabular-nums text-muted-foreground">
+                  {fmt(r.createdAt)}
+                </td>
+                <td className="px-4 py-3 align-top">
+                  <ActionButtons
+                    status={r.status}
+                    reportCount={r.reportCount}
+                    onUpdateStatus={(s) => onUpdateStatus(r.id, s)}
+                    onHardDelete={() => onHardDelete(r.id)}
+                    onViewReports={() => onViewReports(r.id)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -780,57 +765,48 @@ function ReportsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground/60 p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm dark:bg-black/60"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="flex max-h-[80vh] w-full max-w-2xl flex-col border-2 border-border bg-card">
-        <div className="flex items-center justify-between border-b-2 border-border bg-foreground px-5 py-3">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
-            [ {targetType === "post" ? "게시글" : "댓글"} 신고 사유 ]
+      <div className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+        <div className="flex items-center justify-between border-b border-border bg-muted/30 px-4 py-3">
+          <p className="text-sm font-semibold text-foreground">
+            {targetType === "post" ? "게시글" : "댓글"} 신고 사유
           </p>
           <button
             type="button"
             onClick={onClose}
-            className="text-primary-foreground hover:text-primary"
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            aria-label="닫기"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" strokeWidth={2} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-4 md:p-5">
           {loading ? (
-            <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
-              {`// `}로딩 중…
-            </p>
+            <p className="text-sm text-muted-foreground">불러오는 중…</p>
           ) : error ? (
-            <p className="border-2 border-primary bg-card px-3 py-2 font-mono text-[11px] tracking-tight text-primary">
-              {`// `}
+            <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
               {error}
             </p>
           ) : reports.length === 0 ? (
-            <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
-              {`// `}신고 기록이 없습니다.
-            </p>
+            <p className="text-sm text-muted-foreground">신고 기록이 없습니다.</p>
           ) : (
-            <ul className="space-y-0">
+            <ul className="space-y-3">
               {reports.map((r) => (
-                <li
-                  key={r.id}
-                  className="-mt-[2px] border-2 border-border bg-card p-4"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                <li key={r.id} className="rounded-lg border border-border bg-background p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
                     <span className="tabular-nums">{fmt(r.createdAt)}</span>
                     <span>
                       {r.reporterIp ? `IP ${r.reporterIp}` : ""}
                       {r.reporterUserId ? ` · 사용자 ${r.reporterUserId.slice(0, 8)}` : ""}
                     </span>
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">
-                    {r.reason}
-                  </p>
+                  <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{r.reason}</p>
                 </li>
               ))}
             </ul>

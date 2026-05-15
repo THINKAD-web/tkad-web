@@ -87,6 +87,7 @@ export async function buildInsightReportPdf(
   report: InsightReport,
   _isKo: boolean,
 ): Promise<import("jspdf").default> {
+  void _isKo;
   // Force English for PDF (Korean font not embedded)
   const isKo = false;
   const { default: jsPDF } = await import("jspdf");

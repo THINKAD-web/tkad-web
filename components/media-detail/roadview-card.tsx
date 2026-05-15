@@ -94,6 +94,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
 
   const externalHref =
     lat != null && lng != null
@@ -103,15 +104,8 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
       : "";
 
   useEffect(() => {
-    if (!open || lat == null || lng == null) return;
-    const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
-    if (!appkey) {
-      setErrorMsg(t("missingKey"));
-      return;
-    }
+    if (!open || lat == null || lng == null || !appkey) return;
     let cancelled = false;
-    setLoading(true);
-    setErrorMsg(null);
     (async () => {
       try {
         const maps = await loadKakaoSdkForRoadview(appkey);
@@ -141,7 +135,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [open, lat, lng, t]);
+  }, [open, lat, lng, appkey, t]);
 
   if (lat == null || lng == null) return null;
 
@@ -199,7 +193,16 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
         ) : (
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setOpen(true);
+              if (!appkey) {
+                setLoading(false);
+                setErrorMsg(t("missingKey"));
+                return;
+              }
+              setErrorMsg(null);
+              setLoading(true);
+            }}
             className="flex aspect-video w-full items-center justify-center border-2 border-border bg-muted font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
           >
             <Eye className="mr-2 h-4 w-4" aria-hidden />

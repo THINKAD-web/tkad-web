@@ -1,12 +1,21 @@
-import { ArrowUpRight, Building2, MessageSquare, PenSquare } from "lucide-react";
+import { ArrowUpRight, Building2, Calendar, PenSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { type CommunityMemberListItem } from "@/lib/community/types";
-import { CommunityRoleBadge } from "@/components/community/role-badge";
+import { RoleBadge } from "@/components/community/role-badge";
 
 type Props = {
   member: CommunityMemberListItem;
   locale: string;
 };
+
+function fmtJoin(iso: string, locale: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString(locale === "ko" ? "ko-KR" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
 
 export function CommunityMemberCard({ member, locale }: Props) {
   const isKo = locale === "ko";
@@ -21,7 +30,7 @@ export function CommunityMemberCard({ member, locale }: Props) {
             <h2 className="text-lg font-bold tracking-tight text-white">
               {member.name}
             </h2>
-            <CommunityRoleBadge role={member.role} locale={locale} />
+            <RoleBadge role={member.role} locale={locale} />
           </div>
           {member.company ? (
             <p className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-white/58">
@@ -43,14 +52,14 @@ export function CommunityMemberCard({ member, locale }: Props) {
         </p>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-white/58">
-        <span className="inline-flex items-center gap-1">
-          <PenSquare className="h-3 w-3" />
-          {member.postCount}
+      <div className="mt-5 flex flex-wrap items-center gap-4 font-mono text-[11px] uppercase tracking-[0.18em] text-white/58">
+        <span className="inline-flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5" />
+          {isKo ? "가입" : "Joined"} · {fmtJoin(member.joinedAt, locale)}
         </span>
         <span className="inline-flex items-center gap-1">
-          <MessageSquare className="h-3 w-3" />
-          {member.commentCount}
+          <PenSquare className="h-3 w-3" />
+          {isKo ? "글" : "Posts"} · {member.postCount}
         </span>
       </div>
     </Link>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="112" viewBox="0 0 192 112" role="img" aria-label="">
+  <rect width="192" height="112" fill="#0f0f16"/>
+  <path d="M0 80 L48 40 L96 72 L144 28 L192 56 L192 112 L0 112 Z" fill="#1c1c28"/>
+  <text x="96" y="100" text-anchor="middle" fill="#4a4a62" font-family="system-ui,sans-serif" font-size="10" font-weight="600">MEDIA</text>
+</svg>

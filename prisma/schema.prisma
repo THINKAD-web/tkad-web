@@ -659,6 +659,25 @@ model AdminUser {
   @@map("admin_users")
 }
 
+enum AnalyticsIntegrationProvider {
+  ga4
+  gtm
+}
+
+model AnalyticsIntegration {
+  id            String                       @id @default(cuid())
+  provider      AnalyticsIntegrationProvider @unique
+  enabled       Boolean                      @default(false)
+  measurementId String?                      @map("measurement_id")
+  containerId   String?                      @map("container_id")
+  notes         String?                      @db.Text
+  createdAt     DateTime                     @default(now()) @map("created_at")
+  updatedAt     DateTime                     @updatedAt @map("updated_at")
+
+  @@index([enabled])
+  @@map("analytics_integrations")
+}
+
 model TrendReport {
   id                 String    @id @default(cuid())
   month              String?   @unique
@@ -784,6 +803,8 @@ model User {
   role            AppUserRole @default(advertiser)
   communityRole   CommunityMemberRole? @map("community_role")
   communityBio    String?   @map("community_bio")
+  /** 커뮤니티 멤버 디렉터리·프로필용 지역 (서울/부산/대구 등) */
+  region            String?   @map("region")
   emailVerifiedAt DateTime? @map("email_verified_at")
   lastLoginAt     DateTime? @map("last_login_at")
   deletedAt       DateTime? @map("deleted_at")
@@ -946,4 +967,30 @@ model CommunityBookmark {
   @@index([postId])
   @@index([userId])
   @@map("community_bookmarks")
+}
+
+// ── Public trend reports (/[locale]/report) ─────────────────────
+
+enum ReportCategory {
+  TREND
+  REGION
+  GUIDE
+  CAMPAIGN
+}
+
+model Report {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  summary     String         @db.Text
+  content     String         @db.Text
+  category    ReportCategory
+  thumbnail   String?
+  published   Boolean        @default(false) @map("published")
+  publishedAt DateTime?      @map("published_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  @@index([published, category, publishedAt])
+  @@map("reports")
 }

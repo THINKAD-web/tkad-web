@@ -174,7 +174,7 @@ export default function ContactPageContent() {
           <div className="overflow-hidden border-2 border-border bg-card shadow-sm">
             <div className="aspect-video w-full border-b-2 border-border">
               <iframe
-                title="THINKAD — 서울특별시 성동구 뚝섬로17가길 48  1102"
+                title="THINKAD — 서울특별시 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호"
                 src={officeMapEmbedSrc(mapHl)}
                 className="h-full w-full border-0 grayscale"
                 allowFullScreen

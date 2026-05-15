@@ -11,7 +11,7 @@ import {
   type CommunityCategory,
 } from "@/lib/community/types";
 import { Send } from "lucide-react";
-import { CommunityRoleBadge } from "@/components/community/role-badge";
+import { RoleBadge } from "@/components/community/role-badge";
 
 type Props = {
   locale: string;
@@ -84,7 +84,7 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
           <span className="text-base font-bold text-white">
             {currentUser.name}
           </span>
-          <CommunityRoleBadge role={memberRole} locale={locale} />
+          <RoleBadge role={memberRole} locale={locale} />
           {currentUser.company ? (
             <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/58">
               {currentUser.company}

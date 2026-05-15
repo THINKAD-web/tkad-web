@@ -4,18 +4,20 @@ import {
   buildMediaSeoJsonDescription,
   collectMediaSeoKeywordStrings,
 } from "@/lib/media-seo";
+import type { MediaItem } from "@/lib/media-data";
+import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 
 /** 푸터·SNS와 동일 (Organization sameAs / E-E-A-T) */
 const INSTAGRAM_THINKAD = "https://www.instagram.com/thinkad_korea" as const;
-import type { MediaItem } from "@/lib/media-data";
-import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 
 const ORG_ID = `${siteUrl}/#organization`;
 const LOCAL_ID = `${siteUrl}/#localbusiness`;
 const WEBSITE_ID = `${siteUrl}/#website`;
 
 /** Organization + LocalBusiness + WebSite JSON-LD for THINKAD. */
-export function buildStructuredDataGraph() {
+export function buildStructuredDataGraph(locale: string) {
+  const isKo = locale === "ko";
+  const localizedSiteUrl = `${siteUrl}/${locale}`;
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -42,7 +44,7 @@ export function buildStructuredDataGraph() {
           {
             "@type": "ContactPoint",
             telephone: "+82-2-515-2772",
-            email: "mannote@tkad.co.kr",
+            email: "sales@tkad.co.kr",
             contactType: "customer service",
             areaServed: "KR",
             availableLanguage: ["Korean", "English"],
@@ -67,10 +69,10 @@ export function buildStructuredDataGraph() {
         image: `${siteUrl}/pwa-icon/512`,
         url: siteUrl,
         telephone: "+82-2-515-2772",
-        email: "mannote@tkad.co.kr",
+        email: "sales@tkad.co.kr",
         address: {
           "@type": "PostalAddress",
-          streetAddress: "뚝섬로17가길 48  1102",
+          streetAddress: "뚝섬로17가길 48 성수에이원지식산업센터 1102호",
           addressLocality: "성동구",
           addressRegion: "서울특별시",
           postalCode: "04799",
@@ -93,14 +95,14 @@ export function buildStructuredDataGraph() {
         "@type": "WebSite",
         "@id": WEBSITE_ID,
         url: siteUrl,
-        name: "THINKAD 싱커드",
+        name: isKo ? "THINKAD 싱커드" : "THINKAD",
         publisher: { "@id": ORG_ID },
-        inLanguage: ["ko-KR", "en-US"],
+        inLanguage: isKo ? "ko-KR" : "en-US",
         potentialAction: {
           "@type": "SearchAction",
           target: {
             "@type": "EntryPoint",
-            urlTemplate: `${siteUrl}/ko/media?q={search_term_string}`,
+            urlTemplate: `${localizedSiteUrl}/media?q={search_term_string}`,
           },
           "query-input": "required name=search_term_string",
         },
@@ -208,21 +210,31 @@ export function buildMediaBreadcrumbJsonLd(
 export function buildInsightArticleJsonLd(
   report: {
     titleKo: string;
+    titleEn?: string;
     summaryKo: string[];
+    summaryEn?: string[];
     publishedIso: string;
     slug: string;
     sources?: { url: string; title: string }[];
   },
   locale: string,
 ): Record<string, unknown> {
+  const isKo = locale === "ko";
   const url = `${siteUrl}/${locale}/insights/${report.slug}`;
-  const description =
-    report.summaryKo[0]?.slice(0, 280) ?? report.titleKo;
+  const headline = isKo
+    ? report.titleKo
+    : report.titleEn?.trim() || report.titleKo;
+  const summary = isKo
+    ? report.summaryKo
+    : report.summaryEn?.filter(Boolean).length
+      ? report.summaryEn
+      : report.summaryKo;
+  const description = summary[0]?.slice(0, 280) ?? headline;
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Article",
     "@id": `${url}#article`,
-    headline: report.titleKo.slice(0, 110),
+    headline: headline.slice(0, 110),
     description,
     url,
     datePublished: report.publishedIso,
@@ -243,7 +255,7 @@ export function buildInsightArticleJsonLd(
 }
 
 export function buildInsightBreadcrumbJsonLd(
-  report: { titleKo: string; slug: string },
+  report: { titleKo: string; titleEn?: string; slug: string },
   locale: string,
 ): Record<string, unknown> {
   const isKo = locale === "ko";
@@ -266,10 +278,71 @@ export function buildInsightBreadcrumbJsonLd(
       {
         "@type": "ListItem",
         position: 3,
-        name: report.titleKo.slice(0, 110),
+        name: (isKo ? report.titleKo : report.titleEn?.trim() || report.titleKo).slice(
+          0,
+          110,
+        ),
         item: `${siteUrl}/${locale}/insights/${report.slug}`,
       },
     ],
+  };
+}
+
+type CollectionPageItem = {
+  name: string;
+  path?: string;
+  url?: string;
+  description?: string;
+  datePublished?: string;
+};
+
+export function buildCollectionPageJsonLd(
+  locale: string,
+  {
+    path,
+    name,
+    description,
+    items = [],
+  }: {
+    path: string;
+    name: string;
+    description: string;
+    items?: CollectionPageItem[];
+  },
+): Record<string, unknown> {
+  const isKo = locale === "ko";
+  const origin = siteUrl.replace(/\/$/, "");
+  const pageUrl = `${origin}/${locale}${path}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${pageUrl}#collection`,
+    url: pageUrl,
+    name,
+    description,
+    inLanguage: isKo ? "ko-KR" : "en-US",
+    isPartOf: { "@id": WEBSITE_ID },
+    ...(items.length > 0
+      ? {
+          hasPart: items.map((item) => {
+            const targetUrl = item.url ?? `${origin}/${locale}${item.path ?? ""}`;
+            return {
+              "@type": "Article",
+              "@id": `${targetUrl}#item`,
+              headline: item.name,
+              url: targetUrl,
+              ...(item.description ? { description: item.description } : {}),
+              ...(item.datePublished
+                ? {
+                    datePublished: item.datePublished,
+                    dateModified: item.datePublished,
+                  }
+                : {}),
+            };
+          }),
+        }
+      : {}),
   };
 }
 

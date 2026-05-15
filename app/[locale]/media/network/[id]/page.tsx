@@ -7,7 +7,7 @@ import {
   resolveNetworkMediaDetail,
 } from "@/lib/media-network-public";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { getSimilarMediaFromCatalog } from "@/lib/media-data";
 
 type Props = { params: Promise<{ locale: string; id: string }> };

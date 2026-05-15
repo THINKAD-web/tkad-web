@@ -1,4 +1,4 @@
-import type { MediaItem, MediaPriceOption, MediaPricePeriodKey } from "@/lib/media-data";
+import type { MediaItem, MediaPricePeriodKey } from "@/lib/media-data";
 
 /**
  * 카탈로그/JSON 가격 숫자 해석.

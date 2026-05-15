@@ -246,8 +246,9 @@ export default function AdminQuoteNewClient() {
       if (next.has(id)) {
         next.delete(id);
         setQuantities((q) => {
-          const { [id]: _, ...rest } = q;
-          return rest;
+          return Object.fromEntries(
+            Object.entries(q).filter(([key]) => key !== id),
+          );
         });
       } else {
         next.add(id);
@@ -465,7 +466,6 @@ export default function AdminQuoteNewClient() {
     clientPhone,
     clientEmail,
     quoteNumber,
-    displayQuoteNumber,
     validUntilPdf,
     totals,
     lineItems,

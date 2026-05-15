@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, Link } from "@/i18n/navigation";
 import { User } from "lucide-react";
-import { CommunityRoleBadge } from "@/components/community/role-badge";
+import { RoleBadge } from "@/components/community/role-badge";
 import { COMMUNITY_LIMITS, type CommunityCommentItem } from "@/lib/community/types";
 
 type Props = {
@@ -100,6 +100,7 @@ export function CommunityCommentItemCard({
             company: string | null;
             role: "ADVERTISER" | "MEDIA" | "AGENCY" | "FREELANCER" | null;
             bio: string | null;
+            region?: string | null;
           } | null;
         };
       };
@@ -172,7 +173,7 @@ export function CommunityCommentItemCard({
           ) : (
             <span className="font-bold text-white">{comment.authorName}</span>
           )}
-          <CommunityRoleBadge role={comment.author?.role ?? null} locale={locale} />
+          <RoleBadge role={comment.author?.role ?? null} locale={locale} />
           <span className="tabular-nums">{fmtRelative(comment.createdAt, locale)}</span>
         </div>
 

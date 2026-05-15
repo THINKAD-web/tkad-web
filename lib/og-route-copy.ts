@@ -109,6 +109,18 @@ const routes = {
       subtitle: "Monthly & quarterly market reports · DOOH outlook",
     },
   },
+  report: {
+    ko: {
+      badge: "Report",
+      title: "OOH 트렌드 리포트",
+      subtitle: "광고 업계 인사이트와 매체 트렌드",
+    },
+    en: {
+      badge: "Report",
+      title: "OOH trend reports",
+      subtitle: "Industry insight and media trends",
+    },
+  },
   resources: {
     ko: {
       badge: "Resources",

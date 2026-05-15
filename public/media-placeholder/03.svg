@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="112" viewBox="0 0 192 112" role="img" aria-label="">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1020"/>
+      <stop offset="100%" stop-color="#0a0a12"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="112" fill="url(#g)"/>
+  <circle cx="96" cy="56" r="28" fill="none" stroke="#332640" stroke-width="2"/>
+  <text x="96" y="60" text-anchor="middle" fill="#554468" font-family="system-ui,sans-serif" font-size="10" font-weight="700">DOOH</text>
+</svg>

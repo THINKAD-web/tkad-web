@@ -5,11 +5,19 @@ import { notFound } from "next/navigation";
 import localFont from "next/font/local";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
-import { defaultOgImages, pageAlternates, siteUrl } from "@/lib/seo";
+import {
+  defaultOgImages,
+  pageAlternates,
+  serializeJsonLd,
+  siteKeywords,
+  siteUrl,
+} from "@/lib/seo";
 import { buildStructuredDataGraph } from "@/lib/structured-data";
 import { ThemeProvider } from "@/components/theme-provider";
 import LocaleRootBody from "@/components/locale-root-body";
+import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
 import "../globals.css";
+import "leaflet/dist/leaflet.css";
 
 const geistSans = localFont({
   src: "../fonts/geist-latin.woff2",
@@ -25,8 +33,6 @@ const geistMono = localFont({
 
 /** ISR: marketing subtree; admin/client opt out via their own layouts. */
 export const revalidate = 3600;
-
-const structuredData = buildStructuredDataGraph();
 
 type Props = {
   children: React.ReactNode;
@@ -69,26 +75,7 @@ export async function generateMetadata({
     },
     description,
     metadataBase: base,
-    keywords: [
-      "OOH 광고",
-      "옥외광고",
-      "DOOH",
-      "디지털 옥외광고",
-      "빌보드 광고",
-      "디지털 사이니지",
-      "전광판 광고",
-      "교통 광고",
-      "버스쉘터 광고",
-      "지하철 광고",
-      "OOH media Korea",
-      "광고 에이전시",
-      "옥외광고 견적",
-      "미디어 플래너",
-      "싱커드",
-      "THINKAD",
-      "코엑스 전광판",
-      "강남 광고",
-    ],
+    keywords: siteKeywords(locale),
     authors: [{ name: "THINKAD 싱커드", url: siteUrl }],
     creator: "THINKAD 싱커드",
     publisher: "THINKAD 싱커드",
@@ -166,6 +153,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const structuredData = buildStructuredDataGraph(locale);
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -175,9 +163,10 @@ export default async function LocaleLayout({ children, params }: Props) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData),
+            __html: serializeJsonLd(structuredData),
           }}
         />
+        <PublicAnalyticsLoader />
         <ThemeProvider>
           <NextIntlClientProvider
             locale={locale}

@@ -64,8 +64,14 @@ export default function AdminCrmPage() {
     [customerId],
   );
 
-  const companyLabel = (c: CrmCustomer) => (isKo ? c.company : c.companyEn);
-  const campaignName = (cp: CrmCampaign) => (isKo ? cp.name : (cp.nameEn || cp.name));
+  const companyLabel = useCallback(
+    (c: CrmCustomer) => (isKo ? c.company : c.companyEn),
+    [isKo],
+  );
+  const campaignName = useCallback(
+    (cp: CrmCampaign) => (isKo ? cp.name : (cp.nameEn || cp.name)),
+    [isKo],
+  );
 
   const dashboardStats = useMemo(() => {
     const list = customer.campaigns.filter((c) => c.status !== "scheduled");

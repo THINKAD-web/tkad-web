@@ -26,7 +26,9 @@ export function useCart() {
   const [ids, setIds] = useState<string[]>([]);
 
   useEffect(() => {
-    setIds(readRaw());
+    const frame = window.requestAnimationFrame(() => {
+      setIds(readRaw());
+    });
     const onChange = (e: Event) => {
       const detail = (e as CustomEvent<string[]>).detail;
       if (Array.isArray(detail)) setIds(detail);
@@ -38,6 +40,7 @@ export function useCart() {
     window.addEventListener("tkad:cart-changed", onChange);
     window.addEventListener("storage", onStorage);
     return () => {
+      window.cancelAnimationFrame(frame);
       window.removeEventListener("tkad:cart-changed", onChange);
       window.removeEventListener("storage", onStorage);
     };

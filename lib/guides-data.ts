@@ -18,31 +18,39 @@
 
 export type GuideSection = {
   /** 헤더 (h2) — 짧게, 키워드 포함 권장 */
-  heading: string;
+  headingKo: string;
+  headingEn: string;
   /** 본문 단락. 빈 배열이면 헤더만 출력 */
-  paragraphs: string[];
+  paragraphsKo: string[];
+  paragraphsEn: string[];
   /** 옵션: 단락 뒤에 표시되는 bullet 목록 */
-  bullets?: string[];
+  bulletsKo?: string[];
+  bulletsEn?: string[];
 };
 
 export type GuideFaqItem = {
-  question: string;
-  answer: string;
+  questionKo: string;
+  questionEn: string;
+  answerKo: string;
+  answerEn: string;
 };
 
 export type Guide = {
   /** URL slug (영문 권장 — 한글도 허용되지만 SEO 측면에서 영문 단어가 안정적) */
   slug: string;
   /** 검색 친화 제목 (60자 이내 권장) */
-  title: string;
+  titleKo: string;
+  titleEn: string;
   /** meta description / hero subtitle 겸용 (160자 이내 권장) */
-  description: string;
+  descriptionKo: string;
+  descriptionEn: string;
   /** 발행일 (ISO 8601) */
   publishedAt: string;
   /** 마지막 갱신일 — 없으면 publishedAt 사용 */
   updatedAt?: string;
   /** 검색용 keywords (메타 태그) */
-  keywords: string[];
+  keywordsKo: string[];
+  keywordsEn: string[];
   /** 본문 섹션 시퀀스 */
   sections: GuideSection[];
   /** 페이지 하단 FAQ (FAQPage JSON-LD 자동 출력) */
@@ -70,11 +78,14 @@ export type Guide = {
 export const GUIDES: Guide[] = [
   {
     slug: "gangnam-ooh-guide",
-    title: "강남 옥외광고 완벽 가이드 — 매체 선정부터 집행까지",
-    description:
+    titleKo: "강남 옥외광고 완벽 가이드 — 매체 선정부터 집행까지",
+    titleEn: "Gangnam OOH Advertising Guide - From Media Selection to Launch",
+    descriptionKo:
       "서울 강남구에서 OOH 광고를 집행하는 광고주를 위한 가이드. 핵심 매체 위치, 유동인구 분석, 예산 가이드, 매체 선정 체크리스트.",
+    descriptionEn:
+      "A guide for advertisers planning OOH campaigns in Gangnam, Seoul: key media zones, audience patterns, budget planning, and a media selection checklist.",
     publishedAt: "2026-04-28T00:00:00+09:00",
-    keywords: [
+    keywordsKo: [
       "강남 옥외광고",
       "강남 OOH",
       "강남구 빌보드",
@@ -86,57 +97,104 @@ export const GUIDES: Guide[] = [
       "THINKAD",
       "싱커드",
     ],
+    keywordsEn: [
+      "Gangnam OOH",
+      "Gangnam billboard",
+      "Seoul outdoor advertising",
+      "Gangnam station advertising",
+      "Teheran-ro digital signage",
+      "COEX billboard",
+      "OOH media guide Korea",
+      "THINKAD",
+    ],
     sections: [
       {
-        heading: "강남 OOH 광고가 효과적인 이유",
-        paragraphs: [
+        headingKo: "강남 OOH 광고가 효과적인 이유",
+        headingEn: "Why Gangnam Works for OOH Advertising",
+        paragraphsKo: [
           "[편집자 작성 영역] 강남 지역의 유동인구 특성, 비즈니스 밀집도, 타깃 인구통계 등을 작성합니다. THINKAD 검증 매체 데이터와 연계해 강남구 일평균 유동, 주요 상권의 시인성 점수 등을 포함하세요.",
           "이 가이드는 framework 데모입니다. 마케팅 / 편집자 검수 후 본문이 채워집니다.",
         ],
+        paragraphsEn: [
+          "[Editor section] Add the audience profile, business density, and target demographics for Gangnam. Tie the copy to THINKAD verified media data such as daily foot traffic, visibility scores, and buying patterns by sub-area.",
+          "This guide is a framework demo. The final long-form copy will be completed after marketing and editorial review.",
+        ],
       },
       {
-        heading: "강남 핵심 매체 위치 5선",
-        paragraphs: [
+        headingKo: "강남 핵심 매체 위치 5선",
+        headingEn: "Five Priority Gangnam Media Zones",
+        paragraphsKo: [
           "[편집자 작성 영역] 강남대로, 테헤란로, 강남역 사거리, 코엑스 일대, 선릉역 등 핵심 매체 위치를 소개합니다. 각 위치의 특성과 적합한 캠페인 유형을 설명하세요.",
         ],
-        bullets: [
+        paragraphsEn: [
+          "[Editor section] Introduce high-priority locations such as Gangnam-daero, Teheran-ro, Gangnam Station, COEX, and Seolleung. Explain which campaign goals each zone suits best.",
+        ],
+        bulletsKo: [
           "강남대로 — 주요 디지털 사이니지 / 빌보드 밀집",
           "테헤란로 — 디지털 사이니지 + IT 비즈니스 타깃",
           "코엑스 일대 — LED 전광판 + 쇼핑몰 내 디지털",
           "선릉역 — 출퇴근 동선 + 지하철 광고",
           "강남역 사거리 — 최대 유동인구",
         ],
+        bulletsEn: [
+          "Gangnam-daero - dense digital signage and billboard inventory",
+          "Teheran-ro - strong fit for IT and office-worker targeting",
+          "COEX district - landmark LED screens and mall-based digital formats",
+          "Seolleung Station - commuter traffic and subway placements",
+          "Gangnam Station intersection - one of the highest footfall zones",
+        ],
       },
       {
-        heading: "강남 OOH 캠페인 예산 가이드",
-        paragraphs: [
+        headingKo: "강남 OOH 캠페인 예산 가이드",
+        headingEn: "Budget Planning for Gangnam OOH Campaigns",
+        paragraphsKo: [
           "[편집자 작성 영역] 강남 지역의 매체별 단가 범위 (월 단위), 추천 예산 구간 (스타트업 / 중소 / 대형 캠페인) 을 정리합니다. THINKAD 의 견적 데이터를 활용하세요.",
         ],
+        paragraphsEn: [
+          "[Editor section] Outline indicative monthly rate ranges, recommended spend tiers for startups and enterprise campaigns, and where premium landmark placements sit in the budget spectrum.",
+        ],
       },
       {
-        heading: "체크리스트 — 강남 매체 선정 시 확인할 5가지",
-        paragraphs: [
+        headingKo: "체크리스트 — 강남 매체 선정 시 확인할 5가지",
+        headingEn: "Checklist: Five Things to Confirm Before Buying Gangnam Media",
+        paragraphsKo: [
           "[편집자 작성 영역] 매체 선정 시 광고주가 확인해야 할 항목을 체크리스트로 정리합니다.",
         ],
-        bullets: [
+        paragraphsEn: [
+          "[Editor section] Summarize the core buying checklist advertisers should review before selecting Gangnam inventory.",
+        ],
+        bulletsKo: [
           "타깃 인구통계 (직장인 vs 학생 vs 관광객)",
           "매체 시인성 점수 (THINKAD 검증)",
           "주변 광고 노이즈 (경쟁 매체 밀집도)",
           "최소 집행 기간 (월 단위 vs 단기)",
           "측정 방법 (QR 트래킹 / 매장 방문 / 브랜드 인지)",
         ],
+        bulletsEn: [
+          "Target profile fit (office workers vs students vs visitors)",
+          "Visibility score and sightline quality",
+          "Competitive ad clutter around the placement",
+          "Minimum booking term and production constraints",
+          "Measurement approach such as QR, store visits, or lift studies",
+        ],
       },
     ],
     faqs: [
       {
-        question: "강남에서 가장 효과적인 OOH 매체는?",
-        answer:
+        questionKo: "강남에서 가장 효과적인 OOH 매체는?",
+        questionEn: "What is the most effective OOH format in Gangnam?",
+        answerKo:
           "[편집자 작성] 캠페인 목표에 따라 다릅니다. 브랜드 인지 캠페인은 코엑스 LED 전광판이나 강남대로 빌보드, 행동 유도(전환) 캠페인은 강남역 지하철 광고나 디지털 사이니지가 효과적입니다.",
+        answerEn:
+          "[Editor draft] It depends on the campaign goal. Landmark LED screens and large-format billboards work well for awareness, while subway and proximity digital media are stronger for action-oriented campaigns.",
       },
       {
-        question: "강남 OOH 광고비는 얼마인가요?",
-        answer:
+        questionKo: "강남 OOH 광고비는 얼마인가요?",
+        questionEn: "How much does OOH advertising in Gangnam cost?",
+        answerKo:
           "[편집자 작성] 매체 종류 / 위치 / 기간에 따라 다릅니다. 일반 빌보드 월 500만원~, LED 전광판 월 1,500만원~, 지하철 광고는 노출량 기반으로 단가가 결정됩니다. 정확한 견적은 무료 상담을 이용하세요.",
+        answerEn:
+          "[Editor draft] Pricing varies by format, location, and booking term. Standard billboards, landmark LEDs, and transit digital each sit in different monthly ranges, so final pricing should be confirmed through a tailored quote.",
       },
     ],
     relatedRegion: "seoul",
@@ -158,8 +216,10 @@ export function getAllGuideSlugs(): string[] {
 export function listGuideMeta() {
   return GUIDES.map((g) => ({
     slug: g.slug,
-    title: g.title,
-    description: g.description,
+    titleKo: g.titleKo,
+    titleEn: g.titleEn,
+    descriptionKo: g.descriptionKo,
+    descriptionEn: g.descriptionEn,
     publishedAt: g.publishedAt,
     updatedAt: g.updatedAt ?? g.publishedAt,
     draft: g.draft ?? false,

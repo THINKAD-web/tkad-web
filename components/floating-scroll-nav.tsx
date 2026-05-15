@@ -30,11 +30,14 @@ export default function FloatingScrollNav() {
   }, []);
 
   useEffect(() => {
-    setMounted(true);
-    update();
+    const frame = window.requestAnimationFrame(() => {
+      setMounted(true);
+      update();
+    });
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update, { passive: true });
     return () => {
+      window.cancelAnimationFrame(frame);
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };

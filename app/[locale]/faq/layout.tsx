@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
-import { pageAlternates, segmentOpenGraphImages, siteUrl } from "@/lib/seo";
+import {
+  pageAlternates,
+  segmentOpenGraphImages,
+  serializeJsonLd,
+  siteUrl,
+} from "@/lib/seo";
 import { FAQ_ITEMS } from "@/lib/faq-data";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 
@@ -80,7 +85,7 @@ export default async function FaqLayout({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([faqJsonLd, breadcrumb]),
+          __html: serializeJsonLd([faqJsonLd, breadcrumb]),
         }}
       />
       {children}

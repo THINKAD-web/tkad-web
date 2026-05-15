@@ -31,9 +31,8 @@ export default async function ComparePage({
       if (m) items.push(m);
     }
   } else {
-    // ids가 없을 때는 카탈로그에서 랜덤으로 12개를 선택해 기본 비교 세트를 구성합니다.
-    const shuffled = [...catalog].sort(() => Math.random() - 0.5);
-    items = shuffled.slice(0, 12);
+    // ids가 없을 때는 안정적인 기본 비교 세트를 보여 줍니다.
+    items = catalog.slice(0, 12);
   }
 
   return <ComparePageClient items={items} />;

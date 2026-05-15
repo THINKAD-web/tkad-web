@@ -5,6 +5,12 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { cn } from "@/lib/utils";
+import {
+  COMMUNITY_MEMBER_ROLE_LABELS,
+  COMMUNITY_MEMBER_ROLES,
+  type CommunityMemberRole,
+} from "@/lib/community/types";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,6 +19,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
+  const [communityRole, setCommunityRole] = useState<CommunityMemberRole>("ADVERTISER");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +40,7 @@ export default function RegisterPage() {
           password,
           name,
           company: company || undefined,
+          communityRole,
         }),
       });
       const data = await res.json();
@@ -131,6 +139,29 @@ export default function RegisterPage() {
                     onChange={(e) => setCompany(e.target.value)}
                     className={inputCls}
                   />
+                </Field>
+
+                <Field label="업계 역할" htmlFor="role-advertiser" hint="(필수)">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="radiogroup" aria-label="업계 역할">
+                    {COMMUNITY_MEMBER_ROLES.map((role) => (
+                      <button
+                        key={role}
+                        id={role === "ADVERTISER" ? "role-advertiser" : undefined}
+                        type="button"
+                        role="radio"
+                        aria-checked={communityRole === role}
+                        onClick={() => setCommunityRole(role)}
+                        className={cn(
+                          "rounded-[18px] border px-3 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-[0.12em] transition-all sm:text-[10px]",
+                          communityRole === role
+                            ? "border-white/28 bg-white/14 text-white shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+                            : "border-white/10 bg-black/25 text-white/65 hover:border-white/16 hover:text-white/85",
+                        )}
+                      >
+                        {COMMUNITY_MEMBER_ROLE_LABELS[role].ko}
+                      </button>
+                    ))}
+                  </div>
                 </Field>
 
                 {error && (

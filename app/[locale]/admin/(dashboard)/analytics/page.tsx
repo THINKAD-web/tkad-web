@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,6 +14,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Layers,
+  Settings2,
 } from "lucide-react";
 
 const DEMO_MONTHLY = [
@@ -101,6 +104,7 @@ const REGION_COLORS = [
 ];
 
 export default function AdminAnalyticsPage() {
+  const pathname = usePathname();
   const [live, setLive] = useState<LiveStats | null>(null);
 
   useEffect(() => {
@@ -255,24 +259,34 @@ export default function AdminAnalyticsPage() {
 
   const typeRevenue = live?.typeRevenueKrw ?? [];
   const maxTypeRev = Math.max(1, ...typeRevenue.map((t) => t.totalKrw));
+  const locale = pathname.split("/")[1] || "ko";
 
   return (
     <div className="space-y-6 text-foreground">
-      <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-          [ ANALYTICS ]
-        </p>
-        <h2 className="mt-2 text-xl font-bold tracking-tight">분석 대시보드</h2>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-          {`// `}문의, 견적, 계약 데이터를 한눈에 확인하세요.
-          {useDb ? (
-            <span className="ml-2 text-primary">· DB 실데이터</span>
-          ) : (
-            <span className="ml-2 text-muted-foreground">
-              · 샘플 화면(DB 미연결 시)
-            </span>
-          )}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            [ ANALYTICS ]
+          </p>
+          <h2 className="mt-2 text-xl font-bold tracking-tight">분석 대시보드</h2>
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            {`// `}문의, 견적, 계약 데이터를 한눈에 확인하세요.
+            {useDb ? (
+              <span className="ml-2 text-primary">· DB 실데이터</span>
+            ) : (
+              <span className="ml-2 text-muted-foreground">
+                · 샘플 화면(DB 미연결 시)
+              </span>
+            )}
+          </p>
+        </div>
+        <Link
+          href={`/${locale}/admin/analytics/settings`}
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
+        >
+          <Settings2 className="h-4 w-4" />
+          방문자 통계 설정
+        </Link>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

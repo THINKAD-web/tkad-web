@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { AppUserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { rateLimit } from "@/lib/rate-limit";
@@ -19,6 +20,19 @@ import {
 
 export const runtime = "nodejs";
 
+const COMMUNITY_SIGNUP_ROLES = [
+  "ADVERTISER",
+  "MEDIA",
+  "AGENCY",
+  "FREELANCER",
+] as const;
+
+function appRoleForCommunityRole(cr: (typeof COMMUNITY_SIGNUP_ROLES)[number]): AppUserRole {
+  if (cr === "MEDIA") return "owner";
+  if (cr === "AGENCY") return "agency";
+  return "advertiser";
+}
+
 const Body = z.object({
   email: z.string().email().max(254),
   password: z.string().min(8).max(128),
@@ -26,6 +40,7 @@ const Body = z.object({
   phone: z.string().max(20).optional(),
   company: z.string().max(80).optional(),
   locale: z.enum(["ko", "en", "zh", "ja"]).default("ko"),
+  communityRole: z.enum(COMMUNITY_SIGNUP_ROLES).default("ADVERTISER"),
 });
 
 const limiter = rateLimit({ limit: 5, windowMs: 60 * 60 * 1000 });
@@ -45,7 +60,8 @@ export async function POST(req: Request) {
     const parsed = Body.safeParse(body);
     if (!parsed.success) return apiZodError(parsed.error);
 
-    const { email, password, name, phone, company, locale } = parsed.data;
+    const { email, password, name, phone, company, locale, communityRole } =
+      parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -55,6 +71,7 @@ export async function POST(req: Request) {
     }
 
     const passwordHash = await hashPassword(password);
+    const appRole = appRoleForCommunityRole(communityRole);
     const user = await prisma.user.create({
       data: {
         email,
@@ -63,7 +80,8 @@ export async function POST(req: Request) {
         phone,
         company,
         locale,
-        role: "advertiser",
+        role: appRole,
+        communityRole,
         lastLoginAt: new Date(),
       },
       select: { id: true, email: true, name: true, role: true },

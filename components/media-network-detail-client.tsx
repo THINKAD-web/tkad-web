@@ -17,7 +17,6 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 import {
   NETWORK_TYPE_LABELS,
-  computeNetworkMonthlyPrice,
 } from "@/lib/media-network-types";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
@@ -126,24 +125,6 @@ export default function MediaNetworkDetailClient({
   }, [data.locations, data.pricePerUnit, data.pricePackage, data.totalLocations, thumbPool]);
 
   const heroImg = thumbPool[0] ?? null;
-
-  const tierList =
-    data.tiers.length > 0
-      ? data.tiers
-      : [
-          {
-            units: Math.max(data.minUnits, 1),
-            price: computeNetworkMonthlyPrice(
-              {
-                pricePackage: data.pricePackage,
-                pricePerUnit: data.pricePerUnit,
-                minUnits: data.minUnits,
-                packageOptions: null,
-              },
-              data.minUnits,
-            ),
-          },
-        ];
 
   const quoteHref = `/quote?media=${encodeURIComponent(data.catalogId)}`;
 

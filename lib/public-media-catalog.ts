@@ -121,9 +121,10 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
       const normalized: MediaPriceOption[] = [];
       for (const item of arr) {
         if (!item || typeof item !== "object") continue;
-        const label = (item as any).label;
-        const price = (item as any).price;
-        const period = (item as any).period as
+        const priceOption = item as Record<string, unknown>;
+        const label = priceOption.label;
+        const price = priceOption.price;
+        const period = priceOption.period as
           | MediaPricePeriodKey
           | string
           | undefined;
@@ -233,13 +234,6 @@ const catalogInclude = {
     orderBy: { createdAt: "desc" as const },
   },
 } as const;
-
-function mergeMockCatalogWithDbRows(dbRows: MediaItem[]): MediaItem[] {
-  const byId = new Map<string, MediaItem>();
-  for (const m of mediaData) byId.set(m.id, m);
-  for (const m of dbRows) byId.set(m.id, m);
-  return [...byId.values()];
-}
 
 async function appendNetworksIfAny(base: MediaItem[]): Promise<MediaItem[]> {
   try {
@@ -375,6 +369,113 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
     return fallbackWithCoverage.map(prismaMediaToMediaItem);
   } catch {
     return [];
+  }
+}
+
+/** 홈 히어로 지도 핀용 (위도·경도·표시명). */
+export type HomeHeroMapPin = {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+};
+
+const HERO_MARQUEE_IMAGE_COUNT = 14;
+const HERO_MAP_PIN_MAX = 72;
+const HERO_MEDIA_PLACEHOLDERS = [
+  "/media-placeholder/01.svg",
+  "/media-placeholder/02.svg",
+  "/media-placeholder/03.svg",
+  "/media-placeholder/04.svg",
+] as const;
+/** DB·목업 썸네일 부족 시 마퀴용(라이트 모드에서도 대비 확보) */
+const HERO_MARQUEE_UNSPLASH_FALLBACKS = [
+  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+  "https://images.unsplash.com/photo-1595872118318-4fa20be0a41e?w=400",
+  "https://images.unsplash.com/photo-1516156008625-3a9d6067fab5?w=400",
+  "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400",
+  "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400",
+  "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400",
+] as const;
+
+function shuffleMediaItems(items: MediaItem[]): MediaItem[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j]!, a[i]!];
+  }
+  return a;
+}
+
+function marqueeUrlsFromMediaItems(items: MediaItem[]): string[] {
+  const shuffled = shuffleMediaItems(items);
+  const out: string[] = [];
+  for (const m of shuffled) {
+    const img = m.sampleImages?.[0]?.trim();
+    if (img) out.push(img);
+    if (out.length >= HERO_MARQUEE_IMAGE_COUNT) break;
+  }
+  let p = 0;
+  while (out.length < HERO_MARQUEE_IMAGE_COUNT) {
+    if (p < HERO_MARQUEE_UNSPLASH_FALLBACKS.length) {
+      out.push(HERO_MARQUEE_UNSPLASH_FALLBACKS[p]!);
+    } else {
+      out.push(HERO_MEDIA_PLACEHOLDERS[p % HERO_MEDIA_PLACEHOLDERS.length]!);
+    }
+    p++;
+  }
+  return out.slice(0, HERO_MARQUEE_IMAGE_COUNT);
+}
+
+function mapPinsFromMediaItems(
+  items: MediaItem[],
+  max: number,
+): HomeHeroMapPin[] {
+  return shuffleMediaItems(items)
+    .slice(0, max)
+    .map((m) => ({
+      id: m.id,
+      name: m.name,
+      lat: m.lat,
+      lng: m.lng,
+    }));
+}
+
+/**
+ * 홈 히어로 배경 마퀴·지도 핀용 에셋.
+ * - 썸네일: 활성 매체 `sampleImages[0]` 랜덤 샘플, 부족 시 `/public/media-placeholder/*.svg`
+ * - 핀: 동일 카탈로그에서 좌표 매핑 (최대 72)
+ */
+export async function fetchHomeHeroVisualAssets(): Promise<{
+  marqueeImageUrls: string[];
+  mapPins: HomeHeroMapPin[];
+}> {
+  if (!isDatabaseConfigured()) {
+    const mock = getMediaBrowseMockCatalog();
+    return {
+      marqueeImageUrls: marqueeUrlsFromMediaItems(mock),
+      mapPins: mapPinsFromMediaItems(mock, HERO_MAP_PIN_MAX),
+    };
+  }
+  try {
+    const catalog = await fetchPublicMediaCatalog();
+    if (catalog.length === 0) {
+      const mock = getMediaBrowseMockCatalog();
+      return {
+        marqueeImageUrls: marqueeUrlsFromMediaItems(mock),
+        mapPins: mapPinsFromMediaItems(mock, HERO_MAP_PIN_MAX),
+      };
+    }
+    return {
+      marqueeImageUrls: marqueeUrlsFromMediaItems(catalog),
+      mapPins: mapPinsFromMediaItems(catalog, HERO_MAP_PIN_MAX),
+    };
+  } catch {
+    const mock = getMediaBrowseMockCatalog();
+    return {
+      marqueeImageUrls: marqueeUrlsFromMediaItems(mock),
+      mapPins: mapPinsFromMediaItems(mock, HERO_MAP_PIN_MAX),
+    };
   }
 }
 

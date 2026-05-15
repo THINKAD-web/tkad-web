@@ -5,7 +5,7 @@ import {
   type CommunityPostListItem,
 } from "@/lib/community/types";
 import { cn } from "@/lib/utils";
-import { CommunityRoleBadge } from "@/components/community/role-badge";
+import { RoleBadge } from "@/components/community/role-badge";
 
 function fmtRelative(iso: string, locale: string) {
   const date = new Date(iso);
@@ -118,7 +118,7 @@ export function CommunityPostCard({
               {post.authorName}
             </span>
             {!post.isAnonymous && post.author ? (
-              <CommunityRoleBadge
+              <RoleBadge
                 role={post.author.role}
                 locale={locale}
                 className={isNeon ? "bg-white/10" : undefined}
