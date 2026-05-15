@@ -36,7 +36,7 @@ function MarqueeBackground({ imageUrls }: { imageUrls: string[] }) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none flex h-full w-full items-center justify-center overflow-hidden opacity-[0.12] blur-sm dark:opacity-[0.25]"
+      className="pointer-events-none flex h-full w-full items-center justify-center overflow-hidden opacity-[0.12] blur-sm dark:opacity-[0.42] dark:blur-[2px]"
       style={{
         maskImage: MARQUEE_MASK,
         WebkitMaskImage: MARQUEE_MASK,
@@ -134,7 +134,7 @@ export function HomeHeroNeo({ isKo, marqueeImageUrls, mapPins }: Props) {
 
       <div
         aria-hidden
-        className="absolute inset-0 z-[1] bg-gradient-to-br from-background/90 via-background/70 to-background/40"
+        className="absolute inset-0 z-[1] bg-gradient-to-br from-background/90 via-background/70 to-background/40 dark:from-background/70 dark:via-background/45 dark:to-background/20"
       />
 
       <div className="relative z-[2] mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
