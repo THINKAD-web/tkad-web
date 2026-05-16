@@ -13,6 +13,16 @@ import {
   parseBudgetCode,
   parseInquiryTypeCode,
 } from "@/lib/contact-inquiry-labels";
+import {
+  budgetLabelV2,
+  composeContactLeadStoredMessage,
+  inquiryTypeLabelV2,
+  parseCampaignGoalsFromBody,
+  parseContactBudgetV2,
+  parseContactIndustry,
+  parseContactInquiryTypeV2,
+  parseRegionsFromBody,
+} from "@/lib/contact-lead-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -51,19 +61,26 @@ export async function POST(request: NextRequest) {
     return json({ success: true }, { status: 201 });
   }
 
-  const raw = body as Record<string, string | undefined>;
+  const raw = body as Record<string, unknown>;
   const {
-    company,
-    name,
-    phone,
+    company: companyRaw,
+    name: nameRaw,
+    phone: phoneRaw,
     email: emailRaw,
     budget: budgetRaw,
     message: messageRaw,
     inquiryType: inquiryRaw,
     locale: localeRaw,
+    startDate: startDateRaw,
+    additionalNotes: additionalNotesRaw,
+    industry: industryRaw,
+    campaignGoals: campaignGoalsRaw,
+    regions: regionsRaw,
   } = raw;
+
   /** 레거시 문의 클라이언트는 `cfTurnstileToken` 키를 사용할 수 있음 */
-  const turnstileToken = raw.turnstileToken ?? raw.cfTurnstileToken;
+  const turnstileToken =
+    (raw.turnstileToken ?? raw.cfTurnstileToken) as string | undefined;
 
   const locale = localeRaw === "en" ? "en" : "ko";
 
@@ -79,37 +96,99 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const inquiryCode = parseInquiryTypeCode(inquiryRaw);
-  const budgetCode = parseBudgetCode(budgetRaw);
+  const company = typeof companyRaw === "string" ? companyRaw : "";
+  const name = typeof nameRaw === "string" ? nameRaw : "";
+  const phone = typeof phoneRaw === "string" ? phoneRaw : "";
+  const emailStr = typeof emailRaw === "string" ? emailRaw.trim() : "";
+  const startDate =
+    typeof startDateRaw === "string" ? startDateRaw.trim() : "";
+  const additionalNotes =
+    typeof additionalNotesRaw === "string"
+      ? additionalNotesRaw.trim()
+      : typeof messageRaw === "string"
+        ? messageRaw.trim()
+        : "";
+
+  const inquiryV2 = parseContactInquiryTypeV2(
+    typeof inquiryRaw === "string" ? inquiryRaw : undefined,
+  );
+  const industryV2 = parseContactIndustry(
+    typeof industryRaw === "string" ? industryRaw : undefined,
+  );
+  const budgetV2 = parseContactBudgetV2(
+    typeof budgetRaw === "string" ? budgetRaw : undefined,
+  );
+  const goalsV2 = parseCampaignGoalsFromBody(campaignGoalsRaw);
+  const regionsV2 = parseRegionsFromBody(regionsRaw);
 
   const errors: string[] = [];
-  if (!name?.trim()) errors.push("name");
-  if (!phone?.trim() || !PHONE_RE.test(phone ?? "")) errors.push("phone");
-  if (!messageRaw?.trim()) errors.push("message");
-  if (!inquiryCode) errors.push("inquiryType");
-  if (!budgetCode) errors.push("budget");
 
-  const emailOpt = emailRaw?.trim();
-  if (emailOpt && !EMAIL_RE.test(emailOpt)) errors.push("email");
+  if (!name.trim()) errors.push("name");
+  if (!phone.trim() || !PHONE_RE.test(phone)) errors.push("phone");
 
-  if (errors.length > 0) {
-    return json(
-      { error: "validation_failed", fields: errors },
-      { status: 400 },
+  let inquiryLbl: string;
+  let budgetLbl: string;
+  let composedMessage: string;
+
+  if (inquiryV2) {
+    if (!emailStr || !EMAIL_RE.test(emailStr)) errors.push("email");
+    if (!company.trim()) errors.push("company");
+    if (!budgetV2) errors.push("budget");
+    if (!industryV2) errors.push("industry");
+    if (!goalsV2) errors.push("campaignGoals");
+    if (!regionsV2) errors.push("regions");
+    if (!startDate || Number.isNaN(Date.parse(startDate))) {
+      errors.push("startDate");
+    }
+    if (!additionalNotes) errors.push("additionalNotes");
+    if (errors.length > 0) {
+      return json(
+        { error: "validation_failed", fields: errors },
+        { status: 400 },
+      );
+    }
+    inquiryLbl = inquiryTypeLabelV2(inquiryV2, locale);
+    budgetLbl = budgetLabelV2(budgetV2!, locale);
+    composedMessage = composeContactLeadStoredMessage({
+      locale,
+      inquiryType: inquiryV2,
+      budget: budgetV2!,
+      industry: industryV2!,
+      campaignGoals: goalsV2!,
+      regions: regionsV2!,
+      startDate,
+      additionalNotes,
+    });
+  } else {
+    /** Legacy 단일 폼 (message + 구 inquiry 코드) */
+    const inquiryCode = parseInquiryTypeCode(
+      typeof inquiryRaw === "string" ? inquiryRaw : undefined,
+    );
+    const budgetCode = parseBudgetCode(
+      typeof budgetRaw === "string" ? budgetRaw : undefined,
+    );
+
+    if (!additionalNotes) errors.push("message");
+    if (!inquiryCode) errors.push("inquiryType");
+    if (!budgetCode) errors.push("budget");
+    if (emailStr && !EMAIL_RE.test(emailStr)) errors.push("email");
+
+    if (errors.length > 0) {
+      return json(
+        { error: "validation_failed", fields: errors },
+        { status: 400 },
+      );
+    }
+
+    inquiryLbl = inquiryTypeLabel(inquiryCode!, locale);
+    budgetLbl = budgetLabel(budgetCode!, locale);
+    composedMessage = composeStoredMessage(
+      inquiryLbl,
+      additionalNotes,
+      locale,
+      budgetLbl,
     );
   }
-
-  const inquiry = inquiryCode!;
-  const budget = budgetCode!;
-
-  const inquiryLbl = inquiryTypeLabel(inquiry, locale);
-  const budgetLbl = budgetLabel(budget, locale);
-  const composedMessage = composeStoredMessage(
-    inquiryLbl,
-    messageRaw!.trim(),
-    locale,
-    budgetLbl,
-  );
 
   if (!isDatabaseConfigured()) {
     return json(
@@ -118,10 +197,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const companyVal = company?.trim() ?? "";
-  const nameVal = name!.trim();
-  const phoneVal = phone!.trim();
-  const hasValidEmail = !!(emailOpt && EMAIL_RE.test(emailOpt));
+  const companyVal = company.trim();
+  const nameVal = name.trim();
+  const phoneVal = phone.trim();
+  const hasValidEmail =
+    emailStr.length > 0 && EMAIL_RE.test(emailStr);
 
   try {
     const db = getPrisma();
@@ -138,7 +218,7 @@ export async function POST(request: NextRequest) {
           ...base,
           inquiryType: inquiryLbl,
           budget: budgetLbl,
-          ...(hasValidEmail ? { email: emailOpt } : {}),
+          ...(hasValidEmail ? { email: emailStr } : {}),
         },
       });
     } catch (firstErr) {
@@ -147,7 +227,7 @@ export async function POST(request: NextRequest) {
         await db.contactInquiry.create({
           data: {
             ...base,
-            ...(hasValidEmail ? { email: emailOpt } : { email: "" }),
+            ...(hasValidEmail ? { email: emailStr } : { email: "" }),
           },
         });
       } catch (secondErr) {
@@ -163,9 +243,9 @@ export async function POST(request: NextRequest) {
   void postInternalAlert({
     type: "contact_inquiry",
     title: "새 문의 접수",
-    body: `${company?.trim() || "(회사미입력)"} / ${name!.trim()} / ${phone!.trim()} · ${inquiryLbl} · ${budgetLbl}`,
+    body: `${companyVal || "(회사미입력)"} / ${nameVal} / ${phoneVal} · ${inquiryLbl} · ${budgetLbl}`,
     meta: {
-      email: emailOpt ?? "",
+      email: emailStr,
       source: "contact_form",
     },
   }).catch(() => {});
@@ -174,10 +254,10 @@ export async function POST(request: NextRequest) {
   if (alertTo) {
     try {
       const { subject, text, html } = getContactAdminNotifyEmail({
-        company: company?.trim() ?? "",
-        name: name!.trim(),
-        phone: phone!.trim(),
-        email: emailOpt ?? "",
+        company: companyVal,
+        name: nameVal,
+        phone: phoneVal,
+        email: emailStr,
         budget: budgetLbl,
         message: composedMessage,
         inquiryType: inquiryLbl,
@@ -188,13 +268,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (emailOpt && EMAIL_RE.test(emailOpt)) {
+  if (hasValidEmail) {
     try {
       const { subject, text, html } = getContactConfirmationEmail({
-        name: name?.trim(),
+        name: nameVal,
       });
       await sendEmail({
-        to: emailOpt,
+        to: emailStr,
         subject,
         text,
         html,
