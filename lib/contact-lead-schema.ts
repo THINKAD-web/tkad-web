@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { composeStoredMessage } from "@/lib/contact-inquiry-labels";
 
 export const CONTACT_PHONE_RE = /^[\d\-+() ]{8,}$/;
 export const CONTACT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
