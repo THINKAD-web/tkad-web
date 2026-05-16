@@ -1,5 +1,9 @@
 import type { Prisma, ReportCategory } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import {
+  isDatabaseAuthError,
+  isMissingContentTableError,
+} from "@/lib/prisma-content-guards";
 import { REPORT_CATEGORY_ORDER } from "@/lib/report-category";
 
 export function parseReportCategoryParam(
@@ -22,6 +26,13 @@ export type PublishedReportListRow = {
   publishedAt: Date | null;
 };
 
+const emptyListResult = (page: number, pageSize: number) => ({
+  reports: [] as PublishedReportListRow[],
+  total: 0,
+  page,
+  pageSize,
+});
+
 export async function listPublishedReports(opts: {
   category?: ReportCategory | null;
   page?: number;
@@ -35,7 +46,7 @@ export async function listPublishedReports(opts: {
   const pageSize = Math.min(50, Math.max(1, opts.pageSize ?? 20));
   const page = Math.max(1, opts.page ?? 1);
   if (!isDatabaseConfigured()) {
-    return { reports: [], total: 0, page, pageSize };
+    return emptyListResult(page, pageSize);
   }
 
   const where: Prisma.ReportWhereInput = {
@@ -43,33 +54,45 @@ export async function listPublishedReports(opts: {
     ...(opts.category ? { category: opts.category } : {}),
   };
 
-  const db = getPrisma();
-  const [total, rows] = await Promise.all([
-    db.report.count({ where }),
-    db.report.findMany({
-      where,
-      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        summary: true,
-        category: true,
-        thumbnail: true,
-        publishedAt: true,
-      },
-    }),
-  ]);
+  try {
+    const db = getPrisma();
+    const [total, rows] = await Promise.all([
+      db.report.count({ where }),
+      db.report.findMany({
+        where,
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          summary: true,
+          category: true,
+          thumbnail: true,
+          publishedAt: true,
+        },
+      }),
+    ]);
 
-  return { reports: rows, total, page, pageSize };
+    return { reports: rows, total, page, pageSize };
+  } catch (e) {
+    if (isMissingContentTableError(e) || isDatabaseAuthError(e)) {
+      return emptyListResult(page, pageSize);
+    }
+    throw e;
+  }
 }
 
 export async function getPublishedReportBySlug(slug: string) {
   if (!isDatabaseConfigured()) return null;
-  const db = getPrisma();
-  return db.report.findFirst({
-    where: { slug, published: true },
-  });
+  try {
+    const db = getPrisma();
+    return await db.report.findFirst({
+      where: { slug, published: true },
+    });
+  } catch (e) {
+    if (isMissingContentTableError(e) || isDatabaseAuthError(e)) return null;
+    throw e;
+  }
 }
