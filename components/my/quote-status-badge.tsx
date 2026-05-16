@@ -8,6 +8,15 @@ const MAP: Record<
     label: "초안",
     className: "border-border bg-card text-foreground",
   },
+  sent: {
+    label: "검토 대기",
+    className: "border-accent bg-card text-accent",
+  },
+  revision_requested: {
+    label: "수정 요청",
+    className:
+      "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+  },
   booking_requested: {
     label: "예약 요청",
     className: "border-border bg-muted text-foreground",

@@ -37,6 +37,12 @@ export async function GET() {
         totalAmount: true,
         mediaIds: true,
         createdAt: true,
+        revisionRequestedAt: true,
+        revisionResolvedAt: true,
+        contractConfirmedAt: true,
+        oohContract: {
+          select: { status: true, signedAt: true },
+        },
       },
     });
 
@@ -52,6 +58,13 @@ export async function GET() {
       mediaCount: q.mediaIds.length,
       createdAt: q.createdAt,
       isInProgress: IN_PROGRESS_STATUSES.has(q.status),
+      /** 광고주가 가장 최근 수정 요청을 한 시각 (UI 에 "수정 요청 진행 중" 배지용) */
+      revisionRequestedAt: q.revisionRequestedAt,
+      revisionResolvedAt: q.revisionResolvedAt,
+      /** 계약 단계 — 서명/확정 시각이 있으면 그 시각을 활용해 진행률을 그리기 */
+      contractSignedAt: q.oohContract?.signedAt ?? null,
+      contractStatus: q.oohContract?.status ?? null,
+      contractConfirmedAt: q.contractConfirmedAt,
     }));
 
     const inProgress = items.filter((i) => i.isInProgress);

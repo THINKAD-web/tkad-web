@@ -57,6 +57,9 @@ export type OoHQuotePublicJson = {
   contractConfirmedAt: string | null;
   contractDocUrl: string | null;
   invoiceDocUrl: string | null;
+  revisionRequestedAt: string | null;
+  revisionNote: string | null;
+  revisionResolvedAt: string | null;
 };
 
 export function serializeOoHQuotePublic(row: OoHQuote): OoHQuotePublicJson {
@@ -79,11 +82,30 @@ export function serializeOoHQuotePublic(row: OoHQuote): OoHQuotePublicJson {
     contractConfirmedAt: row.contractConfirmedAt?.toISOString() ?? null,
     contractDocUrl: row.contractDocUrl,
     invoiceDocUrl: row.invoiceDocUrl,
+    revisionRequestedAt: row.revisionRequestedAt?.toISOString() ?? null,
+    revisionNote: row.revisionNote,
+    revisionResolvedAt: row.revisionResolvedAt?.toISOString() ?? null,
   };
 }
 
 export function canProceedBooking(status: OoHQuoteStatus): boolean {
   return status === OoHQuoteStatus.sent;
+}
+
+/**
+ * 고객이 수정 요청을 할 수 있는 단계.
+ * `sent` 또는 (어드민 보정 후 다시 sent 로 돌아간) 후에도 다시 요청 가능.
+ * 부킹 단계 이후엔 수정 요청 대신 어드민에 직접 문의하도록 안내.
+ */
+export function canRequestRevision(status: OoHQuoteStatus): boolean {
+  return status === OoHQuoteStatus.sent;
+}
+
+/**
+ * 어드민이 revision_requested 를 해소하고 다시 sent 로 되돌릴 수 있는 단계.
+ */
+export function canAdminResolveRevision(status: OoHQuoteStatus): boolean {
+  return status === OoHQuoteStatus.revision_requested;
 }
 
 export function canAdminBookingConfirm(status: OoHQuoteStatus): boolean {

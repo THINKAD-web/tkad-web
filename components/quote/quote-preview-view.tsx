@@ -14,6 +14,9 @@ import {
   Eye,
   Loader2,
   ArrowRight,
+  AlertCircle,
+  MessageSquare,
+  X,
 } from "lucide-react";
 import { FullPageSpinner, EmptyState } from "@/components/ui/spinner";
 import { QuoteStatusBadge } from "@/components/my/quote-status-badge";
@@ -46,6 +49,9 @@ type Quote = {
   budgetMin: number | null;
   budgetMax: number | null;
   createdAt: string;
+  revisionRequestedAt: string | null;
+  revisionNote: string | null;
+  revisionResolvedAt: string | null;
   medias: Media[];
 };
 
@@ -115,6 +121,9 @@ export default function QuotePreviewView({
   const [err, setErr] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [proceeding, setProceeding] = useState(false);
+  const [revisionOpen, setRevisionOpen] = useState(false);
+  const [revisionNote, setRevisionNote] = useState("");
+  const [revisionSubmitting, setRevisionSubmitting] = useState(false);
   const captureRef = useRef<HTMLDivElement | null>(null);
   const toast = useAppToast();
 
@@ -156,6 +165,47 @@ export default function QuotePreviewView({
       toast.error("네트워크 오류가 발생했습니다.");
     } finally {
       setProceeding(false);
+    }
+  };
+
+  const onSubmitRevision = async () => {
+    if (!quote) return;
+    const note = revisionNote.trim();
+    if (note.length < 5) {
+      toast.warning("수정 요청 내용을 5자 이상 작성해주세요.");
+      return;
+    }
+    setRevisionSubmitting(true);
+    try {
+      const res = await fetch(`/api/quote/${quote.id}/revision-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        toast.error(
+          (data as { error?: string })?.error === "Cannot request revision at this stage"
+            ? "지금은 수정 요청을 받을 수 없는 단계입니다."
+            : "수정 요청 전송에 실패했습니다.",
+        );
+        return;
+      }
+      toast.success("수정 요청을 전달했습니다. 담당자가 곧 연락드립니다.");
+      setRevisionOpen(false);
+      setRevisionNote("");
+      // 새 상태 반영
+      setQuote({
+        ...quote,
+        status: "revision_requested",
+        revisionRequestedAt: new Date().toISOString(),
+        revisionNote: note,
+        revisionResolvedAt: null,
+      });
+    } catch {
+      toast.error("네트워크 오류가 발생했습니다.");
+    } finally {
+      setRevisionSubmitting(false);
     }
   };
 
@@ -233,6 +283,8 @@ export default function QuotePreviewView({
   }
 
   const canProceed = showProceedCta && quote.status === "sent";
+  const canRequestRevision = showProceedCta && quote.status === "sent";
+  const isRevisionPending = quote.status === "revision_requested";
 
   return (
     <div className="min-h-[calc(100vh-72px)] bg-card">
@@ -274,6 +326,16 @@ export default function QuotePreviewView({
               )}
               {downloading ? "PDF 생성 중…" : "PDF 다운로드"}
             </button>
+            {canRequestRevision && (
+              <button
+                type="button"
+                onClick={() => setRevisionOpen(true)}
+                className="inline-flex h-11 items-center justify-center gap-2 border-2 border-border bg-card px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-amber-500 hover:text-amber-600"
+              >
+                <MessageSquare className="w-4 h-4" />
+                수정 요청
+              </button>
+            )}
             {canProceed && (
               <button
                 type="button"
@@ -285,7 +347,7 @@ export default function QuotePreviewView({
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
-                    진행 요청
+                    수락하고 계약 진행
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -293,6 +355,44 @@ export default function QuotePreviewView({
             )}
           </div>
         </header>
+
+        {isRevisionPending ? (
+          <div className="mb-6 flex items-start gap-3 rounded-md border-2 border-amber-500 bg-amber-50 p-4 dark:bg-amber-500/10">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+                [ 수정 요청 접수됨 ]
+              </p>
+              <p className="mt-1 text-sm font-bold text-foreground">
+                담당자가 요청을 검토 중이며, 견적이 갱신되면 다시 알려드립니다.
+              </p>
+              {quote.revisionNote ? (
+                <blockquote className="mt-2 rounded-md border border-amber-300/70 bg-card/80 px-3 py-2 text-[13px] text-foreground/85">
+                  {quote.revisionNote}
+                </blockquote>
+              ) : null}
+              {quote.revisionRequestedAt ? (
+                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-amber-700/80 dark:text-amber-300/80">
+                  {`// `}요청 시각 {new Date(quote.revisionRequestedAt).toLocaleString("ko-KR")}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {quote.revisionResolvedAt && quote.status === "sent" ? (
+          <div className="mb-6 flex items-start gap-3 rounded-md border-2 border-emerald-500 bg-emerald-50 p-4 dark:bg-emerald-500/10">
+            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-300">
+                [ 견적 갱신 완료 ]
+              </p>
+              <p className="mt-1 text-sm font-bold text-foreground">
+                요청하신 내용으로 견적을 보정했습니다. 아래에서 확인 후 진행해주세요.
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         <div ref={captureRef} className="space-y-0 bg-card">
           <section className="border-2 border-border bg-card p-5 sm:p-6">
@@ -395,6 +495,87 @@ export default function QuotePreviewView({
           </section>
         </div>
       </div>
+
+      {revisionOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="revision-modal-title"
+          className="fixed inset-0 z-[100050] flex items-end justify-center bg-black/55 px-4 py-6 backdrop-blur-sm sm:items-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !revisionSubmitting) {
+              setRevisionOpen(false);
+            }
+          }}
+        >
+          <div className="w-full max-w-lg rounded-2xl border-2 border-border bg-card p-5 shadow-[0_24px_72px_rgba(0,0,0,0.35)] sm:p-6">
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                  [ 견적 수정 요청 ]
+                </p>
+                <h2 id="revision-modal-title" className="mt-1 text-lg font-bold tracking-tight text-foreground">
+                  어떤 부분이 달라졌으면 하시나요?
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  담당자가 메모를 확인한 뒤 견적을 보정해서 다시 보내드립니다.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => !revisionSubmitting && setRevisionOpen(false)}
+                aria-label="닫기"
+                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <label className="block">
+              <span className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                [ 수정 요청 메모 ] <span className="text-muted-foreground/70">(5~500자)</span>
+              </span>
+              <textarea
+                value={revisionNote}
+                onChange={(e) => setRevisionNote(e.target.value)}
+                rows={5}
+                maxLength={500}
+                placeholder={
+                  "예: 강남대로 LED 매체를 빼고 시청역 광고탑을 추가해 주세요. 예산은 그대로 유지 부탁드립니다."
+                }
+                className="w-full resize-y rounded-md border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-accent focus:outline-none"
+              />
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+                {revisionNote.length} / 500
+              </p>
+            </label>
+
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setRevisionOpen(false)}
+                disabled={revisionSubmitting}
+                className="inline-flex h-10 items-center justify-center rounded-md border-2 border-border bg-card px-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={() => void onSubmitRevision()}
+                disabled={revisionSubmitting || revisionNote.trim().length < 5}
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md border-2 border-accent bg-accent px-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:opacity-60"
+              >
+                {revisionSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <MessageSquare className="h-4 w-4" />
+                )}
+                요청 보내기
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

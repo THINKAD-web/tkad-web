@@ -1,13 +1,19 @@
 import { NextRequest } from "next/server";
 import {
   CampaignStatus,
+  MediaBookingStatus,
   OoHQuoteStatus,
   OohContractStatus,
 } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
-import { canAdminContractConfirm } from "@/lib/ooh-quote";
+import {
+  canAdminContractConfirm,
+  estimateEndDate,
+} from "@/lib/ooh-quote";
 import { sendEmail } from "@/lib/email/client";
+import { adminOohQuoteUrl } from "@/lib/telegram-notify";
+import { notifyOohQuoteEvent } from "@/lib/slack-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +74,53 @@ export async function PATCH(
     },
     data: { status: OohContractStatus.confirmed },
   });
+
+  // 가용 캘린더 자동 BLOCK — 각 매체에 대해 MediaBooking(confirmed) 생성.
+  // 이미 같은 (mediaId, campaignId) 의 confirmed 가 있으면 skip — 멱등성 보장.
+  // 일정 미확정 매체나 중복 매체ID 는 모두 안전하게 건너뜀.
+  const startsAt = row.startDate ?? new Date();
+  const endsAt =
+    row.endDate ?? estimateEndDate(startsAt, row.periodKey ?? "1month");
+  const uniqueMediaIds = Array.from(new Set(row.mediaIds.filter(Boolean)));
+
+  if (uniqueMediaIds.length > 0) {
+    const existing = await db.mediaBooking.findMany({
+      where: {
+        campaignId: campaign.id,
+        mediaId: { in: uniqueMediaIds },
+      },
+      select: { mediaId: true },
+    });
+    const existingSet = new Set(existing.map((e) => e.mediaId));
+    const toCreate = uniqueMediaIds
+      .filter((mediaId) => !existingSet.has(mediaId))
+      .map((mediaId) => ({
+        mediaId,
+        campaignId: campaign.id,
+        title: campaign.name,
+        startsAt,
+        endsAt,
+        status: MediaBookingStatus.confirmed,
+        requesterName: row.clientName,
+        requesterEmail: clientEmail,
+        requesterPhone: row.clientPhone?.trim() || null,
+        notes: `Auto-blocked on contract-confirm of OoHQuote ${row.id}`,
+      }));
+    if (toCreate.length > 0) {
+      // createMany 는 silently skipDuplicates 옵션 사용
+      await db.mediaBooking.createMany({
+        data: toCreate,
+        skipDuplicates: true,
+      });
+    }
+  }
+
+  // Slack — 어드민 채널에 계약 확정 알림
+  void notifyOohQuoteEvent({
+    title: "OOH 계약 확정",
+    bodyMd: `*${row.clientName}* (${row.clientCompany ?? "-"})\n₩${row.totalAmount.toLocaleString("ko-KR")}만 · ${row.period} · 매체 ${uniqueMediaIds.length}건\n캠페인: ${campaign.name}`,
+    adminUrl: adminOohQuoteUrl(id),
+  }).catch(() => {});
 
   const isKo = row.locale !== "en";
   try {

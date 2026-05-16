@@ -49,6 +49,9 @@ export async function GET(
       budgetMin: quote.budgetMin,
       budgetMax: quote.budgetMax,
       createdAt: quote.createdAt,
+      revisionRequestedAt: quote.revisionRequestedAt,
+      revisionNote: quote.revisionNote,
+      revisionResolvedAt: quote.revisionResolvedAt,
       medias,
     });
   } catch (e) {

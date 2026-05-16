@@ -14,6 +14,8 @@ import {
   sendEmailWithPdfAttachment,
 } from "@/lib/email/client";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { adminOohQuoteUrl } from "@/lib/telegram-notify";
+import { notifyOohQuoteEvent } from "@/lib/slack-notify";
 import {
   isCloudinaryConfigured,
   uploadOohContractPdf,
@@ -171,6 +173,12 @@ export async function POST(
     title: "전자계약 서명 완료",
     body: `${signerName} · ${row.clientCompany || ""} · 견적 ${id.slice(0, 8)}…`,
     meta: { ooHQuoteId: id, contractId: contract.id, sha256 },
+  }).catch(() => {});
+
+  void notifyOohQuoteEvent({
+    title: "OOH 전자계약 서명 완료",
+    bodyMd: `*${signerName}* (${row.clientCompany || "-"}) · ₩${row.totalAmount.toLocaleString("ko-KR")}만 · ${row.period}\n견적 ID: \`${id}\``,
+    adminUrl: adminOohQuoteUrl(id),
   }).catch(() => {});
 
   if (isEmailConfigured()) {
