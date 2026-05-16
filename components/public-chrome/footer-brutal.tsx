@@ -1,6 +1,5 @@
 "use client";
 
-import { CONTACT_EMAIL } from "@/lib/constants";
 /**
  * FooterBrutal — b930b10 IA 의 4컬럼(브랜드 / Quick Links / Contact / Services)
  * 구조를 BrutalFooter 로 렌더하는 래퍼.
@@ -21,6 +20,7 @@ export function FooterBrutal() {
   const quickLinks: BrutalFooterColumn = {
     title: t("footer.quickLinks"),
     items: [
+      { href: "/register/media", label: t("footer.mediaPartnerRegister") },
       { href: "/services", label: t("nav.services") },
       { href: "/media", label: t("footer.linkFeaturedMedia") },
       { href: "/cases", label: t("nav.cases") },
@@ -34,7 +34,7 @@ export function FooterBrutal() {
     items: [
       { label: t("footer.address") },
       { label: t("footer.phone") },
-      { label: CONTACT_EMAIL },
+      { label: t("footer.email") },
       {
         href: KAKAO_CHANNEL_PUBLIC_URL,
         label: t("footer.kakaoChannel"),

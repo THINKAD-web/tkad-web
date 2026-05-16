@@ -24,6 +24,7 @@ import {
   Share2,
   ShieldCheck,
   UserCog,
+  Inbox,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -57,6 +58,7 @@ const navDefs = [
   { href: "/admin/campaigns", key: "campaigns" as const, icon: Megaphone },
   { href: "/admin/community", key: "community" as const, icon: MessageSquareText },
   // 5) 매체/검증/네트워크
+  { href: "/admin/applications", key: "mediaApplications" as const, icon: ClipboardList },
   { href: "/admin/medias", key: "medias" as const, icon: Monitor },
   { href: "/admin/verification", key: "verification" as const, icon: ShieldCheck },
   { href: "/admin/networks", key: "networks" as const, icon: Share2 },

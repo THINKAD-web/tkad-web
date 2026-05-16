@@ -994,3 +994,52 @@ model Report {
   @@index([published, category, publishedAt])
   @@map("reports")
 }
+
+// ── Media owner self-registration (/register/media) ─────────────
+
+enum MediaApplicationStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
+}
+
+model MediaApplication {
+  id            String                 @id @default(cuid())
+  companyName   String                 @map("company_name")
+  contactName   String                 @map("contact_name")
+  contactPhone  String                 @map("contact_phone")
+  contactEmail  String                 @map("contact_email")
+  mediaName     String                 @map("media_name")
+  /// digital | static | other
+  mediaType     String                 @map("media_type")
+  address       String
+  addressDetail String?                @map("address_detail")
+  zonecode      String?
+  latitude      Float?
+  longitude     Float?
+  city          String?
+  district      String?
+  widthCm       Int?                   @map("width_cm")
+  heightCm      Int?                   @map("height_cm")
+  isDigital     Boolean                @default(false) @map("is_digital")
+  operatingHours String?               @map("operating_hours")
+  hasLighting   Boolean                @default(false) @map("has_lighting")
+  dailyFootfall Int?                   @map("daily_footfall")
+  monthlyPrice  Int                    @map("monthly_price")
+  minFlightDays Int?                   @map("min_flight_days")
+  photoFrontUrl String                 @map("photo_front_url")
+  photoSideUrl  String                 @map("photo_side_url")
+  photoNightUrl String                 @map("photo_night_url")
+  notes         String?                @db.Text
+  status        MediaApplicationStatus @default(PENDING)
+  reviewNote    String?                @map("review_note") @db.Text
+  reviewedAt    DateTime?              @map("reviewed_at")
+  createdMediaId String?               @map("created_media_id")
+  submitterIp   String?                @map("submitter_ip")
+  createdAt     DateTime               @default(now()) @map("created_at")
+  updatedAt     DateTime               @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@map("media_applications")
+}

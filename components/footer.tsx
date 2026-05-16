@@ -3,7 +3,6 @@ import { Link } from "@/i18n/navigation";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench, MessageCircle } from "lucide-react";
 
-import { CONTACT_EMAIL } from "@/lib/constants";
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
 /**
@@ -34,6 +33,7 @@ export default function Footer() {
   const t = useTranslations();
 
   const navItems = [
+    { href: "/register/media", label: t("footer.mediaPartnerRegister") },
     { href: "/services", label: t("nav.services") },
     { href: "/media", label: t("footer.linkFeaturedMedia") },
     { href: "/cases", label: t("nav.cases") },
@@ -99,7 +99,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0 text-gold/50" />
-                {CONTACT_EMAIL}
+                {t("footer.email")}
               </li>
               <li className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4 shrink-0 text-gold/50" />
