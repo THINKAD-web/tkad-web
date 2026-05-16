@@ -95,6 +95,8 @@ function HomeContent({
         mapPins={heroVisuals.mapPins}
       />
 
+      <HomeMediaPartnerCta isKo={isKo} />
+
       <div className="tkad-landing-neon">
         {/* Verification Process — 히어로와 상단 간격 제거 */}
         <NeonSection className="mt-0 pt-0 pb-12 sm:pb-16 md:pb-24 lg:pb-32 xl:pb-40 2xl:pb-48">
