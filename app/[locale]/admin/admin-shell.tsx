@@ -20,6 +20,7 @@ import {
   FileText,
   Calculator,
   ClipboardList,
+  CalendarCheck,
   Sparkles,
   Share2,
   ShieldCheck,

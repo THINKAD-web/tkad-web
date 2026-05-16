@@ -1646,7 +1646,8 @@
     "aiContent": "AI 콘텐츠",
     "crm": "CRM (데모)",
     "backToSite": "사이트로 돌아가기",
-    "signOut": "로그아웃"
+    "signOut": "로그아웃",
+    "instantBookings": "즉시 예약"
   },
   "adminNetworks": {
     "title": "네트워크 매체",
@@ -2144,7 +2145,70 @@
       "compareRemove": "비교함에서 제거",
       "compareFull": "비교함은 최대 {max}개입니다.",
       "quote": "견적받기",
-      "quoteShort": "견적"
+      "quoteShort": "견적",
+      "instantBook": "즉시 예약하기"
+    }
+  },
+  "instantBooking": {
+    "eyebrow": "소액 DOOH",
+    "title": "즉시 예약",
+    "backToMedia": "매체 상세로",
+    "viewBooking": "예약 확인",
+    "step1": "기간",
+    "step2": "소재",
+    "step3": "연락처",
+    "datesTitle": "집행 기간 선택",
+    "datesDesc": "캘린더에서 시작일과 종료일을 차례로 선택하세요. 주황 표시는 예약 불가입니다.",
+    "calendarLoading": "가용 일정 불러오는 중…",
+    "calendarError": "캘린더를 불러오지 못했습니다.",
+    "prevMonth": "이전 달",
+    "nextMonth": "다음 달",
+    "selectRange": "시작일 → 종료일 순으로 선택해 주세요.",
+    "rangeBlocked": "선택 구간에 예약 불가 일자가 포함됩니다.",
+    "creativeTitle": "광고 소재 업로드",
+    "uploadLabel": "이미지 또는 영상 선택",
+    "uploadDone": "업로드 완료",
+    "uploadFailed": "업로드 실패",
+    "contactTitle": "담당자 정보",
+    "name": "성함 / 회사명",
+    "email": "이메일",
+    "phone": "연락처 (선택)",
+    "next": "다음",
+    "back": "이전",
+    "goToPay": "결제하기",
+    "submitFailed": "예약 생성에 실패했습니다.",
+    "pay": {
+      "title": "결제",
+      "back": "예약 수정",
+      "methodsHint": "토스페이먼츠 — 신용·체크카드, 계좌이체 지원 (테스트 키)",
+      "loadingWidget": "결제 위젯 로딩…",
+      "payButton": "{amount}원 결제",
+      "notConfigured": "결제 모듈이 설정되지 않았습니다. 관리자에게 문의해 주세요.",
+      "widgetError": "결제 위젯을 불러오지 못했습니다.",
+      "payFailed": "결제 요청에 실패했습니다.",
+      "confirming": "결제 승인 처리 중…",
+      "confirmFailed": "결제 승인에 실패했습니다.",
+      "alreadyPaid": "이미 결제가 완료된 예약입니다."
+    },
+    "confirm": {
+      "titlePaid": "예약이 확정되었습니다",
+      "titlePending": "예약 대기 중",
+      "descPaid": "결제가 완료되었습니다. 확인 메일을 발송했습니다.",
+      "descPending": "결제가 완료되면 이 페이지에서 상태가 갱신됩니다.",
+      "media": "매체",
+      "period": "기간",
+      "amount": "결제 금액",
+      "status": "상태",
+      "status_payment_pending": "결제 대기",
+      "status_paid": "결제 완료",
+      "status_confirmed": "집행 확정",
+      "status_cancelled": "취소",
+      "status_failed": "실패",
+      "status_draft": "임시",
+      "executionConfirmed": "집행 확정일",
+      "continuePay": "결제 이어하기",
+      "backMedia": "매체 상세",
+      "emailHint": "확인 메일: {email}"
     }
   }
 }

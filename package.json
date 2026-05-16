@@ -31,6 +31,7 @@
     "@pdfme/common": "^5.5.10",
     "@prisma/adapter-pg": "^7.6.0",
     "@prisma/client": "^7.6.0",
+    "@tosspayments/payment-widget-sdk": "^0.12.1",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.9.0",

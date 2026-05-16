@@ -132,6 +132,7 @@ export default async function MediaDetailPage({ params }: Props) {
   const relatedCases = await getSuccessCasesForMedia(media.id);
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const isKo = locale === "ko";
+  const instantBookEligible = isInstantBookingEligible(media).eligible;
   const periodLabel = t(
     mediaDetailPricePeriodTranslationKey(media.pricePeriod),
   );
@@ -384,6 +385,7 @@ export default async function MediaDetailPage({ params }: Props) {
                   mediaName={media.name}
                   mediaNameEn={media.nameEn || media.name}
                   isKo={isKo}
+                  instantBookEligible={instantBookEligible}
                 />
               </div>
             </aside>
@@ -848,7 +850,11 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </section>
 
-          <MediaDetailStickyCta media={media} compareHref={compareHref} />
+          <MediaDetailStickyCta
+            media={media}
+            compareHref={compareHref}
+            instantBookEligible={instantBookEligible}
+          />
         </div>
       </HomeLandingDayNight>
     </>
