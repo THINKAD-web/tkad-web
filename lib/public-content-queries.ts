@@ -17,6 +17,7 @@ import {
   getSampleSuccessCaseListItems,
   isSampleSuccessCaseId,
 } from "@/lib/sample-success-case";
+import { resolveCaseMediaLinks } from "@/lib/case-media-links";
 
 /**
  * 콘텐츠 테이블/컬럼이 누락된 환경(예: 마이그레이션 미실행)에서도 빌드와 SSR 이
@@ -107,7 +108,7 @@ export async function getSuccessCasesForMedia(
       orderBy: [{ publishedAt: "desc" }, { updatedAt: "desc" }],
       take: limit,
     });
-    return rows.map(successCaseToPublicListItem);
+    return rows.map((row) => successCaseToPublicListItem(row));
   } catch (e) {
     if (isMissingContentTableError(e)) return [];
     if (isDatabaseAuthError(e)) return [];
@@ -115,25 +116,41 @@ export async function getSuccessCasesForMedia(
   }
 }
 
-export async function getPublishedSuccessCases(): Promise<
-  PublicSuccessCaseListItem[]
-> {
+async function enrichCaseMediaLinks(
+  detail: PublicSuccessCaseDetail,
+  locale: string,
+): Promise<PublicSuccessCaseDetail> {
+  const mediaLinks = await resolveCaseMediaLinks(
+    detail.mediaIds,
+    detail.mediaUsed,
+    locale,
+  );
+  return { ...detail, mediaLinks };
+}
+
+export async function getPublishedSuccessCases(
+  locale = "ko",
+): Promise<PublicSuccessCaseListItem[]> {
   if (!isDatabaseConfigured()) {
-    return getSampleSuccessCaseListItems();
+    return getSampleSuccessCaseListItems(locale);
   }
   try {
     const rows = await prisma.successCase.findMany({
       where: { status: "published" },
       orderBy: [{ publishedAt: "desc" }, { updatedAt: "desc" }],
     });
-    const mapped = rows.map(successCaseToPublicListItem);
+    const mapped = rows.map((row) =>
+      successCaseToPublicListItem(row, locale),
+    );
     if (mapped.length === 0) {
-      return getSampleSuccessCaseListItems();
+      return getSampleSuccessCaseListItems(locale);
     }
     return mapped;
   } catch (e) {
-    if (isMissingContentTableError(e)) return getSampleSuccessCaseListItems();
-    if (isDatabaseAuthError(e)) return getSampleSuccessCaseListItems();
+    if (isMissingContentTableError(e)) {
+      return getSampleSuccessCaseListItems(locale);
+    }
+    if (isDatabaseAuthError(e)) return getSampleSuccessCaseListItems(locale);
     throw e;
   }
 }
@@ -142,28 +159,40 @@ const CUID_RE = /^c[a-z0-9]{24,}$/i;
 
 export async function getPublishedSuccessCaseById(
   id: string,
+  locale = "ko",
 ): Promise<PublicSuccessCaseDetail | null> {
-  if (!CUID_RE.test(id)) return null;
+  const isSample = isSampleSuccessCaseId(id);
+  if (!CUID_RE.test(id) && !isSample) return null;
 
   if (!isDatabaseConfigured()) {
-    return getSampleSuccessCaseDetail(id);
+    const sample = getSampleSuccessCaseDetail(id, locale);
+    return sample ? enrichCaseMediaLinks(sample, locale) : null;
   }
 
   try {
     const row = await prisma.successCase.findFirst({
       where: { id, status: "published" },
     });
-    if (row) return successCaseToPublicDetail(row);
+    if (row) {
+      const detail = successCaseToPublicDetail(row, locale);
+      return enrichCaseMediaLinks(detail, locale);
+    }
 
-    if (!isSampleSuccessCaseId(id)) return null;
+    if (!isSample) return null;
 
     const publishedCount = await prisma.successCase.count({
       where: { status: "published" },
     });
-    return publishedCount === 0 ? getSampleSuccessCaseDetail(id) : null;
+    if (publishedCount === 0) {
+      const sample = getSampleSuccessCaseDetail(id, locale);
+      return sample ? enrichCaseMediaLinks(sample, locale) : null;
+    }
+    return null;
   } catch (e) {
-    if (isMissingContentTableError(e)) return getSampleSuccessCaseDetail(id);
-    if (isDatabaseAuthError(e)) return getSampleSuccessCaseDetail(id);
+    if (isMissingContentTableError(e) || isDatabaseAuthError(e)) {
+      const sample = getSampleSuccessCaseDetail(id, locale);
+      return sample ? enrichCaseMediaLinks(sample, locale) : null;
+    }
     throw e;
   }
 }

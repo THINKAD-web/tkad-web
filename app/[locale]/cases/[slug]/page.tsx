@@ -1,18 +1,22 @@
 import { notFound } from "next/navigation";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
 import {
   getPublishedSuccessCaseById,
   getPublishedSuccessCases,
 } from "@/lib/public-content-queries";
 import CaseDetailClient from "./case-detail-client";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ locale: string; slug: string }>;
+};
 
 export default async function CaseStudyDetailPage({ params }: Props) {
   const { slug } = await params;
-  const row = await getPublishedSuccessCaseById(slug);
+  const locale = await resolveLocaleParam(params);
+  const row = await getPublishedSuccessCaseById(slug, locale);
   if (!row) notFound();
 
-  const ordered = await getPublishedSuccessCases();
+  const ordered = await getPublishedSuccessCases(locale);
   const idx = ordered.findIndex((c) => c.id === row.id);
   const prev =
     idx > 0

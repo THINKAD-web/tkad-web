@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { formatCaseStudyMetricValue } from "@/lib/campaign-case-study";
 import type { PublicSuccessCaseDetail } from "@/lib/success-case-public";
 import {
   ArrowLeft,
@@ -14,8 +15,8 @@ import {
   Calendar,
   Download,
   Eye,
-  Quote,
   Target,
+  Wallet,
 } from "lucide-react";
 
 const LeadCaptureModal = dynamic(() =>
@@ -55,18 +56,18 @@ function formatPeriod(
 
 export default function CaseDetailClient({ row, prev, next }: Props) {
   const locale = useLocale();
-  const t = useTranslations();
+  const t = useTranslations("cases");
   const isKo = locale === "ko";
   const [showLeadModal, setShowLeadModal] = useState(false);
 
-  const title = isKo ? row.titleKo : (row.titleEn ?? row.titleKo);
+  const title = isKo ? row.titleKo : row.titleEn ?? row.titleKo;
   const period = formatPeriod(row.periodStartIso, row.periodEndIso, isKo);
-
-  const metricEntries = row.metricsJson
-    ? Object.entries(row.metricsJson).filter(
-        ([, v]) => v != null && String(v).length > 0,
-      )
-    : [];
+  const managerComment =
+    row.managerCommentKo ?? row.testimonialKo;
+  const metrics =
+    row.structuredMetrics.length > 0
+      ? row.structuredMetrics
+      : [];
 
   return (
     <HomeLandingDayNight>
@@ -78,7 +79,7 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
               className="group mb-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-hero-fg/65 transition-colors hover:text-primary"
             >
               <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-              {t("cases.detailBack")}
+              {t("detailBack")}
             </Link>
 
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
@@ -91,60 +92,86 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
               </span>
               <span className="inline-flex items-center gap-1.5 border-2 border-hero-fg bg-transparent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hero-fg">
                 <BadgeCheck className="h-3 w-3" />
-                {t("cases.detailVerified")}
+                {t("detailVerified")}
               </span>
             </div>
 
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
+            <p className="mt-4 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+              {row.clientName}
+            </p>
+
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
               {title}
             </h1>
 
-            <p className="mt-5 max-w-3xl font-mono text-sm leading-relaxed tracking-tight text-hero-fg/75">
-              {isKo
-                ? row.summaryKo
-                : "A THINKAD case study covering campaign goals, media execution, and measurable OOH outcomes."}
-            </p>
-
-            {!isKo ? (
-              <p className="mt-4 max-w-3xl font-mono text-[11px] leading-relaxed tracking-tight text-hero-fg/60">
-                {`// `}Detailed case narrative sections are currently published in Korean.
+            <div className="mt-6 border-l-4 border-primary pl-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                [ {t("backgroundLabel")} ]
               </p>
-            ) : null}
+              <p className="mt-2 max-w-3xl text-base leading-relaxed text-hero-fg/85 sm:text-lg">
+                {row.summaryKo}
+              </p>
+            </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-4 font-mono text-[11px] uppercase tracking-[0.18em] text-hero-fg/70">
+              {period ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-primary" aria-hidden />
+                  {period}
+                </span>
+              ) : null}
+              {row.budgetRange ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Wallet className="h-4 w-4 text-primary" aria-hidden />
+                  {t("budgetRangeLabel")}: {row.budgetRange}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
               <BtnBlock
                 href={`/contact?case=${encodeURIComponent(row.id)}`}
                 variant="accent"
                 size="lg"
               >
-                {t("cases.ctaSimilar")}
+                {t("ctaSimilar")}
                 <ArrowRight className="h-4 w-4" />
               </BtnBlock>
             </div>
-
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-hero-fg/65">
-              <span className="flex items-center gap-2">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-primary bg-hero-void font-mono text-xs font-bold tracking-tight text-primary">
-                  {row.clientName.slice(0, 2)}
-                </span>
-                <span>{row.clientName}</span>
-              </span>
-              {period ? (
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  {period}
-                </span>
-              ) : null}
-            </div>
           </div>
         </section>
+
+        {metrics.length > 0 ? (
+          <section className="border-y-2 border-border bg-card py-12 sm:py-16">
+            <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                [ {t("metricsSectionTitle")} ]
+              </p>
+              <div className="mt-6 grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
+                {metrics.map((m) => (
+                  <div
+                    key={m.key}
+                    className="-mt-[2px] -ml-[2px] border-2 border-border bg-muted p-5 sm:p-6"
+                  >
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      {isKo ? m.labelKo : m.labelEn}
+                    </p>
+                    <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
+                      {formatCaseStudyMetricValue(m, locale)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section className="bg-card py-20 sm:py-24">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-0 md:grid-cols-2">
               <div className="-mt-[2px] -ml-[2px] border-2 border-border p-6 sm:p-8">
                 <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                  <Target className="h-4 w-4" />[ {t("cases.challengeLabel")} ]
+                  <Target className="h-4 w-4" aria-hidden />[ {t("challengeLabel")} ]
                 </div>
                 <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-foreground sm:text-lg">
                   {row.challengeKo}
@@ -152,7 +179,7 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
               </div>
               <div className="-mt-[2px] -ml-[2px] border-2 border-border p-6 sm:p-8">
                 <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                  <Eye className="h-4 w-4" />[ {t("cases.solutionLabel")} ]
+                  <Eye className="h-4 w-4" aria-hidden />[ {t("solutionLabel")} ]
                 </div>
                 <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-foreground sm:text-lg">
                   {row.solutionKo}
@@ -165,23 +192,36 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
         <section className="bg-muted py-20 sm:py-24">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-              <Eye className="h-4 w-4" />[ {t("cases.mediaLabel")} ]
+              <Eye className="h-4 w-4" aria-hidden />[ {t("mediaLabel")} ]
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              {row.mediaUsed.map((m) => (
-                <span
-                  key={m}
-                  className="border-2 border-border bg-card px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground"
-                >
-                  {m}
-                </span>
-              ))}
+              {(row.mediaLinks.length > 0
+                ? row.mediaLinks
+                : row.mediaUsed.map((label) => ({ label }))
+              ).map((link) =>
+                "id" in link && link.id ? (
+                  <Link
+                    key={String(link.id)}
+                    href={`/media/${link.id}`}
+                    className="border-2 border-border bg-card px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <span
+                    key={link.label}
+                    className="border-2 border-border bg-card px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground"
+                  >
+                    {link.label}
+                  </span>
+                ),
+              )}
             </div>
 
             {row.resultsKo.length > 0 ? (
               <div className="mt-10 border-2 border-border bg-card p-5 sm:p-6">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                  [ {t("cases.resultsLabel")} ]
+                  [ {t("resultsLabel")} ]
                 </p>
                 <ul className="mt-4 space-y-3">
                   {row.resultsKo.map((line, i) => (
@@ -196,24 +236,6 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
                 </ul>
               </div>
             ) : null}
-
-            {metricEntries.length > 0 ? (
-              <div className="mt-8 grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
-                {metricEntries.map(([k, v]) => (
-                  <div
-                    key={k}
-                    className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4"
-                  >
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {k} ]
-                    </p>
-                    <p className="mt-2 font-mono text-lg font-bold tabular-nums text-foreground">
-                      {typeof v === "object" ? JSON.stringify(v) : String(v)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : null}
           </div>
         </section>
 
@@ -221,7 +243,7 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
           <section className="bg-card py-16">
             <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
               <p className="mb-5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                [ {t("cases.galleryLabel")} ]
+                [ {t("galleryLabel")} ]
               </p>
               <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
                 {row.galleryUrls.map((url, i) => (
@@ -242,22 +264,16 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
           </section>
         ) : null}
 
-        {row.testimonialKo ? (
+        {managerComment ? (
           <section className="bg-muted py-20 sm:py-24">
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
               <div className="border-2 border-primary bg-card p-8">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                  [ {t("cases.testimonialLabel")} ]
+                  [ {t("managerCommentTitle")} ]
                 </p>
-                <Quote className="mt-4 h-8 w-8 text-primary" />
-                <p className="mt-4 whitespace-pre-wrap text-lg leading-relaxed text-foreground">
-                  &ldquo;{row.testimonialKo}&rdquo;
+                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-foreground sm:text-lg">
+                  {managerComment}
                 </p>
-                <div className="mt-6 border-t-2 border-border pt-4">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                    — {row.clientName}
-                  </p>
-                </div>
               </div>
             </div>
           </section>
@@ -272,14 +288,14 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
                 onClick={() => setShowLeadModal(true)}
               >
                 <Download className="h-5 w-5" />
-                {t("cases.detailDownloadPdf")}
+                {t("detailDownloadPdf")}
               </BtnBlock>
               <BtnBlock
                 href={`/contact?case=${encodeURIComponent(row.id)}`}
                 variant="dark"
                 size="lg"
               >
-                {t("cases.detailSimilarCampaign")}
+                {t("detailSimilarCampaign")}
                 <ArrowRight className="h-4 w-4" />
               </BtnBlock>
             </div>
@@ -296,11 +312,10 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
                     className="group -ml-[2px] flex flex-1 flex-col border-2 border-border bg-card p-5 transition-colors hover:bg-foreground hover:text-background"
                   >
                     <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      <ArrowLeft className="h-3 w-3" />[ {t("cases.detailPrev")}{" "}
-                      ]
+                      <ArrowLeft className="h-3 w-3" />[ {t("detailPrev")} ]
                     </span>
                     <span className="mt-2 text-sm font-bold tracking-tight">
-                      {isKo ? prev.titleKo : (prev.titleEn ?? prev.titleKo)}
+                      {isKo ? prev.titleKo : prev.titleEn ?? prev.titleKo}
                     </span>
                   </Link>
                 ) : (
@@ -312,11 +327,11 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
                     className="group -ml-[2px] flex flex-1 flex-col items-end border-2 border-border bg-card p-5 text-right transition-colors hover:bg-foreground hover:text-background"
                   >
                     <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("cases.detailNext")} ]
+                      [ {t("detailNext")} ]
                       <ArrowRight className="h-3 w-3" />
                     </span>
                     <span className="mt-2 text-sm font-bold tracking-tight">
-                      {isKo ? next.titleKo : (next.titleEn ?? next.titleKo)}
+                      {isKo ? next.titleKo : next.titleEn ?? next.titleKo}
                     </span>
                   </Link>
                 ) : (

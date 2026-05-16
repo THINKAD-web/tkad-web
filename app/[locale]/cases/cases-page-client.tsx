@@ -11,10 +11,11 @@ import {
   Layers,
   RotateCcw,
   Search,
-  TrendingUp,
 } from "lucide-react";
+import { CaseStudyCard } from "@/components/cases/case-study-card";
 import { cn } from "@/lib/utils";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
+import { isSampleSuccessCaseId } from "@/lib/sample-success-case";
 
 type Props = { initialCases: PublicSuccessCaseListItem[] };
 
@@ -240,78 +241,7 @@ export default function CasesPageClient({ initialCases }: Props) {
 
               <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
                 {filtered.map((cs) => (
-                  <article
-                    key={cs.id}
-                    className="group -mt-[2px] -ml-[2px] flex flex-col overflow-hidden border-2 border-border bg-card"
-                  >
-                    <div className="relative flex h-48 items-center justify-center overflow-hidden border-b-2 border-border bg-muted">
-                      {cs.thumbnailUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={cs.thumbnailUrl}
-                          alt=""
-                          className="absolute inset-0 h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
-                        />
-                      ) : (
-                        <TrendingUp className="h-12 w-12 text-muted-foreground transition-transform group-hover:scale-110" />
-                      )}
-                      <span className="absolute right-3 top-3 border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
-                        [ {cs.industry} ]
-                      </span>
-                    </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                        [ CASE / {cs.id.slice(0, 6).toUpperCase()} ]
-                      </p>
-                      <h3 className="mt-2 text-base font-bold tracking-tight text-foreground">
-                        {isKo ? cs.titleKo : cs.titleEn ?? cs.titleKo}
-                      </h3>
-                      <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
-                        {isKo
-                          ? cs.summaryKo
-                          : "Campaign strategy, media execution, and measurable OOH outcomes from THINKAD."}
-                      </p>
-                      <div className="mt-4 border-2 border-border bg-muted p-3">
-                        <div className="flex items-start gap-2">
-                          <Layers className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                          <div className="min-w-0">
-                            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                              [ {t("cases.mediaLabel")} ]
-                            </p>
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              {cs.mediaUsed.map((m) => (
-                                <span
-                                  key={m}
-                                  className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground"
-                                >
-                                  {m}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-auto flex flex-col gap-2 pt-4">
-                        <BtnBlock
-                          href={`/cases/${cs.id}`}
-                          variant="accent"
-                          size="sm"
-                          className="w-full"
-                        >
-                          {t("cases.viewDetails")}
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </BtnBlock>
-                        <BtnBlock
-                          href={`/contact?case=${encodeURIComponent(cs.id)}`}
-                          variant="secondary"
-                          size="sm"
-                          className="w-full"
-                        >
-                          {t("cases.ctaSimilar")}
-                        </BtnBlock>
-                      </div>
-                    </div>
-                  </article>
+                  <CaseStudyCard key={cs.id} item={cs} />
                 ))}
               </div>
 

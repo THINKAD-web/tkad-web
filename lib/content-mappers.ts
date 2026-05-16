@@ -3,7 +3,12 @@ import type {
   SuccessCase,
   TrendReport,
 } from "@prisma/client";
+import {
+  parseBudgetRangeFromMetrics,
+  parseCaseStudyMetrics,
+} from "@/lib/campaign-case-study";
 import type {
+  CaseStudyMediaLink,
   PublicSuccessCaseDetail,
   PublicSuccessCaseListItem,
 } from "@/lib/success-case-public";
@@ -189,9 +194,20 @@ function metricsAsRecord(json: unknown): Record<string, unknown> | null {
   return json as Record<string, unknown>;
 }
 
+function mediaLinksFromRow(row: SuccessCase): CaseStudyMediaLink[] {
+  const ids = row.mediaIds ?? [];
+  return row.mediaUsed.map((label, i) => ({
+    id: ids[i],
+    label,
+  }));
+}
+
 export function successCaseToPublicListItem(
   row: SuccessCase,
+  locale = "ko",
 ): PublicSuccessCaseListItem {
+  const metricsJson = metricsAsRecord(row.metricsJson);
+  const structured = parseCaseStudyMetrics(metricsJson, locale);
   return {
     id: row.id,
     industry: row.industry,
@@ -203,21 +219,30 @@ export function successCaseToPublicListItem(
     mediaUsed: row.mediaUsed,
     mediaIds: row.mediaIds ?? [],
     publishedAtIso: row.publishedAt ? row.publishedAt.toISOString() : null,
+    periodStartIso: row.periodStart ? row.periodStart.toISOString() : null,
+    periodEndIso: row.periodEnd ? row.periodEnd.toISOString() : null,
+    budgetRange: parseBudgetRangeFromMetrics(metricsJson, locale),
+    highlightMetrics: structured.slice(0, 3),
   };
 }
 
 export function successCaseToPublicDetail(
   row: SuccessCase,
+  locale = "ko",
 ): PublicSuccessCaseDetail {
+  const metricsJson = metricsAsRecord(row.metricsJson);
+  const structured = parseCaseStudyMetrics(metricsJson, locale);
+  const base = successCaseToPublicListItem(row, locale);
   return {
-    ...successCaseToPublicListItem(row),
+    ...base,
     challengeKo: row.challengeKo,
     solutionKo: row.solutionKo,
     resultsKo: row.resultsKo,
-    metricsJson: metricsAsRecord(row.metricsJson),
-    periodStartIso: row.periodStart ? row.periodStart.toISOString() : null,
-    periodEndIso: row.periodEnd ? row.periodEnd.toISOString() : null,
+    metricsJson,
+    structuredMetrics: structured,
     galleryUrls: row.galleryUrls ?? [],
+    managerCommentKo: row.testimonialKo,
     testimonialKo: row.testimonialKo,
+    mediaLinks: mediaLinksFromRow(row),
   };
 }

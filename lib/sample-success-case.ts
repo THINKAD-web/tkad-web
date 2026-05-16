@@ -1,155 +1,125 @@
 import type { Prisma } from "@prisma/client";
-import { caseStudies, type CaseStudyVertical } from "@/lib/case-studies";
+import { campaignCaseStudies } from "@/data/campaign-cases";
+import {
+  campaignCaseToMetricsRecord,
+  type CaseStudyMetric,
+} from "@/lib/campaign-case-study";
 import type {
+  CaseStudyMediaLink,
   PublicSuccessCaseDetail,
   PublicSuccessCaseListItem,
 } from "@/lib/success-case-public";
 
-/** Stable ids for built-in samples (matches CUID-style public route regex). */
-export const SAMPLE_SUCCESS_CASE_IDS = [
-  "ctkadglobalsamplebeauty0001",
-  "ctkadglobalsampletechcoex02",
-  "ctkadglobalsampleentertain03",
-] as const;
+export const SAMPLE_SUCCESS_CASE_IDS = campaignCaseStudies.map((c) => c.id);
 
-/** @deprecated Use SAMPLE_SUCCESS_CASE_IDS[0]; kept for imports that expect one id. */
+/** @deprecated Use SAMPLE_SUCCESS_CASE_IDS[0] */
 export const SAMPLE_SUCCESS_CASE_ID = SAMPLE_SUCCESS_CASE_IDS[0];
 
-const SAMPLE_META: readonly {
-  publishedAt: Date;
-  periodStart: Date;
-  periodEnd: Date;
-}[] = [
-  {
-    publishedAt: new Date("2024-03-15T00:00:00.000Z"),
-    periodStart: new Date("2024-06-01T00:00:00.000Z"),
-    periodEnd: new Date("2024-07-15T00:00:00.000Z"),
-  },
-  {
-    publishedAt: new Date("2024-02-10T00:00:00.000Z"),
-    periodStart: new Date("2024-02-01T00:00:00.000Z"),
-    periodEnd: new Date("2024-02-14T00:00:00.000Z"),
-  },
-  {
-    publishedAt: new Date("2024-01-20T00:00:00.000Z"),
-    periodStart: new Date("2024-04-01T00:00:00.000Z"),
-    periodEnd: new Date("2024-04-28T00:00:00.000Z"),
-  },
-];
-
-function industryFromVertical(v: CaseStudyVertical): string {
-  const map: Record<CaseStudyVertical, string> = {
-    fashion_beauty: "Beauty",
-    automotive: "Automotive",
-    fb: "F&B",
-    tech: "Tech",
-    entertainment: "Entertainment",
-    finance: "Finance",
-  };
-  return map[v];
+function mediaLinks(study: (typeof campaignCaseStudies)[number]): CaseStudyMediaLink[] {
+  return study.mediaPlacements.map((p) => ({
+    id: p.mediaId,
+    label: p.labelKo,
+  }));
 }
 
-function buildSampleListItem(
-  index: 0 | 1 | 2,
+function buildListItem(
+  study: (typeof campaignCaseStudies)[number],
+  locale: string,
 ): PublicSuccessCaseListItem {
-  const sample = caseStudies[index];
-  const meta = SAMPLE_META[index];
+  const isKo = locale !== "en";
+  const highlightMetrics: CaseStudyMetric[] = study.metrics.slice(0, 3);
   return {
-    id: SAMPLE_SUCCESS_CASE_IDS[index],
-    industry: industryFromVertical(sample.vertical),
-    clientName: sample.client,
-    titleKo: sample.title,
-    titleEn: sample.titleEn,
-    summaryKo: sample.description,
-    thumbnailUrl: null,
-    mediaUsed: [...sample.mediaUsed],
-    mediaIds: [],
-    publishedAtIso: meta.publishedAt.toISOString(),
+    id: study.id,
+    industry: study.industry,
+    clientName: isKo ? study.brandLabelKo : study.brandLabelEn,
+    titleKo: study.titleKo,
+    titleEn: study.titleEn,
+    summaryKo: study.backgroundKo,
+    thumbnailUrl: study.thumbnailUrl,
+    mediaUsed: study.mediaPlacements.map((p) =>
+      isKo ? p.labelKo : p.labelEn,
+    ),
+    mediaIds: study.mediaPlacements
+      .map((p) => p.mediaId)
+      .filter((id): id is string => !!id),
+    publishedAtIso: study.publishedAtIso,
+    periodStartIso: study.periodStartIso,
+    periodEndIso: study.periodEndIso,
+    budgetRange: isKo ? study.budgetRangeKo : study.budgetRangeEn,
+    highlightMetrics,
   };
 }
 
-export function getSampleSuccessCaseListItems(): PublicSuccessCaseListItem[] {
-  return [
-    buildSampleListItem(0),
-    buildSampleListItem(1),
-    buildSampleListItem(2),
-  ];
+export function getSampleSuccessCaseListItems(
+  locale = "ko",
+): PublicSuccessCaseListItem[] {
+  return campaignCaseStudies.map((s) => buildListItem(s, locale));
 }
 
-/** First sample only (legacy). Prefer {@link getSampleSuccessCaseListItems}. */
-export function getSampleSuccessCaseListItem(): PublicSuccessCaseListItem {
-  return buildSampleListItem(0);
+export function getSampleSuccessCaseListItem(
+  locale = "ko",
+): PublicSuccessCaseListItem {
+  return buildListItem(campaignCaseStudies[0], locale);
 }
 
 export function getSampleSuccessCaseDetail(
   id: string,
+  locale = "ko",
 ): PublicSuccessCaseDetail | null {
-  const index = SAMPLE_SUCCESS_CASE_IDS.findIndex((sid) => sid === id);
-  if (index < 0 || index > 2) return null;
-
-  const i = index as 0 | 1 | 2;
-  const sample = caseStudies[i];
-  const meta = SAMPLE_META[i];
-  const base = buildSampleListItem(i);
+  const study = campaignCaseStudies.find((c) => c.id === id);
+  if (!study) return null;
+  const isKo = locale !== "en";
+  const base = buildListItem(study, locale);
   return {
     ...base,
-    challengeKo: sample.campaignGoal,
-    solutionKo: `${sample.managerComment}\n\n집행 매체: ${sample.mediaUsed.join(", ")}`,
-    resultsKo: [
-      sample.results,
-      `총 노출 ${sample.exposures}`,
-      `도달 ${sample.reachIncrease}`,
-    ],
-    metricsJson: Object.fromEntries(
-      sample.stats.map((s) => [s.label, s.value]),
-    ),
-    periodStartIso: meta.periodStart.toISOString(),
-    periodEndIso: meta.periodEnd.toISOString(),
-    galleryUrls: [],
-    testimonialKo: sample.testimonial,
+    challengeKo: study.challengeKo,
+    solutionKo: study.solutionKo,
+    resultsKo: study.resultsKo,
+    metricsJson: campaignCaseToMetricsRecord(study),
+    structuredMetrics: study.metrics,
+    galleryUrls: study.galleryUrls,
+    managerCommentKo: study.managerCommentKo ?? null,
+    testimonialKo: study.managerCommentKo ?? null,
+    mediaLinks: mediaLinks(study).map((l) => ({
+      ...l,
+      label: isKo
+        ? study.mediaPlacements.find((p) => p.mediaId === l.id)?.labelKo ?? l.label
+        : study.mediaPlacements.find((p) => p.mediaId === l.id)?.labelEn ?? l.label,
+    })),
   };
 }
 
 export function isSampleSuccessCaseId(id: string): boolean {
-  return (SAMPLE_SUCCESS_CASE_IDS as readonly string[]).includes(id);
+  return SAMPLE_SUCCESS_CASE_IDS.includes(id);
 }
 
-/** Prisma upsert payloads for `prisma/seed.ts`. */
 export function allSampleSuccessCaseSeedData(): Prisma.SuccessCaseCreateInput[] {
-  return ([0, 1, 2] as const).map((i) => {
-    const sample = caseStudies[i];
-    const meta = SAMPLE_META[i];
-    return {
-      id: SAMPLE_SUCCESS_CASE_IDS[i],
-      status: "published",
-      clientName: sample.client,
-      industry: industryFromVertical(sample.vertical),
-      titleKo: sample.title,
-      titleEn: sample.titleEn,
-      summaryKo: sample.description,
-      challengeKo: sample.campaignGoal,
-      solutionKo: `${sample.managerComment}\n\n집행 매체: ${sample.mediaUsed.join(", ")}`,
-      resultsKo: [
-        sample.results,
-        `총 노출 ${sample.exposures}`,
-        `도달 ${sample.reachIncrease}`,
-      ],
-      metricsJson: Object.fromEntries(
-        sample.stats.map((s) => [s.label, s.value]),
-      ),
-      mediaUsed: [...sample.mediaUsed],
-      mediaIds: [],
-      periodStart: meta.periodStart,
-      periodEnd: meta.periodEnd,
-      thumbnailUrl: null,
-      galleryUrls: [],
-      testimonialKo: sample.testimonial,
-      publishedAt: meta.publishedAt,
-    };
-  });
+  return campaignCaseStudies.map((study) => ({
+    id: study.id,
+    status: "published",
+    clientName: study.brandLabelKo,
+    industry: study.industry,
+    titleKo: study.titleKo,
+    titleEn: study.titleEn,
+    summaryKo: study.backgroundKo,
+    challengeKo: study.challengeKo,
+    solutionKo: study.solutionKo,
+    resultsKo: study.resultsKo,
+    metricsJson: campaignCaseToMetricsRecord(study) as Prisma.InputJsonValue,
+    mediaUsed: study.mediaPlacements.map((p) => p.labelKo),
+    mediaIds: study.mediaPlacements
+      .map((p) => p.mediaId)
+      .filter((id): id is string => !!id),
+    periodStart: new Date(study.periodStartIso),
+    periodEnd: new Date(study.periodEndIso),
+    thumbnailUrl: study.thumbnailUrl,
+    galleryUrls: study.galleryUrls,
+    testimonialKo: study.managerCommentKo ?? null,
+    publishedAt: new Date(study.publishedAtIso),
+  }));
 }
 
-/** @deprecated Use {@link allSampleSuccessCaseSeedData}[0]. */
+/** @deprecated Use {@link allSampleSuccessCaseSeedData}[0] */
 export function sampleSuccessCaseSeedData(): Prisma.SuccessCaseCreateInput {
   return allSampleSuccessCaseSeedData()[0];
 }
