@@ -235,9 +235,9 @@
 - [ ] 심사 기간: 평균 **3~5 영업일** → Pre-sprint 끝 무렵 (D8 4/30) 결과 기대
 - [ ] 테스트 키 즉시 발급 → Sprint 1 개발 착수 가능
 - [ ] 환경변수:
-  - `TOSS_CLIENT_KEY` (테스트 → 프로덕션 교체)
-  - `TOSS_SECRET_KEY`
-  - `TOSS_WEBHOOK_SECRET`
+  - `NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY` (테스트 → 프로덕션 교체; Vercel에 수동 등록)
+  - `TOSS_PAYMENTS_SECRET_KEY` (서버 전용 Secret)
+  - (향후) `TOSS_WEBHOOK_SECRET`
 - [ ] **지원 결제 수단** 확정: 카드 + 계좌이체 + 카카오페이 + 네이버페이 (Phase 1)
 - [ ] 세금계산서 자동 발행 옵션 활성
 - **담당**: CFO + BE 리드 · **마감**: 신청 D1 (4/21), 프로덕션 키 D8 예상
