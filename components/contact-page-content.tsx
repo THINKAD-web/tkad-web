@@ -1,5 +1,6 @@
 "use client";
 
+import { CONTACT_EMAIL } from "@/lib/constants";
 import { Suspense, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {

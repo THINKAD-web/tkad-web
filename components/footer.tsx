@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { Mail, MapPin, Phone, Megaphone, Globe, BarChart3, Wrench, MessageCircle } from "lucide-react";
 
+import { CONTACT_EMAIL } from "@/lib/constants";
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
 /**

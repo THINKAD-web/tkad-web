@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@/lib/constants";
 "use client";
 
 import { forwardRef } from "react";

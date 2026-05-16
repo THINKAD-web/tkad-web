@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@/lib/constants";
 export type QuoteTemplateId = "default" | "premium";
 
 export type QuotePdfRow = {

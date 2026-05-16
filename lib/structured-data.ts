@@ -6,6 +6,7 @@ import {
 } from "@/lib/media-seo";
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
+import { CONTACT_EMAIL } from "@/lib/constants";
 
 /** 푸터·SNS와 동일 (Organization sameAs / E-E-A-T) */
 const INSTAGRAM_THINKAD = "https://www.instagram.com/thinkad_korea" as const;

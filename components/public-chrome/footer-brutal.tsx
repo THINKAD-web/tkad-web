@@ -1,5 +1,6 @@
 "use client";
 
+import { CONTACT_EMAIL } from "@/lib/constants";
 /**
  * FooterBrutal — b930b10 IA 의 4컬럼(브랜드 / Quick Links / Contact / Services)
  * 구조를 BrutalFooter 로 렌더하는 래퍼.

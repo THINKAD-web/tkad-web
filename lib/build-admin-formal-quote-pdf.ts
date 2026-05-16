@@ -3,6 +3,7 @@ import {
   krFontFamily,
   registerNotoSansKrIfAvailable,
 } from "@/lib/jspdf-register-noto-kr";
+import { CONTACT_EMAIL } from "@/lib/constants";
 
 /** THINKAD brand — globals.css navy / gold */
 const NAVY: [number, number, number] = [26, 42, 108];

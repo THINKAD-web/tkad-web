@@ -1,5 +1,6 @@
 import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
+import { CONTACT_EMAIL } from "@/lib/constants";
 
 const NAVY = [13, 27, 46] as const;
 const GOLD = [200, 145, 60] as const;

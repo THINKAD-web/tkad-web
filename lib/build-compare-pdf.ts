@@ -1,4 +1,5 @@
 import type { jsPDF } from "jspdf";
+import { CONTACT_EMAIL } from "@/lib/constants";
 
 const NAVY: [number, number, number] = [26, 42, 108];
 const MUTED: [number, number, number] = [90, 99, 114];

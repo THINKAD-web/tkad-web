@@ -15,6 +15,7 @@ import {
   formatFinancialDocKindKo,
   formatFinancialDocStatusKo,
 } from "@/lib/campaign-report-labels";
+import { CONTACT_EMAIL } from "@/lib/constants";
 
 export type CompletionPdfSchedule = {
   title: string;
