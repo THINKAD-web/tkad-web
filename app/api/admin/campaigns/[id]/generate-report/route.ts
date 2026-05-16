@@ -32,6 +32,10 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   try {
     const buf = await buildCampaignCompletionReportPdfBuffer(id);
+    await db.campaign.update({
+      where: { id },
+      data: { reportGeneratedAt: new Date() },
+    });
     // 클라이언트명 조회 (파일명용) — buildCampaignCompletionReportPdfBuffer 가
     // 이미 caller-side 에서 fetch 하지만 여기서 다시 fetch 비용은 미미.
     const db = getPrisma();

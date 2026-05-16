@@ -315,10 +315,15 @@ model Campaign {
   endDate       DateTime?       @map("end_date")
   notes         String?
   accountId     String?         @map("account_id")
+  /// 광고주 셀프 대시보드 연결 (User.id)
+  ownerUserId   String?         @map("owner_user_id")
+  /// 완료 보고서 PDF 생성 시각 (광고주 알림용)
+  reportGeneratedAt DateTime?   @map("report_generated_at")
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
 
   account         CrmAccount?             @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  ownerUser       User?                   @relation("CampaignOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
   scheduleEvents  CampaignScheduleEvent[]
   financialDocs   CampaignFinancialDoc[]
   mediaBookings   MediaBooking[]
@@ -328,6 +333,8 @@ model Campaign {
   oohQuote        OoHQuote?
 
   @@index([status])
+  @@index([ownerUserId])
+  @@index([clientEmail])
   @@map("campaigns")
 }
 
@@ -813,6 +820,7 @@ model User {
 
   sessions        UserSession[]
   bookingRequests MediaBooking[] @relation("BookingRequester")
+  ownedCampaigns  Campaign[] @relation("CampaignOwner")
   communityPosts      CommunityPost[]     @relation("CommunityPostAuthor")
   communityComments   CommunityComment[]  @relation("CommunityCommentAuthor")
   communityPostLikes  CommunityPostLike[]

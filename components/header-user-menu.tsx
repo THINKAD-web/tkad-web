@@ -56,7 +56,7 @@ export function HeaderUserMenu({ onNavigate }: { onNavigate?: () => void }) {
       </Link>
       {session ? (
         <Link
-          href="/my"
+          href="/dashboard"
           onClick={onNavigate}
           className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-foreground hover:bg-secondary/60 transition-colors"
         >
