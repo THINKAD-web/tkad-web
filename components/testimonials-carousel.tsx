@@ -5,17 +5,19 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { type Testimonial } from "@/data/testimonials";
 
 type Props = {
   items: Testimonial[];
-  isKo: boolean;
 };
 
 /**
  * Embla 기반 캐러셀 — 5초 간격 자동 재생, hover 정지, 모바일은 스와이프·데스크톱은 화살표.
  */
-export function TestimonialsCarousel({ items, isKo }: Props) {
+export function TestimonialsCarousel({ items }: Props) {
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: true,

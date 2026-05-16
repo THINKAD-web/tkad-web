@@ -10,6 +10,7 @@ import {
   useMap,
 } from "react-leaflet";
 import type { HomeHeroMapPin } from "@/lib/public-media-catalog";
+import { useTranslations } from "next-intl";
 
 const ACCENT = "#22d3ee";
 const TILE_URL =
@@ -30,10 +31,10 @@ function MapInvalidateSize() {
 
 type Props = {
   pins: HomeHeroMapPin[];
-  isKo: boolean;
 };
 
-export default function HomeHeroMapCard({ pins, isKo }: Props) {
+export default function HomeHeroMapCard({ pins }: Props) {
+  const t = useTranslations("homePage");
   const validPins = useMemo(
     () =>
       pins.filter(
@@ -94,9 +95,9 @@ export default function HomeHeroMapCard({ pins, isKo }: Props) {
 
       <div className="grid shrink-0 grid-cols-3 gap-2 border-t border-border bg-muted/50 px-4 py-3">
         {[
-          { k: isKo ? "검증 매체" : "Verified", v: "500+" },
-          { k: isKo ? "파트너" : "Partners", v: "100+" },
-          { k: isKo ? "평균 응답" : "Response", v: "24h" },
+          { k: t("heroMapStatVerified"), v: "500+" },
+          { k: t("heroMapStatPartners"), v: "100+" },
+          { k: t("heroMapStatResponse"), v: "24h" },
         ].map((s) => (
           <div key={s.k} className="min-w-0 text-center">
             <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
