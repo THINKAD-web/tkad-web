@@ -363,15 +363,58 @@ export default function PlannerPageClient({
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
 
-  // PR-D: 매체 상세에서 ?addMedia=<id> 로 진입 시 Step 4 사전 선택
+  // PR-D: 매체 상세 ?addMedia= · 찜 목록 ?mediaIds= 로 Step 4 사전 선택
   const searchParams = useSearchParams();
   const addMediaId = searchParams.get("addMedia");
-  const handledAddMediaRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!addMediaId) return;
-    if (handledAddMediaRef.current === addMediaId) return;
-    handledAddMediaRef.current = addMediaId;
+  const mediaIdsParam = searchParams.get("mediaIds");
+  const handledQueryRef = useRef<string | null>(null);
 
+  const stripPlannerQueryKeys = useCallback((keys: string[]) => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    for (const k of keys) url.searchParams.delete(k);
+    window.history.replaceState({}, "", url.toString());
+  }, []);
+
+  useEffect(() => {
+    const batchKey = mediaIdsParam
+      ? `mediaIds:${mediaIdsParam}`
+      : addMediaId
+        ? `addMedia:${addMediaId}`
+        : null;
+    if (!batchKey) return;
+    if (handledQueryRef.current === batchKey) return;
+    handledQueryRef.current = batchKey;
+
+    if (mediaIdsParam) {
+      const requested = mediaIdsParam
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const valid = requested.filter((id) => catalog.some((m) => m.id === id));
+      if (valid.length === 0) {
+        toast(
+          "error",
+          isKo
+            ? "선택한 매체를 찾을 수 없습니다."
+            : "Selected media not found.",
+        );
+        stripPlannerQueryKeys(["mediaIds"]);
+        return;
+      }
+      setCampaignMediaIds(valid);
+      setWizardStep(4);
+      toast(
+        "success",
+        isKo
+          ? `찜한 매체 ${valid.length}개로 플래너를 시작합니다.`
+          : `Starting planner with ${valid.length} saved media.`,
+      );
+      stripPlannerQueryKeys(["mediaIds", "addMedia"]);
+      return;
+    }
+
+    if (!addMediaId) return;
     const exists = catalog.some((m) => m.id === addMediaId);
     if (!exists) {
       toast(
@@ -380,6 +423,7 @@ export default function PlannerPageClient({
           ? "선택한 매체를 찾을 수 없습니다."
           : "Selected media not found.",
       );
+      stripPlannerQueryKeys(["addMedia"]);
       return;
     }
     setCampaignMediaIds((prev) =>
@@ -392,13 +436,17 @@ export default function PlannerPageClient({
         ? "매체가 캠페인에 추가되었습니다."
         : "Media added to your campaign.",
     );
-    // URL 정리 — addMedia query 제거 (history 보존)
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.delete("addMedia");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, [addMediaId, catalog, setCampaignMediaIds, setWizardStep, toast, isKo]);
+    stripPlannerQueryKeys(["addMedia"]);
+  }, [
+    addMediaId,
+    mediaIdsParam,
+    catalog,
+    setCampaignMediaIds,
+    setWizardStep,
+    toast,
+    isKo,
+    stripPlannerQueryKeys,
+  ]);
 
   /**
    * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
