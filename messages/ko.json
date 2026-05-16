@@ -1005,8 +1005,8 @@
   },
   "cases": {
     "title": "성공 사례",
-    "subtitle": "THINKAD와 함께한 캠페인 성과",
-    "listIntro": "싱커드와 함께한 캠페인들의 성과입니다.",
+    "subtitle": "브랜드·업종, 집행 매체, 성과 지표가 정리된 캠페인 케이스 스터디",
+    "listIntro": "익명 브랜드 표기와 검증 가능한 OOH 성과 지표를 담은 사례입니다.",
     "reportHeroTitle": "싱커드 성공사례 보고서",
     "reportHeroSubtitle": "모든 캠페인, AI가 분석하고 보고서로 전달합니다",
     "reportLead": "싱커드와 함께하는 모든 캠페인은 AI가 자동으로 성공사례 보고서를 제작해드립니다",
@@ -1072,7 +1072,11 @@
     "ctaSimilar": "비슷한 캠페인 설계 요청",
     "sectionCtaTitle": "우리 브랜드에 맞는 OOH가 필요하신가요?",
     "sectionCtaDesc": "성공 사례를 바탕으로 맞춤 미디어 플랜을 제안해 드립니다.",
-    "sectionCtaButton": "상담 요청하기"
+    "sectionCtaButton": "상담 요청하기",
+    "backgroundLabel": "캠페인 배경",
+    "budgetRangeLabel": "예산 범위",
+    "metricsSectionTitle": "성과 지표",
+    "sampleDataNote": "샘플 데이터 — 실제 집행 사례는 상담 시 공유됩니다"
   },
   "insights": {
     "heroTitle": "싱커드 OOH 트렌드 보고서",

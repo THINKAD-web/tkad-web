@@ -992,8 +992,8 @@
   },
   "cases": {
     "title": "Case Studies",
-    "subtitle": "Campaign results achieved with THINKAD",
-    "listIntro": "These are campaign results from brands that ran with THINKAD.",
+    "subtitle": "Campaign case studies with media mix, budget range, and verified metrics",
+    "listIntro": "Anonymized brands with structured OOH performance data—not fictional testimonials.",
     "reportHeroTitle": "THINKAD success case reports",
     "reportHeroSubtitle": "Every campaign—analyzed by AI and delivered as a report",
     "reportLead": "Every campaign with THINKAD receives an AI-generated success case report",
@@ -1059,7 +1059,11 @@
     "ctaSimilar": "Request a similar campaign plan",
     "sectionCtaTitle": "Need OOH tailored to your brand?",
     "sectionCtaDesc": "We’ll propose a media plan inspired by these proven campaigns.",
-    "sectionCtaButton": "Talk to us"
+    "sectionCtaButton": "Talk to us",
+    "backgroundLabel": "Campaign background",
+    "budgetRangeLabel": "Budget range",
+    "metricsSectionTitle": "Performance metrics",
+    "sampleDataNote": "Sample data — contact us for verified campaign references"
   },
   "insights": {
     "heroTitle": "THINKAD OOH trend reports",
