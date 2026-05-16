@@ -21,11 +21,20 @@ export type MapBounds = {
 type Props = {
   markers: MapMarker[];
   selectedId: string | null;
+  /** 사이드카드 hover 시 지도의 해당 핀을 살짝 더 큰 selected 변형으로 표시 (별도 panTo 없음). */
+  hoveredId?: string | null;
   onSelect: (id: string) => void;
   onBoundsChange: (b: MapBounds) => void;
+  /** 지도 idle 시점에 현재 중심·줌을 알림. URL state 동기화용. */
+  onViewChange?: (view: { lat: number; lng: number; zoom: number }) => void;
   onMarkerDetail?: (id: string) => void;
   center?: { lat: number; lng: number };
   zoom?: number;
+  /** 외부에서 center/zoom 이 바뀔 때마다 panTo + setLevel 로 따라가게 하는 시퀀스 토큰.
+   *  같은 값을 또 보내면 무시됨 (반복 렌더 시 무한 zoom 방지). */
+  programmaticView?: { lat: number; lng: number; zoom: number; nonce: number } | null;
+  /** "내 위치" 라벨 마커. 클릭/선택 대상 아님. */
+  userLocation?: { lat: number; lng: number } | null;
   /** 이동형 커버리지 — `/api/geo/district-boundaries` 응답과 동일 형식 FeatureCollection */
   coverageGeoJson?: unknown | null;
   /** `coverageGeoJson` 이 있을 때 지도를 해당 영역에 맞춤 */
@@ -393,11 +402,15 @@ function loadKakaoSdk(appkey: string): Promise<void> {
 export default function KakaoMapView({
   markers,
   selectedId,
+  hoveredId = null,
   onSelect,
   onBoundsChange,
+  onViewChange,
   onMarkerDetail,
   center = { lat: 37.5665, lng: 126.978 },
   zoom = 8,
+  programmaticView = null,
+  userLocation = null,
   coverageGeoJson = null,
   fitCoverageBounds = false,
 }: Props) {
@@ -406,10 +419,13 @@ export default function KakaoMapView({
   const markerObjsRef = useRef<Map<string, unknown>>(new Map());
   const clustererRef = useRef<unknown>(null);
   const infoWindowRef = useRef<unknown>(null);
+  const userLocationMarkerRef = useRef<unknown>(null);
   const lastBoundsSentRef = useRef<MapBounds | null>(null);
   const onMarkerDetailRef = useRef(onMarkerDetail);
   const onSelectRef = useRef(onSelect);
+  const onViewChangeRef = useRef(onViewChange);
   const markersRef = useRef<MapMarker[]>(markers);
+  const lastProgrammaticNonceRef = useRef<number | null>(null);
   const [sdkError, setSdkError] = useState<string | null>(null);
   /** SDK 비동기 로드 후 지도 인스턴스가 생긴 뒤에만 true — markers effect 가 한 번 더 돌게 함 */
   const [mapReady, setMapReady] = useState(false);
@@ -424,6 +440,10 @@ export default function KakaoMapView({
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
+
+  useEffect(() => {
+    onViewChangeRef.current = onViewChange;
+  }, [onViewChange]);
 
   useEffect(() => {
     markersRef.current = markers;
@@ -549,6 +569,18 @@ export default function KakaoMapView({
               neLat: ne.getLat(),
               neLng: ne.getLng(),
             };
+            // 중심·줌 변경도 함께 통보 — URL state 동기화용
+            try {
+              const cb = onViewChangeRef.current;
+              if (cb) {
+                const centerLat = (sw.getLat() + ne.getLat()) / 2;
+                const centerLng = (sw.getLng() + ne.getLng()) / 2;
+                const z = map.getLevel();
+                cb({ lat: centerLat, lng: centerLng, zoom: z });
+              }
+            } catch {
+              /* noop */
+            }
             const prev = lastBoundsSentRef.current;
             if (
               prev &&
@@ -845,6 +877,149 @@ export default function KakaoMapView({
       console.error("[KakaoMapView] panTo failed", e);
     }
   }, [selectedId, mapReady]);
+
+  // hoveredId 변경 시 해당 핀을 selected 변형으로 표시 (panTo 없음)
+  useEffect(() => {
+    if (!mapReady) return;
+    const kakao = getKakaoSdk();
+    if (!kakao?.maps) return;
+    try {
+      const id = hoveredId;
+      if (!id) return;
+      const m = markersRef.current.find((x) => x.id === id);
+      if (!m) return;
+      const marker = markerObjsRef.current.get(id) as
+        | { setImage?: (im: unknown) => void }
+        | undefined;
+      if (!marker || typeof marker.setImage !== "function") return;
+      const baseType: "digital" | "static" | "mobile" | "default" =
+        m.type?.toLowerCase().includes("digital")
+          ? "digital"
+          : m.type?.toLowerCase().includes("static")
+            ? "static"
+            : m.type?.toLowerCase().includes("mobile")
+              ? "mobile"
+              : "default";
+      const variant: TkadPinVariant =
+        baseType === "digital"
+          ? "digitalSelected"
+          : baseType === "static"
+            ? "staticSelected"
+            : baseType === "mobile"
+              ? "mobileSelected"
+              : "selected";
+      marker.setImage(tkadPinMarkerImage(kakao.maps, variant, m.type));
+      return () => {
+        // 호버 해제 시 원래 variant 로 복귀 (단, 이게 진짜 selected 면 그대로 두기)
+        const isStillSelected = selectedId === id;
+        const restoreVariant: TkadPinVariant = isStillSelected
+          ? variant
+          : baseType === "digital"
+            ? "digital"
+            : baseType === "static"
+              ? "static"
+              : baseType === "mobile"
+                ? "mobile"
+                : "default";
+        try {
+          marker.setImage?.(tkadPinMarkerImage(kakao.maps, restoreVariant, m.type));
+        } catch {
+          /* noop */
+        }
+      };
+    } catch (e) {
+      console.error("[KakaoMapView] hover highlight failed", e);
+    }
+  }, [hoveredId, selectedId, mapReady]);
+
+  // 외부 programmaticView (URL 하이드레이션 / "내 주변" 클릭 등) 반영
+  useEffect(() => {
+    if (!mapReady) return;
+    if (!programmaticView) return;
+    if (lastProgrammaticNonceRef.current === programmaticView.nonce) return;
+    lastProgrammaticNonceRef.current = programmaticView.nonce;
+    const map = mapRef.current as
+      | {
+          panTo?: (pos: unknown) => void;
+          setLevel?: (z: number, opts?: { anchor?: unknown }) => void;
+        }
+      | null;
+    const kakao = getKakaoSdk();
+    if (!map || !kakao?.maps) return;
+    try {
+      const pos = new kakao.maps.LatLng(programmaticView.lat, programmaticView.lng);
+      map.panTo?.(pos);
+      if (typeof map.setLevel === "function") {
+        map.setLevel(programmaticView.zoom);
+      }
+    } catch (e) {
+      console.error("[KakaoMapView] programmaticView failed", e);
+    }
+  }, [programmaticView, mapReady]);
+
+  // "내 위치" 마커
+  useEffect(() => {
+    if (!mapReady) return;
+    const kakao = getKakaoSdk();
+    if (!kakao?.maps) return;
+    const map = mapRef.current as unknown;
+    if (!map) return;
+
+    const existing = userLocationMarkerRef.current as
+      | { setMap?: (m: unknown | null) => void }
+      | null;
+    if (existing?.setMap) {
+      try {
+        existing.setMap(null);
+      } catch {
+        /* noop */
+      }
+    }
+    userLocationMarkerRef.current = null;
+
+    if (!userLocation) return;
+
+    try {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
+  <defs>
+    <radialGradient id="ul" cx="17" cy="17" r="15" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="0.8" stop-color="#22d3ee" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="17" cy="17" r="16" fill="url(#ul)" opacity="0.55"/>
+  <circle cx="17" cy="17" r="8" fill="#22d3ee" stroke="#ffffff" stroke-width="3"/>
+</svg>`;
+      const dataUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+      const image = new kakao.maps.MarkerImage(
+        dataUrl,
+        new kakao.maps.Size(34, 34),
+        { offset: new kakao.maps.Point(17, 17) },
+      );
+      const marker = new kakao.maps.Marker({
+        position: new kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+        image,
+        title: "내 위치",
+      });
+      (marker as { setMap: (m: unknown) => void }).setMap(map);
+      userLocationMarkerRef.current = marker;
+    } catch (e) {
+      console.error("[KakaoMapView] userLocation marker failed", e);
+    }
+
+    return () => {
+      const m = userLocationMarkerRef.current as
+        | { setMap?: (m: unknown | null) => void }
+        | null;
+      try {
+        m?.setMap?.(null);
+      } catch {
+        /* noop */
+      }
+      userLocationMarkerRef.current = null;
+    };
+  }, [userLocation, mapReady]);
 
   if (sdkError) {
     return (
