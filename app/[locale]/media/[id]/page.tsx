@@ -56,6 +56,10 @@ import { RoadviewCard } from "@/components/media-detail/roadview-card";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { TrafficCharts } from "@/components/media-detail/traffic-charts";
+import { CompanionMediaCards } from "@/components/media-detail/companion-media-cards";
+import { MediaExecutionTimelineSection } from "@/components/media-detail/execution-timeline";
+import { getCompanionMediaFromCatalog } from "@/lib/media-companion";
+import { fetchMediaExecutionTimeline } from "@/lib/media-execution-timeline";
 import { MediaAvailabilityCalendar } from "@/components/media-detail/availability-calendar";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
@@ -128,8 +132,11 @@ export default async function MediaDetailPage({ params }: Props) {
   const media = await resolveMediaForDetail(idStr);
   if (!media) notFound();
 
-  const catalog = await fetchPublicMediaCatalog();
-  const relatedCases = await getSuccessCasesForMedia(media.id);
+  const [catalog, relatedCases, executionTimeline] = await Promise.all([
+    fetchPublicMediaCatalog(),
+    getSuccessCasesForMedia(media.id),
+    fetchMediaExecutionTimeline(media.id, locale === "ko"),
+  ]);
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const isKo = locale === "ko";
   const periodLabel = t(
@@ -157,6 +164,9 @@ export default async function MediaDetailPage({ params }: Props) {
   const similar = media.keywordFilter
     ? getSimilarKeywordFilterMediaItems(media.id, 3)
     : getSimilarMediaFromCatalog(catalog, media, 3);
+  const companionMedia = media.keywordFilter
+    ? similar.slice(0, 3)
+    : getCompanionMediaFromCatalog(catalog, media, 3);
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
   const caseStudyItems = buildCaseStudyGalleryItems(media);
@@ -707,6 +717,15 @@ export default async function MediaDetailPage({ params }: Props) {
               isKo={isKo}
             />
           </div>
+
+          {companionMedia.length > 0 ? (
+            <CompanionMediaCards items={companionMedia} isKo={isKo} />
+          ) : null}
+
+          <MediaExecutionTimelineSection
+            timeline={executionTimeline}
+            isKo={isKo}
+          />
 
           <MediaAvailabilityCalendar
             mediaId={media.id}

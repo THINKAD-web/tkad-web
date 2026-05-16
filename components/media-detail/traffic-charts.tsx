@@ -7,8 +7,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -27,7 +25,7 @@ const CHART_ACCENT = "#22d3ee"; // cyan-400 (neon)
 const CHART_NEUTRAL = "#94a3b8"; // slate-400 (neutral)
 const CHART_GRID = "rgba(255,255,255,0.14)";
 
-type Tab = "hourly" | "weekly" | "monthly";
+type Tab = "hourly" | "weekdayWeekend" | "weekly" | "monthly";
 
 type Props = {
   mediaType: string;
@@ -115,6 +113,20 @@ export function TrafficCharts({
     [pattern.monthly, baseDaily],
   );
 
+
+  const weekdayWeekendData = useMemo(() => {
+    const weekdayMul =
+      pattern.weekly.slice(0, 5).reduce((a, b) => a + b, 0) / 5 || 1;
+    const weekendMul =
+      pattern.weekly.slice(5, 7).reduce((a, b) => a + b, 0) / 2 || 1;
+    return pattern.hourly.map((p, h) => ({
+      label: `${h}`,
+      hour: h,
+      weekday: Math.round((baseDaily * p * weekdayMul) / 24),
+      weekend: Math.round((baseDaily * p * weekendMul) / 24),
+    }));
+  }, [pattern.hourly, pattern.weekly, baseDaily]);
+
   const hourlyPeak = peakIndex(pattern.hourly);
   const weeklyPeak = peakIndex(pattern.weekly);
 
@@ -145,6 +157,7 @@ export function TrafficCharts({
             {(
               [
                 ["hourly", t("tabHourly")],
+                ["weekdayWeekend", t("tabWeekdayWeekend")],
                 ["weekly", t("tabWeekly")],
                 ["monthly", t("tabMonthly")],
               ] as const
@@ -182,7 +195,7 @@ export function TrafficCharts({
         >
           <ResponsiveContainer width="100%" height="100%">
             {tab === "hourly" ? (
-              <LineChart data={hourlyData}>
+              <BarChart data={hourlyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
                 <XAxis
                   dataKey="hour"
@@ -195,35 +208,35 @@ export function TrafficCharts({
                   formatter={(v: number) => [v.toLocaleString(), t("axisHourly")]}
                   labelFormatter={(h) => `${h}:00`}
                 />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke={CHART_ACCENT}
-                  strokeWidth={2}
-                  dot={(props) => {
-                    const { cx, cy, index } = props as {
-                      cx?: number;
-                      cy?: number;
-                      index?: number;
-                    };
-                    if (index !== hourlyPeak || cx == null || cy == null) {
-                      return <g key={index ?? 0} />;
-                    }
-                    return (
-                      <rect
-                        key={index}
-                        x={cx - 5}
-                        y={cy - 5}
-                        width={10}
-                        height={10}
-                        fill={CHART_ACCENT}
-                        stroke={CHART_PRIMARY}
-                        strokeWidth={2}
-                      />
-                    );
-                  }}
+                <Bar dataKey="value" radius={[0, 0, 0, 0]}>
+                  {hourlyData.map((d, i) => (
+                    <Cell
+                      key={i}
+                      fill={i === hourlyPeak ? CHART_ACCENT : CHART_PRIMARY}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            ) : tab === "weekdayWeekend" ? (
+              <BarChart data={weekdayWeekendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
+                <XAxis
+                  dataKey="hour"
+                  ticks={HOUR_TICKS}
+                  tickFormatter={(h: number) => `${h}h`}
+                  tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
                 />
-              </LineChart>
+                <YAxis tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }} />
+                <Tooltip
+                  formatter={(v: number, name: string) => [
+                    v.toLocaleString(),
+                    name === "weekday" ? t("seriesWeekday") : t("seriesWeekend"),
+                  ]}
+                  labelFormatter={(h) => `${h}:00`}
+                />
+                <Bar dataKey="weekday" fill={CHART_PRIMARY} radius={[0, 0, 0, 0]} />
+                <Bar dataKey="weekend" fill={CHART_ACCENT} radius={[0, 0, 0, 0]} />
+              </BarChart>
             ) : tab === "weekly" ? (
               <BarChart data={weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />

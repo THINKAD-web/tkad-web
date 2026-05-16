@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { NearbyMapPoi, NearbyMapPoiKind } from "@/lib/kakao-nearby-pois";
 
 export type MapMarker = {
   id: string;
@@ -30,6 +31,8 @@ type Props = {
   coverageGeoJson?: unknown | null;
   /** `coverageGeoJson` 이 있을 때 지도를 해당 영역에 맞춤 */
   fitCoverageBounds?: boolean;
+  focusCircle?: { lat: number; lng: number; radiusM: number } | null;
+  poiMarkers?: NearbyMapPoi[];
 };
 
 declare global {
@@ -163,6 +166,16 @@ type KakaoSdk = {
     Polygon: new (opts: {
       map: unknown;
       path: unknown[];
+      strokeWeight?: number;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      fillColor?: string;
+      fillOpacity?: number;
+    }) => { setMap: (map: unknown | null) => void };
+    Circle?: new (opts: {
+      map: unknown;
+      center: unknown;
+      radius: number;
       strokeWeight?: number;
       strokeColor?: string;
       strokeOpacity?: number;

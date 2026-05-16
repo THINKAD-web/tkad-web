@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { MessageCircle, Phone, FileText, X } from "lucide-react";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
+import { buildMediaContactHref } from "@/lib/media-contact";
 import { cn } from "@/lib/utils";
 
 type Props = {

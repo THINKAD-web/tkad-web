@@ -8,8 +8,22 @@ import { getKakaoRestApiKey } from "@/lib/kakao-address-geocode";
 const BASE = "https://dapi.kakao.com";
 
 type LocalDoc = {
+  id?: string;
   place_name?: string;
   distance?: string;
+  x?: string;
+  y?: string;
+};
+
+export type NearbyMapPoiKind = "subway" | "cafe" | "convenience";
+
+export type NearbyMapPoi = {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  kind: NearbyMapPoiKind;
+  distanceM: number;
 };
 
 type LocalSearchResponse = {
@@ -228,6 +242,89 @@ export async function buildNearbyFacilitiesText(opts: {
   if (!split?.combined) return null;
   const maxLen = opts.maxLength ?? MAX_OUT_LEN;
   return clip(split.combined, maxLen);
+}
+
+
+
+const MAP_POI_CATEGORIES: ReadonlyArray<{
+  code: string;
+  kind: NearbyMapPoiKind;
+  limit: number;
+}> = [
+  { code: "SW8", kind: "subway", limit: 4 },
+  { code: "CE7", kind: "cafe", limit: 5 },
+  { code: "CS2", kind: "convenience", limit: 4 },
+];
+
+function docToMapPoi(d: LocalDoc, kind: NearbyMapPoiKind): NearbyMapPoi | null {
+  const name = (d.place_name ?? "").trim();
+  const lng = Number(d.x);
+  const lat = Number(d.y);
+  if (!name || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  const distanceM = docDistance(d);
+  const id = (d.id ?? `${kind}-${name}-${lat}-${lng}`).trim();
+  return { id, name, lat, lng, kind, distanceM };
+}
+
+async function fetchCategoryMapPois(
+  categoryGroupCode: string,
+  kind: NearbyMapPoiKind,
+  lng: string,
+  lat: string,
+  radius: string,
+  limit: number,
+): Promise<NearbyMapPoi[]> {
+  const json = await kakaoLocalGet("/v2/local/search/category.json", {
+    category_group_code: categoryGroupCode,
+    x: lng,
+    y: lat,
+    radius,
+    size: String(Math.min(15, limit + 3)),
+    sort: "distance",
+  });
+  const docs = json?.documents ?? [];
+  const out: NearbyMapPoi[] = [];
+  const seen = new Set<string>();
+  const sorted = [...docs].sort((a, b) => docDistance(a) - docDistance(b));
+  for (const d of sorted) {
+    const poi = docToMapPoi(d, kind);
+    if (!poi || seen.has(poi.id)) continue;
+    seen.add(poi.id);
+    out.push(poi);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+/** 매체 상세 지도 — 반경(m) 내 지하철·카페·편의점 POI */
+export async function fetchNearbyMapPois(opts: {
+  latitude: number;
+  longitude: number;
+  radiusM?: number;
+}): Promise<NearbyMapPoi[]> {
+  const { latitude, longitude } = opts;
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return [];
+  if (!getKakaoRestApiKey()) return [];
+  const radius = String(
+    Math.min(20000, Math.max(1, Math.round(opts.radiusM ?? 200))),
+  );
+  const lat = String(latitude);
+  const lng = String(longitude);
+  const batches = await Promise.all(
+    MAP_POI_CATEGORIES.map(({ code, kind, limit }) =>
+      fetchCategoryMapPois(code, kind, lng, lat, radius, limit),
+    ),
+  );
+  const merged: NearbyMapPoi[] = [];
+  const seen = new Set<string>();
+  for (const batch of batches) {
+    for (const poi of batch) {
+      if (seen.has(poi.id)) continue;
+      seen.add(poi.id);
+      merged.push(poi);
+    }
+  }
+  return merged.sort((a, b) => a.distanceM - b.distanceM);
 }
 
 /** 반경 내 가장 가까운 지하철역 (카테고리 SW8). 유동인구 추정 등에 사용. */

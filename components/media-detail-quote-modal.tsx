@@ -11,6 +11,7 @@ import {
   mediaDetailPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
+import { buildMediaContactHref } from "@/lib/media-contact";
 
 function MediaDetailQuoteModalBody({
   media,
