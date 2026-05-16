@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { CampaignStatus } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
+import { linkCampaignOwnerByEmail } from "@/lib/link-campaign-owner";
 
 export const dynamic = "force-dynamic";
 
