@@ -55,16 +55,16 @@ import {
   PlannerMonthCompareChart,
 } from "@/components/planner-charts";
 import { PlannerRegionMap } from "@/components/planner-region-map";
-import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
-import PlannerMediaSelector from "@/components/planner-media-selector";
 import PlannerTips from "@/components/planner-tips";
-import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
+import { PlannerBrandStep } from "@/components/planner/planner-brand-step";
+import { PlannerBudgetScheduleStep } from "@/components/planner/planner-budget-schedule-step";
+import { PlannerAiRecommendStep } from "@/components/planner/planner-ai-recommend-step";
+import { PlannerSaveShareStep } from "@/components/planner/planner-save-share-step";
 import PlannerReportStep, {
   PlannerReportPdfCompact,
 } from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
-import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import {
   CompositePreview,
   DEFAULT_LOGO_PLACEMENT,
@@ -76,6 +76,7 @@ import {
   PLANNER_BUDGET_MIN,
   PLANNER_INDUSTRY_KEYS,
   PLANNER_LAST_INPUT_STEP,
+  PLANNER_RESULT_STEP,
   type PlannerCampaignGoal,
   type PlannerCategory,
   type PlannerMapRegion,
@@ -385,7 +386,7 @@ export default function PlannerPageClient({
     setCampaignMediaIds((prev) =>
       prev.includes(addMediaId) ? prev : [...prev, addMediaId],
     );
-    setWizardStep(4);
+    setWizardStep(3);
     toast(
       "success",
       isKo
@@ -411,14 +412,22 @@ export default function PlannerPageClient({
       // PlannerStore 의 Set 등 직렬화 불가 타입은 JSON 변환 시 손실됨 → 안전한 형태로 평탄화.
       const state = usePlannerStore.getState();
       const planJson = {
+        brandName: state.brandName,
+        campaignPurposes: state.campaignPurposes,
         campaignGoal: state.campaignGoal,
         regions: Array.from(state.regions),
         categories: Array.from(state.categories),
         budget: state.budget,
         months: state.months,
         ageKey: state.ageKey,
+        genderKey: state.genderKey,
+        interestKeys: state.interestKeys,
         industryKey: state.industryKey,
+        flightStart: state.flightStart,
+        flightEnd: state.flightEnd,
         campaignMediaIds: Array.from(state.campaignMediaIds),
+        aiBudgetByMediaId: state.aiBudgetByMediaId,
+        aiRecommendSummary: state.aiRecommendSummary,
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
       };
@@ -457,7 +466,7 @@ export default function PlannerPageClient({
 
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
-      const url = `${origin}/${locale}/planner/shared/${data.id}`;
+      const url = `${origin}/${locale}/planner/plan/${data.id}`;
       setShareUrl(url);
       setSavedPlanId(data.id);
       // 링크를 즉시 클립보드에도 복사
@@ -629,6 +638,12 @@ export default function PlannerPageClient({
               current: wizardStep,
               total: PLANNER_LAST_INPUT_STEP,
             })}
+            stepLabels={{
+              1: t("stepBrandShort"),
+              2: t("stepBudgetShort"),
+              3: t("stepAiShort"),
+              4: t("stepSaveShort"),
+            }}
             onStepClick={(s) => setWizardStep(s)}
           />
         ) : null}
@@ -638,7 +653,7 @@ export default function PlannerPageClient({
             className={cn(
               "mx-auto space-y-8",
               // 매체 선택·소재 업로드·보고서 단계는 넓은 캔버스 필요
-              wizardStep === 4 || wizardStep === 5 || wizardStep === 6
+              wizardStep === 3 || wizardStep === 4
                 ? "max-w-7xl"
                 : "max-w-3xl",
             )}
@@ -651,322 +666,34 @@ export default function PlannerPageClient({
               budgetNum={budgetNum}
             />
 
-            {/* Step 1 — 캠페인 목표 */}
-            {wizardStep === 1 ? (
-              <PlannerCampaignStep1
-                campaignGoal={campaignGoal}
-                goals={GOALS}
-                onSelectGoal={setCampaignGoal}
-              />
-            ) : null}
+            {wizardStep === 1 ? <PlannerBrandStep /> : null}
 
-            {/* Step 2 — 타깃 · 지역 */}
             {wizardStep === 2 ? (
-              <div className="space-y-6">
-                <div className="space-y-2 text-center sm:text-left">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ STEP 2 / TARGET + REGION ]
-                  </p>
-                  <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                    {t("stepRegionTitle")}
-                  </h2>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {t("stepRegionDesc")}
-                  </p>
-                </div>
-
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ CATEGORY ]
-                    </p>
-                    <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
-                      <Layers className="h-5 w-5 text-primary" />
-                      {t("category")}
-                    </h3>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-                      {t("mediaMixHint")}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-0 p-5">
-                    {CATEGORIES.map(({ key, labelKey }) => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => toggleCategory(key)}
-                        className={cn(
-                          "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors touch-manipulation",
-                          categories.has(key)
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border bg-card text-foreground hover:bg-muted",
-                        )}
-                      >
-                        {t(labelKey)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <PlannerRegionMap
-                  selected={selectedRegions}
-                  counts={regionCounts}
-                  onToggle={toggleRegion}
-                  labelFor={mapLabel}
-                  title={t("mapTitle")}
-                  hint={t("mapHint")}
-                  countLabel={(n) => t("mapCount", { count: n })}
-                />
-
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("packagesTitle")} ]
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 gap-0 p-5 sm:grid-cols-3">
-                    {(
-                      [
-                        ["premium", "pkgPremium", "pkgPremiumDesc"],
-                        ["national", "pkgNational", "pkgNationalDesc"],
-                        ["value", "pkgValue", "pkgValueDesc"],
-                      ] as const
-                    ).map(([id, titleKey, descKey]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => applyPreset(id)}
-                        className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 text-left transition-colors hover:bg-muted"
-                      >
-                        <p className="font-bold tracking-tight text-foreground">{t(titleKey)}</p>
-                        <p className="mt-2 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
-                          {t(descKey)}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div>
-                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("ageLabel")} ]
-                    </p>
-                    <div className="flex flex-wrap gap-0">
-                      {PLANNER_AGE_KEYS.map((k) => (
-                        <button
-                          key={k}
-                          type="button"
-                          onClick={() => setAgeKey(k)}
-                          className={cn(
-                            "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
-                            ageKey === k
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-card text-foreground hover:bg-muted",
-                          )}
-                        >
-                          {t(k)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("industryLabel")} ]
-                    </p>
-                    <div className="flex flex-wrap gap-0">
-                      {PLANNER_INDUSTRY_KEYS.map((k) => (
-                        <button
-                          key={k}
-                          type="button"
-                          onClick={() => setIndustryKey(k)}
-                          className={cn(
-                            "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
-                            industryKey === k
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-card text-foreground hover:bg-muted",
-                          )}
-                        >
-                          {t(k)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <PlannerBudgetScheduleStep
+                catalog={catalog}
+                regionCounts={regionCounts}
+                mapLabel={mapLabel}
+              />
             ) : null}
 
-            {/* Step 3 — 예산 · 기간 */}
             {wizardStep === 3 ? (
-              <div className="border-2 border-border bg-card">
-                <div className="border-b-2 border-border p-5">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ STEP 3 / BUDGET + PERIOD ]
-                  </p>
-                  <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
-                    <Wallet className="h-5 w-5 text-primary" />
-                    {t("stepBudgetTitle")}
-                  </h3>
-                  <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-                    {t("stepBudgetDesc")}
-                  </p>
-                </div>
-                <div className="space-y-6 p-5">
-                  <div>
-                    <div className="mb-3 flex justify-between font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                      <span>{t("budgetSliderMin")}</span>
-                      <span>{t("budgetSliderMax")}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={PLANNER_BUDGET_MIN}
-                      max={PLANNER_BUDGET_MAX}
-                      step={500}
-                      value={budgetNum}
-                      onChange={(e) => setBudget(e.target.value)}
-                      className="h-3 w-full cursor-pointer appearance-none border-2 border-border bg-card"
-                      style={{ accentColor: "#22d3ee" }}
-                      aria-label={t("budget")}
-                    />
-                    <div className="mt-4 flex flex-wrap items-end gap-3">
-                      <div className="flex-1 min-w-[8rem]">
-                        <label className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                          [ {t("budget")} ]
-                        </label>
-                        <input
-                          inputMode="numeric"
-                          value={budget}
-                          onChange={(e) =>
-                            setBudget(e.target.value.replace(/[^\d]/g, ""))
-                          }
-                          className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono font-bold text-foreground focus:border-primary focus:outline-none"
-                        />
-                      </div>
-                      <p className="pb-1 font-mono text-[12px] tracking-tight text-muted-foreground">
-                        {t("budgetPerMonthSummary", {
-                          amount: Math.round(budgetNum / Math.max(months, 1)),
-                        })}
-                      </p>
-                    </div>
-                    {blurbParts ? (
-                      <p className="mt-4 border-2 border-primary bg-card px-4 py-3 font-mono text-[11px] leading-relaxed tracking-tight text-foreground">
-                        <span className="mr-1 font-bold uppercase tracking-[0.22em] text-primary">
-                          {`// `}
-                        </span>
-                        {t("budgetBlurb", {
-                          name: blurbParts.sampleName.slice(0, 32),
-                          price: blurbParts.samplePrice,
-                          slots: blurbParts.slotsAtMonth,
-                        })}
-                      </p>
-                    ) : null}
-                  </div>
-                  <div>
-                    <p className="mb-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      <CalendarRange className="h-4 w-4" />
-                      [ {t("period")} ]
-                    </p>
-                    <div className="flex flex-wrap gap-0">
-                      {PLANNER_PERIOD_OPTIONS.map((opt) => {
-                        const selected = Math.abs(months - opt.months) < 0.04;
-                        return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            onClick={() => setMonths(opt.months)}
-                            className={cn(
-                              "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
-                              selected
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border bg-card text-foreground hover:bg-muted",
-                            )}
-                          >
-                            {t(opt.labelKey)}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <PlannerAiRecommendStep catalog={catalog} />
             ) : null}
 
-            {/* Step 4 — 매체 선택 (AI 추천 + 직접 탐색) */}
             {wizardStep === 4 ? (
-              <div className="space-y-6">
-                <div className="space-y-2 text-center sm:text-left">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ STEP 4 / MEDIA SELECTION ]
-                  </p>
-                  <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                    {t("stepMediaTitle")}
-                  </h2>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {t("stepMediaDesc")}
-                  </p>
-                </div>
-
-                <PlannerRecommendationPanel
-                  catalog={recommendationCatalog}
-                  isKo={isKo}
-                  regionLabel={mediaRegionLabel}
-                />
-
-                <div className="space-y-2 border-t-2 border-border pt-6">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ MANUAL BROWSE ]
-                  </p>
-                  <h3 className="text-base font-bold tracking-tight text-foreground">
-                    {t("recommendBrowseTitle")}
-                  </h3>
-                  <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
-                    {t("recommendBrowseDesc")}
-                  </p>
-                </div>
-                <PlannerMediaSelector
-                  catalog={catalog}
-                  campaignMediaIds={campaignMediaIds}
-                  setCampaignMediaIds={setCampaignMediaIds}
-                  isKo={isKo}
-                  regionLabel={mediaRegionLabel}
-                />
-              </div>
-            ) : null}
-
-            {/* Step 5 — 로고 업로드 + 합성 미리보기 */}
-            {wizardStep === 5 ? (
-              <PlannerSimulationStep3
-                selectedMedia={selectedMediaForSimulation}
-                creativeObjectUrl={creativeObjectUrl}
-                setCreativeObjectUrl={setCreativeObjectUrl}
-                creativeUploadedUrl={creativeUploadedUrl}
-                setCreativeUploadedUrl={setCreativeUploadedUrl}
+              <PlannerSaveShareStep
+                shareUrl={shareUrl}
+                saving={saving}
+                onSave={() => void savePlan("share")}
+                onQuote={() => {
+                  if (typeof window !== "undefined") {
+                    window.location.href = quoteHref;
+                  }
+                }}
               />
             ) : null}
 
-            {wizardStep === 6 ? (
-              <PlannerReportStep
-                isKo={isKo}
-                campaignGoal={campaignGoal}
-                goalTitle={goalTitle}
-                budgetNum={budgetNum}
-                months={months}
-                regionsText={regionsSummary}
-                categoriesText={categoriesSummary}
-                ageText={t(ageKey)}
-                industryText={t(industryKey)}
-                portfolio={portfolio}
-                matchedCount={filtered.length}
-                monthCompare={monthCompare}
-                cpmBars={cpmBars}
-                metrics={metrics}
-                reachCorePct={reachSplit.corePct}
-                reachExtendedPct={reachSplit.extendedPct}
-                logoUrl={creativeUploadedUrl || creativeObjectUrl}
-                mediaPlacements={mediaPlacements}
-              />
-            ) : null}
-
-            <div className="flex flex-col-reverse gap-3 border-t-2 border-border pt-6 sm:flex-row sm:justify-between">
+                        <div className="flex flex-col-reverse gap-3 border-t-2 border-border pt-6 sm:flex-row sm:justify-between">
               <BtnBlock
                 variant="secondary"
                 size="md"
@@ -977,7 +704,7 @@ export default function PlannerPageClient({
                 {t("back")}
               </BtnBlock>
               <BtnBlock variant="accent" size="md" onClick={goNext}>
-                {wizardStep === 6 ? (
+                {wizardStep === PLANNER_LAST_INPUT_STEP ? (
                   <>
                     {t("viewEffectDashboard")}
                     <ChevronRight className="h-4 w-4" />
@@ -994,7 +721,7 @@ export default function PlannerPageClient({
         ) : (
           <div className="space-y-8">
             <PlannerTips
-              wizardStep={7}
+              wizardStep={PLANNER_RESULT_STEP}
               campaignGoal={campaignGoal}
               campaignMediaCount={campaignMediaIds.length}
               hasCreative={Boolean(creativeObjectUrl)}
@@ -1004,7 +731,7 @@ export default function PlannerPageClient({
               <BtnBlock
                 variant="secondary"
                 size="md"
-                onClick={() => setWizardStep(2)}
+                onClick={() => setWizardStep(1)}
                 className="w-full sm:w-auto"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -1095,7 +822,7 @@ export default function PlannerPageClient({
                   <BtnBlock
                     variant="primary"
                     size="md"
-                    onClick={() => setWizardStep(2)}
+                    onClick={() => setWizardStep(1)}
                   >
                     {t("editInputs")}
                   </BtnBlock>

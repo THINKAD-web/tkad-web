@@ -7,7 +7,10 @@ import {
   type PlannerWizardStep,
 } from "@/lib/planner/types";
 
-const STEP_NUMBERS: ReadonlyArray<PlannerWizardStep> = [1, 2, 3, 4, 5, 6];
+const STEP_NUMBERS: ReadonlyArray<PlannerWizardStep> = Array.from(
+  { length: PLANNER_LAST_INPUT_STEP },
+  (_, i) => (i + 1) as PlannerWizardStep,
+);
 
 type Props = {
   currentStep: PlannerWizardStep;

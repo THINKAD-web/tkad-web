@@ -25,6 +25,65 @@ export const PLANNER_INDUSTRY_KEYS = [
 ] as const;
 export type PlannerIndustryKey = (typeof PLANNER_INDUSTRY_KEYS)[number];
 
+/** UI 멀티선택 ↔ 내부 PlannerCampaignGoal 매핑 */
+export const PLANNER_PURPOSE_KEYS = [
+  "awareness",
+  "launch",
+  "popup",
+  "retarget",
+] as const;
+export type PlannerPurposeKey = (typeof PLANNER_PURPOSE_KEYS)[number];
+
+export const PLANNER_GENDER_KEYS = [
+  "genderAll",
+  "genderFemale",
+  "genderMale",
+] as const;
+export type PlannerGenderKey = (typeof PLANNER_GENDER_KEYS)[number];
+
+export const PLANNER_INTEREST_KEYS = [
+  "intFashion",
+  "intBeauty",
+  "intTech",
+  "intFood",
+  "intEntertainment",
+  "intFinance",
+] as const;
+export type PlannerInterestKey = (typeof PLANNER_INTEREST_KEYS)[number];
+
+export function purposeToCampaignGoal(
+  p: PlannerPurposeKey,
+): PlannerCampaignGoal {
+  const map: Record<PlannerPurposeKey, PlannerCampaignGoal> = {
+    awareness: "brand",
+    launch: "launch",
+    popup: "event",
+    retarget: "sales",
+  };
+  return map[p];
+}
+
+export function isPlannerPurposeKey(v: unknown): v is PlannerPurposeKey {
+  return (
+    typeof v === "string" &&
+    (PLANNER_PURPOSE_KEYS as readonly string[]).includes(v)
+  );
+}
+
+export function isPlannerGenderKey(v: unknown): v is PlannerGenderKey {
+  return (
+    typeof v === "string" &&
+    (PLANNER_GENDER_KEYS as readonly string[]).includes(v)
+  );
+}
+
+export function isPlannerInterestKey(v: unknown): v is PlannerInterestKey {
+  return (
+    typeof v === "string" &&
+    (PLANNER_INTEREST_KEYS as readonly string[]).includes(v)
+  );
+}
+
 export const PLANNER_DEFAULT_CATEGORIES: PlannerCategory[] = [
   "digital",
   "static",
@@ -34,10 +93,10 @@ export const PLANNER_DEFAULT_CATEGORIES: PlannerCategory[] = [
 export const PLANNER_BUDGET_MIN = 500;
 export const PLANNER_BUDGET_MAX = 100_000;
 
-/** 1~6 : 입력 단계, 7 : 결과 대시보드 */
-export type PlannerWizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-export const PLANNER_LAST_INPUT_STEP = 6 as const;
-export const PLANNER_RESULT_STEP = 7 as const;
+/** 1~4 : 입력 단계, 5 : 결과 대시보드 */
+export type PlannerWizardStep = 1 | 2 | 3 | 4 | 5;
+export const PLANNER_LAST_INPUT_STEP = 4 as const;
+export const PLANNER_RESULT_STEP = 5 as const;
 
 export type PlannerPresetId = "premium" | "national" | "value";
 

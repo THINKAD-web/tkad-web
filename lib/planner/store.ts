@@ -10,12 +10,19 @@ import {
   PLANNER_LAST_INPUT_STEP,
   PLANNER_RESULT_STEP,
   isPlannerAgeKey,
+  isPlannerGenderKey,
   isPlannerIndustryKey,
+  isPlannerInterestKey,
+  isPlannerPurposeKey,
   normalizePlannerCategories,
+  purposeToCampaignGoal,
   type PlannerAgeKey,
   type PlannerCampaignGoal,
   type PlannerCategory,
+  type PlannerGenderKey,
   type PlannerIndustryKey,
+  type PlannerInterestKey,
+  type PlannerPurposeKey,
   type PlannerPresetId,
   type PlannerWizardStep,
 } from "@/lib/planner/types";
@@ -26,10 +33,12 @@ import type { CompositeLogoPlacement } from "@/components/planner/composite-prev
  * `migrate()` 훅에서 흡수한다. persist 자체 version은 별도 관리.
  */
 export const PLANNER_STORAGE_KEY = "tkad-planner-plan-v2";
-const PLANNER_PERSIST_VERSION = 3;
+const PLANNER_PERSIST_VERSION = 4;
 
 export type PlannerStoreState = {
   wizardStep: PlannerWizardStep;
+  brandName: string;
+  campaignPurposes: PlannerPurposeKey[];
   campaignGoal: PlannerCampaignGoal | null;
   /** `PlannerMapRegion` 문자열 배열. Set 대신 직렬화 친화적 배열을 저장. */
   regions: string[];
@@ -38,8 +47,14 @@ export type PlannerStoreState = {
   budget: string;
   months: number;
   ageKey: PlannerAgeKey;
+  genderKey: PlannerGenderKey;
+  interestKeys: PlannerInterestKey[];
   industryKey: PlannerIndustryKey;
+  flightStart: string;
+  flightEnd: string;
   campaignMediaIds: string[];
+  aiBudgetByMediaId: Record<string, number>;
+  aiRecommendSummary: string | null;
   /** 로컬 Object URL. 메모리 전용이라 persist 대상에서 제외. */
   creativeObjectUrl: string | null;
   /** Cloudinary 업로드된 크리에이티브 secure_url. persist 포함. */
@@ -52,7 +67,17 @@ export type PlannerStoreActions = {
   setWizardStep: (step: PlannerWizardStep) => void;
   goNextStep: () => void;
   goPrevStep: () => void;
+  setBrandName: (name: string) => void;
+  toggleCampaignPurpose: (purpose: PlannerPurposeKey) => void;
   setCampaignGoal: (goal: PlannerCampaignGoal | null) => void;
+  setGenderKey: (key: PlannerGenderKey) => void;
+  toggleInterestKey: (key: PlannerInterestKey) => void;
+  setFlightRange: (start: string, end: string) => void;
+  setAiRecommendation: (
+    mediaIds: string[],
+    budgetByMediaId: Record<string, number>,
+    summary: string | null,
+  ) => void;
   toggleRegion: (region: string) => void;
   setRegions: (regions: string[]) => void;
   toggleCategory: (cat: PlannerCategory) => void;
@@ -80,14 +105,22 @@ export type PlannerStore = PlannerStoreState & PlannerStoreActions;
 
 const INITIAL_STATE: PlannerStoreState = {
   wizardStep: 1,
+  brandName: "",
+  campaignPurposes: [],
   campaignGoal: null,
   regions: ["seoul"],
   categories: [...PLANNER_DEFAULT_CATEGORIES],
   budget: "5000",
   months: 3,
   ageKey: "ageAll",
+  genderKey: "genderAll",
+  interestKeys: [],
   industryKey: "indOther",
+  flightStart: "",
+  flightEnd: "",
   campaignMediaIds: [],
+  aiBudgetByMediaId: {},
+  aiRecommendSummary: null,
   creativeObjectUrl: null,
   creativeUploadedUrl: null,
   mediaPlacements: {},
@@ -117,7 +150,44 @@ export const usePlannerStore = create<PlannerStore>()(
           wizardStep: clampWizardStep(s.wizardStep - 1),
         })),
 
+      setBrandName: (name) => set({ brandName: name }),
+
+      toggleCampaignPurpose: (purpose) =>
+        set((s) => {
+          const has = s.campaignPurposes.includes(purpose);
+          const campaignPurposes = has
+            ? s.campaignPurposes.filter((p) => p !== purpose)
+            : [...s.campaignPurposes, purpose];
+          const campaignGoal =
+            campaignPurposes.length > 0
+              ? purposeToCampaignGoal(campaignPurposes[0])
+              : null;
+          return { campaignPurposes, campaignGoal };
+        }),
+
       setCampaignGoal: (goal) => set({ campaignGoal: goal }),
+
+      setGenderKey: (key) => set({ genderKey: key }),
+
+      toggleInterestKey: (key) =>
+        set((s) => {
+          const has = s.interestKeys.includes(key);
+          return {
+            interestKeys: has
+              ? s.interestKeys.filter((k) => k !== key)
+              : [...s.interestKeys, key],
+          };
+        }),
+
+      setFlightRange: (flightStart, flightEnd) =>
+        set({ flightStart, flightEnd }),
+
+      setAiRecommendation: (campaignMediaIds, aiBudgetByMediaId, summary) =>
+        set({
+          campaignMediaIds: [...campaignMediaIds],
+          aiBudgetByMediaId: { ...aiBudgetByMediaId },
+          aiRecommendSummary: summary,
+        }),
 
       toggleRegion: (region) =>
         set((s) => {
@@ -225,29 +295,29 @@ export const usePlannerStore = create<PlannerStore>()(
        * - creativeObjectUrl: Object URL 은 세션 간 재사용 불가
        */
       partialize: (state) => ({
+        brandName: state.brandName,
+        campaignPurposes: state.campaignPurposes,
         campaignGoal: state.campaignGoal,
         regions: state.regions,
         categories: state.categories,
         budget: state.budget,
         months: state.months,
         ageKey: state.ageKey,
+        genderKey: state.genderKey,
+        interestKeys: state.interestKeys,
         industryKey: state.industryKey,
+        flightStart: state.flightStart,
+        flightEnd: state.flightEnd,
         campaignMediaIds: state.campaignMediaIds,
+        aiBudgetByMediaId: state.aiBudgetByMediaId,
+        aiRecommendSummary: state.aiRecommendSummary,
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
       }),
-      /**
-       * 레거시 포맷:
-       *   v1: { version:1, region: "all"|<one>, categories?, budget?, months? }
-       *   v2: { version:2, regions:[], categories:[], budget(number), months, campaignGoal, ageKey, industryKey, wizardStep, campaignMediaIds }
-       *   v3: v2와 동일 shape
-       * Zustand persist가 전달하는 persistedState 는 `{ state, version }` 언래핑된 값.
-       */
       migrate: (persistedState, fromVersion) => {
         const raw = (persistedState ?? {}) as Record<string, unknown>;
         const merged: PlannerStoreState = { ...INITIAL_STATE };
 
-        // region: v1은 단일 region 문자열, v2+ 는 regions 배열
         if (fromVersion <= 1 && typeof raw.region === "string") {
           merged.regions =
             raw.region === "all"
@@ -274,21 +344,53 @@ export const usePlannerStore = create<PlannerStore>()(
 
         if (typeof raw.months === "number") merged.months = raw.months;
 
+        if (typeof raw.brandName === "string") merged.brandName = raw.brandName;
+
+        if (Array.isArray(raw.campaignPurposes)) {
+          merged.campaignPurposes = raw.campaignPurposes.filter(
+            isPlannerPurposeKey,
+          );
+          if (merged.campaignPurposes.length > 0) {
+            merged.campaignGoal = purposeToCampaignGoal(
+              merged.campaignPurposes[0],
+            );
+          }
+        }
+
         if (typeof raw.campaignGoal === "string") {
           merged.campaignGoal = raw.campaignGoal as PlannerCampaignGoal;
         }
 
         if (isPlannerAgeKey(raw.ageKey)) merged.ageKey = raw.ageKey;
+        if (isPlannerGenderKey(raw.genderKey)) merged.genderKey = raw.genderKey;
+        if (Array.isArray(raw.interestKeys)) {
+          merged.interestKeys = raw.interestKeys.filter(isPlannerInterestKey);
+        }
         if (isPlannerIndustryKey(raw.industryKey))
           merged.industryKey = raw.industryKey;
 
-        // wizardStep 은 persist 대상이 아님 (항상 Step 1 부터 재개).
-        // 레거시 저장본의 wizardStep 는 무시.
+        if (typeof raw.flightStart === "string")
+          merged.flightStart = raw.flightStart;
+        if (typeof raw.flightEnd === "string") merged.flightEnd = raw.flightEnd;
 
         if (Array.isArray(raw.campaignMediaIds)) {
           merged.campaignMediaIds = raw.campaignMediaIds.filter(
             (id): id is string => typeof id === "string",
           );
+        }
+
+        if (
+          raw.aiBudgetByMediaId &&
+          typeof raw.aiBudgetByMediaId === "object" &&
+          !Array.isArray(raw.aiBudgetByMediaId)
+        ) {
+          merged.aiBudgetByMediaId = raw.aiBudgetByMediaId as Record<
+            string,
+            number
+          >;
+        }
+        if (typeof raw.aiRecommendSummary === "string") {
+          merged.aiRecommendSummary = raw.aiRecommendSummary;
         }
 
         if (typeof raw.creativeUploadedUrl === "string") {
