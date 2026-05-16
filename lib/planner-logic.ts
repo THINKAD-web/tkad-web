@@ -357,6 +357,161 @@ function goalRoiBoost(goal: PlannerCampaignGoal | null): number {
   return t[goal] ?? 0;
 }
 
+/**
+ * 매체별 가시성 점수를 0~1 로 정규화. DB는 0~4, 일부 mock 은 0~100.
+ * 점수 미기입(null/undef) 은 0.5 로 가정.
+ */
+export function normalizeVisibilityScore(v: unknown): number {
+  if (typeof v !== "number" || !Number.isFinite(v) || v < 0) return 0.5;
+  if (v <= 4) return Math.min(1, v / 4);
+  if (v >= 100) return 1;
+  return Math.min(1, v / 100);
+}
+
+export type PlannerAdvancedMetricsRow = {
+  id: string;
+  name: string;
+  type: string;
+  region: string;
+  /** 일평균 노출 (= dailyFootTraffic) */
+  dailyImpressions: number;
+  /** 1개월 노출 (= dailyFootTraffic × 30) */
+  monthlyImpressions: number;
+  /** 캠페인 총 노출 (= 1개월 × months) */
+  totalImpressions: number;
+  /** 0~1 정규화 가시성 */
+  visibilityNorm: number;
+  /** 매체별 OTS (가시성 가중 노출) */
+  ots: number;
+  /** 매체별 CPM (원 / 1000회) — 카탈로그 단가 기준. null = 단가/노출 없음 */
+  cpmKrw: number | null;
+};
+
+export type PlannerAdvancedMetrics = {
+  /** 캠페인 총 노출 (= sum perMedia.totalImpressions) */
+  totalImpressions: number;
+  /** 일평균 노출 합계 (= sum dailyFootTraffic) — 차트·요약용 */
+  dailyImpressions: number;
+  /** 가시성으로 가중한 실질 노출 기회 (OTS) */
+  totalOts: number;
+  /** 중복 제거 추정 도달 — 지역별 saturation 합 */
+  uniqueReach: number;
+  /** 1인당 평균 노출 횟수 (도달 0 일 때 1 로 클램프) */
+  avgFrequency: number;
+  /** CPM (원/1000회). 노출 0 일 때 null. */
+  cpmKrw: number | null;
+  perMedia: PlannerAdvancedMetricsRow[];
+};
+
+/**
+ * 도달·빈도·OTS·CPM 시뮬레이션.
+ *
+ *   - 매체별: imp = dailyFootTraffic × 30 × months, OTS = imp × normalize(visibility)
+ *   - 지역별: 같은 지역 매체끼리는 중복 도달이 발생하므로 saturation 모델 적용.
+ *     audiencePool_region = max(daily) × periodDays × regionUniqueFactor
+ *     reach_region = audiencePool × (1 − exp(−impressions_region / audiencePool))
+ *   - 총 도달 = 각 region 의 reach 합 (region 끼리는 독립 가정)
+ *   - 빈도 = totalImpressions / uniqueReach (클램프 1 이상)
+ *   - CPM = budgetKrw / (totalImpressions / 1000)
+ *
+ * 모든 결과는 데모 모형이며 실제 캠페인 평가용은 아닙니다.
+ */
+export function computeAdvancedPlannerMetrics(args: {
+  portfolio: MediaItem[];
+  budgetMan: number;
+  months: number;
+  /** 같은 지역 매체끼리의 도달 중복 할인 계수 (0~1). 작을수록 도달이 작아짐. 기본 0.45. */
+  regionUniqueFactor?: number;
+}): PlannerAdvancedMetrics | null {
+  const { portfolio, budgetMan, months } = args;
+  if (portfolio.length === 0 || months <= 0) return null;
+
+  const regionFactor = Math.max(
+    0.05,
+    Math.min(1, args.regionUniqueFactor ?? 0.45),
+  );
+  const periodDays = months * 30;
+
+  let totalImpressions = 0;
+  let dailyImpressions = 0;
+  let totalOts = 0;
+  const perMedia: PlannerAdvancedMetricsRow[] = [];
+  const regionAgg = new Map<
+    string,
+    { impressions: number; maxDaily: number }
+  >();
+
+  for (const m of portfolio) {
+    const daily = Math.max(0, m.dailyFootTraffic ?? 0);
+    const monthly = Math.round(daily * 30);
+    const total = Math.round(monthly * months);
+    const visNorm = normalizeVisibilityScore(m.visibilityScore);
+    const ots = Math.round(total * visNorm);
+
+    const priceWon =
+      typeof m.price === "number" && Number.isFinite(m.price) && m.price > 0
+        ? m.price * 10_000
+        : 0;
+    const monthlyImp = Math.max(0, monthly);
+    const cpmKrw = monthlyImp > 0 && priceWon > 0
+      ? Math.round(priceWon / (monthlyImp / 1000))
+      : null;
+
+    totalImpressions += total;
+    dailyImpressions += daily;
+    totalOts += ots;
+
+    const r = regionAgg.get(m.region) ?? { impressions: 0, maxDaily: 0 };
+    r.impressions += daily * periodDays;
+    if (daily > r.maxDaily) r.maxDaily = daily;
+    regionAgg.set(m.region, r);
+
+    perMedia.push({
+      id: m.id,
+      name: m.name,
+      type: m.type,
+      region: m.region,
+      dailyImpressions: daily,
+      monthlyImpressions: monthly,
+      totalImpressions: total,
+      visibilityNorm: visNorm,
+      ots,
+      cpmKrw,
+    });
+  }
+
+  let uniqueReach = 0;
+  for (const r of regionAgg.values()) {
+    if (r.impressions <= 0 || r.maxDaily <= 0) continue;
+    const audiencePool = r.maxDaily * periodDays * regionFactor;
+    if (audiencePool <= 0) continue;
+    const reach = audiencePool * (1 - Math.exp(-r.impressions / audiencePool));
+    uniqueReach += reach;
+  }
+  uniqueReach = Math.round(uniqueReach);
+
+  const avgFrequency =
+    uniqueReach > 0
+      ? Math.max(1, Math.round((totalImpressions / uniqueReach) * 10) / 10)
+      : 1;
+
+  const budgetKrw = Math.max(0, budgetMan) * 10_000;
+  const cpmKrw =
+    totalImpressions > 0 && budgetKrw > 0
+      ? Math.round(budgetKrw / (totalImpressions / 1000))
+      : null;
+
+  return {
+    totalImpressions,
+    dailyImpressions,
+    totalOts,
+    uniqueReach,
+    avgFrequency,
+    cpmKrw,
+    perMedia,
+  };
+}
+
 export type PlannerMetrics = {
   avgMonthlyPrice: number;
   blendDailyReach: number;
