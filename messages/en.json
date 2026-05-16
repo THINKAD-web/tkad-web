@@ -609,7 +609,31 @@
     "compareAvailabilityAvailable": "✅ Available",
     "compareAvailabilityReserved": "🟡 Booked",
     "compareAvailabilityMaintenance": "🔴 Maintenance",
-    "compareStartPlanner": "Start Planner"
+    "compareStartPlanner": "Start Planner",
+    "favorites": {
+      "heroCta": "View saved media",
+      "plannerHeroCta": "Open AI planner",
+      "headerAria": "Saved media",
+      "eyebrow": "[ SAVED MEDIA ]",
+      "title": "Saved media",
+      "subtitle": "Collect media you like, then start an AI campaign plan in one step.",
+      "guestHint": "Guests can save up to 10 items on this device. Sign in to sync to your account.",
+      "loading": "Loading saved media…",
+      "emptyTitle": "No saved media yet",
+      "emptyDescription": "Tap the heart on browse cards or detail pages to save media here.",
+      "browseCta": "Browse media",
+      "plannerLead": "Start planning budget, timing, and targeting with your saved picks.",
+      "plannerCta": "Start AI planner with saved media",
+      "addAria": "Save media",
+      "removeAria": "Remove from saved",
+      "added": "Saved {name}.",
+      "removed": "Removed from saved list.",
+      "removedNamed": "Removed {name} from saved list.",
+      "guestMax": "You can save up to {max} items while signed out.",
+      "error": "Request failed. Please try again.",
+      "networkError": "Network error.",
+      "headerAriaCount": "Saved media ({count})"
+    }
   },
   "recommend": {
     "form": {

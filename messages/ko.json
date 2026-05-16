@@ -609,7 +609,31 @@
     "compareAvailabilityAvailable": "✅ 가능",
     "compareAvailabilityReserved": "🟡 예약중",
     "compareAvailabilityMaintenance": "🔴 점검중",
-    "compareStartPlanner": "Planner 시작"
+    "compareStartPlanner": "Planner 시작",
+    "favorites": {
+      "heroCta": "찜한 매체 보기",
+      "plannerHeroCta": "AI 플래너 시작",
+      "headerAria": "찜한 매체",
+      "eyebrow": "[ SAVED MEDIA ]",
+      "title": "찜한 매체",
+      "subtitle": "마음에 드는 매체를 모아 두었다가, 한 번에 AI 플래너로 캠페인을 설계하세요.",
+      "guestHint": "비로그인 시 기기에 최대 10개까지 저장됩니다. 로그인하면 계정에 동기화됩니다.",
+      "loading": "찜 목록 불러오는 중…",
+      "emptyTitle": "아직 찜한 매체가 없습니다",
+      "emptyDescription": "매체 목록이나 상세 페이지의 하트를 눌러 저장해 보세요.",
+      "browseCta": "매체 탐색하기",
+      "plannerLead": "선택한 매체로 예산·기간·타깃에 맞는 플랜을 바로 시작할 수 있습니다.",
+      "plannerCta": "선택한 매체로 AI 플래너 시작하기",
+      "addAria": "찜하기",
+      "removeAria": "찜 해제",
+      "added": "{name}을(를) 찜했습니다.",
+      "removed": "찜 목록에서 제거했습니다.",
+      "removedNamed": "{name}을(를) 찜 목록에서 제거했습니다.",
+      "guestMax": "비로그인 찜은 최대 {max}개까지 가능합니다.",
+      "error": "요청에 실패했습니다. 잠시 후 다시 시도해주세요.",
+      "networkError": "네트워크 오류가 발생했습니다.",
+      "headerAriaCount": "찜한 매체 {count}개"
+    }
   },
   "recommend": {
     "form": {
