@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import {
   listPublishedReports,
@@ -27,14 +28,14 @@ function reportListHref(category: ReportCategory | null, page: number) {
 function thumbPlaceholderClass(category: ReportCategory): string {
   switch (category) {
     case "TREND":
-      return "bg-gradient-to-br from-[#FF6600] via-orange-600 to-neutral-900";
+      return "bg-gradient-to-br from-violet-600 via-fuchsia-600 to-[#05050a]";
     case "REGION":
-      return "bg-gradient-to-br from-sky-600 via-blue-900 to-neutral-950";
+      return "bg-gradient-to-br from-sky-500 via-cyan-700 to-[#05050a]";
     case "GUIDE":
-      return "bg-gradient-to-br from-amber-500 via-yellow-700 to-neutral-900";
+      return "bg-gradient-to-br from-amber-500 via-orange-700 to-[#05050a]";
     case "CAMPAIGN":
     default:
-      return "bg-gradient-to-br from-emerald-600 via-teal-900 to-neutral-950";
+      return "bg-gradient-to-br from-emerald-600 via-teal-800 to-[#05050a]";
   }
 }
 
@@ -73,158 +74,182 @@ export default async function ReportListPage({ params, searchParams }: ListProps
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const globalEmpty = total === 0 && !category && curPage === 1;
 
+  const filterPill = (active: boolean) =>
+    cn(
+      "inline-flex items-center justify-center rounded-full px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-all",
+      active
+        ? "tkad-neon-cta text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
+        : "border border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted/80 dark:border-white/12 dark:bg-white/6 dark:text-white/90 dark:hover:border-white/22 dark:hover:bg-white/10",
+    );
+
+  const cardShell =
+    "group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_100px_rgba(0,0,0,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-white/12 dark:bg-white/6 dark:shadow-[0_28px_120px_rgba(0,0,0,0.45)] dark:backdrop-blur-md dark:hover:border-white/18";
+
   return (
-    <div className="min-h-screen bg-background">
-      <section className="border-b-2 border-black bg-hero-void py-14 sm:py-18">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#FF6600]">
-            [ Report ] / Trend // ooh industry insight
-          </p>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl lg:text-5xl">
-            {isKo ? "OOH 트렌드 리포트" : "OOH trend reports"}
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-hero-fg/85 sm:text-lg">
-            {isKo
-              ? "광고 업계 인사이트와 매체 트렌드를 정리합니다"
-              : "Industry insight and OOH media trends, curated for marketers."}
-          </p>
-        </div>
-      </section>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-20 tkad-neon-grid"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
 
-      <section className="border-b-2 border-black bg-muted/40 py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={reportListHref(null, 1)}
-              className={cn(
-                "inline-flex border-2 border-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-all",
-                !category
-                  ? "bg-black text-white shadow-[4px_4px_0_0_rgb(255,102,0)]"
-                  : "bg-card text-foreground hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_rgb(0,0,0)]",
+          <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-28 lg:px-8 lg:pb-36 lg:pt-36">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              {`// 10 / Report`}
+            </p>
+            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                <span className="tkad-home-accent-text">OOH</span>
+              </span>
+              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+                {isKo ? "트렌드" : "Trend"}
+              </span>
+            </div>
+            <h1 className="mt-6 text-balance text-[clamp(36px,5vw,64px)] font-[950] leading-[0.95] tracking-[-0.06em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+              {isKo ? (
+                <>
+                  <span className="tkad-home-accent-text">OOH</span> 트렌드 리포트
+                </>
+              ) : (
+                <>
+                  <span className="tkad-home-accent-text">OOH</span> trend reports
+                </>
               )}
-            >
-              {isKo ? "전체" : "All"}
-            </Link>
-            {REPORT_CATEGORY_ORDER.map((cat) => (
-              <Link
-                key={cat}
-                href={reportListHref(cat, 1)}
-                className={cn(
-                  "inline-flex border-2 border-black px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-all",
-                  category === cat
-                    ? "bg-black text-white shadow-[4px_4px_0_0_rgb(255,102,0)]"
-                    : "bg-card text-foreground hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_rgb(0,0,0)]",
-                )}
-              >
-                {labelForReportCategory(cat, isKo)}
-              </Link>
-            ))}
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+              {isKo
+                ? "광고 업계 인사이트와 매체 트렌드를 정리합니다"
+                : "Industry insight and OOH media trends, curated for marketers."}
+            </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        {reports.length === 0 ? (
-          <div className="mx-auto max-w-xl border-2 border-black bg-card p-10 text-center shadow-[6px_8px_0_0_rgb(0,0,0)]">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              [ {isKo ? "준비 중" : "Coming soon"} ]
-            </p>
-            <p className="mt-4 text-lg font-bold text-foreground">
-              {globalEmpty
-                ? isKo
-                  ? "곧 첫 번째 리포트가 발행됩니다"
-                  : "The first report is on the way"
-                : isKo
-                  ? "이 카테고리에 아직 공개된 리포트가 없습니다"
-                  : "No published reports in this category yet"}
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
-              {reports.map((r) => (
+        <section className="border-b border-border bg-muted/30 py-8 dark:border-white/10 dark:bg-[#070712]">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+              <Link href={reportListHref(null, 1)} className={filterPill(!category)}>
+                {isKo ? "전체" : "All"}
+              </Link>
+              {REPORT_CATEGORY_ORDER.map((cat) => (
                 <Link
-                  key={r.id}
-                  href={`/report/${r.slug}`}
-                  className={cn(
-                    "group flex h-full flex-col overflow-hidden border-2 border-black bg-card text-card-foreground shadow-[4px_4px_0_0_rgb(0,0,0)] transition-all duration-200",
-                    "hover:-translate-y-[2px] hover:shadow-[6px_8px_0_0_rgb(0,0,0)]",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6600] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                  )}
+                  key={cat}
+                  href={reportListHref(cat, 1)}
+                  className={filterPill(category === cat)}
                 >
-                  <div
-                    className={cn(
-                      "relative aspect-[16/9] w-full overflow-hidden border-b-2 border-black",
-                      r.thumbnail ? "" : thumbPlaceholderClass(r.category),
-                    )}
-                  >
-                    {r.thumbnail ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={r.thumbnail}
-                        alt=""
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-end p-4">
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/90">
-                          THINKAD REPORT
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <article className="flex flex-1 flex-col gap-3 p-5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="inline-flex border-2 border-black bg-[#FF6600] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-                        {labelForReportCategory(r.category, isKo)}
-                      </span>
-                      <time
-                        dateTime={r.publishedAt?.toISOString()}
-                        className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
-                      >
-                        {formatPublished(r.publishedAt, locale)}
-                      </time>
-                    </div>
-                    <h2 className="line-clamp-2 text-xl font-bold leading-snug tracking-tight text-foreground">
-                      {r.title}
-                    </h2>
-                    <p className="line-clamp-3 flex-1 text-sm leading-relaxed text-muted-foreground">
-                      {r.summary}
-                    </p>
-                  </article>
+                  {labelForReportCategory(cat, isKo)}
                 </Link>
               ))}
             </div>
+          </div>
+        </section>
 
-            {totalPages > 1 ? (
-              <nav
-                className="mt-10 flex flex-wrap items-center justify-center gap-2 border-t-2 border-black/10 pt-8 font-mono text-[12px] font-bold uppercase tracking-[0.14em]"
-                aria-label={isKo ? "페이지" : "Pagination"}
-              >
-                {curPage > 1 ? (
-                  <Link
-                    href={reportListHref(category, curPage - 1)}
-                    className="border-2 border-black bg-card px-4 py-2 transition-colors hover:bg-black hover:text-white"
+        <section className="bg-background py-12 text-foreground sm:py-16 dark:bg-[#030308]">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {reports.length === 0 ? (
+              <div className="mx-auto max-w-xl rounded-[28px] border border-border bg-card p-10 text-center shadow-[0_24px_80px_rgba(0,0,0,0.08)] dark:border-white/12 dark:bg-white/6 dark:backdrop-blur-md dark:shadow-[0_36px_140px_rgba(0,0,0,0.72)]">
+                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+                  [ {isKo ? "준비 중" : "Coming soon"} ]
+                </p>
+                <p className="mt-4 text-lg font-bold text-foreground">
+                  {globalEmpty
+                    ? isKo
+                      ? "곧 첫 번째 리포트가 발행됩니다"
+                      : "The first report is on the way"
+                    : isKo
+                      ? "이 카테고리에 아직 공개된 리포트가 없습니다"
+                      : "No published reports in this category yet"}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+                  {reports.map((r) => (
+                    <Link key={r.id} href={`/report/${r.slug}`} className={cardShell}>
+                      <div
+                        className={cn(
+                          "relative aspect-[16/9] w-full overflow-hidden border-b border-border dark:border-white/10",
+                          r.thumbnail ? "" : thumbPlaceholderClass(r.category),
+                        )}
+                      >
+                        {r.thumbnail ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={r.thumbnail}
+                            alt=""
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-end p-4">
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/90">
+                              THINKAD REPORT
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <article className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary dark:border-white/15 dark:bg-white/10 dark:text-white/90">
+                            {labelForReportCategory(r.category, isKo)}
+                          </span>
+                          <time
+                            dateTime={r.publishedAt?.toISOString()}
+                            className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+                          >
+                            {formatPublished(r.publishedAt, locale)}
+                          </time>
+                        </div>
+                        <h2 className="line-clamp-2 text-xl font-bold leading-snug tracking-tight text-foreground dark:text-white">
+                          {r.title}
+                        </h2>
+                        <p className="line-clamp-3 flex-1 text-sm leading-relaxed text-muted-foreground dark:text-white/70">
+                          {r.summary}
+                        </p>
+                      </article>
+                    </Link>
+                  ))}
+                </div>
+
+                {totalPages > 1 ? (
+                  <nav
+                    className="mt-12 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-10 font-mono text-[12px] font-bold uppercase tracking-[0.14em] dark:border-white/10"
+                    aria-label={isKo ? "페이지" : "Pagination"}
                   >
-                    {isKo ? "이전" : "Prev"}
-                  </Link>
+                    {curPage > 1 ? (
+                      <Link
+                        href={reportListHref(category, curPage - 1)}
+                        className="rounded-full border border-border bg-card px-5 py-2.5 transition-colors hover:border-primary hover:bg-muted/60 dark:border-white/14 dark:bg-white/6 dark:text-white dark:hover:border-white/28 dark:hover:bg-white/10"
+                      >
+                        {isKo ? "이전" : "Prev"}
+                      </Link>
+                    ) : null}
+                    <span className="px-2 text-muted-foreground">
+                      {curPage} / {totalPages}
+                    </span>
+                    {curPage < totalPages ? (
+                      <Link
+                        href={reportListHref(category, curPage + 1)}
+                        className="rounded-full border border-border bg-card px-5 py-2.5 transition-colors hover:border-primary hover:bg-muted/60 dark:border-white/14 dark:bg-white/6 dark:text-white dark:hover:border-white/28 dark:hover:bg-white/10"
+                      >
+                        {isKo ? "다음" : "Next"}
+                      </Link>
+                    ) : null}
+                  </nav>
                 ) : null}
-                <span className="px-2 text-muted-foreground">
-                  {curPage} / {totalPages}
-                </span>
-                {curPage < totalPages ? (
-                  <Link
-                    href={reportListHref(category, curPage + 1)}
-                    className="border-2 border-black bg-card px-4 py-2 transition-colors hover:bg-black hover:text-white"
-                  >
-                    {isKo ? "다음" : "Next"}
-                  </Link>
-                ) : null}
-              </nav>
-            ) : null}
-          </>
-        )}
-      </section>
-    </div>
+              </>
+            )}
+          </div>
+        </section>
+      </div>
+    </HomeLandingDayNight>
   );
 }
