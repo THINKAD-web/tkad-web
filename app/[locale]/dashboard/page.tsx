@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { Bell, FileText, LogOut, Megaphone } from "lucide-react";
+import { Link, useRouter } from "@/i18n/navigation";
+import { Bell, FileText, Film, ListMusic, LogOut, Megaphone } from "lucide-react";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import { AdvertiserSummaryCards } from "@/components/advertiser-dashboard/summary-cards";
 import {
@@ -159,6 +159,37 @@ export default function AdvertiserDashboardPage() {
           isKo={isKo}
         />
       ) : null}
+
+      {/* 광고주 빠른 진입점 — 소재 관리 / 플레이리스트 */}
+      <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <Link
+          href="/creatives"
+          className="flex items-center justify-center gap-1.5 rounded-[12px] border-2 border-border bg-card px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-foreground transition-colors hover:border-accent hover:text-accent"
+        >
+          <Film className="h-3.5 w-3.5" />
+          {isKo ? "소재 라이브러리" : "Library"}
+        </Link>
+        <Link
+          href="/creatives/upload"
+          className="flex items-center justify-center gap-1.5 rounded-[12px] border-2 border-border bg-card px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-foreground transition-colors hover:border-accent hover:text-accent"
+        >
+          <Megaphone className="h-3.5 w-3.5" />
+          {isKo ? "소재 업로드" : "Upload"}
+        </Link>
+        <Link
+          href="/creatives/playlists"
+          className="flex items-center justify-center gap-1.5 rounded-[12px] border-2 border-border bg-card px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-foreground transition-colors hover:border-accent hover:text-accent"
+        >
+          <ListMusic className="h-3.5 w-3.5" />
+          {isKo ? "플레이리스트" : "Playlists"}
+        </Link>
+        <Link
+          href="/creatives/guide"
+          className="flex items-center justify-center gap-1.5 rounded-[12px] border-2 border-border bg-card px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {isKo ? "규격 가이드" : "Specs"}
+        </Link>
+      </div>
 
       <nav className="mt-6 flex gap-2 border-b border-border pb-2">
         {(
