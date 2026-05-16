@@ -12,7 +12,7 @@
 
 import { Suspense, useTransition } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter, usePathname } from "@/i18n/navigation";
+import { useRouter, usePathname, Link } from "@/i18n/navigation";
 import { Globe } from "lucide-react";
 import { BrutalNav, type BrutalNavEntry } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
@@ -55,6 +55,8 @@ type Props = {
 
 export function HeaderBrutal({ contentStatus }: Props) {
   const t = useTranslations();
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const comingSoonBadge = t("nav.comingSoonBadge");
 
   const links: BrutalNavEntry[] = [
@@ -64,6 +66,13 @@ export function HeaderBrutal({ contentStatus }: Props) {
       label: t("nav.media"),
       items: [
         { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록" },
+        {
+          href: "/media/packages",
+          label: t("nav.packages"),
+          desc: isKo
+            ? "지역·목적별 에디토리얼 패키지"
+            : "Editorial bundles by region & goal",
+        },
         { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색" },
         { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천" },
         { href: "/planner", label: t("nav.planner"), desc: "예산·기간별 플래닝" },
@@ -97,16 +106,24 @@ export function HeaderBrutal({ contentStatus }: Props) {
     <BrutalNav
       links={links}
       search={
-        <Suspense
-          fallback={
-            <div
-              className="h-10 w-full rounded-xl border-2 border-border/30 bg-muted/25 dark:border-white/10 dark:bg-white/5"
-              aria-hidden
-            />
-          }
-        >
-          <HeaderMediaSearch />
-        </Suspense>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <Suspense
+            fallback={
+              <div
+                className="h-10 min-w-0 flex-1 rounded-xl border-2 border-border/30 bg-muted/25 dark:border-white/10 dark:bg-white/5"
+                aria-hidden
+              />
+            }
+          >
+            <HeaderMediaSearch />
+          </Suspense>
+          <Link
+            href="/media/packages"
+            className="hidden h-10 shrink-0 items-center rounded-xl border border-border/30 bg-muted/40 px-2.5 text-[11px] font-bold tracking-tight text-foreground transition-colors hover:border-hermes/60 hover:bg-foreground/8 lg:inline-flex lg:px-3 lg:text-[12px] dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:border-hermes dark:hover:bg-white/12"
+          >
+            {t("nav.packages")}
+          </Link>
+        </div>
       }
       cta={{ href: "/contact", label: t("nav.contact") }}
       extras={

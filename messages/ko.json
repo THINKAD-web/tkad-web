@@ -66,7 +66,8 @@
     "searchPlaceholder": "매체명·지역 검색",
     "searchAria": "매체 검색",
     "searchSubmit": "검색",
-    "comingSoonBadge": "준비중"
+    "comingSoonBadge": "준비중",
+    "packages": "패키지"
   },
   "hero": {
     "title": "한국 OOH 광고의 모든 것",
@@ -776,7 +777,10 @@
     "heroChipSuffix": " / 문의하기",
     "heroKicker": "// 무료 상담 신청",
     "heroCtaQuote": "바로 견적 요청",
-    "heroCtaMedia": "매체 먼저 보기"
+    "heroCtaMedia": "매체 먼저 보기",
+    "packageRefBanner": "아래 OOH 패키지 구성으로 견적을 요청 중입니다.",
+    "packageRefViewPackages": "패키지 목록 보기",
+    "packageRefMessageTemplate": "[패키지: {title}]\n포함 매체: {mediaList}\n\n"
   },
   "contactForm": {
     "nameLabel": "이름",
@@ -2261,6 +2265,33 @@
     "floatingCta": "상담 신청",
     "heroMapStatVerified": "검증 매체",
     "heroMapStatPartners": "파트너",
-    "heroMapStatResponse": "평균 응답"
+    "heroMapStatResponse": "평균 응답",
+    "packagesKicker": "Packages",
+    "packagesTitleKo": "지역별 <accent>패키지</accent> 큐레이션",
+    "packagesMeta": "에디토리얼 묶음 · 5개 루트",
+    "packagesLead": "강남·성수·도심 등 목적에 맞춘 실매체 패키지로 빠르게 제안하세요.",
+    "packagesCta": "패키지 보기",
+    "packagesTitle": "지역별 <accent>패키지</accent> 큐레이션"
+  },
+  "packages": {
+    "heroEyebrow": "// OOH PACKAGES · CURATED",
+    "heroTitle": "지역별 패키지 큐레이션",
+    "heroBadge": "EDITORIAL",
+    "heroSubtitle": "매체를 하나씩 고르지 않아도 됩니다. 목적·지역·타깃에 맞춘 에디토리얼 묶음으로 빠르게 제안하고, 객단가를 높이세요.",
+    "heroCtaContact": "패키지 상담하기",
+    "heroCtaBrowse": "개별 매체 탐색",
+    "listCategory": "Curated routes",
+    "listTitle": "추천 패키지 5선",
+    "listMeta": "실매체 ID 기반 · 견적 시 구성 조정 가능",
+    "listLead": "각 패키지는 공개 카탈로그의 실제 매체로 구성됩니다. 노출·가격은 월 단위 참고치이며, 집행 기간·슬롯에 따라 최종 견적이 달라집니다.",
+    "imagePreparing": "이미지 준비 중",
+    "quoteCta": "이 패키지 견적 요청",
+    "mediaCountLabel": "포함 매체",
+    "includedMediaPending": "매체 정보 갱신 중",
+    "footerEyebrow": "[ NEXT STEP ]",
+    "footerTitle": "패키지로 시작하고, AI 플래너로 다듬기",
+    "footerBody": "견적 전에 예산·기간·타깃만 입력하면 AI가 매체 조합을 다시 제안해 드립니다.",
+    "footerPlannerLink": "AI 플래너 열기",
+    "browseEntry": "지역별 패키지 보기"
   }
 }
