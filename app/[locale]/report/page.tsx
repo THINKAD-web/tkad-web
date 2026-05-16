@@ -12,6 +12,7 @@ import {
 } from "@/lib/report-category";
 import { cn } from "@/lib/utils";
 import type { ReportCategory } from "@prisma/client";
+import { ContentNotifySignup } from "@/components/content-notify-signup";
 
 export const dynamic = "force-dynamic";
 
@@ -169,6 +170,11 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                       ? "이 카테고리에 아직 공개된 리포트가 없습니다"
                       : "No published reports in this category yet"}
                 </p>
+                {globalEmpty ? (
+                  <div className="mt-8 text-left">
+                    <ContentNotifySignup source="report" />
+                  </div>
+                ) : null}
               </div>
             ) : (
               <>

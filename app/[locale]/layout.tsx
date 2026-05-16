@@ -15,6 +15,7 @@ import {
 import { buildStructuredDataGraph } from "@/lib/structured-data";
 import { ThemeProvider } from "@/components/theme-provider";
 import LocaleRootBody from "@/components/locale-root-body";
+import { SiteHeader } from "@/components/public-chrome/site-header";
 import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
 import "../globals.css";
 import "leaflet/dist/leaflet.css";
@@ -177,6 +178,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               skipLinkLabel={
                 locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"
               }
+              header={<SiteHeader />}
             >
               {children}
             </LocaleRootBody>

@@ -6,9 +6,8 @@
  * IA (변경 금지):
  *   - 단독: /, /services
  *   - 매체 검색 그룹 (4): /media, /media/map, /recommend, /planner
- *   - 트렌드 & 학습 그룹 (3): /cases, /insights, /academy
+ *   - 트렌드 & 학습 그룹 (3): /cases, /report, /academy
  *   - CTA: /contact
- *   - extras: HeaderUserMenu, LanguageToggle, ThemeToggle(전역 라이트·다크 — 본문·푸터와 동일)
  */
 
 import { Suspense, useTransition } from "react";
@@ -19,6 +18,7 @@ import { BrutalNav, type BrutalNavEntry } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
 import { HeaderMediaSearch } from "@/components/header-media-search";
 import { ThemeToggle } from "@/components/theme-toggle";
+import type { NavContentStatus } from "@/lib/nav-content-status";
 
 function LanguageToggle() {
   const locale = useLocale();
@@ -49,8 +49,13 @@ function LanguageToggle() {
   );
 }
 
-export function HeaderBrutal() {
+type Props = {
+  contentStatus?: NavContentStatus;
+};
+
+export function HeaderBrutal({ contentStatus }: Props) {
   const t = useTranslations();
+  const comingSoonBadge = t("nav.comingSoonBadge");
 
   const links: BrutalNavEntry[] = [
     { href: "/", label: t("nav.home") },
@@ -68,8 +73,22 @@ export function HeaderBrutal() {
       label: t("nav.insights"),
       items: [
         { href: "/cases", label: t("nav.cases"), desc: "집행 사례 모음" },
-        { href: "/report", label: t("nav.insights"), desc: t("nav.insightsReportDesc") },
-        { href: "/academy", label: t("nav.academy"), desc: "광고주 교육 콘텐츠" },
+        {
+          href: "/report",
+          label: t("nav.insights"),
+          desc: t("nav.insightsReportDesc"),
+          ...(contentStatus && contentStatus.reportCount === 0
+            ? { badge: comingSoonBadge }
+            : {}),
+        },
+        {
+          href: "/academy",
+          label: t("nav.academy"),
+          desc: "광고주 교육 콘텐츠",
+          ...(contentStatus && contentStatus.academyLessonCount === 0
+            ? { badge: comingSoonBadge }
+            : {}),
+        },
       ],
     },
   ];
