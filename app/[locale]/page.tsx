@@ -28,7 +28,6 @@ import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { HomeCommunitySection } from "@/components/home-community-section";
 import { listHomeCommunityPosts } from "@/lib/community/queries";
 import type { CommunityPostListItem } from "@/lib/community/types";
-import { fetchHomeHeroInventoryStats } from "@/lib/home-hero-stats";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 type Props = {
@@ -43,13 +42,12 @@ export default async function HomePage({ params }: Props) {
    * 추천 매체: Prisma `isFeatured`·`featuredOrder` (관리자에서 지정).
    * 인기 매체: Prisma `isPopular`·`popularOrder` (관리자에서 별도 지정).
    */
-  const [featuredCatalog, popularCatalog, communityPosts, heroVisuals, heroInventory] =
+  const [featuredCatalog, popularCatalog, communityPosts, heroVisuals] =
     await Promise.all([
       fetchHomeFeaturedMedia(8),
       fetchHomePopularMedia(12),
       listHomeCommunityPosts(),
       fetchHomeHeroVisualAssets(),
-      fetchHomeHeroInventoryStats(),
     ]);
 
   return (
@@ -60,7 +58,6 @@ export default async function HomePage({ params }: Props) {
       popularCatalog={popularCatalog}
       communityPosts={communityPosts}
       heroVisuals={heroVisuals}
-      heroInventory={heroInventory}
     />
   );
 }
@@ -72,7 +69,6 @@ function HomeContent({
   popularCatalog,
   communityPosts,
   heroVisuals,
-  heroInventory,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
@@ -80,7 +76,6 @@ function HomeContent({
   popularCatalog: MediaItem[];
   communityPosts: CommunityPostListItem[];
   heroVisuals: Awaited<ReturnType<typeof fetchHomeHeroVisualAssets>>;
-  heroInventory: Awaited<ReturnType<typeof fetchHomeHeroInventoryStats>>;
 }) {
   const isKo = locale === "ko";
   /** 캐러셀 — 추천 매체 전체 활용 (TOP3 라벨은 첫 3개에만) */
@@ -97,7 +92,6 @@ function HomeContent({
         isKo={isKo}
         marqueeImageUrls={heroVisuals.marqueeImageUrls}
         mapPins={heroVisuals.mapPins}
-        heroInventory={heroInventory}
       />
 
       <div className="tkad-landing-neon">
@@ -384,7 +378,7 @@ function HomeContent({
           </ScrollAnimate>
         </NeonSection>
 
-        <FloatingCta isKo={isKo} />
+        <FloatingCta />
       </div>
     </HomeLandingDayNight>
   );

@@ -69,8 +69,8 @@
     "comingSoonBadge": "Soon"
   },
   "hero": {
-    "title": "Everything About Korean OOH Advertising",
-    "subtitle": "Search nationwide outdoor advertising media at a glance and receive optimal advertising solutions.",
+    "title": "Korea OOH media search & campaign execution",
+    "subtitle": "Browse 500+ verified out-of-home placements nationwide. Plan, buy, and run campaigns with field-verified data.",
     "cta": "Search Media",
     "ctaSecondary": "Request Proposal"
   },
@@ -124,9 +124,9 @@
     }
   },
   "ctaBanner": {
-    "title": "Request a Proposal Now",
-    "description": "THINKAD's expert consultants will propose the optimal OOH advertising solution for you.",
-    "cta": "Free Consultation"
+    "title": "Start your next OOH campaign",
+    "description": "Our consultants will propose a verified media mix and execution plan aligned to your budget and KPIs.",
+    "cta": "Request consultation"
   },
   "media": {
     "title": "Media Search",
@@ -506,7 +506,8 @@
         "available": "Available",
         "reserved": "Booking in progress",
         "maintenance": "Maintenance"
-      }
+      },
+      "quoteStripHint": "Add placements you like to your quote request"
     },
     "ai": {
       "tabSearch": "Media search",
@@ -770,7 +771,11 @@
     "caseRefViewCase": "View case again",
     "academyRefBanner": "You’re requesting a 1:1 follow-up from THINKAD Academy.",
     "academyRefMessageTemplate": "[THINKAD Academy · 1:1 consult]\nWe’d like to schedule OOH fundamentals training, a webinar follow-up, a team workshop, or a custom curriculum.\n\n",
-    "academyRefBack": "Back to Academy"
+    "academyRefBack": "Back to Academy",
+    "heroChipSuffix": " / Contact",
+    "heroKicker": "// Request a free consultation",
+    "heroCtaQuote": "Request a quote",
+    "heroCtaMedia": "Explore media"
   },
   "contactForm": {
     "stepLabel": "Step {current} / {total}",
@@ -1611,7 +1616,10 @@
     "locationDailyFootfall": "Daily footfall: {count}",
     "noLocationsFallback": "No locations registered.",
     "effectMemoLabel": "Ad effectiveness",
-    "contactUs": "Contact us"
+    "contactUs": "Contact us",
+    "coreInfoTitle": "Key metrics at a glance",
+    "detailDescriptionSubtitle": "Brand, inventory, and expected impact in one view.",
+    "detailDescriptionTitle": "About this network"
   },
   "adminNav": {
     "dashboard": "Dashboard",
@@ -2042,7 +2050,9 @@
     "ctaTitle": "Request a quote",
     "ctaSubtitle": "Share budget and timing—we’ll respond quickly with direction and next steps.",
     "ctaButton": "Request a quote",
-    "ctaSecondary": "Browse media"
+    "ctaSecondary": "Browse media",
+    "heroChipSuffix": " / Execution services",
+    "pillarsMeta": "Strategy · planning · execution"
   },
   "myBookingRequests": {
     "eyebrow": "My booking requests",
@@ -2163,5 +2173,37 @@
     "submitted": "Subscribed",
     "successHint": "Thanks — we will reach out when new content goes live.",
     "error": "Could not save your request. Please try again."
+  },
+  "homePage": {
+    "verificationKicker": "Verification",
+    "verificationTitle": "THINKAD's <accent>4-step</accent> media verification",
+    "verificationMeta": "Verified before listing",
+    "featuredTitle": "THINKAD <accent>recommended</accent> media",
+    "featuredMeta": "Curated from verified inventory",
+    "featuredEmpty": "// Featured placements coming soon",
+    "popularTitle": "<accent>Trending</accent> placements now",
+    "popularMeta": "Hand-picked by our team",
+    "viewAllMedia": "View all media",
+    "whyKicker": "Why us",
+    "whyTitle": "Why <accent>THINKAD</accent>?",
+    "whyMeta": "Don't spend on unverified inventory",
+    "whyCard1Title": "On-site verification",
+    "whyCard1Desc": "We inspect visibility, environment, and footfall in person—documented with photos and field reports.",
+    "whyCard1Highlight": "100% site visits",
+    "whyCard2Title": "Performance signals",
+    "whyCard2Desc": "Cumulative metrics—not gut feel—so you can forecast reach and plan with confidence.",
+    "whyCard2Highlight": "Data-driven",
+    "whyCard3Title": "End-to-end execution",
+    "whyCard3Desc": "Quote, contract, production, monitoring, and reporting in one accountable team.",
+    "whyCard3Highlight": "One-stop ops",
+    "testimonialsKicker": "Testimonials",
+    "testimonialsTitle": "What our <accent>clients</accent> say",
+    "testimonialsMeta": "Stories from brand partners",
+    "ctaKicker": "Get started",
+    "exploreMediaFirst": "Explore media first",
+    "ctaFooter": "// Verified inventory · Plans aligned to your budget",
+    "floatingTitle": "Launch your campaign on verified media",
+    "floatingSub": "// Quote through execution, one team",
+    "floatingCta": "Contact us"
   }
 }

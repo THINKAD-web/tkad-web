@@ -36,12 +36,10 @@ export default async function ContactPage({
               <div className="flex flex-col items-center gap-3">
                 <span className="tkad-neon-border rounded-2xl bg-white/5 px-4 py-2 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white/78 backdrop-blur">
                   <span className="tkad-home-accent-text">[ Contact ]</span>
-                  <span className="text-white/55">
-                    {isKo ? " / 문의하기" : " / Contact"}
-                  </span>
+                  <span className="text-white/55">{t("heroChipSuffix")}</span>
                 </span>
                 <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-                  {isKo ? "// 무료 상담 신청" : "// Request a free consultation"}
+                  {t("heroKicker")}
                 </p>
               </div>
 

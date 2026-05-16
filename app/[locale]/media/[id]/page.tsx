@@ -400,7 +400,7 @@ export default async function MediaDetailPage({ params }: Props) {
               ✓
             </span>
             <p className="truncate font-mono text-[11px] uppercase tracking-[0.18em] text-foreground sm:text-[12px]">
-              {`// 관심 가는 매체라면 견적서에 담아보세요`}
+              {`// ${t("quoteStripHint")}`}
             </p>
           </div>
           <div className="flex items-center gap-2">

@@ -519,7 +519,8 @@
         "available": "예약 가능",
         "reserved": "예약 진행 중",
         "maintenance": "점검 중"
-      }
+      },
+      "quoteStripHint": "관심 가는 매체라면 견적서에 담아보세요"
     },
     "ai": {
       "tabSearch": "매체 검색",
@@ -783,7 +784,11 @@
     "caseRefViewCase": "사례 다시 보기",
     "academyRefBanner": "싱커드 아카데미에서 안내한 대로 1:1 교육·맞춤 커리큘럼 상담을 요청 중입니다.",
     "academyRefMessageTemplate": "[싱커드 아카데미 · 1:1 상담]\nOOH 기초 교육, 웨비나, 팀 워크숍 또는 맞춤 커리큘럼 일정을 조율하고 싶습니다.\n\n",
-    "academyRefBack": "아카데미로 돌아가기"
+    "academyRefBack": "아카데미로 돌아가기",
+    "heroChipSuffix": " / 문의하기",
+    "heroKicker": "// 무료 상담 신청",
+    "heroCtaQuote": "바로 견적 요청",
+    "heroCtaMedia": "매체 먼저 보기"
   },
   "contactForm": {
     "stepLabel": "{current} / {total} 단계",
@@ -2038,7 +2043,9 @@
     "ctaTitle": "지금 견적을 요청해 보세요",
     "ctaSubtitle": "예산과 일정만 알려 주셔도 맞춤 미디어 플랜과 견적 방향을 빠르게 안내해 드립니다.",
     "ctaButton": "견적 요청하기",
-    "ctaSecondary": "매체 둘러보기"
+    "ctaSecondary": "매체 둘러보기",
+    "heroChipSuffix": " / 집행 서비스",
+    "pillarsMeta": "strategy · planning · execution"
   },
   "myBookingRequests": {
     "eyebrow": "내 예약 신청",
@@ -2146,5 +2153,37 @@
       "quote": "견적받기",
       "quoteShort": "견적"
     }
+  },
+  "homePage": {
+    "verificationKicker": "Verification",
+    "verificationTitle": "싱커드만의 <accent>4단계</accent> 매체 검증",
+    "verificationMeta": "verified before registration",
+    "featuredTitle": "싱커드 <accent>추천</accent> 매체",
+    "featuredMeta": "curated from verified data",
+    "featuredEmpty": "// 추천 매체 준비 중",
+    "popularTitle": "지금 가장 <accent>주목</accent> 받는 매체",
+    "popularMeta": "hand-picked by our team",
+    "viewAllMedia": "전체 매체",
+    "whyKicker": "Why us",
+    "whyTitle": "왜 <accent>싱커드</accent>인가?",
+    "whyMeta": "don't waste budget on unverified media",
+    "whyCard1Title": "직접 현장 검증",
+    "whyCard1Desc": "담당자가 직접 방문해 실제 노출 환경·시인성·유동을 확인합니다. 사진/리포트로 검증 데이터를 제공합니다.",
+    "whyCard1Highlight": "100% 현장 방문",
+    "whyCard2Title": "누적 성과 데이터",
+    "whyCard2Desc": "단기 느낌이 아니라, 축적된 지표로 성과를 예측 가능한 영역으로 가져옵니다.",
+    "whyCard2Highlight": "데이터 기반",
+    "whyCard3Title": "집행까지 책임",
+    "whyCard3Desc": "견적·계약·설치·모니터링·리포팅까지 원스톱으로 운영합니다.",
+    "whyCard3Highlight": "원스톱 운영",
+    "testimonialsKicker": "Testimonials",
+    "testimonialsTitle": "광고주가 직접 전하는 <accent>이야기</accent>",
+    "testimonialsMeta": "real stories from partners",
+    "ctaKicker": "지금 시작하세요",
+    "exploreMediaFirst": "매체 먼저 보기",
+    "ctaFooter": "// 검증 매체 기반 · 예산에 맞는 조합 제안",
+    "floatingTitle": "검증된 광고매체로 캠페인을 시작하세요",
+    "floatingSub": "// 견적·집행까지 원스톱",
+    "floatingCta": "상담 신청"
   }
 }
