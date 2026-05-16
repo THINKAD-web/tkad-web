@@ -6,8 +6,9 @@
  * IA (변경 금지):
  *   - 단독: /, /services
  *   - 매체 검색 그룹 (4): /media, /media/map, /recommend, /planner
- *   - 트렌드 & 학습 그룹 (3): /cases, /report, /academy
+ *   - 트렌드 & 학습 그룹 (3): /cases, /insights, /academy
  *   - CTA: /contact
+ *   - extras: HeaderUserMenu, LanguageToggle, ThemeToggle(전역 라이트·다크 — 본문·푸터와 동일)
  */
 
 import { Suspense, useTransition } from "react";
@@ -18,7 +19,6 @@ import { BrutalNav, type BrutalNavEntry } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
 import { HeaderMediaSearch } from "@/components/header-media-search";
 import { ThemeToggle } from "@/components/theme-toggle";
-import type { NavContentStatus } from "@/lib/nav-content-status";
 
 function LanguageToggle() {
   const locale = useLocale();
@@ -49,13 +49,10 @@ function LanguageToggle() {
   );
 }
 
-type Props = {
-  contentStatus?: NavContentStatus;
-};
-
-export function HeaderBrutal({ contentStatus }: Props) {
+export function HeaderBrutal() {
   const t = useTranslations();
-  const comingSoonBadge = t("nav.comingSoonBadge");
+  const locale = useLocale();
+  const isKo = locale === "ko";
 
   const links: BrutalNavEntry[] = [
     { href: "/", label: t("nav.home") },
@@ -64,6 +61,13 @@ export function HeaderBrutal({ contentStatus }: Props) {
       label: t("nav.media"),
       items: [
         { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록" },
+        {
+          href: "/media/packages",
+          label: t("nav.packages"),
+          desc: isKo
+            ? "지역·목적별 에디토리얼 패키지"
+            : "Editorial bundles by region & goal",
+        },
         { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색" },
         { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천" },
         { href: "/planner", label: t("nav.planner"), desc: "예산·기간별 플래닝" },
@@ -73,22 +77,8 @@ export function HeaderBrutal({ contentStatus }: Props) {
       label: t("nav.insights"),
       items: [
         { href: "/cases", label: t("nav.cases"), desc: "집행 사례 모음" },
-        {
-          href: "/report",
-          label: t("nav.insights"),
-          desc: t("nav.insightsReportDesc"),
-          ...(contentStatus && contentStatus.reportCount === 0
-            ? { badge: comingSoonBadge }
-            : {}),
-        },
-        {
-          href: "/academy",
-          label: t("nav.academy"),
-          desc: "광고주 교육 콘텐츠",
-          ...(contentStatus && contentStatus.academyLessonCount === 0
-            ? { badge: comingSoonBadge }
-            : {}),
-        },
+        { href: "/report", label: t("nav.insights"), desc: t("nav.insightsReportDesc") },
+        { href: "/academy", label: t("nav.academy"), desc: "광고주 교육 콘텐츠" },
       ],
     },
   ];
