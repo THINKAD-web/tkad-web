@@ -6,6 +6,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { AuthSocialButtons } from "@/components/auth-social-buttons";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -129,13 +130,15 @@ export default function LoginPage() {
                   {loading ? "로그인 중…" : "로그인"}
                 </BtnBlock>
               </form>
+
+              <AuthSocialButtons redirect={redirect} className="mt-4" />
             </div>
           </div>
 
           <p className="mt-6 text-center font-mono text-[12px] tracking-tight text-white/60">
             {`// `}계정이 없으신가요?{" "}
             <Link
-              href="/register"
+              href="/signup"
               className="border-b border-white/20 pb-0.5 font-bold text-white transition-colors hover:border-white/35 hover:text-white"
             >
               회원가입

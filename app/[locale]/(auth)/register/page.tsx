@@ -5,6 +5,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { AuthSocialButtons } from "@/components/auth-social-buttons";
 import { cn } from "@/lib/utils";
 import {
   COMMUNITY_MEMBER_ROLE_LABELS,
@@ -181,6 +182,8 @@ export default function RegisterPage() {
                   {loading ? "가입 중…" : "가입하기"}
                 </BtnBlock>
               </form>
+
+              <AuthSocialButtons className="mt-4" />
             </div>
           </div>
 

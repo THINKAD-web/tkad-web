@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { useAppToast } from "@/lib/use-toast";
+import {
+  addGuestFavorite,
+  isGuestFavorited,
+  readGuestFavorites,
+  removeGuestFavorite,
+} from "@/lib/guest-favorites";
 
 type Props = {
   mediaId: string;
@@ -15,6 +21,7 @@ export function MediaFavoriteButton({ mediaId, mediaName }: Props) {
   const [pending, setPending] = useState(false);
   const toast = useAppToast();
 
+  // 세션 + 현재 상태 로드(로그인: DB, 비로그인: localStorage)
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -24,6 +31,7 @@ export function MediaFavoriteButton({ mediaId, mediaName }: Props) {
         if (cancelled) return;
         if (!sd?.ok || !sd.data) {
           setLoggedIn(false);
+          setFavorited(isGuestFavorited(mediaId));
           return;
         }
         setLoggedIn(true);
@@ -34,7 +42,10 @@ export function MediaFavoriteButton({ mediaId, mediaName }: Props) {
           setFavorited(rd.data.ids.includes(mediaId));
         }
       } catch {
-        if (!cancelled) setLoggedIn(false);
+        if (!cancelled) {
+          setLoggedIn(false);
+          setFavorited(isGuestFavorited(mediaId));
+        }
       }
     })();
     return () => {
@@ -42,11 +53,37 @@ export function MediaFavoriteButton({ mediaId, mediaName }: Props) {
     };
   }, [mediaId]);
 
+  // 다른 컴포넌트가 guest 큐를 비웠을 때 상태 동기화
+  useEffect(() => {
+    if (loggedIn) return;
+    function onChange() {
+      setFavorited(isGuestFavorited(mediaId));
+    }
+    window.addEventListener("tkad-guest-favorites-change", onChange);
+    return () => window.removeEventListener("tkad-guest-favorites-change", onChange);
+  }, [loggedIn, mediaId]);
+
   const toggle = useCallback(async () => {
+    // 비로그인: localStorage 큐로 임시 저장 + 토스트로 안내 (페이지 이탈 X)
     if (loggedIn === false) {
-      window.location.href = `/login?redirect=/media/${mediaId}`;
+      const wasFavorited = isGuestFavorited(mediaId);
+      if (wasFavorited) {
+        removeGuestFavorite(mediaId);
+        setFavorited(false);
+        toast.warning("관심 매체에서 제거했습니다.");
+      } else {
+        addGuestFavorite(mediaId);
+        setFavorited(true);
+        const queued = readGuestFavorites().length;
+        toast.success(
+          mediaName
+            ? `${mediaName}을(를) 관심 매체에 담았습니다. 로그인하면 ${queued}개가 동기화돼요.`
+            : `관심 매체에 담았습니다. 로그인하면 ${queued}개가 동기화돼요.`,
+        );
+      }
       return;
     }
+
     setPending(true);
     try {
       const res = await fetch("/api/my/favorite", {
@@ -59,7 +96,11 @@ export function MediaFavoriteButton({ mediaId, mediaName }: Props) {
         const next = data.data.favorited as boolean;
         setFavorited(next);
         if (next) {
-          toast.success(mediaName ? `${mediaName}을(를) 관심 매체에 담았습니다.` : "관심 매체에 담았습니다.");
+          toast.success(
+            mediaName
+              ? `${mediaName}을(를) 관심 매체에 담았습니다.`
+              : "관심 매체에 담았습니다.",
+          );
         } else {
           toast.warning("관심 매체에서 제거했습니다.");
         }
