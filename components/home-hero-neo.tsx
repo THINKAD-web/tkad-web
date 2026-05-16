@@ -1,9 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import type { HomeHeroInventorySnapshot } from "@/lib/home-hero-stats";
 import type { HomeHeroMapPin } from "@/lib/public-media-catalog";
 import { HomeHeroMarquee } from "@/components/home/home-hero-marquee";
 
@@ -26,11 +27,45 @@ const MARQUEE_MASK =
 /** BrutalNav 높이 — globals.css `--nav-height` (mobile 3.5rem, sm+ 4rem) */
 const HERO_MIN_HEIGHT = "calc(100dvh - var(--nav-height, 4rem))";
 
+const HERO_STATS_POLL_MS = 60_000;
+const IMPRESSION_COUNT_UP_MS = 1100;
+
 type Props = {
   isKo: boolean;
   marqueeImageUrls: string[];
   mapPins: HomeHeroMapPin[];
+  heroInventory: HomeHeroInventorySnapshot;
 };
+
+function useCountUp(target: number, durationMs: number) {
+  const [display, setDisplay] = useState(0);
+  const fromRef = useRef(0);
+
+  useEffect(() => {
+    const from = fromRef.current;
+    if (from === target) {
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - (1 - t) ** 3;
+      const next = Math.round(from + (target - from) * eased);
+      setDisplay(next);
+      if (t < 1) {
+        raf = requestAnimationFrame(step);
+      } else {
+        setDisplay(target);
+        fromRef.current = target;
+      }
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, durationMs]);
+
+  return display;
+}
 
 function MarqueeBackground({ imageUrls }: { imageUrls: string[] }) {
   return (
@@ -51,22 +86,23 @@ function MarqueeBackground({ imageUrls }: { imageUrls: string[] }) {
 
 function LiveBar({
   isKo,
-  impressions,
-  activeBrands,
+  impressionsDisplay,
+  verifiedCount,
 }: {
   isKo: boolean;
-  impressions: number;
-  activeBrands: number;
+  impressionsDisplay: number;
+  verifiedCount: number;
 }) {
   const items = [
     {
-      label: isKo ? "오늘 누적 노출" : "Today impressions",
-      value: impressions.toLocaleString(),
-      live: true,
+      label: isKo
+        ? "등록 매체 추정 일 노출"
+        : "Est. daily impressions (catalog)",
+      value: impressionsDisplay.toLocaleString(),
     },
     {
-      label: isKo ? "활성 브랜드" : "Active brands",
-      value: `${activeBrands}+`,
+      label: isKo ? "검증 활성 매체" : "Verified active media",
+      value: verifiedCount.toLocaleString(),
     },
     {
       label: isKo ? "평균 응답" : "Avg. response",
@@ -81,13 +117,6 @@ function LiveBar({
           key={item.label}
           className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-foreground shadow-sm backdrop-blur-sm"
         >
-          {item.live ? (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-violet-500" aria-hidden />
-              LIVE
-              <span className="text-muted-foreground">•</span>
-            </span>
-          ) : null}
           <span className="text-muted-foreground">{item.label}</span>
           <span className="tabular-nums text-foreground">{item.value}</span>
         </div>
@@ -99,25 +128,33 @@ function LiveBar({
   );
 }
 
-export function HomeHeroNeo({ isKo, marqueeImageUrls, mapPins }: Props) {
-  const [seed, setSeed] = useState(0);
-  const [tick, setTick] = useState(0);
+export function HomeHeroNeo({
+  isKo,
+  marqueeImageUrls,
+  mapPins,
+  heroInventory,
+}: Props) {
+  const [inventory, setInventory] = useState(heroInventory);
+  const animatedImpressions = useCountUp(
+    inventory.estimatedDailyImpressions,
+    IMPRESSION_COUNT_UP_MS,
+  );
 
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setSeed(Date.now()));
-    const id = window.setInterval(() => setTick((t) => (t + 1) % 10_000), 900);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.clearInterval(id);
-    };
+    const id = window.setInterval(async () => {
+      try {
+        const res = await fetch("/api/stats/hero-inventory", {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const next = (await res.json()) as HomeHeroInventorySnapshot;
+        setInventory(next);
+      } catch {
+        /* ignore transient network errors */
+      }
+    }, HERO_STATS_POLL_MS);
+    return () => window.clearInterval(id);
   }, []);
-
-  const liveImpressions = useMemo(() => {
-    const base = 1_862_000;
-    return base + (seed % 7000) + tick * 137;
-  }, [seed, tick]);
-
-  const liveActiveBrands = useMemo(() => 128 + ((tick % 9) - 4), [tick]);
 
   const tags = isKo
     ? ["4단계 검증", "가격·입지 비교", "AI 매체 믹스"]
@@ -140,8 +177,8 @@ export function HomeHeroNeo({ isKo, marqueeImageUrls, mapPins }: Props) {
       <div className="relative z-[2] mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
         <LiveBar
           isKo={isKo}
-          impressions={liveImpressions}
-          activeBrands={liveActiveBrands}
+          impressionsDisplay={animatedImpressions}
+          verifiedCount={inventory.verifiedActiveMediaCount}
         />
 
         <div className="mt-8 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
