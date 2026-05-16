@@ -737,6 +737,19 @@ export default function MediaBrowseClient({
                         </select>
                       </label>
                     ) : null}
+                    {/* /media → /media/map 진입 링크 — 현재 검색어를 그대로 넘김 */}
+                    <Link
+                      href={`/media/map${
+                        debouncedCatalogSearch.trim()
+                          ? `?q=${encodeURIComponent(debouncedCatalogSearch.trim())}`
+                          : ""
+                      }`}
+                      className="inline-flex h-10 items-center gap-1.5 border-2 border-border bg-card px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-accent hover:text-accent"
+                      aria-label="지도로 보기"
+                    >
+                      <MapIcon className="h-3.5 w-3.5" />
+                      {t("media.browseViewMap")}
+                    </Link>
                     {/* #MEDIA-1: 목록/지도 뷰 토글 진입점 숨김 (코드 보존) */}
                     <div className="hidden border-2 border-border bg-card">
                       <button

@@ -1,116 +1,208 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { ArrowRight, Package } from "lucide-react";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { NeonSection } from "@/components/landing/neon/neon-section";
-import { SectionHead } from "@/components/brutalist/section-head";
+import { ArrowRight, Check, Sparkles } from "lucide-react";
 import type { ResolvedMediaPackage } from "@/lib/media-packages";
+import type { PackagePurpose } from "@/data/packages";
 import { PackageCard } from "@/components/packages/package-card";
+import { cn } from "@/lib/utils";
 
 type Props = {
   packages: ResolvedMediaPackage[];
 };
 
+const FILTER_KEYS: Array<{ key: "all" | PackagePurpose; tone: string }> = [
+  { key: "all", tone: "from-violet-500 to-cyan-400" },
+  { key: "brand", tone: "from-violet-500 to-pink-500" },
+  { key: "launch", tone: "from-pink-500 to-cyan-400" },
+  { key: "popup", tone: "from-rose-500 to-violet-500" },
+  { key: "coverage", tone: "from-amber-500 to-cyan-400" },
+];
+
 export function PackagesPageClient({ packages }: Props) {
   const t = useTranslations("packages");
   const locale = useLocale();
   const isKo = locale === "ko";
+  const [active, setActive] =
+    useState<"all" | PackagePurpose>("all");
+
+  const visible = useMemo(() => {
+    if (active === "all") return packages;
+    return packages.filter((p) => p.purposes.includes(active));
+  }, [packages, active]);
 
   return (
-    <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon">
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
-          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
-          />
-
-          <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-40 lg:pt-36">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-              {t("heroEyebrow")}
+    <div className="min-h-screen bg-[#F4F4F2] text-foreground transition-colors dark:bg-[#0A0A0A]">
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_30%,rgba(139,92,246,0.18),transparent_55%),radial-gradient(circle_at_82%_30%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_50%_120%,rgba(236,72,153,0.18),transparent_60%)] dark:opacity-80"
+        />
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+          <div className="flex flex-col items-center text-center">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-muted-foreground">
+              {t("hero.badge")}
             </p>
-            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-              <h1 className="text-balance text-[clamp(40px,5.4vw,72px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
-                {t("heroTitle")}
-              </h1>
-              <span className="tkad-neon-border inline-flex items-center gap-1.5 rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                <Package className="h-3.5 w-3.5" aria-hidden />
-                {t("heroBadge")}
-              </span>
-            </div>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
-              {t("heroSubtitle")}
+            <h1 className="mt-4 text-balance text-4xl font-black leading-[1.05] tracking-[-0.04em] sm:text-5xl lg:text-6xl">
+              {t.rich("hero.title", {
+                accent: (chunks) => (
+                  <span className="bg-gradient-to-r from-violet-500 via-pink-500 to-cyan-400 bg-clip-text text-transparent">
+                    {chunks}
+                  </span>
+                ),
+              })}
+            </h1>
+            <p className="mt-5 max-w-2xl text-balance text-base leading-relaxed text-muted-foreground sm:text-lg">
+              {t("hero.subtitle")}
             </p>
-            <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-              <Link
-                href="/contact"
-                className="tkad-neon-cta-clean inline-flex h-14 items-center justify-center gap-2 rounded-[22px] px-8 text-base font-black text-white transition-transform hover:-translate-y-1 sm:h-16 sm:px-10 sm:text-lg"
+            <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <a
+                href="#package-grid"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-7 text-sm font-bold text-white shadow-[0_18px_48px_rgba(139,92,246,0.35)] transition-transform hover:-translate-y-0.5"
               >
-                {t("heroCtaContact")}
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
-              <Link
-                href="/media"
-                className="inline-flex h-14 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-8 text-base font-black text-white backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 sm:h-16 sm:px-10 sm:text-lg"
-              >
-                {t("heroCtaBrowse")}
-                <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <NeonSection className="pb-20 pt-16 sm:pb-28 sm:pt-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <SectionHead
-              number="01"
-              category={t("listCategory")}
-              title={t("listTitle")}
-              meta={t("listMeta")}
-            />
-            <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {t("listLead")}
-            </p>
-
-            <div className="mt-12 grid gap-0">
-              {packages.map((pkg, i) => (
-                <PackageCard
-                  key={pkg.slug}
-                  pkg={pkg}
-                  index={i}
-                  isKo={isKo}
-                  imagePreparingLabel={t("imagePreparing")}
-                  quoteCtaLabel={t("quoteCta")}
-                  mediaCountLabel={t("mediaCountLabel")}
-                  includedMediaLabel={t("includedMediaPending")}
-                />
-              ))}
-            </div>
-
-            <div className="mt-16 border-2 border-border bg-card p-6 sm:p-8">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
-                {t("footerEyebrow")}
-              </p>
-              <p className="mt-3 text-lg font-bold tracking-tight text-foreground">
-                {t("footerTitle")}
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">{t("footerBody")}</p>
+                {t("hero.ctaPrimary")} <ArrowRight className="h-4 w-4" aria-hidden />
+              </a>
               <Link
                 href="/planner"
-                className="mt-6 inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.18em] text-accent hover:underline"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-foreground/15 bg-transparent px-7 text-sm font-bold text-foreground transition-colors hover:border-foreground/30 hover:bg-foreground/[0.04] dark:border-white/15 dark:hover:border-white/30"
               >
-                {t("footerPlannerLink")}
-                <ArrowRight className="h-4 w-4" aria-hidden />
+                {t("hero.ctaSecondary")} <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
+
+            <dl className="mt-12 grid w-full max-w-3xl grid-cols-3 gap-3 sm:gap-6">
+              {[
+                {
+                  label: t("hero.stat1Label"),
+                  value: t("hero.stat1Value"),
+                },
+                {
+                  label: t("hero.stat2Label"),
+                  value: t("hero.stat2Value"),
+                },
+                {
+                  label: t("hero.stat3Label"),
+                  value: t("hero.stat3Value"),
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-2xl border border-black/5 bg-white/70 px-4 py-4 backdrop-blur dark:border-white/10 dark:bg-white/5"
+                >
+                  <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    {stat.label}
+                  </dt>
+                  <dd className="mt-2 bg-gradient-to-r from-violet-500 to-cyan-400 bg-clip-text font-mono text-2xl font-black tracking-tight text-transparent sm:text-3xl">
+                    {stat.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      {/* Filter tabs */}
+      <section
+        id="package-grid"
+        aria-label={t("filter.all")}
+        className="border-y border-black/[0.04] bg-white/50 backdrop-blur dark:border-white/[0.06] dark:bg-white/[0.025]"
+      >
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-4 sm:gap-3 sm:px-6 sm:py-5 lg:px-8">
+          {FILTER_KEYS.map((f) => {
+            const isActive = active === f.key;
+            const label = t(`filter.${f.key}`);
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setActive(f.key)}
+                className={cn(
+                  "inline-flex h-10 items-center gap-1.5 rounded-full px-4 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-all",
+                  isActive
+                    ? `bg-gradient-to-r ${f.tone} text-white shadow-[0_10px_24px_rgba(139,92,246,0.28)]`
+                    : "border border-foreground/10 bg-white/60 text-foreground/80 hover:border-foreground/20 hover:text-foreground dark:border-white/10 dark:bg-white/[0.04] dark:text-white/75 dark:hover:bg-white/[0.08]",
+                )}
+                aria-pressed={isActive}
+              >
+                {isActive ? <Check className="h-3.5 w-3.5" aria-hidden /> : null}
+                {label}
+              </button>
+            );
+          })}
+          <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            {visible.length} / {packages.length}
+          </span>
+        </div>
+      </section>
+
+      {/* Package grid */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+        {visible.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed border-black/10 bg-white/60 p-12 text-center dark:border-white/12 dark:bg-white/[0.03]">
+            <Sparkles className="h-7 w-7 text-violet-500" aria-hidden />
+            <p className="text-lg font-bold text-foreground">{t("filter.empty")}</p>
+            <Link
+              href="/planner"
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 text-sm font-bold text-white"
+            >
+              {t("custom.cta")} <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {visible.map((pkg) => (
+              <PackageCard
+                key={pkg.slug}
+                pkg={pkg}
+                isKo={isKo}
+                cardLabels={{
+                  media: t("card.media"),
+                  impression: t("card.impression"),
+                  budget: t("card.budget"),
+                  reason: t("card.reason"),
+                  industries: t("card.industries"),
+                  cta: t("card.cta"),
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Custom packager CTA */}
+      <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 sm:pb-24 lg:px-8">
+        <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-violet-600 via-fuchsia-600 to-cyan-500 p-8 text-white shadow-[0_30px_120px_rgba(139,92,246,0.45)] sm:p-12">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_55%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent_60%)]"
+          />
+          <div className="relative grid grid-cols-1 gap-6 sm:grid-cols-[1.4fr,1fr] sm:items-center">
+            <div>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-white/70">
+                {t("custom.eyebrow")}
+              </p>
+              <h2 className="mt-3 text-3xl font-black leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                {t("custom.title")}
+              </h2>
+              <p className="mt-3 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
+                {t("custom.subtitle")}
+              </p>
+            </div>
+            <div className="flex justify-start sm:justify-end">
+              <Link
+                href="/planner"
+                className="inline-flex h-13 items-center justify-center gap-2 rounded-2xl bg-white px-7 py-3 text-base font-bold text-violet-700 shadow-[0_18px_48px_rgba(0,0,0,0.25)] transition-transform hover:-translate-y-0.5"
+              >
+                {t("custom.cta")} <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
             </div>
           </div>
-        </NeonSection>
-      </div>
-    </HomeLandingDayNight>
+        </div>
+      </section>
+    </div>
   );
 }

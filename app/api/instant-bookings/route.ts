@@ -17,6 +17,10 @@ export async function POST(request: Request) {
       endDate?: string;
       creativeUrl?: string;
       creativeType?: string;
+      /** 광고주 라이브러리에서 선택한 Creative.id (옵션) */
+      creativeId?: string;
+      /** 플레이리스트로 보낸 경우 그 id (옵션) */
+      playlistId?: string;
       contactName?: string;
       contactEmail?: string;
       contactPhone?: string;
@@ -104,6 +108,28 @@ export async function POST(request: Request) {
     const user = await getCurrentUser();
     const orderId = generateOrderId();
 
+    // 라이브러리/플레이리스트 ID 가 들어왔다면 본인 소유 여부 검증 후에만 링크
+    let linkedCreativeId: string | null = null;
+    let linkedPlaylistId: string | null = null;
+    if (user) {
+      const candidateCreativeId = body.creativeId?.trim();
+      if (candidateCreativeId) {
+        const owned = await prisma.creative.findFirst({
+          where: { id: candidateCreativeId, userId: user.id, deletedAt: null },
+          select: { id: true },
+        });
+        if (owned) linkedCreativeId = owned.id;
+      }
+      const candidatePlaylistId = body.playlistId?.trim();
+      if (candidatePlaylistId) {
+        const ownedPl = await prisma.creativePlaylist.findFirst({
+          where: { id: candidatePlaylistId, userId: user.id, deletedAt: null },
+          select: { id: true },
+        });
+        if (ownedPl) linkedPlaylistId = ownedPl.id;
+      }
+    }
+
     const booking = await prisma.booking.create({
       data: {
         mediaId,
@@ -112,6 +138,8 @@ export async function POST(request: Request) {
         endDate: end,
         creativeUrl,
         creativeType: body.creativeType?.trim() || null,
+        creativeId: linkedCreativeId,
+        playlistId: linkedPlaylistId,
         amount,
         status: "payment_pending",
         orderId,
