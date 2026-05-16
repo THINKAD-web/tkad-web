@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Heart, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getPublishedReportBySlug } from "@/lib/report-queries";
 import { labelForReportCategory } from "@/lib/report-category";
 import { listRelatedCommunityPostsForReport } from "@/lib/report-related-community";

@@ -33,7 +33,7 @@ export function FooterBrutal() {
     items: [
       { label: t("footer.address") },
       { label: t("footer.phone") },
-      { label: t("footer.email") },
+      { label: CONTACT_EMAIL },
       {
         href: KAKAO_CHANNEL_PUBLIC_URL,
         label: t("footer.kakaoChannel"),

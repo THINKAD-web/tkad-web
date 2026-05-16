@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react";
+import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/constants";
 
 /**
  * AI 자동 생성 안내 배너 (PR-5).
@@ -27,10 +28,10 @@ export function AiGenerationBanner() {
           (팩트·법적·톤·SEO 4축) 을 거쳐 발행되었습니다. 인용한 출처는 본문
           하단에서 확인하실 수 있습니다. 잘못된 정보를 발견하시면{" "}
           <a
-            href="mailto:hello@tkad.co.kr?subject=%5B%EC%9D%B8%EC%82%AC%EC%9D%B4%ED%8A%B8%5D%20%EC%98%A4%EB%A5%98%20%EC%8B%A0%EA%B3%A0"
+            href={`${CONTACT_MAILTO}?subject=${encodeURIComponent("[인사이트] 오류 신고")}`}
             className="border-b-2 border-border pb-0.5 font-mono text-[12px] font-bold tracking-tight text-foreground transition-colors hover:border-accent hover:text-accent"
           >
-            hello@tkad.co.kr
+            {CONTACT_EMAIL}
           </a>{" "}
           로 알려주세요.
         </p>

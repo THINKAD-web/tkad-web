@@ -1345,7 +1345,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
           <div style={{ borderTop: "2px solid #000000", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
             <div>
               <p style={{ fontSize: "11px", fontWeight: 700, color: "#000000", margin: "0 0 4px", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ THINKAD · 싱커드 ]</p>
-              <p style={{ fontSize: "10px", color: "#737373", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}sales@tkad.co.kr · 02-515-2772 · 서울특별시 성동구</p>
+              <p style={{ fontSize: "10px", color: "#737373", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}{CONTACT_EMAIL} · 02-515-2772 · 서울특별시 성동구</p>
             </div>
             <p style={{ fontSize: "10px", color: "#737373", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}© 2026 THINKAD. All rights reserved.</p>
           </div>

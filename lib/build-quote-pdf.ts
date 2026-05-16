@@ -235,7 +235,7 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
   }
   y += 2;
   setHelv(doc, "normal");
-  doc.text("Contact: sales@tkad.co.kr · +82-2-515-2772", margin, y);
+  doc.text(`Contact: ${CONTACT_EMAIL} · +82-2-515-2772`, margin, y);
 
   return doc;
 }

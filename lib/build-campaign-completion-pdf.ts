@@ -334,7 +334,7 @@ function drawCoverPage(
   doc.setFontSize(8);
   setColor(doc, "text", [180, 180, 180]);
   doc.text(
-    "THINKAD · 02-515-2772 · sales@tkad.co.kr",
+    `THINKAD · 02-515-2772 · ${CONTACT_EMAIL}`,
     MARGIN_X,
     PAGE_H - 16,
   );
@@ -1184,7 +1184,7 @@ function drawFooters(doc: jsPDF, fam: string) {
     doc.setFontSize(7.5);
     setColor(doc, "text", C_GRAY);
     doc.text(
-      "THINKAD · 02-515-2772 · sales@tkad.co.kr",
+      `THINKAD · 02-515-2772 · ${CONTACT_EMAIL}`,
       MARGIN_X,
       PAGE_H - 9,
     );

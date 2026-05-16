@@ -11,6 +11,7 @@
  */
 
 import { MediaBookingStatus } from "@prisma/client";
+import { CONTACT_EMAIL } from "@/lib/constants";
 import { sendEmail, isEmailConfigured } from "@/lib/email/client";
 
 const HOST_NAME = "THINKAD";
@@ -79,7 +80,7 @@ export async function sendBookingRequestReceived(
       </p>
       <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
       <p style="font-size:11px;color:#999">
-        본 메일은 발신 전용입니다. 문의는 ${process.env.CONTACT_ALERT_EMAIL ?? "info@tkad.co.kr"} 로 회신해주세요.
+        본 메일은 발신 전용입니다. 문의는 ${process.env.CONTACT_ALERT_EMAIL ?? CONTACT_EMAIL} 로 회신해주세요.
       </p>
     </div>
   `;

@@ -19,7 +19,7 @@ export function getContactConfirmationEmail({
     "",
     "보다 빠른 상담이 필요하신 경우 아래 연락처로 문의 주세요.",
     "- 전화: 02-000-0000",
-    "- 이메일: contact@tkad.co.kr",
+    `- 이메일: ${CONTACT_EMAIL}`,
     "",
     "감사합니다.",
     "THINKAD 싱커드 드림",

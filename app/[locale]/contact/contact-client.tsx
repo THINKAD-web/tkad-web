@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { CONTACT_EMAIL } from "@/lib/constants";
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/toast-provider";
 import { TurnstileWidget } from "@/components/turnstile";
@@ -374,7 +375,7 @@ export default function ContactPage() {
                       d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                     />
                   </svg>
-                  <span>{t("emailAddress")}</span>
+                  <span>{CONTACT_EMAIL}</span>
                 </div>
                 {/* address */}
                 <div className="flex items-start gap-3">

@@ -35,7 +35,7 @@ export function ContactNeonClient() {
   const infoItems = useMemo(
     () => [
       { label: "PHONE", value: t("phoneNumber") },
-      { label: "EMAIL", value: t("emailAddress") },
+      { label: "EMAIL", value: CONTACT_EMAIL },
       { label: "ADDRESS", value: t("address") },
       { label: "HOURS", value: t("hours") },
     ],

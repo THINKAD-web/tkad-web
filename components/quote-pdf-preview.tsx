@@ -2,6 +2,7 @@
 
 import { forwardRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { CONTACT_EMAIL } from "@/lib/constants";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
 import { cn } from "@/lib/utils";
 
@@ -299,7 +300,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 [ {t("pdfFooterCompany")} ]
               </p>
               <p className="mt-2 font-mono text-navy">{t("pdfFooterTel")}</p>
-              <p className="mt-0.5 font-mono text-navy">{t("pdfFooterEmail")}</p>
+              <p className="mt-0.5 font-mono text-navy">{CONTACT_EMAIL}</p>
               <p className="mt-3 font-mono text-slate-500">{t("pdfFooterNote")}</p>
             </div>
           </div>

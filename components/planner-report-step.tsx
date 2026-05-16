@@ -21,10 +21,7 @@ import {
   htmlElementToPdf,
   HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
 } from "@/lib/html-to-pdf";
-
-function isPdfTimeoutError(e: unknown): boolean {
-  return e instanceof Error && /timed out/i.test(e.message);
-}
+import { CONTACT_EMAIL } from "@/lib/constants";
 import { useToast } from "@/components/toast-provider";
 import PlannerReportPreview from "@/components/planner-report-preview";
 import {
@@ -36,6 +33,10 @@ import {
 } from "@/components/planner-charts";
 
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
+
+function isPdfTimeoutError(e: unknown): boolean {
+  return e instanceof Error && /timed out/i.test(e.message);
+}
 
 export type PlannerReportSharedProps = {
   isKo: boolean;
@@ -133,7 +134,7 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
     () => ({
       company: t("reportContactCompany"),
       phone: t("reportContactPhone"),
-      email: t("reportContactEmail"),
+      email: CONTACT_EMAIL,
       address: t("reportContactAddress"),
     }),
     [t],

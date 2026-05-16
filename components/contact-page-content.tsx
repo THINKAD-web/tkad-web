@@ -138,7 +138,7 @@ export default function ContactPageContent() {
                         EMAIL
                       </div>
                       <div className="mt-1 font-mono text-sm text-foreground">
-                        {t("emailAddress")}
+                        {CONTACT_EMAIL}
                       </div>
                     </div>
                   </div>

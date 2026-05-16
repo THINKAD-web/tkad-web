@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/constants";
 import { sendEmail, isEmailConfigured } from "@/lib/email/client";
 
 type MediaItem = {
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
     });
 
     await sendEmail({
-      to: "sales@tkad.co.kr",
+      to: CONTACT_EMAIL,
       subject: `[플래너 보고서 요청] ${userEmail} - ${goalTitle}`,
       html,
       attachments,
@@ -277,7 +278,7 @@ function buildPlannerReportHtml(data: {
 
         <div style="margin-top: 28px; padding: 16px 14px; background: #fffbeb; border-radius: 10px; border: 1px solid #f97316; text-align: center;">
           <p style="margin: 0; color: #92400e; font-size: 13px;">
-            자세한 상담은 <a href="mailto:sales@tkad.co.kr" style="color: #b45309; font-weight: 600; text-decoration: none;">sales@tkad.co.kr</a> 로 연락주세요.
+            자세한 상담은 <a href="${CONTACT_MAILTO}" style="color: #b45309; font-weight: 600; text-decoration: none;">${CONTACT_EMAIL}</a> 로 연락주세요.
           </p>
         </div>
 

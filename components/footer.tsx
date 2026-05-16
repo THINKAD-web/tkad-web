@@ -98,7 +98,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0 text-gold/50" />
-                {t("footer.email")}
+                {CONTACT_EMAIL}
               </li>
               <li className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4 shrink-0 text-gold/50" />

@@ -44,7 +44,7 @@ export function buildStructuredDataGraph(locale: string) {
           {
             "@type": "ContactPoint",
             telephone: "+82-2-515-2772",
-            email: "sales@tkad.co.kr",
+            email: CONTACT_EMAIL,
             contactType: "customer service",
             areaServed: "KR",
             availableLanguage: ["Korean", "English"],
@@ -69,7 +69,7 @@ export function buildStructuredDataGraph(locale: string) {
         image: `${siteUrl}/pwa-icon/512`,
         url: siteUrl,
         telephone: "+82-2-515-2772",
-        email: "sales@tkad.co.kr",
+        email: CONTACT_EMAIL,
         address: {
           "@type": "PostalAddress",
           streetAddress: "뚝섬로17가길 48 성수에이원지식산업센터 1102호",

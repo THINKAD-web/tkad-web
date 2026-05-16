@@ -4,6 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { pageAlternates } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
+import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/constants";
 import { Shield, AlertTriangle, FileText, Users } from "lucide-react";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -220,8 +221,8 @@ export default async function CommunityPolicyPage({ params }: Props) {
               </ul>
               <p>
                 {isKo
-                  ? "작성한 게시물은 본인 요청 시 삭제 가능합니다 (가입 사용자: 마이페이지, 익명: sales@tkad.co.kr 로 게시물 ID + 작성 IP 함께 요청)."
-                  : "You may request deletion (registered: My Page; anonymous: email sales@tkad.co.kr with post ID + IP)."}
+                  ? `작성한 게시물은 본인 요청 시 삭제 가능합니다 (가입 사용자: 마이페이지, 익명: ${CONTACT_EMAIL} 로 게시물 ID + 작성 IP 함께 요청).`
+                  : `You may request deletion (registered: My Page; anonymous: email ${CONTACT_EMAIL} with post ID + IP).`}
               </p>
               <p>
                 {isKo
@@ -267,10 +268,10 @@ export default async function CommunityPolicyPage({ params }: Props) {
                 ? "본 정책 / 게시물 / 신고 관련 문의: "
                 : "Questions about this policy / posts / reports: "}
               <a
-                href="mailto:sales@tkad.co.kr"
+                href={CONTACT_MAILTO}
                 className="font-bold underline underline-offset-4 hover:text-accent"
               >
-                sales@tkad.co.kr
+                {CONTACT_EMAIL}
               </a>
             </p>
           </section>

@@ -106,7 +106,7 @@ export async function buildKoreanQuotePdf(
   doc.text("THINKAD (싱커드)", rightBlockX, y + 7);
   doc.setFontSize(8);
   doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-  doc.text("sales@tkad.co.kr  |  02-515-2772", rightBlockX, y + 13);
+  doc.text(`${CONTACT_EMAIL}  |  02-515-2772`, rightBlockX, y + 13);
 
   y += 22;
   doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
@@ -244,7 +244,7 @@ export async function buildKoreanQuotePdf(
     doc.text("본 견적은 THINKAD 매체 검증 기준에 따라 산출되었습니다.", M + 4, y + 6);
     doc.text("● 현장 4단계 검증: 입지 · 가시성 · 조도 · 경쟁매체", M + 4, y + 11);
     doc.text("● 유효 기간: 발행일로부터 30일", M + 4, y + 16);
-    doc.text("● 문의: sales@tkad.co.kr / 02-515-2772", M + 4, y + 21);
+    doc.text(`● 문의: ${CONTACT_EMAIL} / 02-515-2772`, M + 4, y + 21);
   }
 
   // ─ 푸터 ─
