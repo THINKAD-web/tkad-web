@@ -12,6 +12,14 @@ import Spinner from "@/components/spinner";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { getMediaById, type MediaItem } from "@/lib/media-data";
 import { getMediaPackageBySlug } from "@/data/packages";
+import {
+  buildPlannerContactMessage,
+  isSavedPlannerPlanId,
+  normalizePlannerBudgetManwon,
+  plannerBudgetToContactBudgetV2,
+  plannerGoalToContactGoals,
+  type SavedPlannerPlanJson,
+} from "@/lib/planner/contact-prefill";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import {
@@ -60,10 +68,12 @@ type TurnstileWindow = Window &
 export default function ContactInquiryForm() {
   const t = useTranslations("contact");
   const tForm = useTranslations("contactForm");
+  const tPlanner = useTranslations("planner");
   const locale = useLocale();
   const isKo = locale === "ko";
   const searchParams = useSearchParams();
   const caseSlug = searchParams.get("case");
+  const planIdParam = searchParams.get("plan");
   const [publishedCaseRef, setPublishedCaseRef] = useState<{
     id: string;
     titleKo: string;
@@ -72,13 +82,19 @@ export default function ContactInquiryForm() {
   const casePrefillDone = useRef<string | null>(null);
   const academyTopic = searchParams.get("topic") === "academy";
   const academyPrefillDone = useRef(false);
+  const mediaIdParam = searchParams.get("media");
+  const mediaPrefillDone = useRef(false);
+  const [plannerPlanRef, setPlannerPlanRef] = useState<{
+    id: string;
+    expiresAt: string;
+  } | null>(null);
+  const planPrefillDone = useRef<string | null>(null);
   const packageSlug = searchParams.get("package");
   const [packageRef, setPackageRef] = useState<
     ReturnType<typeof getMediaPackageBySlug> | undefined
   >(undefined);
   const packagePrefillDone = useRef<string | null>(null);
-  const mediaIdParam = searchParams.get("media");
-  const mediaPrefillDone = useRef(false);
+
 
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
@@ -121,6 +137,14 @@ export default function ContactInquiryForm() {
     academyPrefillDone.current = false;
   }, [academyTopic]);
 
+  useEffect(() => {
+    mediaPrefillDone.current = false;
+  }, [mediaIdParam]);
+
+  useEffect(() => {
+    planPrefillDone.current = null;
+    setPlannerPlanRef(null);
+  }, [planIdParam]);
 
   useEffect(() => {
     packagePrefillDone.current = null;
@@ -150,8 +174,105 @@ export default function ContactInquiryForm() {
   }, [getValues, isKo, packageSlug, setValue, t]);
 
   useEffect(() => {
-    mediaPrefillDone.current = false;
-  }, [mediaIdParam]);
+    if (!planIdParam || !isSavedPlannerPlanId(planIdParam)) {
+      return;
+    }
+    if (planPrefillDone.current === planIdParam) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/planner/shared/${planIdParam}`);
+        if (!res.ok || cancelled) return;
+        const payload = (await res.json()) as {
+          id: string;
+          expiresAt: string;
+          planJson: SavedPlannerPlanJson;
+        };
+        if (cancelled) return;
+
+        setPlannerPlanRef({ id: payload.id, expiresAt: payload.expiresAt });
+
+        const plan = payload.planJson ?? {};
+        const ids = Array.isArray(plan.campaignMediaIds)
+          ? plan.campaignMediaIds.filter(
+              (id): id is string => typeof id === "string" && id.length > 0,
+            )
+          : [];
+
+        let catalog: MediaItem[] = [];
+        try {
+          const catRes = await fetch("/api/public/media-catalog");
+          if (catRes.ok) {
+            catalog = (await catRes.json()) as MediaItem[];
+          }
+        } catch {
+          /* ignore */
+        }
+
+        const mediaItems = ids
+          .map((id) => catalog.find((m) => m.id === id) ?? getMediaById(id))
+          .filter((m): m is MediaItem => m != null);
+
+        const goalKey = plan.campaignGoal;
+        let goalLabel: string | null = null;
+        if (typeof goalKey === "string" && goalKey.length > 0) {
+          try {
+            goalLabel = tPlanner(goalKey as "goalBrand");
+          } catch {
+            goalLabel = goalKey;
+          }
+        }
+
+        const regionsText =
+          Array.isArray(plan.regions) && plan.regions.length > 0
+            ? plan.regions.join(", ")
+            : null;
+
+        const budgetManwon = normalizePlannerBudgetManwon(plan.budget);
+        const months = Math.max(1, Number(plan.months) || 1);
+        const budgetCode = plannerBudgetToContactBudgetV2(budgetManwon, months);
+        const goals = plannerGoalToContactGoals(plan.campaignGoal);
+        const message = buildPlannerContactMessage({
+          isKo,
+          plan,
+          mediaItems,
+          goalLabel,
+          regionsText,
+        });
+
+        planPrefillDone.current = planIdParam;
+        if (getValues("additionalNotes").trim() === "") {
+          setValue("additionalNotes", message, { shouldDirty: true });
+        }
+        if (!getValues("inquiryType")) {
+          setValue("inquiryType", "media_quote", {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        }
+        if (!getValues("budget")) {
+          setValue("budget", budgetCode, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        }
+        const currentGoals = getValues("campaignGoals");
+        if (currentGoals.length === 0 && goals.length > 0) {
+          setValue("campaignGoals", goals, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getValues, isKo, planIdParam, setValue, tPlanner]);
 
   useEffect(() => {
     if (!mediaIdParam || mediaPrefillDone.current) return;
@@ -501,6 +622,22 @@ export default function ContactInquiryForm() {
             className="mt-3 inline-flex border-b-2 border-foreground/30 pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary hover:text-primary"
           >
             {t("packageRefViewPackages")} →
+          </Link>
+        </div>
+      ) : plannerPlanRef ? (
+        <div className="border-2 border-primary bg-card p-4 text-sm text-foreground">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            [ PLANNER REFERENCE ]
+          </p>
+          <p className="mt-2 font-medium leading-relaxed">{t("plannerRefBanner")}</p>
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            {`// ID ${plannerPlanRef.id}`}
+          </p>
+          <Link
+            href="/planner"
+            className="mt-3 inline-flex border-b-2 border-foreground/30 pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary hover:text-primary"
+          >
+            {t("plannerRefViewPlanner")} →
           </Link>
         </div>
       ) : publishedCaseRef ? (
