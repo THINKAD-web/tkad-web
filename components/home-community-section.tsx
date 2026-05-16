@@ -6,6 +6,7 @@ import {
 } from "@/lib/community/types";
 import { cn } from "@/lib/utils";
 import { RoleBadge } from "@/components/community/role-badge";
+import { HomeCommunityNewsletter } from "@/components/home-community-newsletter";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
 
@@ -37,6 +38,54 @@ type Props = {
   isKo: boolean;
 };
 
+function CommunityEmptyState({ isKo }: { isKo: boolean }) {
+  const bullets = isKo
+    ? [
+        "매체·캠페인 실무 Q&A와 현장 인사이트",
+        "광고주·매체사·대행사 네트워킹",
+        "회원 전용 글·댓글·북마크",
+      ]
+    : [
+        "Practical Q&A on media and campaigns",
+        "Networking across advertisers, media, and agencies",
+        "Member posts, comments, and bookmarks",
+      ];
+
+  return (
+    <div className="mt-6 grid grid-cols-1 gap-5 sm:mt-8 lg:mt-10 lg:grid-cols-2 lg:gap-6">
+      <div className="flex flex-col gap-4 border-2 border-black bg-card p-6 text-card-foreground shadow-[4px_4px_0_0_rgb(0,0,0)] sm:p-8">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          {isKo ? "// 멤버 커뮤니티" : "// members community"}
+        </p>
+        <p className="text-base leading-relaxed text-foreground sm:text-lg">
+          {isKo
+            ? "질문을 남기고, 집행 사례를 공유하고, 업계 동료와 바로 연결하세요. 가입 후 첫 글을 작성할 수 있습니다."
+            : "Ask questions, share execution stories, and connect with peers. Sign up to publish your first post."}
+        </p>
+        <ul className="space-y-2 text-sm text-muted-foreground">
+          {bullets.map((item) => (
+            <li key={item} className="flex gap-2">
+              <span className="font-mono text-[#FF6600]" aria-hidden>
+                →
+              </span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+        <Link
+          href="/register"
+          className="mt-2 inline-flex w-fit items-center gap-2 border-2 border-black bg-[#FF6600] px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[3px_3px_0_0_rgb(0,0,0)] transition-transform hover:-translate-y-0.5"
+        >
+          {isKo ? "멤버로 참여하기" : "Join as a member"}
+          <span aria-hidden>→</span>
+        </Link>
+      </div>
+
+      <HomeCommunityNewsletter isKo={isKo} />
+    </div>
+  );
+}
+
 export function HomeCommunitySection({ posts, locale, isKo }: Props) {
   return (
     <NeonSection>
@@ -67,9 +116,9 @@ export function HomeCommunitySection({ posts, locale, isKo }: Props) {
         </p>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:mt-8 md:grid-cols-2 lg:mt-10 lg:grid-cols-3 lg:gap-5">
-        {posts.length > 0 ? (
-          posts.map((post) => {
+      {posts.length > 0 ? (
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:mt-8 md:grid-cols-2 lg:mt-10 lg:grid-cols-3 lg:gap-5">
+          {posts.map((post) => {
             const labels = COMMUNITY_CATEGORY_LABELS[post.category];
             return (
               <Link
@@ -120,17 +169,11 @@ export function HomeCommunitySection({ posts, locale, isKo }: Props) {
                 </article>
               </Link>
             );
-          })
-        ) : (
-          <div className="rounded-none border-2 border-black bg-card/80 p-8 text-center shadow-[4px_4px_0_0_rgb(0,0,0)] md:col-span-2 lg:col-span-3">
-            <p className="font-mono text-[12px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-              {isKo
-                ? "// 커뮤니티 글이 곧 노출됩니다"
-                : "// community posts coming soon"}
-            </p>
-          </div>
-        )}
-      </div>
+          })}
+        </div>
+      ) : (
+        <CommunityEmptyState isKo={isKo} />
+      )}
 
       <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-8 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
         <Link
@@ -142,15 +185,17 @@ export function HomeCommunitySection({ posts, locale, isKo }: Props) {
             →
           </span>
         </Link>
-        <Link
-          href="/register"
-          className="group inline-flex items-center gap-2 border-b-2 border-transparent font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/88 transition-colors hover:border-[#FF6600]/70 hover:text-white"
-        >
-          {isKo ? "멤버로 참여하기" : "Join as a member"}
-          <span aria-hidden className="transition-transform group-hover:translate-x-1">
-            →
-          </span>
-        </Link>
+        {posts.length > 0 ? (
+          <Link
+            href="/register"
+            className="group inline-flex items-center gap-2 border-b-2 border-transparent font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/88 transition-colors hover:border-[#FF6600]/70 hover:text-white"
+          >
+            {isKo ? "멤버로 참여하기" : "Join as a member"}
+            <span aria-hidden className="transition-transform group-hover:translate-x-1">
+              →
+            </span>
+          </Link>
+        ) : null}
       </div>
     </NeonSection>
   );
