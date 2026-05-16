@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { AdminBookingRequestsReviewPanel } from "@/components/admin/booking-requests-review-panel";
+import { AdminMediaAvailabilityPanel } from "@/components/admin/media-availability-panel";
 
 type MediaAvailability = "available" | "reserved" | "maintenance";
 

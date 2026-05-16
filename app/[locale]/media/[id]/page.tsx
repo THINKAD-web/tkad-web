@@ -848,6 +848,11 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </section>
 
+          <MediaAvailabilityCalendar
+            mediaId={media.id}
+            mediaName={isKo ? media.name : (media.nameEn || media.name)}
+          />
+
           <MediaDetailStickyCta media={media} compareHref={compareHref} />
         </div>
       </HomeLandingDayNight>

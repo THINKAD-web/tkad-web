@@ -35,6 +35,12 @@ enum MediaBookingStatus {
   expired
 }
 
+enum MediaPeriodStatus {
+  AVAILABLE
+  BOOKED
+  RESERVED
+}
+
 enum MediaPricePeriod {
   month
   biweekly
@@ -164,6 +170,7 @@ model Media {
 
   priceSnapshots        MediaPriceSnapshot[]
   bookings              MediaBooking[]
+  availabilityPeriods   MediaAvailabilityPeriod[]
   advertiserExecutions  MediaAdvertiserExecution[]
 
   /// 네트워크 패키지 내 개별 지점과의 연결 (선택)
@@ -222,6 +229,23 @@ model MediaBooking {
   @@index([startsAt, endsAt])
   @@index([requestedByUserId])
   @@map("media_bookings")
+}
+
+model MediaAvailabilityPeriod {
+  id        String            @id @default(cuid())
+  mediaId   String            @map("media_id")
+  startDate DateTime          @map("start_date") @db.Date
+  endDate   DateTime          @map("end_date") @db.Date
+  status    MediaPeriodStatus
+  note      String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([mediaId, startDate, endDate])
+  @@map("media_availability")
 }
 
 model MediaAdvertiserExecution {
