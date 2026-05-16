@@ -1,21 +1,30 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { BookingRequestModal } from "@/components/media-detail/booking-request-modal";
+import { Link } from "@/i18n/navigation";
+import {
+  dayIsBlocked,
+  diffDaysInclusive,
+  formatRangeDate,
+  isDayInRange,
+  rangeHasBlockedDays,
+  startOfDay,
+  ymdLocal,
+} from "@/lib/calendar-date-range";
 
 type Props = {
   mediaId: string;
-  /** 매체 이름 (모달 헤더 노출용) */
+  /** 매체 이름 (요약·접근성) */
   mediaName: string;
-  /** 가입 사용자 prefill (선택) */
-  userPrefill?: { name?: string; email?: string };
+  /** 소액 DOOH 즉시 예약 가능 여부 */
+  instantBookingEligible?: boolean;
 };
 
 type BlockedRange = {
-  start: string; // ISO
-  end: string; // ISO
+  start: string;
+  end: string;
   status: "blocked";
 };
 
@@ -26,30 +35,14 @@ type AvailabilityResponse = {
   blockedRanges: BlockedRange[];
 };
 
-/** 매체별 ±3개월 한계 — API 의 MAX_LOOKAHEAD_DAYS(180) 와 정렬 */
 const MAX_FORWARD_MONTHS = 3;
-/** 과거는 보여주지 않음 (예약 의미 없음) */
 const MAX_BACKWARD_MONTHS = 0;
-
-function startOfDay(d: Date): Date {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return x;
-}
-
-function ymd(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
 
 function buildMonthCells(viewMonth: Date): ({ date: Date; day: number } | null)[] {
   const y = viewMonth.getFullYear();
   const mo = viewMonth.getMonth();
   const first = new Date(y, mo, 1);
   const last = new Date(y, mo + 1, 0);
-  // 월요일 시작 (한국 관습)
   const startPad = (first.getDay() + 6) % 7;
   const cells: ({ date: Date; day: number } | null)[] = [];
   for (let i = 0; i < startPad; i++) cells.push(null);
@@ -60,34 +53,23 @@ function buildMonthCells(viewMonth: Date): ({ date: Date; day: number } | null)[
   return cells;
 }
 
-function dayIsBlocked(date: Date, blocked: BlockedRange[]): boolean {
-  // 해당 날짜의 [00:00, 다음날 00:00) 와 blocked range 가 오버랩되는지
-  const dayStart = startOfDay(date);
-  const dayEnd = new Date(dayStart.getTime() + 86400000);
-  return blocked.some((r) => {
-    const rStart = new Date(r.start);
-    const rEnd = new Date(r.end);
-    return rStart < dayEnd && rEnd > dayStart;
-  });
-}
-
 export function MediaAvailabilityCalendar({
   mediaId,
   mediaName,
-  userPrefill,
+  instantBookingEligible = false,
 }: Props) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [refreshTick, setRefreshTick] = useState(0);
+  const locale = useLocale();
   const t = useTranslations("mediaDetail.availability");
   const today = useMemo(() => startOfDay(new Date()), []);
   const [viewMonth, setViewMonth] = useState<Date>(
     () => new Date(today.getFullYear(), today.getMonth(), 1),
   );
+  const [rangeStart, setRangeStart] = useState<Date | null>(null);
+  const [rangeEnd, setRangeEnd] = useState<Date | null>(null);
   const [data, setData] = useState<AvailabilityResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 한 번에 ±3개월 fetch — 좌우 이동 시 재요청 회피 (네트워크/캐시 효율)
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
@@ -100,11 +82,9 @@ export function MediaAvailabilityCalendar({
           today.getMonth() + MAX_FORWARD_MONTHS + 1,
           0,
         );
-        const url = `/api/public/media/${encodeURIComponent(mediaId)}/availability?from=${ymd(fromD)}&to=${ymd(toD)}`;
+        const url = `/api/public/media/${encodeURIComponent(mediaId)}/availability?from=${ymdLocal(fromD)}&to=${ymdLocal(toD)}`;
         const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = (await res.json()) as AvailabilityResponse;
         if (!cancelled) setData(json);
       } catch (e) {
@@ -119,10 +99,11 @@ export function MediaAvailabilityCalendar({
     return () => {
       cancelled = true;
     };
-  }, [mediaId, today, refreshTick]);
+  }, [mediaId, today]);
 
   const cells = useMemo(() => buildMonthCells(viewMonth), [viewMonth]);
   const blockedRanges = useMemo(() => data?.blockedRanges ?? [], [data]);
+
   const isCurrentMonth =
     viewMonth.getFullYear() === today.getFullYear() &&
     viewMonth.getMonth() === today.getMonth();
@@ -144,7 +125,6 @@ export function MediaAvailabilityCalendar({
     return viewMonth < latest;
   })();
 
-  // 월 단위 가용 일수 카운트 (CTA 카피용)
   const stats = useMemo(() => {
     let blockedDays = 0;
     let totalFutureDays = 0;
@@ -154,10 +134,59 @@ export function MediaAvailabilityCalendar({
       totalFutureDays++;
       if (dayIsBlocked(cell.date, blockedRanges)) blockedDays++;
     }
-    return { blockedDays, availableDays: totalFutureDays - blockedDays, totalFutureDays };
+    return {
+      blockedDays,
+      availableDays: totalFutureDays - blockedDays,
+      totalFutureDays,
+    };
   }, [cells, blockedRanges, today]);
 
-  const weekdays = ["월", "화", "수", "목", "금", "토", "일"];
+  const rangeComplete = rangeStart !== null && rangeEnd !== null;
+  const rangeDays =
+    rangeComplete && rangeStart && rangeEnd
+      ? diffDaysInclusive(rangeStart, rangeEnd)
+      : 0;
+
+  const contactHref = rangeComplete
+    ? `/contact?media=${encodeURIComponent(mediaId)}&from=${ymdLocal(rangeStart!)}&to=${ymdLocal(rangeEnd!)}`
+    : null;
+
+  const bookHref = rangeComplete
+    ? `/media/${encodeURIComponent(mediaId)}/book?from=${ymdLocal(rangeStart!)}&to=${ymdLocal(rangeEnd!)}`
+    : null;
+
+  const onDayClick = useCallback(
+    (day: Date) => {
+      if (day < today) return;
+      if (dayIsBlocked(day, blockedRanges)) return;
+
+      if (!rangeStart || (rangeStart && rangeEnd)) {
+        setRangeStart(day);
+        setRangeEnd(null);
+        return;
+      }
+
+      if (day < rangeStart) {
+        setRangeStart(day);
+        setRangeEnd(null);
+        return;
+      }
+
+      if (rangeHasBlockedDays(rangeStart, day, blockedRanges)) {
+        setRangeStart(day);
+        setRangeEnd(null);
+        return;
+      }
+
+      setRangeEnd(day);
+    },
+    [blockedRanges, rangeEnd, rangeStart, today],
+  );
+
+  const weekdays =
+    locale === "ko"
+      ? ["월", "화", "수", "목", "금", "토", "일"]
+      : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
     <section
@@ -185,7 +214,6 @@ export function MediaAvailabilityCalendar({
           </p>
         </div>
 
-        {/* 월 네비게이션 */}
         <div className="inline-flex items-center gap-1 rounded-2xl border border-border/80 bg-muted/50 p-1 shadow-xs backdrop-blur">
           <button
             type="button"
@@ -233,7 +261,12 @@ export function MediaAvailabilityCalendar({
           </p>
         ) : (
           <>
-            {/* 모바일: 가로 스크롤 가능, 데스크탑: max-width로 컴팩트 */}
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              {rangeStart && !rangeEnd
+                ? t("rangeSelectEnd")
+                : t("rangeSelectStart")}
+            </p>
+
             <div className="overflow-x-auto">
               <div className="mx-auto min-w-[320px] max-w-[360px]">
                 <div className="grid grid-cols-7 gap-0.5 text-center">
@@ -258,59 +291,92 @@ export function MediaAvailabilityCalendar({
                       return <div key={idx} className="aspect-square" />;
                     }
                     const isPast = cell.date < today;
-                    const isToday =
-                      cell.date.getTime() === today.getTime();
-                    const blocked = !isPast && dayIsBlocked(cell.date, blockedRanges);
+                    const isToday = cell.date.getTime() === today.getTime();
+                    const blocked =
+                      !isPast && dayIsBlocked(cell.date, blockedRanges);
+                    const inRange = isDayInRange(
+                      cell.date,
+                      rangeStart,
+                      rangeEnd,
+                    );
+                    const isStart =
+                      rangeStart?.getTime() === cell.date.getTime();
+                    const isEnd =
+                      rangeEnd?.getTime() === cell.date.getTime();
+                    const selectable = !isPast && !blocked;
 
                     let cls =
-                      "relative flex aspect-square items-center justify-center rounded-[10px] border text-[11px] font-black tabular-nums transition-colors";
+                      "relative flex aspect-square w-full items-center justify-center rounded-[10px] border text-[11px] font-black tabular-nums transition-colors";
                     if (isPast) {
                       cls +=
                         " border-transparent bg-transparent text-muted-foreground/40";
                     } else if (blocked) {
                       cls +=
-                        " border-accent bg-accent/15 text-accent";
+                        " border-accent bg-accent/15 text-accent cursor-not-allowed";
+                    } else if (inRange) {
+                      cls +=
+                        " border-foreground/30 bg-foreground/10 text-foreground";
                     } else {
-                      cls += " border-border bg-card/80 text-foreground";
+                      cls +=
+                        " border-border bg-card/80 text-foreground hover:border-foreground/40 hover:bg-muted/60";
                     }
-                    if (isToday) {
+                    if (isStart || isEnd) {
+                      cls +=
+                        " z-[1] border-foreground bg-foreground text-background ring-2 ring-foreground/20";
+                    }
+                    if (isToday && !isStart && !isEnd) {
                       cls += " ring-1 ring-foreground/70 ring-offset-1";
                     }
 
+                    const label = blocked
+                      ? `${ymdLocal(cell.date)} — ${t("dayBlocked")}`
+                      : isPast
+                        ? t("dayPast")
+                        : `${ymdLocal(cell.date)} — ${t("dayAvailable")}`;
+
+                    if (!selectable) {
+                      return (
+                        <div
+                          key={idx}
+                          className={cls}
+                          aria-label={isPast ? undefined : label}
+                          title={
+                            blocked
+                              ? t("dayBlocked")
+                              : isPast
+                                ? t("dayPast")
+                                : undefined
+                          }
+                        >
+                          <span>{cell.day}</span>
+                          {blocked ? (
+                            <span
+                              aria-hidden
+                              className="pointer-events-none absolute inset-0 rounded-[10px] bg-[linear-gradient(135deg,transparent_45%,rgba(255,102,0,0.45)_45%,rgba(255,102,0,0.45)_55%,transparent_55%)]"
+                            />
+                          ) : null}
+                        </div>
+                      );
+                    }
+
                     return (
-                      <div
+                      <button
                         key={idx}
+                        type="button"
                         className={cls}
-                        aria-label={
-                          blocked
-                            ? `${ymd(cell.date)} — ${t("dayBlocked")}`
-                            : isPast
-                              ? undefined
-                              : `${ymd(cell.date)} — ${t("dayAvailable")}`
-                        }
-                        title={
-                          blocked
-                            ? t("dayBlocked")
-                            : isPast
-                              ? t("dayPast")
-                              : t("dayAvailable")
-                        }
+                        onClick={() => onDayClick(cell.date)}
+                        aria-label={label}
+                        aria-pressed={inRange || isStart}
+                        title={label}
                       >
                         <span>{cell.day}</span>
-                        {blocked ? (
-                          <span
-                            aria-hidden
-                            className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,transparent_45%,rgba(255,102,0,0.45)_45%,rgba(255,102,0,0.45)_55%,transparent_55%)]"
-                          />
-                        ) : null}
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
               </div>
             </div>
 
-            {/* 범례 + 통계 + CTA */}
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
               <span className="inline-flex items-center gap-2">
                 <span className="inline-block h-3 w-3 border border-border bg-card" />
@@ -320,6 +386,10 @@ export function MediaAvailabilityCalendar({
                 <span className="inline-block h-3 w-3 border border-accent bg-accent/15" />
                 {t("legendBlocked")}
               </span>
+              <span className="inline-flex items-center gap-2">
+                <span className="inline-block h-3 w-3 border border-foreground/30 bg-foreground/10" />
+                {t("legendSelected")}
+              </span>
               {isCurrentMonth ? (
                 <span className="inline-flex items-center gap-2">
                   <span className="inline-block h-3 w-3 border border-border ring-1 ring-foreground ring-offset-1" />
@@ -328,38 +398,70 @@ export function MediaAvailabilityCalendar({
               ) : null}
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border/15 pt-3">
+            <div className="mt-4 space-y-3 border-t border-border/15 pt-4">
               <p className="text-[12.5px] leading-relaxed text-foreground">
                 {t("statsAvailable", { n: stats.availableDays })}
                 {stats.blockedDays > 0
                   ? `  ·  ${t("statsBlocked", { n: stats.blockedDays })}`
                   : null}
               </p>
-              <button
-                type="button"
-                onClick={() => setModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-[14px] border border-accent bg-accent px-3.5 py-2 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:opacity-95"
-              >
-                {t("ctaRequest")}
-              </button>
+
+              {rangeStart ? (
+                <div
+                  className="rounded-[18px] border border-border/80 bg-muted/30 px-4 py-3"
+                  aria-live="polite"
+                >
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    {t("rangeLabel")}
+                  </p>
+                  {rangeComplete && rangeStart && rangeEnd ? (
+                    <p className="mt-1 text-sm font-semibold text-foreground">
+                      {t("rangeSelected", {
+                        start: formatRangeDate(rangeStart, locale),
+                        end: formatRangeDate(rangeEnd, locale),
+                        days: rangeDays,
+                      })}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-foreground">
+                      {formatRangeDate(rangeStart, locale)} —{" "}
+                      <span className="text-muted-foreground">
+                        {t("rangeSelectEnd")}
+                      </span>
+                    </p>
+                  )}
+                  <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                    {mediaName}
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                {contactHref ? (
+                  <Link
+                    href={contactHref}
+                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-foreground bg-foreground px-4 py-2.5 text-center font-mono text-[10px] font-black uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90"
+                  >
+                    {t("ctaInquiryPeriod")}
+                  </Link>
+                ) : (
+                  <span className="inline-flex cursor-not-allowed items-center justify-center rounded-[14px] border border-border/50 bg-muted/40 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                    {t("ctaInquiryPeriod")}
+                  </span>
+                )}
+                {instantBookingEligible && bookHref ? (
+                  <Link
+                    href={bookHref}
+                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-accent bg-accent px-4 py-2.5 text-center font-mono text-[10px] font-black uppercase tracking-[0.2em] text-accent-foreground transition-opacity hover:opacity-95"
+                  >
+                    {t("ctaInstantBook")}
+                  </Link>
+                ) : null}
+              </div>
             </div>
           </>
         )}
       </div>
-
-      <BookingRequestModal
-        open={modalOpen}
-        mediaId={mediaId}
-        mediaName={mediaName}
-        blockedRanges={blockedRanges}
-        prefill={userPrefill}
-        onClose={() => setModalOpen(false)}
-        onSuccess={() => {
-          // 신청 완료 → 캘린더는 변하지 않지만 (requested 비공개), 사용자에게 피드백
-          // 후속: 캘린더 위젯 위에 "신청 접수됨" 배너 띄우거나 토스트
-          setRefreshTick((n) => n + 1);
-        }}
-      />
     </section>
   );
 }

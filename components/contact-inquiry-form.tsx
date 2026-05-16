@@ -22,6 +22,7 @@ import {
 } from "@/lib/planner/contact-prefill";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
+import { formatRangeDate, parseYmdLocal } from "@/lib/calendar-date-range";
 import {
   CONTACT_BUDGET_V2,
   CONTACT_CAMPAIGN_GOALS,
@@ -90,6 +91,9 @@ export default function ContactInquiryForm() {
   } | null>(null);
   const planPrefillDone = useRef<string | null>(null);
   const packageSlug = searchParams.get("package");
+  const fromParam = searchParams.get("from");
+  const toParam = searchParams.get("to");
+  const periodPrefillDone = useRef(false);
   const [packageRef, setPackageRef] = useState<
     ReturnType<typeof getMediaPackageBySlug> | undefined
   >(undefined);
@@ -136,6 +140,32 @@ export default function ContactInquiryForm() {
   useEffect(() => {
     academyPrefillDone.current = false;
   }, [academyTopic]);
+
+  useEffect(() => {
+    periodPrefillDone.current = false;
+  }, [fromParam, toParam]);
+
+  useEffect(() => {
+    if (periodPrefillDone.current) return;
+    const start = parseYmdLocal(fromParam?.trim() ?? "");
+    if (!start) return;
+    periodPrefillDone.current = true;
+    const end = parseYmdLocal(toParam?.trim() ?? "");
+    setValue("startDate", fromParam!.trim(), { shouldDirty: true, shouldValidate: true });
+    const periodSnippet = isKo
+      ? end
+        ? `[집행 희망 기간: ${formatRangeDate(start, locale)} ~ ${formatRangeDate(end, locale)}]\n`
+        : `[집행 시작 희망일: ${formatRangeDate(start, locale)}]\n`
+      : end
+        ? `[Preferred flight: ${formatRangeDate(start, locale)} – ${formatRangeDate(end!, locale)}]\n`
+        : `[Preferred start: ${formatRangeDate(start, locale)}]\n`;
+    if (getValues("additionalNotes").trim() === "") {
+      setValue("additionalNotes", periodSnippet, { shouldDirty: true });
+    }
+    if (!getValues("inquiryType")) {
+      setValue("inquiryType", "media_quote", { shouldValidate: true, shouldDirty: true });
+    }
+  }, [fromParam, toParam, getValues, isKo, locale, setValue]);
 
   useEffect(() => {
     mediaPrefillDone.current = false;
