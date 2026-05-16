@@ -10,7 +10,7 @@ import {
 import type { ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
@@ -340,11 +340,6 @@ export default function PlannerPageClient({
       )
     : 1;
 
-  const quoteHref =
-    portfolio.length > 0
-      ? `/quote?media=${portfolio.map((m) => m.id).join(",")}`
-      : "/quote";
-
   const compareHref = useMemo(() => {
     const ids = Array.from(campaignMediaIds).slice(0, COMPARE_MAX_ITEMS);
     const q = ids.join(",");
@@ -362,6 +357,9 @@ export default function PlannerPageClient({
   const [saving, setSaving] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
+  const router = useRouter();
+  const [navigatingContact, setNavigatingContact] = useState(false);
+
 
   // PR-D: 매체 상세에서 ?addMedia=<id> 로 진입 시 Step 4 사전 선택
   const searchParams = useSearchParams();
@@ -404,11 +402,8 @@ export default function PlannerPageClient({
    * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
    * 기존 localStorage persist 는 유지 — DB 저장은 "공유/이메일 발송" 시점에만.
    */
-  const savePlan = useCallback(async (saveMode: "share" | "draft" = "share") => {
-    if (saving) return;
-    setSaving(true);
-    try {
-      // PlannerStore 의 Set 등 직렬화 불가 타입은 JSON 변환 시 손실됨 → 안전한 형태로 평탄화.
+  const persistPlan = useCallback(
+    async (saveMode: "share" | "draft" = "share"): Promise<string | null> => {
       const state = usePlannerStore.getState();
       const planJson = {
         campaignGoal: state.campaignGoal,
@@ -430,7 +425,6 @@ export default function PlannerPageClient({
       });
 
       if (!res.ok) {
-        // 서버 에러 응답을 가능한 만큼 읽어 콘솔에 남김 (사용자 모를 디테일 로깅).
         let detail = "";
         try {
           const errBody = (await res.json()) as { error?: string; detail?: string };
@@ -446,20 +440,72 @@ export default function PlannerPageClient({
           status: res.status,
           detail,
         });
-        throw new Error(`save failed: ${res.status}${detail ? ` — ${detail}` : ""}`);
+        return null;
       }
 
       const data = (await res.json()) as { id?: string; expiresAt?: string };
       if (!data.id) {
         console.error("[planner.save] missing id in response", data);
-        throw new Error("Invalid response: missing id");
+        return null;
+      }
+      return data.id;
+    },
+    [],
+  );
+
+  const goToContactQuote = useCallback(async () => {
+    if (navigatingContact || saving) return;
+    setNavigatingContact(true);
+    try {
+      let planId = savedPlanId;
+      if (!planId) {
+        setSaving(true);
+        planId = await persistPlan("share");
+        if (planId) {
+          setSavedPlanId(planId);
+          const origin =
+            typeof window !== "undefined" ? window.location.origin : "";
+          const url = `${origin}/${locale}/planner/shared/${planId}`;
+          setShareUrl(url);
+        }
+        setSaving(false);
+      }
+      if (!planId) {
+        toast(
+          "error",
+          isKo ? "플랜 저장에 실패했습니다." : "Could not save your plan.",
+        );
+        return;
+      }
+      router.push(`/contact?plan=${planId}`);
+    } finally {
+      setNavigatingContact(false);
+    }
+  }, [
+    isKo,
+    locale,
+    navigatingContact,
+    persistPlan,
+    router,
+    savedPlanId,
+    saving,
+    toast,
+  ]);
+
+  const savePlan = useCallback(async (saveMode: "share" | "draft" = "share") => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const dataId = await persistPlan(saveMode);
+      if (!dataId) {
+        throw new Error("save failed");
       }
 
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
-      const url = `${origin}/${locale}/planner/shared/${data.id}`;
+      const url = `${origin}/${locale}/planner/shared/${dataId}`;
       setShareUrl(url);
-      setSavedPlanId(data.id);
+      setSavedPlanId(dataId);
       // 링크를 즉시 클립보드에도 복사
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(url).catch(() => {});
@@ -477,7 +523,7 @@ export default function PlannerPageClient({
     } finally {
       setSaving(false);
     }
-  }, [saving, toast, t, isKo, locale]);
+  }, [persistPlan, saving, toast, t, isKo, locale]);
 
   const mapLabel = useCallback(
     (r: PlannerMapRegion) =>
@@ -1034,13 +1080,16 @@ export default function PlannerPageClient({
                   {t("ctaCompareSelection")}
                 </BtnBlock>
                 <BtnBlock
-                  href={quoteHref}
                   variant="accent"
                   size="md"
                   className="!text-white"
+                  onClick={() => void goToContactQuote()}
+                  disabled={saving || navigatingContact}
                 >
                   <Send className="h-4 w-4" />
-                  {t("ctaQuoteWithPlan")}
+                  {navigatingContact
+                    ? t("savingInProgress")
+                    : t("ctaQuoteWithPlan")}
                 </BtnBlock>
               </div>
             </div>
@@ -1488,21 +1537,20 @@ export default function PlannerPageClient({
                     </div>
                     <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[240px]">
                       <BtnBlock
-                        href={quoteHref}
                         variant="accent"
                         size="lg"
                         className="w-full !text-white"
+                        onClick={() => void goToContactQuote()}
+                        disabled={saving || navigatingContact}
                       >
                         <Send className="h-4 w-4" />
-                        {t("ctaQuoteWithPlan")}
+                        {navigatingContact
+                          ? t("savingInProgress")
+                          : t("ctaQuoteWithPlan")}
                         <ArrowRight className="h-4 w-4" />
                       </BtnBlock>
                       <BtnBlock
-                        href={
-                          savedPlanId
-                            ? `/contact?plan=${savedPlanId}`
-                            : "/contact"
-                        }
+                        href="/contact"
                         variant="secondary"
                         size="lg"
                         className="w-full"
