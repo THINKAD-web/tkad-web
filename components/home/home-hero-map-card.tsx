@@ -11,7 +11,7 @@ import {
 } from "react-leaflet";
 import type { HomeHeroMapPin } from "@/lib/public-media-catalog";
 
-const ACCENT = "#FF6600";
+const ACCENT = "#22d3ee";
 const TILE_URL =
   "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 

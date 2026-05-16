@@ -731,12 +731,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-2xl border border-white/12 bg-white/6 font-mono text-sm font-black backdrop-blur transition-colors",
-                      step === n
-                        ? "border-white/16 bg-white/12 text-white shadow-[0_0_0_1px_rgba(34,211,238,0.24),0_24px_80px_rgba(0,0,0,0.45)]"
-                        : step > n
-                          ? "text-white/80 hover:bg-white/10"
-                          : "text-white/40",
+                      "flex h-10 w-10 items-center justify-center rounded-2xl border-2 font-mono text-sm font-black backdrop-blur transition-colors",
+                      "border-border bg-card text-foreground/70 dark:border-white/12 dark:bg-white/6 dark:text-white/40",
+                      step === n &&
+                        "border-accent bg-accent text-accent-foreground shadow-[0_6px_24px_rgba(67,56,202,0.32)] dark:border-white/16 dark:bg-white/12 dark:text-white dark:shadow-[0_0_0_1px_rgba(34,211,238,0.24),0_24px_80px_rgba(0,0,0,0.45)]",
+                      step > n &&
+                        "border-accent/50 bg-accent/10 text-foreground hover:bg-accent/20 dark:border-white/12 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10",
                     )}
                   >
                     {step > n ? "✓" : n}

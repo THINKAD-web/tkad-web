@@ -36,7 +36,7 @@ function MarqueeBackground({ imageUrls }: { imageUrls: string[] }) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none flex h-full w-full items-center justify-center overflow-hidden opacity-[0.12] blur-sm dark:opacity-[0.25]"
+      className="pointer-events-none flex h-full w-full items-center justify-center overflow-hidden opacity-[0.22] blur-[2px] dark:opacity-[0.42]"
       style={{
         maskImage: MARQUEE_MASK,
         WebkitMaskImage: MARQUEE_MASK,
@@ -134,7 +134,7 @@ export function HomeHeroNeo({ isKo, marqueeImageUrls, mapPins }: Props) {
 
       <div
         aria-hidden
-        className="absolute inset-0 z-[1] bg-gradient-to-br from-background/90 via-background/70 to-background/40"
+        className="absolute inset-0 z-[1] bg-gradient-to-br from-background/78 via-background/55 to-background/28 dark:from-background/70 dark:via-background/45 dark:to-background/20"
       />
 
       <div className="relative z-[2] mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
@@ -153,13 +153,13 @@ export function HomeHeroNeo({ isKo, marqueeImageUrls, mapPins }: Props) {
             <h1 className="text-balance text-5xl font-black leading-tight tracking-tight lg:text-6xl">
               {isKo ? (
                 <>
-                  검증된 <span className="text-[#FF6600]">광고매체.</span>
+                  검증된 <span className="tkad-home-accent-text">광고매체.</span>
                   <br />
                   예측 가능한 성과.
                 </>
               ) : (
                 <>
-                  Verified <span className="text-[#FF6600]">OOH.</span>
+                  Verified <span className="tkad-home-accent-text">OOH.</span>
                   <br />
                   Predictable outcomes.
                 </>
@@ -175,7 +175,7 @@ export function HomeHeroNeo({ isKo, marqueeImageUrls, mapPins }: Props) {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/media"
-                className="inline-flex items-center gap-2 bg-[#FF6600] px-6 py-3 font-bold text-white transition-colors hover:bg-[#e55a00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6600] focus-visible:ring-offset-2"
+                className="tkad-neon-cta inline-flex items-center gap-2 rounded-[14px] px-6 py-3 font-bold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a855f7] focus-visible:ring-offset-2"
               >
                 {isKo ? "지금 시작하기" : "Start now"}
                 <ArrowRight className="h-4 w-4" aria-hidden />
