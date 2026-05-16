@@ -1,4 +1,7 @@
 import { CONTACT_EMAIL } from "@/lib/constants";
+
+const CONTACT_PHONE = "02-515-2772";
+
 export type ContactConfirmationEmailParams = {
   name?: string | null;
 };
@@ -19,7 +22,7 @@ export function getContactConfirmationEmail({
     "담당 컨설턴트가 내용을 확인한 뒤, 영업일 기준 24시간 이내에 답변 드리겠습니다.",
     "",
     "보다 빠른 상담이 필요하신 경우 아래 연락처로 문의 주세요.",
-    "- 전화: 02-000-0000",
+    `- 전화: ${CONTACT_PHONE}`,
     `- 이메일: ${CONTACT_EMAIL}`,
     "",
     "감사합니다.",
@@ -27,7 +30,7 @@ export function getContactConfirmationEmail({
   ].join("\n");
 
   const html = `
-    <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #f5f5f7; padding: 32px 16px;">
+    <motionless style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #f5f5f7; padding: 32px 16px;">
       <div style="max-width: 520px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; padding: 28px 24px; box-shadow: 0 18px 45px rgba(15,23,42,0.10); border: 1px solid #e2e8f0;">
         <div style="margin-bottom: 20px;">
           <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #f59e0b; margin-bottom: 4px;">
@@ -53,8 +56,8 @@ export function getContactConfirmationEmail({
 
         <div style="margin: 14px 0 18px 0; padding: 12px 14px; border-radius: 12px; background-color: #0f172a; color: #e5e7eb; font-size: 13px;">
           <div style="font-weight: 600; margin-bottom: 4px;">THINKAD 싱커드 연락처</div>
-          <div>전화: 02-000-0000</div>
-          <div>이메일: contact@tkad.co.kr</div>
+          <div>전화: ${CONTACT_PHONE}</div>
+          <div>이메일: ${CONTACT_EMAIL}</div>
         </div>
 
         <p style="margin: 0 0 6px 0; font-size: 13px; color: #6b7280;">
@@ -76,4 +79,3 @@ export function getContactConfirmationEmail({
 
   return { subject, text, html };
 }
-
