@@ -136,10 +136,40 @@ function HomeContent({
 
         <HomeClientLogos />
 
-        <NeonSection className="pt-10 pb-[calc(3rem+14px)] sm:pt-16 sm:pb-[calc(5rem+14px)] md:pt-24 md:pb-[calc(7rem+14px)] lg:pt-40 lg:pb-[calc(10rem+14px)] xl:pt-48 xl:pb-[calc(12rem+14px)]">
+        <NeonSection className="pt-10 pb-[calc(3rem+14px)] sm:pt-16 sm:pb-[calc(5rem+14px)] md:pt-24 md:pb-[calc(7rem+14px)]">
           <ScrollAnimate>
             <NeonSectionHead
               number="02"
+              kicker={th("packagesKicker")}
+              title={th.rich("packagesTitle", { accent: accentTag })}
+              meta={th("packagesMeta")}
+            />
+          </ScrollAnimate>
+          <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-white/78 sm:mt-8 sm:text-base">
+            {th("packagesLead")}
+          </p>
+          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">
+            <Link
+              href="/media/packages"
+              className="tkad-neon-cta group inline-flex h-14 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+            >
+              {th("packagesCta")}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex h-14 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10"
+            >
+              {t("contact.heroCtaQuote")}
+              <ArrowRight className="h-4 w-4 text-white/80" />
+            </Link>
+          </div>
+        </NeonSection>
+
+        <NeonSection className="pt-10 pb-[calc(3rem+14px)] sm:pt-16 sm:pb-[calc(5rem+14px)] md:pt-24 md:pb-[calc(7rem+14px)] lg:pt-40 lg:pb-[calc(10rem+14px)] xl:pt-48 xl:pb-[calc(12rem+14px)]">
+          <ScrollAnimate>
+            <NeonSectionHead
+              number="03"
               kicker={th("featuredKicker")}
               title={th.rich("featuredTitle", { accent: accentTag })}
               meta={th("featuredMeta")}
@@ -166,7 +196,7 @@ function HomeContent({
             <ScrollAnimate>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
                 <NeonSectionHead
-                  number="03"
+                  number="04"
                   kicker={th("popularKicker")}
                   title={th.rich("popularTitle", { accent: accentTag })}
                   meta={th("popularMeta")}
@@ -190,7 +220,7 @@ function HomeContent({
         <NeonSection>
           <ScrollAnimate>
             <NeonSectionHead
-              number="04"
+              number="05"
               kicker={th("whyKicker")}
               title={th.rich("whyTitle", { accent: accentTag })}
               meta={th("whyMeta")}
@@ -233,7 +263,7 @@ function HomeContent({
         <NeonSection>
           <ScrollAnimate>
             <NeonSectionHead
-              number="05"
+              number="06"
               kicker={th("testimonialsKicker")}
               title={th.rich("testimonialsTitle", { accent: accentTag })}
               meta={th("testimonialsMeta")}

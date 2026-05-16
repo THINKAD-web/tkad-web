@@ -10,7 +10,7 @@ import {
 import type { ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
@@ -340,11 +340,6 @@ export default function PlannerPageClient({
       )
     : 1;
 
-  const quoteHref =
-    portfolio.length > 0
-      ? `/quote?media=${portfolio.map((m) => m.id).join(",")}`
-      : "/quote";
-
   const compareHref = useMemo(() => {
     const ids = Array.from(campaignMediaIds).slice(0, COMPARE_MAX_ITEMS);
     const q = ids.join(",");
@@ -362,16 +357,62 @@ export default function PlannerPageClient({
   const [saving, setSaving] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
+  const router = useRouter();
+  const [navigatingContact, setNavigatingContact] = useState(false);
 
-  // PR-D: 매체 상세에서 ?addMedia=<id> 로 진입 시 Step 4 사전 선택
+
+  // PR-D: 매체 상세 ?addMedia= · 찜 목록 ?mediaIds= 로 Step 4 사전 선택
   const searchParams = useSearchParams();
   const addMediaId = searchParams.get("addMedia");
-  const handledAddMediaRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!addMediaId) return;
-    if (handledAddMediaRef.current === addMediaId) return;
-    handledAddMediaRef.current = addMediaId;
+  const mediaIdsParam = searchParams.get("mediaIds");
+  const handledQueryRef = useRef<string | null>(null);
 
+  const stripPlannerQueryKeys = useCallback((keys: string[]) => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    for (const k of keys) url.searchParams.delete(k);
+    window.history.replaceState({}, "", url.toString());
+  }, []);
+
+  useEffect(() => {
+    const batchKey = mediaIdsParam
+      ? `mediaIds:${mediaIdsParam}`
+      : addMediaId
+        ? `addMedia:${addMediaId}`
+        : null;
+    if (!batchKey) return;
+    if (handledQueryRef.current === batchKey) return;
+    handledQueryRef.current = batchKey;
+
+    if (mediaIdsParam) {
+      const requested = mediaIdsParam
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const valid = requested.filter((id) => catalog.some((m) => m.id === id));
+      if (valid.length === 0) {
+        toast(
+          "error",
+          isKo
+            ? "선택한 매체를 찾을 수 없습니다."
+            : "Selected media not found.",
+        );
+        stripPlannerQueryKeys(["mediaIds"]);
+        return;
+      }
+      setCampaignMediaIds(valid);
+      setWizardStep(4);
+      toast(
+        "success",
+        isKo
+          ? `찜한 매체 ${valid.length}개로 플래너를 시작합니다.`
+          : `Starting planner with ${valid.length} saved media.`,
+      );
+      stripPlannerQueryKeys(["mediaIds", "addMedia"]);
+      return;
+    }
+
+    if (!addMediaId) return;
     const exists = catalog.some((m) => m.id === addMediaId);
     if (!exists) {
       toast(
@@ -380,6 +421,7 @@ export default function PlannerPageClient({
           ? "선택한 매체를 찾을 수 없습니다."
           : "Selected media not found.",
       );
+      stripPlannerQueryKeys(["addMedia"]);
       return;
     }
     setCampaignMediaIds((prev) =>
@@ -392,23 +434,24 @@ export default function PlannerPageClient({
         ? "매체가 캠페인에 추가되었습니다."
         : "Media added to your campaign.",
     );
-    // URL 정리 — addMedia query 제거 (history 보존)
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.delete("addMedia");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, [addMediaId, catalog, setCampaignMediaIds, setWizardStep, toast, isKo]);
+    stripPlannerQueryKeys(["addMedia"]);
+  }, [
+    addMediaId,
+    mediaIdsParam,
+    catalog,
+    setCampaignMediaIds,
+    setWizardStep,
+    toast,
+    isKo,
+    stripPlannerQueryKeys,
+  ]);
 
   /**
    * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
    * 기존 localStorage persist 는 유지 — DB 저장은 "공유/이메일 발송" 시점에만.
    */
-  const savePlan = useCallback(async (saveMode: "share" | "draft" = "share") => {
-    if (saving) return;
-    setSaving(true);
-    try {
-      // PlannerStore 의 Set 등 직렬화 불가 타입은 JSON 변환 시 손실됨 → 안전한 형태로 평탄화.
+  const persistPlan = useCallback(
+    async (saveMode: "share" | "draft" = "share"): Promise<string | null> => {
       const state = usePlannerStore.getState();
       const planJson = {
         campaignGoal: state.campaignGoal,
@@ -430,7 +473,6 @@ export default function PlannerPageClient({
       });
 
       if (!res.ok) {
-        // 서버 에러 응답을 가능한 만큼 읽어 콘솔에 남김 (사용자 모를 디테일 로깅).
         let detail = "";
         try {
           const errBody = (await res.json()) as { error?: string; detail?: string };
@@ -446,20 +488,72 @@ export default function PlannerPageClient({
           status: res.status,
           detail,
         });
-        throw new Error(`save failed: ${res.status}${detail ? ` — ${detail}` : ""}`);
+        return null;
       }
 
       const data = (await res.json()) as { id?: string; expiresAt?: string };
       if (!data.id) {
         console.error("[planner.save] missing id in response", data);
-        throw new Error("Invalid response: missing id");
+        return null;
+      }
+      return data.id;
+    },
+    [],
+  );
+
+  const goToContactQuote = useCallback(async () => {
+    if (navigatingContact || saving) return;
+    setNavigatingContact(true);
+    try {
+      let planId = savedPlanId;
+      if (!planId) {
+        setSaving(true);
+        planId = await persistPlan("share");
+        if (planId) {
+          setSavedPlanId(planId);
+          const origin =
+            typeof window !== "undefined" ? window.location.origin : "";
+          const url = `${origin}/${locale}/planner/shared/${planId}`;
+          setShareUrl(url);
+        }
+        setSaving(false);
+      }
+      if (!planId) {
+        toast(
+          "error",
+          isKo ? "플랜 저장에 실패했습니다." : "Could not save your plan.",
+        );
+        return;
+      }
+      router.push(`/contact?plan=${planId}`);
+    } finally {
+      setNavigatingContact(false);
+    }
+  }, [
+    isKo,
+    locale,
+    navigatingContact,
+    persistPlan,
+    router,
+    savedPlanId,
+    saving,
+    toast,
+  ]);
+
+  const savePlan = useCallback(async (saveMode: "share" | "draft" = "share") => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const dataId = await persistPlan(saveMode);
+      if (!dataId) {
+        throw new Error("save failed");
       }
 
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
-      const url = `${origin}/${locale}/planner/shared/${data.id}`;
+      const url = `${origin}/${locale}/planner/shared/${dataId}`;
       setShareUrl(url);
-      setSavedPlanId(data.id);
+      setSavedPlanId(dataId);
       // 링크를 즉시 클립보드에도 복사
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(url).catch(() => {});
@@ -477,7 +571,7 @@ export default function PlannerPageClient({
     } finally {
       setSaving(false);
     }
-  }, [saving, toast, t, isKo, locale]);
+  }, [persistPlan, saving, toast, t, isKo, locale]);
 
   const mapLabel = useCallback(
     (r: PlannerMapRegion) =>
@@ -1034,13 +1128,16 @@ export default function PlannerPageClient({
                   {t("ctaCompareSelection")}
                 </BtnBlock>
                 <BtnBlock
-                  href={quoteHref}
                   variant="accent"
                   size="md"
                   className="!text-white"
+                  onClick={() => void goToContactQuote()}
+                  disabled={saving || navigatingContact}
                 >
                   <Send className="h-4 w-4" />
-                  {t("ctaQuoteWithPlan")}
+                  {navigatingContact
+                    ? t("savingInProgress")
+                    : t("ctaQuoteWithPlan")}
                 </BtnBlock>
               </div>
             </div>
@@ -1488,21 +1585,20 @@ export default function PlannerPageClient({
                     </div>
                     <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[240px]">
                       <BtnBlock
-                        href={quoteHref}
                         variant="accent"
                         size="lg"
                         className="w-full !text-white"
+                        onClick={() => void goToContactQuote()}
+                        disabled={saving || navigatingContact}
                       >
                         <Send className="h-4 w-4" />
-                        {t("ctaQuoteWithPlan")}
+                        {navigatingContact
+                          ? t("savingInProgress")
+                          : t("ctaQuoteWithPlan")}
                         <ArrowRight className="h-4 w-4" />
                       </BtnBlock>
                       <BtnBlock
-                        href={
-                          savedPlanId
-                            ? `/contact?plan=${savedPlanId}`
-                            : "/contact"
-                        }
+                        href="/contact"
                         variant="secondary"
                         size="lg"
                         className="w-full"

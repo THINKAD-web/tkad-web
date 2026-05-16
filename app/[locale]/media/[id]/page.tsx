@@ -407,7 +407,8 @@ export default async function MediaDetailPage({ params }: Props) {
           <div className="flex items-center gap-2">
             <MediaFavoriteButton
               mediaId={media.id}
-              mediaName={isKo ? media.name : (media.nameEn || media.name)}
+              mediaName={media.name}
+              mediaNameEn={media.nameEn || media.name}
             />
             <MediaDetailAddToCart mediaId={media.id} mediaName={isKo ? media.name : (media.nameEn || media.name)} />
           </div>

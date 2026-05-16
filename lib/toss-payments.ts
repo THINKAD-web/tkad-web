@@ -9,20 +9,11 @@ export function generateOrderId(): string {
 }
 
 function readTossClientKey(): string | null {
-  return (
-    process.env.NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY?.trim() ||
-    process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY?.trim() ||
-    process.env.TOSS_CLIENT_KEY?.trim() ||
-    null
-  );
+  return process.env.NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY?.trim() || null;
 }
 
 function readTossSecretKey(): string | null {
-  return (
-    process.env.TOSS_PAYMENTS_SECRET_KEY?.trim() ||
-    process.env.TOSS_SECRET_KEY?.trim() ||
-    null
-  );
+  return process.env.TOSS_PAYMENTS_SECRET_KEY?.trim() || null;
 }
 
 export function isTossPaymentsConfigured(): boolean {
@@ -37,7 +28,7 @@ function authHeader(): string {
   const secret = readTossSecretKey();
   if (!secret) {
     throw new Error(
-      "Toss secret key not configured (TOSS_PAYMENTS_SECRET_KEY or TOSS_SECRET_KEY)",
+      "Toss secret key not configured (TOSS_PAYMENTS_SECRET_KEY)",
     );
   }
   return `Basic ${Buffer.from(`${secret}:`).toString("base64")}`;
