@@ -50,6 +50,7 @@ import { RelatedCases } from "@/components/media-detail/related-cases";
 import { MediaStickyCta } from "@/components/media-detail/sticky-cta";
 import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
+import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
 import { RoadviewCard } from "@/components/media-detail/roadview-card";
@@ -132,7 +133,6 @@ export default async function MediaDetailPage({ params }: Props) {
   const relatedCases = await getSuccessCasesForMedia(media.id);
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const isKo = locale === "ko";
-  const instantBookEligible = isInstantBookingEligible(media).eligible;
   const periodLabel = t(
     mediaDetailPricePeriodTranslationKey(media.pricePeriod),
   );
@@ -385,7 +385,6 @@ export default async function MediaDetailPage({ params }: Props) {
                   mediaName={media.name}
                   mediaNameEn={media.nameEn || media.name}
                   isKo={isKo}
-                  instantBookEligible={instantBookEligible}
                 />
               </div>
             </aside>
@@ -402,7 +401,7 @@ export default async function MediaDetailPage({ params }: Props) {
               ✓
             </span>
             <p className="truncate font-mono text-[11px] uppercase tracking-[0.18em] text-foreground sm:text-[12px]">
-              {`// ${t("quoteStripHint")}`}
+              {`// 관심 가는 매체라면 견적서에 담아보세요`}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -850,11 +849,7 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </section>
 
-          <MediaDetailStickyCta
-            media={media}
-            compareHref={compareHref}
-            instantBookEligible={instantBookEligible}
-          />
+          <MediaDetailStickyCta media={media} compareHref={compareHref} />
         </div>
       </HomeLandingDayNight>
     </>
