@@ -246,6 +246,9 @@ export default function AcademyPageClient({
                 <p className="mx-auto mt-2 max-w-md font-mono text-[12px] tracking-tight text-muted-foreground">
                   {t("preparingLessonsDesc")}
                 </p>
+                <div className="mx-auto mt-8 max-w-lg text-left">
+                  <ContentNotifySignup source="academy" />
+                </div>
               </div>
             ) : (
               <div className="grid gap-0 lg:grid-cols-3">

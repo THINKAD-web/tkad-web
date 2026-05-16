@@ -8,7 +8,6 @@ import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import {
   ArrowRight,
-  Layers,
   RotateCcw,
   Search,
 } from "lucide-react";
@@ -184,9 +183,16 @@ export default function CasesPageClient({ initialCases }: Props) {
             </div>
           ) : (
             <>
-              <p className="mb-10 text-center font-mono text-[12px] tracking-tight text-muted-foreground sm:text-sm">
+              <p className="mb-4 text-center font-mono text-[12px] tracking-tight text-muted-foreground sm:text-sm">
                 {`// `}{t("cases.listIntro")}
               </p>
+              {initialCases.some((c) => isSampleSuccessCaseId(c.id)) ? (
+                <p className="mb-10 text-center font-mono text-[11px] tracking-tight text-muted-foreground">
+                  {`// `}{t("cases.sampleDataNote")}
+                </p>
+              ) : (
+                <div className="mb-10" />
+              )}
 
               <div className="mb-8 space-y-4">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">

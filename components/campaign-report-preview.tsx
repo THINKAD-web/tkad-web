@@ -1,6 +1,6 @@
-import { CONTACT_EMAIL } from "@/lib/constants";
 "use client";
 
+import { CONTACT_EMAIL } from "@/lib/constants";
 import { forwardRef } from "react";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
 import {

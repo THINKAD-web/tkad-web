@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { CONTACT_EMAIL } from "@/lib/constants";
 export const CONTACT_PHONE_RE = /^[\d\-+() ]{8,}$/;
 export const CONTACT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
