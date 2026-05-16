@@ -1,25 +1,19 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { BarChart3, Sparkles } from "lucide-react";
+import { BarChart3, Bolt, Sparkles } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import type { MediaItem } from "@/lib/media-data";
 
-/**
- * #MEDIA-3: 매체 상세 모바일 하단 sticky CTA.
- * 라벨: 플래너 / 견적받기 / 비교하기 (변경 없음).
- * 디자인 개선:
- *   - 상단 모노 라벨 [ MEDIA ACTIONS ]
- *   - rounded-t-lg + 오프셋 그림자 → 부드러운 모서리 + 떠있는 느낌
- *   - 검정 배경 + 주황 보더 (브루탈리스트) + safe-area 패딩
- */
 export default function MediaDetailStickyCta({
   media,
   compareHref,
+  instantBookEligible = false,
 }: {
   media: MediaItem;
   compareHref: string;
+  instantBookEligible?: boolean;
 }) {
   const t = useTranslations("media.detail");
   const tCta = useTranslations("mediaDetail.cta");
@@ -40,9 +34,22 @@ export default function MediaDetailStickyCta({
             [ MEDIA ACTIONS ]
           </span>
           <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-white/45">
-            {`// `}3 OPTIONS
+            {instantBookEligible ? `// ` + "4 OPTIONS" : `// ` + "3 OPTIONS"}
           </span>
         </div>
+        {instantBookEligible ? (
+          <div className="border-b border-white/10 p-2.5">
+            <BtnBlock
+              href={`/media/${encodeURIComponent(media.id)}/book`}
+              variant="primary"
+              size="sm"
+              className="min-h-11 w-full justify-center rounded-[15px] px-2 text-[11px] font-black tracking-[0.06em]"
+            >
+              <Bolt className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              {tCta("instantBook")}
+            </BtnBlock>
+          </div>
+        ) : null}
         <div className="grid grid-cols-3 gap-2 p-2.5">
           <BtnBlock
             href={`/planner?addMedia=${encodeURIComponent(media.id)}`}

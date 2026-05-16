@@ -1613,7 +1613,8 @@
     "aiContent": "AI content",
     "crm": "CRM (demo)",
     "backToSite": "Back to site",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "instantBookings": "Instant bookings"
   },
   "adminNetworks": {
     "title": "Network media",
@@ -2132,7 +2133,8 @@
       "compareRemove": "Remove from compare",
       "compareFull": "Compare is limited to {max} items.",
       "quote": "Request quote",
-      "quoteShort": "Quote"
+      "quoteShort": "Quote",
+      "instantBook": "Book instantly"
     }
   },
   "contentNotify": {
@@ -2226,5 +2228,67 @@
     "heroMapStatVerified": "Verified media",
     "heroMapStatPartners": "Partners",
     "heroMapStatResponse": "Response"
+  },
+  "instantBooking": {
+    "eyebrow": "Small DOOH",
+    "title": "Instant booking",
+    "backToMedia": "Back to media",
+    "viewBooking": "View booking",
+    "step1": "Dates",
+    "step2": "Creative",
+    "step3": "Contact",
+    "datesTitle": "Select flight dates",
+    "datesDesc": "Pick start and end dates on the calendar. Blocked days cannot be selected.",
+    "calendarLoading": "Loading availability…",
+    "calendarError": "Could not load calendar.",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "selectRange": "Select start date, then end date.",
+    "rangeBlocked": "The range includes blocked days.",
+    "creativeTitle": "Upload creative",
+    "uploadLabel": "Choose image or video",
+    "uploadDone": "Uploaded",
+    "uploadFailed": "Upload failed",
+    "contactTitle": "Contact details",
+    "name": "Name / company",
+    "email": "Email",
+    "phone": "Phone (optional)",
+    "next": "Next",
+    "back": "Back",
+    "goToPay": "Continue to payment",
+    "submitFailed": "Could not create booking.",
+    "pay": {
+      "title": "Payment",
+      "back": "Edit booking",
+      "methodsHint": "Toss Payments — card and bank transfer (test keys)",
+      "loadingWidget": "Loading payment widget…",
+      "payButton": "Pay {amount}",
+      "notConfigured": "Payments are not configured. Contact support.",
+      "widgetError": "Failed to load payment widget.",
+      "payFailed": "Payment request failed.",
+      "confirming": "Confirming payment…",
+      "confirmFailed": "Payment confirmation failed.",
+      "alreadyPaid": "This booking is already paid."
+    },
+    "confirm": {
+      "titlePaid": "Booking confirmed",
+      "titlePending": "Awaiting payment",
+      "descPaid": "Payment complete. We sent a confirmation email.",
+      "descPending": "Complete payment to confirm your booking.",
+      "media": "Media",
+      "period": "Period",
+      "amount": "Amount",
+      "status": "Status",
+      "status_payment_pending": "Payment pending",
+      "status_paid": "Paid",
+      "status_confirmed": "Execution confirmed",
+      "status_cancelled": "Cancelled",
+      "status_failed": "Failed",
+      "status_draft": "Draft",
+      "executionConfirmed": "Execution confirmed",
+      "continuePay": "Continue payment",
+      "backMedia": "Media detail",
+      "emailHint": "Confirmation sent to {email}"
+    }
   }
 }

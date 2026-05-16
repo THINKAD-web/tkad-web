@@ -164,6 +164,7 @@ model Media {
 
   priceSnapshots        MediaPriceSnapshot[]
   bookings              MediaBooking[]
+  instantBookings       Booking[]
   advertiserExecutions  MediaAdvertiserExecution[]
 
   /// 네트워크 패키지 내 개별 지점과의 연결 (선택)
@@ -821,6 +822,7 @@ model User {
   sessions        UserSession[]
   bookingRequests MediaBooking[] @relation("BookingRequester")
   ownedCampaigns  Campaign[] @relation("CampaignOwner")
+  instantBookings Booking[]
   communityPosts      CommunityPost[]     @relation("CommunityPostAuthor")
   communityComments   CommunityComment[]  @relation("CommunityCommentAuthor")
   communityPostLikes  CommunityPostLike[]
@@ -1051,3 +1053,71 @@ model MediaApplication {
   @@index([status, createdAt])
   @@map("media_applications")
 }
+// ── Instant DOOH booking (소액 온라인 결제) ─────────────────────
+
+enum InstantBookingStatus {
+  draft
+  payment_pending
+  paid
+  confirmed
+  cancelled
+  failed
+}
+
+enum PaymentProvider {
+  toss
+  portone
+}
+
+enum PaymentLogStatus {
+  pending
+  succeeded
+  failed
+  cancelled
+}
+
+model Booking {
+  id                   String               @id @default(cuid())
+  mediaId              String               @map("media_id")
+  userId               String?              @map("user_id")
+  startDate            DateTime             @map("start_date") @db.Date
+  endDate              DateTime             @map("end_date") @db.Date
+  creativeUrl          String               @map("creative_url") @db.Text
+  creativeType         String?              @map("creative_type") @db.VarChar(20)
+  amount               Int
+  status               InstantBookingStatus @default(draft)
+  paymentId            String?              @map("payment_id")
+  orderId              String               @unique @map("order_id")
+  contactName          String               @map("contact_name")
+  contactEmail         String               @map("contact_email")
+  contactPhone         String?              @map("contact_phone")
+  mediaBookingId       String?              @unique @map("media_booking_id")
+  executionConfirmedAt DateTime?            @map("execution_confirmed_at")
+  paidAt               DateTime?            @map("paid_at")
+  createdAt            DateTime             @default(now()) @map("created_at")
+  updatedAt            DateTime             @updatedAt @map("updated_at")
+
+  media       Media         @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  paymentLogs PaymentLog[]
+
+  @@index([mediaId, status])
+  @@index([status, createdAt])
+  @@map("bookings")
+}
+
+model PaymentLog {
+  id        String           @id @default(cuid())
+  bookingId String           @map("booking_id")
+  provider  PaymentProvider
+  amount    Int
+  status    PaymentLogStatus
+  raw       Json?
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@map("payment_logs")
+}
+
