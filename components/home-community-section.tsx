@@ -1,3 +1,5 @@
+"use client";
+
 import { Heart, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
@@ -9,6 +11,8 @@ import { RoleBadge } from "@/components/community/role-badge";
 import { HomeCommunityNewsletter } from "@/components/home-community-newsletter";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
+import { useTranslations } from "next-intl";
+import { accentTag } from "@/lib/render-accent-title";
 
 function fmtRelative(iso: string, locale: string) {
   const date = new Date(iso);
@@ -35,10 +39,10 @@ function fmtRelative(iso: string, locale: string) {
 type Props = {
   posts: CommunityPostListItem[];
   locale: string;
-  isKo: boolean;
 };
 
 function CommunityEmptyState({ isKo }: { isKo: boolean }) {
+  const t = useTranslations("homePage");
   const bullets = isKo
     ? [
         "매체·캠페인 실무 Q&A와 현장 인사이트",
@@ -76,7 +80,7 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
           href="/register"
           className="mt-2 inline-flex w-fit items-center gap-2 border-2 border-black bg-[#FF6600] px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[3px_3px_0_0_rgb(0,0,0)] transition-transform hover:-translate-y-0.5"
         >
-          {isKo ? "멤버로 참여하기" : "Join as a member"}
+          {t("communityJoin")}
           <span aria-hidden>→</span>
         </Link>
       </div>
@@ -86,33 +90,21 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
   );
 }
 
-export function HomeCommunitySection({ posts, locale, isKo }: Props) {
+export function HomeCommunitySection({ posts, locale }: Props) {
+  const t = useTranslations("homePage");
+  const isKo = locale === "ko";
   return (
     <NeonSection>
       <div className="flex flex-col gap-4">
         <NeonSectionHead
           number="06"
-          kicker="Community"
-          title={
-            isKo ? (
-              <>
-                OOH 업계 사람들과{" "}
-                <span className="tkad-home-accent-text">연결</span>되세요
-              </>
-            ) : (
-              <>
-                Connect with people across{" "}
-                <span className="tkad-home-accent-text">OOH</span>
-              </>
-            )
-          }
-          meta="ooh industry network"
+          kicker={t("communityKicker")}
+          title={t.rich("communityTitle", { accent: accentTag })}
+          meta={t("communityMeta")}
           className="mb-0"
         />
         <p className="max-w-2xl text-[15px] leading-relaxed text-white/78 sm:text-base">
-          {isKo
-            ? "광고주·매체사·대행사가 모이는 국내 유일 OOH 커뮤니티"
-            : "The place where advertisers, media owners, and agencies meet for OOH in Korea."}
+          {t("communityLead")}
         </p>
       </div>
 
@@ -180,7 +172,7 @@ export function HomeCommunitySection({ posts, locale, isKo }: Props) {
           href="/community"
           className="group inline-flex items-center gap-2 border-b-2 border-transparent font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/88 transition-colors hover:border-white/40 hover:text-white"
         >
-          {isKo ? "커뮤니티 전체 보기" : "View full community"}
+          {t("communityViewAll")}
           <span aria-hidden className="transition-transform group-hover:translate-x-1">
             →
           </span>
@@ -190,7 +182,7 @@ export function HomeCommunitySection({ posts, locale, isKo }: Props) {
             href="/register"
             className="group inline-flex items-center gap-2 border-b-2 border-transparent font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/88 transition-colors hover:border-[#FF6600]/70 hover:text-white"
           >
-            {isKo ? "멤버로 참여하기" : "Join as a member"}
+            {t("communityJoin")}
             <span aria-hidden className="transition-transform group-hover:translate-x-1">
               →
             </span>

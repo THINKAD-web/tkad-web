@@ -4,9 +4,11 @@ import ScrollAnimate from "@/components/scroll-animate";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-export function HomeClientLogos({ isKo }: { isKo: boolean }) {
+export function HomeClientLogos() {
+  const t = useTranslations("homePage");
   const appearance = useTkadAppearance();
   const isDay = appearance === "day";
 
@@ -47,15 +49,9 @@ export function HomeClientLogos({ isKo }: { isKo: boolean }) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <NeonSectionHead
             number="00"
-            kicker="Trust"
-            title={
-              isKo
-                ? "검증된 데이터로 선택받는 플랫폼"
-                : "Trusted by modern B2B teams"
-            }
-            meta={
-              isKo ? "100+ enterprise partners" : "100+ enterprise partners"
-            }
+            kicker={t("trustKicker")}
+title={t("trustTitle")}
+            meta={t("trustMeta")}
             className="mb-0 flex-1"
           />
         </div>

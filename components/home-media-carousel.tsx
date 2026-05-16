@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 import {
@@ -17,18 +18,10 @@ import {
 } from "@/lib/ai-recommend-metrics";
 import { cn } from "@/lib/utils";
 
-const typeLabels: Record<string, { ko: string; en: string }> = {
-  digital: { ko: "디지털", en: "Digital" },
-  static: { ko: "고정형", en: "Static" },
-  mobile: { ko: "이동형", en: "Mobile" },
-  network: { ko: "네트워크/패키지", en: "Network / package" },
-};
-
 type Variant = "featured" | "popular";
 
 type Props = {
   items: MediaItem[];
-  isKo: boolean;
   variant: Variant;
   /** Featured 표시용 — index 1·2·3 뱃지 (TOP3 표기는 제거됨, 단순 순번 인디케이터) */
   showRankBadge?: boolean;
@@ -43,10 +36,13 @@ type Props = {
  */
 export function HomeMediaCarousel({
   items,
-  isKo,
   variant,
   showRankBadge = false,
 }: Props) {
+  const locale = useLocale();
+  const isKo = locale === "ko";
+  const th = useTranslations("homePage");
+  const tm = useTranslations("media");
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
     align: "start",
@@ -195,7 +191,7 @@ export function HomeMediaCarousel({
                       compact ? "text-[9px]" : "text-[10px]",
                     )}
                   >
-                    {isKo ? "예상 노출" : "Impressions"}
+                    {th("carouselImpressions")}
                   </p>
                   <p className={cn("mt-1 font-black tabular-nums", compact ? "text-[12px]" : "text-sm")}>
                     {estimatedMonthlyImpressions(media).toLocaleString()}
@@ -237,7 +233,7 @@ export function HomeMediaCarousel({
                           compact ? "text-[9px]" : "text-[10px]",
                         )}
                       >
-                        {isKo ? "가시성" : "Visibility"}
+                        {th("carouselVisibility")}
                       </span>
                       <span className="tabular-nums">{Math.round(media.visibilityScore)}</span>
                     </span>
@@ -255,7 +251,7 @@ export function HomeMediaCarousel({
                           compact ? "text-[9px]" : "text-[10px]",
                         )}
                       >
-                        {isKo ? "지역" : "Region"}
+                        {th("carouselRegion")}
                       </span>
                       <span>{regionLabel(media.region)}</span>
                     </span>
@@ -272,7 +268,7 @@ export function HomeMediaCarousel({
                         compact ? "text-[9px]" : "text-[10px]",
                       )}
                     >
-                      {isKo ? "유형" : "Type"}
+                      {th("carouselType")}
                     </span>
                     <span>{typeLabel}</span>
                   </span>
@@ -284,7 +280,7 @@ export function HomeMediaCarousel({
                       compact ? "rounded-lg px-3 py-2 text-[10px]" : "rounded-xl px-3 py-3 text-[11px]",
                     )}
                   >
-                    {compact && isKo ? "미리보기" : isKo ? "자세히 보기" : "View details"}
+                    {compact && isKo ? th("carouselPreview") : th("carouselViewDetails")}
                     <ArrowRight
                       className={compact ? "h-3.5 w-3.5 text-white/80" : "h-4 w-4 text-white/80"}
                       aria-hidden
@@ -311,7 +307,7 @@ export function HomeMediaCarousel({
           <p className={cn("mt-1 font-mono font-black tabular-nums text-white", compact ? "text-[22px]" : "text-[28px]")}>
             {priceText}
           </p>
-          <p className="mt-auto text-xs font-semibold text-white/55">{isKo ? "// 검증 데이터 기반" : "// Verified signals"}</p>
+          <p className="mt-auto text-xs font-semibold text-white/55">{th("carouselFooter")}</p>
         </div>
       </Link>
     );
@@ -322,9 +318,11 @@ export function HomeMediaCarousel({
       <div className="overflow-hidden -mx-2 px-2" ref={emblaRef}>
         <div className="flex gap-4 sm:gap-5">
           {items.map((media, i) => {
-            const typeLabel = isKo
-              ? (typeLabels[media.type]?.ko ?? media.type)
-              : (typeLabels[media.type]?.en ?? media.type);
+            const typeKey = media.type as "digital" | "static" | "mobile" | "network";
+            const typeLabel =
+              typeKey in { digital: 1, static: 1, mobile: 1, network: 1 }
+                ? tm(`types.${typeKey}`)
+                : media.type;
             const priceMan = catalogPriceFieldToPriceMan(media.price);
             const priceText = formatMediaPriceWonWithSymbol(
               priceMan * 10_000,
@@ -375,7 +373,7 @@ export function HomeMediaCarousel({
           type="button"
           onClick={scrollPrev}
           disabled={!canPrev}
-          aria-label={isKo ? "이전" : "Previous"}
+          aria-label={th("carouselPrev")}
           className={`tkad-home-media-carousel-arrow ${arrowBase}`}
         >
           <ChevronLeft className="h-5 w-5" />
@@ -384,7 +382,7 @@ export function HomeMediaCarousel({
           type="button"
           onClick={scrollNext}
           disabled={!canNext}
-          aria-label={isKo ? "다음" : "Next"}
+          aria-label={th("carouselNext")}
           className={`tkad-home-media-carousel-arrow ${arrowBase}`}
         >
           <ChevronRight className="h-5 w-5" />

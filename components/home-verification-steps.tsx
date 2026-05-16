@@ -2,48 +2,16 @@
 
 import { motion } from "framer-motion";
 import { Camera, ClipboardCheck, Database, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-type Props = {
-  isKo: boolean;
-};
-
-const steps = (isKo: boolean) => [
-  {
-    step: "01",
-    icon: Search,
-    title: isKo ? "현장 방문" : "Site Visit",
-    desc: isKo
-      ? "담당자가 직접 방문해 설치·노출 환경과 핵심 동선을 확인합니다."
-      : "We visit the site to verify installation conditions and traffic.",
-  },
-  {
-    step: "02",
-    icon: Camera,
-    title: isKo ? "촬영·실측" : "Photo & Measurement",
-    desc: isKo
-      ? "시인성·규격·조도 등 핵심 지표를 실측하고 사진으로 기록합니다."
-      : "We measure key factors like visibility, size, and illumination.",
-  },
-  {
-    step: "03",
-    icon: Database,
-    title: isKo ? "데이터 검증" : "Data Verification",
-    desc: isKo
-      ? "유동·통행·노출 데이터를 교차 검증해 기대 효과를 산출합니다."
-      : "We analyze traffic and exposure data to validate performance.",
-  },
-  {
-    step: "04",
-    icon: ClipboardCheck,
-    title: isKo ? "검증 후 등록" : "Register After Verification",
-    desc: isKo
-      ? "검증을 통과한 매체만 등록하고, 광고주에 투명하게 공개합니다."
-      : "Only verified media are registered on the platform.",
-  },
-];
-
-export function HomeVerificationSteps({ isKo }: Props) {
-  const items = steps(isKo);
+export function HomeVerificationSteps() {
+  const t = useTranslations("homePage");
+  const items = [
+    { step: "01", icon: Search, title: t("verifyStep1Title"), desc: t("verifyStep1Desc") },
+    { step: "02", icon: Camera, title: t("verifyStep2Title"), desc: t("verifyStep2Desc") },
+    { step: "03", icon: Database, title: t("verifyStep3Title"), desc: t("verifyStep3Desc") },
+    { step: "04", icon: ClipboardCheck, title: t("verifyStep4Title"), desc: t("verifyStep4Desc") },
+  ];
 
   return (
     <div className="tkad-home-verification-steps relative mt-6 sm:mt-10 lg:mt-12">

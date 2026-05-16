@@ -69,8 +69,8 @@
     "comingSoonBadge": "Soon"
   },
   "hero": {
-    "title": "Everything About Korean OOH Advertising",
-    "subtitle": "Search nationwide outdoor advertising media at a glance and receive optimal advertising solutions.",
+    "title": "Korea OOH media search & campaign execution",
+    "subtitle": "Browse 500+ verified out-of-home placements nationwide. Plan, buy, and run campaigns with field-verified data.",
     "cta": "Search Media",
     "ctaSecondary": "Request Proposal"
   },
@@ -124,9 +124,9 @@
     }
   },
   "ctaBanner": {
-    "title": "Request a Proposal Now",
-    "description": "THINKAD's expert consultants will propose the optimal OOH advertising solution for you.",
-    "cta": "Free Consultation"
+    "title": "Start your next OOH campaign",
+    "description": "Our consultants will propose a verified media mix and execution plan aligned to your budget and KPIs.",
+    "cta": "Request consultation"
   },
   "media": {
     "title": "Media Search",
@@ -506,7 +506,8 @@
         "available": "Available",
         "reserved": "Booking in progress",
         "maintenance": "Maintenance"
-      }
+      },
+      "quoteStripHint": "Add placements you like to your quote request"
     },
     "ai": {
       "tabSearch": "Media search",
@@ -770,7 +771,11 @@
     "caseRefViewCase": "View case again",
     "academyRefBanner": "You’re requesting a 1:1 follow-up from THINKAD Academy.",
     "academyRefMessageTemplate": "[THINKAD Academy · 1:1 consult]\nWe’d like to schedule OOH fundamentals training, a webinar follow-up, a team workshop, or a custom curriculum.\n\n",
-    "academyRefBack": "Back to Academy"
+    "academyRefBack": "Back to Academy",
+    "heroChipSuffix": " / Contact",
+    "heroKicker": "// Request a free consultation",
+    "heroCtaQuote": "Request a quote",
+    "heroCtaMedia": "Explore media"
   },
   "contactForm": {
     "stepLabel": "Step {current} / {total}",
@@ -1611,7 +1616,10 @@
     "locationDailyFootfall": "Daily footfall: {count}",
     "noLocationsFallback": "No locations registered.",
     "effectMemoLabel": "Ad effectiveness",
-    "contactUs": "Contact us"
+    "contactUs": "Contact us",
+    "coreInfoTitle": "Key metrics at a glance",
+    "detailDescriptionSubtitle": "Brand, inventory, and expected impact in one view.",
+    "detailDescriptionTitle": "About this network"
   },
   "adminNav": {
     "dashboard": "Dashboard",
@@ -2042,7 +2050,9 @@
     "ctaTitle": "Request a quote",
     "ctaSubtitle": "Share budget and timing—we’ll respond quickly with direction and next steps.",
     "ctaButton": "Request a quote",
-    "ctaSecondary": "Browse media"
+    "ctaSecondary": "Browse media",
+    "heroChipSuffix": " / Execution services",
+    "pillarsMeta": "Strategy · planning · execution"
   },
   "myBookingRequests": {
     "eyebrow": "My booking requests",
@@ -2163,5 +2173,84 @@
     "submitted": "Subscribed",
     "successHint": "Thanks — we will reach out when new content goes live.",
     "error": "Could not save your request. Please try again."
+  },
+  "homePage": {
+    "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
+    "heroLiveToday": "Today's impressions",
+    "heroLiveBrands": "Active brands",
+    "heroLiveResponse": "Avg. response",
+    "heroVerifiedOnly": "Verified-only inventory",
+    "heroTitleLine1": "Verified <accent>OOH media.</accent>",
+    "heroTitleLine2": "Predictable outcomes.",
+    "heroSubtitle": "Compare placements with on-site verification data and build a budget-fit mix in minutes—from quote through execution.",
+    "heroCtaStart": "Get started",
+    "heroCtaPlanner": "Try AI Planner →",
+    "heroTag1": "4-step verification",
+    "heroTag2": "Price & location",
+    "heroTag3": "AI media mix",
+    "heroMapTitle": "Nationwide footprint",
+    "heroMapHint": "{count} pins · tap for name",
+    "trustKicker": "Trust",
+    "trustTitle": "Trusted by modern B2B teams",
+    "trustMeta": "100+ enterprise partners",
+    "verificationKicker": "Verification",
+    "verificationTitle": "THINKAD's <accent>4-step</accent> media verification",
+    "verificationMeta": "Verified before listing",
+    "verifyStep1Title": "Site visit",
+    "verifyStep1Desc": "We inspect installation, exposure, and key traffic paths on location.",
+    "verifyStep2Title": "Photo & measurement",
+    "verifyStep2Desc": "We record visibility, size, lighting, and other core metrics with photos.",
+    "verifyStep3Title": "Data verification",
+    "verifyStep3Desc": "We cross-check footfall, traffic, and exposure data to model expected reach.",
+    "verifyStep4Title": "List after verification",
+    "verifyStep4Desc": "Only verified inventory is published—transparently—for advertisers.",
+    "featuredKicker": "Recommended",
+    "featuredTitle": "THINKAD <accent>recommended</accent> media",
+    "featuredMeta": "Curated from verified inventory",
+    "featuredEmpty": "// Featured placements coming soon",
+    "popularKicker": "Popular",
+    "popularTitle": "<accent>Trending</accent> placements now",
+    "popularMeta": "Hand-picked by our team",
+    "viewAllMedia": "View all media",
+    "whyKicker": "Why us",
+    "whyTitle": "Why <accent>THINKAD</accent>?",
+    "whyMeta": "Don't spend on unverified inventory",
+    "whyCard1Title": "On-site verification",
+    "whyCard1Desc": "We inspect visibility, environment, and footfall in person—documented with photos and field reports.",
+    "whyCard1Highlight": "100% site visits",
+    "whyCard2Title": "Performance signals",
+    "whyCard2Desc": "Cumulative metrics—not gut feel—so you can forecast reach and plan with confidence.",
+    "whyCard2Highlight": "Data-driven",
+    "whyCard3Title": "End-to-end execution",
+    "whyCard3Desc": "Quote, contract, production, monitoring, and reporting in one accountable team.",
+    "whyCard3Highlight": "One-stop ops",
+    "testimonialsKicker": "Testimonials",
+    "testimonialsTitle": "What our <accent>clients</accent> say",
+    "testimonialsMeta": "Stories from brand partners",
+    "communityKicker": "Community",
+    "communityTitle": "Connect with people across <accent>OOH</accent>",
+    "communityMeta": "OOH industry network",
+    "communityLead": "Where advertisers, media owners, and agencies meet for OOH in Korea.",
+    "communityEmpty": "// Community posts coming soon",
+    "communityViewAll": "View full community",
+    "communityJoin": "Join as a member",
+    "carouselImpressions": "Est. impressions",
+    "carouselVisibility": "Visibility",
+    "carouselRegion": "Region",
+    "carouselType": "Type",
+    "carouselViewDetails": "View details",
+    "carouselPreview": "Preview",
+    "carouselFooter": "// Verified signals",
+    "carouselPrev": "Previous",
+    "carouselNext": "Next",
+    "ctaKicker": "Get started",
+    "exploreMediaFirst": "Explore media first",
+    "ctaFooter": "// Verified inventory · Plans aligned to your budget",
+    "floatingTitle": "Launch your campaign on verified media",
+    "floatingSub": "// Quote through execution, one team",
+    "floatingCta": "Contact us",
+    "heroMapStatVerified": "Verified media",
+    "heroMapStatPartners": "Partners",
+    "heroMapStatResponse": "Response"
   }
 }

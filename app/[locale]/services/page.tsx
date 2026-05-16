@@ -113,7 +113,7 @@ export default async function ServicesPage({ params }: Props) {
             number="01"
             kicker="Services"
             title={<span className="tkad-home-accent-text">{t("pillarsTitle")}</span>}
-            meta={isKo ? "strategy · planning · execution" : "strategy · planning · execution"}
+            meta={t("pillarsMeta")}
           />
         </ScrollAnimate>
         <div className="grid gap-5 md:grid-cols-3">

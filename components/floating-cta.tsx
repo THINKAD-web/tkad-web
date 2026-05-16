@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
-export function FloatingCta({ isKo }: { isKo: boolean }) {
+export function FloatingCta() {
+  const t = useTranslations("homePage");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -27,17 +29,17 @@ export function FloatingCta({ isKo }: { isKo: boolean }) {
         <div className="tkad-home-floating-cta flex items-center justify-between gap-3 rounded-[22px] bg-white/5 px-4 py-3 backdrop-blur tkad-neon-border tkad-neon-glow">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-white">
-              {isKo ? "검증된 광고매체로 캠페인을 시작하세요" : "Start with verified media"}
+              {t("floatingTitle")}
             </p>
             <p className="mt-0.5 hidden truncate font-mono text-[11px] uppercase tracking-[0.2em] text-white/55 sm:block">
-              {isKo ? "// 견적·집행까지 원스톱" : "// Quote to execution, one-stop"}
+              {t("floatingSub")}
             </p>
           </div>
           <Link
             href="/contact"
             className="tkad-neon-cta inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-black text-white transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
           >
-            {isKo ? "상담 신청" : "Contact"}
+            {t("floatingCta")}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

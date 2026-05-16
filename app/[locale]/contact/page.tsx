@@ -16,8 +16,6 @@ export default async function ContactPage({
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "contact" });
-  const isKo = locale === "ko";
-
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon">
@@ -36,12 +34,10 @@ export default async function ContactPage({
               <div className="flex flex-col items-center gap-3">
                 <span className="tkad-neon-border rounded-2xl bg-white/5 px-4 py-2 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white/78 backdrop-blur">
                   <span className="tkad-home-accent-text">[ Contact ]</span>
-                  <span className="text-white/55">
-                    {isKo ? " / 문의하기" : " / Contact"}
-                  </span>
+                  <span className="text-white/55">{t("heroChipSuffix")}</span>
                 </span>
                 <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-                  {isKo ? "// 무료 상담 신청" : "// Request a free consultation"}
+                  {t("heroKicker")}
                 </p>
               </div>
 
@@ -57,14 +53,14 @@ export default async function ContactPage({
                   href="/quote"
                   className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
                 >
-                  {isKo ? "바로 견적 요청" : "Request a quote"}
+                  {t("heroCtaQuote")}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
                 <Link
                   href="/media"
                   className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
                 >
-                  {isKo ? "매체 먼저 보기" : "Explore media"}
+                  {t("heroCtaMedia")}
                   <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
                 </Link>
               </div>
