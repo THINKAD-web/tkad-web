@@ -10,13 +10,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const title = isKo ? "웨비나 & OOH 아카데미" : "Webinars & OOH Academy";
+  const title = isKo ? "OOH 광고 아카데미" : "OOH advertising academy";
   const description = isKo
-    ? "OOH 기초 강의, 캠페인 전략 웨비나, PDF·PPT·영상 자료와 웨비나 등록을 한곳에서 제공합니다."
-    : "OOH fundamentals, strategy webinars, PDFs, slides, video, and registration in one place.";
+    ? "옥외광고 기초, 매체 선정, 예산·집행 가이드. 광고 초보도 따라 할 수 있는 THINKAD 교육 허브입니다."
+    : "OOH basics, media selection, budget and execution guides for first-time advertisers.";
   const ogTitle = isKo
-    ? "THINKAD OOH 아카데미 & 웨비나"
-    : "THINKAD OOH Academy & webinars";
+    ? "THINKAD OOH 아카데미"
+    : "THINKAD OOH Academy";
   return {
     title,
     description,

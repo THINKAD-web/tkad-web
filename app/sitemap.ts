@@ -162,6 +162,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  let academyPart: MetadataRoute.Sitemap = [];
+  if (isDatabaseConfigured()) {
+    try {
+      const db = getPrisma();
+      const articles = await db.academyArticle.findMany({
+        where: { published: true },
+        select: { slug: true, publishedAt: true, updatedAt: true },
+        orderBy: { publishedAt: "desc" },
+        take: 500,
+      });
+      academyPart = articles.map((a) =>
+        sitemapEntry(
+          `/academy/${a.slug}`,
+          a.updatedAt ?? a.publishedAt ?? buildTime,
+        ),
+      );
+    } catch {
+      // academy fetch 실패
+    }
+  }
+  if (academyPart.length === 0) {
+    academyPart = DEMO_ACADEMY_ARTICLES.map((a) =>
+      sitemapEntry(
+        `/academy/${a.slug}`,
+        a.updatedAt ?? a.publishedAt ?? buildTime,
+      ),
+    );
+  }
+
   // ── Guides — 비-draft 만 포함
   const guidePart: MetadataRoute.Sitemap = listGuideMeta()
     .filter((g) => !g.draft)

@@ -1,5 +1,9 @@
 import "dotenv/config";
-import { PrismaClient, ReportCategory } from "@prisma/client";
+import {
+  AcademyArticleCategory,
+  PrismaClient,
+  ReportCategory,
+} from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { randomBytes, scryptSync } from "crypto";
@@ -298,6 +302,61 @@ QR·랜딩·검색량·매장 유입 등 간접 지표를 사전에 설계해 �
     });
     console.log(`Report seed: ${r.slug}`);
   }
+
+  // --- OOH Academy articles (/[locale]/academy) ---
+  const academySeeds = [
+    {
+      slug: "what-is-ooh",
+      title: "옥외광고(OOH)란?",
+      category: AcademyArticleCategory.BASICS,
+      tags: ["기초", "OOH"],
+      summary: "옥외광고 정의와 디지털 광고와의 차이.",
+      content: "## 옥외광고란\n\nOOH는 동선에서 접하는 옥외 매체입니다.",
+    },
+    {
+      slug: "industry-media-selection-guide",
+      title: "업종별 추천 매체 유형",
+      category: AcademyArticleCategory.MEDIA_GUIDE,
+      tags: ["매체선정"],
+      summary: "업종별 OOH 포맷 가이드.",
+      content: "## F&B\n\n역세권 미디어폴이 효과적입니다.",
+    },
+    {
+      slug: "budget-tier-media-mix",
+      title: "예산 규모별 추천 전략",
+      category: AcademyArticleCategory.BUDGET,
+      tags: ["예산"],
+      summary: "예산별 매체 믹스.",
+      content: "## 1천만 원\n\n중소형 믹스가 효율적입니다.",
+    },
+  ] as const;
+
+  for (const a of academySeeds) {
+    await prisma.academyArticle.upsert({
+      where: { slug: a.slug },
+      create: {
+        slug: a.slug,
+        title: a.title,
+        summary: a.summary,
+        content: a.content,
+        category: a.category,
+        tags: [...a.tags],
+        published: true,
+        publishedAt,
+      },
+      update: {
+        title: a.title,
+        summary: a.summary,
+        content: a.content,
+        category: a.category,
+        tags: [...a.tags],
+        published: true,
+        publishedAt,
+      },
+    });
+    console.log(`Academy article seed: ${a.slug}`);
+  }
+
 
   console.log("\nSeed completed!");
   await prisma.$disconnect();

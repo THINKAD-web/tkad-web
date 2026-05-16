@@ -6,7 +6,6 @@ import {
 } from "@/lib/media-seo";
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
-import { CONTACT_EMAIL } from "@/lib/constants";
 
 /** 푸터·SNS와 동일 (Organization sameAs / E-E-A-T) */
 const INSTAGRAM_THINKAD = "https://www.instagram.com/thinkad_korea" as const;
@@ -45,7 +44,7 @@ export function buildStructuredDataGraph(locale: string) {
           {
             "@type": "ContactPoint",
             telephone: "+82-2-515-2772",
-            email: CONTACT_EMAIL,
+            email: "sales@tkad.co.kr",
             contactType: "customer service",
             areaServed: "KR",
             availableLanguage: ["Korean", "English"],
@@ -70,7 +69,7 @@ export function buildStructuredDataGraph(locale: string) {
         image: `${siteUrl}/pwa-icon/512`,
         url: siteUrl,
         telephone: "+82-2-515-2772",
-        email: CONTACT_EMAIL,
+        email: "sales@tkad.co.kr",
         address: {
           "@type": "PostalAddress",
           streetAddress: "뚝섬로17가길 48 성수에이원지식산업센터 1102호",
@@ -253,6 +252,69 @@ export function buildInsightArticleJsonLd(
     }));
   }
   return data;
+}
+
+/** Academy article (/[locale]/academy/[slug]) */
+export function buildAcademyArticleJsonLd(
+  article: {
+    title: string;
+    summary: string;
+    slug: string;
+    publishedIso: string;
+    thumbnail?: string | null;
+  },
+  locale: string,
+): Record<string, unknown> {
+  const url = `${siteUrl}/${locale}/academy/${article.slug}`;
+  const data: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${url}#article`,
+    headline: article.title.slice(0, 110),
+    description: article.summary.slice(0, 280),
+    url,
+    datePublished: article.publishedIso,
+    dateModified: article.publishedIso,
+    inLanguage: locale === "ko" ? "ko-KR" : "en-US",
+    author: { "@id": ORG_ID },
+    publisher: { "@id": ORG_ID },
+    mainEntityOfPage: url,
+  };
+  if (article.thumbnail?.trim()) {
+    data.image = article.thumbnail;
+  }
+  return data;
+}
+
+export function buildAcademyBreadcrumbJsonLd(
+  article: { title: string; slug: string },
+  locale: string,
+): Record<string, unknown> {
+  const isKo = locale === "ko";
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: isKo ? "홈" : "Home",
+        item: `${siteUrl}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: isKo ? "OOH 아카데미" : "OOH Academy",
+        item: `${siteUrl}/${locale}/academy`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: article.title.slice(0, 110),
+        item: `${siteUrl}/${locale}/academy/${article.slug}`,
+      },
+    ],
+  };
 }
 
 export function buildInsightBreadcrumbJsonLd(
