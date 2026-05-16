@@ -1,3 +1,4 @@
+import { buildMediaCompareHref } from "@/lib/compare-href";
 import type { Metadata } from "next";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
@@ -166,7 +167,7 @@ export default async function MediaDetailPage({ params }: Props) {
   const performanceMetrics = resolvePerformanceMetrics(media);
   const compareHref =
     similar.length > 0
-      ? `/compare?ids=${media.id},${similar[0].id}`
+      ? buildMediaCompareHref([media.id, similar[0].id])
       : "/media";
 
   const heroTags = media.keywordFilter
@@ -708,11 +709,6 @@ export default async function MediaDetailPage({ params }: Props) {
             />
           </div>
 
-          <MediaAvailabilityCalendar
-            mediaId={media.id}
-            mediaName={isKo ? media.name : (media.nameEn || media.name)}
-          />
-
           <section
             aria-labelledby="media-detail-description-heading"
             className="mt-12 border-t-2 border-border py-12"
@@ -847,11 +843,6 @@ export default async function MediaDetailPage({ params }: Props) {
           />
         </div>
       </section>
-
-          <MediaAvailabilityCalendar
-            mediaId={media.id}
-            mediaName={isKo ? media.name : (media.nameEn || media.name)}
-          />
 
           <MediaDetailStickyCta media={media} compareHref={compareHref} />
         </div>

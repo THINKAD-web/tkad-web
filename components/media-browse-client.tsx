@@ -21,6 +21,7 @@ import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
 import { BtnBlock } from "@/components/brutalist";
+import { useToast } from "@/components/toast-provider";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -118,6 +119,7 @@ export default function MediaBrowseClient({
   // TODO: dev server restart if needed (after large UI changes)
   const t = useTranslations();
   const tMedia = useTranslations("media");
+  const { toast } = useToast();
   const locale = useLocale();
   const isKo = locale === "ko";
   const searchParams = useSearchParams();
@@ -438,14 +440,20 @@ export default function MediaBrowseClient({
     selectAllInCategory,
   };
 
-  const toggleCompare = useCallback((media: MediaItem) => {
-    setCompareItems((prev) => {
-      const exists = prev.find((m) => m.id === media.id);
-      if (exists) return prev.filter((m) => m.id !== media.id);
-      if (prev.length >= COMPARE_MAX_ITEMS) return prev;
-      return [...prev, media];
-    });
-  }, []);
+  const toggleCompare = useCallback(
+    (media: MediaItem) => {
+      setCompareItems((prev) => {
+        const exists = prev.find((m) => m.id === media.id);
+        if (exists) return prev.filter((m) => m.id !== media.id);
+        if (prev.length >= COMPARE_MAX_ITEMS) {
+          toast("warning", tMedia("compareMaxReached", { max: COMPARE_MAX_ITEMS }));
+          return prev;
+        }
+        return [...prev, media];
+      });
+    },
+    [toast, tMedia],
+  );
 
   const addManyToCompare = useCallback((items: MediaItem[]) => {
     setCompareItems((prev) => {
@@ -1004,7 +1012,7 @@ export default function MediaBrowseClient({
                               e.stopPropagation();
                             }}
                             onKeyDown={(e) => e.stopPropagation()}
-                            title={t("media.compareToggleAria")}
+                            title={t("media.compareAddLabel")}
                           >
                             <input
                               type="checkbox"
@@ -1015,9 +1023,10 @@ export default function MediaBrowseClient({
                                 (!isInCompare(media.id) &&
                                   compareItems.length >= COMPARE_MAX_ITEMS)
                               }
-                              aria-label={t("media.compareToggleAria")}
+                              aria-label={t("media.compareAddLabel")}
                               className="h-3.5 w-3.5 accent-cta sm:h-4 sm:w-4"
                             />
+                            <span className="sr-only">{t("media.compareAddLabel")}</span>
                           </label>
                         }
                       />

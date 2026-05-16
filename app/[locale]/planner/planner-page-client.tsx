@@ -26,6 +26,7 @@ import {
   ArrowRight,
   MessageCircle,
 } from "lucide-react";
+import { buildMediaCompareHref } from "@/lib/compare-href";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -348,7 +349,7 @@ export default function PlannerPageClient({
   const compareHref = useMemo(() => {
     const ids = Array.from(campaignMediaIds).slice(0, COMPARE_MAX_ITEMS);
     const q = ids.join(",");
-    return q ? `/compare?ids=${q}` : "/compare";
+    return q ? buildMediaCompareHref(q.split(",")) : "/media/compare";
   }, [campaignMediaIds]);
 
   const applyPreset = useCallback(

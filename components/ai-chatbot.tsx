@@ -18,6 +18,7 @@ import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 import { cn } from "@/lib/utils";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { buildMediaCompareHref } from "@/lib/compare-href";
 import {
   getCompareCartEntries,
   setCompareCartEntries,
@@ -443,7 +444,7 @@ export default function AiChatbot() {
                       </BtnBlock>
                       {compareEntries.length >= 2 ? (
                         <BtnBlock
-                          href={`/compare?ids=${compareEntries.map((x) => x.id).join(",")}`}
+                          href={buildMediaCompareHref(compareEntries.map((x) => x.id))}
                           variant="dark"
                           size="sm"
                           className="-ml-2 flex-1 rounded-[18px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-all hover:-translate-y-0.5 hover:opacity-95"

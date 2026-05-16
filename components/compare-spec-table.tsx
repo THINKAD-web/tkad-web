@@ -1,8 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ShieldCheck } from "lucide-react";
+import { BtnBlock } from "@/components/brutalist";
 import { Link } from "@/i18n/navigation";
+import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
@@ -75,6 +77,22 @@ export function CompareSpecTable({
   const rows: { key: string; label: string; cell: (m: MediaItem) => string; numVal?: (m: MediaItem) => number | null; better?: "higher" | "lower" }[] =
     [
       {
+        key: "location",
+        label: t("compareRowLocation"),
+        cell: (m) => {
+          const loc = formatMediaLocationShort(m, isKo);
+          return loc.trim().length > 0 ? loc : "—";
+        },
+      },
+      {
+        key: "type",
+        label: t("compareRowType"),
+        cell: (m) => {
+          const tl = typeLabels[m.type];
+          return isKo ? (tl?.ko ?? m.type) : (tl?.en ?? m.type);
+        },
+      },
+      {
         key: "price",
         label: t("compareRowPrice"),
         cell: (m) =>
@@ -131,6 +149,12 @@ export function CompareSpecTable({
             : "—",
         numVal: (m) => m.visibilityScore ?? null,
         better: "higher",
+      },
+      {
+        key: "verified",
+        label: t("compareRowVerified"),
+        cell: (m) =>
+          m.isVerified ? t("compareVerifiedYes") : t("compareVerifiedNo"),
       },
       {
         key: "targetAge",
@@ -265,9 +289,18 @@ export function CompareSpecTable({
                         >
                           {isKo ? m.name : m.nameEn || m.name}
                         </Link>
+                        <p className="mt-1 line-clamp-1 text-[10px] text-muted-foreground">
+                          {formatMediaLocationShort(m, isKo)}
+                        </p>
                         <p className="mt-1 font-mono text-[10px] font-bold tabular-nums leading-tight text-accent sm:text-[11px]">
                           {formatMediaPriceWonWithSymbol(m.price, locale)}
                         </p>
+                        {m.isVerified ? (
+                          <span className="mt-1 inline-flex items-center gap-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.12em] text-accent">
+                            <ShieldCheck className="h-3 w-3" aria-hidden />
+                            Verified
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                     <Link
@@ -351,6 +384,31 @@ export function CompareSpecTable({
               );
             })}
           </tbody>
+          <tfoot>
+            <tr className="bg-muted/80">
+              <th
+                scope="row"
+                className="sticky left-0 z-10 border-t-2 border-r-2 border-border bg-muted px-2 py-3 text-left font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground sm:px-3"
+              >
+                {t("compareRowInquiry")}
+              </th>
+              {items.map((m) => (
+                <td
+                  key={`inquiry-${m.id}`}
+                  className="border-t-2 border-border px-2 py-3 sm:px-3"
+                >
+                  <BtnBlock
+                    href={`/contact?media=${encodeURIComponent(m.id)}&mediaName=${encodeURIComponent(isKo ? m.name : m.nameEn || m.name)}`}
+                    variant="accent"
+                    size="sm"
+                    className="w-full min-h-10 justify-center font-mono text-[9px] uppercase tracking-[0.16em]"
+                  >
+                    {t("compareInquiryCta")}
+                  </BtnBlock>
+                </td>
+              ))}
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>

@@ -15,6 +15,7 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { CompareSpecTable } from "@/components/compare-spec-table";
+import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import {
   MEDIA_CATALOG_GRID_CLASS,
   MEDIA_CATALOG_COMPACT_GRID_CLASS,
@@ -40,7 +41,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
     [],
   );
 
-  const visibleItems = items;
+  const visibleItems = items.slice(0, COMPARE_MAX_ITEMS);
 
   const handleComparePdfDownload = useCallback(async () => {
     const el = comparePdfRef.current;
@@ -153,8 +154,8 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
             </div>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
               {isKo
-                ? "선택한 매체를 같은 카드 톤으로 보고, 표에서 수치를 나란히 비교한 뒤 견적·PDF·이미지 저장으로 이어갈 수 있습니다."
-                : "Same cards as Media Search, a spec table for side-by-side metrics, then quote, PDF, or image export."}
+                ? "최대 3개 매체를 카드·표로 나란히 비교합니다. 모바일에서는 가로 스크롤로 지표를 확인하세요."
+                : "Compare up to 3 placements side by side. Scroll the spec table horizontally on mobile."}
             </p>
           </div>
         </section>

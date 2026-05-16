@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { BtnBlock } from "@/components/brutalist";
 import { FloatingSelectionBar } from "@/components/floating-selection-bar";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { buildMediaCompareHref } from "@/lib/compare-href";
 import type { MediaItem } from "@/lib/media-data";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,7 @@ export default function CompareBar({ items, locale, onClear }: Props) {
   /* eslint-enable react-hooks/refs */
 
   const ids = displayItems.map((m) => m.id).join(",");
-  const compareHref = `/compare?ids=${displayItems.map((m) => m.id).join(",")}`;
+  const compareHref = buildMediaCompareHref(displayItems.map((m) => m.id));
   const one = displayItems[0];
   const onlyPo =
     displayItems.length === 1 && (one?.priceOptions?.length ?? 0) > 0
@@ -41,6 +42,10 @@ export default function CompareBar({ items, locale, onClear }: Props) {
 
   const count = displayItems.length;
   const canCompare = count >= 2;
+  const compareCtaLabel =
+    count >= 2
+      ? t("compareFloatingCompareGo", { count })
+      : t("compareFloatingCompare");
 
   const blockClass =
     "w-full min-h-12 min-w-0 justify-center px-2 text-[11px] sm:min-h-10 sm:px-4 sm:text-[12px]";
@@ -89,7 +94,7 @@ export default function CompareBar({ items, locale, onClear }: Props) {
               size="sm"
               className={blockClass}
             >
-              {t("compareFloatingCompare")}
+              {compareCtaLabel}
             </BtnBlock>
           ) : (
             <BtnBlock
