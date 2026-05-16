@@ -315,6 +315,8 @@ model Campaign {
   endDate       DateTime?       @map("end_date")
   notes         String?
   accountId     String?         @map("account_id")
+  completionReportUrl         String?   @map("completion_report_url")
+  completionReportGeneratedAt DateTime? @map("completion_report_generated_at")
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
 

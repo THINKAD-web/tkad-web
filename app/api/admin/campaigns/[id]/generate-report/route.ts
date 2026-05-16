@@ -1,16 +1,13 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
-import { buildCampaignCompletionReportPdfBuffer } from "@/lib/campaign-completion-report";
+import { generateCampaignReport } from "@/lib/campaign-report-generate";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120;
 
 type Params = { params: Promise<{ id: string }> };
 
-/**
- * #5: "[클라이언트명]_THINKAD_옥외광고_성과보고서_YYYYMM.pdf"
- * 클라이언트명 비어있으면 "클라이언트미지정", 파일명 금지 문자 제거.
- */
 function buildClientReportFilename(clientCompany: string | null | undefined): string {
   const raw = (clientCompany ?? "").trim() || "클라이언트미지정";
   const safe = raw.replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, "_");
@@ -25,15 +22,37 @@ function asciiFallbackFilename(campaignId: string): string {
   return `THINKAD-OOH-Report-${campaignId.slice(0, 8)}-${yyyymm}.pdf`;
 }
 
+/**
+ * 레거시: PDF 바이너리 직접 다운로드 (query 없음)
+ * ?mode=cdn — JSON { pdfUrl, ... } (Bunny 업로드 + DB 저장)
+ * ?mode=cdn&sendEmail=1 — 업로드 후 광고주 메일 발송
+ */
 export async function POST(request: NextRequest, { params }: Params) {
   const deny = assertAdminDb(request);
   if (deny) return deny;
   const { id } = await params;
+  const mode = request.nextUrl.searchParams.get("mode");
+  const sendEmail = request.nextUrl.searchParams.get("sendEmail") === "1";
+
+  if (mode === "cdn") {
+    try {
+      const result = await generateCampaignReport(id, { sendEmail });
+      return json(result);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes("Campaign not found")) {
+        return json({ error: msg }, 404);
+      }
+      console.error("[generate-report cdn]", e);
+      return json({ error: msg }, 500);
+    }
+  }
 
   try {
+    const { buildCampaignCompletionReportPdfBuffer } = await import(
+      "@/lib/campaign-completion-report"
+    );
     const buf = await buildCampaignCompletionReportPdfBuffer(id);
-    // 클라이언트명 조회 (파일명용) — buildCampaignCompletionReportPdfBuffer 가
-    // 이미 caller-side 에서 fetch 하지만 여기서 다시 fetch 비용은 미미.
     const db = getPrisma();
     const c = await db.campaign.findUnique({
       where: { id },
@@ -52,9 +71,6 @@ export async function POST(request: NextRequest, { params }: Params) {
     const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes("not found") || msg.includes("Campaign not found")) {
       return json({ error: msg }, 404);
-    }
-    if (msg.includes("ANTHROPIC_API_KEY")) {
-      return json({ error: "AI 미설정: ANTHROPIC_API_KEY" }, 503);
     }
     console.error("[generate-report]", e);
     return json({ error: msg }, 500);

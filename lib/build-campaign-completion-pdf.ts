@@ -9,13 +9,17 @@ import {
   computeCampaignTotalAmount,
   type CampaignKpiBooking,
 } from "@/lib/campaign-kpis";
+import {
+  applyCoverBrandExtras,
+  drawReportExtrasInBody,
+  enrichProofPhotosWithImages,
+} from "@/lib/campaign-report-pdf-extras";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
 import {
   formatCampaignStatusKo,
   formatFinancialDocKindKo,
   formatFinancialDocStatusKo,
 } from "@/lib/campaign-report-labels";
-import { CONTACT_EMAIL } from "@/lib/constants";
 
 export type CompletionPdfSchedule = {
   title: string;
@@ -27,6 +31,7 @@ export type CompletionPdfSchedule = {
 export type CompletionPdfProof = {
   imageUrl: string;
   caption: string | null;
+  imageData?: { dataUrl: string; format: "JPEG" | "PNG" } | null;
 };
 
 export type CompletionPdfFinancial = {
@@ -58,11 +63,22 @@ export type CompletionPdfMediaBooking = {
   } | null;
 };
 
+export type CampaignReportMetricsOverride = {
+  totalImpressions?: number;
+  totalBudgetKrw?: number;
+  avgCpm?: number;
+  mediaCount?: number;
+  dailyImpressions?: number[];
+  weeklyImpressions?: number[];
+};
+
 export type BuildCampaignCompletionPdfParams = {
   campaignName: string;
+  brandDisplayName?: string;
   clientCompany: string;
   clientName: string;
   clientEmail: string;
+  accountManager?: string;
   status: string;
   notes: string | null;
   scheduleEvents: CompletionPdfSchedule[];
@@ -72,6 +88,8 @@ export type BuildCampaignCompletionPdfParams = {
   /** 캠페인 명시 기간 (mediaBookings/scheduleEvents 가 없을 때 표지/요약에 사용) */
   startDate?: Date | string | null;
   endDate?: Date | string | null;
+  metricsOverride?: CampaignReportMetricsOverride;
+  nextCampaignProposal?: string | null;
 };
 
 // ── 디자인 토큰 (검정 + 주황 #FF6600 통일) ──
@@ -277,15 +295,7 @@ function drawCoverPage(
     titleY += 12;
   }
 
-  // FOR · 클라이언트
-  doc.setFont("courier", "bold");
-  doc.setFontSize(11);
-  setColor(doc, "text", C_ACCENT);
-  doc.text(
-    `FOR · ${p.clientCompany || "—"}`,
-    MARGIN_X,
-    Math.max(titleY + 6, 130),
-  );
+  applyCoverBrandExtras(doc, fam, p, titleY);
 
   // 메타 4 컬럼 (하단)
   const metaY = 200;
@@ -335,7 +345,7 @@ function drawCoverPage(
   doc.setFontSize(8);
   setColor(doc, "text", [180, 180, 180]);
   doc.text(
-    `THINKAD · 02-515-2772 · ${CONTACT_EMAIL}`,
+    "THINKAD · 02-515-2772 · sales@tkad.co.kr",
     MARGIN_X,
     PAGE_H - 16,
   );
@@ -373,8 +383,18 @@ function drawExecutiveSummary(
     visibilityScore: b.visibilityScore ?? null,
   }));
   const stats = computeCampaignBaseStats(kpiBookings);
-  const totalAmount = computeCampaignTotalAmount(p.financialDocs);
+  const totalAmount =
+    p.metricsOverride?.totalBudgetKrw != null &&
+    p.metricsOverride.totalBudgetKrw > 0
+      ? p.metricsOverride.totalBudgetKrw
+      : computeCampaignTotalAmount(p.financialDocs);
   const plannerKpis = computeCampaignPlannerKpis(stats, totalAmount);
+  const ov = p.metricsOverride;
+  if (ov && stats) {
+    if (ov.mediaCount != null) stats.mediaCount = ov.mediaCount;
+    if (ov.totalImpressions != null && plannerKpis) plannerKpis.totalImp = ov.totalImpressions;
+    if (ov.avgCpm != null && plannerKpis) plannerKpis.blendedCpm = ov.avgCpm;
+  }
 
   // 한 줄 요약 (템플릿 — AI X)
   let y = 38;
@@ -1185,7 +1205,7 @@ function drawFooters(doc: jsPDF, fam: string) {
     doc.setFontSize(7.5);
     setColor(doc, "text", C_GRAY);
     doc.text(
-      `THINKAD · 02-515-2772 · ${CONTACT_EMAIL}`,
+      "THINKAD · 02-515-2772 · sales@tkad.co.kr",
       MARGIN_X,
       PAGE_H - 9,
     );
@@ -1205,6 +1225,10 @@ function drawFooters(doc: jsPDF, fam: string) {
 export async function createCampaignCompletionPdfDoc(
   p: BuildCampaignCompletionPdfParams,
 ): Promise<jsPDF> {
+  const enriched: BuildCampaignCompletionPdfParams = {
+    ...p,
+    proofPhotos: await enrichProofPhotosWithImages(p.proofPhotos),
+  };
   const { default: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const hasKrFont = await ensureKrFontForServerPdf(doc);
@@ -1213,15 +1237,15 @@ export async function createCampaignCompletionPdfDoc(
   // page 1: 표지 (총 페이지 수는 끝에서 갱신해야 정확하지만, 1+1+본문 추정으로 미리)
   // → 표지의 NN 부분은 estimate. 본문 페이지 추가 후 표지를 다시 그릴 수도 있으나
   //   시각적 영향이 크지 않아 finalize 단계에서 page 1 는 다시 그리지 않음.
-  drawCoverPage(doc, fam, hasKrFont, p, 0); // 0 → finalize 후 갱신
+  drawCoverPage(doc, fam, hasKrFont, enriched, 0); // 0 → finalize 후 갱신
 
   // page 2: Executive Summary
   doc.addPage();
-  drawExecutiveSummary(doc, fam, hasKrFont, p);
+  drawExecutiveSummary(doc, fam, hasKrFont, enriched);
 
   // page 3+: 본문
   doc.addPage();
-  drawBody(doc, fam, hasKrFont, p);
+  drawBody(doc, fam, hasKrFont, enriched);
 
   // 푸터 (page 2부터)
   drawFooters(doc, fam);

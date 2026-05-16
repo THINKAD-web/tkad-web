@@ -151,11 +151,16 @@ export default function AdminCampaignsPage() {
     endDate: string | null;
     budgetMin: number | null;
     budgetMax: number | null;
+    completionReportUrl?: string | null;
   } | null>(null);
   // 관리자 페이지에서는 선택 캠페인 확인이 핵심이므로 기본값을 "열림"으로 둡니다.
   const [showReportPreview, setShowReportPreview] = useState(true);
   const reportCaptureRef = useRef<HTMLDivElement>(null);
   const [reportPngBusy, setReportPngBusy] = useState(false);
+  const [reportGenBusy, setReportGenBusy] = useState(false);
+  const [sendReportEmail, setSendReportEmail] = useState(true);
+  const [storedReportUrl, setStoredReportUrl] = useState<string | null>(null);
+  const [reportGenMsg, setReportGenMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -222,6 +227,8 @@ export default function AdminCampaignsPage() {
         endDate?: string | Date | null;
         budgetMin?: number | null;
         budgetMax?: number | null;
+        completionReportUrl?: string | null;
+        completionReportGeneratedAt?: string | Date | null;
       };
       setReportCampaignMeta({
         name: campFull.name,
@@ -238,7 +245,9 @@ export default function AdminCampaignsPage() {
           : null,
         budgetMin: campFull.budgetMin ?? null,
         budgetMax: campFull.budgetMax ?? null,
+        completionReportUrl: campFull.completionReportUrl ?? null,
       });
+      setStoredReportUrl(campFull.completionReportUrl ?? null);
       setEvents(
         (c.scheduleEvents ?? []).map((x) => ({
           ...x,
@@ -567,6 +576,56 @@ export default function AdminCampaignsPage() {
       window.alert("네트워크 오류가 발생했습니다.");
     }
   };
+
+
+  const generateAndPublishReport = useCallback(async () => {
+    if (!selectedId) return;
+    setReportGenBusy(true);
+    setReportGenMsg(null);
+    try {
+      const res = await fetch("/api/reports/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          campaignId: selectedId,
+          brandName: reportCampaignMeta?.clientCompany,
+          period: {
+            start: reportCampaignMeta?.startDate?.slice(0, 10),
+            end: reportCampaignMeta?.endDate?.slice(0, 10),
+          },
+          sendEmail: sendReportEmail,
+        }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        data?: {
+          pdfUrl: string | null;
+          emailSent: boolean;
+          emailError?: string;
+          filename: string;
+        };
+        error?: { message?: string };
+      };
+      if (!res.ok || !data.data) {
+        throw new Error(
+          data.error?.message ?? (data as { error?: string }).error ?? "리포트 생성 실패",
+        );
+      }
+      if (data.data.pdfUrl) setStoredReportUrl(data.data.pdfUrl);
+      const mailNote = data.data.emailSent
+        ? " · 광고주 이메일 발송 완료"
+        : data.data.emailError
+          ? ` · 메일 실패: ${data.data.emailError}`
+          : sendReportEmail
+            ? " · 메일 미발송"
+            : "";
+      setReportGenMsg(`리포트 생성 완료${mailNote}`);
+    } catch (e) {
+      setReportGenMsg(e instanceof Error ? e.message : "리포트 생성 실패");
+    } finally {
+      setReportGenBusy(false);
+    }
+  }, [selectedId, reportCampaignMeta, sendReportEmail]);
 
   // (규칙) AI 기반 보고서 생성은 비활성화되었습니다.
 
@@ -953,7 +1012,7 @@ export default function AdminCampaignsPage() {
                       ? `/api/admin/campaigns/${selectedId}/completion-report`
                       : "#"
                   }
-                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-primary bg-primary px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-foreground hover:border-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-40 disabled:cursor-not-allowed"
                   target="_blank"
                   rel="noreferrer"
                   aria-disabled={!selectedId}
@@ -962,8 +1021,30 @@ export default function AdminCampaignsPage() {
                   }}
                 >
                   <FileDown className="h-3.5 w-3.5" />
-                  완료 보고서 PDF
+                  PDF 다운로드
                 </a>
+                <button
+                  type="button"
+                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-primary bg-primary px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-foreground hover:border-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={!selectedId || reportGenBusy}
+                  onClick={() => void generateAndPublishReport()}
+                >
+                  {reportGenBusy ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <FileText className="h-3.5 w-3.5" />
+                  )}
+                  리포트 생성
+                </button>
+                <label className="-ml-[2px] inline-flex cursor-pointer items-center gap-2 border-2 border-border bg-card px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={sendReportEmail}
+                    onChange={(e) => setSendReportEmail(e.target.checked)}
+                    className="h-3.5 w-3.5 accent-[#FF6600]"
+                  />
+                  생성 후 메일
+                </label>
               </div>
               <p className="font-mono text-[10px] tracking-tight text-muted-foreground">
                 {`// `}서버 PDF(완료 보고서)는 KPI·패턴·매체·일정·문서를 반영합니다. 이미지 저장은 화면 캡처용입니다.
