@@ -76,6 +76,13 @@ export function HeaderBrutal({ contentStatus }: Props) {
         { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색" },
         { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천" },
         { href: "/planner", label: t("nav.planner"), desc: "예산·기간별 플래닝" },
+        {
+          href: "/creatives",
+          label: isKo ? "크리에이티브" : "Creatives",
+          desc: isKo
+            ? "소재 업로드·라이브러리·DOOH 플레이리스트"
+            : "Upload, library & DOOH playlists",
+        },
       ],
     },
     {

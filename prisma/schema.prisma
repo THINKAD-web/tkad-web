@@ -87,85 +87,99 @@ enum OohContractStatus {
 }
 
 model Media {
-  id        String   @id @default(cuid())
-  name      String
-  nameEn    String?  @map("name_en")
-  location  String
-  region    String
+  id           String           @id @default(cuid())
+  name         String
+  nameEn       String?          @map("name_en")
+  location     String
+  region       String
   /// Catalog code: `digital` | `static` | `mobile` (OOH 유형)
-  type      String
-  price     Int
-  pricePeriod MediaPricePeriod @default(month) @map("price_period")
+  type         String
+  price        Int
+  pricePeriod  MediaPricePeriod @default(month) @map("price_period")
   /// 가격 옵션 (JSON 배열). 예: [{"label":"20초 기준","price":30000000,"period":"month"},{"label":"15초 기준","price":25000000,"period":"month"}]
-  priceOptions Json? @map("price_options")
-  image     String?
-  width     String?
-  height    String?
+  priceOptions Json?            @map("price_options")
+  image        String?
+  width        String?
+  height       String?
 
-  description      String?
-  subCategory      String?  @map("sub_category")
-  tags             String[] @default([])
-  district         String?
-  city             String?
+  description           String?
+  subCategory           String?   @map("sub_category")
+  tags                  String[]  @default([])
+  district              String?
+  city                  String?
   /// 이동형(`type=mobile`) 매체 서비스 구역 — 행정구역 5자리 코드 배열 (전국 시·군·구, 예: 서울 강남 `11680`). 공개 지도 폴리곤에 사용.
-  coverageDistrictCodes String[] @default([]) @map("coverage_district_codes")
-  latitude         Float?
-  longitude        Float?
-  priceNote        String?  @map("price_note")
-  widthM           Float?   @map("width_m")
-  heightM          Float?   @map("height_m")
-  resolution       String?
-  operatingHours   String?  @map("operating_hours")
-  dailyFootfall    Int?     @map("daily_footfall")
-  weekdayFootfall  Int?     @map("weekday_footfall")
-  targetAge        String?  @map("target_age")
-  impressions      Int?
-  reach            Float?
-  frequency        Float?
-  cpm              Float?
-  engagementRate   Float?   @map("engagement_rate")
-  visibilityScore  Int      @default(0) @map("visibility_score")
+  coverageDistrictCodes String[]  @default([]) @map("coverage_district_codes")
+  latitude              Float?
+  longitude             Float?
+  priceNote             String?   @map("price_note")
+  widthM                Float?    @map("width_m")
+  heightM               Float?    @map("height_m")
+  resolution            String?
+  operatingHours        String?   @map("operating_hours")
+  dailyFootfall         Int?      @map("daily_footfall")
+  weekdayFootfall       Int?      @map("weekday_footfall")
+  targetAge             String?   @map("target_age")
+  impressions           Int?
+  reach                 Float?
+  frequency             Float?
+  cpm                   Float?
+  engagementRate        Float?    @map("engagement_rate")
+  visibilityScore       Int       @default(0) @map("visibility_score")
   /// 설치 연도 (옵션, 공개 검색 고급 필터)
-  installYear      Int?     @map("install_year")
-  effectMemo       String?  @map("effect_memo")
+  installYear           Int?      @map("install_year")
+  effectMemo            String?   @map("effect_memo")
   /// 시간대(24)·요일(7)·월(12) 유동인구 패턴. nullable — 미입력 시 추정 사용.
   /// shape: { hourly: number[24], weekly: number[7], monthly: number[12], updatedAt?: ISO }
-  trafficPattern   Json?    @map("traffic_pattern")
-  extractedImages  String[] @default([]) @map("extracted_images")
-  /** 광고주 이력 (쉼표 구분). 비어 있으면 집행 이력(MediaAdvertiserExecution)에서 요약 */
-  pastAdvertisers  String?  @map("past_advertisers")
-  /** 주변 시설 (쉼표 구분). 자동 수집·수동 입력 */
-  nearbyFacilities String?  @map("nearby_facilities")
-  /** 가까운 지하철역 목록(자동·수정) */
-  nearbyStations   String?  @map("nearby_stations")
-  /** 백화점·대학·관광 등 랜드마크 요약 */
-  nearbyLandmarks  String?  @map("nearby_landmarks")
-  /** 카카오 주소검색 등으로 좌표·행정구역이 확인된 경우 */
-  addressVerified  Boolean  @default(false) @map("address_verified")
-  /** 운영이 공개 카탈로그에 THINKAD Verified 리본을 붙일지 (관리자 수동) */
-  isVerified       Boolean  @default(false) @map("is_verified")
-  /** 주변 시설 등 자동 수집이 수행된 시각 */
-  autoPopulatedAt  DateTime? @map("auto_populated_at")
+  trafficPattern        Json?     @map("traffic_pattern")
+  extractedImages       String[]  @default([]) @map("extracted_images")
+  /**
+   * 광고주 이력 (쉼표 구분). 비어 있으면 집행 이력(MediaAdvertiserExecution)에서 요약
+   */
+  pastAdvertisers       String?   @map("past_advertisers")
+  /**
+   * 주변 시설 (쉼표 구분). 자동 수집·수동 입력
+   */
+  nearbyFacilities      String?   @map("nearby_facilities")
+  /**
+   * 가까운 지하철역 목록(자동·수정)
+   */
+  nearbyStations        String?   @map("nearby_stations")
+  /**
+   * 백화점·대학·관광 등 랜드마크 요약
+   */
+  nearbyLandmarks       String?   @map("nearby_landmarks")
+  /**
+   * 카카오 주소검색 등으로 좌표·행정구역이 확인된 경우
+   */
+  addressVerified       Boolean   @default(false) @map("address_verified")
+  /**
+   * 운영이 공개 카탈로그에 THINKAD Verified 리본을 붙일지 (관리자 수동)
+   */
+  isVerified            Boolean   @default(false) @map("is_verified")
+  /**
+   * 주변 시설 등 자동 수집이 수행된 시각
+   */
+  autoPopulatedAt       DateTime? @map("auto_populated_at")
 
-  availability MediaAvailability @default(available) @map("availability")
-  isActive     Boolean           @default(true) @map("is_active")
+  availability  MediaAvailability @default(available) @map("availability")
+  isActive      Boolean           @default(true) @map("is_active")
   /// 홈(`page.tsx`) 추천 영역 — `fetchHomeFeaturedMedia`가 `isFeatured=true` 우선 조회
-  isFeatured    Boolean @default(false) @map("is_featured")
+  isFeatured    Boolean           @default(false) @map("is_featured")
   /// 홈 추천 정렬: 오름차순, null은 뒤로
-  featuredOrder Int?    @map("featured_order")
+  featuredOrder Int?              @map("featured_order")
 
   /// 홈 인기 매체 영역 — `fetchHomePopularMedia`가 `isPopular=true` 우선 조회 (추천과 독립)
-  isPopular     Boolean @default(false) @map("is_popular")
+  isPopular    Boolean @default(false) @map("is_popular")
   /// 홈 인기 정렬: 오름차순, null은 뒤로
-  popularOrder  Int?    @map("popular_order")
+  popularOrder Int?    @map("popular_order")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  priceSnapshots        MediaPriceSnapshot[]
-  bookings              MediaBooking[]
-  instantBookings       Booking[]
-  advertiserExecutions  MediaAdvertiserExecution[]
+  priceSnapshots       MediaPriceSnapshot[]
+  bookings             MediaBooking[]
+  instantBookings      Booking[]
+  advertiserExecutions MediaAdvertiserExecution[]
 
   /// 네트워크 패키지 내 개별 지점과의 연결 (선택)
   networkLocations MediaNetworkLocation[]
@@ -189,32 +203,32 @@ model MediaPriceSnapshot {
 }
 
 model MediaBooking {
-  id                String              @id @default(cuid())
-  mediaId           String              @map("media_id")
-  title             String
-  startsAt          DateTime            @map("starts_at")
-  endsAt            DateTime            @map("ends_at")
+  id         String             @id @default(cuid())
+  mediaId    String             @map("media_id")
+  title      String
+  startsAt   DateTime           @map("starts_at")
+  endsAt     DateTime           @map("ends_at")
   /// 기본값 tentative — 운영자가 직접 만드는 슬롯은 가홀드부터.
   /// 광고주 자가 신청은 API 에서 명시적으로 requested 로 생성.
-  status            MediaBookingStatus  @default(tentative)
-  campaignId        String?             @map("campaign_id")
-  notes             String?
+  status     MediaBookingStatus @default(tentative)
+  campaignId String?            @map("campaign_id")
+  notes      String?
 
   /// 광고주 자가 신청 추적 — 가입 사용자
-  requestedByUserId String?             @map("requested_by_user_id")
+  requestedByUserId String?   @map("requested_by_user_id")
   /// 익명 신청 시 연락처 (가입 사용자면 User 테이블 참조 우선)
-  requesterName     String?             @map("requester_name")
-  requesterEmail    String?             @map("requester_email")
-  requesterPhone    String?             @map("requester_phone")
+  requesterName     String?   @map("requester_name")
+  requesterEmail    String?   @map("requester_email")
+  requesterPhone    String?   @map("requester_phone")
   /// 광고주가 입력한 희망 예산 (₩)
-  budgetWon         Int?                @map("budget_won")
+  budgetWon         Int?      @map("budget_won")
   /// 어드민이 status 결정한 시각 (requested → tentative/confirmed/cancelled)
-  decidedAt         DateTime?           @map("decided_at")
-  decidedByAdminId  String?             @map("decided_by_admin_id")
-  createdAt         DateTime            @default(now()) @map("created_at")
-  updatedAt         DateTime            @updatedAt       @map("updated_at")
+  decidedAt         DateTime? @map("decided_at")
+  decidedByAdminId  String?   @map("decided_by_admin_id")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  media       Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  media       Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   requestedBy User?     @relation("BookingRequester", fields: [requestedByUserId], references: [id], onDelete: SetNull)
 
@@ -286,14 +300,14 @@ model CrmNote {
 }
 
 model CrmFollowUp {
-  id               String    @id @default(cuid())
-  accountId        String    @map("account_id")
-  title            String
-  dueAt            DateTime  @map("due_at")
-  doneAt           DateTime? @map("done_at")
-  remindEmail      String?   @map("remind_email")
-  reminderSentAt   DateTime? @map("reminder_sent_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
+  id             String    @id @default(cuid())
+  accountId      String    @map("account_id")
+  title          String
+  dueAt          DateTime  @map("due_at")
+  doneAt         DateTime? @map("done_at")
+  remindEmail    String?   @map("remind_email")
+  reminderSentAt DateTime? @map("reminder_sent_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
 
   account CrmAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
@@ -303,35 +317,35 @@ model CrmFollowUp {
 }
 
 model Campaign {
-  id            String          @id @default(cuid())
-  name          String
-  clientCompany String          @map("client_company")
-  clientName    String          @map("client_name")
-  clientEmail   String          @map("client_email")
-  clientPhone   String?         @map("client_phone")
-  status        CampaignStatus  @default(proposal)
-  budgetMin     Int?            @map("budget_min")
-  budgetMax     Int?            @map("budget_max")
-  startDate     DateTime?       @map("start_date")
-  endDate       DateTime?       @map("end_date")
-  notes         String?
-  accountId     String?         @map("account_id")
+  id                String         @id @default(cuid())
+  name              String
+  clientCompany     String         @map("client_company")
+  clientName        String         @map("client_name")
+  clientEmail       String         @map("client_email")
+  clientPhone       String?        @map("client_phone")
+  status            CampaignStatus @default(proposal)
+  budgetMin         Int?           @map("budget_min")
+  budgetMax         Int?           @map("budget_max")
+  startDate         DateTime?      @map("start_date")
+  endDate           DateTime?      @map("end_date")
+  notes             String?
+  accountId         String?        @map("account_id")
   /// 광고주 셀프 대시보드 연결 (User.id)
-  ownerUserId   String?         @map("owner_user_id")
+  ownerUserId       String?        @map("owner_user_id")
   /// 완료 보고서 PDF 생성 시각 (광고주 알림용)
-  reportGeneratedAt DateTime?   @map("report_generated_at")
-  createdAt     DateTime        @default(now()) @map("created_at")
-  updatedAt     DateTime        @updatedAt @map("updated_at")
+  reportGeneratedAt DateTime?      @map("report_generated_at")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
 
-  account         CrmAccount?             @relation(fields: [accountId], references: [id], onDelete: SetNull)
-  ownerUser       User?                   @relation("CampaignOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
-  scheduleEvents  CampaignScheduleEvent[]
-  financialDocs   CampaignFinancialDoc[]
-  mediaBookings   MediaBooking[]
-  quoteRequests   QuoteRequest[]
-  proofPhotos     CampaignProofPhoto[]
-  successCase     SuccessCase?
-  oohQuote        OoHQuote?
+  account        CrmAccount?             @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  ownerUser      User?                   @relation("CampaignOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  scheduleEvents CampaignScheduleEvent[]
+  financialDocs  CampaignFinancialDoc[]
+  mediaBookings  MediaBooking[]
+  quoteRequests  QuoteRequest[]
+  proofPhotos    CampaignProofPhoto[]
+  successCase    SuccessCase?
+  oohQuote       OoHQuote?
 
   @@index([status])
   @@index([ownerUserId])
@@ -402,15 +416,15 @@ model QuoteTemplate {
 }
 
 model ContactInquiry {
-  id        String   @id @default(cuid())
-  company   String
-  name      String
-  phone     String
-  email     String?
+  id          String   @id @default(cuid())
+  company     String
+  name        String
+  phone       String
+  email       String?
   inquiryType String?  @map("inquiry_type")
-  budget    String?
-  message   String
-  createdAt DateTime @default(now()) @map("created_at")
+  budget      String?
+  message     String
+  createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("contact_inquiries")
 }
@@ -475,12 +489,12 @@ model OoHQuote {
   clientPhone   String? @map("client_phone")
   clientCompany String? @map("client_company")
 
-  mediaIds    String[] @map("media_ids")
-  totalAmount Int      @map("total_amount")
+  mediaIds    String[]  @map("media_ids")
+  totalAmount Int       @map("total_amount")
   period      String
-  periodKey   String?  @map("period_key")
-  budgetMin   Int?     @map("budget_min")
-  budgetMax   Int?     @map("budget_max")
+  periodKey   String?   @map("period_key")
+  budgetMin   Int?      @map("budget_min")
+  budgetMax   Int?      @map("budget_max")
   startDate   DateTime? @map("start_date")
   endDate     DateTime? @map("end_date")
 
@@ -491,21 +505,23 @@ model OoHQuote {
   paymentConfirmedAt  DateTime? @map("payment_confirmed_at")
   contractConfirmedAt DateTime? @map("contract_confirmed_at")
 
-  adminNote    String? @map("admin_note")
-  cancelReason String? @map("cancel_reason")
-  pdfTemplate  String  @default("default") @map("pdf_template")
-  locale       String  @default("ko")
+  adminNote      String?   @map("admin_note")
+  cancelReason   String?   @map("cancel_reason")
+  pdfTemplate    String    @default("default") @map("pdf_template")
+  locale         String    @default("ko")
   quotePdfSentAt DateTime? @map("quote_pdf_sent_at")
-  contractDocUrl String? @map("contract_doc_url")
-  invoiceDocUrl  String? @map("invoice_doc_url")
+  contractDocUrl String?   @map("contract_doc_url")
+  invoiceDocUrl  String?   @map("invoice_doc_url")
 
   campaignId String?   @unique @map("campaign_id")
   campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
 
-  quoteRequestId String?      @unique @map("quote_request_id")
+  quoteRequestId String?       @unique @map("quote_request_id")
   quoteRequest   QuoteRequest? @relation(fields: [quoteRequestId], references: [id], onDelete: SetNull)
 
-  /** 네트워크 매체 선택 시 [{ networkId, units, regions, lineTotal만원 }] */
+  /**
+   * 네트워크 매체 선택 시 [{ networkId, units, regions, lineTotal만원 }]
+   */
   networkSelections Json? @map("network_selections")
 
   oohContract OohContract?
@@ -527,27 +543,27 @@ model MediaNetwork {
   /// bus_shelter | apartment | subway_pillar | convenience_store | golf_course | highway_rest | subway_digital_square_pillar
   type        String
 
-  pricePerUnit   Int?    @map("price_per_unit")
-  pricePackage   Int?    @map("price_package")
-  priceNote      String? @map("price_note") @db.Text
-  minUnits       Int     @default(1) @map("min_units")
+  pricePerUnit Int?    @map("price_per_unit")
+  pricePackage Int?    @map("price_package")
+  priceNote    String? @map("price_note") @db.Text
+  minUnits     Int     @default(1) @map("min_units")
 
   totalLocations Int      @map("total_locations")
   regions        String[] @default([])
   city           String?
   district       String?
 
-  image         String?
-  galleryImages String[] @default([]) @map("gallery_images")
-  features      String?  @db.Text
+  image          String?
+  galleryImages  String[] @default([]) @map("gallery_images")
+  features       String?  @db.Text
   /// [{ "units": 100, "price": 5000 }, ...] 만원 단위
-  packageOptions Json?   @map("package_options")
+  packageOptions Json?    @map("package_options")
 
-  visibilityScore Int?    @map("visibility_score")
-  dailyFootfall   Int?    @map("daily_footfall")
-  targetAge       String? @map("target_age")
-  effectMemo      String? @map("effect_memo") @db.Text
-  operatingHours  String? @map("operating_hours")
+  visibilityScore Int?     @map("visibility_score")
+  dailyFootfall   Int?     @map("daily_footfall")
+  targetAge       String?  @map("target_age")
+  effectMemo      String?  @map("effect_memo") @db.Text
+  operatingHours  String?  @map("operating_hours")
   tags            String[] @default([])
 
   isActive  Boolean  @default(true) @map("is_active")
@@ -565,7 +581,7 @@ model MediaNetworkLocation {
   networkId String       @map("network_id")
   network   MediaNetwork @relation(fields: [networkId], references: [id], onDelete: Cascade)
 
-   /// 연결된 단일 매체 (선택). 없으면 네트워크 전용 지점으로 취급
+  /// 연결된 단일 매체 (선택). 없으면 네트워크 전용 지점으로 취급
   mediaId String? @map("media_id")
   media   Media?  @relation(fields: [mediaId], references: [id])
 
@@ -587,21 +603,25 @@ model MediaNetworkLocation {
 
 /// OOH 표준 계약서 + 전자서명 (OoHQuote 1:1)
 model OohContract {
-  id         String @id @default(cuid())
-  ooHQuoteId String @unique @map("ooh_quote_id")
+  id         String   @id @default(cuid())
+  ooHQuoteId String   @unique @map("ooh_quote_id")
   ooHQuote   OoHQuote @relation(fields: [ooHQuoteId], references: [id], onDelete: Cascade)
 
-  /** 서명 완료 PDF (Base64). 공개 다운로드는 API에서 제공 */
+  /**
+   * 서명 완료 PDF (Base64). 공개 다운로드는 API에서 제공
+   */
   signedPdfBase64 String? @map("signed_pdf_base64") @db.Text
-  /** 감사용: inline | cloud URL 확장 시 */
-  contractPdfUrl String @default("") @map("contract_pdf_url")
+  /**
+   * 감사용: inline | cloud URL 확장 시
+   */
+  contractPdfUrl  String  @default("") @map("contract_pdf_url")
 
-  signedAt       DateTime? @map("signed_at")
-  signerName     String?   @map("signer_name")
-  signerEmail    String?   @map("signer_email")
-  signerIp       String?   @map("signer_ip")
-  signerAgent    String?   @map("signer_agent") @db.Text
-  signatureImage String?   @map("signature_image") @db.Text
+  signedAt            DateTime? @map("signed_at")
+  signerName          String?   @map("signer_name")
+  signerEmail         String?   @map("signer_email")
+  signerIp            String?   @map("signer_ip")
+  signerAgent         String?   @map("signer_agent") @db.Text
+  signatureImage      String?   @map("signature_image") @db.Text
   agreementAcceptedAt DateTime? @map("agreement_accepted_at")
 
   documentSha256 String? @map("document_sha256")
@@ -616,25 +636,29 @@ model OohContract {
   @@map("ooh_contracts")
 }
 
-/** 관리자 견적(정규화 라인 아이템) */
+/**
+ * 관리자 견적(정규화 라인 아이템)
+ */
 model Quote {
-  id          String   @id @default(cuid())
-  quoteNumber String   @unique @map("quote_number")
-  /** draft | sent | contracted | expired */
-  status      String   @default("draft")
-  clientName  String   @map("client_name")
-  clientEmail String?  @map("client_email")
-  clientPhone String?  @map("client_phone")
-  validUntil  DateTime @map("valid_until")
+  id          String      @id @default(cuid())
+  quoteNumber String      @unique @map("quote_number")
+  /**
+   * draft | sent | contracted | expired
+   */
+  status      String      @default("draft")
+  clientName  String      @map("client_name")
+  clientEmail String?     @map("client_email")
+  clientPhone String?     @map("client_phone")
+  validUntil  DateTime    @map("valid_until")
   subtotal    Int
-  discount    Int      @default(0)
-  tax         Int      @default(0)
+  discount    Int         @default(0)
+  tax         Int         @default(0)
   total       Int
   items       QuoteItem[]
-  sentAt      DateTime? @map("sent_at")
-  isKo        Boolean  @default(true) @map("is_ko")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  sentAt      DateTime?   @map("sent_at")
+  isKo        Boolean     @default(true) @map("is_ko")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
   @@index([status])
   @@index([createdAt])
@@ -717,31 +741,31 @@ model TrendReport {
 }
 
 model SuccessCase {
-  id             String    @id @default(cuid())
-  campaignId     String?   @unique @map("campaign_id")
-  campaign       Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  status         String    @default("draft")
-  clientName     String    @map("client_name")
-  industry       String
-  titleKo        String    @map("title_ko")
-  titleEn        String?   @map("title_en")
-  summaryKo      String    @map("summary_ko")
-  challengeKo    String    @map("challenge_ko") @db.Text
-  solutionKo     String    @map("solution_ko") @db.Text
-  resultsKo      String[]  @map("results_ko")
-  metricsJson    Json?     @map("metrics_json")
+  id            String    @id @default(cuid())
+  campaignId    String?   @unique @map("campaign_id")
+  campaign      Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  status        String    @default("draft")
+  clientName    String    @map("client_name")
+  industry      String
+  titleKo       String    @map("title_ko")
+  titleEn       String?   @map("title_en")
+  summaryKo     String    @map("summary_ko")
+  challengeKo   String    @map("challenge_ko") @db.Text
+  solutionKo    String    @map("solution_ko") @db.Text
+  resultsKo     String[]  @map("results_ko")
+  metricsJson   Json?     @map("metrics_json")
   /// 카테고리 텍스트 (예: "빌보드", "디지털 사이니지"). 운영팀 입력 라벨.
-  mediaUsed      String[]  @map("media_used")
+  mediaUsed     String[]  @map("media_used")
   /// 실제 매체 ID(`Media.id`) 배열. 매체 상세 ↔ 사례 양방향 연결용. 빈배열이면 양방향 연결 없음.
-  mediaIds       String[]  @default([]) @map("media_ids")
-  periodStart    DateTime? @map("period_start")
-  periodEnd      DateTime? @map("period_end")
-  thumbnailUrl   String?   @map("thumbnail_url")
-  galleryUrls    String[]  @default([]) @map("gallery_urls")
-  testimonialKo  String?   @map("testimonial_ko") @db.Text
-  publishedAt    DateTime? @map("published_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  mediaIds      String[]  @default([]) @map("media_ids")
+  periodStart   DateTime? @map("period_start")
+  periodEnd     DateTime? @map("period_end")
+  thumbnailUrl  String?   @map("thumbnail_url")
+  galleryUrls   String[]  @default([]) @map("gallery_urls")
+  testimonialKo String?   @map("testimonial_ko") @db.Text
+  publishedAt   DateTime? @map("published_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   @@index([status])
   @@index([publishedAt])
@@ -749,21 +773,21 @@ model SuccessCase {
 }
 
 model AcademyLesson {
-  id             String    @id @default(cuid())
-  courseId       String    @map("course_id")
-  order          Int       @map("lesson_order")
-  status         String    @default("draft")
-  titleKo        String    @map("title_ko")
-  titleEn        String?   @map("title_en")
-  descriptionKo  String    @map("description_ko")
-  objectivesKo   String[]  @map("objectives_ko")
-  chapters       Json      @map("chapters")
-  quizzes        Json?     @map("quizzes")
-  durationMin    Int       @default(15) @map("duration_min")
-  thumbnailUrl   String?   @map("thumbnail_url")
-  publishedAt    DateTime? @map("published_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  id            String    @id @default(cuid())
+  courseId      String    @map("course_id")
+  order         Int       @map("lesson_order")
+  status        String    @default("draft")
+  titleKo       String    @map("title_ko")
+  titleEn       String?   @map("title_en")
+  descriptionKo String    @map("description_ko")
+  objectivesKo  String[]  @map("objectives_ko")
+  chapters      Json      @map("chapters")
+  quizzes       Json?     @map("quizzes")
+  durationMin   Int       @default(15) @map("duration_min")
+  thumbnailUrl  String?   @map("thumbnail_url")
+  publishedAt   DateTime? @map("published_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   @@index([courseId, order])
   @@map("academy_lessons")
@@ -801,32 +825,36 @@ enum CommunityMemberRole {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  passwordHash    String?   @map("password_hash")
+  id              String               @id @default(cuid())
+  email           String               @unique
+  passwordHash    String?              @map("password_hash")
   name            String
   phone           String?
   company         String?
-  locale          String    @default("ko")
-  role            AppUserRole @default(advertiser)
+  locale          String               @default("ko")
+  role            AppUserRole          @default(advertiser)
   communityRole   CommunityMemberRole? @map("community_role")
-  communityBio    String?   @map("community_bio")
-  /** 커뮤니티 멤버 디렉터리·프로필용 지역 (서울/부산/대구 등) */
-  region            String?   @map("region")
-  emailVerifiedAt DateTime? @map("email_verified_at")
-  lastLoginAt     DateTime? @map("last_login_at")
-  deletedAt       DateTime? @map("deleted_at")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  communityBio    String?              @map("community_bio")
+  /**
+   * 커뮤니티 멤버 디렉터리·프로필용 지역 (서울/부산/대구 등)
+   */
+  region          String?              @map("region")
+  emailVerifiedAt DateTime?            @map("email_verified_at")
+  lastLoginAt     DateTime?            @map("last_login_at")
+  deletedAt       DateTime?            @map("deleted_at")
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
 
-  sessions        UserSession[]
-  bookingRequests MediaBooking[] @relation("BookingRequester")
-  ownedCampaigns  Campaign[] @relation("CampaignOwner")
-  instantBookings Booking[]
-  communityPosts      CommunityPost[]     @relation("CommunityPostAuthor")
-  communityComments   CommunityComment[]  @relation("CommunityCommentAuthor")
-  communityPostLikes  CommunityPostLike[]
-  communityBookmarks  CommunityBookmark[]
+  sessions           UserSession[]
+  bookingRequests    MediaBooking[]      @relation("BookingRequester")
+  ownedCampaigns     Campaign[]          @relation("CampaignOwner")
+  instantBookings    Booking[]
+  communityPosts     CommunityPost[]     @relation("CommunityPostAuthor")
+  communityComments  CommunityComment[]  @relation("CommunityCommentAuthor")
+  communityPostLikes CommunityPostLike[]
+  communityBookmarks CommunityBookmark[]
+  creatives          Creative[]          @relation("UserCreatives")
+  playlists          CreativePlaylist[]  @relation("UserPlaylists")
 
   @@index([email])
   @@map("users")
@@ -842,7 +870,7 @@ model UserSession {
   revokedAt DateTime? @map("revoked_at")
   createdAt DateTime  @default(now()) @map("created_at")
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
@@ -853,9 +881,13 @@ model UserSession {
 model SavedPlannerPlan {
   id        String   @id @default(cuid())
   expiresAt DateTime @map("expires_at")
-  /** 저장 시 선택적으로 입력. 재편집·이메일 재전송 플로우에 활용 */
+  /**
+   * 저장 시 선택적으로 입력. 재편집·이메일 재전송 플로우에 활용
+   */
   userEmail String?  @map("user_email")
-  /** PlannerStore partialize 결과 그대로 직렬화된 입력 상태 전체 */
+  /**
+   * PlannerStore partialize 결과 그대로 직렬화된 입력 상태 전체
+   */
   planJson  Json     @map("plan_json")
   viewCount Int      @default(0) @map("view_count")
   createdAt DateTime @default(now()) @map("created_at")
@@ -882,29 +914,35 @@ model UserFavoriteMedia {
 // 신고 누적 시 자동 hidden, 어드민이 검토 후 published / deleted 결정.
 
 model CommunityPost {
-  id          String   @id @default(cuid())
-  category    String   // "insight" | "qna" | "networking" | "review"
-  title       String   @db.VarChar(200)
-  body        String   @db.Text
-  authorName  String   @map("author_name") @db.VarChar(50)
-  /** 가입 사용자 글일 때 User.id, 익명일 때 null */
-  authorUserId String? @map("author_user_id")
-  /** 본문 내 노출 안 함 — 어드민 검토 / 답변 통보용 */
-  authorEmail String?  @map("author_email")
-  isAnonymous Boolean  @default(false) @map("is_anonymous")
-  /** 작성 IP (rate limit / 신고 추적용, 일정 기간 후 익명화 가능) */
-  authorIp    String?  @map("author_ip")
-  status      String   @default("published") // published | hidden | deleted
-  reportCount Int      @default(0) @map("report_count")
-  likeCount   Int      @default(0) @map("like_count")
-  viewCount   Int      @default(0) @map("view_count")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(cuid())
+  category     String // "insight" | "qna" | "networking" | "review"
+  title        String   @db.VarChar(200)
+  body         String   @db.Text
+  authorName   String   @map("author_name") @db.VarChar(50)
+  /**
+   * 가입 사용자 글일 때 User.id, 익명일 때 null
+   */
+  authorUserId String?  @map("author_user_id")
+  /**
+   * 본문 내 노출 안 함 — 어드민 검토 / 답변 통보용
+   */
+  authorEmail  String?  @map("author_email")
+  isAnonymous  Boolean  @default(false) @map("is_anonymous")
+  /**
+   * 작성 IP (rate limit / 신고 추적용, 일정 기간 후 익명화 가능)
+   */
+  authorIp     String?  @map("author_ip")
+  status       String   @default("published") // published | hidden | deleted
+  reportCount  Int      @default(0) @map("report_count")
+  likeCount    Int      @default(0) @map("like_count")
+  viewCount    Int      @default(0) @map("view_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  authorUser  User?    @relation("CommunityPostAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
-  comments    CommunityComment[]
-  likes       CommunityPostLike[]
-  bookmarks   CommunityBookmark[]
+  authorUser User?               @relation("CommunityPostAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
+  comments   CommunityComment[]
+  likes      CommunityPostLike[]
+  bookmarks  CommunityBookmark[]
 
   @@index([category, status, createdAt])
   @@index([status, createdAt])
@@ -913,19 +951,19 @@ model CommunityPost {
 }
 
 model CommunityComment {
-  id          String   @id @default(cuid())
-  postId      String   @map("post_id")
-  post        CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  body        String   @db.Text
-  authorName  String   @map("author_name") @db.VarChar(50)
-  authorUserId String? @map("author_user_id")
-  authorEmail String?  @map("author_email")
-  isAnonymous Boolean  @default(false) @map("is_anonymous")
-  authorIp    String?  @map("author_ip")
-  status      String   @default("published") // published | hidden | deleted
-  reportCount Int      @default(0) @map("report_count")
-  createdAt   DateTime @default(now()) @map("created_at")
-  authorUser  User?    @relation("CommunityCommentAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
+  id           String        @id @default(cuid())
+  postId       String        @map("post_id")
+  post         CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  body         String        @db.Text
+  authorName   String        @map("author_name") @db.VarChar(50)
+  authorUserId String?       @map("author_user_id")
+  authorEmail  String?       @map("author_email")
+  isAnonymous  Boolean       @default(false) @map("is_anonymous")
+  authorIp     String?       @map("author_ip")
+  status       String        @default("published") // published | hidden | deleted
+  reportCount  Int           @default(0) @map("report_count")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  authorUser   User?         @relation("CommunityCommentAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
 
   @@index([postId, status, createdAt])
   @@index([authorUserId])
@@ -933,14 +971,16 @@ model CommunityComment {
 }
 
 model CommunityReport {
-  id         String   @id @default(cuid())
-  /** "post" | "comment" */
-  targetType String   @map("target_type")
-  targetId   String   @map("target_id")
-  reason     String   @db.Text
-  reporterIp String?  @map("reporter_ip")
-  reporterUserId String? @map("reporter_user_id")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id             String   @id @default(cuid())
+  /**
+   * "post" | "comment"
+   */
+  targetType     String   @map("target_type")
+  targetId       String   @map("target_id")
+  reason         String   @db.Text
+  reporterIp     String?  @map("reporter_ip")
+  reporterUserId String?  @map("reporter_user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
 
   @@index([targetType, targetId])
   @@index([createdAt])
@@ -950,13 +990,15 @@ model CommunityReport {
 model CommunityPostLike {
   id        String   @id @default(cuid())
   postId    String   @map("post_id")
-  /** 가입 사용자 likeId, 익명은 ipHash */
+  /**
+   * 가입 사용자 likeId, 익명은 ipHash
+   */
   userId    String?  @map("user_id")
   ipHash    String?  @map("ip_hash")
   createdAt DateTime @default(now()) @map("created_at")
 
-  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([postId, userId], name: "post_user_unique")
   @@unique([postId, ipHash], name: "post_ip_unique")
@@ -970,8 +1012,8 @@ model CommunityBookmark {
   userId    String   @map("user_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId], name: "post_bookmark_user_unique")
   @@index([postId])
@@ -1015,44 +1057,45 @@ enum MediaApplicationStatus {
 }
 
 model MediaApplication {
-  id            String                 @id @default(cuid())
-  companyName   String                 @map("company_name")
-  contactName   String                 @map("contact_name")
-  contactPhone  String                 @map("contact_phone")
-  contactEmail  String                 @map("contact_email")
-  mediaName     String                 @map("media_name")
+  id             String                 @id @default(cuid())
+  companyName    String                 @map("company_name")
+  contactName    String                 @map("contact_name")
+  contactPhone   String                 @map("contact_phone")
+  contactEmail   String                 @map("contact_email")
+  mediaName      String                 @map("media_name")
   /// digital | static | other
-  mediaType     String                 @map("media_type")
-  address       String
-  addressDetail String?                @map("address_detail")
-  zonecode      String?
-  latitude      Float?
-  longitude     Float?
-  city          String?
-  district      String?
-  widthCm       Int?                   @map("width_cm")
-  heightCm      Int?                   @map("height_cm")
-  isDigital     Boolean                @default(false) @map("is_digital")
-  operatingHours String?               @map("operating_hours")
-  hasLighting   Boolean                @default(false) @map("has_lighting")
-  dailyFootfall Int?                   @map("daily_footfall")
-  monthlyPrice  Int                    @map("monthly_price")
-  minFlightDays Int?                   @map("min_flight_days")
-  photoFrontUrl String                 @map("photo_front_url")
-  photoSideUrl  String                 @map("photo_side_url")
-  photoNightUrl String                 @map("photo_night_url")
-  notes         String?                @db.Text
-  status        MediaApplicationStatus @default(PENDING)
-  reviewNote    String?                @map("review_note") @db.Text
-  reviewedAt    DateTime?              @map("reviewed_at")
-  createdMediaId String?               @map("created_media_id")
-  submitterIp   String?                @map("submitter_ip")
-  createdAt     DateTime               @default(now()) @map("created_at")
-  updatedAt     DateTime               @updatedAt @map("updated_at")
+  mediaType      String                 @map("media_type")
+  address        String
+  addressDetail  String?                @map("address_detail")
+  zonecode       String?
+  latitude       Float?
+  longitude      Float?
+  city           String?
+  district       String?
+  widthCm        Int?                   @map("width_cm")
+  heightCm       Int?                   @map("height_cm")
+  isDigital      Boolean                @default(false) @map("is_digital")
+  operatingHours String?                @map("operating_hours")
+  hasLighting    Boolean                @default(false) @map("has_lighting")
+  dailyFootfall  Int?                   @map("daily_footfall")
+  monthlyPrice   Int                    @map("monthly_price")
+  minFlightDays  Int?                   @map("min_flight_days")
+  photoFrontUrl  String                 @map("photo_front_url")
+  photoSideUrl   String                 @map("photo_side_url")
+  photoNightUrl  String                 @map("photo_night_url")
+  notes          String?                @db.Text
+  status         MediaApplicationStatus @default(PENDING)
+  reviewNote     String?                @map("review_note") @db.Text
+  reviewedAt     DateTime?              @map("reviewed_at")
+  createdMediaId String?                @map("created_media_id")
+  submitterIp    String?                @map("submitter_ip")
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
 
   @@index([status, createdAt])
   @@map("media_applications")
 }
+
 // ── Instant DOOH booking (소액 온라인 결제) ─────────────────────
 
 enum InstantBookingStatus {
@@ -1084,6 +1127,14 @@ model Booking {
   endDate              DateTime             @map("end_date") @db.Date
   creativeUrl          String               @map("creative_url") @db.Text
   creativeType         String?              @map("creative_type") @db.VarChar(20)
+  /**
+   * 사용자가 라이브러리에서 선택한 Creative 의 id (옵션 — 외부 URL 입력 시 null)
+   */
+  creativeId           String?              @map("creative_id")
+  /**
+   * 사용자가 묶음으로 보낸 플레이리스트 (옵션 — 단일 소재 예약 시 null)
+   */
+  playlistId           String?              @map("playlist_id")
   amount               Int
   status               InstantBookingStatus @default(draft)
   paymentId            String?              @map("payment_id")
@@ -1097,13 +1148,103 @@ model Booking {
   createdAt            DateTime             @default(now()) @map("created_at")
   updatedAt            DateTime             @updatedAt @map("updated_at")
 
-  media       Media         @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  media       Media             @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user        User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  creative    Creative?         @relation(fields: [creativeId], references: [id], onDelete: SetNull)
+  playlist    CreativePlaylist? @relation(fields: [playlistId], references: [id], onDelete: SetNull)
   paymentLogs PaymentLog[]
 
   @@index([mediaId, status])
   @@index([status, createdAt])
+  @@index([creativeId])
+  @@index([playlistId])
   @@map("bookings")
+}
+
+/// 광고주가 직접 업로드한 광고 소재(이미지/영상).
+/// Cloudinary 등 외부 CDN URL 을 저장. `publicId` 가 있으면 향후 삭제/변환에 사용.
+enum CreativeType {
+  image
+  video
+}
+
+model Creative {
+  id           String       @id @default(cuid())
+  userId       String       @map("user_id")
+  name         String
+  type         CreativeType
+  /// Cloudinary secure_url (또는 다른 CDN URL)
+  url          String       @db.Text
+  /// Cloudinary public_id (delete/transform 용, optional)
+  publicId     String?      @map("public_id")
+  /// 원본 파일명
+  fileName     String?      @map("file_name")
+  /// 픽셀 단위 가로/세로
+  width        Int?
+  height       Int?
+  /// 파일 크기 (bytes)
+  fileSize     Int?         @map("file_size")
+  /// 영상 길이 (초). 이미지면 null
+  duration     Int?
+  /// 영상 썸네일 URL (이미지면 null — UI 는 `url` 사용)
+  thumbnailUrl String?      @map("thumbnail_url") @db.Text
+  /// 자유 태그 (캠페인명/색감 등)
+  tags         String[]     @default([])
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  /// 소프트 삭제 — UI 와 API 에서 deletedAt: null 만 노출
+  deletedAt    DateTime?    @map("deleted_at")
+
+  user          User                   @relation("UserCreatives", fields: [userId], references: [id], onDelete: Cascade)
+  playlistItems CreativePlaylistItem[]
+  bookings      Booking[]
+
+  @@index([userId])
+  @@index([userId, type])
+  @@index([userId, createdAt])
+  @@map("creatives")
+}
+
+/// 여러 Creative 를 묶은 DOOH 플레이리스트. `scheduleJson` 으로 요일/시간대별 노출 규칙을 저장.
+/// 스케줄 JSON shape:
+///   { rules: Array<{ id: string; creativeId: string; days: number[]; startTime?: string; endTime?: string; note?: string }> }
+/// days: 0=일 ... 6=토.  time: "HH:MM" 24h.
+model CreativePlaylist {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  name         String
+  description  String?   @db.Text
+  /// DOOH 노출 규칙 — 룰이 없으면 단순 round-robin 으로 재생
+  scheduleJson Json?     @map("schedule_json")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  user     User                   @relation("UserPlaylists", fields: [userId], references: [id], onDelete: Cascade)
+  items    CreativePlaylistItem[]
+  bookings Booking[]
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@map("creative_playlists")
+}
+
+/// 플레이리스트 ↔ Creative N:M. 각 아이템마다 노출 시간(초)·순서를 갖는다.
+model CreativePlaylistItem {
+  id          String   @id @default(cuid())
+  playlistId  String   @map("playlist_id")
+  creativeId  String   @map("creative_id")
+  /// DOOH 노출 시간 (초). 이미지 기본 15초, 영상은 duration 반영 추천.
+  durationSec Int      @default(15) @map("duration_sec")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  playlist CreativePlaylist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  creative Creative         @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+
+  @@index([playlistId, order])
+  @@index([creativeId])
+  @@map("creative_playlist_items")
 }
 
 model PaymentLog {
@@ -1120,4 +1261,3 @@ model PaymentLog {
   @@index([bookingId])
   @@map("payment_logs")
 }
-
