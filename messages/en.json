@@ -2155,6 +2155,44 @@
     "successHint": "Thanks — we will reach out when new content goes live.",
     "error": "Could not save your request. Please try again."
   },
+  "packages": {
+    "hero": {
+      "badge": "// CURATED PACKAGES",
+      "title": "OOH <accent>packages</accent> by goal",
+      "subtitle": "Verified media curated by industry, target, and region. Pick a budget once and we’ll match the right pack.",
+      "ctaPrimary": "Browse packages",
+      "ctaSecondary": "Custom via AI Planner",
+      "stat1Label": "Curated packs",
+      "stat1Value": "5+",
+      "stat2Label": "Avg savings",
+      "stat2Value": "15%",
+      "stat3Label": "Instant quote",
+      "stat3Value": "Ready"
+    },
+    "filter": {
+      "all": "All",
+      "brand": "Brand Awareness",
+      "launch": "Product Launch",
+      "popup": "Pop-up & Event",
+      "coverage": "Wide Coverage",
+      "empty": "No packages match this goal yet."
+    },
+    "card": {
+      "media": "Placements",
+      "impression": "Est. impressions",
+      "budget": "Budget range",
+      "reason": "Why this pack",
+      "industries": "Target industries",
+      "cta": "Request a quote"
+    },
+    "custom": {
+      "eyebrow": "// CUSTOM",
+      "title": "Need something else?",
+      "subtitle": "Enter your budget, region, and goal — our AI will design the right mix in three minutes.",
+      "cta": "Open the AI Planner"
+    },
+    "imagePreparing": "Image coming soon"
+  },
   "homePage": {
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroLiveToday": "Today's impressions",
