@@ -820,7 +820,9 @@
       "inquiryType": "Please select an inquiry type.",
       "budget": "Please select a budget range.",
       "message": "Please enter your message."
-    }
+    },
+    "campaignStartLabel": "Campaign start",
+    "campaignEndLabel": "Campaign end"
   },
   "contactFeedback": {
     "intro": "Service satisfaction survey for THINKAD. Tell us about satisfaction and any campaign experience—about 2–3 minutes. When you submit, you’ll get a thank-you coupon code. Depending on ops settings, your response may trigger an admin notification email.",
@@ -2081,7 +2083,7 @@
     "availability": {
       "eyebrow": "Availability calendar",
       "title": "Booked & available dates",
-      "desc": "Orange-striped dates are already booked. If your desired period is open, hit [Request booking] on the right.",
+      "desc": "Tap a start date, then an end date. Orange stripes mean already booked.",
       "loading": "Loading calendar…",
       "error": "Could not load availability. Please try again later.",
       "prevMonth": "Previous month",
@@ -2094,7 +2096,14 @@
       "legendToday": "Today",
       "statsAvailable": "{n} days available this month",
       "statsBlocked": "{n} days booked",
-      "ctaRequest": "Request booking"
+      "ctaRequest": "Request booking",
+      "rangeSelectStart": "Select a start date",
+      "rangeSelectEnd": "Select an end date",
+      "rangeLabel": "Selected period",
+      "rangeSelected": "{start} – {end} ({days} days)",
+      "legendSelected": "Selected",
+      "ctaInquiryPeriod": "Inquire for this period",
+      "ctaInstantBook": "Book instantly"
     },
     "traffic": {
       "title": "Hourly · Weekday · Monthly footfall",

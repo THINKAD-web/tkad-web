@@ -8,12 +8,20 @@ import { resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getCurrentUser } from "@/lib/user-session";
 
-type Props = { params: Promise<{ locale: string; id: string }> };
+type Props = {
+  params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ from?: string; to?: string }>;
+};
 
-export default async function InstantBookPage({ params }: Props) {
+export default async function InstantBookPage({ params, searchParams }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const { id } = await params;
+  const sp = await searchParams;
+  const initialRange =
+    sp.from?.trim() && sp.to?.trim()
+      ? { start: sp.from.trim(), end: sp.to.trim() }
+      : undefined;
 
   const media = await resolveMediaForDetail(id);
   if (!media) notFound();
@@ -42,6 +50,7 @@ export default async function InstantBookPage({ params }: Props) {
         <InstantBookingWizard
           media={media}
           locale={locale}
+          initialRange={initialRange}
           prefill={{
             name: user?.name,
             email: user?.email,

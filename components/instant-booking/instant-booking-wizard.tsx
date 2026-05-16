@@ -18,10 +18,12 @@ import {
 } from "@/lib/instant-booking-pricing";
 import { uploadInstantBookingCreative } from "@/lib/instant-booking-upload";
 import type { MediaItem } from "@/lib/media-data";
+import { rangeHasBlockedDays } from "@/lib/calendar-date-range";
 
 type Props = {
   media: MediaItem;
   locale: string;
+  initialRange?: { start: string; end: string };
   prefill?: { name?: string; email?: string; phone?: string };
 };
 
@@ -48,7 +50,7 @@ function isBlocked(day: Date, ranges: BlockedRange[]): boolean {
   return false;
 }
 
-export function InstantBookingWizard({ media, locale, prefill }: Props) {
+export function InstantBookingWizard({ media, locale, initialRange, prefill }: Props) {
   const t = useTranslations("instantBooking");
   const { toast } = useToast();
   const router = useRouter();
@@ -102,6 +104,19 @@ export function InstantBookingWizard({ media, locale, prefill }: Props) {
       cancelled = true;
     };
   }, [media.id, t, toast]);
+
+  useEffect(() => {
+    if (!initialRange?.start || !initialRange.end) return;
+    const start = parseYmd(initialRange.start);
+    const end = parseYmd(initialRange.end);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (start < today || end < start) return;
+    if (rangeHasBlockedDays(start, end, blocked)) return;
+    setRangeStart(initialRange.start);
+    setRangeEnd(initialRange.end);
+    setViewMonth(new Date(start.getFullYear(), start.getMonth(), 1));
+  }, [initialRange, blocked]);
 
   const amountPreview = useMemo(() => {
     if (!rangeStart || !rangeEnd) return 0;

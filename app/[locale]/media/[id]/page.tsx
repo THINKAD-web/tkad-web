@@ -50,7 +50,6 @@ import { RelatedCases } from "@/components/media-detail/related-cases";
 import { MediaStickyCta } from "@/components/media-detail/sticky-cta";
 import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
-import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
 import { RoadviewCard } from "@/components/media-detail/roadview-card";
@@ -58,6 +57,7 @@ import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { TrafficCharts } from "@/components/media-detail/traffic-charts";
 import { MediaAvailabilityCalendar } from "@/components/media-detail/availability-calendar";
+import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
@@ -712,6 +712,7 @@ export default async function MediaDetailPage({ params }: Props) {
           <MediaAvailabilityCalendar
             mediaId={media.id}
             mediaName={isKo ? media.name : (media.nameEn || media.name)}
+            instantBookingEligible={isInstantBookingEligible(media).eligible}
           />
 
           <section
