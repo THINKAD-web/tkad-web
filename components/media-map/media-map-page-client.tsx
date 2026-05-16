@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { Crosshair, LayoutList } from "lucide-react";
 import type { MapBounds, MapMarker } from "./kakao-map-view";
 import { Spinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/use-toast";
@@ -16,6 +17,12 @@ import {
   subscribeCompareCart,
   type CompareCartEntry,
 } from "@/lib/compare-cart-client";
+import { Link } from "@/i18n/navigation";
+import {
+  buildMediaMapSearchString,
+  parseMediaMapUrlState,
+  replaceUrlSearch,
+} from "@/lib/media-map/url-state";
 
 function NeonLoadingCard({ label }: { label: string }) {
   return (
@@ -102,24 +109,72 @@ function formatPrice(v: number, period: string): string {
   return `₩${krw}${p}`;
 }
 
+/** SSR-safe 초기 URL 파싱 (hydration warning 방지를 위해 lazy init 으로 사용) */
+function readInitialUrlState() {
+  if (typeof window === "undefined") return null;
+  try {
+    return parseMediaMapUrlState(new URLSearchParams(window.location.search));
+  } catch {
+    return null;
+  }
+}
+
 export default function MediaMapPageClient() {
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [facets, setFacets] = useState<Facets>({ regions: [], types: [] });
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState<Filter>({
-    type: "",
-    region: "",
-    priceMin: "",
-    priceMax: "",
-    q: "",
-    sort: "default",
+  const initialUrl = useRef(readInitialUrlState());
+  const [filter, setFilter] = useState<Filter>(() => {
+    const init = initialUrl.current;
+    return {
+      type: init?.type ?? "",
+      region: init?.region ?? "",
+      priceMin: init?.priceMin ?? "",
+      priceMax: init?.priceMax ?? "",
+      q: init?.q ?? "",
+      sort: (init?.sort as Filter["sort"]) ?? "default",
+    };
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>([]);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  /** 마지막으로 idle 한 지도 중심/줌 — URL 동기화용 */
+  const [view, setView] = useState<{ lat: number; lng: number; zoom: number } | null>(
+    () => {
+      const init = initialUrl.current;
+      if (init && init.lat != null && init.lng != null && init.zoom != null) {
+        return { lat: init.lat, lng: init.lng, zoom: init.zoom };
+      }
+      return null;
+    },
+  );
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [locating, setLocating] = useState(false);
+  /** "내 주변" / URL 하이드레이션으로 지도 중심·줌을 강제 이동시킬 때 사용 */
+  const [programmaticView, setProgrammaticView] = useState<{
+    lat: number;
+    lng: number;
+    zoom: number;
+    nonce: number;
+  } | null>(() => {
+    const init = initialUrl.current;
+    if (init && init.lat != null && init.lng != null) {
+      return {
+        lat: init.lat,
+        lng: init.lng,
+        zoom: init.zoom ?? 8,
+        nonce: 1,
+      };
+    }
+    return null;
+  });
   const itemsRef = useRef<Item[]>([]);
   const shuffleSeedRef = useRef<number>(
     Math.floor(Date.now() + Math.random() * 1_000_000),
@@ -150,6 +205,40 @@ export default function MediaMapPageClient() {
       setCompareEntriesState(getCompareCartEntries());
     });
   }, []);
+
+  // URL 상태 동기화 — view + filter 변경 시 history.replaceState
+  const urlSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (urlSyncTimerRef.current) clearTimeout(urlSyncTimerRef.current);
+    urlSyncTimerRef.current = setTimeout(() => {
+      const next = buildMediaMapSearchString({
+        lat: view?.lat,
+        lng: view?.lng,
+        zoom: view?.zoom,
+        type: filter.type || undefined,
+        region: filter.region || undefined,
+        priceMin: filter.priceMin || undefined,
+        priceMax: filter.priceMax || undefined,
+        q: filter.q || undefined,
+        sort:
+          filter.sort && filter.sort !== "default" ? filter.sort : undefined,
+      });
+      replaceUrlSearch(next);
+    }, 300);
+    return () => {
+      if (urlSyncTimerRef.current) clearTimeout(urlSyncTimerRef.current);
+    };
+  }, [
+    view?.lat,
+    view?.lng,
+    view?.zoom,
+    filter.type,
+    filter.region,
+    filter.priceMin,
+    filter.priceMax,
+    filter.q,
+    filter.sort,
+  ]);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -306,6 +395,64 @@ export default function MediaMapPageClient() {
         ? prev.filter((e) => e.id !== it.id)
         : [...prev, { id: it.id, name: it.name, nameEn: it.name }];
       setCompareCartEntries(next);
+    },
+    [],
+  );
+
+  // "내 주변" 버튼 — Geolocation API
+  const handleLocateMe = useCallback(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.warning("이 브라우저에서는 현위치를 사용할 수 없습니다.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        // 한국 영역 밖이면 거부 (해외에서 접근 시 지도가 엉뚱한 곳으로 튀는 것 방지)
+        if (lat < 33 || lat > 39.5 || lng < 124 || lng > 132.5) {
+          toast.warning("현위치가 한국 영역 밖이라 적용하지 않았습니다.");
+          setLocating(false);
+          return;
+        }
+        setUserLocation({ lat, lng });
+        setProgrammaticView({
+          lat,
+          lng,
+          zoom: 5,
+          nonce: Date.now(),
+        });
+        toast.success("현위치를 지도에 표시했습니다.");
+        setLocating(false);
+      },
+      (err) => {
+        const map: Record<number, string> = {
+          1: "위치 권한이 거부됐습니다. 브라우저 설정에서 허용해주세요.",
+          2: "현위치를 가져올 수 없습니다. 잠시 후 다시 시도해주세요.",
+          3: "위치 요청이 시간 초과됐습니다.",
+        };
+        toast.error(map[err.code] ?? "현위치 요청에 실패했습니다.");
+        setLocating(false);
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
+    );
+  }, [toast]);
+
+  // 지도 idle 시 view state 갱신 → URL 동기화 effect 가 받아 처리
+  const handleViewChange = useCallback(
+    (v: { lat: number; lng: number; zoom: number }) => {
+      setView((cur) => {
+        if (
+          cur &&
+          Math.abs(cur.lat - v.lat) < 1e-5 &&
+          Math.abs(cur.lng - v.lng) < 1e-5 &&
+          cur.zoom === v.zoom
+        ) {
+          return cur;
+        }
+        return v;
+      });
     },
     [],
   );
@@ -485,9 +632,15 @@ export default function MediaMapPageClient() {
               className={`group rounded-[18px] border bg-card/80 text-card-foreground overflow-hidden cursor-pointer transition-all hover:shadow-md backdrop-blur ${
                 selectedId === it.id
                   ? "border-primary ring-2 ring-primary/20 shadow-md"
-                  : "border-border/70 hover:border-primary/40"
+                  : hoveredId === it.id
+                    ? "border-primary/60 shadow-md"
+                    : "border-border/70 hover:border-primary/40"
               }`}
               onClick={() => handleSelect(it.id)}
+              onMouseEnter={() => setHoveredId(it.id)}
+              onMouseLeave={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
+              onFocus={() => setHoveredId(it.id)}
+              onBlur={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
             >
               <div className="relative aspect-[4/3] bg-secondary">
                 {it.image ? (
@@ -564,8 +717,12 @@ export default function MediaMapPageClient() {
           <KakaoMapView
             markers={markers}
             selectedId={selectedId}
+            hoveredId={hoveredId}
             onSelect={handleSelect}
             onBoundsChange={setBounds}
+            onViewChange={handleViewChange}
+            programmaticView={programmaticView}
+            userLocation={userLocation}
             onMarkerDetail={(id) => {
               const locale =
                 typeof document !== "undefined"
@@ -574,6 +731,28 @@ export default function MediaMapPageClient() {
               window.location.href = `/${locale}/media/${id}`;
             }}
           />
+
+          {/* 지도 우상단 컨트롤 — 내 주변 + 리스트 토글 */}
+          <div className="pointer-events-none absolute right-3 top-3 z-[100001] flex flex-col gap-2 sm:right-4 sm:top-4">
+            <button
+              type="button"
+              onClick={handleLocateMe}
+              disabled={locating}
+              className="pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border border-white/14 bg-black/55 px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:bg-black/70 disabled:opacity-60"
+              aria-label="내 주변 매체 보기"
+            >
+              <Crosshair className={`h-3.5 w-3.5 ${locating ? "animate-pulse" : ""}`} />
+              {locating ? "위치 확인 중…" : "내 주변"}
+            </button>
+            <Link
+              href="/media"
+              className="pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border border-white/14 bg-black/55 px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:bg-black/70"
+              aria-label="목록으로 보기"
+            >
+              <LayoutList className="h-3.5 w-3.5" />
+              목록으로
+            </Link>
+          </div>
 
           {selected && (
             <div

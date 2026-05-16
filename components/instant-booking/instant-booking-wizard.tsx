@@ -19,6 +19,9 @@ import {
 import { uploadInstantBookingCreative } from "@/lib/instant-booking-upload";
 import type { MediaItem } from "@/lib/media-data";
 import { rangeHasBlockedDays } from "@/lib/calendar-date-range";
+import { CreativeLibraryPicker } from "@/components/creatives/library-picker";
+import { Link } from "@/i18n/navigation";
+import type { CreativeListItem } from "@/lib/creatives/types";
 
 type Props = {
   media: MediaItem;
@@ -67,6 +70,10 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
   const [loadingCal, setLoadingCal] = useState(true);
   const [creativeUrl, setCreativeUrl] = useState("");
   const [creativeType, setCreativeType] = useState("");
+  const [creativeId, setCreativeId] = useState<string | null>(null);
+  const [creativeSource, setCreativeSource] = useState<"library" | "upload">(
+    "library",
+  );
   const [uploading, setUploading] = useState(false);
   const [contactName, setContactName] = useState(prefill?.name ?? "");
   const [contactEmail, setContactEmail] = useState(prefill?.email ?? "");
@@ -182,12 +189,20 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
       const result = await uploadInstantBookingCreative(file);
       setCreativeUrl(result.secureUrl);
       setCreativeType(result.resourceType);
+      setCreativeId(null); // 즉시 업로드는 라이브러리 행 없음
       toast("success", t("uploadDone"));
     } catch (e) {
       toast("error", e instanceof Error ? e.message : t("uploadFailed"));
     } finally {
       setUploading(false);
     }
+  };
+
+  const handlePickFromLibrary = (item: CreativeListItem) => {
+    setCreativeUrl(item.url);
+    setCreativeType(item.type);
+    setCreativeId(item.id);
+    toast("success", `${item.name} 을(를) 선택했습니다.`);
   };
 
   const submitBooking = async () => {
@@ -203,6 +218,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
           endDate: rangeEnd,
           creativeUrl,
           creativeType,
+          creativeId,
           contactName,
           contactEmail,
           contactPhone,
@@ -347,41 +363,99 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
               <li key={line}>{line}</li>
             ))}
           </ul>
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-[20px] border border-dashed border-border bg-muted/30 p-8">
-            <Upload className="h-8 w-8 text-muted-foreground" />
-            <span className="text-sm font-medium">{t("uploadLabel")}</span>
-            <input
-              type="file"
-              accept="image/*,video/mp4,video/quicktime"
-              className="sr-only"
-              disabled={uploading}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void handleUpload(f);
-              }}
-            />
-            {uploading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : creativeUrl ? (
-              <span className="text-xs text-primary">{t("uploadDone")}</span>
-            ) : null}
-          </label>
+
+          {/* 라이브러리 / 신규 업로드 토글 */}
+          <div className="inline-flex rounded-full border-2 border-border bg-card p-0.5">
+            <button
+              type="button"
+              onClick={() => setCreativeSource("library")}
+              className={`rounded-full px-4 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-colors ${
+                creativeSource === "library"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {isKo ? "내 라이브러리" : "My Library"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setCreativeSource("upload")}
+              className={`rounded-full px-4 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-colors ${
+                creativeSource === "upload"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {isKo ? "새로 업로드" : "Upload New"}
+            </button>
+          </div>
+
+          {creativeSource === "library" ? (
+            <div className="space-y-2">
+              <CreativeLibraryPicker
+                selectedId={creativeId}
+                onSelect={handlePickFromLibrary}
+              />
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                {isKo ? "처음이신가요?" : "First time?"}{" "}
+                <Link
+                  href="/creatives/upload"
+                  className="border-b border-border pb-0.5 font-bold text-foreground hover:border-accent hover:text-accent"
+                >
+                  {isKo ? "라이브러리에 소재 업로드 →" : "Upload to library →"}
+                </Link>
+              </p>
+            </div>
+          ) : (
+            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-[20px] border border-dashed border-border bg-muted/30 p-8">
+              <Upload className="h-8 w-8 text-muted-foreground" />
+              <span className="text-sm font-medium">{t("uploadLabel")}</span>
+              <input
+                type="file"
+                accept="image/*,video/mp4,video/quicktime"
+                className="sr-only"
+                disabled={uploading}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void handleUpload(f);
+                }}
+              />
+              {uploading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : creativeUrl && !creativeId ? (
+                <span className="text-xs text-primary">{t("uploadDone")}</span>
+              ) : null}
+            </label>
+          )}
+
           {creativeUrl ? (
-            creativeType === "video" ? (
-              <video
-                src={creativeUrl}
-                controls
-                className="max-h-48 w-full rounded-lg"
-              />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={creativeUrl}
-                alt=""
-                className="max-h-48 w-full rounded-lg object-contain"
-              />
-            )
+            <div className="rounded-lg border-2 border-border bg-card p-3">
+              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+                {isKo
+                  ? creativeId
+                    ? "[ 선택된 소재 — 라이브러리 ]"
+                    : "[ 업로드된 소재 ]"
+                  : creativeId
+                    ? "[ Selected — from library ]"
+                    : "[ Uploaded ]"}
+              </p>
+              {creativeType === "video" ? (
+                <video
+                  src={creativeUrl}
+                  controls
+                  className="max-h-48 w-full rounded-md"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={creativeUrl}
+                  alt=""
+                  className="max-h-48 w-full rounded-md object-contain"
+                />
+              )}
+            </div>
           ) : null}
+
           <div className="flex gap-2">
             <BtnBlock variant="secondary" onClick={() => setStep(1)}>
               {t("back")}

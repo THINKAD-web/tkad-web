@@ -853,6 +853,8 @@ model User {
   communityComments       CommunityComment[]     @relation("CommunityCommentAuthor")
   communityPostLikes      CommunityPostLike[]
   communityBookmarks      CommunityBookmark[]
+  creatives               Creative[]             @relation("UserCreatives")
+  playlists               CreativePlaylist[]     @relation("UserPlaylists")
   newsletterSubscriptions NewsletterSubscriber[] @relation("UserNewsletters")
 
   @@index([email])
@@ -1192,6 +1194,14 @@ model Booking {
   endDate              DateTime             @map("end_date") @db.Date
   creativeUrl          String               @map("creative_url") @db.Text
   creativeType         String?              @map("creative_type") @db.VarChar(20)
+  /**
+   * 사용자가 라이브러리에서 선택한 Creative 의 id (옵션 — 외부 URL 입력 시 null)
+   */
+  creativeId           String?              @map("creative_id")
+  /**
+   * 사용자가 묶음으로 보낸 플레이리스트 (옵션 — 단일 소재 예약 시 null)
+   */
+  playlistId           String?              @map("playlist_id")
   amount               Int
   status               InstantBookingStatus @default(draft)
   paymentId            String?              @map("payment_id")
@@ -1205,13 +1215,103 @@ model Booking {
   createdAt            DateTime             @default(now()) @map("created_at")
   updatedAt            DateTime             @updatedAt @map("updated_at")
 
-  media       Media        @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  media       Media             @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user        User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  creative    Creative?         @relation(fields: [creativeId], references: [id], onDelete: SetNull)
+  playlist    CreativePlaylist? @relation(fields: [playlistId], references: [id], onDelete: SetNull)
   paymentLogs PaymentLog[]
 
   @@index([mediaId, status])
   @@index([status, createdAt])
+  @@index([creativeId])
+  @@index([playlistId])
   @@map("bookings")
+}
+
+/// 광고주가 직접 업로드한 광고 소재(이미지/영상).
+/// Cloudinary 등 외부 CDN URL 을 저장. `publicId` 가 있으면 향후 삭제/변환에 사용.
+enum CreativeType {
+  image
+  video
+}
+
+model Creative {
+  id           String       @id @default(cuid())
+  userId       String       @map("user_id")
+  name         String
+  type         CreativeType
+  /// Cloudinary secure_url (또는 다른 CDN URL)
+  url          String       @db.Text
+  /// Cloudinary public_id (delete/transform 용, optional)
+  publicId     String?      @map("public_id")
+  /// 원본 파일명
+  fileName     String?      @map("file_name")
+  /// 픽셀 단위 가로/세로
+  width        Int?
+  height       Int?
+  /// 파일 크기 (bytes)
+  fileSize     Int?         @map("file_size")
+  /// 영상 길이 (초). 이미지면 null
+  duration     Int?
+  /// 영상 썸네일 URL (이미지면 null — UI 는 `url` 사용)
+  thumbnailUrl String?      @map("thumbnail_url") @db.Text
+  /// 자유 태그 (캠페인명/색감 등)
+  tags         String[]     @default([])
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  /// 소프트 삭제 — UI 와 API 에서 deletedAt: null 만 노출
+  deletedAt    DateTime?    @map("deleted_at")
+
+  user          User                   @relation("UserCreatives", fields: [userId], references: [id], onDelete: Cascade)
+  playlistItems CreativePlaylistItem[]
+  bookings      Booking[]
+
+  @@index([userId])
+  @@index([userId, type])
+  @@index([userId, createdAt])
+  @@map("creatives")
+}
+
+/// 여러 Creative 를 묶은 DOOH 플레이리스트. `scheduleJson` 으로 요일/시간대별 노출 규칙을 저장.
+/// 스케줄 JSON shape:
+///   { rules: Array<{ id: string; creativeId: string; days: number[]; startTime?: string; endTime?: string; note?: string }> }
+/// days: 0=일 ... 6=토.  time: "HH:MM" 24h.
+model CreativePlaylist {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  name         String
+  description  String?   @db.Text
+  /// DOOH 노출 규칙 — 룰이 없으면 단순 round-robin 으로 재생
+  scheduleJson Json?     @map("schedule_json")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  user     User                   @relation("UserPlaylists", fields: [userId], references: [id], onDelete: Cascade)
+  items    CreativePlaylistItem[]
+  bookings Booking[]
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@map("creative_playlists")
+}
+
+/// 플레이리스트 ↔ Creative N:M. 각 아이템마다 노출 시간(초)·순서를 갖는다.
+model CreativePlaylistItem {
+  id          String   @id @default(cuid())
+  playlistId  String   @map("playlist_id")
+  creativeId  String   @map("creative_id")
+  /// DOOH 노출 시간 (초). 이미지 기본 15초, 영상은 duration 반영 추천.
+  durationSec Int      @default(15) @map("duration_sec")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  playlist CreativePlaylist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  creative Creative         @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+
+  @@index([playlistId, order])
+  @@index([creativeId])
+  @@map("creative_playlist_items")
 }
 
 model PaymentLog {

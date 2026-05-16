@@ -31,6 +31,7 @@ import {
   PlannerCpmCompareChart,
   PlannerMonthCompareChart,
 } from "@/components/planner-charts";
+import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
 
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 
@@ -749,6 +750,17 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
               generatedAt={snapshotAt}
               logoUrl={props.logoUrl}
               mediaPlacements={props.mediaPlacements}
+            />
+
+            {/* [PATCH-P3-01] Reach·Frequency·CPM·OTS 시뮬레이션 패널 + recharts 예산 파이 */}
+            <PlannerEffectSimulationPanel
+              isKo={props.isKo}
+              portfolio={props.portfolio}
+              budgetMan={props.budgetNum}
+              months={props.months}
+              totalImpressionsFromMetrics={
+                props.metrics?.estimatedTotalImpressions ?? null
+              }
             />
 
             {props.metrics ? (

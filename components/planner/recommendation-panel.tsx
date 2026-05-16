@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Sparkles, Plus, Check, RefreshCw } from "lucide-react";
+import { Sparkles, Plus, Check, RefreshCw, Eye, Users } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import {
   recommendPlannerMedia,
@@ -15,6 +15,11 @@ import {
 } from "@/lib/planner/store";
 import { BtnBlock } from "@/components/brutalist";
 import { cn } from "@/lib/utils";
+import {
+  estimatedCpmWon,
+  estimatedMonthlyImpressions,
+} from "@/lib/ai-recommend-metrics";
+import { normalizeVisibilityScore } from "@/lib/planner-logic";
 
 const REASON_COLORS: Record<RecommendReasonKey, string> = {
   matchRegion: "border-border bg-card text-foreground",
@@ -209,6 +214,46 @@ export function PlannerRecommendationPanel({
                       ).slice(0, 28)}
                     </p>
                   </div>
+                  {/* [PATCH-P3-01] AI 추천의 수치 근거 — 노출/가시성/CPM 한 줄 */}
+                  {(() => {
+                    const monthlyImp = estimatedMonthlyImpressions(media);
+                    const visPct = Math.round(
+                      normalizeVisibilityScore(media.visibilityScore) * 100,
+                    );
+                    const cpm = estimatedCpmWon(media);
+                    const items: string[] = [];
+                    if (monthlyImp > 0) {
+                      items.push(
+                        isKo
+                          ? `월 ${Math.round(monthlyImp / 1000).toLocaleString()}K 노출`
+                          : `${Math.round(monthlyImp / 1000).toLocaleString()}K imp/mo`,
+                      );
+                    }
+                    if (visPct > 0) {
+                      items.push(
+                        isKo ? `가시성 ${visPct}/100` : `Vis ${visPct}/100`,
+                      );
+                    }
+                    if (cpm != null && cpm > 0) {
+                      items.push(
+                        `CPM ₩${Math.round(cpm).toLocaleString("ko-KR")}`,
+                      );
+                    }
+                    if (items.length === 0) return null;
+                    return (
+                      <p className="inline-flex flex-wrap items-center gap-x-3 gap-y-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                        <Users className="h-3 w-3 text-primary" aria-hidden />
+                        <span>{items[0]}</span>
+                        {items[1] ? (
+                          <>
+                            <Eye className="h-3 w-3 text-primary" aria-hidden />
+                            <span>{items[1]}</span>
+                          </>
+                        ) : null}
+                        {items[2] ? <span>· {items[2]}</span> : null}
+                      </p>
+                    );
+                  })()}
                   {reasons.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {reasons.map((r) => (

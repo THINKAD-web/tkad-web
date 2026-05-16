@@ -15,6 +15,7 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { CompareSpecTable } from "@/components/compare-spec-table";
+import { CompareQuotePdf } from "@/components/compare-pdf-quote";
 import {
   MEDIA_CATALOG_GRID_CLASS,
   MEDIA_CATALOG_COMPACT_GRID_CLASS,
@@ -31,9 +32,24 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   const tCommon = useTranslations("common");
   const { toast } = useToast();
   const comparePdfRef = useRef<HTMLDivElement>(null);
+  const quotePdfRef = useRef<HTMLDivElement>(null);
   const [comparePdfLoading, setComparePdfLoading] = useState(false);
+  const [quotePdfLoading, setQuotePdfLoading] = useState(false);
 
   const [layout, setLayout] = useState<"grid" | "compact">("grid");
+
+  /** 캡처/파일명 stamp — 헤더와 파일명에서 동일 값 사용해 일치 보장 */
+  const issuedStamp = useMemo(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return { ymd: `${y}${m}${day}`, ymdDot: `${y}.${m}.${day}` };
+  }, []);
+  const quoteRef = useMemo(
+    () => `CMP-${issuedStamp.ymd}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
+    [issuedStamp.ymd],
+  );
 
   const popularIds = useMemo(
     () => new Set(["1", "2", "3", "8", "9"]),
@@ -42,6 +58,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
 
   const visibleItems = items;
 
+  // 표만 캡처하는 기존 PDF (이미지 저장 시 동일 영역 사용)
   const handleComparePdfDownload = useCallback(async () => {
     const el = comparePdfRef.current;
     if (!el) {
@@ -62,6 +79,30 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
       setComparePdfLoading(false);
     }
   }, [toast, tCommon]);
+
+  // [PATCH-P2-03] 견적서 PDF — 로고/발행일/스펙표/총 예상 비용 포함, 파일명 THINKAD_견적비교_YYYYMMDD.pdf
+  const handleQuotePdfDownload = useCallback(async () => {
+    const el = quotePdfRef.current;
+    if (!el) {
+      toast("error", tCommon("pdfGenerationFailed"));
+      return;
+    }
+    setQuotePdfLoading(true);
+    try {
+      const filename = isKo
+        ? `THINKAD_견적비교_${issuedStamp.ymd}.pdf`
+        : `THINKAD_quote_compare_${issuedStamp.ymd}.pdf`;
+      await downloadPdfFromHtmlElement(el, filename, {
+        timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
+      });
+      toast("success", isKo ? "견적서 PDF를 다운로드했습니다." : "Quote PDF downloaded.");
+    } catch (e) {
+      console.error("[compare-quote-pdf]", e);
+      toast("error", tCommon("pdfGenerationFailed"));
+    } finally {
+      setQuotePdfLoading(false);
+    }
+  }, [isKo, issuedStamp.ymd, toast, tCommon]);
 
   const [captureLoading, setCaptureLoading] = useState(false);
   const handleCaptureImage = useCallback(async () => {
@@ -219,6 +260,15 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                 <CompareSpecTable items={visibleItems} isKo={isKo} />
               </div>
 
+              {/* [PATCH-P2-03] 화면에 보이지 않는 견적서 PDF 캡처 영역 */}
+              <CompareQuotePdf
+                ref={quotePdfRef}
+                items={visibleItems}
+                isKo={isKo}
+                issuedAt={issuedStamp.ymdDot}
+                quoteRef={quoteRef}
+              />
+
               <div className="mt-10 flex flex-col items-stretch gap-4 sm:mt-12 sm:items-center md:gap-5">
                 <div className="flex w-full max-w-4xl flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
                   <BtnBlock
@@ -228,6 +278,23 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     className="w-full min-h-12 justify-center rounded-[22px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[10rem]"
                   >
                     {isKo ? "견적 요청" : "Request a quote"}
+                  </BtnBlock>
+                  <BtnBlock
+                    type="button"
+                    variant="accent"
+                    size="md"
+                    disabled={quotePdfLoading}
+                    onClick={() => void handleQuotePdfDownload()}
+                    className="w-full min-h-12 justify-center rounded-[22px] border-2 border-foreground/85 bg-foreground text-background transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[16rem] disabled:opacity-50 dark:border-white/85 dark:bg-white dark:text-black"
+                  >
+                    {quotePdfLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileDown className="h-4 w-4" />
+                    )}
+                    {isKo
+                      ? "선택 매체 견적서 다운로드 (PDF)"
+                      : "Download Quote PDF"}
                   </BtnBlock>
                   <BtnBlock
                     type="button"
@@ -242,7 +309,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     ) : (
                       <FileDown className="h-4 w-4" />
                     )}
-                    {isKo ? "PDF 다운로드" : "Download PDF"}
+                    {isKo ? "비교표 PDF" : "Spec table PDF"}
                   </BtnBlock>
                   <BtnBlock
                     type="button"
