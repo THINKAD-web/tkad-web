@@ -4,6 +4,7 @@ import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
 import { listGuideMeta } from "@/lib/guides-data";
+import { DEMO_REPORTS } from "@/lib/report-demo-data";
 
 const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");

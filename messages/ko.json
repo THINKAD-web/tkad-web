@@ -1646,7 +1646,8 @@
     "aiContent": "AI 콘텐츠",
     "crm": "CRM (데모)",
     "backToSite": "사이트로 돌아가기",
-    "signOut": "로그아웃"
+    "signOut": "로그아웃",
+    "trendReports": "트렌드 리포트"
   },
   "adminNetworks": {
     "title": "네트워크 매체",

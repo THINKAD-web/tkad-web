@@ -1631,7 +1631,8 @@
     "aiContent": "AI content",
     "crm": "CRM (demo)",
     "backToSite": "Back to site",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "trendReports": "Trend reports"
   },
   "adminNetworks": {
     "title": "Network media",

@@ -975,8 +975,9 @@ model CommunityBookmark {
 
 enum ReportCategory {
   TREND
-  REGION
+  MEDIA
   GUIDE
+  REGION
   CAMPAIGN
 }
 
@@ -987,6 +988,7 @@ model Report {
   summary     String         @db.Text
   content     String         @db.Text
   category    ReportCategory
+  tags        String[]       @default([])
   thumbnail   String?
   published   Boolean        @default(false) @map("published")
   publishedAt DateTime?      @map("published_at")

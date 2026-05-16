@@ -202,76 +202,65 @@ async function main() {
     summary: string;
     category: ReportCategory;
     content: string;
+    tags: string[];
   }> = [
     {
       slug: "ooh-trend-2026",
       title: "2026년 주목할 OOH 광고 트렌드 5가지",
       category: ReportCategory.TREND,
+      tags: ["월간리포트", "DOOH", "트렌드"],
       summary:
         "DOOH 확산, 데이터 기반 매체 선택, 크리에이티브 자동화 등 주목할 변화를 정리했습니다.",
       content: `## 1. DOOH와 프로그래매틱
 
-디지털 옥외는 이제 선택이 아니라 기본 전제에 가깝습니다. 송출·재고가 API로 연결되면서 캠페인 운영 속도가 빨라집니다.
+디지털 옥외는 이제 선택이 아니라 기본 전제에 가깝습니다.
 
 ## 2. 데이터 기반 매체 선정
 
-노출수만이 아닌 오디언스·동선·상권 데이터가 견적과 기획의 중심에 섭니다. A/B 테스트와 사후 검증 루틴이 표준화됩니다.
+노출수만이 아닌 오디언스·동선·상권 데이터가 견적과 기획의 중심에 섭니다.`,
+    },
+    {
+      slug: "new-media-gangnam-tower-q2",
+      title: "[신규 매체] 강남역 프리미엄 타워 전광판 오픈",
+      category: ReportCategory.MEDIA,
+      tags: ["신규매체", "강남", "DOOH"],
+      summary:
+        "싱커드 네트워크에 강남역 인근 초고해상도 전광판이 추가됐습니다.",
+      content: `## 매체 개요
 
-## 3. 크리에이티브 자동화
+강남역 인근 LED 타워가 2026년 4월부터 집행 가능합니다.`,
+    },
+    {
+      slug: "industry-fnb-ooh-playbook",
+      title: "F&B 업종 OOH 집행 인사이트",
+      category: ReportCategory.GUIDE,
+      tags: ["업종", "F&B", "집행팁"],
+      summary: "F&B 브랜드 OOH 집행 팁과 매체 믹스.",
+      content: `## F&B OOH
 
-소재 제작·검수 파이프라인이 자동화되며, 동적 소재로 시간대·날씨·이벤트에 맞춘 메시지 전환이 쉬워집니다.
-
-## 4. 브랜드 세이프티
-
-UGC·리스크 키워드 필터링과 송출 전 검수 체크리스트가 운영 필수 항목으로 자리합니다.
-
-## 5. 통합 리포팅
-
-캠페인 KPI를 웹 대시보드로 공유하고, 대행사·광고주·매체사가 같은 숫자를 보며 의사결정하는 흐름이 가속화됩니다.`,
+상권과 메뉴 타이밍이 핵심입니다.`,
     },
     {
       slug: "seongsu-hannam-ooh-2026",
       title: "성수·한남 상권 OOH 매체 현황 분석",
       category: ReportCategory.REGION,
+      tags: ["지역", "성수", "한남"],
       summary:
-        "서울 핵심 상권의 옥외광고 매체 분포와 단가 현황을 현장 데이터 기반으로 분석했습니다.",
+        "서울 핵심 상권의 옥외광고 매체 분포와 단가 현황을 분석했습니다.",
       content: `## 상권 개요
 
-성수·한남 일대는 유동 인구와 체류 시간이 모두 높아 OOH 수요가 꾸준한 핵심 상권입니다.
-
-## 매체 믹스
-
-대형 전광판·미디어폴·버스쉘터 등 포맷이 다층적으로 분포합니다. 캠페인 목적에 따라 상·하단 믹스를 나누는 전략이 흔합니다.
-
-## 단가·가용성
-
-시즌·패키지에 따라 변동폭이 큽니다. 동일 상권이라도 노출 각도·교통량·야간 가시성에 따라 단가 편차가 발생합니다.
-
-## 실행 체크포인트
-
-제작물 규격, 전기·구조 안전, 송출 스케줄을 사전 확정하면 현장 변수를 줄일 수 있습니다.`,
+성수·한남 일대는 OOH 수요가 꾸준한 핵심 상권입니다.`,
     },
     {
       slug: "ooh-budget-10m-guide",
       title: "OOH 예산 1천만원, 어떻게 쓸까?",
       category: ReportCategory.CAMPAIGN,
+      tags: ["예산", "캠페인", "믹스"],
       summary:
-        "제한된 예산으로 최대 노출을 뽑는 매체 믹스 전략을 사례 중심으로 안내합니다.",
+        "제한된 예산으로 최대 노출을 뽑는 매체 믹스 전략을 안내합니다.",
       content: `## 목표 정의
 
-1천만원 예산에서는 "노출 최대"와 "타깃 정확도" 중 하나를 우선해야 합니다. KPI를 하나로 좁히면 매체 선택이 쉬워집니다.
-
-## 믹스 전략
-
-고가 단일 매체보다, 상보적인 중소형 매체 조합이 리치 대비 효율이 나은 경우가 많습니다.
-
-## 기간·주파수
-
-짧고 강한 집중 vs 길게 나눈 노출. 브랜드 인지 목적이면 주파수를, 리텐션 목적이면 기간을 우선하세요.
-
-## 사후 측정
-
-QR·랜딩·검색량·매장 유입 등 간접 지표를 사전에 설계해 두면 성과 설명이 명확해집니다.`,
+1천만원 예산에서는 KPI를 하나로 좁히면 매체 선택이 쉬워집니다.`,
     },
   ];
 
@@ -284,6 +273,7 @@ QR·랜딩·검색량·매장 유입 등 간접 지표를 사전에 설계해 �
         summary: r.summary,
         content: r.content,
         category: r.category,
+        tags: r.tags,
         published: true,
         publishedAt: publishedAt,
       },
@@ -292,6 +282,7 @@ QR·랜딩·검색량·매장 유입 등 간접 지표를 사전에 설계해 �
         summary: r.summary,
         content: r.content,
         category: r.category,
+        tags: r.tags,
         published: true,
         publishedAt: publishedAt,
       },

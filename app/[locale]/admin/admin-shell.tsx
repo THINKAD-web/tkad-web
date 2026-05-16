@@ -66,6 +66,7 @@ const navDefs = [
   // 7) 분석/도구
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
   { href: "/admin/ai-content", key: "aiContent" as const, icon: Sparkles },
+  { href: "/admin/reports", key: "trendReports" as const, icon: FileText },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {

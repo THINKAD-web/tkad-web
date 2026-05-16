@@ -1,10 +1,11 @@
 import type { Prisma, ReportCategory } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import {
-  isDatabaseAuthError,
-  isMissingContentTableError,
-} from "@/lib/prisma-content-guards";
 import { REPORT_CATEGORY_ORDER } from "@/lib/report-category";
+import {
+  getDemoReportBySlug,
+  listDemoReports,
+} from "@/lib/report-demo-data";
+import { estimateReportReadMinutes } from "@/lib/report-markdown";
 
 export function parseReportCategoryParam(
   raw: string | null | undefined,
@@ -24,14 +25,36 @@ export type PublishedReportListRow = {
   category: ReportCategory;
   thumbnail: string | null;
   publishedAt: Date | null;
+  tags: string[];
+  readMinutes: number;
 };
 
-const emptyListResult = (page: number, pageSize: number) => ({
-  reports: [] as PublishedReportListRow[],
-  total: 0,
-  page,
-  pageSize,
-});
+function mapListRow(
+  r: {
+    id: string;
+    slug: string;
+    title: string;
+    summary: string;
+    category: ReportCategory;
+    thumbnail: string | null;
+    publishedAt: Date | null;
+    tags: string[];
+    content?: string;
+  },
+): PublishedReportListRow {
+  const body = r.content?.trim() ? r.content : r.summary;
+  return {
+    id: r.id,
+    slug: r.slug,
+    title: r.title,
+    summary: r.summary,
+    category: r.category,
+    thumbnail: r.thumbnail,
+    publishedAt: r.publishedAt,
+    tags: r.tags,
+    readMinutes: estimateReportReadMinutes(body),
+  };
+}
 
 export async function listPublishedReports(opts: {
   category?: ReportCategory | null;
@@ -42,11 +65,20 @@ export async function listPublishedReports(opts: {
   total: number;
   page: number;
   pageSize: number;
+  usingDemo: boolean;
 }> {
   const pageSize = Math.min(50, Math.max(1, opts.pageSize ?? 20));
   const page = Math.max(1, opts.page ?? 1);
+
   if (!isDatabaseConfigured()) {
-    return emptyListResult(page, pageSize);
+    const demo = listDemoReports({ ...opts, page, pageSize });
+    return {
+      reports: demo.reports.map((r) => mapListRow(r)),
+      total: demo.total,
+      page: demo.page,
+      pageSize: demo.pageSize,
+      usingDemo: true,
+    };
   }
 
   const where: Prisma.ReportWhereInput = {
@@ -54,45 +86,56 @@ export async function listPublishedReports(opts: {
     ...(opts.category ? { category: opts.category } : {}),
   };
 
-  try {
-    const db = getPrisma();
-    const [total, rows] = await Promise.all([
-      db.report.count({ where }),
-      db.report.findMany({
-        where,
-        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          summary: true,
-          category: true,
-          thumbnail: true,
-          publishedAt: true,
-        },
-      }),
-    ]);
+  const db = getPrisma();
+  const [total, rows] = await Promise.all([
+    db.report.count({ where }),
+    db.report.findMany({
+      where,
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        summary: true,
+        content: true,
+        category: true,
+        thumbnail: true,
+        publishedAt: true,
+        tags: true,
+      },
+    }),
+  ]);
 
-    return { reports: rows, total, page, pageSize };
-  } catch (e) {
-    if (isMissingContentTableError(e) || isDatabaseAuthError(e)) {
-      return emptyListResult(page, pageSize);
-    }
-    throw e;
+  if (total === 0 && page === 1) {
+    const demo = listDemoReports({ ...opts, page, pageSize });
+    return {
+      reports: demo.reports.map((r) => mapListRow(r)),
+      total: demo.total,
+      page: demo.page,
+      pageSize: demo.pageSize,
+      usingDemo: true,
+    };
   }
+
+  return {
+    reports: rows.map((r) => mapListRow(r)),
+    total,
+    page,
+    pageSize,
+    usingDemo: false,
+  };
 }
 
 export async function getPublishedReportBySlug(slug: string) {
-  if (!isDatabaseConfigured()) return null;
-  try {
-    const db = getPrisma();
-    return await db.report.findFirst({
-      where: { slug, published: true },
-    });
-  } catch (e) {
-    if (isMissingContentTableError(e) || isDatabaseAuthError(e)) return null;
-    throw e;
+  if (!isDatabaseConfigured()) {
+    return getDemoReportBySlug(slug);
   }
+  const db = getPrisma();
+  const row = await db.report.findFirst({
+    where: { slug, published: true },
+  });
+  if (row) return row;
+  return getDemoReportBySlug(slug);
 }

@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
-import { Heart, MessageSquare } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getPublishedReportBySlug } from "@/lib/report-queries";
 import { labelForReportCategory } from "@/lib/report-category";
-import { listRelatedCommunityPostsForReport } from "@/lib/report-related-community";
-import { COMMUNITY_CATEGORY_LABELS } from "@/lib/community/types";
-import { cn } from "@/lib/utils";
-import { InsightMarkdownBody } from "@/components/insights/markdown-body";
-import { pageAlternates, siteUrl } from "@/lib/seo";
+import { listRelatedPublishedReports } from "@/lib/report-related";
+import {
+  extractReportToc,
+  estimateReportReadMinutes,
+} from "@/lib/report-markdown";
+import { pageAlternates, serializeJsonLd, siteUrl } from "@/lib/seo";
+import {
+  buildReportArticleJsonLd,
+  buildReportBreadcrumbJsonLd,
+} from "@/lib/structured-data";
+import { ReportMarkdownBody } from "@/components/report/report-markdown-body";
+import { ReportArticleToc } from "@/components/report/report-article-toc";
+import { ReportDetailSidebar } from "@/components/report/report-detail-sidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -62,58 +70,81 @@ export default async function ReportDetailPage({ params }: Params) {
   const row = await getPublishedReportBySlug(slug);
   if (!row) notFound();
 
-  const related = await listRelatedCommunityPostsForReport(row.category);
+  const toc = extractReportToc(row.content);
+  const readMinutes = estimateReportReadMinutes(row.content);
+  const related = await listRelatedPublishedReports(slug, row.category, 3);
+  const tags = row.tags ?? [];
 
-  const relatedCard =
-    "group block rounded-[28px] border border-border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_100px_rgba(0,0,0,0.12)] dark:border-white/12 dark:bg-white/6 dark:backdrop-blur-md dark:shadow-[0_24px_80px_rgba(0,0,0,0.4)] dark:hover:border-white/18";
+  const publishedIso =
+    row.publishedAt?.toISOString() ?? row.updatedAt.toISOString();
+  const jsonLd = [
+    buildReportArticleJsonLd(
+      {
+        title: row.title,
+        summary: row.summary,
+        slug,
+        publishedIso,
+        thumbnail: row.thumbnail,
+      },
+      locale,
+    ),
+    buildReportBreadcrumbJsonLd({ title: row.title, slug }, locale),
+  ];
 
   return (
-    <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon">
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
-          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-          <div
-            aria-hidden
-            className="absolute inset-0 opacity-20 tkad-neon-grid"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2),rgba(0,0,0,0.75),rgba(0,0,0,0.95))]"
-          />
-          <div className="relative mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pb-20 sm:pt-20 lg:px-8">
-            <nav className="mb-8 font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
-              <Link href="/report" className="transition-colors hover:text-white">
-                {isKo ? "← 트렌드 리포트 목록" : "← Trend reports"}
-              </Link>
-            </nav>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                <span className="tkad-home-accent-text">Report</span>
-              </span>
-              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                {labelForReportCategory(row.category, isKo)}
-              </span>
-            </div>
-            <time
-              dateTime={row.publishedAt?.toISOString()}
-              className="mt-5 block font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55"
-            >
-              {formatPublished(row.publishedAt, locale)}
-            </time>
-            <h1 className="mt-4 text-balance text-3xl font-[950] leading-tight tracking-[-0.04em] text-white sm:text-4xl lg:text-5xl">
-              {row.title}
-            </h1>
-          </div>
-        </section>
+    <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+      />
 
-        <article className="bg-background text-foreground dark:bg-[#030308]">
-          <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:py-16">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
+        <nav className="mb-8 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <Link href="/report" className="transition-colors hover:text-primary">
+            {isKo ? "← 트렌드 리포트 목록" : "← Trend reports"}
+          </Link>
+        </nav>
+
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-12">
+          <article className="min-w-0">
+            <header className="space-y-4 border-b-2 border-black pb-8">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex border-2 border-black bg-[#FF6600] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+                  {labelForReportCategory(row.category, isKo)}
+                </span>
+                <time
+                  dateTime={row.publishedAt?.toISOString()}
+                  className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+                >
+                  {formatPublished(row.publishedAt, locale)}
+                </time>
+                <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" aria-hidden />
+                  {isKo ? `약 ${readMinutes}분` : `~${readMinutes} min`}
+                </span>
+              </div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+                {row.title}
+              </h1>
+              <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+                {row.summary}
+              </p>
+              {tags.length > 0 ? (
+                <ul className="flex flex-wrap gap-2 pt-1">
+                  {tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="border border-black/20 bg-muted px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+                    >
+                      #{tag}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </header>
+
             {row.thumbnail ? (
-              <div className="overflow-hidden rounded-[28px] border border-border shadow-[0_24px_80px_rgba(0,0,0,0.1)] dark:border-white/12 dark:shadow-[0_36px_120px_rgba(0,0,0,0.55)]">
+              <div className="mt-8 overflow-hidden border-2 border-black shadow-[4px_4px_0_0_rgb(0,0,0)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={row.thumbnail}
@@ -123,66 +154,40 @@ export default async function ReportDetailPage({ params }: Params) {
               </div>
             ) : null}
 
-            <div
-              className={cn(
-                "mt-10 rounded-[28px] border border-border bg-card p-6 sm:p-8",
-                "dark:border-white/12 dark:bg-white/6 dark:backdrop-blur-md",
-              )}
-            >
-              <InsightMarkdownBody markdown={row.content} />
+            {toc.length > 0 ? (
+              <div className="mt-8 lg:hidden">
+                <ReportArticleToc items={toc} isKo={isKo} />
+              </div>
+            ) : null}
+
+            <div className="mt-8 border-2 border-black bg-card p-6 sm:p-8">
+              <ReportMarkdownBody markdown={row.content} />
             </div>
 
-            <div className="mt-12 border-t border-border pt-10 dark:border-white/10">
+            <div className="mt-12 border-t-2 border-black pt-10">
               <Link
                 href="/report"
-                className="tkad-neon-cta-clean inline-flex h-14 items-center justify-center rounded-[22px] px-8 text-sm font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-base"
+                className="inline-flex border-2 border-black bg-foreground px-6 py-3 font-mono text-[12px] font-bold uppercase tracking-[0.16em] text-background transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_rgb(255,102,0)]"
               >
                 {isKo ? "다른 리포트 보기" : "More reports"}
               </Link>
             </div>
+          </article>
 
-            {related.length > 0 ? (
-              <section className="mt-14">
-                <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
-                  {isKo ? "관련 커뮤니티 글" : "Related community posts"}
-                </h2>
-                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {related.map((post) => {
-                    const labels = COMMUNITY_CATEGORY_LABELS[post.category];
-                    return (
-                      <Link
-                        key={post.id}
-                        href={`/community/post/${post.id}`}
-                        className={relatedCard}
-                      >
-                        <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary dark:border-white/15 dark:bg-white/10 dark:text-white/90">
-                          {isKo ? labels.shortKo : labels.en}
-                        </span>
-                        <h3 className="mt-3 line-clamp-2 text-base font-bold leading-snug text-foreground dark:text-white">
-                          {post.title}
-                        </h3>
-                        <div className="mt-4 flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          <span className="inline-flex items-center gap-1 text-foreground dark:text-white">
-                            <Heart
-                              className="h-3.5 w-3.5 text-primary dark:text-cyan-300"
-                              aria-hidden
-                            />
-                            {post.likeCount}
-                          </span>
-                          <span className="inline-flex items-center gap-1 text-foreground dark:text-white">
-                            <MessageSquare className="h-3.5 w-3.5" aria-hidden />
-                            {post.commentCount}
-                          </span>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </section>
+          <div className="space-y-6">
+            {toc.length > 0 ? (
+              <div className="hidden lg:block">
+                <ReportArticleToc items={toc} isKo={isKo} />
+              </div>
             ) : null}
+            <ReportDetailSidebar
+              isKo={isKo}
+              category={row.category}
+              related={related}
+            />
           </div>
-        </article>
+        </div>
       </div>
-    </HomeLandingDayNight>
+    </div>
   );
 }
