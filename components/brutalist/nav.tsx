@@ -17,7 +17,13 @@ import { Link } from "@/i18n/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type BrutalNavLeaf = { href: string; label: string; desc?: string };
+export type BrutalNavLeaf = {
+  href: string;
+  label: string;
+  desc?: string;
+  /** e.g. 준비중 — shown next to label in nav */
+  badge?: string;
+};
 export type BrutalNavGroup = { label: string; items: BrutalNavLeaf[] };
 export type BrutalNavEntry = BrutalNavLeaf | BrutalNavGroup;
 

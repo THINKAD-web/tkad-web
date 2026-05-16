@@ -30,6 +30,7 @@ import {
 } from "@/lib/build-academy-pdf";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
+import { ContentNotifySignup } from "@/components/content-notify-signup";
 
 const inputCls =
   "h-10 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";

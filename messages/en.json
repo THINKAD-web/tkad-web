@@ -65,7 +65,8 @@
     "recommend": "AI media picks",
     "searchPlaceholder": "Search media or area",
     "searchAria": "Search media",
-    "searchSubmit": "Search"
+    "searchSubmit": "Search",
+    "comingSoonBadge": "Soon"
   },
   "hero": {
     "title": "Everything About Korean OOH Advertising",
@@ -2123,5 +2124,18 @@
       "quote": "Request quote",
       "quoteShort": "Quote"
     }
+  },
+  "contentNotify": {
+    "badge": "Notify me",
+    "title": "Get notified",
+    "descReport": "We will email you when the first OOH trend report is published.",
+    "descAcademy": "We will email you when new lessons or webinars are added.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "name@company.com",
+    "submit": "Notify me",
+    "submitting": "Sending…",
+    "submitted": "Subscribed",
+    "successHint": "Thanks — we will reach out when new content goes live.",
+    "error": "Could not save your request. Please try again."
   }
 }
