@@ -190,10 +190,10 @@ function FavoritesTab({
       <EmptyState
         icon="⭐"
         title="관심 매체가 없습니다"
-        description="지도에서 매체 카드의 하트 아이콘을 눌러 관심 매체로 저장해보세요."
+        description="매체 목록·상세의 하트로 찜한 뒤, 찜 목록에서 AI 플래너로 이어갈 수 있습니다."
         action={
           <Link
-            href="/media/map"
+            href="/media"
             className="inline-flex items-center gap-2 border-2 border-border bg-card px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
           >
             매체 탐색하러 가기

@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User as UserIcon } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import { HeaderFavoritesLink } from "@/components/header-favorites-link";
+import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 
 type Session = { id: string; email: string; name: string; role: string } | null;
 
@@ -41,6 +43,8 @@ export function HeaderUserMenu({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex items-center gap-1.5">
+      <FavoritesSessionSync />
+      <HeaderFavoritesLink onNavigate={onNavigate} />
       <Link
         href="/cart"
         onClick={onNavigate}
