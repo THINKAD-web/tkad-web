@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { CampaignStatus } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
+import { linkCampaignOwnerByEmail } from "@/lib/link-campaign-owner";
 
 export const dynamic = "force-dynamic";
 
@@ -75,5 +76,8 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return json({ campaign }, 201);
+  await linkCampaignOwnerByEmail(campaign.id, campaign.clientEmail);
+  const linked = await db.campaign.findUnique({ where: { id: campaign.id } });
+
+  return json({ campaign: linked ?? campaign }, 201);
 }

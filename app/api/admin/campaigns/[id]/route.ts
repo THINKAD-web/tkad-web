@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { CampaignStatus } from "@prisma/client";
 import { upsertDraftSuccessCaseFromCampaign } from "@/lib/auto-success-case-from-campaign";
 import { assertAdminDb, json } from "@/lib/admin-guard";
+import { linkCampaignOwnerByEmail } from "@/lib/link-campaign-owner";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -85,6 +86,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     data.endDate = body.endDate ? new Date(String(body.endDate)) : null;
   if (body.accountId !== undefined)
     data.accountId = String(body.accountId ?? "").trim() || null;
+  if (body.ownerUserId !== undefined)
+    data.ownerUserId = String(body.ownerUserId ?? "").trim() || null;
 
   if (body.status != null) {
     const s = String(body.status);
@@ -99,6 +102,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       where: { id },
       data,
     });
+    if (body.clientEmail != null) {
+      await linkCampaignOwnerByEmail(id, campaign.clientEmail);
+    }
     const becameCompleted =
       campaign.status === CampaignStatus.completed &&
       existing.status !== CampaignStatus.completed;
