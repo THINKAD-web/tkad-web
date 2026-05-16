@@ -65,7 +65,8 @@
     "recommend": "AI media picks",
     "searchPlaceholder": "Search media or area",
     "searchAria": "Search media",
-    "searchSubmit": "Search"
+    "searchSubmit": "Search",
+    "packages": "Package curation"
   },
   "hero": {
     "title": "Everything About Korean OOH Advertising",
@@ -796,7 +797,10 @@
     "plannerRefViewPlanner": "Back to planner",
     "academyRefBanner": "You’re requesting a 1:1 follow-up from THINKAD Academy.",
     "academyRefMessageTemplate": "[THINKAD Academy · 1:1 consult]\nWe’d like to schedule OOH fundamentals training, a webinar follow-up, a team workshop, or a custom curriculum.\n\n",
-    "academyRefBack": "Back to Academy"
+    "academyRefBack": "Back to Academy",
+    "packageRefBanner": "You are requesting a quote for the OOH package below.",
+    "packageRefViewPackages": "View all packages",
+    "packageRefMessageTemplate": "[Package: {title}]\nMedia included: {mediaList}\n\n"
   },
   "contactForm": {
     "nameLabel": "Name",
@@ -2149,5 +2153,33 @@
       "quote": "Request quote",
       "quoteShort": "Quote"
     }
+  },
+  "packages": {
+    "heroEyebrow": "// OOH PACKAGES · CURATED",
+    "heroTitle": "Regional package curation",
+    "heroBadge": "EDITORIAL",
+    "heroSubtitle": "Skip picking media one by one. Editorial bundles by goal, region, and audience help you propose faster and lift deal size.",
+    "heroCtaContact": "Consult on a package",
+    "heroCtaBrowse": "Browse individual media",
+    "listCategory": "Curated routes",
+    "listTitle": "Five recommended packages",
+    "listMeta": "Real catalog IDs · adjustable at quote",
+    "listLead": "Each package is built from live catalog media. Reach and price are monthly references; final quotes vary by flight and slot.",
+    "imagePreparing": "Image coming soon",
+    "quoteCta": "Request quote for this package",
+    "mediaCountLabel": "Media included",
+    "includedMediaPending": "Refreshing media details",
+    "footerEyebrow": "[ NEXT STEP ]",
+    "footerTitle": "Start with a package, refine in AI planner",
+    "footerBody": "Enter budget, timing, and target before quoting — AI can suggest an alternate mix.",
+    "footerPlannerLink": "Open AI planner",
+    "browseEntry": "Browse regional packages"
+  },
+  "homePage": {
+    "packagesKicker": "Packages",
+    "packagesTitle": "Regional <accent>OOH packages</accent>",
+    "packagesMeta": "editorial bundles · 5 routes",
+    "packagesLead": "Propose faster with curated real-media bundles for Gangnam, Seongsu, downtown, and more.",
+    "packagesCta": "Browse packages"
   }
 }

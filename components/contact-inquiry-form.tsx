@@ -11,6 +11,7 @@ import { useToast } from "@/components/toast-provider";
 import Spinner from "@/components/spinner";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { getMediaById, type MediaItem } from "@/lib/media-data";
+import { getMediaPackageBySlug } from "@/data/packages";
 import {
   buildPlannerContactMessage,
   isSavedPlannerPlanId,
@@ -88,6 +89,12 @@ export default function ContactInquiryForm() {
     expiresAt: string;
   } | null>(null);
   const planPrefillDone = useRef<string | null>(null);
+  const packageSlug = searchParams.get("package");
+  const [packageRef, setPackageRef] = useState<
+    ReturnType<typeof getMediaPackageBySlug> | undefined
+  >(undefined);
+  const packagePrefillDone = useRef<string | null>(null);
+
 
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
@@ -138,6 +145,33 @@ export default function ContactInquiryForm() {
     planPrefillDone.current = null;
     setPlannerPlanRef(null);
   }, [planIdParam]);
+
+  useEffect(() => {
+    packagePrefillDone.current = null;
+    setPackageRef(undefined);
+  }, [packageSlug]);
+
+  useEffect(() => {
+    if (!packageSlug?.trim()) return;
+    const slug = packageSlug.trim();
+    if (packagePrefillDone.current === slug) return;
+    const pkg = getMediaPackageBySlug(slug);
+    if (!pkg) return;
+    packagePrefillDone.current = slug;
+    setPackageRef(pkg);
+    const title = isKo ? pkg.nameKo : pkg.nameEn;
+    const mediaList = pkg.mediaIds.join(", ");
+    const snippet = t("packageRefMessageTemplate", { title, mediaList });
+    if (getValues("additionalNotes").trim() === "") {
+      setValue("additionalNotes", snippet, { shouldDirty: true });
+    }
+    if (!getValues("inquiryType")) {
+      setValue("inquiryType", "media_quote", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [getValues, isKo, packageSlug, setValue, t]);
 
   useEffect(() => {
     if (!planIdParam || !isSavedPlannerPlanId(planIdParam)) {
@@ -574,7 +608,23 @@ export default function ContactInquiryForm() {
         {tForm("stepLabel", { current: step + 1, total: 4 })}
       </p>
 
-      {plannerPlanRef ? (
+      {packageRef ? (
+        <div className="border-2 border-primary bg-card p-4 text-sm text-foreground">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            [ PACKAGE REFERENCE ]
+          </p>
+          <p className="mt-2 font-medium leading-relaxed">{t("packageRefBanner")}</p>
+          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            {"// "}{isKo ? packageRef.nameKo : packageRef.nameEn}
+          </p>
+          <Link
+            href="/media/packages"
+            className="mt-3 inline-flex border-b-2 border-foreground/30 pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary hover:text-primary"
+          >
+            {t("packageRefViewPackages")} →
+          </Link>
+        </div>
+      ) : plannerPlanRef ? (
         <div className="border-2 border-primary bg-card p-4 text-sm text-foreground">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ PLANNER REFERENCE ]

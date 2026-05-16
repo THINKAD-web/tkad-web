@@ -86,7 +86,6 @@ import {
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
 import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
-import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import {
   formatMediaPriceWonWithSymbol,
@@ -522,7 +521,7 @@ export default function MediaBrowseClient({
               />
             </div>
 
-            <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+            <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
               <Link
                 href="/contact"
                 className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
@@ -531,17 +530,17 @@ export default function MediaBrowseClient({
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link
-                href="/media/favorites"
+                href="/media/packages"
                 className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-8 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:px-10 sm:text-lg"
               >
-                {t("media.favorites.heroCta")}
+                {t("packages.browseEntry")}
                 <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
               </Link>
               <Link
                 href="/planner"
-                className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-8 text-base font-black text-white/90 backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:px-10 sm:text-lg"
+                className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-8 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:px-10 sm:text-lg"
               >
-                {t("media.favorites.plannerHeroCta")}
+                {isKo ? "AI 캠페인 설계" : "AI campaign planner"}
                 <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
               </Link>
             </div>
@@ -1005,39 +1004,28 @@ export default function MediaBrowseClient({
                         imagePreparingLabel={t("media.imagePreparing")}
                         popularIds={popularIds}
                         topLeftSlot={
-                          <div className="absolute left-2 top-2 z-20 flex items-center gap-1 sm:left-2.5 sm:top-2.5">
-                            <label
-                              className="flex h-8 w-8 cursor-pointer select-none items-center justify-center border-2 border-border bg-card sm:h-9 sm:w-9"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
-                              onKeyDown={(e) => e.stopPropagation()}
-                              title={t("media.compareToggleAria")}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isInCompare(media.id)}
-                                onChange={() => toggleCompare(media)}
-                                disabled={
-                                  media.catalogSource === "network" ||
-                                  (!isInCompare(media.id) &&
-                                    compareItems.length >= COMPARE_MAX_ITEMS)
-                                }
-                                aria-label={t("media.compareToggleAria")}
-                                className="h-3.5 w-3.5 accent-cta sm:h-4 sm:w-4"
-                              />
-                            </label>
-                            {media.catalogSource !== "network" ? (
-                              <MediaFavoriteButton
-                                mediaId={media.id}
-                                mediaName={media.name}
-                                mediaNameEn={media.nameEn || media.name}
-                                compact
-                                className="border-2"
-                              />
-                            ) : null}
-                          </div>
+                          <label
+                            className="absolute left-2 top-2 z-20 flex h-8 w-8 cursor-pointer select-none items-center justify-center border-2 border-border bg-card sm:left-2.5 sm:top-2.5 sm:h-9 sm:w-9"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                            title={t("media.compareToggleAria")}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isInCompare(media.id)}
+                              onChange={() => toggleCompare(media)}
+                              disabled={
+                                media.catalogSource === "network" ||
+                                (!isInCompare(media.id) &&
+                                  compareItems.length >= COMPARE_MAX_ITEMS)
+                              }
+                              aria-label={t("media.compareToggleAria")}
+                              className="h-3.5 w-3.5 accent-cta sm:h-4 sm:w-4"
+                            />
+                          </label>
                         }
                       />
                     ))}
@@ -1053,39 +1041,28 @@ export default function MediaBrowseClient({
                         imagePreparingLabel={t("media.imagePreparing")}
                         popularIds={popularIds}
                         leadingSlot={
-                          <div className="flex items-center gap-1">
-                            <label
-                              className="flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
-                              onKeyDown={(e) => e.stopPropagation()}
-                              title={t("media.compareToggleAria")}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isInCompare(media.id)}
-                                onChange={() => toggleCompare(media)}
-                                disabled={
-                                  media.catalogSource === "network" ||
-                                  (!isInCompare(media.id) &&
-                                    compareItems.length >= COMPARE_MAX_ITEMS)
-                                }
-                                aria-label={t("media.compareToggleAria")}
-                                className="h-4 w-4 accent-cta"
-                              />
-                            </label>
-                            {media.catalogSource !== "network" ? (
-                              <MediaFavoriteButton
-                                mediaId={media.id}
-                                mediaName={media.name}
-                                mediaNameEn={media.nameEn || media.name}
-                                compact
-                                className="border-2"
-                              />
-                            ) : null}
-                          </div>
+                          <label
+                            className="flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onKeyDown={(e) => e.stopPropagation()}
+                            title={t("media.compareToggleAria")}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isInCompare(media.id)}
+                              onChange={() => toggleCompare(media)}
+                              disabled={
+                                media.catalogSource === "network" ||
+                                (!isInCompare(media.id) &&
+                                  compareItems.length >= COMPARE_MAX_ITEMS)
+                              }
+                              aria-label={t("media.compareToggleAria")}
+                              className="h-4 w-4 accent-cta"
+                            />
+                          </label>
                         }
                       />
                     ))}
