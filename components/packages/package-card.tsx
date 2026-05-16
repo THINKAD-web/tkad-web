@@ -1,154 +1,168 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { ArrowRight, Layers } from "lucide-react";
-import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
-import { BtnBlock } from "@/components/brutalist";
-import { cn } from "@/lib/utils";
+import { ArrowRight, Layers, Tag, TrendingUp, Wallet } from "lucide-react";
+import {
+  PACKAGE_PURPOSE_EN,
+  PACKAGE_PURPOSE_KO,
+} from "@/data/packages";
 import type { ResolvedMediaPackage } from "@/lib/media-packages";
 import { buildPackageContactHref } from "@/lib/media-packages";
 import { PACKAGE_INDUSTRY_LABELS } from "@/lib/package-industry-labels";
-import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { cn } from "@/lib/utils";
 
-const accentBorder: Record<ResolvedMediaPackage["accent"], string> = {
-  hermes: "border-hermes/80 hover:border-hermes",
-  violet: "border-violet-500/70 hover:border-violet-400",
-  cyan: "border-cyan-500/70 hover:border-cyan-400",
-  gold: "border-amber-500/70 hover:border-amber-400",
-  rose: "border-rose-500/70 hover:border-rose-400",
+const ACCENT_RING: Record<ResolvedMediaPackage["accent"], string> = {
+  violet: "before:from-violet-500/0 before:via-violet-500/35 before:to-violet-500/0",
+  rose: "before:from-rose-500/0 before:via-rose-500/35 before:to-rose-500/0",
+  cyan: "before:from-cyan-500/0 before:via-cyan-500/35 before:to-cyan-500/0",
+  amber: "before:from-amber-500/0 before:via-amber-500/35 before:to-amber-500/0",
+  indigo: "before:from-indigo-500/0 before:via-indigo-500/35 before:to-indigo-500/0",
 };
 
 type Props = {
   pkg: ResolvedMediaPackage;
-  index: number;
   isKo: boolean;
-  imagePreparingLabel: string;
-  quoteCtaLabel: string;
-  mediaCountLabel: string;
-  includedMediaLabel: string;
+  cardLabels: {
+    media: string;
+    impression: string;
+    budget: string;
+    reason: string;
+    industries: string;
+    cta: string;
+  };
 };
 
-export function PackageCard({
-  pkg,
-  index,
-  isKo,
-  imagePreparingLabel,
-  quoteCtaLabel,
-  mediaCountLabel,
-  includedMediaLabel,
-}: Props) {
+export function PackageCard({ pkg, isKo, cardLabels }: Props) {
   const name = isKo ? pkg.nameKo : pkg.nameEn;
-  const tagline = isKo ? pkg.taglineKo : pkg.taglineEn;
   const description = isKo ? pkg.descriptionKo : pkg.descriptionEn;
-  const reach = isKo ? pkg.reachLabelKo : pkg.reachLabelEn;
-  const priceRange = isKo ? pkg.priceRangeLabelKo : pkg.priceRangeLabelEn;
-  const preview = pkg.media.slice(0, 3);
+  const region = isKo ? pkg.regionLabelKo : pkg.regionLabelEn;
+  const mediaCount = isKo ? pkg.mediaCountRangeKo : pkg.mediaCountRangeEn;
+  const impression = isKo
+    ? pkg.expectedImpressionsLabelKo
+    : pkg.expectedImpressionsLabelEn;
+  const budget = isKo ? pkg.budgetRangeLabelKo : pkg.budgetRangeLabelEn;
+  const reason = isKo ? pkg.recommendReasonKo : pkg.recommendReasonEn;
+  const purposeMap = isKo ? PACKAGE_PURPOSE_KO : PACKAGE_PURPOSE_EN;
 
   return (
     <article
       className={cn(
-        "group relative -mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card transition-colors hover:bg-muted/40",
-        accentBorder[pkg.accent],
+        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 bg-white/80 p-6 backdrop-blur transition-all duration-200",
+        "hover:-translate-y-1 hover:bg-white/95 hover:shadow-[0_24px_72px_rgba(15,23,42,0.18)]",
+        "dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/[0.08]",
+        "dark:hover:shadow-[0_24px_72px_rgba(0,0,0,0.55)]",
+        "before:pointer-events-none before:absolute before:-inset-px before:rounded-2xl before:bg-gradient-to-br before:opacity-0 before:transition-opacity before:duration-300 group-hover:before:opacity-100",
+        ACCENT_RING[pkg.accent],
       )}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b-2 border-border p-4 sm:p-5">
-        <div className="min-w-0 flex-1">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">
-            {`// PKG ${String(index + 1).padStart(2, "0")}`}
-          </p>
-          <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-            {name}
-          </h2>
-          <p className="mt-2 text-sm font-medium leading-relaxed text-accent">
-            {tagline}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {pkg.industryBadges.map((badge) => (
-            <span
-              key={badge}
-              className="border-2 border-border bg-muted px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-foreground"
-            >
-              {isKo
-                ? PACKAGE_INDUSTRY_LABELS[badge].ko
-                : PACKAGE_INDUSTRY_LABELS[badge].en}
-            </span>
-          ))}
-        </div>
+      {/* 상단 — 지역 + 목적 태그 */}
+      <div className="relative flex flex-wrap items-center gap-1.5">
+        <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-700 dark:border-cyan-400/40 dark:bg-cyan-400/10 dark:text-cyan-200">
+          <Tag className="h-3 w-3" aria-hidden />
+          {region}
+        </span>
+        {pkg.purposes.slice(0, 2).map((p) => (
+          <span
+            key={p}
+            className="inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-violet-700 dark:border-violet-400/40 dark:bg-violet-400/10 dark:text-violet-200"
+          >
+            {purposeMap[p]}
+          </span>
+        ))}
       </div>
 
-      <p className="border-b-2 border-border px-4 py-4 text-sm leading-relaxed text-muted-foreground sm:px-5">
+      {/* 이름 + 설명 */}
+      <h3 className="relative mt-4 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+        {name}
+      </h3>
+      <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
         {description}
       </p>
 
-      <div className="grid grid-cols-3 gap-0 border-b-2 border-border">
-        {preview.length > 0 ? (
-          preview.map((m) => (
-            <Link
-              key={m.id}
-              href={mediaItemDetailPath(m.id)}
-              className="relative -ml-[2px] -mt-[2px] block aspect-[4/3] overflow-hidden border-2 border-border bg-muted transition-opacity hover:opacity-90"
-            >
-              <MediaCatalogThumbnail
-                media={m}
-                placeholderLabel={imagePreparingLabel}
-                className="h-full w-full"
-                imgClassName="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
-                sizes="(max-width: 768px) 33vw, 200px"
-              />
-            </Link>
-          ))
-        ) : (
-          <div className="col-span-3 flex aspect-[4/1] items-center justify-center border-2 border-border bg-muted font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-            {includedMediaLabel}
-          </div>
-        )}
-      </div>
+      {/* 통계 3개 */}
+      <dl className="relative mt-5 grid grid-cols-3 gap-2 rounded-xl border border-black/5 bg-black/[0.02] p-3 dark:border-white/8 dark:bg-white/[0.04] sm:gap-3 sm:p-4">
+        <Stat
+          icon={<Layers className="h-3.5 w-3.5" />}
+          label={cardLabels.media}
+          value={mediaCount}
+        />
+        <Stat
+          icon={<TrendingUp className="h-3.5 w-3.5" />}
+          label={cardLabels.impression}
+          value={impression}
+        />
+        <Stat
+          icon={<Wallet className="h-3.5 w-3.5" />}
+          label={cardLabels.budget}
+          value={budget}
+        />
+      </dl>
 
-      <div className="grid gap-px border-b-2 border-border bg-border sm:grid-cols-3">
-        <div className="flex flex-col gap-1 bg-card p-4 sm:p-5">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-            {mediaCountLabel}
-          </span>
-          <span className="flex items-center gap-1.5 text-lg font-bold tabular-nums text-foreground">
-            <Layers className="h-4 w-4 text-accent" aria-hidden />
-            {pkg.mediaCount}
-          </span>
-        </div>
-        <div className="flex flex-col gap-1 bg-card p-4 sm:p-5">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-            {isKo ? "예상 노출" : "Est. reach"}
-          </span>
-          <span className="text-sm font-bold leading-snug text-foreground">
-            {reach}
-          </span>
-        </div>
-        <div className="flex flex-col gap-1 bg-card p-4 sm:p-5">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-            {isKo ? "가격 범위" : "Price range"}
-          </span>
-          <span className="text-sm font-bold leading-snug text-accent">
-            {priceRange}
-          </span>
-        </div>
-      </div>
-
-      <div className="mt-auto flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-          {isKo
-            ? `구성 매체 ${pkg.mediaCount}곳 · 맞춤 기간·슬롯 협의`
-            : `${pkg.mediaCount} placements · custom flight & slots`}
+      {/* 추천 이유 */}
+      <div className="relative mt-4 rounded-xl border-l-2 border-cyan-400 bg-cyan-50/60 px-3 py-2 dark:border-cyan-300/70 dark:bg-cyan-400/10">
+        <p className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-200">
+          {`// `}{cardLabels.reason}
         </p>
-        <BtnBlock
+        <p className="mt-1 text-[13px] leading-relaxed text-foreground/85">
+          {reason}
+        </p>
+      </div>
+
+      {/* 타겟 업종 */}
+      {pkg.industryBadges.length > 0 ? (
+        <div className="relative mt-4">
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            {cardLabels.industries}
+          </p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {pkg.industryBadges.map((b) => (
+              <span
+                key={b}
+                className="inline-flex items-center rounded-full border border-black/10 bg-white/80 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/85 dark:border-white/12 dark:bg-white/[0.06] dark:text-white/85"
+              >
+                {isKo
+                  ? PACKAGE_INDUSTRY_LABELS[b].ko
+                  : PACKAGE_INDUSTRY_LABELS[b].en}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* CTA */}
+      <div className="relative mt-auto pt-5">
+        <Link
           href={buildPackageContactHref(pkg.slug)}
-          variant="accent"
-          size="md"
-          className="shrink-0"
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 text-sm font-bold text-white shadow-[0_10px_28px_rgba(139,92,246,0.30)] transition-transform hover:-translate-y-0.5 dark:shadow-[0_12px_36px_rgba(34,211,238,0.30)]"
         >
-          {quoteCtaLabel}
+          {cardLabels.cta}
           <ArrowRight className="h-4 w-4" aria-hidden />
-        </BtnBlock>
+        </Link>
       </div>
     </article>
+  );
+}
+
+function Stat({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="min-w-0">
+      <dt className="flex items-center gap-1 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="text-cyan-500" aria-hidden>
+          {icon}
+        </span>
+        <span className="truncate">{label}</span>
+      </dt>
+      <dd className="mt-1 truncate text-[13px] font-bold leading-tight text-foreground sm:text-sm">
+        {value}
+      </dd>
+    </div>
   );
 }

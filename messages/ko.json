@@ -2184,6 +2184,44 @@
       "emailHint": "확인 메일: {email}"
     }
   },
+  "packages": {
+    "hero": {
+      "badge": "// CURATED PACKAGES",
+      "title": "목적에 맞는 <accent>OOH 패키지</accent>",
+      "subtitle": "업종·타겟·지역별로 검증된 매체를 조합했습니다. 예산 입력 한 번으로 최적 패키지를 찾으세요.",
+      "ctaPrimary": "패키지 탐색하기",
+      "ctaSecondary": "AI 플래너로 커스텀",
+      "stat1Label": "검증 패키지",
+      "stat1Value": "5+",
+      "stat2Label": "평균 절감",
+      "stat2Value": "15%",
+      "stat3Label": "즉시 견적",
+      "stat3Value": "가능"
+    },
+    "filter": {
+      "all": "전체",
+      "brand": "브랜드 인지도",
+      "launch": "신제품 론칭",
+      "popup": "팝업·이벤트",
+      "coverage": "대형 커버리지",
+      "empty": "선택한 목적에 맞는 패키지가 아직 없습니다."
+    },
+    "card": {
+      "media": "포함 매체",
+      "impression": "예상 총 노출",
+      "budget": "예산 범위",
+      "reason": "추천 이유",
+      "industries": "타겟 업종",
+      "cta": "이 패키지 견적 받기"
+    },
+    "custom": {
+      "eyebrow": "// CUSTOM",
+      "title": "딱 맞는 패키지가 없다면?",
+      "subtitle": "예산·지역·목적을 입력하면 AI가 최적 매체 조합을 3분 안에 설계합니다.",
+      "cta": "AI 플래너 시작하기"
+    },
+    "imagePreparing": "이미지 준비 중"
+  },
   "homePage": {
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroLiveToday": "오늘 누적 노출",
