@@ -3,7 +3,10 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email/client";
 import { getContactConfirmationEmail } from "@/lib/email/contact-confirmation";
-import { getContactAdminNotifyEmail } from "@/lib/email/contact-admin-notify";
+import {
+  getContactAdminNotifyEmail,
+  resolveContactAlertEmail,
+} from "@/lib/email/contact-admin-notify";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
 import {
@@ -14,14 +17,9 @@ import {
   parseInquiryTypeCode,
 } from "@/lib/contact-inquiry-labels";
 import {
-  budgetLabelV2,
   composeContactLeadStoredMessage,
-  inquiryTypeLabelV2,
-  parseCampaignGoalsFromBody,
-  parseContactBudgetV2,
-  parseContactIndustry,
-  parseContactInquiryTypeV2,
-  parseRegionsFromBody,
+  contactLeadSchema,
+  isContactLeadV2Payload,
 } from "@/lib/contact-lead-schema";
 
 export const dynamic = "force-dynamic";
@@ -62,27 +60,10 @@ export async function POST(request: NextRequest) {
   }
 
   const raw = body as Record<string, unknown>;
-  const {
-    company: companyRaw,
-    name: nameRaw,
-    phone: phoneRaw,
-    email: emailRaw,
-    budget: budgetRaw,
-    message: messageRaw,
-    inquiryType: inquiryRaw,
-    locale: localeRaw,
-    startDate: startDateRaw,
-    additionalNotes: additionalNotesRaw,
-    industry: industryRaw,
-    campaignGoals: campaignGoalsRaw,
-    regions: regionsRaw,
-  } = raw;
-
-  /** 레거시 문의 클라이언트는 `cfTurnstileToken` 키를 사용할 수 있음 */
+  const locale = raw.locale === "en" ? "en" : "ko";
   const turnstileToken =
-    (raw.turnstileToken ?? raw.cfTurnstileToken) as string | undefined;
-
-  const locale = localeRaw === "en" ? "en" : "ko";
+    (typeof raw.turnstileToken === "string" ? raw.turnstileToken : undefined) ??
+    (typeof raw.cfTurnstileToken === "string" ? raw.cfTurnstileToken : undefined);
 
   const turnstile = await verifyTurnstileForRequest({
     token: turnstileToken,
@@ -96,119 +77,94 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const company = typeof companyRaw === "string" ? companyRaw : "";
-  const name = typeof nameRaw === "string" ? nameRaw : "";
-  const phone = typeof phoneRaw === "string" ? phoneRaw : "";
-  const emailStr = typeof emailRaw === "string" ? emailRaw.trim() : "";
-  const startDate =
-    typeof startDateRaw === "string" ? startDateRaw.trim() : "";
-  const additionalNotes =
-    typeof additionalNotesRaw === "string"
-      ? additionalNotesRaw.trim()
-      : typeof messageRaw === "string"
-        ? messageRaw.trim()
-        : "";
+  let companyVal = "";
+  let nameVal = "";
+  let phoneVal = "";
+  let emailStr = "";
+  let inquiryLbl = "";
+  let budgetLbl = "";
+  let industryLbl = "";
+  let goalsLbl = "";
+  let regionsLbl = "";
+  let startDateLbl = "";
+  let composedMessage = "";
 
-  const inquiryV2 = parseContactInquiryTypeV2(
-    typeof inquiryRaw === "string" ? inquiryRaw : undefined,
-  );
-  const industryV2 = parseContactIndustry(
-    typeof industryRaw === "string" ? industryRaw : undefined,
-  );
-  const budgetV2 = parseContactBudgetV2(
-    typeof budgetRaw === "string" ? budgetRaw : undefined,
-  );
-  const goalsV2 = parseCampaignGoalsFromBody(campaignGoalsRaw);
-  const regionsV2 = parseRegionsFromBody(regionsRaw);
-
-  const errors: string[] = [];
-
-  if (!name.trim()) errors.push("name");
-  if (!phone.trim() || !PHONE_RE.test(phone)) errors.push("phone");
-
-  let inquiryLbl: string;
-  let budgetLbl: string;
-  let composedMessage: string;
-
-  if (inquiryV2) {
-    if (!emailStr || !EMAIL_RE.test(emailStr)) errors.push("email");
-    if (!company.trim()) errors.push("company");
-    if (!budgetV2) errors.push("budget");
-    if (!industryV2) errors.push("industry");
-    if (!goalsV2) errors.push("campaignGoals");
-    if (!regionsV2) errors.push("regions");
-    if (!startDate || Number.isNaN(Date.parse(startDate))) {
-      errors.push("startDate");
+  if (isContactLeadV2Payload(raw)) {
+    const parsed = contactLeadSchema.safeParse({ ...raw, locale, turnstileToken });
+    if (!parsed.success) {
+      const fields = [
+        ...new Set(
+          parsed.error.issues.map((i) => String(i.path[0] ?? "form")),
+        ),
+      ];
+      return json({ error: "validation_failed", fields }, { status: 400 });
     }
-    if (!additionalNotes) errors.push("additionalNotes");
-    if (errors.length > 0) {
-      return json(
-        { error: "validation_failed", fields: errors },
-        { status: 400 },
-      );
-    }
-    inquiryLbl = inquiryTypeLabelV2(inquiryV2, locale);
-    budgetLbl = budgetLabelV2(budgetV2!, locale);
-    composedMessage = composeContactLeadStoredMessage({
-      locale,
-      inquiryType: inquiryV2,
-      budget: budgetV2!,
-      industry: industryV2!,
-      campaignGoals: goalsV2!,
-      regions: regionsV2!,
-      startDate,
-      additionalNotes,
-    });
+
+    const lead = parsed.data;
+    const composed = composeContactLeadStoredMessage(lead, locale);
+    companyVal = lead.company.trim();
+    nameVal = lead.name.trim();
+    phoneVal = lead.phone?.trim() ?? "";
+    emailStr = lead.email?.trim() ?? "";
+    inquiryLbl = composed.inquiryLabel;
+    budgetLbl = composed.budgetLabel;
+    industryLbl = composed.industryLabel;
+    goalsLbl = composed.goalsLabel;
+    regionsLbl = composed.regionsLabel;
+    startDateLbl = composed.startDateLabel;
+    composedMessage = composed.storedMessage;
   } else {
-    /** Legacy 단일 폼 (message + 구 inquiry 코드) */
+    const name = typeof raw.name === "string" ? raw.name : "";
+    const phone = typeof raw.phone === "string" ? raw.phone : "";
+    const messageRaw =
+      typeof raw.message === "string" ? raw.message
+      : typeof raw.additionalNotes === "string" ? raw.additionalNotes
+      : "";
     const inquiryCode = parseInquiryTypeCode(
-      typeof inquiryRaw === "string" ? inquiryRaw : undefined,
+      typeof raw.inquiryType === "string" ? raw.inquiryType : undefined,
     );
     const budgetCode = parseBudgetCode(
-      typeof budgetRaw === "string" ? budgetRaw : undefined,
+      typeof raw.budget === "string" ? raw.budget : undefined,
     );
+    emailStr = typeof raw.email === "string" ? raw.email.trim() : "";
+    companyVal = typeof raw.company === "string" ? raw.company.trim() : "";
 
-    if (!additionalNotes) errors.push("message");
+    const errors: string[] = [];
+    if (!name.trim()) errors.push("name");
+    if (!phone.trim() || !PHONE_RE.test(phone)) errors.push("phone");
+    if (!messageRaw.trim()) errors.push("message");
     if (!inquiryCode) errors.push("inquiryType");
     if (!budgetCode) errors.push("budget");
     if (emailStr && !EMAIL_RE.test(emailStr)) errors.push("email");
 
     if (errors.length > 0) {
-      return json(
-        { error: "validation_failed", fields: errors },
-        { status: 400 },
-      );
+      return json({ error: "validation_failed", fields: errors }, { status: 400 });
     }
 
+    nameVal = name.trim();
+    phoneVal = phone.trim();
     inquiryLbl = inquiryTypeLabel(inquiryCode!, locale);
     budgetLbl = budgetLabel(budgetCode!, locale);
     composedMessage = composeStoredMessage(
       inquiryLbl,
-      additionalNotes,
+      messageRaw.trim(),
       locale,
       budgetLbl,
     );
   }
 
-  if (!isDatabaseConfigured()) {
-    return json(
-      { error: "service_unavailable" },
-      { status: 503 },
-    );
-  }
+  const hasValidEmail = !!(emailStr && EMAIL_RE.test(emailStr));
 
-  const companyVal = company.trim();
-  const nameVal = name.trim();
-  const phoneVal = phone.trim();
-  const hasValidEmail =
-    emailStr.length > 0 && EMAIL_RE.test(emailStr);
+  if (!isDatabaseConfigured()) {
+    return json({ error: "service_unavailable" }, { status: 503 });
+  }
 
   try {
     const db = getPrisma();
     const base = {
       company: companyVal,
       name: nameVal,
-      phone: phoneVal,
+      phone: phoneVal || (hasValidEmail ? "—" : "-"),
       message: composedMessage,
     };
 
@@ -243,29 +199,27 @@ export async function POST(request: NextRequest) {
   void postInternalAlert({
     type: "contact_inquiry",
     title: "새 문의 접수",
-    body: `${companyVal || "(회사미입력)"} / ${nameVal} / ${phoneVal} · ${inquiryLbl} · ${budgetLbl}`,
-    meta: {
-      email: emailStr,
-      source: "contact_form",
-    },
+    body: `${companyVal || "(회사미입력)"} / ${nameVal} / ${phoneVal || emailStr} · ${inquiryLbl}`,
+    meta: { email: emailStr, source: "contact_form" },
   }).catch(() => {});
 
-  const alertTo = process.env.CONTACT_ALERT_EMAIL?.trim();
-  if (alertTo) {
-    try {
-      const { subject, text, html } = getContactAdminNotifyEmail({
-        company: companyVal,
-        name: nameVal,
-        phone: phoneVal,
-        email: emailStr,
-        budget: budgetLbl,
-        message: composedMessage,
-        inquiryType: inquiryLbl,
-      });
-      await sendEmail({ to: alertTo, subject, text, html });
-    } catch (err) {
-      console.error("[contact] Admin notify email failed:", err);
-    }
+  try {
+    const { subject, text, html } = getContactAdminNotifyEmail({
+      company: companyVal,
+      name: nameVal,
+      phone: phoneVal,
+      email: emailStr,
+      inquiryType: inquiryLbl,
+      budget: budgetLbl,
+      industry: industryLbl || undefined,
+      campaignGoals: goalsLbl || undefined,
+      regions: regionsLbl || undefined,
+      startDate: startDateLbl || undefined,
+      message: composedMessage,
+    });
+    await sendEmail({ to: resolveContactAlertEmail(), subject, text, html });
+  } catch (err) {
+    console.error("[contact] Admin notify email failed:", err);
   }
 
   if (hasValidEmail) {
@@ -273,12 +227,7 @@ export async function POST(request: NextRequest) {
       const { subject, text, html } = getContactConfirmationEmail({
         name: nameVal,
       });
-      await sendEmail({
-        to: emailStr,
-        subject,
-        text,
-        html,
-      });
+      await sendEmail({ to: emailStr, subject, text, html });
     } catch (err) {
       console.error("[contact] Failed to send confirmation email:", err);
     }

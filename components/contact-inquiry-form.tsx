@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -273,7 +273,7 @@ export default function ContactInquiryForm() {
   );
 
   const fieldError = useCallback(
-    (name: keyof ContactLeadFormValues) => {
+    (name: FieldPath<ContactLeadFormValues>) => {
       const e = errors[name];
       if (!e) return null;
       if (name === "phone" && e.message === "phoneFormat") {
@@ -304,7 +304,7 @@ export default function ContactInquiryForm() {
   const toggleGoal = (code: ContactCampaignGoal) => {
     const cur = getValues("campaignGoals");
     const next: ContactCampaignGoal[] = cur.includes(code)
-      ? cur.filter((c) => c !== code)
+      ? cur.filter((c: ContactCampaignGoal) => c !== code)
       : [...cur, code];
     setValue("campaignGoals", next, {
       shouldValidate: true,
@@ -315,7 +315,7 @@ export default function ContactInquiryForm() {
   const toggleRegion = (code: ContactRegion) => {
     const cur = getValues("regions");
     const next: ContactRegion[] = cur.includes(code)
-      ? cur.filter((c) => c !== code)
+      ? cur.filter((c: ContactRegion) => c !== code)
       : [...cur, code];
     setValue("regions", next, {
       shouldValidate: true,
@@ -324,7 +324,7 @@ export default function ContactInquiryForm() {
   };
 
   const goNext = async () => {
-    const ok = await trigger(STEP_FIELDS[step] ?? []);
+    const ok = await trigger(STEP_FIELDS[step] as FieldPath<ContactLeadFormValues>[]);
     if (!ok) {
       toast("warning", tForm("toastValidation"));
       return;
@@ -393,7 +393,7 @@ export default function ContactInquiryForm() {
     }
   };
 
-  const inputErrorBorder = (name: keyof ContactLeadFormValues) =>
+  const inputErrorBorder = (name: FieldPath<ContactLeadFormValues>) =>
     errors[name] ? "border-destructive" : "";
 
   const tabDefs: { value: ContactInquiryType; labelKey: "inquiryTypeMediaQuote" | "inquiryTypeCampaignPlan" | "inquiryTypeOther" }[] =
