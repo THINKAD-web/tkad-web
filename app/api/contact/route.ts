@@ -3,7 +3,10 @@ import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email/client";
 import { getContactConfirmationEmail } from "@/lib/email/contact-confirmation";
-import { getContactAdminNotifyEmail } from "@/lib/email/contact-admin-notify";
+import {
+  getContactAdminNotifyEmail,
+  resolveContactAlertEmail,
+} from "@/lib/email/contact-admin-notify";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
 import {
@@ -13,6 +16,11 @@ import {
   parseBudgetCode,
   parseInquiryTypeCode,
 } from "@/lib/contact-inquiry-labels";
+import {
+  composeContactLeadStoredMessage,
+  contactLeadSchema,
+  isContactLeadV2Payload,
+} from "@/lib/contact-lead-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -51,21 +59,11 @@ export async function POST(request: NextRequest) {
     return json({ success: true }, { status: 201 });
   }
 
-  const raw = body as Record<string, string | undefined>;
-  const {
-    company,
-    name,
-    phone,
-    email: emailRaw,
-    budget: budgetRaw,
-    message: messageRaw,
-    inquiryType: inquiryRaw,
-    locale: localeRaw,
-  } = raw;
-  /** 레거시 문의 클라이언트는 `cfTurnstileToken` 키를 사용할 수 있음 */
-  const turnstileToken = raw.turnstileToken ?? raw.cfTurnstileToken;
-
-  const locale = localeRaw === "en" ? "en" : "ko";
+  const raw = body as Record<string, unknown>;
+  const locale = raw.locale === "en" ? "en" : "ko";
+  const turnstileToken =
+    (typeof raw.turnstileToken === "string" ? raw.turnstileToken : undefined) ??
+    (typeof raw.cfTurnstileToken === "string" ? raw.cfTurnstileToken : undefined);
 
   const turnstile = await verifyTurnstileForRequest({
     token: turnstileToken,
@@ -79,56 +77,94 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const inquiryCode = parseInquiryTypeCode(inquiryRaw);
-  const budgetCode = parseBudgetCode(budgetRaw);
+  let companyVal = "";
+  let nameVal = "";
+  let phoneVal = "";
+  let emailStr = "";
+  let inquiryLbl = "";
+  let budgetLbl = "";
+  let industryLbl = "";
+  let goalsLbl = "";
+  let regionsLbl = "";
+  let startDateLbl = "";
+  let composedMessage = "";
 
-  const errors: string[] = [];
-  if (!name?.trim()) errors.push("name");
-  if (!phone?.trim() || !PHONE_RE.test(phone ?? "")) errors.push("phone");
-  if (!messageRaw?.trim()) errors.push("message");
-  if (!inquiryCode) errors.push("inquiryType");
-  if (!budgetCode) errors.push("budget");
+  if (isContactLeadV2Payload(raw)) {
+    const parsed = contactLeadSchema.safeParse({ ...raw, locale, turnstileToken });
+    if (!parsed.success) {
+      const fields = [
+        ...new Set(
+          parsed.error.issues.map((i) => String(i.path[0] ?? "form")),
+        ),
+      ];
+      return json({ error: "validation_failed", fields }, { status: 400 });
+    }
 
-  const emailOpt = emailRaw?.trim();
-  if (emailOpt && !EMAIL_RE.test(emailOpt)) errors.push("email");
+    const lead = parsed.data;
+    const composed = composeContactLeadStoredMessage(lead, locale);
+    companyVal = lead.company.trim();
+    nameVal = lead.name.trim();
+    phoneVal = lead.phone?.trim() ?? "";
+    emailStr = lead.email?.trim() ?? "";
+    inquiryLbl = composed.inquiryLabel;
+    budgetLbl = composed.budgetLabel;
+    industryLbl = composed.industryLabel;
+    goalsLbl = composed.goalsLabel;
+    regionsLbl = composed.regionsLabel;
+    startDateLbl = composed.startDateLabel;
+    composedMessage = composed.storedMessage;
+  } else {
+    const name = typeof raw.name === "string" ? raw.name : "";
+    const phone = typeof raw.phone === "string" ? raw.phone : "";
+    const messageRaw =
+      typeof raw.message === "string" ? raw.message
+      : typeof raw.additionalNotes === "string" ? raw.additionalNotes
+      : "";
+    const inquiryCode = parseInquiryTypeCode(
+      typeof raw.inquiryType === "string" ? raw.inquiryType : undefined,
+    );
+    const budgetCode = parseBudgetCode(
+      typeof raw.budget === "string" ? raw.budget : undefined,
+    );
+    emailStr = typeof raw.email === "string" ? raw.email.trim() : "";
+    companyVal = typeof raw.company === "string" ? raw.company.trim() : "";
 
-  if (errors.length > 0) {
-    return json(
-      { error: "validation_failed", fields: errors },
-      { status: 400 },
+    const errors: string[] = [];
+    if (!name.trim()) errors.push("name");
+    if (!phone.trim() || !PHONE_RE.test(phone)) errors.push("phone");
+    if (!messageRaw.trim()) errors.push("message");
+    if (!inquiryCode) errors.push("inquiryType");
+    if (!budgetCode) errors.push("budget");
+    if (emailStr && !EMAIL_RE.test(emailStr)) errors.push("email");
+
+    if (errors.length > 0) {
+      return json({ error: "validation_failed", fields: errors }, { status: 400 });
+    }
+
+    nameVal = name.trim();
+    phoneVal = phone.trim();
+    inquiryLbl = inquiryTypeLabel(inquiryCode!, locale);
+    budgetLbl = budgetLabel(budgetCode!, locale);
+    composedMessage = composeStoredMessage(
+      inquiryLbl,
+      messageRaw.trim(),
+      locale,
+      budgetLbl,
     );
   }
 
-  const inquiry = inquiryCode!;
-  const budget = budgetCode!;
-
-  const inquiryLbl = inquiryTypeLabel(inquiry, locale);
-  const budgetLbl = budgetLabel(budget, locale);
-  const composedMessage = composeStoredMessage(
-    inquiryLbl,
-    messageRaw!.trim(),
-    locale,
-    budgetLbl,
-  );
+  const hasValidEmail = !!(emailStr && EMAIL_RE.test(emailStr));
 
   if (!isDatabaseConfigured()) {
-    return json(
-      { error: "service_unavailable" },
-      { status: 503 },
-    );
+    return json({ error: "service_unavailable" }, { status: 503 });
   }
-
-  const companyVal = company?.trim() ?? "";
-  const nameVal = name!.trim();
-  const phoneVal = phone!.trim();
-  const hasValidEmail = !!(emailOpt && EMAIL_RE.test(emailOpt));
 
   try {
     const db = getPrisma();
     const base = {
       company: companyVal,
       name: nameVal,
-      phone: phoneVal,
+      phone: phoneVal || (hasValidEmail ? "—" : "-"),
       message: composedMessage,
     };
 
@@ -138,7 +174,7 @@ export async function POST(request: NextRequest) {
           ...base,
           inquiryType: inquiryLbl,
           budget: budgetLbl,
-          ...(hasValidEmail ? { email: emailOpt } : {}),
+          ...(hasValidEmail ? { email: emailStr } : {}),
         },
       });
     } catch (firstErr) {
@@ -147,7 +183,7 @@ export async function POST(request: NextRequest) {
         await db.contactInquiry.create({
           data: {
             ...base,
-            ...(hasValidEmail ? { email: emailOpt } : { email: "" }),
+            ...(hasValidEmail ? { email: emailStr } : { email: "" }),
           },
         });
       } catch (secondErr) {
@@ -163,42 +199,35 @@ export async function POST(request: NextRequest) {
   void postInternalAlert({
     type: "contact_inquiry",
     title: "새 문의 접수",
-    body: `${company?.trim() || "(회사미입력)"} / ${name!.trim()} / ${phone!.trim()} · ${inquiryLbl} · ${budgetLbl}`,
-    meta: {
-      email: emailOpt ?? "",
-      source: "contact_form",
-    },
+    body: `${companyVal || "(회사미입력)"} / ${nameVal} / ${phoneVal || emailStr} · ${inquiryLbl}`,
+    meta: { email: emailStr, source: "contact_form" },
   }).catch(() => {});
 
-  const alertTo = process.env.CONTACT_ALERT_EMAIL?.trim();
-  if (alertTo) {
-    try {
-      const { subject, text, html } = getContactAdminNotifyEmail({
-        company: company?.trim() ?? "",
-        name: name!.trim(),
-        phone: phone!.trim(),
-        email: emailOpt ?? "",
-        budget: budgetLbl,
-        message: composedMessage,
-        inquiryType: inquiryLbl,
-      });
-      await sendEmail({ to: alertTo, subject, text, html });
-    } catch (err) {
-      console.error("[contact] Admin notify email failed:", err);
-    }
+  try {
+    const { subject, text, html } = getContactAdminNotifyEmail({
+      company: companyVal,
+      name: nameVal,
+      phone: phoneVal,
+      email: emailStr,
+      inquiryType: inquiryLbl,
+      budget: budgetLbl,
+      industry: industryLbl || undefined,
+      campaignGoals: goalsLbl || undefined,
+      regions: regionsLbl || undefined,
+      startDate: startDateLbl || undefined,
+      message: composedMessage,
+    });
+    await sendEmail({ to: resolveContactAlertEmail(), subject, text, html });
+  } catch (err) {
+    console.error("[contact] Admin notify email failed:", err);
   }
 
-  if (emailOpt && EMAIL_RE.test(emailOpt)) {
+  if (hasValidEmail) {
     try {
       const { subject, text, html } = getContactConfirmationEmail({
-        name: name?.trim(),
+        name: nameVal,
       });
-      await sendEmail({
-        to: emailOpt,
-        subject,
-        text,
-        html,
-      });
+      await sendEmail({ to: emailStr, subject, text, html });
     } catch (err) {
       console.error("[contact] Failed to send confirmation email:", err);
     }
