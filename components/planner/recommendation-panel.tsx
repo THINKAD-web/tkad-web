@@ -141,7 +141,7 @@ export function PlannerRecommendationPanel({
       <div className="flex flex-col gap-3 border-b-2 border-border p-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            [ AI RECOMMENDATIONS ]
+            {t("recommendEyebrow")}
           </p>
           <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
             <Sparkles className="h-5 w-5 text-primary" aria-hidden />

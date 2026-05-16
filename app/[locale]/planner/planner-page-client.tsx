@@ -643,7 +643,7 @@ export default function PlannerPageClient({
                   <span className="tkad-home-accent-text">THINKAD Planner</span>
                 </span>
                 <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                  <span className="tkad-home-accent-text">BETA</span>
+                  <span className="tkad-home-accent-text">{t("previewBadge")}</span>
                 </span>
               </div>
               <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
@@ -700,7 +700,7 @@ export default function PlannerPageClient({
                 <span className="tkad-home-accent-text">THINKAD Planner</span>
               </span>
               <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                <span className="tkad-home-accent-text">BETA</span>
+                <span className="tkad-home-accent-text">{t("previewBadge")}</span>
               </span>
             </div>
             <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
