@@ -1,0 +1,17 @@
+{
+  "explorer.excludeGitIgnore": false,
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "ENV.setup": ".env.local, .env.production.example, .env",
+    "package.json": ".env.local, .env.production.example"
+  },
+  "files.exclude": {
+    "**/.env.local": false,
+    "**/.env": false,
+    "**/.env.production.example": false
+  },
+  "search.exclude": {
+    "**/.env.local": false
+  }
+}
