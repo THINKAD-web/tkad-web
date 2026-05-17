@@ -16,29 +16,16 @@ export default async function CreativesLibraryPage({
 
   return (
     <CreativesShell
-      eyebrow="// 06 · CREATIVES ✦ BETA"
-      title={
-        isKo ? (
-          <>
-            소재를 올리고{" "}
-            <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-              바로 집행
-            </span>
-          </>
-        ) : (
-          <>
-            Upload creatives and{" "}
-            <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-              go live
-            </span>
-          </>
-        )
-      }
-      description={
-        isKo
+      eyebrow=""
+      title=""
+      categoryHero={{
+        code: "// 06 · CREATIVES ✦ BETA",
+        headlineBefore: isKo ? "소재를 올리고 " : "Upload creatives and ",
+        headlineGradient: isKo ? "바로 집행" : "go live",
+        subtitle: isKo
           ? "광고 집행에 사용할 이미지·영상 소재를 업로드하고, 즉시예약과 플레이리스트에서 재사용할 수 있습니다."
-          : "Upload images and videos once, then reuse them across instant bookings and playlists."
-      }
+          : "Upload images and videos once, then reuse them across instant bookings and playlists.",
+      }}
       isKo={isKo}
     >
       <CreativeLibraryClient />

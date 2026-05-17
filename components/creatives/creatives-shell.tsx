@@ -4,8 +4,17 @@ import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { CategoryExploreHero } from "@/components/category-explore-hero";
 import { ArrowLeft, BookOpen, Film, ListMusic, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+export type CreativesCategoryHero = {
+  code: string;
+  headlineBefore: string;
+  headlineGradient: string;
+  headlineAfter?: string;
+  subtitle: string;
+};
 
 /**
  * `/creatives/*` 모든 페이지가 공유하는 네온 셸 (히어로 + 좌측 네브).
@@ -19,6 +28,7 @@ export function CreativesShell({
   eyebrow,
   title,
   description,
+  categoryHero,
   rightSlot,
   children,
   showBackToLibrary = false,
@@ -27,6 +37,7 @@ export function CreativesShell({
   eyebrow: string;
   title: ReactNode;
   description?: ReactNode;
+  categoryHero?: CreativesCategoryHero;
   rightSlot?: ReactNode;
   children: ReactNode;
   showBackToLibrary?: boolean;
@@ -35,6 +46,21 @@ export function CreativesShell({
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
+        {categoryHero ? (
+          <CategoryExploreHero
+            code={categoryHero.code}
+            headlineBefore={categoryHero.headlineBefore}
+            headlineGradient={categoryHero.headlineGradient}
+            headlineAfter={categoryHero.headlineAfter}
+            subtitle={categoryHero.subtitle}
+            className="border-b border-white/10"
+          >
+            <div className="flex flex-col items-center gap-4">
+              {rightSlot ? <div className="shrink-0">{rightSlot}</div> : null}
+              <CreativesSubNav className="justify-center" />
+            </div>
+          </CategoryExploreHero>
+        ) : (
         <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
@@ -69,6 +95,7 @@ export function CreativesShell({
             <CreativesSubNav className="mt-6" />
           </div>
         </section>
+        )}
 
         <section className="bg-card py-10 sm:py-14">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
