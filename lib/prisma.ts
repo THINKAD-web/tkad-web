@@ -4,6 +4,10 @@ import { config as loadEnv } from "dotenv";
 import { statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { Pool } from "pg";
+import {
+  isValidPostgresDatabaseUrl,
+  stripDatabaseUrlQuotes,
+} from "@/lib/format-db-api-error";
 import { normalizePgDatabaseUrl } from "@/lib/normalize-pg-database-url";
 
 declare global {
@@ -40,11 +44,29 @@ function readPrismaClientBundleMtimeMs(): number | null {
   }
 }
 
+function readDatabaseUrl(): string | undefined {
+  if (process.env.NODE_ENV !== "production") {
+    ensureLocalDatabaseEnvFromFiles();
+  }
+  const raw = process.env.DATABASE_URL?.trim();
+  if (!raw) return undefined;
+  const stripped = stripDatabaseUrlQuotes(raw);
+  if (stripped !== raw) {
+    process.env.DATABASE_URL = stripped;
+  }
+  return stripped;
+}
+
 function createPrismaClient(): PrismaClient {
-  const rawUrl = process.env.DATABASE_URL?.trim();
+  const rawUrl = readDatabaseUrl();
   if (!rawUrl) {
     throw new Error(
       "Missing DATABASE_URL. Add it to .env (e.g. Neon: https://neon.tech → Connection string)",
+    );
+  }
+  if (!isValidPostgresDatabaseUrl(rawUrl)) {
+    throw new Error(
+      "Invalid DATABASE_URL. Use a postgresql:// connection string from Neon (see .env.production.example).",
     );
   }
 
@@ -107,7 +129,8 @@ const prisma = new Proxy({} as PrismaClient, {
 });
 
 export function isDatabaseConfigured(): boolean {
-  return !!process.env.DATABASE_URL?.trim();
+  const url = readDatabaseUrl();
+  return !!url && isValidPostgresDatabaseUrl(url);
 }
 
 export default prisma;

@@ -162,10 +162,19 @@ export default function AdminCampaignsPage() {
     setErr(null);
     try {
       const res = await fetch("/api/admin/campaigns");
-      const data = (await res.json()) as {
+      const raw = await res.text();
+      let data: {
         campaigns?: CampaignRow[];
         error?: string;
+        code?: string;
       };
+      try {
+        data = raw ? (JSON.parse(raw) as typeof data) : {};
+      } catch {
+        throw new Error(
+          "서버 응답을 해석할 수 없습니다. DATABASE_URL 설정 후 npm run db:push 를 실행했는지 확인하세요.",
+        );
+      }
       if (!res.ok) throw new Error(data.error ?? "load failed");
       setList(data.campaigns ?? []);
     } catch (e) {
@@ -710,9 +719,12 @@ export default function AdminCampaignsPage() {
       </div>
 
       {err ? (
-        <p className="text-sm text-red-600">
-          {err} (DATABASE_URL 및 prisma db push 필요)
-        </p>
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-500/40 dark:bg-rose-950/40 dark:text-rose-100">
+          <p>{err}</p>
+          <p className="mt-2 font-mono text-[11px] text-rose-700/90 dark:text-rose-200/80">
+            {`// 로컬: .env 에 DATABASE_URL → npm run db:push · Vercel: 환경 변수 추가 후 재배포`}
+          </p>
+        </div>
       ) : null}
 
       {/* 상단: 새 캠페인 + 캠페인 목록 (가로 배치) */}

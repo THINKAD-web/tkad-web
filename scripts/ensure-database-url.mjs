@@ -10,7 +10,16 @@ const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 config({ path: resolve(root, ".env") });
 config({ path: resolve(root, ".env.local"), override: true });
 
-if (!process.env.DATABASE_URL?.trim()) {
+let databaseUrl = process.env.DATABASE_URL?.trim() ?? "";
+if (
+  (databaseUrl.startsWith('"') && databaseUrl.endsWith('"')) ||
+  (databaseUrl.startsWith("'") && databaseUrl.endsWith("'"))
+) {
+  databaseUrl = databaseUrl.slice(1, -1).trim();
+  process.env.DATABASE_URL = databaseUrl;
+}
+
+if (!databaseUrl) {
   console.error(`
 [tkad-web] DATABASE_URL이 설정되어 있지 않습니다.
 
@@ -22,6 +31,15 @@ if (!process.env.DATABASE_URL?.trim()) {
 
 그 다음:
   npm run db:push
+`);
+  process.exit(1);
+}
+
+if (!/^postgres(ql)?:\/\//i.test(databaseUrl)) {
+  console.error(`
+[tkad-web] DATABASE_URL이 postgresql:// 로 시작하지 않습니다.
+
+Neon 연결 문자열 전체를 복사했는지, 따옴표·공백·줄바꿈이 섞이지 않았는지 확인하세요.
 `);
   process.exit(1);
 }
