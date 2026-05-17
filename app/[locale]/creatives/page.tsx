@@ -16,15 +16,21 @@ export default async function CreativesLibraryPage({
 
   return (
     <CreativesShell
-      eyebrow={`[ ${isKo ? "내 소재 라이브러리" : "Creative Library"} ]`}
+      eyebrow="// 06 · CREATIVES ✦ BETA"
       title={
         isKo ? (
           <>
-            업로드한 <span className="tkad-home-accent-text">소재</span>를 한 곳에서
+            소재를 올리고{" "}
+            <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+              바로 집행
+            </span>
           </>
         ) : (
           <>
-            All your <span className="tkad-home-accent-text">creatives</span> in one place
+            Upload creatives and{" "}
+            <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+              go live
+            </span>
           </>
         )
       }

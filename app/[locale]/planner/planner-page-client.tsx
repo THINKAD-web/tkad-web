@@ -13,6 +13,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { CategoryExploreHero } from "@/components/category-explore-hero";
 import {
   ChevronLeft,
   ChevronRight,
@@ -625,35 +626,12 @@ export default function PlannerPageClient({
     return (
       <HomeLandingDayNight>
         <div className="tkad-landing-neon">
-          <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
-            <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-            <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-            <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
-            />
-
-            <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-                {`// 05 / Planner`}
-              </p>
-              <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-                <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                  <span className="tkad-home-accent-text">THINKAD Planner</span>
-                </span>
-                <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                  <span className="tkad-home-accent-text">{t("previewBadge")}</span>
-                </span>
-              </div>
-              <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
-                {t("title")}
-              </h1>
-              <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
-                {t("subtitle")}
-              </p>
-            </div>
-          </section>
+          <CategoryExploreHero
+          code="// 05 · PLANNER"
+          headlineBefore={isKo ? "예산에 맞는 " : "Media plans for "}
+          headlineGradient={isKo ? "미디어 플랜" : "your budget"}
+          subtitle={t("subtitle")}
+        />
 
           <PlannerNeonPageBody
             appearance={landingAppearance}
@@ -682,35 +660,12 @@ export default function PlannerPageClient({
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon">
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
-          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
-          />
-
-          <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-              {`// 05 / Planner`}
-            </p>
-            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                <span className="tkad-home-accent-text">THINKAD Planner</span>
-              </span>
-              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                <span className="tkad-home-accent-text">{t("previewBadge")}</span>
-              </span>
-            </div>
-            <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
-              {t("title")}
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
-              {t("subtitle")}
-            </p>
-          </div>
-        </section>
+        <CategoryExploreHero
+          code="// 05 · PLANNER"
+          headlineBefore={isKo ? "예산에 맞는 " : "Media plans for "}
+          headlineGradient={isKo ? "미디어 플랜" : "your budget"}
+          subtitle={t("subtitle")}
+        />
 
         <PlannerNeonPageBody
           appearance={landingAppearance}

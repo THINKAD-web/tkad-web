@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { CategoryExploreHero } from "@/components/category-explore-hero";
 import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
 } from "@/components/media-ai-recommend-form";
@@ -138,35 +139,16 @@ export default function RecommendPageClient({
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
-          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-          <div
-            aria-hidden
-            className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
-          />
-
-          <div className="tkad-recommend-hero relative mx-auto max-w-7xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-28 lg:px-8 lg:pb-36 lg:pt-32">
-            <p className="tkad-recommend-hero__eyebrow font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-              {`// 04 / AI Media Explorer`}
-            </p>
-            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-              <h1 className="text-balance text-[clamp(40px,5.2vw,72px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
-                {isKo ? "TKAD Bot과 함께 매체 탐험 시작!" : tr("heroTitle")}
-              </h1>
-              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                <span className="tkad-home-accent-text">BETA</span>
-              </span>
-            </div>
-            <p className="tkad-recommend-hero__subtitle mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
-              {isKo
-                ? "몇 가지 정보만 알려주시면, TKAD Bot이 캠페인에 꼭 맞는 매체들을 찾아드려요."
-                : tr("heroSubtitle")}
-            </p>
+        <CategoryExploreHero
+          code="// 04 · RECOMMEND"
+          headlineBefore={isKo ? "AI가 추천하는 " : "AI-recommended "}
+          headlineGradient={isKo ? "맞춤 매체" : "media picks"}
+          subtitle={
+            isKo
+              ? "몇 가지 정보만 알려주시면, TKAD Bot이 캠페인에 꼭 맞는 매체들을 찾아드려요."
+              : tr("heroSubtitle")
+          }
+        >
             <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
                 href="/media"
@@ -181,8 +163,8 @@ export default function RecommendPageClient({
                 {isKo ? "플래너로 설계하기" : "Plan with Planner"}
               </Link>
             </div>
-          </div>
-        </section>
+        </CategoryExploreHero>
+
 
         <section className="tkad-media-browse-main border-t border-border/60 bg-card py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

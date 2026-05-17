@@ -1,0 +1,106 @@
+import type { CampaignReportData } from "@/components/campaign-report-preview";
+
+/** Admin 보고서 미리보기 데모·스크린샷용 (DB 불필요) */
+export const CAMPAIGN_REPORT_MOCK_DATA: CampaignReportData = {
+  campaignName: "강남 역삼 코리도 OOH 2026 Q2",
+  clientCompany: "데모 브랜드코리아",
+  clientName: "김마케팅",
+  clientEmail: "marketing@demo-brand.co.kr",
+  status: "집행 완료",
+  notes:
+    "주요 집행 구간 역삼·선릉역 인근. 야간 송출 구간은 18–22시 피크에 맞춰 운영했습니다.\n증빙은 현장 촬영 + 매체별 송출 확인서 기준입니다.",
+  startDate: "2026-03-01T00:00:00.000Z",
+  endDate: "2026-05-15T00:00:00.000Z",
+  budgetMin: 45_000_000,
+  budgetMax: 52_000_000,
+  scheduleEvents: [
+    {
+      title: "1차 매체 설치",
+      startsAt: "2026-02-25T00:00:00.000Z",
+      endsAt: "2026-02-26T00:00:00.000Z",
+      kind: "install",
+    },
+    {
+      title: "본 송출 시작",
+      startsAt: "2026-03-01T00:00:00.000Z",
+      endsAt: "2026-03-01T12:00:00.000Z",
+      kind: "broadcast",
+    },
+    {
+      title: "중간 점검 미팅",
+      startsAt: "2026-04-10T00:00:00.000Z",
+      endsAt: "2026-04-10T02:00:00.000Z",
+      kind: "meeting",
+    },
+    {
+      title: "철거·원상복구",
+      startsAt: "2026-05-16T00:00:00.000Z",
+      endsAt: "2026-05-17T00:00:00.000Z",
+      kind: "removal",
+    },
+  ],
+  proofPhotos: [
+    {
+      imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
+      caption: "역삼역 사거리 전광판 야간 송출",
+    },
+    {
+      imageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80",
+      caption: "선릉역 인근 빌보드 주간",
+    },
+  ],
+  mediaBookings: [
+    {
+      title: "역삼 LED 타워",
+      mediaName: "역삼 LED 타워",
+      location: "서울 강남구 역삼동",
+      imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&q=80",
+      startsAt: "2026-03-01T00:00:00.000Z",
+      endsAt: "2026-05-15T00:00:00.000Z",
+      status: "completed",
+      dailyFootTraffic: 128_000,
+      type: "digital",
+      region: "서울",
+      visibilityScore: 4,
+      impressions: 2_400_000,
+      trafficPattern: {
+        hourly: [2, 3, 4, 6, 8, 12, 15, 18, 20, 22, 24, 26, 28, 30, 32, 34, 38, 42, 45, 40, 32, 24, 14, 8],
+        weekly: [14, 15, 16, 17, 18, 12, 10],
+        monthly: [7, 8, 9, 10, 9, 8, 7, 8, 9, 10, 11, 9],
+      },
+    },
+    {
+      title: "선릉역 지하철 스크린",
+      mediaName: "선릉역 지하철 스크린",
+      location: "서울 강남구 선릉역",
+      imageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&q=80",
+      startsAt: "2026-03-05T00:00:00.000Z",
+      endsAt: "2026-05-10T00:00:00.000Z",
+      status: "completed",
+      dailyFootTraffic: 95_000,
+      type: "transit",
+      region: "서울",
+      visibilityScore: 3,
+      impressions: 1_800_000,
+    },
+    {
+      title: "테헤란로 빌보드",
+      mediaName: "테헤란로 빌보드",
+      location: "서울 강남구 테헤란로",
+      imageUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&q=80",
+      startsAt: "2026-03-10T00:00:00.000Z",
+      endsAt: "2026-04-30T00:00:00.000Z",
+      status: "completed",
+      dailyFootTraffic: 72_000,
+      type: "billboard",
+      region: "서울",
+      visibilityScore: 4,
+      impressions: 1_200_000,
+    },
+  ],
+  financialDocs: [
+    { kind: "quote", title: "1차 견적", amountKrw: 48_000_000, status: "approved" },
+    { kind: "invoice", title: "중도금 청구", amountKrw: 24_000_000, status: "paid" },
+    { kind: "invoice", title: "잔금 청구", amountKrw: 24_000_000, status: "paid" },
+  ],
+};

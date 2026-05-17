@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { CategoryExploreHero } from "@/components/category-explore-hero";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import {
   ArrowRight,
@@ -70,30 +71,12 @@ export default function CasesPageClient({ initialCases }: Props) {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
-          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
-          />
-
-          <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-              {`// 08 / Cases`}
-            </p>
-            <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-              <h1 className="text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
-                {empty ? t("cases.reportHeroTitle") : t("cases.title")}
-              </h1>
-              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
-                <span className="tkad-home-accent-text">BETA</span>
-              </span>
-            </div>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
-              {empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
-            </p>
+        <CategoryExploreHero
+          code="// 01 · CASES"
+          headlineBefore={isKo ? "브랜드가 선택한 " : "Brands chose "}
+          headlineGradient={isKo ? "성공 사례" : "success stories"}
+          subtitle={empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
+        >
             <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
                 href="/quote"
@@ -110,8 +93,8 @@ export default function CasesPageClient({ initialCases }: Props) {
                 <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
               </Link>
             </div>
-          </div>
-        </section>
+        </CategoryExploreHero>
+
 
         <NeonSection className="pb-0 pt-40 sm:pb-0 sm:pt-48">
           {empty ? (

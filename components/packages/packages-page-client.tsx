@@ -7,6 +7,7 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 import type { ResolvedMediaPackage } from "@/lib/media-packages";
 import type { PackagePurpose } from "@/data/packages";
 import { PackageCard } from "@/components/packages/package-card";
+import { CategoryExploreHero } from "@/components/category-explore-hero";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -35,30 +36,13 @@ export function PackagesPageClient({ packages }: Props) {
 
   return (
     <div className="min-h-screen bg-[#F4F4F2] text-foreground transition-colors dark:bg-[#0A0A0A]">
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_30%,rgba(139,92,246,0.18),transparent_55%),radial-gradient(circle_at_82%_30%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_50%_120%,rgba(236,72,153,0.18),transparent_60%)] dark:opacity-80"
-        />
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-          <div className="flex flex-col items-center text-center">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-muted-foreground">
-              {t("hero.badge")}
-            </p>
-            <h1 className="mt-4 text-balance text-4xl font-black leading-[1.05] tracking-[-0.04em] sm:text-5xl lg:text-6xl">
-              {t.rich("hero.title", {
-                accent: (chunks) => (
-                  <span className="bg-gradient-to-r from-violet-500 via-pink-500 to-cyan-400 bg-clip-text text-transparent">
-                    {chunks}
-                  </span>
-                ),
-              })}
-            </h1>
-            <p className="mt-5 max-w-2xl text-balance text-base leading-relaxed text-muted-foreground sm:text-lg">
-              {t("hero.subtitle")}
-            </p>
-            <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+      <CategoryExploreHero
+        code="// 03 · PACKAGES"
+        headlineBefore={isKo ? "목적에 맞는 " : "OOH packages for "}
+        headlineGradient={isKo ? "OOH 패키지" : "your goals"}
+        subtitle={t("hero.subtitle")}
+      >
+            <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
               <a
                 href="#package-grid"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-7 text-sm font-bold text-white shadow-[0_18px_48px_rgba(139,92,246,0.35)] transition-transform hover:-translate-y-0.5"
@@ -67,13 +51,12 @@ export function PackagesPageClient({ packages }: Props) {
               </a>
               <Link
                 href="/planner"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-foreground/15 bg-transparent px-7 text-sm font-bold text-foreground transition-colors hover:border-foreground/30 hover:bg-foreground/[0.04] dark:border-white/15 dark:hover:border-white/30"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-7 text-sm font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10"
               >
                 {t("hero.ctaSecondary")} <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
             </div>
-
-            <dl className="mt-12 grid w-full max-w-3xl grid-cols-3 gap-3 sm:gap-6">
+            <dl className="mt-12 grid w-full max-w-3xl grid-cols-3 gap-3 sm:gap-6 mx-auto">
               {[
                 {
                   label: t("hero.stat1Label"),
@@ -101,9 +84,8 @@ export function PackagesPageClient({ packages }: Props) {
                 </div>
               ))}
             </dl>
-          </div>
-        </div>
-      </section>
+      </CategoryExploreHero>
+
 
       {/* Filter tabs */}
       <section
