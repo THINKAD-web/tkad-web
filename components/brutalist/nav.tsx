@@ -23,7 +23,13 @@ export type BrutalNavLeaf = {
   desc?: string;
   /** e.g. 준비중 — shown next to label in nav */
   badge?: string;
+  /** React list key when the same href appears more than once */
+  navKey?: string;
 };
+
+function navLeafKey(leaf: BrutalNavLeaf): string {
+  return leaf.navKey ?? leaf.href;
+}
 export type BrutalNavGroup = { label: string; items: BrutalNavLeaf[] };
 export type BrutalNavEntry = BrutalNavLeaf | BrutalNavGroup;
 
@@ -108,7 +114,7 @@ export function BrutalNav({
             isGroup(entry) ? (
               <BrutalNavDropdown key={`g-${i}`} entry={entry} />
             ) : (
-              <li key={entry.href}>
+              <li key={navLeafKey(entry)}>
                 <Link
                   href={entry.href}
                   className="inline-flex h-10 items-center rounded-xl px-3 text-[12px] font-semibold tracking-tight text-foreground transition-colors hover:bg-foreground/8 hover:text-foreground lg:px-4 lg:text-[13px] dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
@@ -176,7 +182,7 @@ export function BrutalNav({
             className="flex list-none gap-1.5 overflow-x-auto overscroll-x-contain py-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {flattenNavLeaves(links).map((leaf) => (
-              <li key={leaf.href} className="shrink-0">
+              <li key={navLeafKey(leaf)} className="shrink-0">
                 <Link
                   href={leaf.href}
                   className="inline-flex max-w-[11rem] truncate rounded-full border border-zinc-300/90 bg-white px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 dark:bg-white/10 dark:text-white"
@@ -213,7 +219,7 @@ export function BrutalNav({
                   </p>
                   <ul className="divide-y divide-zinc-200 dark:divide-white/10">
                     {entry.items.map((leaf) => (
-                      <li key={leaf.href}>
+                      <li key={navLeafKey(leaf)}>
                         <Link
                           href={leaf.href}
                           onClick={() => setMobileOpen(false)}
@@ -226,7 +232,7 @@ export function BrutalNav({
                   </ul>
                 </li>
               ) : (
-                <li key={entry.href}>
+                <li key={navLeafKey(entry)}>
                   <Link
                     href={entry.href}
                     onClick={() => setMobileOpen(false)}
@@ -346,7 +352,7 @@ function BrutalNavDropdown({ entry }: { entry: BrutalNavGroup }) {
             )}
           >
             {entry.items.map((leaf) => (
-              <li key={leaf.href}>
+              <li key={navLeafKey(leaf)}>
                 <Link
                   href={leaf.href}
                   role="menuitem"

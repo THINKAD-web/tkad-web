@@ -613,7 +613,30 @@
     "compareAvailabilityAvailable": "✅ Available",
     "compareAvailabilityReserved": "🟡 Booked",
     "compareAvailabilityMaintenance": "🔴 Maintenance",
-    "compareStartPlanner": "Start Planner"
+    "compareStartPlanner": "Start Planner",
+    "favorites": {
+      "headerAria": "Saved media",
+      "headerAriaCount": "{count} saved media",
+      "menuLabel": "Saved media",
+      "guestMax": "Guests can save up to {max} items.",
+      "added": "Saved {name}.",
+      "removed": "Removed from saved list.",
+      "removedNamed": "Removed {name} from saved list.",
+      "error": "Could not update saved list.",
+      "networkError": "Network error. Please try again.",
+      "addAria": "Save media",
+      "removeAria": "Remove from saved",
+      "eyebrow": "MY FAVORITES",
+      "title": "Saved media",
+      "subtitle": "Collect placements you like and continue to planner or quotes.",
+      "guestHint": "Guest saves stay on this device. Sign in to sync across devices.",
+      "loading": "Loading…",
+      "emptyTitle": "No saved media yet",
+      "emptyDescription": "Tap the heart on a media card to save it here.",
+      "browseCta": "Browse media",
+      "plannerLead": "Start the planner with your saved picks?",
+      "plannerCta": "Start planner"
+    }
   },
   "recommend": {
     "form": {

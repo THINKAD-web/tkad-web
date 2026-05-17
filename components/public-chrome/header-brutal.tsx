@@ -62,7 +62,11 @@ export function HeaderBrutal({ contentStatus }: Props) {
   const links: BrutalNavEntry[] = [
     { href: "/", label: t("nav.home") },
     { href: "/services", label: t("nav.services") },
-    { href: "/media/packages", label: t("nav.packages") },
+    {
+      href: "/media/packages",
+      label: t("nav.packages"),
+      navKey: "packages-top",
+    },
     {
       label: t("nav.media"),
       items: [
@@ -70,6 +74,7 @@ export function HeaderBrutal({ contentStatus }: Props) {
           href: "/media/packages",
           label: t("nav.packages"),
           desc: t("nav.packagesDesc"),
+          navKey: "packages-dropdown",
         },
         { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록" },
         { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색" },
