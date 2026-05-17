@@ -27,3 +27,21 @@ if (!process.env.DATABASE_URL?.trim()) {
 `);
   process.exit(1);
 }
+
+const url = process.env.DATABASE_URL.trim();
+if (
+  /@ep-xxx\.|@ep-xxx\.region\.|\/\/user:password@/i.test(url) ||
+  url.includes("ep-xxx.region.aws.neon.tech")
+) {
+  console.error(`
+[tkad-web] DATABASE_URL이 아직 예시(.env.production.example) 값입니다.
+
+  현재: ep-xxx / user:password 같은 placeholder → DB에 연결되지 않습니다.
+
+  1) Neon Console → 프로젝트 → Connection details → Pooled connection
+  2) 연결 문자열 전체 복사
+  3) 프로젝트 루트 .env.local 의 DATABASE_URL= 한 줄만 교체
+  4) npm run db:push 다시 실행
+`);
+  process.exit(1);
+}
