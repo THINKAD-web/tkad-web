@@ -67,13 +67,6 @@ export function HeaderBrutal({ contentStatus }: Props) {
       label: t("nav.media"),
       items: [
         { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록" },
-        {
-          href: "/media/packages",
-          label: t("nav.packages"),
-          desc: isKo
-            ? "지역·목적별 에디토리얼 패키지"
-            : "Editorial bundles by region & goal",
-        },
         { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색" },
         { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천" },
         { href: "/planner", label: t("nav.planner"), desc: "예산·기간별 플래닝" },
