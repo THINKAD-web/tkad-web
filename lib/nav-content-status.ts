@@ -9,12 +9,16 @@ export type NavContentStatus = {
 };
 
 export async function getNavContentStatus(): Promise<NavContentStatus> {
-  const [{ total: reportCount }, academyLessons] = await Promise.all([
-    listPublishedReports({ page: 1, pageSize: 1 }),
-    getPublishedAcademyLessonsForUi(),
-  ]);
-  return {
-    reportCount,
-    academyLessonCount: academyLessons.length,
-  };
+  try {
+    const [{ total: reportCount }, academyLessons] = await Promise.all([
+      listPublishedReports({ page: 1, pageSize: 1 }),
+      getPublishedAcademyLessonsForUi(),
+    ]);
+    return {
+      reportCount,
+      academyLessonCount: academyLessons.length,
+    };
+  } catch {
+    return { reportCount: 0, academyLessonCount: 0 };
+  }
 }

@@ -8,7 +8,12 @@
  * @see https://www.postgresql.org/docs/current/libpq-ssl.html
  */
 export function normalizePgDatabaseUrl(url: string): string {
-  const u = url.trim();
+  let u = url.trim();
+  // `channel_binding=require` breaks some local node-pg builds; Neon pooler works without it.
+  u = u.replace(/([?&])channel_binding=[^&]*&?/gi, (_, sep) =>
+    sep === "?" ? "?" : "",
+  );
+  u = u.replace(/\?&/, "?").replace(/[?&]$/, "");
   if (!/[?&]sslmode=/i.test(u)) return u;
   return u.replace(
     /([?&])sslmode=(prefer|require|verify-ca)\b/gi,

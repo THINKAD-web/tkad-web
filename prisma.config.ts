@@ -10,7 +10,9 @@ import { defineConfig } from "prisma/config";
 
 const root = process.cwd();
 loadEnv({ path: resolve(root, ".env") });
+loadEnv({ path: resolve(root, ".env.development"), override: true });
 loadEnv({ path: resolve(root, ".env.local"), override: true });
+loadEnv({ path: resolve(root, ".env.development.local"), override: true });
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
 

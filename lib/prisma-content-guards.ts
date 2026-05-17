@@ -30,6 +30,7 @@ export function isDatabaseAuthError(e: unknown): boolean {
   if (e instanceof Error) {
     const msg = e.message || "";
     if (/Authentication failed against the database server/i.test(msg)) return true;
+    if (/password authentication failed/i.test(msg)) return true;
     if (/AuthenticationFailed/i.test(msg)) return true;
   }
   return false;

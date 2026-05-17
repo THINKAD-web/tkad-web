@@ -8,7 +8,9 @@ import { fileURLToPath } from "url";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 config({ path: resolve(root, ".env") });
+config({ path: resolve(root, ".env.development"), override: true });
 config({ path: resolve(root, ".env.local"), override: true });
+config({ path: resolve(root, ".env.development.local"), override: true });
 
 if (!process.env.DATABASE_URL?.trim()) {
   console.error(`
