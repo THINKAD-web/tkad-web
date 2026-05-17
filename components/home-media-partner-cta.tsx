@@ -29,16 +29,14 @@ export function HomeMediaPartnerCta({ isKo }: { isKo: boolean }) {
           </span>
           <div className="min-w-0">
             <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-white/55 sm:text-[10px]">
-              {`[ ${isKo ? "Media Partner" : "Media Partner"} ]`}
+              {`[ ${isKo ? "신규 매체" : "New media"} ]`}
             </p>
             <p className="mt-1 text-balance text-sm font-bold leading-snug text-white sm:text-base">
               {isKo ? (
-                <>
-                  <span className="tkad-home-accent-text">매체사</span>이신가요? 싱커드 카탈로그에 매체를 등록해 보세요.
-                </>
+                <>신규 매체가 있으신가요? 싱커드 카탈로그에 매체를 등록해 보세요.</>
               ) : (
                 <>
-                  <span className="tkad-home-accent-text">Media owner</span>? Register your inventory with THINKAD.
+                  Have new media to list? Register your inventory with THINKAD.
                 </>
               )}
             </p>

@@ -18,7 +18,7 @@ export default async function ContactPage({
   const t = await getTranslations({ locale, namespace: "contact" });
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon">
+      <div className="tkad-landing-neon bg-[#0A0A0A]">
         {/* Hero — 홈/서비스와 동일 네온 랜딩 쉘 */}
         <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
