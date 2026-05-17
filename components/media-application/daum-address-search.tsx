@@ -102,21 +102,27 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
     }
   }, [open]);
 
+  const inputCls =
+    "min-w-0 flex-1 h-11 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/40";
+
   return (
     <div className="space-y-2">
+      <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
+        {isKo ? "주소" : "Address"}
+      </span>
       <div className="flex flex-wrap gap-2">
         <input
           type="text"
           readOnly
           value={value}
           placeholder={isKo ? "주소 검색 버튼을 눌러주세요" : "Search address"}
-          className="min-w-0 flex-1 border-2 border-black bg-card px-3 py-2 font-mono text-sm"
+          className={inputCls}
         />
         <button
           type="button"
           disabled={disabled || loading}
           onClick={() => void openSearch()}
-          className="shrink-0 border-2 border-black bg-[#FF6600] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-white disabled:opacity-50"
+          className="tkad-neon-cta-clean shrink-0 rounded-xl px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-white disabled:opacity-50"
         >
           {loading
             ? isKo
@@ -129,12 +135,12 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
       </div>
       {open ? (
         <div
-          className="relative z-50 overflow-hidden border-2 border-black bg-card shadow-[6px_6px_0_0_rgb(0,0,0)]"
+          className="relative z-50 overflow-hidden rounded-2xl border border-white/12 bg-[#0a0a0f] shadow-[0_24px_80px_rgba(0,0,0,0.65)]"
           style={{ height: 420 }}
         >
           <button
             type="button"
-            className="absolute right-2 top-2 z-10 border border-black bg-white px-2 py-1 font-mono text-[10px] font-bold"
+            className="absolute right-2 top-2 z-10 rounded-lg border border-white/15 bg-white/10 px-2 py-1 font-mono text-[10px] font-bold text-white"
             onClick={() => setOpen(false)}
           >
             {isKo ? "닫기" : "Close"}

@@ -12,9 +12,11 @@ import { PhotoSlotUpload } from "@/components/media-application/photo-slot-uploa
 import { MEDIA_APPLICATION_MEDIA_TYPES } from "@/lib/media-application";
 
 const inputCls =
-  "w-full border-2 border-black bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-[#FF6600] focus:outline-none";
+  "h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/40 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30";
 const labelCls =
-  "block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#FF6600]";
+  "block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/55";
+const sectionTitleCls =
+  "font-mono text-[12px] font-bold uppercase tracking-[0.2em] text-white/90";
 
 export function MediaRegisterForm() {
   const locale = useLocale();
@@ -90,12 +92,25 @@ export function MediaRegisterForm() {
           notes,
         }),
       });
-      const data = (await res.json()) as {
-        id?: string;
-        error?: string;
-        fields?: string[];
-      };
+      const text = await res.text();
+      let data: { id?: string; error?: string; fields?: string[] } = {};
+      try {
+        data = JSON.parse(text) as typeof data;
+      } catch {
+        throw new Error(
+          isKo
+            ? "서버 응답 오류입니다. 잠시 후 다시 시도해 주세요."
+            : "Server response error. Please try again.",
+        );
+      }
       if (!res.ok) {
+        if (data.error === "database_error") {
+          throw new Error(
+            isKo
+              ? "접수 저장에 실패했습니다. 잠시 후 다시 시도하거나 문의해 주세요."
+              : "Could not save your application. Please try again or contact us.",
+          );
+        }
         if (data.fields?.length) {
           throw new Error(
             isKo
@@ -115,24 +130,22 @@ export function MediaRegisterForm() {
 
   if (successId) {
     return (
-      <div className="mx-auto max-w-xl border-2 border-black bg-card p-10 text-center shadow-[8px_8px_0_0_rgb(0,0,0)]">
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#FF6600]">
+      <div className="mx-auto max-w-xl rounded-2xl border border-white/12 bg-white/6 p-10 text-center backdrop-blur">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
           [ {isKo ? "접수 완료" : "Submitted"} ]
         </p>
-        <h2 className="mt-4 text-2xl font-bold">
+        <h2 className="mt-4 text-2xl font-black text-white">
           {isKo ? "매체 등록 신청이 접수되었습니다" : "Application received"}
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-sm leading-relaxed text-white/75">
           {isKo
             ? "심사 후 담당자 이메일로 결과를 안내드립니다. 영업일 기준 수일이 소요될 수 있습니다."
             : "We will email you after review."}
         </p>
-        <p className="mt-6 font-mono text-[10px] text-muted-foreground">
-          ID: {successId}
-        </p>
+        <p className="mt-6 font-mono text-[10px] text-white/45">ID: {successId}</p>
         <Link
           href="/"
-          className="mt-8 inline-flex border-2 border-black bg-foreground px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-background"
+          className="tkad-neon-cta-clean mt-8 inline-flex items-center justify-center rounded-2xl px-8 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-white"
         >
           {isKo ? "홈으로" : "Home"}
         </Link>
@@ -143,13 +156,13 @@ export function MediaRegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-10">
       {error ? (
-        <p className="border-2 border-destructive bg-destructive/10 px-4 py-3 font-mono text-sm text-destructive">
+        <p className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
           {error}
         </p>
       ) : null}
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={sectionTitleCls}>
           1. {isKo ? "신청자 정보" : "Applicant"}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -195,7 +208,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={sectionTitleCls}>
           2. {isKo ? "매체 기본 정보" : "Media basics"}
         </h2>
         <label className="grid gap-1">
@@ -218,7 +231,7 @@ export function MediaRegisterForm() {
             }}
           >
             {MEDIA_APPLICATION_MEDIA_TYPES.map((t) => (
-              <option key={t} value={t}>
+              <option key={t} value={t} className="bg-[#0a0a0f] text-white">
                 {t === "digital"
                   ? isKo
                     ? "디지털"
@@ -253,7 +266,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={sectionTitleCls}>
           3. {isKo ? "매체 스펙" : "Specs"}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -282,9 +295,10 @@ export function MediaRegisterForm() {
             />
           </label>
         </div>
-        <label className="flex items-center gap-2 font-mono text-sm">
+        <label className="flex items-center gap-2 font-mono text-sm text-white/80">
           <input
             type="checkbox"
+            className="rounded border-white/20"
             checked={isDigital}
             onChange={(e) => setIsDigital(e.target.checked)}
           />
@@ -301,9 +315,10 @@ export function MediaRegisterForm() {
             onChange={(e) => setOperatingHours(e.target.value)}
           />
         </label>
-        <label className="flex items-center gap-2 font-mono text-sm">
+        <label className="flex items-center gap-2 font-mono text-sm text-white/80">
           <input
             type="checkbox"
+            className="rounded border-white/20"
             checked={hasLighting}
             onChange={(e) => setHasLighting(e.target.checked)}
           />
@@ -312,7 +327,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={sectionTitleCls}>
           4. {isKo ? "노출 데이터" : "Exposure"}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -357,7 +372,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={sectionTitleCls}>
           5. {isKo ? "사진 (각 1장 이상)" : "Photos"}
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
@@ -389,7 +404,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={sectionTitleCls}>
           6. {isKo ? "추가 특이사항" : "Notes"}
         </h2>
         <textarea
@@ -414,7 +429,7 @@ export function MediaRegisterForm() {
           !photoNightUrl ||
           !address
         }
-        className="inline-flex w-full items-center justify-center gap-2 border-2 border-black bg-[#FF6600] py-4 font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto sm:px-12"
+        className="tkad-neon-cta-clean inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto sm:min-w-[14rem] sm:px-12"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {isKo ? "등록 신청 제출" : "Submit application"}

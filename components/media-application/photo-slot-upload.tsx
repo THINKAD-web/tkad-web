@@ -31,11 +31,11 @@ export function PhotoSlotUpload({
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      setError("이미지 파일만 업로드할 수 있습니다.");
+      setError("Images only / 이미지 파일만");
       return;
     }
     if (file.size > 12 * 1024 * 1024) {
-      setError("12MB 이하 이미지를 사용해 주세요.");
+      setError("Max 12MB / 12MB 이하");
       return;
     }
     setError(null);
@@ -52,11 +52,11 @@ export function PhotoSlotUpload({
   };
 
   return (
-    <div className="border-2 border-black bg-card p-4 shadow-[4px_4px_0_0_rgb(0,0,0)]">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-[#FF6600]">
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/55">
         {label}
       </p>
-      <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+      <p className="mt-1 text-xs text-white/55">{hint}</p>
       <input
         ref={inputRef}
         type="file"
@@ -73,10 +73,10 @@ export function PhotoSlotUpload({
         type="button"
         disabled={disabled || uploading}
         onClick={() => inputRef.current?.click()}
-        className="mt-3 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 border-2 border-dashed border-black/30 bg-muted/40 transition-colors hover:border-[#FF6600] disabled:opacity-50"
+        className="mt-3 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-dashed border-white/20 bg-white/5 transition-colors hover:border-violet-500/40 hover:bg-white/8 disabled:opacity-50"
       >
         {uploading ? (
-          <Loader2 className="h-8 w-8 animate-spin text-[#FF6600]" />
+          <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
         ) : value ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -86,15 +86,15 @@ export function PhotoSlotUpload({
           />
         ) : (
           <>
-            <ImagePlus className="h-8 w-8 text-muted-foreground" />
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em]">
+            <ImagePlus className="h-8 w-8 text-white/45" />
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-white/55">
               {slot}
             </span>
           </>
         )}
       </button>
       {error ? (
-        <p className="mt-2 text-xs text-destructive">{error}</p>
+        <p className="mt-2 text-xs text-rose-300">{error}</p>
       ) : null}
     </div>
   );
