@@ -845,19 +845,86 @@ model User {
   createdAt       DateTime             @default(now()) @map("created_at")
   updatedAt       DateTime             @updatedAt @map("updated_at")
 
-  sessions           UserSession[]
-  bookingRequests    MediaBooking[]      @relation("BookingRequester")
-  ownedCampaigns     Campaign[]          @relation("CampaignOwner")
-  instantBookings    Booking[]
-  communityPosts     CommunityPost[]     @relation("CommunityPostAuthor")
-  communityComments  CommunityComment[]  @relation("CommunityCommentAuthor")
-  communityPostLikes CommunityPostLike[]
-  communityBookmarks CommunityBookmark[]
-  creatives          Creative[]          @relation("UserCreatives")
-  playlists          CreativePlaylist[]  @relation("UserPlaylists")
+  sessions                UserSession[]
+  bookingRequests         MediaBooking[]         @relation("BookingRequester")
+  ownedCampaigns          Campaign[]             @relation("CampaignOwner")
+  instantBookings         Booking[]
+  communityPosts          CommunityPost[]        @relation("CommunityPostAuthor")
+  communityComments       CommunityComment[]     @relation("CommunityCommentAuthor")
+  communityPostLikes      CommunityPostLike[]
+  communityBookmarks      CommunityBookmark[]
+  creatives               Creative[]             @relation("UserCreatives")
+  playlists               CreativePlaylist[]     @relation("UserPlaylists")
+  newsletterSubscriptions NewsletterSubscriber[] @relation("UserNewsletters")
 
   @@index([email])
   @@map("users")
+}
+
+/// 트렌드 리포트 뉴스레터 구독자.
+/// 같은 이메일 재신청은 unsubscribedAt 만 null 로 갱신해 재활성화.
+model NewsletterSubscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  /**
+   * 발송 언어 ('ko' | 'en')
+   */
+  locale         String    @default("ko")
+  /**
+   * 가입 동선: 'home_community' | 'report_dashboard' | 'admin_manual' 등
+   */
+  source         String?
+  /**
+   * 가입 사용자(User) 가 있으면 함께 묶어서 어드민이 컨텍스트 확인
+   */
+  userId         String?   @map("user_id")
+  /// 해지 시각. null = 활성. 발송 대상 필터 기준.
+  unsubscribedAt DateTime? @map("unsubscribed_at")
+  /**
+   * 마지막 발송 시각 — 어드민 정렬·재활성화 트래킹
+   */
+  lastSentAt     DateTime? @map("last_sent_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  user User? @relation("UserNewsletters", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([unsubscribedAt])
+  @@index([locale])
+  @@map("newsletter_subscribers")
+}
+
+/// 뉴스레터 발송 기록 (어드민이 보낸 1회분).
+/// 발송 자체의 fan-out 은 cron/queue 에서 처리하고, 이 레코드는 메타·집계.
+model NewsletterDispatch {
+  id             String    @id @default(cuid())
+  subject        String
+  /**
+   * 마크다운/HTML 본문(저장만 — 발송 후 변경 X)
+   */
+  bodyMd         String    @db.Text
+  /**
+   * 발송 대상 locale 필터 ('ko' | 'en' | 'all')
+   */
+  localeFilter   String    @default("all") @map("locale_filter")
+  recipientCount Int       @default(0) @map("recipient_count")
+  successCount   Int       @default(0) @map("success_count")
+  failedCount    Int       @default(0) @map("failed_count")
+  scheduledAt    DateTime? @map("scheduled_at")
+  startedAt      DateTime? @map("started_at")
+  completedAt    DateTime? @map("completed_at")
+  /**
+   * 어드민 메모(외부 노출 X)
+   */
+  notes          String?
+  /**
+   * 보낸 어드민 식별자(`tkad_admin_session` 사용자 — 단순 string 라벨)
+   */
+  createdByAdmin String?   @map("created_by_admin")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("newsletter_dispatches")
 }
 
 model UserSession {
