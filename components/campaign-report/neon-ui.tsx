@@ -98,9 +98,11 @@ export type StatVariant = "default" | "accent" | "muted";
 export function StatGrid({
   children,
   cols = 3,
+  className,
 }: {
   children: ReactNode;
   cols?: 2 | 3 | 4;
+  className?: string;
 }) {
   const colClass =
     cols === 4
@@ -108,7 +110,7 @@ export function StatGrid({
       : cols === 2
         ? "sm:grid-cols-2"
         : "sm:grid-cols-2 lg:grid-cols-3";
-  return <div className={cn("grid grid-cols-1 gap-3", colClass)}>{children}</div>;
+  return <div className={cn("grid grid-cols-1 gap-3", colClass, className)}>{children}</div>;
 }
 
 export function StatCard({
@@ -200,6 +202,142 @@ export function NeonBadge({ children }: { children: ReactNode }) {
     <span className="inline-flex rounded-full border border-[#22d3ee]/35 bg-[#22d3ee]/15 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#22d3ee]">
       {children}
     </span>
+  );
+}
+
+export function InfoGrid({
+  children,
+  cols = 2,
+}: {
+  children: ReactNode;
+  cols?: 2 | 3;
+}) {
+  return (
+    <div
+      className={cn(
+        "grid grid-cols-1 gap-3",
+        cols === 3 ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2",
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function InfoCell({
+  label,
+  children,
+  variant = "default",
+  className,
+}: {
+  label: string;
+  children: ReactNode;
+  variant?: StatVariant;
+  className?: string;
+}) {
+  return (
+    <div className={cn("tkad-glass-surface-soft rounded-[18px] border border-white/10 bg-white/5 p-3.5 backdrop-blur-md", className)}>
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/50">
+        [ {label} ]
+      </p>
+      <p
+        className={cn(
+          "mt-1.5 text-sm font-semibold text-white",
+          variant === "accent" && "font-mono text-base font-extrabold text-[#22d3ee]",
+        )}
+      >
+        {children}
+      </p>
+    </div>
+  );
+}
+
+export function StatCardFootnote({
+  label,
+  value,
+  suffix,
+  footnote,
+  variant = "default",
+  className,
+}: {
+  label: string;
+  value: ReactNode;
+  suffix?: ReactNode;
+  footnote?: string;
+  variant?: StatVariant;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-1", className)}>
+      <StatCard label={label} value={value} suffix={suffix} variant={variant} />
+      {footnote ? (
+        <p className="px-1 font-mono text-[10px] text-white/45">{`// `}{footnote}</p>
+      ) : null}
+    </div>
+  );
+}
+
+export function ThumbGrid({
+  items,
+}: {
+  items: { url: string; tag: string }[];
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {items.map((x, i) => (
+        <div
+          key={`${x.tag}-${i}`}
+          className="relative overflow-hidden rounded-[14px] border border-white/12 bg-white/5"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={x.url}
+            alt=""
+            crossOrigin="anonymous"
+            className="block h-24 w-full object-cover"
+          />
+          <span className="absolute left-0 top-0 rounded-br-[10px] border border-white/12 bg-[#05050a]/85 px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#22d3ee] backdrop-blur">
+            [ {x.tag} ]
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function NeonTable({
+  headers,
+  children,
+}: {
+  headers: string[];
+  children: ReactNode;
+}) {
+  return (
+    <div className="overflow-x-auto rounded-[18px] border border-white/12 bg-white/[0.03] backdrop-blur-sm">
+      <table className="w-full min-w-[640px] border-collapse text-[11px]">
+        <thead>
+          <tr className="border-b border-white/10 bg-white/5">
+            {headers.map((h) => (
+              <th
+                key={h}
+                className="px-3 py-2.5 text-left font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#22d3ee]"
+              >
+                [ {h} ]
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/10 text-white/90">{children}</tbody>
+      </table>
+    </div>
+  );
+}
+
+export function NotesBox({ children }: { children: ReactNode }) {
+  return (
+    <p className="whitespace-pre-wrap rounded-[18px] border border-white/12 bg-white/5 p-4 text-sm leading-relaxed text-white/85 backdrop-blur-sm">
+      {children}
+    </p>
   );
 }
 
