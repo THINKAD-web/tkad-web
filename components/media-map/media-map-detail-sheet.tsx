@@ -173,9 +173,9 @@ export function MediaMapDetailSheet({
         aria-modal
         aria-label={item.name}
         className={cn(
-          "pointer-events-auto fixed z-[100002] flex max-h-[min(88vh,720px)] flex-col overflow-hidden",
+          "pointer-events-auto fixed z-[100004] flex flex-col overflow-hidden",
           "border border-white/10 bg-black/90 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl",
-          "inset-x-0 bottom-0 rounded-t-2xl",
+          "inset-x-0 bottom-0 max-h-[min(92dvh,680px)] rounded-t-2xl",
           "md:inset-x-auto md:bottom-4 md:right-4 md:top-4 md:w-[min(420px,calc(100%-2rem))] md:max-h-none md:rounded-2xl",
         )}
       >

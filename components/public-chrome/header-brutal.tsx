@@ -5,7 +5,7 @@
  *
  * IA (변경 금지):
  *   - 단독: /, /services
- *   - 매체 검색 그룹: /media/packages, /media, /media/map, /recommend, /planner, /creatives
+ *   - 매체 검색 그룹: /media, /media/map, /media/packages, /recommend, /planner, /creatives
  *   - 트렌드 & 학습 그룹 (3): /cases, /report, /academy
  *   - CTA: /contact
  */
@@ -63,23 +63,35 @@ export function HeaderBrutal({ contentStatus }: Props) {
     { href: "/", label: t("nav.home") },
     { href: "/services", label: t("nav.services") },
     {
-      href: "/media/packages",
-      label: t("nav.packages"),
-      navKey: "packages-top",
-    },
-    {
       label: t("nav.media"),
       items: [
         {
+          href: "/media",
+          label: isKo ? "매체 검색" : "Media search",
+          desc: isKo ? "전국 OOH 매체 목록" : "Nationwide OOH catalog",
+          navKey: "media-search",
+        },
+        {
+          href: "/media/map",
+          label: isKo ? "지도에서 찾기" : "Map search",
+          desc: isKo ? "위치 기반 탐색" : "Browse by location",
+        },
+        {
           href: "/media/packages",
-          label: t("nav.packages"),
-          desc: t("nav.packagesDesc"),
+          label: t("nav.packageProposal"),
+          desc: t("nav.packageProposalDesc"),
           navKey: "packages-dropdown",
         },
-        { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록" },
-        { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색" },
-        { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천" },
-        { href: "/planner", label: t("nav.planner"), desc: "예산·기간별 플래닝" },
+        {
+          href: "/recommend",
+          label: t("nav.recommend"),
+          desc: isKo ? "AI 기반 맞춤 추천" : "AI-powered picks",
+        },
+        {
+          href: "/planner",
+          label: t("nav.planner"),
+          desc: isKo ? "예산·기간별 플래닝" : "Budget & timeline planning",
+        },
         {
           href: "/creatives",
           label: isKo ? "크리에이티브" : "Creatives",

@@ -7,7 +7,12 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 import type { ResolvedMediaPackage } from "@/lib/media-packages";
 import type { PackagePurpose } from "@/data/packages";
 import { PackageCard } from "@/components/packages/package-card";
-import { CategoryExploreHero } from "@/components/category-explore-hero";
+import {
+  CategoryExploreHero,
+  CategoryHeroCtaRow,
+  categoryHeroCtaPrimaryClass,
+  categoryHeroCtaSecondaryClass,
+} from "@/components/category-explore-hero";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -42,20 +47,14 @@ export function PackagesPageClient({ packages }: Props) {
         headlineGradient={isKo ? "OOH 패키지" : "your goals"}
         subtitle={t("hero.subtitle")}
       >
-            <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
-              <a
-                href="#package-grid"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-7 text-sm font-bold text-white shadow-[0_18px_48px_rgba(139,92,246,0.35)] transition-transform hover:-translate-y-0.5"
-              >
+            <CategoryHeroCtaRow>
+              <a href="#package-grid" className={categoryHeroCtaPrimaryClass}>
                 {t("hero.ctaPrimary")} <ArrowRight className="h-4 w-4" aria-hidden />
               </a>
-              <Link
-                href="/planner"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-7 text-sm font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10"
-              >
+              <Link href="/planner" className={categoryHeroCtaSecondaryClass}>
                 {t("hero.ctaSecondary")} <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
-            </div>
+            </CategoryHeroCtaRow>
             <dl className="mt-12 grid w-full max-w-3xl grid-cols-3 gap-3 sm:gap-6 mx-auto">
               {[
                 {

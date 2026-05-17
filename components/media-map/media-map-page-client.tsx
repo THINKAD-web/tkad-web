@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { Crosshair, LayoutList } from "lucide-react";
+import { ChevronDown, Crosshair, LayoutList, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "./kakao-map-view";
 import { Spinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/use-toast";
@@ -131,6 +132,7 @@ export default function MediaMapPageClient() {
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>([]);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [mobileListOpen, setMobileListOpen] = useState(false);
   /** 마지막으로 idle 한 지도 중심/줌 — URL 동기화용 */
   const [view, setView] = useState<{ lat: number; lng: number; zoom: number } | null>(
     () => {
@@ -317,6 +319,12 @@ export default function MediaMapPageClient() {
     setSelectedId(id);
     const item = itemsRef.current.find((i) => i.id === id);
     if (item) setSelectedItem(item);
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches
+    ) {
+      setMobileListOpen(false);
+    }
   }, []);
 
   const selected = selectedItem;
@@ -458,12 +466,47 @@ export default function MediaMapPageClient() {
             ? "위치·유형·가격으로 필터링하고, 핀을 눌러 매체 요약을 확인하세요. 전체 상세는 새 탭에서 열립니다."
             : "Filter by location, type, and price. Tap a pin for a quick summary—open full details in a new tab."
         }
+        compactOnMobile
         className="border-b border-white/10"
       />
-      <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row">
-        {/* Side list — 모바일에서는 지도 아래 */}
-        <aside className="order-2 md:order-1 w-full md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r border-border/60 md:overflow-y-auto bg-card/70 backdrop-blur">
-          <div className="sticky top-0 z-10 border-b border-border/60 bg-card/85 backdrop-blur-md p-4 space-y-3">
+
+      {mobileListOpen ? (
+        <button
+          type="button"
+          className="fixed inset-0 z-[100002] bg-black/45 backdrop-blur-[2px] md:hidden"
+          onClick={() => setMobileListOpen(false)}
+          aria-label={isKo ? "리스트 닫기" : "Close list"}
+        />
+      ) : null}
+
+      <div className="relative flex flex-1 flex-col md:h-[calc(100vh-72px)] md:flex-row md:min-h-0">
+        <aside
+          className={cn(
+            "order-2 z-[100003] flex w-full flex-col border-border/60 bg-card/95 backdrop-blur-md",
+            "fixed inset-x-0 bottom-0 max-h-[min(85dvh,720px)] rounded-t-2xl border-t shadow-[0_-24px_80px_rgba(0,0,0,0.4)] transition-transform duration-300 ease-out",
+            "md:static md:max-h-none md:rounded-none md:border-r md:shadow-none",
+            "md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:overflow-y-auto",
+            mobileListOpen ? "translate-y-0" : "translate-y-full md:translate-y-0",
+            "flex flex-col overflow-hidden",
+          )}
+        >
+          <div className="flex justify-center border-b border-border/60 py-2 md:hidden">
+            <span className="h-1 w-10 rounded-full bg-muted-foreground/35" aria-hidden />
+          </div>
+          <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 pb-3 md:hidden">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
+              {isKo ? `매체 리스트 · ${items.length}개` : `Media list · ${items.length}`}
+            </p>
+            <button
+              type="button"
+              onClick={() => setMobileListOpen(false)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground"
+              aria-label={isKo ? "닫기" : "Close"}
+            >
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+          <div className="sticky top-0 z-10 hidden border-b border-border/60 bg-card/85 backdrop-blur-md p-4 space-y-3 md:block">
             <div className="tkad-media-map-search-pill group relative flex h-12 items-center rounded-full border border-white/12 bg-black/25 shadow-sm backdrop-blur-md transition-all hover:border-white/18 focus-within:border-white/22 focus-within:ring-2 focus-within:ring-primary/25 focus-within:shadow-md">
             <svg
               className="ml-4 h-[18px] w-[18px] flex-none text-white/70 transition-colors group-focus-within:text-white/85"
@@ -626,7 +669,7 @@ export default function MediaMapPageClient() {
           )}
         </div>
 
-        <ul className="grid grid-cols-2 gap-3 p-3 md:gap-4 md:p-4">
+        <ul className="grid flex-1 grid-cols-2 gap-3 overflow-y-auto overscroll-contain p-3 pb-8 md:gap-4 md:p-4">
           {items.map((it) => (
             <li
               key={it.id}
@@ -713,8 +756,67 @@ export default function MediaMapPageClient() {
           </ul>
         </aside>
 
-        {/* Map — 모바일에서는 최상단 */}
-        <div className="relative order-1 md:order-2 flex-1 h-[60vh] md:h-auto md:min-h-0">
+        {/* Map — 모바일 우선: 넓은 지도 + 오버레이 검색 */}
+        <div className="relative order-1 min-h-[calc(100dvh-11rem)] flex-1 md:order-2 md:min-h-0 md:h-auto">
+          <div className="pointer-events-none absolute inset-x-3 top-3 z-[100001] space-y-2 md:hidden">
+            <div className="pointer-events-auto tkad-media-map-search-pill group relative flex h-11 items-center rounded-full border border-white/14 bg-black/60 shadow-lg backdrop-blur-md">
+              <svg
+                className="ml-3 h-4 w-4 flex-none text-white/70"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                type="search"
+                placeholder={isKo ? "매체명 · 지역 검색" : "Search name or area"}
+                value={filter.q}
+                onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))}
+                className="h-full w-full bg-transparent px-3 text-sm font-semibold text-white placeholder:text-white/55 outline-none"
+              />
+            </div>
+            <div className="pointer-events-auto flex gap-2 overflow-x-auto pb-1">
+              <label className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/14 bg-black/55 px-3 py-2 text-[11px] font-semibold text-white backdrop-blur">
+                <span className="text-white/60">{isKo ? "정렬" : "Sort"}</span>
+                <select
+                  className="max-w-[6.5rem] border-l border-white/12 bg-transparent pl-2 text-[11px] font-semibold text-white focus:outline-none"
+                  value={filter.sort}
+                  onChange={(e) =>
+                    setFilter((f) => ({
+                      ...f,
+                      sort: e.target.value as Filter["sort"],
+                    }))
+                  }
+                >
+                  <option value="default">{isKo ? "랜덤" : "Random"}</option>
+                  <option value="newest">{isKo ? "최신" : "Newest"}</option>
+                  <option value="priceAsc">{isKo ? "가격↑" : "Price ↑"}</option>
+                  <option value="priceDesc">{isKo ? "가격↓" : "Price ↓"}</option>
+                  <option value="trafficDesc">{isKo ? "가시성" : "Visibility"}</option>
+                </select>
+              </label>
+              <label className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/14 bg-black/55 px-3 py-2 text-[11px] font-semibold text-white backdrop-blur">
+                <span className="text-white/60">{isKo ? "타입" : "Type"}</span>
+                <select
+                  className="max-w-[5.5rem] border-l border-white/12 bg-transparent pl-2 text-[11px] font-semibold text-white focus:outline-none"
+                  value={filter.type}
+                  onChange={(e) => setFilter((f) => ({ ...f, type: e.target.value }))}
+                >
+                  <option value="">{isKo ? "전체" : "All"}</option>
+                  {facets.types.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </div>
+
           <KakaoMapView
             markers={markers}
             selectedId={selectedId}
@@ -737,8 +839,24 @@ export default function MediaMapPageClient() {
             />
           ) : null}
 
-          {/* 지도 우상단 컨트롤 — 내 주변 + 리스트 토글 */}
-          <div className="pointer-events-none absolute right-3 top-3 z-[100001] flex flex-col gap-2 sm:right-4 sm:top-4">
+          {!mobileListOpen && !selected ? (
+            <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[100001] flex justify-center px-4 md:hidden">
+              <button
+                type="button"
+                onClick={() => setMobileListOpen(true)}
+                className="pointer-events-auto inline-flex h-12 max-w-full items-center gap-2 rounded-full border border-white/18 bg-black/75 px-5 text-sm font-bold text-white shadow-[0_16px_48px_rgba(0,0,0,0.55)] backdrop-blur-md"
+              >
+                <LayoutList className="h-4 w-4 shrink-0" aria-hidden />
+                <span className="truncate">
+                  {isKo ? `매체 리스트 (${items.length})` : `List (${items.length})`}
+                </span>
+                <ChevronDown className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+              </button>
+            </div>
+          ) : null}
+
+          {/* 지도 우상단 컨트롤 — 내 주변 + 목록 (데스크톱) */}
+          <div className="pointer-events-none absolute right-3 top-3 z-[100001] hidden flex-col gap-2 md:flex sm:right-4 sm:top-4">
             <button
               type="button"
               onClick={handleLocateMe}
@@ -757,6 +875,18 @@ export default function MediaMapPageClient() {
               <LayoutList className="h-3.5 w-3.5" />
               목록으로
             </Link>
+          </div>
+
+          <div className="pointer-events-none absolute right-3 top-3 z-[100001] flex flex-col gap-2 md:hidden">
+            <button
+              type="button"
+              onClick={handleLocateMe}
+              disabled={locating}
+              className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/14 bg-black/60 text-white shadow-lg backdrop-blur-md disabled:opacity-60"
+              aria-label={isKo ? "내 주변" : "Near me"}
+            >
+              <Crosshair className={`h-4 w-4 ${locating ? "animate-pulse" : ""}`} />
+            </button>
           </div>
 
         </div>
