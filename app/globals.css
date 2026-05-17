@@ -296,40 +296,177 @@ html.dark .admin-dashboard-root .tkad-glass-surface-soft {
   box-shadow: 0 8px 28px rgb(0 0 0 / 0.35) !important;
 }
 
-/* Admin 캠페인 완료 보고서 미리보기 — legacy inline brutalist → neon 톤 */
-.campaign-report-document [style*="background: #ffffff"],
-.campaign-report-document [style*='background: "#ffffff"'] {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-}
-.campaign-report-document [style*="background: #f5f5f5"],
-.campaign-report-document [style*='background: "#f5f5f5"'] {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-.campaign-report-document [style*="background: #000000"],
-.campaign-report-document [style*='background: "#000000"'] {
-  background: linear-gradient(
+/* Admin 캠페인 완료 보고서 — neon document (dark default, admin light override) */
+.campaign-report-document {
+  --cr-bg: #05050a;
+  --cr-fg: #ffffff;
+  --cr-fg-subtle: rgb(255 255 255 / 0.55);
+  --cr-fg-muted: rgb(255 255 255 / 0.5);
+  --cr-fg-soft: rgb(255 255 255 / 0.75);
+  --cr-fg-body: rgb(255 255 255 / 0.85);
+  --cr-fg-table: rgb(255 255 255 / 0.9);
+  --cr-fg-dim: rgb(255 255 255 / 0.45);
+  --cr-border: rgb(255 255 255 / 0.12);
+  --cr-border-soft: rgb(255 255 255 / 0.1);
+  --cr-border-faint: rgb(255 255 255 / 0.08);
+  --cr-surface: rgb(255 255 255 / 0.05);
+  --cr-surface-soft: rgb(255 255 255 / 0.03);
+  --cr-row-even: rgb(255 255 255 / 0.02);
+  --cr-row-odd: rgb(255 255 255 / 0.04);
+  --cr-accent: #22d3ee;
+  --cr-accent-border: rgb(34 211 238 / 0.35);
+  --cr-accent-surface: rgb(34 211 238 / 0.15);
+  --cr-shadow: 0 32px 120px rgb(0 0 0 / 0.55);
+  --cr-overlay: linear-gradient(to bottom, rgb(5 5 10 / 0.2), rgb(5 5 10 / 0.85));
+  --cr-stat-accent: linear-gradient(
     135deg,
-    rgba(34, 211, 238, 0.14),
-    rgba(168, 85, 247, 0.1)
-  ) !important;
-  border-color: rgba(34, 211, 238, 0.28) !important;
+    rgb(34 211 238 / 0.16),
+    rgb(168 85 247 / 0.12)
+  );
+  --cr-stat-accent-border: rgb(34 211 238 / 0.3);
+  --cr-sum-row: linear-gradient(
+    135deg,
+    rgb(34 211 238 / 0.12),
+    rgb(168 85 247 / 0.1)
+  );
+  --cr-bar: rgb(255 255 255 / 0.7);
+  --cr-bar-track: rgb(255 255 255 / 0.1);
+  --cr-thumb-badge-bg: rgb(5 5 10 / 0.85);
+  --cr-timeline-track: rgb(255 255 255 / 0.08);
+  --cr-timeline-bar: linear-gradient(90deg, #22d3ee, #a855f7);
+  --cr-grid-opacity: 0.12;
+
+  color: var(--cr-fg);
+  --foreground: var(--cr-fg);
+  --muted-foreground: var(--cr-fg-muted);
+  --border: var(--cr-border);
 }
-.campaign-report-document [style*="color: #000000"],
-.campaign-report-document [style*='color: "#000000"'] {
-  color: #f4f2ef !important;
+
+html:not(.dark) .admin-dashboard-root .campaign-report-document {
+  --cr-bg: #f4f2ee;
+  --cr-fg: #0a0a0c;
+  --cr-fg-subtle: rgb(10 10 12 / 0.58);
+  --cr-fg-muted: rgb(10 10 12 / 0.52);
+  --cr-fg-soft: rgb(10 10 12 / 0.78);
+  --cr-fg-body: rgb(10 10 12 / 0.86);
+  --cr-fg-table: rgb(10 10 12 / 0.9);
+  --cr-fg-dim: rgb(10 10 12 / 0.45);
+  --cr-border: rgb(10 10 12 / 0.12);
+  --cr-border-soft: rgb(10 10 12 / 0.1);
+  --cr-border-faint: rgb(10 10 12 / 0.08);
+  --cr-surface: rgb(255 255 255 / 0.72);
+  --cr-surface-soft: rgb(255 255 255 / 0.58);
+  --cr-row-even: rgb(255 255 255 / 0.45);
+  --cr-row-odd: rgb(255 255 255 / 0.68);
+  --cr-accent: #0891b2;
+  --cr-accent-border: rgb(8 145 178 / 0.38);
+  --cr-accent-surface: rgb(34 211 238 / 0.14);
+  --cr-shadow:
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 24px 64px rgb(10 10 12 / 0.1);
+  --cr-overlay: linear-gradient(
+    to bottom,
+    rgb(244 242 238 / 0.35),
+    rgb(244 242 238 / 0.92)
+  );
+  --cr-stat-accent: linear-gradient(
+    135deg,
+    rgb(34 211 238 / 0.14),
+    rgb(168 85 247 / 0.1)
+  );
+  --cr-stat-accent-border: rgb(34 211 238 / 0.35);
+  --cr-sum-row: linear-gradient(
+    135deg,
+    rgb(34 211 238 / 0.1),
+    rgb(168 85 247 / 0.08)
+  );
+  --cr-bar: rgb(10 10 12 / 0.22);
+  --cr-bar-track: rgb(10 10 12 / 0.08);
+  --cr-thumb-badge-bg: rgb(255 255 255 / 0.92);
+  --cr-timeline-track: rgb(10 10 12 / 0.06);
+  --cr-timeline-bar: linear-gradient(90deg, #0891b2, #7c3aed);
+  --cr-grid-opacity: 0.07;
 }
-.campaign-report-document [style*="color: #FF6600"],
-.campaign-report-document [style*='color: "#FF6600"'] {
-  color: #22d3ee !important;
+
+html:not(.dark) .admin-dashboard-root .campaign-report-document .tkad-neon-grid {
+  background-image:
+    linear-gradient(to right, rgb(10 10 12 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(10 10 12 / 0.05) 1px, transparent 1px);
 }
-.campaign-report-document [style*="color: #737373"],
-.campaign-report-document [style*='color: "#737373"'] {
-  color: rgba(255, 255, 255, 0.5) !important;
+
+html:not(.dark) .admin-dashboard-root .campaign-report-document .tkad-neon-depth {
+  background:
+    radial-gradient(900px 520px at 50% 0%, rgb(34 211 238 / 0.14), transparent 62%),
+    radial-gradient(720px 480px at 12% 88%, rgb(168 85 247 / 0.1), transparent 58%),
+    linear-gradient(to bottom, rgb(244 242 238 / 0.15), rgb(244 242 238 / 0.88));
+  opacity: 0.85;
 }
-.campaign-report-document table {
-  border-color: rgba(255, 255, 255, 0.12) !important;
+
+html:not(.dark) .admin-dashboard-root .campaign-report-document .tkad-neon-border {
+  border-color: var(--cr-border);
+  background: rgb(255 255 255 / 0.75);
+}
+
+/* Legacy inline brutalist → themed (dark admin) */
+html.dark .admin-dashboard-root .campaign-report-document [style*="background: #ffffff"],
+html.dark .admin-dashboard-root .campaign-report-document [style*='background: "#ffffff"'] {
+  background: var(--cr-surface) !important;
+  border-color: var(--cr-border) !important;
+}
+html.dark .admin-dashboard-root .campaign-report-document [style*="background: #f5f5f5"],
+html.dark .admin-dashboard-root .campaign-report-document [style*='background: "#f5f5f5"'] {
+  background: var(--cr-surface-soft) !important;
+  border-color: var(--cr-border-soft) !important;
+}
+html.dark .admin-dashboard-root .campaign-report-document [style*="background: #000000"],
+html.dark .admin-dashboard-root .campaign-report-document [style*='background: "#000000"'] {
+  background: var(--cr-stat-accent) !important;
+  border-color: var(--cr-stat-accent-border) !important;
+}
+html.dark .admin-dashboard-root .campaign-report-document [style*="color: #000000"],
+html.dark .admin-dashboard-root .campaign-report-document [style*='color: "#000000"'] {
+  color: var(--cr-fg) !important;
+}
+html.dark .admin-dashboard-root .campaign-report-document [style*="color: #FF6600"],
+html.dark .admin-dashboard-root .campaign-report-document [style*='color: "#FF6600"'] {
+  color: var(--cr-accent) !important;
+}
+html.dark .admin-dashboard-root .campaign-report-document [style*="color: #737373"],
+html.dark .admin-dashboard-root .campaign-report-document [style*='color: "#737373"'] {
+  color: var(--cr-fg-muted) !important;
+}
+
+/* Legacy inline → themed (light admin) */
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*="background: #ffffff"],
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='background: "#ffffff"'] {
+  background: var(--cr-surface) !important;
+  border-color: var(--cr-border) !important;
+}
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*="background: #f5f5f5"],
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='background: "#f5f5f5"'] {
+  background: var(--cr-timeline-track) !important;
+  border-color: var(--cr-border-soft) !important;
+}
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*="background: #000000"],
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='background: "#000000"'] {
+  background: var(--cr-stat-accent) !important;
+  border-color: var(--cr-stat-accent-border) !important;
+}
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*="color: #000000"],
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: "#000000"'] {
+  color: var(--cr-fg) !important;
+}
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*="color: #FF6600"],
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: "#FF6600"'] {
+  color: var(--cr-accent) !important;
+}
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*="color: #737373"],
+html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: "#737373"'] {
+  color: var(--cr-fg-muted) !important;
+}
+
+.admin-dashboard-root .campaign-report-document table {
+  border-color: var(--cr-border) !important;
 }
 
 .dark {
