@@ -5,7 +5,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { CategoryExploreHero } from "@/components/category-explore-hero";
+import {
+  CategoryExploreHero,
+  CategoryHeroCtaRow,
+  categoryHeroCtaPrimaryClass,
+  categoryHeroCtaSecondaryClass,
+} from "@/components/category-explore-hero";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import {
   ArrowRight,
@@ -77,22 +82,16 @@ export default function CasesPageClient({ initialCases }: Props) {
           headlineGradient={isKo ? "성공 사례" : "success stories"}
           subtitle={empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
         >
-            <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-              <Link
-                href="/quote"
-                className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
-              >
+            <CategoryHeroCtaRow>
+              <Link href="/quote" className={categoryHeroCtaPrimaryClass}>
                 {t("cases.reportCtaQuote")}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
-              <Link
-                href="/contact"
-                className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
-              >
+              <Link href="/contact" className={categoryHeroCtaSecondaryClass}>
                 {isKo ? "무료 상담" : "Free consult"}
                 <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
               </Link>
-            </div>
+            </CategoryHeroCtaRow>
         </CategoryExploreHero>
 
 

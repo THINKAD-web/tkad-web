@@ -16,13 +16,19 @@ import {
   ChevronUp,
   Search,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
 import { BtnBlock } from "@/components/brutalist";
 import { Link } from "@/i18n/navigation";
-import { CategoryExploreHero } from "@/components/category-explore-hero";
+import {
+  CategoryExploreHero,
+  CategoryHeroCtaRow,
+  categoryHeroCtaPrimaryClass,
+  categoryHeroCtaSecondaryClass,
+} from "@/components/category-explore-hero";
 import { cn } from "@/lib/utils";
 import {
   useState,
@@ -503,29 +509,16 @@ export default function MediaBrowseClient({
               aria-label={isKo ? "매체 검색" : "Search media"}
             />
           </div>
-          <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
-            <Link
-              href="/contact"
-              className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
-            >
+          <CategoryHeroCtaRow>
+            <Link href="/contact" className={categoryHeroCtaPrimaryClass}>
               {isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
-            <Link
-              href="/media/packages"
-              className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-8 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:px-10 sm:text-lg"
-            >
-              {t("packages.browseEntry")}
-              <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
-            </Link>
-            <Link
-              href="/planner"
-              className="inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-8 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:px-10 sm:text-lg"
-            >
+            <Link href="/planner" className={categoryHeroCtaSecondaryClass}>
               {isKo ? "AI 캠페인 설계" : "AI campaign planner"}
               <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
             </Link>
-          </div>
+          </CategoryHeroCtaRow>
         </CategoryExploreHero>
       )}
 
@@ -801,6 +794,23 @@ export default function MediaBrowseClient({
                         </BtnBlock>
                       </>
                     ) : null}
+                    <Link
+                      href="/media/packages"
+                      className="inline-flex min-w-0 max-w-full items-start gap-2 border-2 border-border bg-card px-3 py-2 transition-colors hover:border-accent/50 sm:max-w-[14rem]"
+                    >
+                      <Sparkles
+                        className="mt-0.5 h-4 w-4 shrink-0 text-violet-500"
+                        aria-hidden
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-foreground sm:text-sm">
+                          {tMedia("packagesBrowseLink")}
+                        </p>
+                        <p className="mt-1 text-[10px] leading-snug text-muted-foreground sm:text-[11px]">
+                          {t("nav.packageProposalDesc")}
+                        </p>
+                      </div>
+                    </Link>
                     <div className="flex min-w-0 max-w-full items-start gap-2 border-2 border-border bg-card px-3 py-2 sm:max-w-[24rem]">
                       <ShieldCheck
                         className="mt-0.5 h-4 w-4 shrink-0 text-hermes"
