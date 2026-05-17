@@ -47,20 +47,33 @@ export type BrutalNavProps = {
   links: BrutalNavEntry[];
   /** 우측 CTA */
   cta?: { href: string; label: string };
-  /** CTA 좌측에 노출할 보조 슬롯 (언어/테마/유저 토글 등). b930b10 의 부가 기능 보존용. */
+  /** CTA 좌측에 노출할 보조 슬롯 (언어/테마/유저 토글 등). 데스크톱(md+) 전용. */
   extras?: ReactNode;
+  /** 모바일 햄버거 패널 — 찜·장바구니·로그인 등 (상단 링크 목록 아래) */
+  mobileMenuExtras?: ReactNode | ((close: () => void) => ReactNode);
+  /** 모바일 햄버거 패널 최하단 — 언어·다크모드 */
+  mobileMenuFooter?: ReactNode;
   /** 데스크톱·모바일 공통 검색 UI (예: 매체 목록 `?q=` 연동) */
   search?: ReactNode;
   className?: string;
 };
 
-export function BrutalNav({ logo, links, cta, extras, search, className }: BrutalNavProps) {
+export function BrutalNav({
+  logo,
+  links,
+  cta,
+  extras,
+  mobileMenuExtras,
+  mobileMenuFooter,
+  search,
+  className,
+}: BrutalNavProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const Logo = (
     <Link
       href="/"
-      className="text-[18px] font-black tracking-tight text-foreground sm:text-[20px] dark:text-white"
+      className="whitespace-nowrap text-[16px] font-black tracking-tight text-foreground sm:text-[18px] md:text-[20px] dark:text-white"
     >
       {logo ?? (
         <>
@@ -124,15 +137,18 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
         </div>
       </div>
 
-      {/* 모바일: 로고 + extras + 햄버거 */}
+      {/* 모바일: 로고 + 문의 CTA + 햄버거 */}
       <div className="md:hidden">
         <div className="flex h-14 items-center justify-between gap-2 px-4 sm:h-16 sm:px-5">
-          <div className="min-w-0 shrink">{Logo}</div>
-          <div className="flex shrink-0 items-center gap-1">
-            {extras ? (
-              <div className="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-1">
-                {extras}
-              </div>
+          <div className="min-w-0 shrink-0">{Logo}</div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {cta ? (
+              <Link
+                href={cta.href}
+                className="tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-mono text-[10px] font-black uppercase tracking-[0.16em] text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
+              >
+                {cta.label}
+              </Link>
             ) : null}
             <button
               type="button"
@@ -222,6 +238,13 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
               ),
             )}
           </ul>
+          {mobileMenuExtras ? (
+            <div className="relative border-t border-zinc-200 dark:border-white/10">
+              {typeof mobileMenuExtras === "function"
+                ? mobileMenuExtras(() => setMobileOpen(false))
+                : mobileMenuExtras}
+            </div>
+          ) : null}
           {cta ? (
             <div className="relative border-t border-zinc-200 dark:border-white/10 p-4">
               <Link
@@ -231,6 +254,11 @@ export function BrutalNav({ logo, links, cta, extras, search, className }: Bruta
               >
                 {cta.label}
               </Link>
+            </div>
+          ) : null}
+          {mobileMenuFooter ? (
+            <div className="relative flex items-center justify-center gap-2 border-t border-zinc-200 p-4 dark:border-white/10">
+              {mobileMenuFooter}
             </div>
           ) : null}
         </div>

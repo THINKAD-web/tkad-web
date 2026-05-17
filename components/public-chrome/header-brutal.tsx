@@ -62,17 +62,11 @@ export function HeaderBrutal({ contentStatus }: Props) {
   const links: BrutalNavEntry[] = [
     { href: "/", label: t("nav.home") },
     { href: "/services", label: t("nav.services") },
+    { href: "/media/packages", label: t("nav.packages") },
     {
       label: t("nav.media"),
       items: [
         { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록" },
-        {
-          href: "/media/packages",
-          label: t("nav.packages"),
-          desc: isKo
-            ? "지역·목적별 에디토리얼 패키지"
-            : "Editorial bundles by region & goal",
-        },
         { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색" },
         { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천" },
         { href: "/planner", label: t("nav.planner"), desc: "예산·기간별 플래닝" },
@@ -126,7 +120,7 @@ export function HeaderBrutal({ contentStatus }: Props) {
           </Suspense>
           <Link
             href="/media/packages"
-            className="hidden h-10 shrink-0 items-center rounded-xl border border-border/30 bg-muted/40 px-2.5 text-[11px] font-bold tracking-tight text-foreground transition-colors hover:border-hermes/60 hover:bg-foreground/8 lg:inline-flex lg:px-3 lg:text-[12px] dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:border-hermes dark:hover:bg-white/12"
+            className="hidden h-10 shrink-0 items-center rounded-xl border border-border/30 bg-muted/40 px-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] md:inline-flex lg:px-3 lg:text-[11px] lg:tracking-[0.16em] dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:border-primary dark:hover:bg-primary/15 dark:hover:shadow-[0_0_24px_rgba(34,211,238,0.28)]"
           >
             {t("nav.packages")}
           </Link>
@@ -134,8 +128,15 @@ export function HeaderBrutal({ contentStatus }: Props) {
       }
       cta={{ href: "/contact", label: t("nav.contact") }}
       extras={
-        <>
+        <div className="hidden items-center gap-1.5 md:flex">
           <HeaderUserMenu />
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
+      }
+      mobileMenuExtras={(close) => <HeaderUserMenu variant="menu" onNavigate={close} />}
+      mobileMenuFooter={
+        <>
           <LanguageToggle />
           <ThemeToggle />
         </>
