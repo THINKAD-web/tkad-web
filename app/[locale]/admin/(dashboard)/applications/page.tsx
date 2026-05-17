@@ -9,12 +9,17 @@ import {
   RefreshCw,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { MediaApplication, MediaApplicationStatus } from "@prisma/client";
 import {
   labelMediaApplicationStatus,
   labelMediaApplicationType,
   MEDIA_APPLICATION_STATUSES,
 } from "@/lib/media-application";
+import {
+  isAdminDatabaseError,
+  parseAdminJson,
+} from "@/lib/admin-fetch-json";
 import {
   Card,
   CardContent,
@@ -31,7 +36,10 @@ function fmt(iso: string | Date): string {
   });
 }
 
+type ApiErrorBody = { error?: string; code?: string; message?: string };
+
 export default function AdminMediaApplicationsPage() {
+  const t = useTranslations("adminApplications");
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,6 +57,20 @@ export default function AdminMediaApplicationsPage() {
 
   const selectedId = searchParams.get("id");
 
+  const resolveFetchError = useCallback(
+    (parsed: { ok: false; status: number; body: ApiErrorBody | null }) => {
+      if (isAdminDatabaseError(parsed.status, parsed.body)) {
+        return t("dbLoadError");
+      }
+      return (
+        parsed.body?.message ??
+        parsed.body?.error ??
+        t("loadError")
+      );
+    },
+    [t],
+  );
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -58,31 +80,39 @@ export default function AdminMediaApplicationsPage() {
       const res = await fetch(`/api/admin/media-applications${qs}`, {
         credentials: "include",
       });
-      const data = (await res.json()) as {
+      const parsed = await parseAdminJson<{
         applications?: MediaApplication[];
-        error?: string;
-      };
-      if (!res.ok) throw new Error(data.error ?? "load failed");
-      setRows(data.applications ?? []);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "load failed");
+      } & ApiErrorBody>(res);
+      if (!parsed.ok) {
+        setRows([]);
+        setError(resolveFetchError(parsed));
+        return;
+      }
+      setRows(parsed.data.applications ?? []);
+    } catch {
+      setRows([]);
+      setError(t("dbLoadError"));
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, resolveFetchError, t]);
 
-  const loadDetail = useCallback(async (id: string) => {
-    const res = await fetch(`/api/admin/media-applications/${id}`, {
-      credentials: "include",
-    });
-    const data = (await res.json()) as {
-      application?: MediaApplication;
-      error?: string;
-    };
-    if (!res.ok) throw new Error(data.error ?? "detail failed");
-    setDetail(data.application ?? null);
-    setReviewNote(data.application?.reviewNote ?? "");
-  }, []);
+  const loadDetail = useCallback(
+    async (id: string) => {
+      const res = await fetch(`/api/admin/media-applications/${id}`, {
+        credentials: "include",
+      });
+      const parsed = await parseAdminJson<{
+        application?: MediaApplication;
+      } & ApiErrorBody>(res);
+      if (!parsed.ok) {
+        throw new Error(resolveFetchError(parsed));
+      }
+      setDetail(parsed.data.application ?? null);
+      setReviewNote(parsed.data.application?.reviewNote ?? "");
+    },
+    [resolveFetchError],
+  );
 
   useEffect(() => {
     void load();
@@ -91,12 +121,12 @@ export default function AdminMediaApplicationsPage() {
   useEffect(() => {
     if (selectedId) {
       void loadDetail(selectedId).catch((e) =>
-        setError(e instanceof Error ? e.message : "detail failed"),
+        setError(e instanceof Error ? e.message : t("loadError")),
       );
     } else {
       setDetail(null);
     }
-  }, [selectedId, loadDetail]);
+  }, [selectedId, loadDetail, t]);
 
   const selectRow = (id: string) => {
     const p = new URLSearchParams(searchParams.toString());
@@ -115,12 +145,14 @@ export default function AdminMediaApplicationsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, reviewNote }),
       });
-      const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "update failed");
+      const parsed = await parseAdminJson<ApiErrorBody>(res);
+      if (!parsed.ok) {
+        throw new Error(resolveFetchError(parsed));
+      }
       await load();
       await loadDetail(detail.id);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "update failed");
+      setError(e instanceof Error ? e.message : t("loadError"));
     } finally {
       setActing(false);
     }
@@ -135,15 +167,16 @@ export default function AdminMediaApplicationsPage() {
         `/api/admin/media-applications/${detail.id}/approve`,
         { method: "POST", credentials: "include" },
       );
-      const data = (await res.json()) as {
-        mediaId?: string;
-        error?: string;
-      };
-      if (!res.ok) throw new Error(data.error ?? "approve failed");
+      const parsed = await parseAdminJson<
+        { mediaId?: string } & ApiErrorBody
+      >(res);
+      if (!parsed.ok) {
+        throw new Error(resolveFetchError(parsed));
+      }
       await load();
       await loadDetail(detail.id);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "approve failed");
+      setError(e instanceof Error ? e.message : t("loadError"));
     } finally {
       setActing(false);
     }
@@ -153,10 +186,8 @@ export default function AdminMediaApplicationsPage() {
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">매체 등록 신청</h1>
-          <p className="text-sm text-muted-foreground">
-            매체사 셀프 신청 심사 · 승인 시 Media 자동 생성
-          </p>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <button
           type="button"
@@ -169,7 +200,7 @@ export default function AdminMediaApplicationsPage() {
           ) : (
             <RefreshCw className="h-4 w-4" />
           )}
-          새로고침
+          {t("refresh")}
         </button>
       </div>
 
@@ -185,7 +216,7 @@ export default function AdminMediaApplicationsPage() {
           onClick={() => setStatusFilter("all")}
           className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${statusFilter === "all" ? "bg-primary text-primary-foreground" : ""}`}
         >
-          전체
+          {t("filterAll")}
         </button>
         {MEDIA_APPLICATION_STATUSES.map((s) => (
           <button
@@ -202,13 +233,13 @@ export default function AdminMediaApplicationsPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">신청 목록</CardTitle>
+            <CardTitle className="text-base">{t("listTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading && rows.length === 0 ? (
-              <p className="text-sm text-muted-foreground">불러오는 중…</p>
+              <p className="text-sm text-muted-foreground">{t("loading")}</p>
             ) : rows.length === 0 ? (
-              <p className="text-sm text-muted-foreground">신청이 없습니다.</p>
+              <p className="text-sm text-muted-foreground">{t("empty")}</p>
             ) : (
               <ul className="divide-y">
                 {rows.map((r) => (
@@ -234,13 +265,11 @@ export default function AdminMediaApplicationsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">상세</CardTitle>
+            <CardTitle className="text-base">{t("detailTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             {!detail ? (
-              <p className="text-sm text-muted-foreground">
-                목록에서 신청을 선택하세요.
-              </p>
+              <p className="text-sm text-muted-foreground">{t("selectHint")}</p>
             ) : (
               <div className="space-y-4 text-sm">
                 <p>
@@ -276,7 +305,7 @@ export default function AdminMediaApplicationsPage() {
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {[detail.photoFrontUrl, detail.photoSideUrl, detail.photoNightUrl].map(
-                    (url, i) => (
+                    (url) => (
                       <a
                         key={url}
                         href={url}
@@ -300,7 +329,7 @@ export default function AdminMediaApplicationsPage() {
                   </p>
                 ) : null}
                 <label className="grid gap-1">
-                  <span className="text-xs font-semibold">심사 메모</span>
+                  <span className="text-xs font-semibold">{t("reviewNote")}</span>
                   <textarea
                     rows={3}
                     className="w-full rounded-md border bg-background px-2 py-1.5 text-sm"
@@ -315,7 +344,7 @@ export default function AdminMediaApplicationsPage() {
                     onClick={() => void patchStatus("REVIEWING")}
                     className="rounded-md border px-3 py-1.5 text-xs font-semibold"
                   >
-                    심사 중
+                    {t("statusReviewing")}
                   </button>
                   <button
                     type="button"
@@ -324,7 +353,7 @@ export default function AdminMediaApplicationsPage() {
                     className="inline-flex items-center gap-1 rounded-md border border-destructive px-3 py-1.5 text-xs font-semibold text-destructive"
                   >
                     <X className="h-3 w-3" />
-                    반려
+                    {t("statusReject")}
                   </button>
                   <button
                     type="button"
@@ -337,7 +366,7 @@ export default function AdminMediaApplicationsPage() {
                     ) : (
                       <Check className="h-3 w-3" />
                     )}
-                    승인 → Media 생성
+                    {t("approve")}
                   </button>
                 </div>
                 {detail.createdMediaId ? (
@@ -345,7 +374,7 @@ export default function AdminMediaApplicationsPage() {
                     href={`/${locale}/admin/medias/${detail.createdMediaId}/edit`}
                     className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
                   >
-                    생성된 매체 편집
+                    {t("editCreatedMedia")}
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 ) : null}

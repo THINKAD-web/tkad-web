@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import type { MediaApplicationStatus } from "@prisma/client";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, adminDbQueryFailed, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { MEDIA_APPLICATION_STATUSES } from "@/lib/media-application";
 
@@ -14,12 +14,16 @@ export async function GET(
   if (deny) return deny;
 
   const { id } = await params;
-  const db = getPrisma();
-  const application = await db.mediaApplication.findUnique({ where: { id } });
-  if (!application) {
-    return json({ error: "Not found" }, 404);
+  try {
+    const db = getPrisma();
+    const application = await db.mediaApplication.findUnique({ where: { id } });
+    if (!application) {
+      return json({ error: "Not found" }, 404);
+    }
+    return json({ application });
+  } catch (e) {
+    return adminDbQueryFailed(e);
   }
-  return json({ application });
 }
 
 export async function PATCH(
@@ -57,10 +61,14 @@ export async function PATCH(
     data.reviewNote = body.reviewNote?.trim() || null;
   }
 
-  const db = getPrisma();
-  const application = await db.mediaApplication.update({
-    where: { id },
-    data,
-  });
-  return json({ application });
+  try {
+    const db = getPrisma();
+    const application = await db.mediaApplication.update({
+      where: { id },
+      data,
+    });
+    return json({ application });
+  } catch (e) {
+    return adminDbQueryFailed(e);
+  }
 }

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import type { MediaApplicationStatus } from "@prisma/client";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, adminDbQueryFailed, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { MEDIA_APPLICATION_STATUSES } from "@/lib/media-application";
 
@@ -17,12 +17,15 @@ export async function GET(request: NextRequest) {
       ? (statusRaw as MediaApplicationStatus)
       : undefined;
 
-  const db = getPrisma();
-  const applications = await db.mediaApplication.findMany({
-    where: status ? { status } : {},
-    orderBy: { createdAt: "desc" },
-    take: 200,
-  });
-
-  return json({ applications });
+  try {
+    const db = getPrisma();
+    const applications = await db.mediaApplication.findMany({
+      where: status ? { status } : {},
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    });
+    return json({ applications });
+  } catch (e) {
+    return adminDbQueryFailed(e);
+  }
 }

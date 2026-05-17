@@ -1676,7 +1676,26 @@
     "crm": "CRM (데모)",
     "backToSite": "사이트로 돌아가기",
     "signOut": "로그아웃",
-    "instantBookings": "즉시 예약"
+    "instantBookings": "즉시 예약",
+    "mediaApplications": "매체 등록 신청"
+  },
+  "adminApplications": {
+    "title": "매체 등록 신청",
+    "subtitle": "매체사 셀프 신청 심사 · 승인 시 Media 자동 생성",
+    "dbLoadError": "매체 등록 신청 데이터를 불러올 수 없습니다. DB 연결을 확인해주세요.",
+    "loadError": "데이터를 불러오지 못했습니다.",
+    "refresh": "새로고침",
+    "listTitle": "신청 목록",
+    "detailTitle": "상세",
+    "loading": "불러오는 중…",
+    "empty": "신청이 없습니다.",
+    "selectHint": "목록에서 신청을 선택하세요.",
+    "filterAll": "전체",
+    "reviewNote": "심사 메모",
+    "statusReviewing": "심사 중",
+    "statusReject": "반려",
+    "approve": "승인 → Media 생성",
+    "editCreatedMedia": "생성된 매체 편집"
   },
   "adminNetworks": {
     "title": "네트워크 매체",
