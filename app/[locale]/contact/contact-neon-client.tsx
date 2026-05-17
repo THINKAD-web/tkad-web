@@ -28,10 +28,11 @@ export function ContactNeonClient() {
   const [mainTab, setMainTab] = useState<MainTab>("inquiry");
 
   const tabBase =
-    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-4 py-3 font-mono text-[11px] font-black uppercase tracking-[0.18em] backdrop-blur transition-all";
+    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold backdrop-blur transition-all";
 
-  const tabActive = "tkad-neon-cta-clean text-white";
-  const tabIdle = "text-white/75 hover:bg-white/8";
+  const tabActive =
+    "border-violet-500/40 bg-gradient-to-r from-violet-500/25 to-cyan-400/20 text-white shadow-[0_8px_32px_rgba(139,92,246,0.25)]";
+  const tabIdle = "text-white/70 hover:border-white/20 hover:bg-white/10";
 
   const infoItems = useMemo(
     () => [
@@ -69,7 +70,7 @@ export function ContactNeonClient() {
 
         <div className="mt-10 grid gap-5 lg:grid-cols-5">
           <div className="lg:col-span-3">
-            <div className="rounded-[28px] bg-white/5 p-6 backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur sm:p-8">
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <button
@@ -102,7 +103,7 @@ export function ContactNeonClient() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="rounded-[28px] bg-white/5 p-6 backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur sm:p-8">
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                 [ INFO ]
               </p>

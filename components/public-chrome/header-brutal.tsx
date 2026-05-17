@@ -12,7 +12,7 @@
 
 import { Suspense, useTransition } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter, usePathname, Link } from "@/i18n/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { Globe } from "lucide-react";
 import { BrutalNav, type BrutalNavEntry } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
@@ -107,24 +107,16 @@ export function HeaderBrutal({ contentStatus }: Props) {
     <BrutalNav
       links={links}
       search={
-        <div className="flex min-w-0 items-center gap-1.5">
-          <Suspense
-            fallback={
-              <div
-                className="h-10 min-w-0 flex-1 rounded-xl border-2 border-border/30 bg-muted/25 dark:border-white/10 dark:bg-white/5"
-                aria-hidden
-              />
-            }
-          >
-            <HeaderMediaSearch />
-          </Suspense>
-          <Link
-            href="/media/packages"
-            className="hidden h-10 shrink-0 items-center rounded-xl border border-border/30 bg-muted/40 px-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] md:inline-flex lg:px-3 lg:text-[11px] lg:tracking-[0.16em] dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:border-primary dark:hover:bg-primary/15 dark:hover:shadow-[0_0_24px_rgba(34,211,238,0.28)]"
-          >
-            {t("nav.packages")}
-          </Link>
-        </div>
+        <Suspense
+          fallback={
+            <div
+              className="h-10 min-w-0 w-full rounded-xl border-2 border-border/30 bg-muted/25 dark:border-white/10 dark:bg-white/5"
+              aria-hidden
+            />
+          }
+        >
+          <HeaderMediaSearch />
+        </Suspense>
       }
       cta={{ href: "/contact", label: t("nav.contact") }}
       extras={
