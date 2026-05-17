@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "npx tsx prisma/seed.ts",
+    "db:check": "node scripts/db-check.mjs",
     "db:push": "node scripts/ensure-database-url.mjs && prisma db push",
     "postinstall": "prisma generate && node scripts/ensure-noto-kr-font.mjs"
   },
