@@ -613,7 +613,30 @@
     "compareAvailabilityAvailable": "✅ 가능",
     "compareAvailabilityReserved": "🟡 예약중",
     "compareAvailabilityMaintenance": "🔴 점검중",
-    "compareStartPlanner": "Planner 시작"
+    "compareStartPlanner": "Planner 시작",
+    "favorites": {
+      "headerAria": "찜한 매체",
+      "headerAriaCount": "찜한 매체 {count}개",
+      "menuLabel": "찜한 매체",
+      "guestMax": "비회원은 최대 {max}개까지 찜할 수 있습니다.",
+      "added": "{name}을(를) 찜했습니다.",
+      "removed": "찜 목록에서 제거했습니다.",
+      "removedNamed": "{name}을(를) 찜 목록에서 제거했습니다.",
+      "error": "찜 처리에 실패했습니다.",
+      "networkError": "네트워크 오류가 발생했습니다.",
+      "addAria": "찜하기",
+      "removeAria": "찜 해제",
+      "eyebrow": "MY FAVORITES",
+      "title": "찜한 매체",
+      "subtitle": "관심 매체를 모아 플래너·견적으로 이어가세요.",
+      "guestHint": "비회원 찜은 이 기기에만 저장됩니다. 로그인하면 계정에 동기화됩니다.",
+      "loading": "불러오는 중…",
+      "emptyTitle": "아직 찜한 매체가 없습니다",
+      "emptyDescription": "매체 목록에서 하트를 눌러 저장해 보세요.",
+      "browseCta": "매체 둘러보기",
+      "plannerLead": "찜한 매체로 플래너를 시작할까요?",
+      "plannerCta": "플래너 시작"
+    }
   },
   "recommend": {
     "form": {

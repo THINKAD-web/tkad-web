@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { Heart } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   getGuestFavoriteIds,
   subscribeFavorites,
@@ -29,7 +29,6 @@ export function HeaderFavoritesLink({
   className?: string;
 }) {
   const t = useTranslations("media.favorites");
-  const locale = useLocale();
   const pathname = usePathname();
   const guestCount = useGuestFavoriteCount();
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
@@ -80,9 +79,7 @@ export function HeaderFavoritesLink({
         aria-label={aria}
       >
         <Heart className="h-4 w-4 shrink-0" strokeWidth={2} />
-        <span className="flex-1">
-          {locale === "ko" ? "찜한 매체" : "Saved media"}
-        </span>
+        <span className="flex-1">{t("menuLabel")}</span>
         {count > 0 ? (
           <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1.5 text-[10px] font-bold text-white dark:from-violet-500 dark:to-cyan-400">
             {count > 99 ? "99+" : count}
