@@ -86,6 +86,7 @@ export function HeaderBrutal({ contentStatus }: Props) {
           desc: isKo
             ? "소재 업로드·라이브러리·DOOH 플레이리스트"
             : "Upload, library & DOOH playlists",
+          badge: "BETA",
         },
       ],
     },

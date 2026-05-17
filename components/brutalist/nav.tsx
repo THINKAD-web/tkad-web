@@ -223,9 +223,14 @@ export function BrutalNav({
                         <Link
                           href={leaf.href}
                           onClick={() => setMobileOpen(false)}
-                          className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white dark:hover:bg-white/6"
+                          className="flex min-h-[3.25rem] items-center gap-2 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white dark:hover:bg-white/6"
                         >
                           {leaf.label}
+                          {leaf.badge ? (
+                            <span className="rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-violet-500/20 text-violet-300">
+                              {leaf.badge}
+                            </span>
+                          ) : null}
                         </Link>
                       </li>
                     ))}
@@ -364,11 +369,16 @@ function BrutalNavDropdown({ entry }: { entry: BrutalNavGroup }) {
                 >
                   <span
                     className={cn(
-                      "block text-[13px] font-semibold leading-snug tracking-tight",
+                      "flex flex-wrap items-center gap-1.5 text-[13px] font-semibold leading-snug tracking-tight",
                       lightPanel ? "text-zinc-900" : "text-white",
                     )}
                   >
                     {leaf.label}
+                    {leaf.badge ? (
+                      <span className="rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-violet-500/20 text-violet-300">
+                        {leaf.badge}
+                      </span>
+                    ) : null}
                   </span>
                   {leaf.desc ? (
                     <span

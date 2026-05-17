@@ -18,6 +18,10 @@ import {
   type CompareCartEntry,
 } from "@/lib/compare-cart-client";
 import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
+import { CategoryExploreHero } from "@/components/category-explore-hero";
+import { MediaMapDetailSheet } from "@/components/media-map/media-map-detail-sheet";
+import type { MapMapItem } from "@/components/media-map/media-map-types";
 import {
   buildMediaMapSearchString,
   parseMediaMapUrlState,
@@ -54,24 +58,7 @@ const KakaoMapView = dynamic(() => import("./kakao-map-view"), {
   ),
 });
 
-type Item = {
-  id: string;
-  name: string;
-  location: string;
-  region: string;
-  city: string | null;
-  district: string | null;
-  type: string;
-  subCategory: string | null;
-  price: number;
-  pricePeriod: string;
-  createdAt: string | null;
-  lat: number;
-  lng: number;
-  image: string | null;
-  availability: string | null;
-  visibilityScore: number;
-};
+type Item = MapMapItem;
 
 type Facets = { regions: string[]; types: string[] };
 
@@ -120,6 +107,8 @@ function readInitialUrlState() {
 }
 
 export default function MediaMapPageClient() {
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [facets, setFacets] = useState<Facets>({ regions: [], types: [] });
@@ -459,6 +448,18 @@ export default function MediaMapPageClient() {
 
   return (
     <>
+      <CategoryExploreHero
+        code="// 02 · MAP"
+        headlineBefore={isKo ? "지도로 찾는 " : "Find "}
+        headlineGradient={isKo ? "옥외광고" : "OOH on the map"}
+        headlineAfter={isKo ? "" : ""}
+        subtitle={
+          isKo
+            ? "위치·유형·가격으로 필터링하고, 핀을 눌러 매체 요약을 확인하세요. 전체 상세는 새 탭에서 열립니다."
+            : "Filter by location, type, and price. Tap a pin for a quick summary—open full details in a new tab."
+        }
+        className="border-b border-white/10"
+      />
       <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row">
         {/* Side list — 모바일에서는 지도 아래 */}
         <aside className="order-2 md:order-1 w-full md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r border-border/60 md:overflow-y-auto bg-card/70 backdrop-blur">
@@ -723,14 +724,18 @@ export default function MediaMapPageClient() {
             onViewChange={handleViewChange}
             programmaticView={programmaticView}
             userLocation={userLocation}
-            onMarkerDetail={(id) => {
-              const locale =
-                typeof document !== "undefined"
-                  ? document.documentElement.lang || "ko"
-                  : "ko";
-              window.location.href = `/${locale}/media/${id}`;
-            }}
           />
+
+          {selected ? (
+            <MediaMapDetailSheet
+              item={selected}
+              onClose={() => {
+                setSelectedId(null);
+                setSelectedItem(null);
+              }}
+              isKo={isKo}
+            />
+          ) : null}
 
           {/* 지도 우상단 컨트롤 — 내 주변 + 리스트 토글 */}
           <div className="pointer-events-none absolute right-3 top-3 z-[100001] flex flex-col gap-2 sm:right-4 sm:top-4">
@@ -754,80 +759,6 @@ export default function MediaMapPageClient() {
             </Link>
           </div>
 
-          {selected && (
-            <div
-              style={{ zIndex: 100000 }}
-              className="tkad-media-map-mini-popup absolute bottom-4 left-1/2 w-[min(20rem,calc(100%-1.5rem))] max-w-[320px] -translate-x-1/2 rounded-[18px] shadow-2xl p-3 backdrop-blur border border-border/70 bg-card/95 text-foreground dark:border-white/12 dark:bg-black/45 dark:text-white"
-            >
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedId(null);
-                setSelectedItem(null);
-              }}
-              className="absolute top-2 right-2 text-foreground/60 hover:text-foreground text-sm dark:text-white/65 dark:hover:text-white"
-              aria-label="닫기"
-            >
-              ✕
-            </button>
-            <div className="flex gap-3">
-              {selected.image && (
-                <div className="relative w-20 h-20 flex-shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={selected.image}
-                    alt={selected.name}
-                    className="w-20 h-20 object-cover rounded-lg border border-border/70 dark:border-white/10"
-                  />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold pr-6">{selected.name}</div>
-                <div className="text-xs text-muted-foreground">{selected.location}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">
-                  {selected.type}
-                  {selected.subCategory ? ` · ${selected.subCategory}` : ""}
-                </div>
-                <div className="text-sm font-semibold mt-1">
-                  {formatPrice(selected.price, selected.pricePeriod)}
-                </div>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-2">
-              <div className="flex-shrink-0">
-                <MediaFavoriteButton mediaId={selected.id} mediaName={selected.name} />
-              </div>
-              <a
-                href={`/media/${selected.id}`}
-                className="flex-1 inline-flex items-center justify-center text-xs py-2 rounded-md border border-border/70 bg-card/80 text-foreground hover:bg-card backdrop-blur dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
-              >
-                상세 보기
-              </a>
-              <button
-                type="button"
-                onClick={() => toggleCompare(selected)}
-                className={`flex-1 text-xs py-2 rounded-md transition-colors ${
-                  isInCompare(selected.id)
-                    ? "bg-card text-foreground border border-border/70 dark:bg-white dark:text-black dark:border-white/14"
-                    : "bg-card/80 text-foreground border border-border/70 hover:bg-card backdrop-blur dark:bg-white/8 dark:text-white dark:border-white/14 dark:hover:bg-white/12"
-                }`}
-              >
-                {isInCompare(selected.id) ? "선택됨" : "선택"}
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleCart(selected.id)}
-                className={`flex-1 text-xs py-2 rounded-md transition-colors ${
-                  inCart(selected.id)
-                    ? "bg-card text-foreground border border-border/70 dark:bg-white dark:text-black dark:border-white/14"
-                    : "bg-card/80 text-foreground border border-border/70 hover:bg-card backdrop-blur dark:bg-white/8 dark:text-white dark:border-white/14 dark:hover:bg-white/12"
-                }`}
-              >
-                {inCart(selected.id) ? "장바구니에 담김" : "견적서에 담기"}
-              </button>
-            </div>
-            </div>
-          )}
         </div>
       </div>
 

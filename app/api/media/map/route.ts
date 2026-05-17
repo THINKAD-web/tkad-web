@@ -86,6 +86,9 @@ export async function GET(req: Request) {
         image: m.sampleImages?.[0] ?? null,
         availability: m.availability ?? null,
         visibilityScore: m.visibilityScore ?? 0,
+        dailyFootTraffic: m.dailyFootTraffic ?? null,
+        impressions: m.impressions ?? null,
+        cpm: m.cpm ?? null,
       }));
 
     const items = (() => {
