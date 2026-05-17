@@ -1677,7 +1677,26 @@
     "crm": "CRM (demo)",
     "backToSite": "Back to site",
     "signOut": "Sign out",
-    "instantBookings": "Instant bookings"
+    "instantBookings": "Instant bookings",
+    "mediaApplications": "Media Applications"
+  },
+  "adminApplications": {
+    "title": "Media registration applications",
+    "subtitle": "Review self-service submissions · approving creates a Media record",
+    "dbLoadError": "Could not load media registration applications. Please check the database connection.",
+    "loadError": "Could not load data.",
+    "refresh": "Refresh",
+    "listTitle": "Applications",
+    "detailTitle": "Details",
+    "loading": "Loading…",
+    "empty": "No applications yet.",
+    "selectHint": "Select an application from the list.",
+    "filterAll": "All",
+    "reviewNote": "Review note",
+    "statusReviewing": "In review",
+    "statusReject": "Reject",
+    "approve": "Approve → create Media",
+    "editCreatedMedia": "Edit created media"
   },
   "adminNetworks": {
     "title": "Network media",
