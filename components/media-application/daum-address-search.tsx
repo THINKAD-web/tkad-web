@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  mediaRegisterInputCls,
+  mediaRegisterLabelCls,
+} from "@/components/media-application/media-register-ui";
 
 export type DaumAddressResult = {
   address: string;
@@ -103,20 +107,23 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
   }, [open]);
 
   return (
-    <div className="space-y-2">
+    <div className="grid gap-2">
+      <span className={mediaRegisterLabelCls}>
+        {isKo ? "주소" : "Address"}
+      </span>
       <div className="flex flex-wrap gap-2">
         <input
           type="text"
           readOnly
           value={value}
           placeholder={isKo ? "주소 검색 버튼을 눌러주세요" : "Search address"}
-          className="min-w-0 flex-1 border-2 border-black bg-card px-3 py-2 font-mono text-sm"
+          className={`min-w-0 flex-1 ${mediaRegisterInputCls}`}
         />
         <button
           type="button"
           disabled={disabled || loading}
           onClick={() => void openSearch()}
-          className="shrink-0 border-2 border-black bg-[#FF6600] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-white disabled:opacity-50"
+          className="tkad-neon-cta-clean shrink-0 rounded-[18px] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-white disabled:opacity-50"
         >
           {loading
             ? isKo
@@ -129,12 +136,12 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
       </div>
       {open ? (
         <div
-          className="relative z-50 overflow-hidden border-2 border-black bg-card shadow-[6px_6px_0_0_rgb(0,0,0)]"
+          className="relative z-50 overflow-hidden rounded-[18px] border border-white/15 bg-card shadow-[0_24px_80px_rgba(0,0,0,0.45)] dark:bg-[#0a0a12]"
           style={{ height: 420 }}
         >
           <button
             type="button"
-            className="absolute right-2 top-2 z-10 border border-black bg-white px-2 py-1 font-mono text-[10px] font-bold"
+            className="absolute right-2 top-2 z-10 rounded-lg border border-border/60 bg-card px-2 py-1 font-mono text-[10px] font-bold text-foreground"
             onClick={() => setOpen(false)}
           >
             {isKo ? "닫기" : "Close"}

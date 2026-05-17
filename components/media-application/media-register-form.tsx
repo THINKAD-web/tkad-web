@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { Loader2 } from "lucide-react";
 import {
   DaumAddressSearch,
@@ -10,11 +9,13 @@ import {
 } from "@/components/media-application/daum-address-search";
 import { PhotoSlotUpload } from "@/components/media-application/photo-slot-upload";
 import { MEDIA_APPLICATION_MEDIA_TYPES } from "@/lib/media-application";
-
-const inputCls =
-  "w-full border-2 border-black bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-[#FF6600] focus:outline-none";
-const labelCls =
-  "block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#FF6600]";
+import {
+  mediaRegisterInputCls as inputCls,
+  mediaRegisterLabelCls as labelCls,
+  mediaRegisterSectionCls,
+  mediaRegisterSubmitCls,
+} from "@/components/media-application/media-register-ui";
+import { BtnBlock } from "@/components/brutalist";
 
 export function MediaRegisterForm() {
   const locale = useLocale();
@@ -115,11 +116,11 @@ export function MediaRegisterForm() {
 
   if (successId) {
     return (
-      <div className="mx-auto max-w-xl border-2 border-black bg-card p-10 text-center shadow-[8px_8px_0_0_rgb(0,0,0)]">
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#FF6600]">
+      <div className="mx-auto max-w-xl text-center">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
           [ {isKo ? "접수 완료" : "Submitted"} ]
         </p>
-        <h2 className="mt-4 text-2xl font-bold">
+        <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
           {isKo ? "매체 등록 신청이 접수되었습니다" : "Application received"}
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -130,12 +131,9 @@ export function MediaRegisterForm() {
         <p className="mt-6 font-mono text-[10px] text-muted-foreground">
           ID: {successId}
         </p>
-        <Link
-          href="/"
-          className="mt-8 inline-flex border-2 border-black bg-foreground px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-background"
-        >
+        <BtnBlock href="/" variant="accent" size="md" className="mt-8">
           {isKo ? "홈으로" : "Home"}
-        </Link>
+        </BtnBlock>
       </div>
     );
   }
@@ -143,13 +141,13 @@ export function MediaRegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-10">
       {error ? (
-        <p className="border-2 border-destructive bg-destructive/10 px-4 py-3 font-mono text-sm text-destructive">
+        <p className="rounded-[18px] border border-destructive/50 bg-destructive/10 px-4 py-3 font-mono text-sm text-destructive">
           {error}
         </p>
       ) : null}
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={mediaRegisterSectionCls}>
           1. {isKo ? "신청자 정보" : "Applicant"}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -195,7 +193,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={mediaRegisterSectionCls}>
           2. {isKo ? "매체 기본 정보" : "Media basics"}
         </h2>
         <label className="grid gap-1">
@@ -253,7 +251,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={mediaRegisterSectionCls}>
           3. {isKo ? "매체 스펙" : "Specs"}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -282,7 +280,7 @@ export function MediaRegisterForm() {
             />
           </label>
         </div>
-        <label className="flex items-center gap-2 font-mono text-sm">
+        <label className="flex items-center gap-2 font-mono text-sm text-foreground">
           <input
             type="checkbox"
             checked={isDigital}
@@ -301,7 +299,7 @@ export function MediaRegisterForm() {
             onChange={(e) => setOperatingHours(e.target.value)}
           />
         </label>
-        <label className="flex items-center gap-2 font-mono text-sm">
+        <label className="flex items-center gap-2 font-mono text-sm text-foreground">
           <input
             type="checkbox"
             checked={hasLighting}
@@ -312,7 +310,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={mediaRegisterSectionCls}>
           4. {isKo ? "노출 데이터" : "Exposure"}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -357,7 +355,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={mediaRegisterSectionCls}>
           5. {isKo ? "사진 (각 1장 이상)" : "Photos"}
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
@@ -389,7 +387,7 @@ export function MediaRegisterForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-mono text-[12px] font-bold uppercase tracking-[0.2em]">
+        <h2 className={mediaRegisterSectionCls}>
           6. {isKo ? "추가 특이사항" : "Notes"}
         </h2>
         <textarea
@@ -414,7 +412,7 @@ export function MediaRegisterForm() {
           !photoNightUrl ||
           !address
         }
-        className="inline-flex w-full items-center justify-center gap-2 border-2 border-black bg-[#FF6600] py-4 font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto sm:px-12"
+        className={mediaRegisterSubmitCls}
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {isKo ? "등록 신청 제출" : "Submit application"}

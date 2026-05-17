@@ -7,6 +7,7 @@ import {
   uploadToCloudinary,
   type PhotoSlot,
 } from "@/lib/media-application-upload";
+import { mediaRegisterLabelCls } from "@/components/media-application/media-register-ui";
 
 type Props = {
   slot: PhotoSlot;
@@ -52,10 +53,8 @@ export function PhotoSlotUpload({
   };
 
   return (
-    <div className="border-2 border-black bg-card p-4 shadow-[4px_4px_0_0_rgb(0,0,0)]">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-[#FF6600]">
-        {label}
-      </p>
+    <div className="rounded-[20px] border border-white/12 bg-black/20 p-4 shadow-[0_12px_48px_rgba(0,0,0,0.35)] backdrop-blur dark:border-white/12">
+      <p className={mediaRegisterLabelCls}>{label}</p>
       <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
       <input
         ref={inputRef}
@@ -73,10 +72,10 @@ export function PhotoSlotUpload({
         type="button"
         disabled={disabled || uploading}
         onClick={() => inputRef.current?.click()}
-        className="mt-3 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 border-2 border-dashed border-black/30 bg-muted/40 transition-colors hover:border-[#FF6600] disabled:opacity-50"
+        className="mt-3 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-[16px] border border-dashed border-white/20 bg-white/5 transition-colors hover:border-primary/50 hover:bg-primary/5 disabled:opacity-50 dark:border-white/15"
       >
         {uploading ? (
-          <Loader2 className="h-8 w-8 animate-spin text-[#FF6600]" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         ) : value ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
