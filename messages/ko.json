@@ -64,6 +64,7 @@
     "planner": "미디어 플래너",
     "recommend": "AI 매체 추천",
     "packages": "패키지",
+    "packagesDesc": "업종·목적별 검증 패키지",
     "searchPlaceholder": "매체명·지역 검색",
     "searchAria": "매체 검색",
     "searchSubmit": "검색",

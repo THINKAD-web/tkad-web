@@ -64,6 +64,7 @@
     "planner": "Media Planner",
     "recommend": "AI media picks",
     "packages": "Packages",
+    "packagesDesc": "Verified bundles by goal and region",
     "searchPlaceholder": "Search media or area",
     "searchAria": "Search media",
     "searchSubmit": "Search",

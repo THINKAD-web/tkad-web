@@ -5,7 +5,7 @@
  *
  * IA (변경 금지):
  *   - 단독: /, /services
- *   - 매체 검색 그룹 (4): /media, /media/map, /recommend, /planner
+ *   - 매체 검색 그룹: /media/packages, /media, /media/map, /recommend, /planner, /creatives
  *   - 트렌드 & 학습 그룹 (3): /cases, /report, /academy
  *   - CTA: /contact
  */
@@ -66,6 +66,11 @@ export function HeaderBrutal({ contentStatus }: Props) {
     {
       label: t("nav.media"),
       items: [
+        {
+          href: "/media/packages",
+          label: t("nav.packages"),
+          desc: t("nav.packagesDesc"),
+        },
         { href: "/media", label: t("nav.media"), desc: "전국 OOH 매체 목록" },
         { href: "/media/map", label: "지도에서 찾기", desc: "위치 기반 탐색" },
         { href: "/recommend", label: t("nav.recommend"), desc: "AI 기반 추천" },
