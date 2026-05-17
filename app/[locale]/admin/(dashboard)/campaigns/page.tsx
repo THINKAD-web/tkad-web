@@ -890,10 +890,10 @@ export default function AdminCampaignsPage() {
           </Card>
       </div>
 
-      <Card>
+      <Card className="tkad-glass-surface overflow-hidden rounded-[22px]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Eye className="h-4 w-4" />
+              <Eye className="h-4 w-4 text-[#22d3ee]" />
               완료 보고서 미리보기
             </CardTitle>
             <p className="text-xs text-muted-foreground">
@@ -901,22 +901,22 @@ export default function AdminCampaignsPage() {
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2 border-2 border-border bg-card p-3">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            <div className="tkad-glass-surface-soft space-y-3 rounded-[18px] border border-border/70 p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
                 [ REPORT ACTIONS ]
               </p>
-              <div className="flex flex-wrap gap-0">
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => setShowReportPreview((v) => !v)}
-                  className="inline-flex items-center justify-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground backdrop-blur transition-all hover:border-[#22d3ee]/40 hover:bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(168,85,247,0.08))]"
                 >
                   <Eye className="h-3.5 w-3.5" />
                   {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
                 </button>
                 <button
                   type="button"
-                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground backdrop-blur transition-all hover:border-[#22d3ee]/40 hover:bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(168,85,247,0.08))] disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={
                     !selectedId ||
                     !showReportPreview ||
@@ -953,7 +953,7 @@ export default function AdminCampaignsPage() {
                       ? `/api/admin/campaigns/${selectedId}/completion-report`
                       : "#"
                   }
-                  className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-primary bg-primary px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-foreground hover:border-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#22d3ee]/40 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.16))] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_40px_rgba(34,211,238,0.15)] transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
                   target="_blank"
                   rel="noreferrer"
                   aria-disabled={!selectedId}
@@ -1191,76 +1191,6 @@ export default function AdminCampaignsPage() {
                   )}
                 </div>
               </div>
-
-                {showReportPreview && selectedId && (
-                  <div className="mt-4">
-                    <CampaignReportPreview
-                      data={{
-                        campaignName:
-                          list.find((c) => c.id === selectedId)?.name ?? "—",
-                        clientCompany:
-                          list.find((c) => c.id === selectedId)
-                            ?.clientCompany ?? "",
-                        clientName:
-                          list.find((c) => c.id === selectedId)?.clientName ??
-                          "",
-                        clientEmail:
-                          list.find((c) => c.id === selectedId)?.clientEmail ??
-                          "",
-                        status:
-                          list.find((c) => c.id === selectedId)?.status ??
-                          "진행중",
-                        notes:
-                          list.find((c) => c.id === selectedId)?.notes ?? null,
-                        startDate:
-                          list.find((c) => c.id === selectedId)?.startDate ??
-                          null,
-                        endDate:
-                          list.find((c) => c.id === selectedId)?.endDate ??
-                          null,
-                        budgetMin:
-                          list.find((c) => c.id === selectedId)?.budgetMin ??
-                          null,
-                        budgetMax:
-                          list.find((c) => c.id === selectedId)?.budgetMax ??
-                          null,
-                        scheduleEvents: events?.map((e: { title: string; startsAt: string; endsAt: string; kind: string }) => ({
-                          title: e.title,
-                          startsAt: e.startsAt,
-                          endsAt: e.endsAt,
-                          kind: e.kind,
-                        })),
-                        proofPhotos: proofs?.map((p: { imageUrl: string; caption?: string | null }) => ({
-                          imageUrl: p.imageUrl,
-                          caption: p.caption,
-                        })),
-                        mediaBookings: mediaBookings.map((b) => ({
-                          title: b.title,
-                          mediaName: b.media?.name ?? "—",
-                          location: b.media?.location ?? "—",
-                          startsAt: b.startsAt,
-                          endsAt: b.endsAt,
-                          status: b.status,
-                          dailyFootTraffic: b.media?.dailyFootfall ?? null,
-                          type: b.media?.type ?? null,
-                          region: b.media?.region ?? null,
-                          visibilityScore: b.media?.visibilityScore ?? null,
-                          operatingHours: b.media?.operatingHours ?? null,
-                          impressions: b.media?.impressions ?? null,
-                          trafficPattern:
-                            (b.media as { trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null } | null | undefined)
-                              ?.trafficPattern ?? null,
-                        })),
-                        financialDocs: docs?.map((f: { kind: string; title: string; amountKrw?: number | null; status: string }) => ({
-                          kind: f.kind,
-                          title: f.title,
-                          amountKrw: f.amountKrw,
-                          status: f.status,
-                        })),
-                      }}
-                    />
-                  </div>
-                )}
 
               <div>
                 <h3 className="mb-2 text-sm font-semibold text-foreground">

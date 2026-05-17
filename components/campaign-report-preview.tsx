@@ -16,6 +16,19 @@ import {
   computeCampaignTotalAmount,
   computeAvgVisibility,
 } from "@/lib/campaign-kpis";
+import {
+  CampaignReportDocument,
+  CampaignReportHero,
+  ReportBody,
+  ReportSection,
+  SectionTitle,
+  SectionNote,
+  StatGrid,
+  StatCard,
+  NeonBadge,
+  ReportFooter,
+} from "@/components/campaign-report/neon-ui";
+import { cn } from "@/lib/utils";
 
 export type CampaignReportData = {
   campaignName: string;
@@ -321,83 +334,30 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
   })();
 
   return (
-    <div ref={ref} className="bg-white font-sans" style={{ fontFamily: "system-ui, sans-serif", border: "2px solid #000000" }}>
+    <CampaignReportDocument ref={ref}>
+      <CampaignReportHero
+        campaignName={data.campaignName}
+        clientLine={[data.clientCompany, data.clientName, data.clientEmail].filter(Boolean).join(" · ")}
+        status={data.status}
+      />
+      <ReportBody>
 
-        {/* 헤더 배너 — brutalist */}
-        <div style={{ background: "#000000", padding: "32px 40px", borderBottom: "2px solid #000000" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "24px" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <p style={{ color: "#FF6600", fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                [ THINKAD · 싱커드 ]
-              </p>
-              <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "10px", margin: "4px 0 16px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-                {`// `}OOH 광고 게재 완료 보고서
-              </p>
-              <h1 style={{ color: "#ffffff", fontSize: "24px", fontWeight: 800, margin: "0 0 6px", lineHeight: 1.2, letterSpacing: "-0.01em" }}>
-                {data.campaignName || "캠페인명"}
-              </h1>
-              <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "13px", margin: 0 }}>
-                {[data.clientCompany, data.clientName, data.clientEmail].filter(Boolean).join(" · ")}
-              </p>
-            </div>
-            <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ background: "#FF6600", color: "#ffffff", padding: "6px 14px", fontSize: "10px", fontWeight: 800, display: "inline-block", border: "2px solid #FF6600", letterSpacing: "0.12em", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", maxWidth: "200px" }}>
-                [ {data.status || "—"} ]
-              </div>
-              <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "10px", margin: "8px 0 0", textAlign: "right", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", letterSpacing: "0.18em" }}>
-                {`// `}발행일 {new Date().toLocaleDateString("ko-KR")}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ padding: "32px 40px" }}>
-
-          {/* 집행 스냅샷 — PDF 요약과 같은 데이터 축을 한눈에 */}
-          <div style={{ marginBottom: "28px" }}>
-            <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 12px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-              [ 집행 스냅샷 ]
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
-              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#ffffff", border: "2px solid #000000" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 집행 매체 ]</p>
-                <p style={{ margin: "6px 0 0", fontSize: "20px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
-                  {nMedia}
-                  <span style={{ marginLeft: "4px", fontSize: "12px", color: "#737373" }}>개</span>
-                </p>
-              </div>
-              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#000000", border: "2px solid #000000" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#FF6600", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 송출 일정 ]</p>
-                <p style={{ margin: "6px 0 0", fontSize: "20px", fontWeight: 800, color: "#FF6600", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
-                  {nSchedule}
-                  <span style={{ marginLeft: "4px", fontSize: "12px", color: "rgba(255,255,255,0.55)" }}>건</span>
-                </p>
-              </div>
-              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#ffffff", border: "2px solid #000000" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 증빙 사진 ]</p>
-                <p style={{ margin: "6px 0 0", fontSize: "20px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
-                  {nProofs}
-                  <span style={{ marginLeft: "4px", fontSize: "12px", color: "#737373" }}>장</span>
-                </p>
-              </div>
-              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: "#ffffff", border: "2px solid #000000" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 재무 문서 ]</p>
-                <p style={{ margin: "6px 0 0", fontSize: "20px", fontWeight: 800, color: "#000000", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontVariantNumeric: "tabular-nums" }}>
-                  {nFinancial}
-                  <span style={{ marginLeft: "4px", fontSize: "12px", color: "#737373" }}>건</span>
-                </p>
-              </div>
-              <div style={{ marginTop: "-2px", marginLeft: "-2px", padding: "12px 14px", background: campaignPeriod ? "#000000" : "#ffffff", border: "2px solid #000000", gridColumn: "span 2" }}>
-                <p style={{ margin: 0, fontSize: "10px", color: campaignPeriod ? "#FF6600" : "#737373", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ 캠페인·집행 기간(요약) ]</p>
-                <p style={{ margin: "6px 0 0", fontSize: "13px", fontWeight: 800, lineHeight: 1.4, color: campaignPeriod ? "#FF6600" : "#737373", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                  {campaignPeriod ?? "캘린더 일정·매체 기간이 없으면 미정"}
-                </p>
-              </div>
-            </div>
-            <p style={{ margin: "10px 0 0", fontSize: "10px", color: "#737373", lineHeight: 1.5, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-              {`// `}KPI·차트·하단 표는 이 스냅샷과 동일 DB 기준이며,「완료 보고서 PDF」와 맞춰 점검할 수 있습니다.
-            </p>
-          </div>
+          <ReportSection>
+            <SectionTitle>집행 스냅샷</SectionTitle>
+            <StatGrid cols={3}>
+              <StatCard label="집행 매체" value={nMedia} suffix="개" />
+              <StatCard label="송출 일정" value={nSchedule} suffix="건" variant="accent" />
+              <StatCard label="증빙 사진" value={nProofs} suffix="장" />
+              <StatCard label="재무 문서" value={nFinancial} suffix="건" />
+              <StatCard
+                label="캠페인·집행 기간(요약)"
+                value={campaignPeriod ?? "캘린더 일정·매체 기간이 없으면 미정"}
+                variant={campaignPeriod ? "accent" : "muted"}
+                className="sm:col-span-2"
+              />
+            </StatGrid>
+            <SectionNote>KPI·차트·하단 표는 이 스냅샷과 동일 DB 기준이며,「완료 보고서 PDF」와 맞춰 점검할 수 있습니다.</SectionNote>
+          </ReportSection>
 
           {/* 캠페인 개요 (연락·예산) — 상단 */}
           <div style={{ marginBottom: "28px" }}>
@@ -723,10 +683,10 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               >
                 [ EFFECT DASHBOARD ]
               </h2>
-              <div className="grid gap-0 lg:grid-cols-2">
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <div className="grid gap-3 lg:grid-cols-2">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 도달 구조 ]
                     </p>
                   </div>
@@ -740,9 +700,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 유형별 일유동 ]
                     </p>
                   </div>
@@ -755,9 +715,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                   </div>
                 </div>
               </div>
-              <div className="mt-6 border-2 border-border bg-card">
-                <div className="border-b-2 border-border p-4">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <div className="tkad-glass-surface mt-6 overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                <div className="border-b border-white/10 px-4 py-3">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                     [ 지역 분포 ]
                   </p>
                 </div>
@@ -793,10 +753,10 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               >
                 [ TOP MEDIA (DATA) ]
               </h2>
-              <div className="grid gap-0 lg:grid-cols-2">
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <div className="grid gap-3 lg:grid-cols-2">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 매체별 일유동 TOP ]
                     </p>
                   </div>
@@ -808,9 +768,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 매체별 노출 TOP ]
                     </p>
                   </div>
@@ -854,10 +814,10 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               >
                 [ OPERATIONS DASHBOARD ]
               </h2>
-              <div className="grid gap-0 lg:grid-cols-3">
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <div className="grid gap-3 lg:grid-cols-3">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 예약 상태 분포 ]
                     </p>
                   </div>
@@ -869,9 +829,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 문서 상태 분포 ]
                     </p>
                   </div>
@@ -883,9 +843,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 가시성 TOP ]
                     </p>
                   </div>
@@ -917,10 +877,10 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               >
                 [ SCHEDULE DASHBOARD ]
               </h2>
-              <div className="grid gap-0 lg:grid-cols-2">
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <div className="grid gap-3 lg:grid-cols-2">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 일정 이벤트 종류 ]
                     </p>
                   </div>
@@ -932,9 +892,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="-ml-[2px] border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 매체 시작 월 ]
                     </p>
                   </div>
@@ -966,13 +926,13 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               >
                 [ TIMELINE (MEDIA) ]
               </h2>
-              <div className="border-2 border-border bg-card">
-                <div className="border-b-2 border-border p-4">
+                            <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
+                <div className="border-b border-white/10 px-4 py-3">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       [ 매체 집행 타임라인 ]
                     </p>
-                    <p className="font-mono text-[10px] text-muted-foreground">
+                    <p className="font-mono text-[10px] text-white/55">
                       {`// `}표시: {timeline.rows.length}/{timeline.total} · {timeline.minLabel} → {timeline.maxLabel}
                     </p>
                   </div>
@@ -985,7 +945,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                           <p className="truncate font-mono text-[10px] font-bold text-foreground">
                             {r.label}
                           </p>
-                          <p className="font-mono text-[9px] text-muted-foreground">
+                          <p className="font-mono text-[9px] text-white/55">
                             {fmtShort(r.startsAt)} ~ {fmtShort(r.endsAt)}
                           </p>
                         </div>
@@ -1010,7 +970,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                       </div>
                     ))}
                   </div>
-                  <p className="mt-3 font-mono text-[10px] text-muted-foreground">
+                  <p className="mt-3 font-mono text-[10px] text-white/55">
                     {`// `}집행 시작/종료 일자를 막대로만 표시합니다. (추가 계산/평가 없음)
                   </p>
                 </div>
@@ -1342,17 +1302,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
 
           {/* (규칙) 평가/인사이트 자동 생성 섹션 제거 */}
 
-          {/* 푸터 — brutalist */}
-          <div style={{ borderTop: "2px solid #000000", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-            <div>
-              <p style={{ fontSize: "11px", fontWeight: 700, color: "#000000", margin: "0 0 4px", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>[ THINKAD · 싱커드 ]</p>
-              <p style={{ fontSize: "10px", color: "#737373", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}{CONTACT_EMAIL} · 02-515-2772 · 서울특별시 성동구</p>
-            </div>
-            <p style={{ fontSize: "10px", color: "#737373", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{`// `}© 2026 THINKAD. All rights reserved.</p>
-          </div>
-
-        </div>
-      </div>
+          <ReportFooter />
+      </ReportBody>
+    </CampaignReportDocument>
   );
 });
 
@@ -1389,21 +1341,15 @@ function CampaignTrafficSection({
   const peakMonth = indexOfMaxArr(agg.monthly);
 
   return (
-    <div style={{ marginBottom: "32px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "0 0 12px" }}>
-        <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#FF6600", textTransform: "uppercase", letterSpacing: "0.22em", margin: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-          [ 노출 패턴 (시간대 · 요일 · 월별) ]
-        </h2>
-        {!agg.allReal && (
-          <span style={{ background: "#FF6600", color: "#ffffff", padding: "3px 10px", fontSize: "10px", fontWeight: 700, border: "2px solid #FF6600", letterSpacing: "0.22em", textTransform: "uppercase", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-            [ 일부 추정 ]
-          </span>
-        )}
+    <ReportSection>
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+        <SectionTitle>노출 패턴 (시간대 · 요일 · 월별)</SectionTitle>
+        {!agg.allReal ? <NeonBadge>[ 일부 추정 ]</NeonBadge> : null}
       </div>
-      <p style={{ margin: "0 0 12px", fontSize: "11px", color: "#737373", lineHeight: 1.6, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-        {`// `}매체 상세의 일유동 데이터(또는 매체유형·지역 기반 추정)를 가중평균한 캠페인 전체의 노출 패턴.
-      </p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
+      <SectionNote>
+        매체 상세의 일유동 데이터(또는 매체유형·지역 기반 추정)를 가중평균한 캠페인 전체의 노출 패턴.
+      </SectionNote>
+      <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
         <CampaignTrafficBlock
           title="시간대 (24h)"
           values={agg.hourly}
@@ -1426,7 +1372,7 @@ function CampaignTrafficSection({
           peakLabel={`피크 ${CAMP_MONTH_LABELS[peakMonth]}월`}
         />
       </div>
-    </div>
+    </ReportSection>
   );
 }
 
