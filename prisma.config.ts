@@ -9,10 +9,15 @@ import { resolve } from "path";
 import { defineConfig } from "prisma/config";
 
 const root = process.cwd();
+/** CLI `DATABASE_URL=... npx prisma` should win over stale `.env.local` */
+const databaseUrlFromCli = process.env.DATABASE_URL?.trim();
 loadEnv({ path: resolve(root, ".env") });
 loadEnv({ path: resolve(root, ".env.development"), override: true });
 loadEnv({ path: resolve(root, ".env.local"), override: true });
 loadEnv({ path: resolve(root, ".env.development.local"), override: true });
+if (databaseUrlFromCli) {
+  process.env.DATABASE_URL = databaseUrlFromCli;
+}
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
 
