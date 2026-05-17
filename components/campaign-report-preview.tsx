@@ -36,6 +36,7 @@ import {
   ChartCard,
   DistBar,
   ReportFooter,
+  ReportPanel,
 } from "@/components/campaign-report/neon-ui";
 import { cn } from "@/lib/utils";
 
@@ -482,7 +483,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
 
               {distribution?.types?.length ? (
                 <div className="mt-4 space-y-2">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/50">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-muted)]">
                     [ 매체 유형 분포 (요약) ]
                   </p>
                   {distribution.types.slice(0, 6).map(([label, count], i) => {
@@ -508,9 +509,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
             <ReportSection>
               <SectionTitle>EFFECT DASHBOARD</SectionTitle>
               <div className="grid gap-3 lg:grid-cols-2">
-                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                  <div className="border-b border-white/10 px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                  <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 도달 구조 ]
                     </p>
                   </div>
@@ -524,9 +525,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                  <div className="border-b border-white/10 px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                  <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 유형별 일유동 ]
                     </p>
                   </div>
@@ -539,9 +540,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                   </div>
                 </div>
               </div>
-              <div className="tkad-glass-surface mt-6 overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                <div className="border-b border-white/10 px-4 py-3">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+              <div className="tkad-glass-surface mt-6 overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                     [ 지역 분포 ]
                   </p>
                 </div>
@@ -566,9 +567,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
             <ReportSection>
               <SectionTitle>TOP MEDIA (DATA)</SectionTitle>
               <div className="grid gap-3 lg:grid-cols-2">
-                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                  <div className="border-b border-white/10 px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                  <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 매체별 일유동 TOP ]
                     </p>
                   </div>
@@ -580,9 +581,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                  <div className="border-b border-white/10 px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                  <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 매체별 노출 TOP ]
                     </p>
                   </div>
@@ -599,7 +600,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 style={{
                   margin: "10px 0 0",
                   fontSize: "10px",
-                  color: "#737373",
+                  color: "var(--cr-fg-muted)",
                   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
                 }}
               >
@@ -615,9 +616,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
             <ReportSection>
               <SectionTitle>OPERATIONS DASHBOARD</SectionTitle>
               <div className="grid gap-3 lg:grid-cols-3">
-                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                  <div className="border-b border-white/10 px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                  <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 예약 상태 분포 ]
                     </p>
                   </div>
@@ -629,9 +630,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                  <div className="border-b border-white/10 px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                  <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 문서 상태 분포 ]
                     </p>
                   </div>
@@ -643,9 +644,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                  <div className="border-b border-white/10 px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                  <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 가시성 TOP ]
                     </p>
                   </div>
@@ -666,9 +667,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
             <ReportSection>
               <SectionTitle>SCHEDULE DASHBOARD</SectionTitle>
               <div className="grid gap-3 lg:grid-cols-2">
-                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                  <div className="border-b border-white/10 px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                  <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 일정 이벤트 종류 ]
                     </p>
                   </div>
@@ -680,9 +681,9 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     />
                   </div>
                 </div>
-                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                  <div className="border-b border-white/10 px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                  <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 매체 시작 월 ]
                     </p>
                   </div>
@@ -702,13 +703,13 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
           {timeline?.rows.length ? (
             <ReportSection>
               <SectionTitle>TIMELINE (MEDIA)</SectionTitle>
-                            <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-white/12 bg-white/5 backdrop-blur-md">
-                <div className="border-b border-white/10 px-4 py-3">
+                            <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
+                <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 매체 집행 타임라인 ]
                     </p>
-                    <p className="font-mono text-[10px] text-white/55">
+                    <p className="font-mono text-[10px] text-[color:var(--cr-fg-subtle)]">
                       {`// `}표시: {timeline.rows.length}/{timeline.total} · {timeline.minLabel} → {timeline.maxLabel}
                     </p>
                   </div>
@@ -718,16 +719,16 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     {timeline.rows.map((r) => (
                       <div key={r.key} className="grid grid-cols-[160px_1fr] gap-3">
                         <div className="min-w-0">
-                          <p className="truncate font-mono text-[10px] font-bold text-foreground">
+                          <p className="truncate font-mono text-[10px] font-bold text-[color:var(--cr-fg)]">
                             {r.label}
                           </p>
-                          <p className="font-mono text-[9px] text-white/55">
+                          <p className="font-mono text-[9px] text-[color:var(--cr-fg-subtle)]">
                             {fmtShort(r.startsAt)} ~ {fmtShort(r.endsAt)}
                           </p>
                         </div>
-                        <div className="relative h-8 border-2 border-border bg-[#f5f5f5]">
+                        <div className="relative h-8 border-2 border-[color:var(--cr-border-soft)] bg-[var(--cr-timeline-track)]">
                           <div
-                            className="absolute top-0 h-full border-r-2 border-border bg-hero-void"
+                            className="absolute top-0 h-full border-r-2 border-[color:var(--cr-accent-border)] bg-[image:var(--cr-timeline-bar)]"
                             style={{
                               left: `${Math.max(0, Math.min(98.8, r.left))}%`,
                               width: `${Math.max(1.2, Math.min(100, r.width))}%`,
@@ -746,7 +747,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                       </div>
                     ))}
                   </div>
-                  <p className="mt-3 font-mono text-[10px] text-white/55">
+                  <p className="mt-3 font-mono text-[10px] text-[color:var(--cr-fg-subtle)]">
                     {`// `}집행 시작/종료 일자를 막대로만 표시합니다. (추가 계산/평가 없음)
                   </p>
                 </div>
@@ -876,14 +877,14 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 headers={["매체명", "유형", "지역", "위치", "집행 기간", "일 유동", "가시성", "상태"]}
               >
                 {data.mediaBookings.map((b, i) => (
-                  <tr key={i} className={i % 2 === 0 ? "bg-white/[0.02]" : "bg-white/[0.04]"}>
+                  <tr key={i} className={i % 2 === 0 ? "bg-[var(--cr-row-even)]" : "bg-[var(--cr-row-odd)]"}>
                     <td className="max-w-[120px] px-3 py-2 font-semibold">{b.mediaName}</td>
-                    <td className="px-3 py-2 text-[10px] text-white/80">{b.type ?? "—"}</td>
-                    <td className="px-3 py-2 text-[10px] text-white/80">{b.region ?? "—"}</td>
-                    <td className="px-3 py-2 text-[10px] text-white/80">{b.location}</td>
-                    <td className="px-3 py-2 font-mono text-[10px] tabular-nums text-white/80">
+                    <td className="px-3 py-2 text-[10px] text-[color:var(--cr-fg-table)]">{b.type ?? "—"}</td>
+                    <td className="px-3 py-2 text-[10px] text-[color:var(--cr-fg-table)]">{b.region ?? "—"}</td>
+                    <td className="px-3 py-2 text-[10px] text-[color:var(--cr-fg-table)]">{b.location}</td>
+                    <td className="px-3 py-2 font-mono text-[10px] tabular-nums text-[color:var(--cr-fg-table)]">
                       {fmtDate(b.startsAt)} ~ {fmtDate(b.endsAt)}
-                      <span className="ml-1 text-white/45">({diffDays(b.startsAt, b.endsAt)}일)</span>
+                      <span className="ml-1 text-[color:var(--cr-fg-dim)]">({diffDays(b.startsAt, b.endsAt)}일)</span>
                     </td>
                     <td className="px-3 py-2 font-mono text-[10px] font-semibold tabular-nums">
                       {b.dailyFootTraffic ? `${b.dailyFootTraffic.toLocaleString()}` : "—"}
@@ -914,16 +915,16 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 {data.scheduleEvents.map((e, i) => (
                   <div
                     key={i}
-                    className="tkad-glass-surface-soft rounded-[18px] border border-white/10 bg-white/5 p-3.5 backdrop-blur-md"
+                    className="tkad-glass-surface-soft rounded-[18px] border border-[color:var(--cr-border-soft)] bg-[var(--cr-surface)] p-3.5 backdrop-blur-md"
                   >
                     <div className="flex items-start gap-3">
-                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#22d3ee]" aria-hidden />
+                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--cr-accent)]" aria-hidden />
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-bold text-white">{e.title}</span>
+                          <span className="text-sm font-bold text-[color:var(--cr-fg)]">{e.title}</span>
                           <NeonBadge>{scheduleKindKo(e.kind || "—")}</NeonBadge>
                         </div>
-                        <p className="mt-1.5 font-mono text-[11px] tabular-nums text-white/55">
+                        <p className="mt-1.5 font-mono text-[11px] tabular-nums text-[color:var(--cr-fg-subtle)]">
                           {fmtDate(e.startsAt)} — {fmtDate(e.endsAt)}
                         </p>
                       </div>
@@ -939,21 +940,21 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               <SectionTitle>비용 내역</SectionTitle>
               <NeonTable headers={["구분", "항목", "금액", "상태"]}>
                 {data.financialDocs.map((f, i) => (
-                  <tr key={i} className={i % 2 === 0 ? "bg-white/[0.02]" : "bg-white/[0.04]"}>
-                    <td className="px-3 py-2.5 font-mono text-[11px] text-white/55">
+                  <tr key={i} className={i % 2 === 0 ? "bg-[var(--cr-row-even)]" : "bg-[var(--cr-row-odd)]"}>
+                    <td className="px-3 py-2.5 font-mono text-[11px] text-[color:var(--cr-fg-subtle)]">
                       {formatFinancialDocKindKo(f.kind)}
                     </td>
                     <td className="px-3 py-2.5 font-semibold">{f.title}</td>
                     <td className="px-3 py-2.5 font-mono font-semibold tabular-nums">
                       {f.amountKrw ? fmtAmount(f.amountKrw) : "—"}
                     </td>
-                    <td className="px-3 py-2.5 text-[11px] text-white/55">
+                    <td className="px-3 py-2.5 text-[11px] text-[color:var(--cr-fg-subtle)]">
                       {formatFinancialDocStatusKo(f.status)}
                     </td>
                   </tr>
                 ))}
                 {totalAmount > 0 ? (
-                  <tr className="bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(168,85,247,0.1))]">
+                  <tr className="bg-[image:var(--cr-sum-row)]">
                     <td colSpan={2} className="px-3 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#22d3ee]">
                       [ 합계 ]
                     </td>
@@ -974,7 +975,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 {data.proofPhotos.slice(0, 9).map((p, i) => (
                   <div
                     key={i}
-                    className="overflow-hidden rounded-[14px] border border-white/12 bg-white/5"
+                    className="overflow-hidden rounded-[14px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)]"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -984,7 +985,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                       className="block h-40 w-full object-cover"
                     />
                     {p.caption ? (
-                      <p className="border-t border-white/10 bg-white/[0.03] px-3 py-2 font-mono text-[10px] text-white/70">
+                      <p className="border-t border-[color:var(--cr-border-soft)] bg-[var(--cr-surface-soft)] px-3 py-2 font-mono text-[10px] text-[color:var(--cr-fg-body)]">
                         {`// `}
                         {p.caption}
                       </p>
@@ -1107,8 +1108,8 @@ function CampaignTrafficBlock({
                 className={cn(
                   "absolute inset-0 rounded-sm",
                   isPeak
-                    ? "bg-[linear-gradient(180deg,#22d3ee,#a855f7)]"
-                    : "bg-white/70",
+                    ? "bg-[image:var(--cr-timeline-bar)]"
+                    : "bg-[var(--cr-bar)]",
                 )}
               />
             </div>
@@ -1119,7 +1120,7 @@ function CampaignTrafficBlock({
         {labels.map((label, i) => (
           <div
             key={i}
-            className="flex-1 text-center font-mono text-[8px] font-medium text-white/45"
+            className="flex-1 text-center font-mono text-[8px] font-medium text-[color:var(--cr-fg-dim)]"
           >
             {label}
           </div>
