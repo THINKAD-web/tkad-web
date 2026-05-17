@@ -12,15 +12,29 @@ config({ path: resolve(root, ".env.development"), override: true });
 config({ path: resolve(root, ".env.local"), override: true });
 config({ path: resolve(root, ".env.development.local"), override: true });
 
-if (!process.env.DATABASE_URL?.trim()) {
+function cleanUrl(raw) {
+  if (!raw?.trim()) return undefined;
+  const v = raw.trim();
+  if (/@ep-xxx\.|\/\/user:password@|ep-xxx\.region\.aws\.neon\.tech/i.test(v)) {
+    return undefined;
+  }
+  const m = v.match(/^DATABASE_URL=(?:"([^"]+)"|'([^']+)'|(\S+))$/i);
+  if (m) return (m[1] ?? m[2] ?? m[3])?.trim();
+  return v;
+}
+
+const resolved =
+  cleanUrl(process.env.DATABASE_URL) ??
+  cleanUrl(process.env.DATABASE_URL_UNPOOLED);
+
+if (!resolved) {
   console.error(`
-[tkad-web] DATABASE_URL이 설정되어 있지 않습니다.
+[tkad-web] DATABASE_URL (또는 DATABASE_URL_UNPOOLED)이 설정되어 있지 않습니다.
 
 다음 중 하나를 하세요:
-  1) 프로젝트 루트에 .env 또는 .env.local 파일을 만들고
-     DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=verify-full"
-     형식으로 넣으세요. (Neon 대시보드에서 연결 문자열 복사 가능)
-  2) 참고용: cp .env.production.example .env 후 값 수정
+  1) 프로젝트 루트 .env.local 에 Neon Pooled 연결 문자열만 넣기
+     DATABASE_URL=postgresql://neondb_owner:...@ep-....-pooler....neon.tech/neondb?sslmode=require
+  2) Vercel: DATABASE_URL 또는 DATABASE_URL_UNPOOLED (값에 DATABASE_URL= 접두어 넣지 말 것)
 
 그 다음:
   npm run db:push
@@ -28,7 +42,8 @@ if (!process.env.DATABASE_URL?.trim()) {
   process.exit(1);
 }
 
-const url = process.env.DATABASE_URL.trim();
+process.env.DATABASE_URL = resolved;
+const url = resolved;
 if (
   /@ep-xxx\.|@ep-xxx\.region\.|\/\/user:password@/i.test(url) ||
   url.includes("ep-xxx.region.aws.neon.tech")

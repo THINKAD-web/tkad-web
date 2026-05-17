@@ -1,4 +1,5 @@
 import { isDatabaseConfigured } from "@/lib/prisma";
+import { resolveDatabaseUrl } from "@/lib/database-url";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,17 @@ export default function DeployTestPage() {
   const checks = [
     { label: "Server Time (UTC)", value: now, ok: true },
     { label: "Node.js", value: nodeVer, ok: true },
-    { label: "DATABASE_URL", value: dbOk ? "configured" : "not set", ok: dbOk },
+    {
+      label: "DATABASE_URL",
+      value: dbOk
+        ? resolveDatabaseUrl()?.includes("-pooler")
+          ? "configured (pooled)"
+          : process.env.DATABASE_URL?.trim()
+            ? "configured"
+            : "configured (from DATABASE_URL_UNPOOLED)"
+        : "not set",
+      ok: dbOk,
+    },
     {
       label: "CRON_SECRET",
       value: process.env.CRON_SECRET ? "set" : "not set",

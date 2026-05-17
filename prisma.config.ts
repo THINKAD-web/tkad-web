@@ -7,6 +7,7 @@
 import { config as loadEnv } from "dotenv";
 import { resolve } from "path";
 import { defineConfig } from "prisma/config";
+import { resolveDatabaseUrl } from "./lib/database-url";
 
 const root = process.cwd();
 /** CLI `DATABASE_URL=... npx prisma` should win over stale `.env.local` */
@@ -19,7 +20,8 @@ if (databaseUrlFromCli) {
   process.env.DATABASE_URL = databaseUrlFromCli;
 }
 
-const databaseUrl = process.env.DATABASE_URL?.trim();
+const databaseUrl = resolveDatabaseUrl();
+if (databaseUrl) process.env.DATABASE_URL = databaseUrl;
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

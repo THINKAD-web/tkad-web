@@ -75,39 +75,45 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const db = getPrisma();
-  const app = await db.mediaApplication.create({
-    data: {
-      companyName: d.companyName,
-      contactName: d.contactName,
-      contactPhone: d.contactPhone,
-      contactEmail: d.contactEmail,
-      mediaName: d.mediaName,
-      mediaType: d.mediaType,
-      address: d.address,
-      addressDetail: d.addressDetail ?? null,
-      zonecode: d.zonecode ?? null,
-      latitude,
-      longitude,
-      city,
-      district,
-      widthCm: d.widthCm != null ? Math.round(d.widthCm) : null,
-      heightCm: d.heightCm != null ? Math.round(d.heightCm) : null,
-      isDigital: d.isDigital,
-      operatingHours: d.operatingHours ?? null,
-      hasLighting: d.hasLighting,
-      dailyFootfall:
-        d.dailyFootfall != null ? Math.round(d.dailyFootfall) : null,
-      monthlyPrice: Math.round(d.monthlyPrice),
-      minFlightDays:
-        d.minFlightDays != null ? Math.round(d.minFlightDays) : null,
-      photoFrontUrl: d.photoFrontUrl,
-      photoSideUrl: d.photoSideUrl,
-      photoNightUrl: d.photoNightUrl,
-      notes: d.notes ?? null,
-      submitterIp: ip,
-    },
-  });
+  let app;
+  try {
+    const db = getPrisma();
+    app = await db.mediaApplication.create({
+      data: {
+        companyName: d.companyName,
+        contactName: d.contactName,
+        contactPhone: d.contactPhone,
+        contactEmail: d.contactEmail,
+        mediaName: d.mediaName,
+        mediaType: d.mediaType,
+        address: d.address,
+        addressDetail: d.addressDetail ?? null,
+        zonecode: d.zonecode ?? null,
+        latitude,
+        longitude,
+        city,
+        district,
+        widthCm: d.widthCm != null ? Math.round(d.widthCm) : null,
+        heightCm: d.heightCm != null ? Math.round(d.heightCm) : null,
+        isDigital: d.isDigital,
+        operatingHours: d.operatingHours ?? null,
+        hasLighting: d.hasLighting,
+        dailyFootfall:
+          d.dailyFootfall != null ? Math.round(d.dailyFootfall) : null,
+        monthlyPrice: Math.round(d.monthlyPrice),
+        minFlightDays:
+          d.minFlightDays != null ? Math.round(d.minFlightDays) : null,
+        photoFrontUrl: d.photoFrontUrl,
+        photoSideUrl: d.photoSideUrl,
+        photoNightUrl: d.photoNightUrl,
+        notes: d.notes ?? null,
+        submitterIp: ip,
+      },
+    });
+  } catch (e) {
+    console.error("[media-applications] create failed", e);
+    return json({ error: "database_error" }, { status: 503 });
+  }
 
   const locale =
     typeof raw === "object" &&

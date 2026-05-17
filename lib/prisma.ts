@@ -4,6 +4,11 @@ import { config as loadEnv } from "dotenv";
 import { statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { Pool } from "pg";
+import {
+  ensureDatabaseUrlEnv,
+  isDatabaseUrlConfigured,
+  resolveDatabaseUrl,
+} from "@/lib/database-url";
 import { normalizePgDatabaseUrl } from "@/lib/normalize-pg-database-url";
 
 declare global {
@@ -41,10 +46,10 @@ function readPrismaClientBundleMtimeMs(): number | null {
 }
 
 function createPrismaClient(): PrismaClient {
-  const rawUrl = process.env.DATABASE_URL?.trim();
+  const rawUrl = ensureDatabaseUrlEnv();
   if (!rawUrl) {
     throw new Error(
-      "Missing DATABASE_URL. Add it to .env (e.g. Neon: https://neon.tech → Connection string)",
+      "Missing DATABASE_URL (or DATABASE_URL_UNPOOLED). Add Neon connection string to .env.local or Vercel env.",
     );
   }
 
@@ -65,7 +70,7 @@ function createPrismaClient(): PrismaClient {
 export function getPrisma(): PrismaClient {
   if (process.env.NODE_ENV !== "production") {
     ensureLocalDatabaseEnvFromFiles();
-    const cs = process.env.DATABASE_URL?.trim();
+    const cs = resolveDatabaseUrl();
     if (globalThis.prisma && devPrismaDatabaseUrl !== cs) {
       const stale = globalThis.prisma;
       globalThis.prisma = undefined;
@@ -93,7 +98,7 @@ export function getPrisma(): PrismaClient {
   // 새로 생겨 Neon 연결 고갈·간헐 500(특히 /api/media/map 반복)로 이어질 수 있음.
   globalThis.prisma = client;
   if (process.env.NODE_ENV !== "production") {
-    devPrismaDatabaseUrl = process.env.DATABASE_URL?.trim();
+    devPrismaDatabaseUrl = resolveDatabaseUrl();
     const m = readPrismaClientBundleMtimeMs();
     if (m != null) globalThis.__prismaClientBundleMtimeMs = m;
   }
@@ -107,7 +112,7 @@ const prisma = new Proxy({} as PrismaClient, {
 });
 
 export function isDatabaseConfigured(): boolean {
-  return !!process.env.DATABASE_URL?.trim();
+  return isDatabaseUrlConfigured();
 }
 
 export default prisma;
