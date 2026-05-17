@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User as UserIcon } from "lucide-react";
@@ -35,11 +36,60 @@ function useSession() {
   return { session, loaded };
 }
 
-export function HeaderUserMenu({ onNavigate }: { onNavigate?: () => void }) {
+const menuRowClass =
+  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white dark:hover:bg-white/6";
+
+export function HeaderUserMenu({
+  onNavigate,
+  variant = "inline",
+}: {
+  onNavigate?: () => void;
+  variant?: "inline" | "menu";
+}) {
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const { session, loaded } = useSession();
   const { ids } = useCart();
 
   if (!loaded) return null;
+
+  if (variant === "menu") {
+    return (
+      <div className="divide-y divide-zinc-200 dark:divide-white/10">
+        <FavoritesSessionSync />
+        <HeaderFavoritesLink
+          onNavigate={onNavigate}
+          variant="menu"
+          className={menuRowClass}
+        />
+        <Link
+          href="/cart"
+          onClick={onNavigate}
+          className={menuRowClass}
+          aria-label={`장바구니${ids.length > 0 ? ` (${ids.length})` : ""}`}
+        >
+          <ShoppingCart className="h-4 w-4 shrink-0" strokeWidth={2} />
+          <span className="flex-1">{isKo ? "장바구니" : "Cart"}</span>
+          {ids.length > 0 ? (
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1.5 text-[10px] font-bold text-white dark:from-violet-500 dark:to-cyan-400">
+              {ids.length}
+            </span>
+          ) : null}
+        </Link>
+        {session ? (
+          <Link href="/dashboard" onClick={onNavigate} className={menuRowClass}>
+            <UserIcon className="h-4 w-4 shrink-0" />
+            <span className="truncate">{session.name}</span>
+          </Link>
+        ) : (
+          <Link href="/login" onClick={onNavigate} className={menuRowClass}>
+            <UserIcon className="h-4 w-4 shrink-0" />
+            <span>{isKo ? "로그인" : "Log in"}</span>
+          </Link>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-1.5">

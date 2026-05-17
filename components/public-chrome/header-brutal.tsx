@@ -134,8 +134,15 @@ export function HeaderBrutal({ contentStatus }: Props) {
       }
       cta={{ href: "/contact", label: t("nav.contact") }}
       extras={
-        <>
+        <div className="hidden items-center gap-1.5 md:flex">
           <HeaderUserMenu />
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
+      }
+      mobileMenuExtras={(close) => <HeaderUserMenu variant="menu" onNavigate={close} />}
+      mobileMenuFooter={
+        <>
           <LanguageToggle />
           <ThemeToggle />
         </>
