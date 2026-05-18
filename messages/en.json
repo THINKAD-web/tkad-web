@@ -20,7 +20,17 @@
     "packageLabel": "SUPPORT",
     "quoteEyebrow": "[ Get a quote ]",
     "kakaoShort": "KakaoTalk",
-    "aiShort": "AI chat"
+    "aiShort": "AI chat",
+    "scrollTopTitle": "Top",
+    "scrollTopHint": "Jump to page top",
+    "scrollBottomTitle": "Bottom",
+    "scrollBottomHint": "Jump to page bottom",
+    "quotePreviewTitle": "Get a quote",
+    "quotePreviewHint": "Media, campaign, planner",
+    "kakaoPreviewTitle": "KakaoTalk",
+    "kakaoPreviewHint": "Live 1:1 chat",
+    "aiPreviewTitle": "AI media planner",
+    "aiPreviewHint": "Recommendations & Q&A"
   },
   "quoteFab": {
     "regionLabel": "Quote and consultation shortcuts",
