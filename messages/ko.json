@@ -2264,6 +2264,19 @@
       "emailHint": "확인 메일: {email}"
     }
   },
+  "contentNotify": {
+    "badge": "알림 받기",
+    "title": "새 콘텐츠 알림",
+    "descReport": "첫 OOH 트렌드 리포트가 게시되면 이메일로 알려드립니다.",
+    "descAcademy": "새 레슨·웨비나가 추가되면 이메일로 알려드립니다.",
+    "emailLabel": "이메일",
+    "emailPlaceholder": "name@company.com",
+    "submit": "알림 신청",
+    "submitting": "전송 중…",
+    "submitted": "신청 완료",
+    "successHint": "감사합니다. 콘텐츠가 공개되면 연락드리겠습니다.",
+    "error": "저장에 실패했습니다. 잠시 후 다시 시도해주세요."
+  },
   "packages": {
     "hero": {
       "badge": "// CURATED PACKAGES",
