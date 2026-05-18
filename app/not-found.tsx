@@ -7,6 +7,7 @@ export default function RootNotFound() {
     <html lang="ko">
       <body className="m-0 bg-[#05050a] antialiased">
         <NeonErrorPage
+          standalone
           code="404"
           eyebrow="[ NOT FOUND ]"
           title="페이지를 찾을 수 없습니다"
