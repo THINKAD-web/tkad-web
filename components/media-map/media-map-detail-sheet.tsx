@@ -42,26 +42,53 @@ type AvailabilitySummary = {
   label: string;
 };
 
-function MediaMapDetailSheetSpecBlock({ label, value }: { label: string; value: string }) {
+function SpecBlock({
+  label,
+  value,
+  dark,
+}: {
+  label: string;
+  value: string;
+  dark?: boolean;
+}) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
-      <dt className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-white/45">
+    <div
+      className={cn(
+        "rounded-lg border px-2.5 py-2",
+        dark
+          ? "border-white/10 bg-white/5"
+          : "border-border/70 bg-muted/40",
+      )}
+    >
+      <dt
+        className={cn(
+          "font-mono text-[9px] font-bold uppercase tracking-[0.12em]",
+          dark ? "text-white/45" : "text-muted-foreground",
+        )}
+      >
         {label}
       </dt>
-      <dd className="mt-1 font-semibold tabular-nums text-white">{value}</dd>
+      <dd
+        className={cn(
+          "mt-0.5 text-sm font-semibold tabular-nums",
+          dark ? "text-white" : "text-foreground",
+        )}
+      >
+        {value}
+      </dd>
     </div>
   );
 }
 
-export function MediaMapDetailSheet({
-  item,
-  onClose,
-  isKo = true,
-}: {
+type DetailProps = {
   item: MapMapItem;
   onClose: () => void;
   isKo?: boolean;
-}) {
+  variant: "sheet" | "inline";
+};
+
+function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps) {
+  const dark = variant === "sheet";
   const [availability, setAvailability] = useState<AvailabilitySummary>({
     status: "loading",
     label: isKo ? "이번 달 예약 현황 확인 중…" : "Checking this month…",
@@ -146,26 +173,229 @@ export function MediaMapDetailSheet({
       const day = today + i;
       const tone =
         availability.status === "available"
-          ? "bg-emerald-400/80"
+          ? "bg-emerald-500"
           : availability.status === "partial"
             ? i % 3 === 0
-              ? "bg-amber-400/80"
-              : "bg-emerald-400/50"
+              ? "bg-amber-500"
+              : "bg-emerald-400"
             : availability.status === "busy"
-              ? "bg-rose-400/70"
-              : "bg-white/20";
+              ? "bg-rose-500"
+              : "bg-muted-foreground/40";
       return { day, tone };
     });
   }, [availability.status]);
 
   const regionLine = [item.region, item.district].filter(Boolean).join(" · ") || item.location;
 
+  const ctaPrimary = cn(
+    "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors",
+    dark
+      ? "border border-white/14 bg-white/8 text-white hover:bg-white/12"
+      : "border border-border bg-card text-foreground hover:bg-muted",
+  );
+
+  const ctaAccent = cn(
+    "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-transform hover:-translate-y-0.5",
+    "bg-gradient-to-r from-violet-500 to-cyan-400",
+  );
+
+  if (variant === "inline") {
+    return (
+      <div className="px-3 py-4 sm:px-4">
+        <p className="mb-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          {isKo ? "선택한 매체" : "Selected"}
+        </p>
+        <div className="flex gap-3">
+          {item.image ? (
+            <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.image} alt="" className="h-full w-full object-cover" />
+            </div>
+          ) : (
+            <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg border border-dashed border-border bg-muted text-[10px] text-muted-foreground">
+              NO IMG
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-primary">
+                  {item.type}
+                </p>
+                <h2 className="mt-0.5 line-clamp-2 text-base font-bold leading-snug text-foreground">
+                  {item.name}
+                </h2>
+                <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{regionLine}</p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-foreground"
+                aria-label={isKo ? "닫기" : "Close"}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mt-2 text-sm font-bold text-primary tabular-nums">
+              {formatPrice(item.price, item.pricePeriod)}
+            </p>
+          </div>
+        </div>
+
+        <dl className="mt-3 grid grid-cols-2 gap-2">
+          <SpecBlock
+            label={isKo ? "예상 노출" : "Est. impressions"}
+            value={
+              impressions != null
+                ? `${formatCompact(impressions)}${isKo ? "회/월" : "/mo"}`
+                : "—"
+            }
+          />
+          <SpecBlock label="CPM" value={cpm != null ? `₩${cpm.toLocaleString("ko-KR")}` : "—"} />
+          <SpecBlock label={isKo ? "가시성" : "Visibility"} value={visibilityLabel} />
+          <SpecBlock
+            label={isKo ? "이번 달" : "This month"}
+            value={availability.label.replace(/^이번 달: |^This month: /, "")}
+          />
+        </dl>
+
+        <div className="mt-3 flex flex-wrap gap-1">
+          {calendarDots.map((d) => (
+            <span
+              key={d.day}
+              title={`${d.day}${isKo ? "일" : ""}`}
+              className={cn("h-2 w-2 rounded-full", d.tone)}
+            />
+          ))}
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Link href={`/media/${item.id}`} target="_blank" rel="noopener noreferrer" className={ctaPrimary}>
+            {isKo ? "전체 상세 보기 →" : "Full details →"}
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+          <Link href={`/contact?media=${encodeURIComponent(item.id)}`} className={ctaAccent}>
+            <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+            {isKo ? "문의하기" : "Contact"}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex justify-center pt-2 md:hidden">
+        <span className="h-1 w-10 rounded-full bg-white/25" aria-hidden />
+      </div>
+      <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400/70">
+            {item.type}
+            {item.subCategory ? ` · ${item.subCategory}` : ""}
+          </p>
+          <h2 className="mt-1 truncate text-lg font-bold text-white">{item.name}</h2>
+          <p className="mt-0.5 text-xs text-white/55">{regionLine}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+          aria-label={isKo ? "닫기" : "Close"}
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        {item.image ? (
+          <div className="overflow-hidden rounded-xl border border-white/10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={item.image} alt="" className="aspect-[16/10] w-full object-cover" />
+          </div>
+        ) : null}
+
+        <dl className="mt-4 grid grid-cols-2 gap-2 text-xs">
+          <SpecBlock dark label={isKo ? "월 단가" : "Monthly"} value={formatPrice(item.price, item.pricePeriod)} />
+          <SpecBlock
+            dark
+            label={isKo ? "예상 노출" : "Est. impressions"}
+            value={impressions != null ? `${formatCompact(impressions)}${isKo ? "회/월" : "/mo"}` : "—"}
+          />
+          <SpecBlock dark label="CPM" value={cpm != null ? `₩${cpm.toLocaleString("ko-KR")}` : "—"} />
+          <SpecBlock dark label={isKo ? "가시성" : "Visibility"} value={visibilityLabel} />
+        </dl>
+
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-3">
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-white/45">
+            {isKo ? "가용 캘린더 (이번 달)" : "Availability (this month)"}
+          </p>
+          <p className="mt-1.5 text-sm text-white/80">{availability.label}</p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {calendarDots.map((d) => (
+              <span
+                key={d.day}
+                title={`${d.day}${isKo ? "일" : ""}`}
+                className={cn(
+                  "h-2 w-2 rounded-full",
+                  d.tone.replace("emerald-500", "emerald-400/80").replace("amber-500", "amber-400/80").replace("rose-500", "rose-400/70"),
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 border-t border-white/10 p-4 sm:flex-row">
+        <Link
+          href={`/media/${item.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(ctaPrimary, "sm:flex-1")}
+        >
+          {isKo ? "전체 상세 보기 →" : "Full details →"}
+          <ExternalLink className="h-4 w-4" aria-hidden />
+        </Link>
+        <Link
+          href={`/contact?media=${encodeURIComponent(item.id)}`}
+          className={cn(ctaAccent, "sm:flex-1")}
+        >
+          <MessageCircle className="h-4 w-4" aria-hidden />
+          {isKo ? "문의하기" : "Contact"}
+        </Link>
+      </div>
+    </>
+  );
+}
+
+export function MediaMapDetailSheet({
+  item,
+  onClose,
+  isKo = true,
+  variant = "sheet",
+}: {
+  item: MapMapItem;
+  onClose: () => void;
+  isKo?: boolean;
+  variant?: "sheet" | "inline";
+}) {
+  if (variant === "inline") {
+    return (
+      <section
+        id="media-map-mobile-preview"
+        className="order-2 w-full border-y border-border/80 bg-card shadow-[0_-8px_24px_rgba(0,0,0,0.06)] md:hidden"
+        aria-label={item.name}
+      >
+        <MediaMapDetailBody item={item} onClose={onClose} isKo={isKo} variant="inline" />
+      </section>
+    );
+  }
+
   return (
     <>
       <button
         type="button"
         aria-label={isKo ? "패널 닫기" : "Close panel"}
-        className="fixed inset-0 z-[100001] bg-black/40 backdrop-blur-[2px]"
+        className="fixed inset-0 z-[100001] bg-black/40 backdrop-blur-[2px] max-md:hidden"
         onClick={onClose}
       />
       <div
@@ -173,86 +403,12 @@ export function MediaMapDetailSheet({
         aria-modal
         aria-label={item.name}
         className={cn(
-          "pointer-events-auto fixed z-[100004] flex flex-col overflow-hidden",
+          "pointer-events-auto fixed z-[100004] hidden flex-col overflow-hidden md:flex",
           "border border-white/10 bg-black/90 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl",
-          "inset-x-0 bottom-0 max-h-[min(92dvh,680px)] rounded-t-2xl",
-          "md:inset-x-auto md:bottom-4 md:right-4 md:top-4 md:w-[min(420px,calc(100%-2rem))] md:max-h-none md:rounded-2xl",
+          "inset-x-auto bottom-4 right-4 top-4 w-[min(420px,calc(100%-2rem))] rounded-2xl",
         )}
       >
-        <div className="flex justify-center pt-2 md:hidden">
-          <span className="h-1 w-10 rounded-full bg-white/25" aria-hidden />
-        </div>
-        <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
-          <div className="min-w-0">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400/70">
-              {item.type}
-              {item.subCategory ? ` · ${item.subCategory}` : ""}
-            </p>
-            <h2 className="mt-1 truncate text-lg font-bold text-white">{item.name}</h2>
-            <p className="mt-0.5 text-xs text-white/55">{regionLine}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-            aria-label={isKo ? "닫기" : "Close"}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          {item.image ? (
-            <div className="overflow-hidden rounded-xl border border-white/10">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.image} alt="" className="aspect-[16/10] w-full object-cover" />
-            </div>
-          ) : null}
-
-          <dl className="mt-4 grid grid-cols-2 gap-2 text-xs">
-            <MediaMapDetailSheetSpecBlock label={isKo ? "월 단가" : "Monthly"} value={formatPrice(item.price, item.pricePeriod)} />
-            <MediaMapDetailSheetSpecBlock
-              label={isKo ? "예상 노출" : "Est. impressions"}
-              value={impressions != null ? `${formatCompact(impressions)}${isKo ? "회/월" : "/mo"}` : "—"}
-            />
-            <MediaMapDetailSheetSpecBlock label="CPM" value={cpm != null ? `₩${cpm.toLocaleString("ko-KR")}` : "—"} />
-            <MediaMapDetailSheetSpecBlock label={isKo ? "가시성" : "Visibility"} value={visibilityLabel} />
-          </dl>
-
-          <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-3">
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-white/45">
-              {isKo ? "가용 캘린더 (이번 달)" : "Availability (this month)"}
-            </p>
-            <p className="mt-1.5 text-sm text-white/80">{availability.label}</p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {calendarDots.map((d) => (
-                <span
-                  key={d.day}
-                  title={`${d.day}${isKo ? "일" : ""}`}
-                  className={cn("h-2 w-2 rounded-full", d.tone)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-white/10 p-4 sm:flex-row">
-          <Link
-            href={`/media/${item.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/14 bg-white/8 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-white/12"
-          >
-            {isKo ? "전체 상세 보기 →" : "Full details →"}
-            <ExternalLink className="h-4 w-4" aria-hidden />
-          </Link>
-          <Link
-            href={`/contact?media=${encodeURIComponent(item.id)}`}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-3 text-sm font-bold text-white shadow-[0_12px_40px_rgba(139,92,246,0.35)] transition-transform hover:-translate-y-0.5"
-          >
-            <MessageCircle className="h-4 w-4" aria-hidden />
-            {isKo ? "문의하기" : "Contact"}
-          </Link>
-        </div>
+        <MediaMapDetailBody item={item} onClose={onClose} isKo={isKo} variant="sheet" />
       </div>
     </>
   );
