@@ -513,33 +513,33 @@ export default function MediaBrowseClient({
             </div>
             <Link
               href="/media/packages"
-              className="category-hero-cta-secondary flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-4 text-xs font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10 sm:text-sm"
+              className="category-hero-cta-secondary flex h-10 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl border border-white/14 bg-white/6 px-3 text-[11px] font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10 sm:gap-2 sm:px-4 sm:text-xs"
             >
               <Sparkles className="h-3.5 w-3.5 shrink-0 text-violet-300" aria-hidden />
               {tMedia("packagesBrowseLink")}
-              <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white/75" aria-hidden />
+              <ArrowRight className="h-3 w-3 shrink-0 text-white/75 sm:h-3.5 sm:w-3.5" aria-hidden />
             </Link>
           </div>
-          <CategoryHeroCtaRow className="mt-1 gap-2 sm:gap-2.5">
+          <CategoryHeroCtaRow className="mt-1 flex-row gap-2">
             <Link
               href="/contact"
               className={cn(
                 categoryHeroCtaPrimaryClass,
-                "h-10 px-5 text-xs sm:h-11 sm:px-6 sm:text-sm",
+                "h-10 min-w-0 flex-1 whitespace-nowrap px-3 text-[11px] sm:h-11 sm:flex-none sm:px-6 sm:text-sm",
               )}
             >
-              {isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
-              <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
+              {tMedia("heroCtaProposal")}
+              <ArrowRight className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" aria-hidden />
             </Link>
             <Link
               href="/planner"
               className={cn(
                 categoryHeroCtaSecondaryClass,
-                "h-10 px-5 text-xs sm:h-11 sm:px-6 sm:text-sm",
+                "h-10 min-w-0 flex-1 whitespace-nowrap px-3 text-[11px] sm:h-11 sm:flex-none sm:px-6 sm:text-sm",
               )}
             >
-              {isKo ? "AI 캠페인 설계" : "AI campaign planner"}
-              <ArrowRight className="h-3.5 w-3.5 text-white/75 sm:h-4 sm:w-4" aria-hidden />
+              {tMedia("heroCtaPlanner")}
+              <ArrowRight className="h-3 w-3 shrink-0 text-white/75 sm:h-4 sm:w-4" aria-hidden />
             </Link>
           </CategoryHeroCtaRow>
         </CategoryExploreHero>
