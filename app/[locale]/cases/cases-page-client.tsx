@@ -78,6 +78,7 @@ export default function CasesPageClient({ initialCases }: Props) {
       <div className="tkad-landing-neon tkad-planner-neon">
         <CategoryExploreHero
           code="// 01 · CASES"
+          showBeta
           headlineBefore={isKo ? "브랜드가 선택한 " : "Brands chose "}
           headlineGradient={isKo ? "성공 사례" : "success stories"}
           subtitle={empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}

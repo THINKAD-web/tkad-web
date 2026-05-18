@@ -146,6 +146,7 @@ export default function RecommendPageClient({
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
         <CategoryExploreHero
           code="// 04 · RECOMMEND"
+          showBeta
           headlineBefore={isKo ? "AI가 추천하는 " : "AI-recommended "}
           headlineGradient={isKo ? "맞춤 매체" : "media picks"}
           subtitle={

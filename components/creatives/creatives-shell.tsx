@@ -14,6 +14,7 @@ export type CreativesCategoryHero = {
   headlineGradient: string;
   headlineAfter?: string;
   subtitle: string;
+  showBeta?: boolean;
 };
 
 /**
@@ -49,6 +50,7 @@ export function CreativesShell({
         {categoryHero ? (
           <CategoryExploreHero
             code={categoryHero.code}
+            showBeta={categoryHero.showBeta}
             headlineBefore={categoryHero.headlineBefore}
             headlineGradient={categoryHero.headlineGradient}
             headlineAfter={categoryHero.headlineAfter}

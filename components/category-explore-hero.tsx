@@ -6,10 +6,14 @@ const HEADLINE_GRADIENT =
 
 /** `/media/packages` 히어로 CTA와 동일한 스타일 토큰 */
 export const categoryHeroCtaPrimaryClass =
-  "inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-7 text-sm font-bold text-white shadow-[0_18px_48px_rgba(139,92,246,0.35)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+  "category-hero-cta-primary inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-7 text-sm font-bold text-white shadow-[0_18px_48px_rgba(139,92,246,0.35)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 
 export const categoryHeroCtaSecondaryClass =
-  "inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-7 text-sm font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+  "category-hero-cta-secondary inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-7 text-sm font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+
+/** packages 히어로 통계 카드 */
+export const categoryHeroStatCardClass =
+  "rounded-2xl border border-white/10 bg-white/5 px-4 py-4 backdrop-blur";
 
 export function CategoryHeroCtaRow({
   children,
@@ -41,11 +45,26 @@ export type CategoryExploreHeroProps = {
   className?: string;
   /** 모바일에서 코드·헤드라인만 슬림 표시 (지도 등) */
   compactOnMobile?: boolean;
+  /** 코드 라인 옆 BETA 뱃지 */
+  showBeta?: boolean;
 };
+
+function CategoryHeroCodeLine({ code, showBeta }: { code: string; showBeta?: boolean }) {
+  return (
+    <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-mono text-sm font-medium tracking-widest text-cyan-400/60">
+      <span>{code}</span>
+      {showBeta ? (
+        <span className="rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-violet-500/20 text-violet-300">
+          BETA
+        </span>
+      ) : null}
+    </p>
+  );
+}
 
 /**
  * 매체 탐색·콘텐츠 카테고리 페이지 공통 네온 히어로 (중앙 정렬).
- * CTA·통계는 `CategoryHeroCtaRow` + packages 페이지와 동일 클래스 사용.
+ * `tkad-category-explore-hero` — 라이트 테마에서도 항상 다크(#05050a), packages 페이지와 동일.
  */
 export function CategoryExploreHero({
   code,
@@ -56,11 +75,12 @@ export function CategoryExploreHero({
   children,
   className,
   compactOnMobile = false,
+  showBeta = false,
 }: CategoryExploreHeroProps) {
   return (
     <section
       className={cn(
-        "tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white",
+        "tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] text-white",
         className,
       )}
     >
@@ -82,9 +102,7 @@ export function CategoryExploreHero({
             : "px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-20 lg:px-8 lg:pb-24 lg:pt-24",
         )}
       >
-        <p className="font-mono text-sm font-medium tracking-widest text-cyan-400/60">
-          {code}
-        </p>
+        <CategoryHeroCodeLine code={code} showBeta={showBeta} />
         <h1
           className={cn(
             "mt-4 max-w-4xl text-balance font-bold leading-[1.08] tracking-tight text-white",
