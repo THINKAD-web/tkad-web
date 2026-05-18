@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
+import { MediaScarcitySection } from "@/components/media-scarcity-section";
+import { useMediaAvailabilitySummary } from "@/lib/use-media-availability-summary";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
 import { BtnBlock } from "@/components/brutalist";
 import { Link } from "@/i18n/navigation";
@@ -162,6 +164,8 @@ export default function MediaBrowseClient({
   const [sortBy, setSortBy] = useState<
     "default" | "newest" | "priceAsc" | "priceDesc" | "trafficDesc"
   >("default");
+  const [instantOnlyFilter, setInstantOnlyFilter] = useState(false);
+  const { summary: availabilitySummary } = useMediaAvailabilitySummary();
 
   /**
    * 서버 카탈로그를 그대로 사용. 초기 1회만 셔플.
@@ -358,25 +362,35 @@ export default function MediaBrowseClient({
     }
   }, [filtered, sortBy]);
 
+  const catalogListForDisplay = useMemo(() => {
+    if (!instantOnlyFilter || !availabilitySummary?.items) {
+      return sortedFiltered;
+    }
+    return sortedFiltered.filter(
+      (m) => availabilitySummary.items[m.id]?.tier === "instant",
+    );
+  }, [sortedFiltered, instantOnlyFilter, availabilitySummary]);
+
   /** 필터 결과가 적을 때 카탈로그에서 부족분만큼 덧붙여 그리드·지도 최소 노출 유지 */
   const { gridDisplayList, catalogMinPadActive } = useMemo(() => {
     if (
-      sortedFiltered.length >= MEDIA_BROWSE_GRID_MIN_ITEMS ||
+      catalogListForDisplay.length >= MEDIA_BROWSE_GRID_MIN_ITEMS ||
       effectiveCatalog.length < MEDIA_BROWSE_GRID_MIN_ITEMS
     ) {
       return {
-        gridDisplayList: sortedFiltered,
+        gridDisplayList: catalogListForDisplay,
         catalogMinPadActive: false,
       };
     }
-    const need = MEDIA_BROWSE_GRID_MIN_ITEMS - sortedFiltered.length;
-    const seen = new Set(sortedFiltered.map((m) => m.id));
+    const need =
+      MEDIA_BROWSE_GRID_MIN_ITEMS - catalogListForDisplay.length;
+    const seen = new Set(catalogListForDisplay.map((m) => m.id));
     const extras = effectiveCatalog.filter((m) => !seen.has(m.id)).slice(0, need);
     return {
-      gridDisplayList: [...sortedFiltered, ...extras],
+      gridDisplayList: [...catalogListForDisplay, ...extras],
       catalogMinPadActive: extras.length > 0,
     };
-  }, [sortedFiltered, effectiveCatalog]);
+  }, [catalogListForDisplay, effectiveCatalog]);
 
   useEffect(() => {
     // 팝업이 열려있을 때만 선택된 매체가 리스트에 있는지 검증
@@ -388,7 +402,14 @@ export default function MediaBrowseClient({
 
   useEffect(() => {
     setCatalogPage(1);
-  }, [searchTarget, debouncedCatalogSearch, filterState, sortBy, filters]);
+  }, [
+    searchTarget,
+    debouncedCatalogSearch,
+    filterState,
+    sortBy,
+    filters,
+    instantOnlyFilter,
+  ]);
 
   const pagedCatalog = useMemo(() => {
     const start = (catalogPage - 1) * catalogPageSize;
@@ -600,6 +621,12 @@ export default function MediaBrowseClient({
             />
           ) : (
             <div className="flex flex-col gap-6">
+              <MediaScarcitySection
+                catalog={effectiveCatalog}
+                summary={availabilitySummary}
+                isKo={isKo}
+                imagePreparingLabel={t("media.imagePreparing")}
+              />
               {/* #MEDIA-1: 정밀필터 진입점 숨김 (코드 보존) */}
               <div className="hidden flex-col gap-3">
                 <button
@@ -691,7 +718,7 @@ export default function MediaBrowseClient({
                       {catalogMinPadActive ? (
                         <span className="ml-2 text-sm font-normal text-muted-foreground">
                           {tMedia("catalogMinPadCountHint", {
-                            matched: sortedFiltered.length,
+                            matched: catalogListForDisplay.length,
                           })}
                         </span>
                       ) : null}
@@ -704,6 +731,22 @@ export default function MediaBrowseClient({
                         </span>
                       </span>
                     ) : null}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInstantOnlyFilter((v) => !v);
+                        setCatalogPage(1);
+                      }}
+                      className={cn(
+                        "inline-flex h-10 items-center gap-1.5 border-2 px-3 text-xs font-semibold transition-colors sm:text-sm",
+                        instantOnlyFilter
+                          ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                          : "border-border bg-card text-foreground hover:border-emerald-500/40",
+                      )}
+                      aria-pressed={instantOnlyFilter}
+                    >
+                      {tMedia("availabilityLive.filterInstant")}
+                    </button>
                     {browseMode === "list" ? (
                       <label className="inline-flex h-10 items-center gap-2 border-2 border-border bg-card px-3 text-sm text-foreground">
                         <span className="shrink-0 text-muted-foreground">
@@ -1012,6 +1055,10 @@ export default function MediaBrowseClient({
                         denseMobile
                         imagePreparingLabel={t("media.imagePreparing")}
                         popularIds={popularIds}
+                        quickInquiryOverlay
+                        availabilityTier={
+                          availabilitySummary?.items[media.id]?.tier
+                        }
                         topLeftSlot={
                           <label
                             className="absolute left-2 top-2 z-20 flex h-8 w-8 cursor-pointer select-none items-center justify-center border-2 border-border bg-card sm:left-2.5 sm:top-2.5 sm:h-9 sm:w-9"

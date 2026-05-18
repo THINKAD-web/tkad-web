@@ -1,7 +1,7 @@
 import type { MediaItem } from "./media-data";
 
 const STORAGE_KEY = "tkad_recently_viewed";
-export const RECENTLY_VIEWED_MAX = 5;
+export const RECENTLY_VIEWED_MAX = 20;
 
 const CHANGED_EVENT = "tkad-recently-viewed-changed";
 

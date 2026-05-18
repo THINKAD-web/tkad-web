@@ -9,13 +9,7 @@ import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
 import ContactInquiryForm from "@/components/contact-inquiry-form";
 import { ContactFeedbackSurvey } from "@/components/contact-feedback-survey";
-
-const OFFICE_MAP_LAT = 37.5407427;
-const OFFICE_MAP_LNG = 127.0595201;
-
-function officeMapEmbedSrc(hl: string) {
-  return `https://maps.google.com/maps?q=${OFFICE_MAP_LAT}%2C${OFFICE_MAP_LNG}&z=18&hl=${encodeURIComponent(hl)}&output=embed`;
-}
+import { ContactOfficeMap } from "@/components/contact/contact-office-map";
 
 type MainTab = "inquiry" | "feedback";
 
@@ -24,7 +18,6 @@ export function ContactNeonClient() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const mapHl = locale === "en" ? "en" : "ko";
-
   const [mainTab, setMainTab] = useState<MainTab>("inquiry");
 
   const tabBase =
@@ -157,13 +150,9 @@ export function ContactNeonClient() {
 
         <div className="mt-10 overflow-hidden rounded-[28px] bg-white/5 backdrop-blur tkad-neon-border tkad-neon-glow">
           <div className="aspect-video w-full border-b border-white/10">
-            <iframe
+            <ContactOfficeMap
+              mapHl={mapHl}
               title={isKo ? "THINKAD 오피스 위치" : "THINKAD office location"}
-              src={officeMapEmbedSrc(mapHl)}
-              className="h-full w-full border-0 grayscale"
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
           <div className="grid gap-0 sm:grid-cols-3">

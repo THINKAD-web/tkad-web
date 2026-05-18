@@ -13,13 +13,26 @@ import {
   startOfDay,
   ymdLocal,
 } from "@/lib/calendar-date-range";
+import {
+  computeMonthAvailabilityStats,
+  formatEstimatedCostWon,
+  getMonthDateRange,
+} from "@/lib/media-availability-stats";
+import { computeInstantBookingAmount } from "@/lib/instant-booking-pricing";
+import {
+  catalogPriceFieldToWon,
+  normalizeMediaPricePeriod,
+} from "@/lib/media-price-format";
+import type { MediaPricePeriodKey } from "@/lib/media-data";
+import { cn } from "@/lib/utils";
 
 type Props = {
   mediaId: string;
-  /** 매체 이름 (요약·접근성) */
   mediaName: string;
-  /** 소액 DOOH 즉시 예약 가능 여부 */
   instantBookingEligible?: boolean;
+  /** 카탈로그 price 필드 (원 또는 만원) */
+  catalogPrice?: number;
+  pricePeriod?: MediaPricePeriodKey | string | null;
 };
 
 type BlockedRange = {
@@ -57,6 +70,8 @@ export function MediaAvailabilityCalendar({
   mediaId,
   mediaName,
   instantBookingEligible = false,
+  catalogPrice = 0,
+  pricePeriod = "month",
 }: Props) {
   const locale = useLocale();
   const t = useTranslations("mediaDetail.availability");
@@ -69,6 +84,11 @@ export function MediaAvailabilityCalendar({
   const [data, setData] = useState<AvailabilityResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const monthlyPriceWon = useMemo(
+    () => catalogPriceFieldToWon(catalogPrice),
+    [catalogPrice],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -103,6 +123,14 @@ export function MediaAvailabilityCalendar({
 
   const cells = useMemo(() => buildMonthCells(viewMonth), [viewMonth]);
   const blockedRanges = useMemo(() => data?.blockedRanges ?? [], [data]);
+
+  const viewMonthStats = useMemo(() => {
+    const { start, end } = getMonthDateRange(
+      viewMonth.getFullYear(),
+      viewMonth.getMonth(),
+    );
+    return computeMonthAvailabilityStats(blockedRanges, start, end, today);
+  }, [blockedRanges, today, viewMonth]);
 
   const isCurrentMonth =
     viewMonth.getFullYear() === today.getFullYear() &&
@@ -147,6 +175,26 @@ export function MediaAvailabilityCalendar({
       ? diffDaysInclusive(rangeStart, rangeEnd)
       : 0;
 
+  const estimatedCostWon = useMemo(() => {
+    if (!rangeComplete || !rangeStart || !rangeEnd || monthlyPriceWon <= 0) {
+      return 0;
+    }
+    return computeInstantBookingAmount(
+      {
+        price: monthlyPriceWon,
+        pricePeriod: normalizeMediaPricePeriod(pricePeriod),
+      },
+      rangeStart,
+      rangeEnd,
+    );
+  }, [
+    monthlyPriceWon,
+    pricePeriod,
+    rangeComplete,
+    rangeEnd,
+    rangeStart,
+  ]);
+
   const contactHref = rangeComplete
     ? `/contact?media=${encodeURIComponent(mediaId)}&from=${ymdLocal(rangeStart!)}&to=${ymdLocal(rangeEnd!)}`
     : null;
@@ -154,6 +202,39 @@ export function MediaAvailabilityCalendar({
   const bookHref = rangeComplete
     ? `/media/${encodeURIComponent(mediaId)}/book?from=${ymdLocal(rangeStart!)}&to=${ymdLocal(rangeEnd!)}`
     : null;
+
+  const applyQuickRange = useCallback(
+    (start: Date, end: Date) => {
+      const s = startOfDay(start);
+      const e = startOfDay(end);
+      if (e < today) return;
+      const effectiveStart = s < today ? today : s;
+      if (rangeHasBlockedDays(effectiveStart, e, blockedRanges)) return;
+      setRangeStart(effectiveStart);
+      setRangeEnd(e);
+      setViewMonth(
+        new Date(effectiveStart.getFullYear(), effectiveStart.getMonth(), 1),
+      );
+    },
+    [blockedRanges, today],
+  );
+
+  const onQuickThisMonth = useCallback(() => {
+    const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    applyQuickRange(today, end);
+  }, [applyQuickRange, today]);
+
+  const onQuickNextMonth = useCallback(() => {
+    const start = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+    applyQuickRange(start, end);
+  }, [applyQuickRange, today]);
+
+  const onQuickTwoWeeks = useCallback(() => {
+    const end = new Date(today);
+    end.setDate(end.getDate() + 13);
+    applyQuickRange(today, end);
+  }, [applyQuickRange, today]);
 
   const onDayClick = useCallback(
     (day: Date) => {
@@ -188,6 +269,14 @@ export function MediaAvailabilityCalendar({
       ? ["월", "화", "수", "목", "금", "토", "일"]
       : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+  const monthLabel =
+    locale === "ko"
+      ? `${viewMonth.getFullYear()}년 ${viewMonth.getMonth() + 1}월`
+      : viewMonth.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        });
+
   return (
     <section
       aria-labelledby="availability-calendar-heading"
@@ -212,6 +301,14 @@ export function MediaAvailabilityCalendar({
             {`// `}
             {t("desc")}
           </p>
+          {!loading && !error ? (
+            <p className="mt-2 text-sm font-semibold text-foreground">
+              {t("monthAvailabilityPct", {
+                month: monthLabel,
+                pct: viewMonthStats.availabilityPct,
+              })}
+            </p>
+          ) : null}
         </div>
 
         <div className="inline-flex items-center gap-1 rounded-2xl border border-border/80 bg-muted/50 p-1 shadow-xs backdrop-blur">
@@ -248,6 +345,33 @@ export function MediaAvailabilityCalendar({
         </div>
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={loading}
+          onClick={onQuickThisMonth}
+          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+        >
+          {t("quickThisMonth")}
+        </button>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={onQuickNextMonth}
+          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+        >
+          {t("quickNextMonth")}
+        </button>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={onQuickTwoWeeks}
+          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+        >
+          {t("quickTwoWeeks")}
+        </button>
+      </div>
+
       <div className="mt-6">
         {loading ? (
           <div className="flex items-center justify-center gap-2 rounded-[24px] border border-border/80 bg-muted/40 px-4 py-12 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur">
@@ -273,13 +397,14 @@ export function MediaAvailabilityCalendar({
                   {weekdays.map((d, i) => (
                     <div
                       key={d}
-                      className={`font-mono text-[8px] font-black uppercase tracking-[0.2em] ${
+                      className={cn(
+                        "font-mono text-[8px] font-black uppercase tracking-[0.2em]",
                         i === 6
                           ? "text-accent"
                           : i === 5
                             ? "text-foreground"
-                            : "text-muted-foreground"
-                      }`}
+                            : "text-muted-foreground",
+                      )}
                     >
                       {d}
                     </div>
@@ -415,13 +540,28 @@ export function MediaAvailabilityCalendar({
                     {t("rangeLabel")}
                   </p>
                   {rangeComplete && rangeStart && rangeEnd ? (
-                    <p className="mt-1 text-sm font-semibold text-foreground">
-                      {t("rangeSelected", {
-                        start: formatRangeDate(rangeStart, locale),
-                        end: formatRangeDate(rangeEnd, locale),
-                        days: rangeDays,
-                      })}
-                    </p>
+                    <>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {t("rangeSelected", {
+                          start: formatRangeDate(rangeStart, locale),
+                          end: formatRangeDate(rangeEnd, locale),
+                          days: rangeDays,
+                        })}
+                      </p>
+                      {estimatedCostWon > 0 ? (
+                        <p className="mt-2 text-sm font-bold text-accent">
+                          {t("estimatedCost", {
+                            start: formatRangeDate(rangeStart, locale),
+                            end: formatRangeDate(rangeEnd, locale),
+                            days: rangeDays,
+                            cost: formatEstimatedCostWon(
+                              estimatedCostWon,
+                              locale,
+                            ),
+                          })}
+                        </p>
+                      ) : null}
+                    </>
                   ) : (
                     <p className="mt-1 text-sm text-foreground">
                       {formatRangeDate(rangeStart, locale)} —{" "}

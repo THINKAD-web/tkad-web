@@ -18,12 +18,17 @@ const ExitIntentPopup = dynamic(
   () => import("@/components/exit-intent-popup"),
   { ssr: false },
 );
+const FloatingQuoteFab = dynamic(
+  () => import("@/components/floating-quote-fab"),
+  { ssr: false },
+);
 
 export default function DeferredPublicWidgets() {
   return (
     <>
       <FloatingScrollNav />
       <ExitIntentPopup />
+      <FloatingQuoteFab />
       <AiChatbot />
     </>
   );

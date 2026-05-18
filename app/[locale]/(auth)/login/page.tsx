@@ -2,13 +2,17 @@
 
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { useAppToast } from "@/lib/use-toast";
 
 export default function LoginPage() {
+  const t = useTranslations("auth");
   const router = useRouter();
+  const toast = useAppToast();
   const search = useSearchParams();
   const redirect = search.get("redirect") || "/my";
 
@@ -74,6 +78,29 @@ export default function LoginPage() {
                 </p>
               </div>
 
+              <button
+                type="button"
+                onClick={() => toast.warning(t("kakaoComingSoon"))}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-[18px] border border-[#FEE500]/40 bg-[#FEE500] px-4 font-mono text-sm font-bold text-[#191600] shadow-[0_12px_40px_rgba(254,229,0,0.22)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
+              >
+                <span
+                  aria-hidden
+                  className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-[#191600] text-[10px] font-black text-[#FEE500]"
+                >
+                  K
+                </span>
+                {t("kakaoLogin")}
+              </button>
+
+              <div className="relative py-1">
+                <div className="absolute inset-0 flex items-center" aria-hidden>
+                  <div className="w-full border-t border-white/12" />
+                </div>
+                <p className="relative text-center font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/45">
+                  {t("orEmail")}
+                </p>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label
@@ -135,10 +162,10 @@ export default function LoginPage() {
           <p className="mt-6 text-center font-mono text-[12px] tracking-tight text-white/60">
             {`// `}계정이 없으신가요?{" "}
             <Link
-              href="/register"
+              href="/signup"
               className="border-b border-white/20 pb-0.5 font-bold text-white transition-colors hover:border-white/35 hover:text-white"
             >
-              회원가입
+              {t("signup")}
             </Link>
           </p>
         </div>

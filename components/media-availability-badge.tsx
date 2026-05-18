@@ -1,0 +1,52 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import type { AvailabilityTier } from "@/lib/media-availability-stats";
+
+const TIER_STYLES: Record<
+  Exclude<AvailabilityTier, "unknown">,
+  string
+> = {
+  instant:
+    "border-emerald-500/40 bg-emerald-500/90 text-white shadow-emerald-500/20",
+  partial:
+    "border-amber-500/40 bg-amber-500/90 text-white shadow-amber-500/20",
+  scarce: "border-rose-500/40 bg-rose-500/90 text-white shadow-rose-500/20",
+};
+
+export function MediaAvailabilityBadge({
+  tier,
+  className,
+  compact = false,
+}: {
+  tier: AvailabilityTier;
+  className?: string;
+  compact?: boolean;
+}) {
+  const t = useTranslations("media.availabilityLive");
+
+  if (tier === "unknown") return null;
+
+  const labelKey =
+    tier === "instant"
+      ? "badgeInstant"
+      : tier === "partial"
+        ? "badgePartial"
+        : "badgeScarce";
+
+  return (
+    <span
+      className={cn(
+        "inline-flex max-w-[calc(100%-0.5rem)] items-center border font-mono font-bold uppercase tracking-[0.14em] shadow-sm",
+        compact
+          ? "px-1.5 py-0.5 text-[8px] sm:text-[9px]"
+          : "px-2 py-1 text-[9px] sm:text-[10px]",
+        TIER_STYLES[tier],
+        className,
+      )}
+    >
+      {t(labelKey)}
+    </span>
+  );
+}

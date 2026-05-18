@@ -2,15 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User as UserIcon } from "lucide-react";
+import { Megaphone, ShoppingCart, User as UserIcon } from "lucide-react";
+import { HeaderProfileDropdown } from "@/components/header-profile-dropdown";
 import { useCart } from "@/lib/cart";
 import { HeaderFavoritesLink } from "@/components/header-favorites-link";
 import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 
 type Session = { id: string; email: string; name: string; role: string } | null;
+
+const SIGNUP_BTN_CLASS =
+  "inline-flex h-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 dark:shadow-[0_0_20px_rgba(34,211,238,0.28)]";
+
+const SIGNUP_MENU_BTN_CLASS =
+  "flex min-h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95";
 
 function useSession() {
   const pathname = usePathname();
@@ -32,7 +39,7 @@ function useSession() {
     return () => {
       cancelled = true;
     };
-  }, [pathname]); // 경로 변경(로그아웃 후 /login 이동 등) 시 재조회
+  }, [pathname]);
   return { session, loaded };
 }
 
@@ -47,7 +54,7 @@ export function HeaderUserMenu({
   variant?: "inline" | "menu";
 }) {
   const locale = useLocale();
-  const isKo = locale === "ko";
+  const t = useTranslations("auth");
   const { session, loaded } = useSession();
   const { ids } = useCart();
 
@@ -66,10 +73,10 @@ export function HeaderUserMenu({
           href="/cart"
           onClick={onNavigate}
           className={menuRowClass}
-          aria-label={`장바구니${ids.length > 0 ? ` (${ids.length})` : ""}`}
+          aria-label={`${locale === "ko" ? "장바구니" : "Cart"}${ids.length > 0 ? ` (${ids.length})` : ""}`}
         >
           <ShoppingCart className="h-4 w-4 shrink-0" strokeWidth={2} />
-          <span className="flex-1">{isKo ? "장바구니" : "Cart"}</span>
+          <span className="flex-1">{locale === "ko" ? "장바구니" : "Cart"}</span>
           {ids.length > 0 ? (
             <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1.5 text-[10px] font-bold text-white dark:from-violet-500 dark:to-cyan-400">
               {ids.length}
@@ -77,15 +84,29 @@ export function HeaderUserMenu({
           ) : null}
         </Link>
         {session ? (
-          <Link href="/dashboard" onClick={onNavigate} className={menuRowClass}>
-            <UserIcon className="h-4 w-4 shrink-0" />
-            <span className="truncate">{session.name}</span>
-          </Link>
+          <>
+            <Link href="/my" onClick={onNavigate} className={menuRowClass}>
+              <UserIcon className="h-4 w-4 shrink-0" strokeWidth={2} />
+              <span>{t("myPage")}</span>
+            </Link>
+            <Link href="/dashboard" onClick={onNavigate} className={menuRowClass}>
+              <Megaphone className="h-4 w-4 shrink-0" strokeWidth={2} />
+              <span>{t("myCampaigns")}</span>
+            </Link>
+          </>
         ) : (
-          <Link href="/login" onClick={onNavigate} className={menuRowClass}>
-            <UserIcon className="h-4 w-4 shrink-0" />
-            <span>{isKo ? "로그인" : "Log in"}</span>
-          </Link>
+          <div className="space-y-2 px-5 py-4">
+            <Link
+              href="/login"
+              onClick={onNavigate}
+              className="flex min-h-11 w-full items-center justify-center rounded-xl border border-zinc-300/90 bg-white px-4 text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-white/14 dark:bg-white/6 dark:text-white dark:hover:bg-white/10"
+            >
+              {t("login")}
+            </Link>
+            <Link href="/signup" onClick={onNavigate} className={SIGNUP_MENU_BTN_CLASS}>
+              {t("signup")}
+            </Link>
+          </div>
         )}
       </div>
     );
@@ -98,8 +119,8 @@ export function HeaderUserMenu({
       <Link
         href="/cart"
         onClick={onNavigate}
-        className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:text-violet-600 hover:bg-secondary/60 active:scale-95 transition-all duration-150 dark:hover:text-cyan-300"
-        aria-label={`장바구니${ids.length > 0 ? ` (${ids.length})` : ""}`}
+        className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-all duration-150 hover:bg-secondary/60 hover:text-violet-600 active:scale-95 dark:hover:text-cyan-300"
+        aria-label={`${locale === "ko" ? "장바구니" : "Cart"}${ids.length > 0 ? ` (${ids.length})` : ""}`}
       >
         <ShoppingCart className="h-4 w-4" strokeWidth={2} />
         {ids.length > 0 && (
@@ -109,25 +130,38 @@ export function HeaderUserMenu({
         )}
       </Link>
       {session ? (
-        <Link
-          href="/dashboard"
-          onClick={onNavigate}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-foreground hover:bg-secondary/60 transition-colors"
-        >
-          <UserIcon className="h-4 w-4" />
-          <span className="max-w-[6rem] truncate">{session.name}</span>
-        </Link>
-      ) : (
-        <Button
-          asChild
-          variant="ghost"
-          size="sm"
-          className="h-9 rounded-full px-3 text-foreground hover:text-foreground dark:text-white dark:hover:text-white"
-        >
-          <Link href="/login" onClick={onNavigate}>
-            로그인
+        <>
+          <Link
+            href="/dashboard"
+            onClick={onNavigate}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60 dark:text-white dark:hover:bg-white/10"
+          >
+            <Megaphone className="h-4 w-4 shrink-0" strokeWidth={2} />
+            <span className="hidden sm:inline">{t("myCampaigns")}</span>
           </Link>
-        </Button>
+          <HeaderProfileDropdown
+            session={session}
+            onNavigate={onNavigate}
+            myPageLabel={t("myPage")}
+            campaignsLabel={t("myCampaigns")}
+          />
+        </>
+      ) : (
+        <>
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="h-9 rounded-xl px-3 text-foreground hover:text-foreground dark:text-white dark:hover:text-white"
+          >
+            <Link href="/login" onClick={onNavigate}>
+              {t("login")}
+            </Link>
+          </Button>
+          <Link href="/signup" onClick={onNavigate} className={SIGNUP_BTN_CLASS}>
+            {t("signup")}
+          </Link>
+        </>
       )}
     </div>
   );

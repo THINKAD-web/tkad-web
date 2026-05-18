@@ -1,10 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { Flame } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
+import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
@@ -16,10 +17,13 @@ import {
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS } from "@/components/media-catalog-shared";
+import { MediaAvailabilityBadge } from "@/components/media-availability-badge";
+import type { AvailabilityTier } from "@/lib/media-availability-stats";
 
 /**
  * 매체 검색 그리드 카드 (리스트/비교/견적 공통).
- * Phase 3 Brutalist: 2px 검정 보더, 사각, 모노 메타, grayscale → hover 컬러.
+ * Phase 3 Brutalist: 2px 검정 보더, 사각, 모노 메타, 50% 그레이 → hover 풀 컬러.
  * 그리드 컨테이너에서 보더 겹침 처리를 위해 -mt/-ml 사용.
  */
 export const mediaCatalogGridCardShellClass =
@@ -35,6 +39,8 @@ type Common = {
   showPricePeriod?: boolean;
   className?: string;
   denseMobile?: boolean;
+  /** 이번 달 가용 등급 (availability-summary API) */
+  availabilityTier?: AvailabilityTier;
 };
 
 export type MediaCatalogGridCardProps =
@@ -42,6 +48,8 @@ export type MediaCatalogGridCardProps =
       variant: "link";
       /** 썸네일 좌측 상단 (예: 비교 체크박스). 링크 전파 차단은 슬롯에서 처리 */
       topLeftSlot?: ReactNode;
+      /** /media 그리드: hover 시 찜·빠른 문의 오버레이 */
+      quickInquiryOverlay?: boolean;
     })
   | (Common & {
       variant: "selectable";
@@ -51,6 +59,7 @@ export type MediaCatalogGridCardProps =
     });
 
 export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
+  const router = useRouter();
   const tMedia = useTranslations("media");
   const { media, isKo, imagePreparingLabel, popularIds } = props;
   const denseMobile = props.denseMobile ?? false;
@@ -99,6 +108,11 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           </span>
         </div>
       ) : null}
+      {props.availabilityTier && props.availabilityTier !== "unknown" ? (
+        <div className="absolute bottom-2 left-2 z-10 max-w-[calc(100%-1rem)]">
+          <MediaAvailabilityBadge tier={props.availabilityTier} compact />
+        </div>
+      ) : null}
       {popularIds?.has(media.id) ? (
         <div className="absolute bottom-0 right-0 z-10 flex items-center gap-1 border-l-2 border-t-2 border-border bg-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-accent-foreground">
           <Flame className="h-3 w-3" />
@@ -114,7 +128,9 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         media={media}
         placeholderLabel={imagePreparingLabel}
         className={cn(
-          "flex items-center justify-center border-b-2 border-border bg-muted [&_img]:grayscale [&_img]:transition-[filter,transform] [&_img]:duration-500 group-hover:[&_img]:grayscale-0 group-hover:[&_img]:scale-[1.02]",
+          "flex items-center justify-center border-b-2 border-border bg-muted",
+          MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS,
+          "group-hover:[&_img]:scale-[1.02]",
           denseMobile ? "h-30 sm:h-52 lg:h-60" : "h-44 sm:h-52 lg:h-60",
         )}
         bottomGradientClassName={null}
@@ -187,7 +203,46 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         aria-label={isKo ? media.name : (media.nameEn || media.name)}
         className={wrapClass}
       >
-        <div className={mediaCatalogGridCardShellClass}>{body}</div>
+        <div
+          className={cn(
+            mediaCatalogGridCardShellClass,
+            (props.quickInquiryOverlay ?? false) && "overflow-hidden",
+          )}
+        >
+          {body}
+          {props.quickInquiryOverlay ? (
+            <div
+              className="absolute inset-x-0 bottom-0 z-30 flex gap-2 border-t-2 border-border bg-black/75 p-2.5 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 max-md:hidden"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg border-2 border-border bg-card px-2 py-2 text-xs font-bold text-card-foreground">
+                <MediaFavoriteButton
+                  mediaId={media.id}
+                  mediaName={media.name}
+                  mediaNameEn={media.nameEn}
+                  compact
+                  className="h-7 w-7 shrink-0 border-0 bg-transparent"
+                />
+                <span className="truncate">{tMedia("quickInquiryFavorite")}</span>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push(`/contact?media=${encodeURIComponent(media.id)}`);
+                }}
+                className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-2 text-xs font-bold text-white shadow-md shadow-violet-500/25"
+              >
+                <span className="truncate">{tMedia("quickInquiryCta")}</span>
+                <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              </button>
+            </div>
+          ) : null}
+        </div>
       </Link>
     );
   }

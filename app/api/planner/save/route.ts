@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/user-session";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -46,10 +47,12 @@ export async function POST(request: NextRequest) {
   const expiresAt = new Date(Date.now() + ms);
 
   try {
+    const sessionUser = await getCurrentUser();
     const created = await prisma.savedPlannerPlan.create({
       data: {
         expiresAt,
-        userEmail: parsed.data.userEmail ?? null,
+        userEmail:
+          parsed.data.userEmail ?? sessionUser?.email ?? null,
         planJson: parsed.data.planJson as never,
       },
       select: { id: true, expiresAt: true },

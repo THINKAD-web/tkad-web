@@ -322,18 +322,6 @@ export default function MediaMapPageClient() {
 
   const selected = selectedItem;
 
-  useEffect(() => {
-    if (!selectedId) return;
-    if (typeof window === "undefined") return;
-    if (!window.matchMedia("(max-width: 767px)").matches) return;
-    requestAnimationFrame(() => {
-      document
-        .getElementById("media-map-mobile-preview")
-        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
-  }, [selectedId]);
-
-
   const inCart = useCallback((id: string) => cartIds.includes(id), [cartIds]);
   const isInCompare = useCallback(
     (id: string) => compareEntries.some((e) => e.id === id),
@@ -489,12 +477,13 @@ export default function MediaMapPageClient() {
               onViewChange={handleViewChange}
               programmaticView={programmaticView}
               userLocation={userLocation}
+              monochromeTiles
             />
           </div>
 
           {selected ? (
             <MediaMapDetailSheet
-              variant="sheet"
+              variant="dock"
               item={selected}
               onClose={() => {
                 setSelectedId(null);
@@ -525,19 +514,6 @@ export default function MediaMapPageClient() {
             </Link>
           </div>
         </div>
-
-        {/* 모바일: 지도 하단 인라인 미리보기 */}
-        {selected ? (
-          <MediaMapDetailSheet
-            variant="inline"
-            item={selected}
-            onClose={() => {
-              setSelectedId(null);
-              setSelectedItem(null);
-            }}
-            isKo={isKo}
-          />
-        ) : null}
 
         {/* 매체 리스트 — 모바일: 지도·미리보기 아래 */}
         <aside className="order-3 w-full border-t border-border/60 bg-card md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r md:overflow-y-auto">

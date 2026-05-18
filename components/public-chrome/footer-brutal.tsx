@@ -1,33 +1,74 @@
 "use client";
 
 /**
- * FooterBrutal — b930b10 IA 의 4컬럼(브랜드 / Quick Links / Contact / Services)
- * 구조를 BrutalFooter 로 렌더하는 래퍼.
- *
- * 컬럼 매핑은 components/footer.tsx (b930b10) 와 1:1 동일.
- * Phase 3 의 다른 페이지들이 모두 마이그레이션되어도 IA 그대로.
+ * FooterBrutal — 공개 네비 IA(`PUBLIC_NAV_GROUPS`)와 동기화된 4컬럼 푸터.
+ * 브랜드 | 발견·기획 | 크리에이티브·인사이트 | 연락처
  */
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { BrutalFooter, type BrutalFooterColumn } from "@/components/brutalist";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
+import {
+  buildPublicNavGroups,
+  type ResolvedPublicNavGroup,
+  type ResolvedPublicNavItem,
+} from "@/lib/navigation/build-public-nav";
+import type { PublicNavGroupId } from "@/lib/navigation/public-nav-data";
 
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
-export function FooterBrutal() {
-  const t = useTranslations();
+function footerItemLabel(item: ResolvedPublicNavItem): string {
+  return item.badge ? `${item.label} · ${item.badge}` : item.label;
+}
 
-  const quickLinks: BrutalFooterColumn = {
-    title: t("footer.quickLinks"),
+function mergeNavGroups(
+  groups: ResolvedPublicNavGroup[],
+  title: string,
+  extraItems: BrutalFooterColumn["items"] = [],
+): BrutalFooterColumn {
+  return {
+    title,
     items: [
-      { href: "/register/media", label: t("footer.mediaPartnerRegister") },
-      { href: "/services", label: t("nav.services") },
-      { href: "/media", label: t("footer.linkFeaturedMedia") },
-      { href: "/cases", label: t("nav.cases") },
-      { href: "/contact", label: t("nav.contact") },
-      { href: "/privacy", label: t("footer.privacy") },
+      ...groups.flatMap((g) =>
+        g.items.map((item) => ({
+          href: item.href,
+          label: footerItemLabel(item),
+        })),
+      ),
+      ...extraItems,
     ],
   };
+}
+
+function pickGroup(
+  groups: ResolvedPublicNavGroup[],
+  id: PublicNavGroupId,
+): ResolvedPublicNavGroup {
+  const g = groups.find((x) => x.id === id);
+  if (!g) throw new Error(`Missing nav group: ${id}`);
+  return g;
+}
+
+export function FooterBrutal() {
+  const t = useTranslations();
+  const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
+
+  const columns = useMemo((): BrutalFooterColumn[] => {
+    const discovery = pickGroup(navGroups, "discovery");
+    const planning = pickGroup(navGroups, "planning");
+    const creative = pickGroup(navGroups, "creative");
+    const insights = pickGroup(navGroups, "insights");
+    const academy = pickGroup(navGroups, "academy");
+
+    return [
+      mergeNavGroups([discovery, planning], t("footer.discoveryPlanning")),
+      mergeNavGroups([creative, insights, academy], t("footer.creativeInsights"), [
+        { href: "/register/media", label: t("footer.mediaPartnerRegister") },
+        { href: "/privacy", label: t("footer.privacy") },
+      ]),
+    ];
+  }, [navGroups, t]);
 
   const contactInfo: BrutalFooterColumn = {
     title: t("footer.contactInfo"),
@@ -48,16 +89,6 @@ export function FooterBrutal() {
     ],
   };
 
-  const services: BrutalFooterColumn = {
-    title: t("footer.services"),
-    items: [
-      { href: "/media", label: t("footer.domesticOOH") },
-      { href: "/planner", label: t("footer.crossBorderOOH") },
-      { href: "/contact", label: t("footer.dataConsulting") },
-      { href: "/tools", label: t("footer.planningTool") },
-    ],
-  };
-
   return (
     <BrutalFooter
       description={t("footer.description")}
@@ -67,7 +98,7 @@ export function FooterBrutal() {
           <p>{t("footer.bizNumber")}</p>
         </>
       }
-      columns={[quickLinks, contactInfo, services]}
+      columns={[...columns, contactInfo]}
       copyright={`(C) ${new Date().getFullYear()}. THINKAD Corp. All rights reserved.`}
     />
   );

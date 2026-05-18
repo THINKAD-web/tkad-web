@@ -1,7 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useHorizontalScrollGesture } from "@/lib/use-horizontal-scroll-gesture";
 
 export type SimpleFilterKey = "bus" | "subway" | "screen" | "building";
 
@@ -22,6 +24,9 @@ export function MediaFilterButtons({
   resetLabel,
   variant = "inline",
 }: Props) {
+  const barScrollRef = useRef<HTMLDivElement>(null);
+  useHorizontalScrollGesture(barScrollRef, variant === "bar");
+
   const chips: { key: SimpleFilterKey; emoji: string; labelKo: string; labelEn: string }[] =
     [
       { key: "bus", emoji: "🚌", labelKo: "버스정류장", labelEn: "Bus stop" },
@@ -69,7 +74,10 @@ export function MediaFilterButtons({
 
   if (variant === "bar") {
     return (
-      <div className="flex gap-2 overflow-x-auto overscroll-x-contain px-3 py-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        ref={barScrollRef}
+        className="flex gap-2 overflow-x-auto overscroll-x-contain touch-pan-x px-3 py-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden"
+      >
         {row}
       </div>
     );

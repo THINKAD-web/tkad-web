@@ -6,6 +6,12 @@ import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
+  CategoryExploreHero,
+  CategoryHeroCtaRow,
+  categoryHeroCtaPrimaryClass,
+  categoryHeroCtaSecondaryClass,
+} from "@/components/category-explore-hero";
+import {
   ArrowRight,
   BadgeCheck,
   BarChart3,
@@ -146,58 +152,35 @@ export default function ToolsPage() {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
-      <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] py-20 text-white sm:py-24">
-        <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-        <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-        <div
-          aria-hidden
-          className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
-        />
-
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
-                {`// 18 / Tools`}
-              </p>
-              <div className="mt-3 inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/85 backdrop-blur">
-                <Zap className="h-3.5 w-3.5" />
-                {isKo ? "PREVIEW" : "PREVIEW"}
-                <Lock className="h-3 w-3" />
-              </div>
-              <h1 className="mt-4 text-balance text-[clamp(40px,4.8vw,68px)] font-[950] leading-[0.95] tracking-[-0.06em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
-                {isKo ? "미디어 플래닝 툴" : "Media Planning Tool"}
-              </h1>
-              <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
-                {isKo
-                  ? "지역·매체 유형·노출 규모를 한 화면에서 비교하고, 캠페인에 맞는 추천 조합을 빠르게 탐색하세요. 전체 분석·예약 연동은 정식 버전에서 제공됩니다."
-                  : "Compare region, format, and reach in one view and explore recommended mixes for your campaign. Full analytics and booking connect in the production release."}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={openModal}
-                className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
-              >
-                {isKo ? "전체 기능 이용하기" : "Use full features"}
-                <ArrowRight className="h-4 w-4" />
-              </button>
-              <Link
-                href="/media"
-                className="inline-flex h-16 items-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
-              >
-                <Monitor className="h-4 w-4" />
-                {isKo ? "매체 카탈로그" : "Media catalog"}
-              </Link>
-            </div>
-          </div>
+      <CategoryExploreHero
+        code="// 18 · TOOLS"
+        headlineBefore={isKo ? "미디어 " : "Media "}
+        headlineGradient={isKo ? "플래닝 툴" : "planning tool"}
+        subtitle={
+          isKo
+            ? "지역·매체 유형·노출 규모를 한 화면에서 비교하고, 캠페인에 맞는 추천 조합을 빠르게 탐색하세요. 전체 분석·예약 연동은 정식 버전에서 제공됩니다."
+            : "Compare region, format, and reach in one view and explore recommended mixes for your campaign. Full analytics and booking connect in the production release."
+        }
+      >
+        <div className="mx-auto flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white backdrop-blur">
+            <Zap className="h-3.5 w-3.5" aria-hidden />
+            PREVIEW
+            <Lock className="h-3 w-3" aria-hidden />
+          </span>
         </div>
-      </section>
+        <CategoryHeroCtaRow className="mt-4">
+          <button type="button" onClick={openModal} className={categoryHeroCtaPrimaryClass}>
+            {isKo ? "전체 기능 이용하기" : "Use full features"}
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </button>
+          <Link href="/media" className={categoryHeroCtaSecondaryClass}>
+            <Monitor className="h-4 w-4" aria-hidden />
+            {isKo ? "매체 카탈로그" : "Media catalog"}
+            <ArrowRight className="h-4 w-4 text-white/75" aria-hidden />
+          </Link>
+        </CategoryHeroCtaRow>
+      </CategoryExploreHero>
 
       <section className="border-t border-border/60 bg-card/0 py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

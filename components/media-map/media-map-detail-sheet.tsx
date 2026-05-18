@@ -84,11 +84,11 @@ type DetailProps = {
   item: MapMapItem;
   onClose: () => void;
   isKo?: boolean;
-  variant: "sheet" | "inline";
+  variant: "sheet" | "inline" | "dock";
 };
 
 function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps) {
-  const dark = variant === "sheet";
+  const dark = variant === "sheet" || variant === "dock";
   const [availability, setAvailability] = useState<AvailabilitySummary>({
     status: "loading",
     label: isKo ? "이번 달 예약 현황 확인 중…" : "Checking this month…",
@@ -198,6 +198,70 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
     "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-transform hover:-translate-y-0.5",
     "bg-gradient-to-r from-violet-500 to-cyan-400",
   );
+
+  if (variant === "dock") {
+    return (
+      <div className="px-3 py-3 sm:px-4">
+        <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-400/70">
+          {isKo ? "선택한 매체" : "Selected"}
+        </p>
+        <div className="flex gap-3">
+          {item.image ? (
+            <div className="h-[4.5rem] w-24 shrink-0 overflow-hidden rounded-xl border border-white/12 bg-white/5 sm:w-28">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.image} alt="" className="h-full w-full object-cover" />
+            </div>
+          ) : (
+            <div className="flex h-[4.5rem] w-24 shrink-0 items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/5 text-[9px] text-white/45 sm:w-28">
+              NO IMG
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-violet-300/90">
+                  {item.type}
+                </p>
+                <h2 className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug text-white sm:text-base">
+                  {item.name}
+                </h2>
+                <p className="mt-0.5 line-clamp-1 text-[11px] text-white/55">{regionLine}</p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/5 text-white/80 transition-colors hover:bg-white/10"
+                aria-label={isKo ? "닫기" : "Close"}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mt-2 text-sm font-bold tabular-nums text-cyan-300">
+              {formatPrice(item.price, item.pricePeriod)}
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Link
+            href={`/media/${item.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(ctaPrimary, "text-xs")}
+          >
+            {isKo ? "상세 보기" : "Details"}
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+          <Link
+            href={`/contact?media=${encodeURIComponent(item.id)}`}
+            className={cn(ctaAccent, "text-xs")}
+          >
+            <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+            {isKo ? "문의" : "Contact"}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (variant === "inline") {
     return (
@@ -371,12 +435,12 @@ export function MediaMapDetailSheet({
   item,
   onClose,
   isKo = true,
-  variant = "sheet",
+  variant = "dock",
 }: {
   item: MapMapItem;
   onClose: () => void;
   isKo?: boolean;
-  variant?: "sheet" | "inline";
+  variant?: "sheet" | "inline" | "dock";
 }) {
   if (variant === "inline") {
     return (
@@ -390,26 +454,38 @@ export function MediaMapDetailSheet({
     );
   }
 
-  return (
-    <>
-      <button
-        type="button"
-        aria-label={isKo ? "패널 닫기" : "Close panel"}
-        className="fixed inset-0 z-[100001] bg-black/40 backdrop-blur-[2px] max-md:hidden"
-        onClick={onClose}
-      />
+  if (variant === "dock") {
+    return (
       <div
+        id="media-map-preview-dock"
         role="dialog"
-        aria-modal
         aria-label={item.name}
         className={cn(
-          "pointer-events-auto fixed z-[100004] hidden flex-col overflow-hidden md:flex",
-          "border border-white/10 bg-black/90 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl",
-          "inset-x-auto bottom-4 right-4 top-4 w-[min(420px,calc(100%-2rem))] rounded-2xl",
+          "pointer-events-auto absolute inset-x-0 bottom-0 z-[25]",
+          "mx-2 mb-2 max-h-[min(42dvh,280px)] overflow-hidden rounded-2xl sm:mx-3 sm:mb-3",
+          "border border-white/12 bg-black/88 shadow-[0_-16px_48px_rgba(0,0,0,0.55)] backdrop-blur-xl",
         )}
       >
-        <MediaMapDetailBody item={item} onClose={onClose} isKo={isKo} variant="sheet" />
+        <div className="flex justify-center pt-2">
+          <span className="h-1 w-10 rounded-full bg-white/25" aria-hidden />
+        </div>
+        <MediaMapDetailBody item={item} onClose={onClose} isKo={isKo} variant="dock" />
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal
+      aria-label={item.name}
+      className={cn(
+        "pointer-events-auto fixed z-[100004] flex flex-col overflow-hidden",
+        "border border-white/10 bg-black/90 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl",
+        "inset-x-auto bottom-4 right-4 top-4 w-[min(420px,calc(100%-2rem))] rounded-2xl",
+      )}
+    >
+      <MediaMapDetailBody item={item} onClose={onClose} isKo={isKo} variant="sheet" />
+    </div>
   );
 }

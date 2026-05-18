@@ -3,6 +3,10 @@
 import { LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** 매체 카탈로그 썸네일 — 기본 50% 그레이(모바일 가독), 호버·포커스 시 풀 컬러 */
+export const MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS =
+  "[&_img]:grayscale-[20%] [&_img]:transition-[filter,transform] [&_img]:duration-500 group-hover:[&_img]:grayscale-0 group-focus-within:[&_img]:grayscale-0";
+
 /** 매체 카탈로그 그리드 카드 — 매체검색·견적·비교 공통. 데스크톱은 3열 고정. */
 export const MEDIA_CATALOG_GRID_CLASS =
   "grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-3";

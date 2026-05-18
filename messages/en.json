@@ -15,6 +15,15 @@
     "scrollNavLabel": "Page scroll navigation",
     "pdfGenerationFailed": "PDF generation failed. Please try again in a moment."
   },
+  "quoteFab": {
+    "regionLabel": "Quote and consultation shortcuts",
+    "buttonLabel": "Get a quote",
+    "modalTitle": "What can we help you with?",
+    "mediaQuote": "Media quote",
+    "campaignConsult": "Campaign planning consult",
+    "tryPlanner": "Try AI planner",
+    "kakaoAria": "Contact via Kakao channel"
+  },
   "aiChatbot": {
     "title": "THINKAD AI Media Planner",
     "subtitle": "Media · quotes · OOH guidance",
@@ -61,6 +70,7 @@
     "faq": "FAQ",
     "quote": "Get Quote",
     "contact": "Contact",
+    "sidebarLabel": "Site navigation",
     "planner": "Media Planner",
     "recommend": "AI media picks",
     "packages": "Packages",
@@ -70,7 +80,173 @@
     "searchPlaceholder": "Search media or area",
     "searchAria": "Search media",
     "searchSubmit": "Search",
-    "comingSoonBadge": "Soon"
+    "comingSoonBadge": "Soon",
+    "beta": "BETA",
+    "groups": {
+      "discovery": { "label": "Discover", "labelEn": "Discovery" },
+      "planning": { "label": "Plan", "labelEn": "Planning" },
+      "creative": { "label": "Create", "labelEn": "Creative" },
+      "insights": { "label": "Insights", "labelEn": "Insights" },
+      "academy": { "label": "Learn", "labelEn": "Academy" }
+    },
+    "items": {
+      "media-search": {
+        "label": "Media search",
+        "desc": "Nationwide OOH catalog"
+      },
+      "map-search": {
+        "label": "Map search",
+        "desc": "Browse by location"
+      },
+      "ai-recommend": {
+        "label": "AI media picks",
+        "desc": "Goal and budget-based AI picks"
+      },
+      "media-planner": {
+        "label": "Media planner",
+        "desc": "Budget, timeline, and mix"
+      },
+      "package-proposal": {
+        "label": "Package proposals",
+        "desc": "Curated bundles by goal"
+      },
+      "creative-library": {
+        "label": "Creative library",
+        "desc": "Upload, manage, reuse"
+      },
+      "dooh-playlists": {
+        "label": "DOOH playlists",
+        "desc": "Schedule and rule-based lists"
+      },
+      "creative-studio": {
+        "label": "Creative studio",
+        "desc": "Upload and specs"
+      },
+      "trend-report": {
+        "label": "Trend reports",
+        "desc": "OOH industry insights"
+      },
+      "success-cases": {
+        "label": "Success stories",
+        "desc": "Campaign case studies"
+      },
+      "academy-content": {
+        "label": "Learning hub",
+        "desc": "Advertiser education"
+      },
+      "advertiser-guide": {
+        "label": "Advertiser guides",
+        "desc": "By region and media type"
+      }
+    }
+  },
+  "proposal": {
+    "heroEyebrow": "AI Proposal",
+    "heroTitle": "AI campaign proposal",
+    "heroDesc": "Enter your brand, budget, and media criteria — we generate a proposal from THINKAD's verified catalog.",
+    "prefilledFromPlanner": "Your media planner inputs are applied. Add your brand name to generate.",
+    "step1Title": "1. Brand info",
+    "step2Title": "2. Campaign brief",
+    "step3Title": "3. Media selection",
+    "brandName": "Brand name",
+    "industry": "Industry",
+    "campaignName": "Campaign name",
+    "targetAge": "Target age",
+    "targetAgePlaceholder": "e.g. Women 25–34",
+    "targetGender": "Target gender",
+    "targetInterests": "Interests / lifestyle",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "budgetManwon": "Total budget (×10k KRW)",
+    "goal": "Primary goal",
+    "goalAwareness": "Awareness",
+    "goalConversion": "Conversion",
+    "goalEvent": "Event",
+    "regions": "Target regions",
+    "regionsPlaceholder": "e.g. Gangnam, Hongdae (comma-separated)",
+    "loadPlanner": "Load saved planner",
+    "loadPlannerPlaceholder": "Saved plan ID (c…)",
+    "loadPlannerBtn": "Load",
+    "aiRecommend": "Apply AI picks",
+    "browseMedia": "Browse full catalog",
+    "selectedCount": "{count} selected",
+    "back": "Back",
+    "next": "Next",
+    "generate": "Generate proposal",
+    "generating": "Generating…",
+    "generateError": "Could not generate the proposal.",
+    "invalidPlanId": "Invalid planner ID.",
+    "planLoadError": "Could not load the planner plan.",
+    "resultEyebrow": "Generated Proposal",
+    "editAgain": "Edit inputs and regenerate",
+    "downloadPdf": "Download PDF",
+    "pdfGenerating": "Creating PDF…",
+    "pdfError": "PDF export failed.",
+    "quoteWithProposal": "Request quote with this proposal",
+    "openSharePage": "Share page",
+    "sharePageTitle": "Campaign proposal",
+    "sectionOverview": "Overview",
+    "sectionStrategy": "Strategy",
+    "sectionMediaMix": "Media mix",
+    "sectionBudget": "Budget split",
+    "sectionMetrics": "Estimated KPIs",
+    "sectionTimeline": "Timeline",
+    "sectionOutcomes": "Expected outcomes",
+    "metricImpressions": "Impressions",
+    "metricReach": "Reach",
+    "viewMedia": "View media"
+  },
+  "auth": {
+    "login": "Log in",
+    "signup": "Sign up",
+    "myCampaigns": "My campaigns",
+    "myPage": "My page",
+    "kakaoLogin": "Continue with Kakao",
+    "kakaoComingSoon": "Kakao sign-in is coming soon.",
+    "orEmail": "Or with email"
+  },
+  "myHub": {
+    "loading": "Loading your hub…",
+    "greeting": "Hello, {name}",
+    "logout": "Log out",
+    "tabs": {
+      "campaigns": "My campaigns",
+      "favorites": "Saved media",
+      "planner": "My planner",
+      "recent": "Recently viewed"
+    },
+    "campaigns": {
+      "loading": "Loading campaigns…",
+      "emptyTitle": "No campaigns yet",
+      "emptyDesc": "Search media and start planning to launch your first campaign.",
+      "emptyCta": "Browse media",
+      "viewDetail": "View details"
+    },
+    "favorites": {
+      "loading": "Loading favorites…",
+      "emptyTitle": "No saved media",
+      "emptyDesc": "Heart media on detail pages, then continue in the AI planner.",
+      "emptyCta": "Explore media",
+      "plannerCta": "Start with AI planner"
+    },
+    "planner": {
+      "loading": "Loading planner & proposals…",
+      "emptyTitle": "No saved planner or proposals",
+      "emptyDesc": "Save a media planner plan or generate an AI proposal to see it here.",
+      "emptyCta": "Open planner",
+      "emptyProposalCta": "Create AI proposal",
+      "proposalsSection": "AI campaign proposals",
+      "plansSection": "Saved planner plans",
+      "viewProposal": "View proposal",
+      "continueEdit": "Continue editing",
+      "requestQuote": "Request quote"
+    },
+    "recent": {
+      "loading": "Loading recently viewed…",
+      "emptyTitle": "Nothing viewed yet",
+      "emptyDesc": "Browse media listings — up to 20 recent items appear here.",
+      "emptyCta": "Explore media"
+    }
   },
   "hero": {
     "title": "Korea OOH media search & campaign execution",
@@ -306,6 +482,18 @@
     "sortPriceAsc": "Price · low to high",
     "sortPriceDesc": "Price · high to low",
     "sortTrafficDesc": "Foot traffic · high to low",
+    "quickInquiryFavorite": "Save ♡",
+    "quickInquiryCta": "Quick inquiry",
+    "availabilityLive": {
+      "badgeInstant": "Book now",
+      "badgePartial": "Limited slots",
+      "badgeScarce": "Almost full",
+      "filterInstant": "Book now",
+      "scarcityEyebrow": "Almost full",
+      "scarcityTitle": "Closing soon this month",
+      "scarcityDesc": "These placements have under 20% availability left. Contact us to secure dates.",
+      "scarcityCta": "Quick inquiry"
+    },
     "compareToggleAria": "Add to selection",
     "compareBarTitle": "Selected media",
     "compareRemoveSuffix": "remove",
@@ -489,6 +677,7 @@
       "stickyCtaQuoteSticky": "Get Quote Now",
       "quoteCtaInline": "Get a quote",
       "stickyCtaCompare": "Compare",
+      "inquireThisMedia": "Inquire about this placement",
       "quoteModalTitle": "Quote & contact",
       "quoteModalDescription": "Open the quote request form or start a 1:1 inquiry—we’ll match this placement to your brief.",
       "quoteModalPrimary": "Get a quote now",
@@ -1546,9 +1735,12 @@
     "monthCompare3": "3 mo",
     "monthCompare6": "6 mo",
     "ctaQuoteWithPlan": "Get a quote with this plan",
+    "quoteTrustLine": "We typically respond within 24 hours",
     "ctaSaveDraft24h": "24h temporary link",
     "savedToastDraft24h": "Temporary link saved (24h). URL copied to clipboard.",
     "ctaCompareSelection": "Compare selected media",
+    "ctaCreateProposal": "Create AI proposal",
+    "ctaCreateProposalHint": "Auto-fill from your planner plan and selected media",
     "loadPlan": "Load saved plan",
     "loadedToast": "Saved plan loaded.",
     "loadNoneToast": "No saved plan found.",
@@ -1618,6 +1810,8 @@
     "ecommerce": "E-Commerce Permit: 2017-Seoul Seongdong-0681",
     "mediaPartnerRegister": "List your media (partners)",
     "quickLinks": "Quick Links",
+    "discoveryPlanning": "Discover & Plan",
+    "creativeInsights": "Creative & Insights",
     "contactInfo": "Contact Info",
     "address": "48 Ttukseom-ro 17ga-gil, Seongdong-gu, Seoul (Seongsu A1 Knowledge Industry Center), Room 1102",
     "phone": "02-515-2772",
@@ -2176,7 +2370,19 @@
       "legendToday": "Today",
       "statsAvailable": "{n} days available this month",
       "statsBlocked": "{n} days booked",
-      "ctaRequest": "Request booking"
+      "ctaRequest": "Request booking",
+      "monthAvailabilityPct": "{month}: {pct}% available",
+      "quickThisMonth": "This month",
+      "quickNextMonth": "Next month",
+      "quickTwoWeeks": "2 weeks",
+      "rangeSelectStart": "Select a start date",
+      "rangeSelectEnd": "Select an end date",
+      "rangeLabel": "Selected period",
+      "rangeSelected": "{start} – {end} ({days} days)",
+      "estimatedCost": "{start}–{end} ({days} days) est. cost: {cost}",
+      "ctaInquiryPeriod": "Inquire for this period",
+      "ctaInstantBook": "Instant book",
+      "legendSelected": "Selected"
     },
     "traffic": {
       "title": "Hourly · Weekday · Monthly footfall",

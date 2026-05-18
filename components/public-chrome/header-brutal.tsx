@@ -1,24 +1,19 @@
 "use client";
 
 /**
- * HeaderBrutal — b930b10 IA 메뉴 구조를 BrutalNav 로 렌더하는 래퍼.
- *
- * IA (변경 금지):
- *   - 단독: /, /services
- *   - 매체 검색 그룹: /media, /media/map, /media/packages, /recommend, /planner, /creatives
- *   - 트렌드 & 학습 그룹 (3): /cases, /report, /academy
- *   - CTA: /contact
+ * HeaderBrutal — OOH 플랫폼 리뉴얼 IA (5 메인 카테고리 · 2depth · BETA는 세부만).
  */
 
-import { Suspense, useTransition } from "react";
+import { Suspense, useMemo, useTransition } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { Globe } from "lucide-react";
-import { BrutalNav, type BrutalNavEntry } from "@/components/brutalist";
+import { BrutalNav } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
 import { HeaderMediaSearch } from "@/components/header-media-search";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { NavContentStatus } from "@/lib/nav-content-status";
+import { buildPublicNavGroups } from "@/lib/navigation/build-public-nav";
 
 function LanguageToggle() {
   const locale = useLocale();
@@ -55,85 +50,12 @@ type Props = {
 
 export function HeaderBrutal({ contentStatus: _contentStatus }: Props) {
   const t = useTranslations();
-  const locale = useLocale();
-  const isKo = locale === "ko";
-  const betaBadge = "BETA";
-
-  const links: BrutalNavEntry[] = [
-    { href: "/", label: t("nav.home") },
-    { href: "/services", label: t("nav.services"), badge: betaBadge },
-    {
-      label: t("nav.media"),
-      items: [
-        {
-          href: "/media",
-          label: isKo ? "매체 검색" : "Media search",
-          desc: isKo ? "전국 OOH 매체 목록" : "Nationwide OOH catalog",
-          navKey: "media-search",
-          badge: betaBadge,
-        },
-        {
-          href: "/media/map",
-          label: isKo ? "지도에서 찾기" : "Map search",
-          desc: isKo ? "위치 기반 탐색" : "Browse by location",
-          badge: betaBadge,
-        },
-        {
-          href: "/media/packages",
-          label: t("nav.packageProposal"),
-          desc: t("nav.packageProposalDesc"),
-          navKey: "packages-dropdown",
-          badge: betaBadge,
-        },
-        {
-          href: "/recommend",
-          label: t("nav.recommend"),
-          desc: isKo ? "AI 기반 맞춤 추천" : "AI-powered picks",
-          badge: betaBadge,
-        },
-        {
-          href: "/planner",
-          label: t("nav.planner"),
-          desc: isKo ? "예산·기간별 플래닝" : "Budget & timeline planning",
-        },
-        {
-          href: "/creatives",
-          label: isKo ? "크리에이티브" : "Creatives",
-          desc: isKo
-            ? "소재 업로드·라이브러리·DOOH 플레이리스트"
-            : "Upload, library & DOOH playlists",
-          badge: "BETA",
-        },
-      ],
-    },
-    {
-      label: t("nav.insights"),
-      items: [
-        {
-          href: "/cases",
-          label: t("nav.cases"),
-          desc: "집행 사례 모음",
-          badge: betaBadge,
-        },
-        {
-          href: "/report",
-          label: t("nav.insights"),
-          desc: t("nav.insightsReportDesc"),
-          badge: betaBadge,
-        },
-        {
-          href: "/academy",
-          label: t("nav.academy"),
-          desc: "광고주 교육 콘텐츠",
-          badge: betaBadge,
-        },
-      ],
-    },
-  ];
+  const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
 
   return (
     <BrutalNav
-      links={links}
+      sidebarLayout
+      links={navGroups}
       search={
         <Suspense
           fallback={
@@ -153,6 +75,12 @@ export function HeaderBrutal({ contentStatus: _contentStatus }: Props) {
           <LanguageToggle />
           <ThemeToggle />
         </div>
+      }
+      mobileBarExtras={
+        <>
+          <LanguageToggle />
+          <ThemeToggle />
+        </>
       }
       mobileMenuExtras={(close) => <HeaderUserMenu variant="menu" onNavigate={close} />}
       mobileMenuFooter={

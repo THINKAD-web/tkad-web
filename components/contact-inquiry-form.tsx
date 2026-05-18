@@ -19,6 +19,12 @@ import {
   plannerGoalToContactGoals,
   type SavedPlannerPlanJson,
 } from "@/lib/planner/contact-prefill";
+import { buildProposalContactMessage } from "@/lib/proposal/contact-prefill";
+import {
+  isSavedCampaignProposalId,
+  type CampaignProposalOutput,
+  type ProposalInput,
+} from "@/lib/proposal/types";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { formatRangeDate, parseYmdLocal } from "@/lib/calendar-date-range";
@@ -74,6 +80,7 @@ export default function ContactInquiryForm() {
   const searchParams = useSearchParams();
   const caseSlug = searchParams.get("case");
   const planIdParam = searchParams.get("plan");
+  const proposalIdParam = searchParams.get("proposal");
   const [publishedCaseRef, setPublishedCaseRef] = useState<{
     id: string;
     titleKo: string;
@@ -84,11 +91,18 @@ export default function ContactInquiryForm() {
   const academyPrefillDone = useRef(false);
   const mediaIdParam = searchParams.get("media");
   const mediaPrefillDone = useRef(false);
+  const typeParam = searchParams.get("type");
+  const typePrefillDone = useRef(false);
   const [plannerPlanRef, setPlannerPlanRef] = useState<{
     id: string;
     expiresAt: string;
   } | null>(null);
   const planPrefillDone = useRef<string | null>(null);
+  const [proposalRef, setProposalRef] = useState<{
+    id: string;
+    expiresAt: string;
+  } | null>(null);
+  const proposalPrefillDone = useRef<string | null>(null);
   const packageSlug = searchParams.get("package");
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
@@ -169,6 +183,28 @@ export default function ContactInquiryForm() {
   useEffect(() => {
     mediaPrefillDone.current = false;
   }, [mediaIdParam]);
+
+  useEffect(() => {
+    typePrefillDone.current = false;
+  }, [typeParam]);
+
+  useEffect(() => {
+    if (typePrefillDone.current) return;
+    const raw = typeParam?.trim().toLowerCase();
+    if (raw === "media") {
+      typePrefillDone.current = true;
+      setValue("inquiryType", "media_quote", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    } else if (raw === "campaign") {
+      typePrefillDone.current = true;
+      setValue("inquiryType", "campaign_plan", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [setValue, typeParam]);
 
   useEffect(() => {
     planPrefillDone.current = null;
@@ -302,6 +338,58 @@ export default function ContactInquiryForm() {
       cancelled = true;
     };
   }, [getValues, isKo, planIdParam, setValue, tPlanner]);
+
+  useEffect(() => {
+    proposalPrefillDone.current = null;
+    setProposalRef(null);
+  }, [proposalIdParam]);
+
+  useEffect(() => {
+    if (!proposalIdParam || !isSavedCampaignProposalId(proposalIdParam)) {
+      return;
+    }
+    if (proposalPrefillDone.current === proposalIdParam) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/proposal/${proposalIdParam}`);
+        if (!res.ok || cancelled) return;
+        const payload = (await res.json()) as {
+          id: string;
+          expiresAt: string;
+          inputJson: ProposalInput;
+          proposalJson: CampaignProposalOutput;
+        };
+        if (cancelled) return;
+
+        setProposalRef({ id: payload.id, expiresAt: payload.expiresAt });
+        const message = buildProposalContactMessage({
+          isKo,
+          input: payload.inputJson,
+          proposal: payload.proposalJson,
+          proposalId: payload.id,
+        });
+
+        proposalPrefillDone.current = proposalIdParam;
+        if (getValues("additionalNotes").trim() === "") {
+          setValue("additionalNotes", message, { shouldDirty: true });
+        }
+        if (!getValues("inquiryType")) {
+          setValue("inquiryType", "campaign_plan", {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getValues, isKo, proposalIdParam, setValue]);
 
   useEffect(() => {
     if (!mediaIdParam || mediaPrefillDone.current) return;
