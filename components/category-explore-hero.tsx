@@ -58,6 +58,9 @@ export function CategoryHeroBetaBadge({ className }: { className?: string }) {
         className,
       )}
     >
+      <span aria-hidden className="mr-1 not-italic">
+        ✨
+      </span>
       BETA
     </span>
   );

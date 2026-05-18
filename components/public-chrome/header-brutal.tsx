@@ -11,6 +11,7 @@ import { Globe } from "lucide-react";
 import { BrutalNav } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
 import { HeaderMediaSearch } from "@/components/header-media-search";
+import { headerChromeIconButtonClass } from "@/components/public-chrome/header-chrome-buttons";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { NavContentStatus } from "@/lib/nav-content-status";
 import { buildPublicNavGroups } from "@/lib/navigation/build-public-nav";
@@ -36,7 +37,7 @@ function LanguageToggle() {
       disabled={isPending}
       aria-label={locale === "ko" ? "Switch to English" : "한국어로 전환"}
       title={label}
-      className="inline-flex h-10 w-10 shrink-0 items-center justify-center border-2 border-border/25 bg-muted text-foreground transition-all duration-300 hover:border-hermes hover:bg-foreground hover:text-white hover:shadow-[0_0_28px_rgba(255,98,0,0.35)] disabled:opacity-50 dark:border-white/15 dark:bg-muted dark:text-foreground dark:hover:border-hermes dark:hover:bg-hermes dark:hover:text-white dark:hover:shadow-[0_0_32px_rgba(255,98,0,0.45)]"
+      className={headerChromeIconButtonClass}
     >
       <Globe className="h-4 w-4" />
       <span className="sr-only">{label}</span>
@@ -73,20 +74,20 @@ export function HeaderBrutal({ contentStatus: _contentStatus }: Props) {
         <div className="hidden items-center gap-1.5 md:flex">
           <HeaderUserMenu />
           <LanguageToggle />
-          <ThemeToggle />
+          <ThemeToggle className={headerChromeIconButtonClass} />
         </div>
       }
       mobileBarExtras={
         <>
           <LanguageToggle />
-          <ThemeToggle />
+          <ThemeToggle className={headerChromeIconButtonClass} />
         </>
       }
       mobileMenuExtras={(close) => <HeaderUserMenu variant="menu" onNavigate={close} />}
       mobileMenuFooter={
         <>
           <LanguageToggle />
-          <ThemeToggle />
+          <ThemeToggle className={headerChromeIconButtonClass} />
         </>
       }
     />

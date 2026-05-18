@@ -161,8 +161,8 @@ export function BrutalNav({
               className={cn(
                 "max-w-full shrink-0",
                 sidebarLayout
-                  ? "hidden w-[min(10.5rem,18vw)] md:block lg:block lg:w-full lg:max-w-xl"
-                  : "hidden w-[min(10.5rem,18vw)] md:block lg:w-[min(13rem,22vw)]",
+                  ? "hidden w-[min(10.5rem,18vw)] md:block lg:block lg:w-full lg:max-w-[18rem]"
+                  : "hidden w-[min(10.5rem,18vw)] md:block lg:w-[min(6.5rem,11vw)]",
               )}
             >
               {search}
@@ -197,8 +197,7 @@ export function BrutalNav({
         <div
           className={cn(
             "flex min-w-0 items-center justify-end gap-1.5 px-4 lg:gap-2 lg:px-6",
-            sidebarLayout && "lg:hidden",
-            !sidebarLayout && "min-h-16",
+            sidebarLayout ? "min-h-14" : "min-h-16",
           )}
         >
           {extras ? (

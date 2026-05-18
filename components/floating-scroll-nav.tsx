@@ -3,13 +3,25 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FLOATING_SUPPORT_DOCK_SCROLL_OFFSET } from "@/lib/floating-support-dock-layout";
 import { cn } from "@/lib/utils";
 
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
+
+const scrollBtnClass = cn(
+  "pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full border-2 backdrop-blur-md transition-all",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+  "border-navy/20 bg-white/95 text-navy shadow-[0_8px_28px_rgba(15,23,42,0.18)]",
+  "hover:border-gold/50 hover:bg-gold/15 hover:text-navy",
+  "dark:border-cyan-400/55 dark:bg-zinc-950/95 dark:text-cyan-100",
+  "dark:shadow-[0_0_24px_rgba(34,211,238,0.38),0_10px_32px_rgba(0,0,0,0.65)]",
+  "dark:ring-1 dark:ring-cyan-400/25",
+  "dark:hover:border-cyan-300/80 dark:hover:bg-cyan-500/20 dark:hover:text-white dark:hover:shadow-[0_0_28px_rgba(34,211,238,0.5),0_10px_32px_rgba(0,0,0,0.65)]",
+  "disabled:pointer-events-none disabled:opacity-45 dark:disabled:opacity-55",
+);
 
 export default function FloatingScrollNav() {
   const t = useTranslations("common");
@@ -59,36 +71,31 @@ export default function FloatingScrollNav() {
 
   return (
     <div
-      className="pointer-events-none fixed bottom-[max(5.75rem,calc(env(safe-area-inset-bottom,0px)+5rem))] right-[max(1rem,env(safe-area-inset-right,0px))] z-[52] flex flex-col gap-2 sm:right-6"
+      className="pointer-events-none fixed bottom-[max(5.75rem,calc(env(safe-area-inset-bottom,0px)+5rem))] z-[52] flex flex-col gap-2 sm:right-6"
+      style={{
+        right: `calc(max(1rem, env(safe-area-inset-right, 0px)) + ${FLOATING_SUPPORT_DOCK_SCROLL_OFFSET})`,
+      }}
       role="navigation"
       aria-label={t("scrollNavLabel")}
     >
-      <Button
+      <button
         type="button"
-        variant="outline"
-        size="icon"
         onClick={goTop}
         disabled={nearTop}
-        className={cn(
-          "pointer-events-auto h-11 w-11 rounded-full border-navy/15 bg-white/95 text-navy shadow-lg backdrop-blur-sm transition-opacity hover:bg-gold/15 disabled:pointer-events-none disabled:opacity-35",
-        )}
+        className={scrollBtnClass}
         aria-label={t("scrollToTop")}
       >
-        <ChevronUp className="h-5 w-5" aria-hidden />
-      </Button>
-      <Button
+        <ChevronUp className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+      </button>
+      <button
         type="button"
-        variant="outline"
-        size="icon"
         onClick={goBottom}
         disabled={nearBottom}
-        className={cn(
-          "pointer-events-auto h-11 w-11 rounded-full border-navy/15 bg-white/95 text-navy shadow-lg backdrop-blur-sm transition-opacity hover:bg-gold/15 disabled:pointer-events-none disabled:opacity-35",
-        )}
+        className={scrollBtnClass}
         aria-label={t("scrollToBottom")}
       >
-        <ChevronDown className="h-5 w-5" aria-hidden />
-      </Button>
+        <ChevronDown className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+      </button>
     </div>
   );
 }

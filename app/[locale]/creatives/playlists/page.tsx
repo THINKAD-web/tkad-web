@@ -16,23 +16,18 @@ export default async function PlaylistListPage({
 
   return (
     <CreativesShell
-      eyebrow={`[ ${isKo ? "DOOH 플레이리스트" : "DOOH Playlists"} ]`}
-      title={
-        isKo ? (
-          <>
-            여러 소재를 묶어 <span className="tkad-home-accent-text">스케줄</span>로
-          </>
-        ) : (
-          <>
-            Bundle creatives into a <span className="tkad-home-accent-text">schedule</span>
-          </>
-        )
-      }
-      description={
-        isKo
+      eyebrow=""
+      title=""
+      categoryHero={{
+        code: isKo ? "// DOOH PLAY" : "// DOOH PLAY",
+        showBeta: true,
+        headlineBefore: isKo ? "여러 소재를 묶어 " : "Bundle creatives into a ",
+        headlineGradient: isKo ? "스케줄" : "schedule",
+        headlineAfter: isKo ? "로" : "",
+        subtitle: isKo
           ? "요일·시간대별로 다른 소재를 노출하는 DOOH 플레이리스트를 만들고, 즉시예약에 한 번에 연결할 수 있습니다."
-          : "Build DOOH playlists with day/time rules, then attach them to instant bookings in one click."
-      }
+          : "Build DOOH playlists with day/time rules, then attach them to instant bookings in one click.",
+      }}
       isKo={isKo}
     >
       <PlaylistListClient />

@@ -5,8 +5,9 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-const defaultToggleClass =
-  "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card/70 text-foreground shadow-sm backdrop-blur transition-all duration-300 hover:bg-card hover:shadow-[0_18px_60px_rgba(0,0,0,0.16)] dark:border-white/14 dark:bg-black/30 dark:text-white/85 dark:hover:bg-black/40 dark:hover:shadow-[0_22px_70px_rgba(0,0,0,0.55)]";
+import { headerChromeIconButtonClass } from "@/components/public-chrome/header-chrome-buttons";
+
+const defaultToggleClass = headerChromeIconButtonClass;
 
 /**
  * Light / Dark 토글. next-themes 의 resolvedTheme 는 SSR 과 첫 클라이언트 틱에서

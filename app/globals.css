@@ -978,15 +978,19 @@ main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
   border-color: rgb(167 139 250 / 0.5) !important;
 }
 
-/* 라이트 테마 — 헤더 서브카테고리(드롭다운·모바일 패널) */
-html:not(.dark) .tkad-nav-chrome .category-hero-beta-badge {
-  color: rgb(76 29 149) !important;
+/* 라이트 테마 — 카테고리 BETA (헤더 드롭다운·모바일·데스크톱 사이드바) */
+html:not(.dark) .tkad-nav-chrome .category-hero-beta-badge,
+html:not(.dark) .tkad-public-nav-aside .category-hero-beta-badge {
+  color: rgb(46 16 101) !important;
   -webkit-text-fill-color: currentColor !important;
-  background-color: rgb(237 233 254) !important;
-  border-color: rgb(124 58 237 / 0.55) !important;
+  background-color: rgb(196 181 253) !important;
+  border: 1px solid rgb(109 40 217 / 0.72) !important;
   box-shadow:
-    0 0 0 1px rgb(139 92 246 / 0.14),
-    0 1px 4px rgb(91 33 182 / 0.14);
+    0 0 0 1px rgb(139 92 246 / 0.22),
+    0 1px 5px rgb(91 33 182 / 0.18),
+    0 0 12px rgb(167 139 250 / 0.24);
+  font-size: 10px !important;
+  letter-spacing: 0.14em !important;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-beta-badge {
@@ -1114,11 +1118,14 @@ html:not(.dark) .tkad-nav-chrome .category-hero-beta-badge {
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .category-hero-beta-badge {
-  color: rgb(76 29 149) !important;
+  color: rgb(46 16 101) !important;
   -webkit-text-fill-color: currentColor !important;
-  background-color: rgb(233 213 255) !important;
-  border-color: rgb(124 58 237 / 0.5) !important;
-  box-shadow: 0 0 0 1px rgb(139 92 246 / 0.12);
+  background-color: rgb(196 181 253) !important;
+  border: 1px solid rgb(109 40 217 / 0.68) !important;
+  box-shadow:
+    0 0 0 1px rgb(139 92 246 / 0.18),
+    0 1px 5px rgb(91 33 182 / 0.16),
+    0 0 10px rgb(167 139 250 / 0.2);
 }
 
 /* 각 히어로·Neon 섹션 = 떠 있는 라이트 패널 — 프리미엄 깊이(입체 그림자) */

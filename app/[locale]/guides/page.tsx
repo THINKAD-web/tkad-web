@@ -7,6 +7,7 @@ import {
   buildCollectionPageJsonLd,
 } from "@/lib/structured-data";
 import { serializeJsonLd } from "@/lib/seo";
+import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
 import { ArrowRight, BookText } from "lucide-react";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -47,8 +48,9 @@ export default async function GuidesIndexPage({ params }: Props) {
 
       <section className="bg-hero-void py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
-            [ {isKo ? "가이드" : "GUIDES"} ]
+          <p className="flex flex-wrap items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
+            <span>[ {isKo ? "가이드" : "GUIDES"} ]</span>
+            <CategoryHeroBetaBadge />
           </p>
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl lg:text-5xl">
             <BookText

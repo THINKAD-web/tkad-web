@@ -4,20 +4,17 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import { Megaphone, ShoppingCart, User as UserIcon } from "lucide-react";
+import {
+  headerChromeSignupButtonClass,
+  headerChromeTextButtonClass,
+} from "@/components/public-chrome/header-chrome-buttons";
 import { HeaderProfileDropdown } from "@/components/header-profile-dropdown";
 import { useCart } from "@/lib/cart";
 import { HeaderFavoritesLink } from "@/components/header-favorites-link";
 import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 
 type Session = { id: string; email: string; name: string; role: string } | null;
-
-const SIGNUP_BTN_CLASS =
-  "inline-flex h-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 dark:shadow-[0_0_20px_rgba(34,211,238,0.28)]";
-
-const SIGNUP_MENU_BTN_CLASS =
-  "flex min-h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95";
 
 function useSession() {
   const pathname = usePathname();
@@ -99,11 +96,15 @@ export function HeaderUserMenu({
             <Link
               href="/login"
               onClick={onNavigate}
-              className="flex min-h-11 w-full items-center justify-center rounded-xl border border-zinc-300/90 bg-white px-4 text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-white/14 dark:bg-white/6 dark:text-white dark:hover:bg-white/10"
+              className={`${headerChromeTextButtonClass} min-h-11 w-full`}
             >
               {t("login")}
             </Link>
-            <Link href="/signup" onClick={onNavigate} className={SIGNUP_MENU_BTN_CLASS}>
+            <Link
+              href="/signup"
+              onClick={onNavigate}
+              className={`${headerChromeSignupButtonClass} min-h-11 w-full`}
+            >
               {t("signup")}
             </Link>
           </div>
@@ -144,21 +145,19 @@ export function HeaderUserMenu({
             onNavigate={onNavigate}
             myPageLabel={t("myPage")}
             campaignsLabel={t("myCampaigns")}
+            logoutLabel={t("logout")}
           />
         </>
       ) : (
         <>
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="h-9 rounded-xl px-3 text-foreground hover:text-foreground dark:text-white dark:hover:text-white"
+          <Link
+            href="/login"
+            onClick={onNavigate}
+            className={headerChromeTextButtonClass}
           >
-            <Link href="/login" onClick={onNavigate}>
-              {t("login")}
-            </Link>
-          </Button>
-          <Link href="/signup" onClick={onNavigate} className={SIGNUP_BTN_CLASS}>
+            {t("login")}
+          </Link>
+          <Link href="/signup" onClick={onNavigate} className={headerChromeSignupButtonClass}>
             {t("signup")}
           </Link>
         </>
