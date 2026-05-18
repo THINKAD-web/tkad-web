@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 export type MapMarker = {
   id: string;
@@ -39,6 +40,8 @@ type Props = {
   coverageGeoJson?: unknown | null;
   /** `coverageGeoJson` 이 있을 때 지도를 해당 영역에 맞춤 */
   fitCoverageBounds?: boolean;
+  /** 타일만 흑백 — 마커·클러스터 핀 이미지는 컬러 유지 */
+  monochromeTiles?: boolean;
 };
 
 declare global {
@@ -58,59 +61,34 @@ function kakaoMapsSdkUrl(appkey: string) {
 const TKAD_CLUSTER_CALCULATOR = [5, 14, 35, 90] as const;
 
 const TKAD_CLUSTER_STYLES: Array<Record<string, string>> = (() => {
-  const mk = (px: number, fs: string, ring: string, glow: string) => {
+  const mk = (px: number, fs: string, accent: string, glow: string) => {
     const h = `${px}px`;
-    const lh = `${px - 2}px`;
+    const lh = `${px - 4}px`;
     return {
       width: h,
       height: h,
-      borderRadius: "50%",
+      borderRadius: "999px",
       background:
-        "linear-gradient(165deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.92) 40%, rgba(255,255,255,0.86) 100%)",
-      border: "1px solid rgba(15,23,42,0.22)",
-      color: "#0a0a0c",
+        "linear-gradient(145deg, rgba(8,8,12,0.94) 0%, rgba(18,18,26,0.88) 55%, rgba(8,8,12,0.92) 100%)",
+      border: `2px solid ${accent}`,
+      color: "#f8fafc",
       textAlign: "center",
       lineHeight: lh,
       fontSize: fs,
-      fontWeight: "800",
+      fontWeight: "700",
       fontFamily:
         "'JetBrains Mono', 'Pretendard Variable', Pretendard, ui-monospace, system-ui, sans-serif",
-      letterSpacing: "-0.03em",
+      letterSpacing: "-0.05em",
       cursor: "pointer",
-      boxShadow: `${ring}, 0 0 0 1px rgba(255,255,255,0.55) inset, 0 10px 28px rgba(2,2,2,0.16), 0 18px 48px rgba(2,2,2,0.10), ${glow}`,
+      boxShadow: `0 0 0 1px rgba(255,255,255,0.06) inset, 0 0 18px ${glow}`,
     };
   };
   return [
-    mk(
-      40,
-      "11px",
-      "0 0 0 2px rgba(168,85,247,0.55)",
-      "0 14px 38px rgba(34,211,238,0.14)",
-    ),
-    mk(
-      44,
-      "12px",
-      "0 0 0 2px rgba(34,211,238,0.58)",
-      "0 16px 42px rgba(236,72,153,0.14)",
-    ),
-    mk(
-      48,
-      "13px",
-      "0 0 0 3px rgba(236,72,153,0.52)",
-      "0 18px 46px rgba(168,85,247,0.14)",
-    ),
-    mk(
-      52,
-      "14px",
-      "0 0 0 3px rgba(34,211,238,0.56)",
-      "0 20px 54px rgba(34,211,238,0.16)",
-    ),
-    mk(
-      56,
-      "15px",
-      "0 0 0 3px rgba(168,85,247,0.58)",
-      "0 22px 60px rgba(168,85,247,0.16)",
-    ),
+    mk(38, "10px", "rgba(168,85,247,0.92)", "rgba(168,85,247,0.35)"),
+    mk(42, "11px", "rgba(34,211,238,0.92)", "rgba(34,211,238,0.32)"),
+    mk(46, "12px", "rgba(236,72,153,0.9)", "rgba(236,72,153,0.3)"),
+    mk(50, "13px", "rgba(34,211,238,0.95)", "rgba(34,211,238,0.34)"),
+    mk(54, "14px", "rgba(168,85,247,0.95)", "rgba(168,85,247,0.36)"),
   ];
 })();
 
@@ -199,7 +177,9 @@ type TkadPinVariant =
   | "static"
   | "staticSelected"
   | "mobile"
-  | "mobileSelected";
+  | "mobileSelected"
+  | "office"
+  | "officeSelected";
 
 const TKAD_PIN: Record<
   TkadPinVariant,
@@ -214,6 +194,8 @@ const TKAD_PIN: Record<
   staticSelected: { path: "data", w: 44, h: 52 },
   mobile: { path: "data", w: 40, h: 48 },
   mobileSelected: { path: "data", w: 44, h: 52 },
+  office: { path: "data", w: 40, h: 48 },
+  officeSelected: { path: "data", w: 44, h: 52 },
 };
 
 function pinColorForType(type: string): {
@@ -224,6 +206,15 @@ function pinColorForType(type: string): {
   ink: string;
 } {
   const t = (type || "").toLowerCase();
+  if (t.includes("office") || t.includes("thinkad")) {
+    return {
+      fill: "#a855f7",
+      stroke: "#22d3ee",
+      text: "#0a0a0c",
+      glow: "rgba(168,85,247,0.45)",
+      ink: "#05050a",
+    };
+  }
   // premium neon palette — consistent with landing day/night
   if (t.includes("digital")) {
     return {
@@ -265,6 +256,7 @@ function pinColorForType(type: string): {
 
 function pinLetterForType(type: string): string {
   const t = (type || "").toLowerCase();
+  if (t.includes("office") || t.includes("thinkad")) return "T";
   if (t.includes("digital")) return "D";
   if (t.includes("static")) return "S";
   if (t.includes("mobile")) return "M";
@@ -272,51 +264,33 @@ function pinLetterForType(type: string): string {
 }
 
 function pinDataUrl(type: string, selected: boolean): string {
-  const { fill, stroke, text, glow, ink } = pinColorForType(type);
+  const { fill, stroke, text } = pinColorForType(type);
   const w = selected ? 44 : 40;
   const h = selected ? 52 : 48;
   const label = pinLetterForType(type);
   const ring = selected ? 3 : 2;
   const font = selected ? 14 : 13;
   // If a bright fill ever feels too loud, we can flip this to "border-only" quickly.
-  const borderOnly = false;
-  const bodyFill = borderOnly ? "rgba(0,0,0,0.18)" : fill;
-  const coreFill = borderOnly ? "rgba(255,255,255,0.96)" : "rgba(255,255,255,0.96)";
-  // Premium neon pin: slim silhouette + glass highlight + gradient ring + selected glow.
+  const bodyFill = selected ? fill : "rgba(8,8,12,0.94)";
+  const bodyStroke = selected ? stroke : "rgba(255,255,255,0.14)";
+  const coreFill = selected ? fill : "rgba(12,12,18,0.98)";
+  const labelFill = selected ? text : stroke;
   const svg = `
   <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 44 52">
     <defs>
-      <linearGradient id="ring" x1="10" y1="10" x2="34" y2="34" gradientUnits="userSpaceOnUse">
+      <linearGradient id="ring" x1="8" y1="8" x2="36" y2="36" gradientUnits="userSpaceOnUse">
         <stop offset="0" stop-color="${stroke}" stop-opacity="1"/>
-        <stop offset="0.55" stop-color="#ffffff" stop-opacity="0.42"/>
-        <stop offset="1" stop-color="${stroke}" stop-opacity="0.95"/>
+        <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.5"/>
+        <stop offset="1" stop-color="${stroke}" stop-opacity="1"/>
       </linearGradient>
-      <radialGradient id="cap" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(22 16) rotate(90) scale(18 18)">
-        <stop offset="0" stop-color="rgba(255,255,255,0.18)"/>
-        <stop offset="1" stop-color="rgba(255,255,255,0)"/>
-      </radialGradient>
-      <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="${glow}" flood-opacity="${selected ? "0.65" : "0.0"}"/>
-        <feDropShadow dx="0" dy="18" stdDeviation="14" flood-color="rgba(0,0,0,0.60)" flood-opacity="0.9"/>
-      </filter>
-      <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
-        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(0,0,0,0.55)" flood-opacity="0.85"/>
-      </filter>
     </defs>
-    <g filter="${selected ? "url(#glow)" : "url(#soft)"}">
-      <!-- outer body -->
-      <path d="M22 51C31 39 36 30.5 36 22.5C36 12.85 29.15 5 22 5C14.85 5 8 12.85 8 22.5C8 30.5 13 39 22 51Z" fill="${bodyFill}" stroke="rgba(0,0,0,0.22)" stroke-width="2"/>
-      <!-- glass sheen -->
-      <path d="M14 14c3.5-5 8.5-7.2 13.2-6.1c1 .25 1.5 1.35.95 2.2c-1.8 2.8-5.2 4.6-9.1 4.9c-2.2.18-4 .98-5.2 2.4c-.7.8-2 .5-1.95-.4c.06-1.0.6-2.1 2.1-3.0Z" fill="rgba(255,255,255,0.10)"/>
-      <!-- cap glow -->
-      <circle cx="22" cy="18" r="16" fill="url(#cap)"/>
-      <!-- inner ring + core -->
-      <circle cx="22" cy="22" r="12.2" fill="rgba(0,0,0,0.12)" stroke="url(#ring)" stroke-width="${ring}"/>
-      <circle cx="22" cy="22" r="9.3" fill="${coreFill}"/>
-      <!-- label -->
-      <text x="22" y="27.2" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" font-size="${font}" font-weight="950" fill="${borderOnly ? ink : text}">${label}</text>
-      <!-- micro highlight dot -->
-      <circle cx="28.2" cy="16.8" r="1.2" fill="rgba(255,255,255,0.55)"/>
+    <g>
+      <path d="M22 51C31 39 36 30.5 36 22.5C36 12.85 29.15 5 22 5C14.85 5 8 12.85 8 22.5C8 30.5 13 39 22 51Z" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="${selected ? 2.5 : 1.75}"/>
+      <path d="M14 14c3.5-5 8.5-7.2 13.2-6.1c1 .25 1.5 1.35.95 2.2c-1.8 2.8-5.2 4.6-9.1 4.9c-2.2.18-4 .98-5.2 2.4c-.7.8-2 .5-1.95-.4c.06-1.0.6-2.1 2.1-3.0Z" fill="rgba(255,255,255,0.08)"/>
+      ${selected ? `<ellipse cx="22" cy="21" rx="17" ry="18" fill="none" stroke="${stroke}" stroke-width="2" opacity="0.85"/>` : ""}
+      <circle cx="22" cy="22" r="11.8" fill="${coreFill}" stroke="url(#ring)" stroke-width="${ring}"/>
+      <circle cx="22" cy="22" r="8.6" fill="rgba(255,255,255,0.04)"/>
+      <text x="22" y="26.8" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="${font}" font-weight="800" fill="${labelFill}">${label}</text>
     </g>
   </svg>`;
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
@@ -342,6 +316,70 @@ function tkadPinMarkerImage(
   return new maps.MarkerImage(src, new maps.Size(w, h), {
     offset: new maps.Point(w / 2, h),
   });
+}
+
+type MediaPinBase = "digital" | "static" | "mobile" | "office" | "default";
+
+const pinImageCache = new Map<string, unknown>();
+
+function mediaPinBaseType(type: string): MediaPinBase {
+  const t = (type || "").toLowerCase();
+  if (t.includes("office") || t.includes("thinkad")) return "office";
+  if (t.includes("digital")) return "digital";
+  if (t.includes("static")) return "static";
+  if (t.includes("mobile")) return "mobile";
+  return "default";
+}
+
+function mediaPinVariant(base: MediaPinBase, highlighted: boolean): TkadPinVariant {
+  if (highlighted) {
+    if (base === "office") return "officeSelected";
+    if (base === "digital") return "digitalSelected";
+    if (base === "static") return "staticSelected";
+    if (base === "mobile") return "mobileSelected";
+    return "selected";
+  }
+  if (base === "office") return "office";
+  if (base === "digital") return "digital";
+  if (base === "static") return "static";
+  if (base === "mobile") return "mobile";
+  return "default";
+}
+
+function cachedPinMarkerImage(
+  maps: KakaoMapsForImage["maps"],
+  variant: TkadPinVariant,
+  mediaType: string,
+) {
+  const key = `trendy:${variant}:${mediaType}`;
+  const hit = pinImageCache.get(key);
+  if (hit) return hit;
+  const img = tkadPinMarkerImage(maps, variant, mediaType);
+  pinImageCache.set(key, img);
+  return img;
+}
+
+/** 클러스터 탭 시 항상 줌인만 (setBounds 는 분산이 크면 오히려 줌아웃됨). */
+function zoomClusterIn(
+  map: {
+    getLevel: () => number;
+    setLevel: (next: number, opts?: { anchor?: unknown }) => void;
+    panTo: (pos: unknown) => void;
+  },
+  center: unknown,
+  markerCount: number,
+) {
+  const current = map.getLevel();
+  const steps =
+    markerCount >= 80 ? 1 : markerCount >= 30 ? 2 : markerCount >= 10 ? 3 : 4;
+  const target = Math.max(1, current - steps);
+  const next = target < current ? target : Math.max(1, current - 1);
+  if (center) {
+    map.panTo(center);
+    map.setLevel(next, { anchor: center });
+  } else {
+    map.setLevel(next);
+  }
 }
 
 const SDK_LOAD_FAILED_KO =
@@ -413,6 +451,7 @@ export default function KakaoMapView({
   userLocation = null,
   coverageGeoJson = null,
   fitCoverageBounds = false,
+  monochromeTiles = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<unknown>(null);
@@ -449,6 +488,39 @@ export default function KakaoMapView({
     markersRef.current = markers;
   }, [markers]);
 
+  const isMarkerMapImage = useCallback((img: HTMLImageElement) => {
+    const src = img.getAttribute("src") ?? "";
+    return (
+      src.startsWith("data:image") ||
+      src.includes("tkad-media-map-pin") ||
+      src.includes("/images/tkad")
+    );
+  }, []);
+
+  const applyMonochromeTiles = useCallback(() => {
+    const root = containerRef.current;
+    if (!root || !monochromeTiles) return;
+    root.querySelectorAll("img").forEach((img) => {
+      if (isMarkerMapImage(img)) {
+        img.style.filter = "none";
+        img.dataset.tkadMarker = "1";
+        return;
+      }
+      if (img.dataset.tkadMarker === "1") return;
+      img.style.filter = "grayscale(1) contrast(1.08) brightness(1.03)";
+    });
+  }, [isMarkerMapImage, monochromeTiles]);
+
+  useEffect(() => {
+    if (!mapReady || !monochromeTiles) return;
+    const root = containerRef.current;
+    if (!root) return;
+    applyMonochromeTiles();
+    const observer = new MutationObserver(() => applyMonochromeTiles());
+    observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
+    return () => observer.disconnect();
+  }, [mapReady, monochromeTiles, applyMonochromeTiles]);
+
   // This effect intentionally boots Kakao SDK once per mount.
   useEffect(() => {
     const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY?.trim();
@@ -463,6 +535,7 @@ export default function KakaoMapView({
 
     let cancelled = false;
     let idleHandler: (() => void) | null = null;
+    let idleDebounce: ReturnType<typeof setTimeout> | null = null;
     let clusterClickHandler: ((cluster: unknown) => void) | null = null;
     let resizeObserver: ResizeObserver | null = null;
     const markerObjs = markerObjsRef.current;
@@ -508,8 +581,7 @@ export default function KakaoMapView({
               averageCenter: true,
               // 더 가까운 줌(레벨↓)에서도 숫자 클러스터 유지
               minLevel: 5,
-              // 중간 줌에서도 적극적으로 묶이게 확대
-              gridSize: 120,
+              gridSize: 100,
               disableClickZoom: true,
               calculator: [...TKAD_CLUSTER_CALCULATOR],
               styles: TKAD_CLUSTER_STYLES,
@@ -525,32 +597,8 @@ export default function KakaoMapView({
               const centerLatLng = c.getCenter?.();
               const markersIn =
                 typeof c.getMarkers === "function" ? (c.getMarkers() ?? []) : [];
-
-              if (markersIn.length > 1) {
-                const bounds = new kakao.maps.LatLngBounds();
-                for (const m of markersIn as Array<{ getPosition?: () => unknown }>) {
-                  try {
-                    const p = m.getPosition?.();
-                    if (p) bounds.extend(p);
-                  } catch {
-                    /* noop */
-                  }
-                }
-                try {
-                  // (상,우,하,좌) 패딩 px — 클러스터 탭 후 주변 맥락이 보이도록
-                  map.setBounds(bounds, 72, 72, 72, 72);
-                } catch {
-                  try {
-                    map.setBounds(bounds, 72);
-                  } catch {
-                    const next = Math.max(1, map.getLevel() - 2);
-                    if (centerLatLng) map.setLevel(next, { anchor: centerLatLng });
-                  }
-                }
-              } else {
-                const next = Math.max(1, map.getLevel() - 2);
-                if (centerLatLng) map.setLevel(next, { anchor: centerLatLng });
-              }
+              const count = Math.max(1, markersIn.length);
+              zoomClusterIn(map, centerLatLng, count);
             };
             kakao.maps.event.addListener(clusterer, "clusterclick", clusterClickHandler);
           } else {
@@ -595,8 +643,15 @@ export default function KakaoMapView({
             onBoundsChange(next);
           };
 
-          idleHandler = fireBounds;
-          kakao.maps.event.addListener(map, "idle", fireBounds);
+          const fireBoundsDebounced = () => {
+            if (idleDebounce) clearTimeout(idleDebounce);
+            idleDebounce = setTimeout(() => {
+              idleDebounce = null;
+              fireBounds();
+            }, 140);
+          };
+          idleHandler = fireBoundsDebounced;
+          kakao.maps.event.addListener(map, "idle", fireBoundsDebounced);
           fireBounds();
           requestAnimationFrame(() => {
             if (!cancelled) fireRelayout();
@@ -614,6 +669,7 @@ export default function KakaoMapView({
 
     return () => {
       cancelled = true;
+      if (idleDebounce) clearTimeout(idleDebounce);
       resizeObserver?.disconnect();
       resizeObserver = null;
       const mapInst = mapRef.current as Record<string, unknown> | null;
@@ -660,6 +716,8 @@ export default function KakaoMapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const pinVariantByIdRef = useRef<Map<string, TkadPinVariant>>(new Map());
+
   useEffect(() => {
     if (!mapReady) return;
     const map = mapRef.current as unknown;
@@ -676,13 +734,16 @@ export default function KakaoMapView({
       if (!kakao?.maps) return;
 
       const existing = markerObjsRef.current;
+      const variantById = pinVariantByIdRef.current;
       const nextIds = new Set(markers.map((m) => m.id));
+      const highlightId = hoveredId ?? selectedId;
 
       for (const [id, m] of existing) {
         if (!nextIds.has(id)) {
           if (clusterer?.removeMarker) clusterer.removeMarker(m);
           else (m as { setMap: (map: unknown | null) => void }).setMap(null);
           existing.delete(id);
+          variantById.delete(id);
         }
       }
 
@@ -692,75 +753,18 @@ export default function KakaoMapView({
         const lat = Number(mk.lat);
         const lng = Number(mk.lng);
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
-        const baseType: "digital" | "static" | "mobile" | "default" =
-          mk.type?.toLowerCase().includes("digital")
-            ? "digital"
-            : mk.type?.toLowerCase().includes("static")
-              ? "static"
-              : mk.type?.toLowerCase().includes("mobile")
-                ? "mobile"
-                : "default";
-        const variant: TkadPinVariant =
-          selectedId != null && mk.id === selectedId
-            ? baseType === "digital"
-              ? "digitalSelected"
-              : baseType === "static"
-                ? "staticSelected"
-                : baseType === "mobile"
-                  ? "mobileSelected"
-                  : "selected"
-            : baseType === "digital"
-              ? "digital"
-              : baseType === "static"
-                ? "static"
-                : baseType === "mobile"
-                  ? "mobile"
-                  : "default";
+        const base = mediaPinBaseType(mk.type);
+        const variant = mediaPinVariant(base, mk.id === highlightId);
         const marker = new kakao.maps.Marker({
           position: new kakao.maps.LatLng(lat, lng),
           title: mk.name,
-          image: tkadPinMarkerImage(kakao.maps, variant, mk.type),
+          image: cachedPinMarkerImage(kakao.maps, variant, mk.type),
         });
         kakao.maps.event.addListener(marker, "click", () => onSelectRef.current(mk.id));
         existing.set(mk.id, marker);
+        variantById.set(mk.id, variant);
         if (clusterer) toAdd.push(marker);
         else (marker as { setMap: (m: unknown) => void }).setMap(map);
-      }
-
-      for (const mk of markers) {
-        const marker = existing.get(mk.id) as
-          | { setImage?: (im: unknown) => void }
-          | undefined;
-        if (!marker || typeof marker.setImage !== "function") continue;
-        const baseType: "digital" | "static" | "mobile" | "default" =
-          mk.type?.toLowerCase().includes("digital")
-            ? "digital"
-            : mk.type?.toLowerCase().includes("static")
-              ? "static"
-              : mk.type?.toLowerCase().includes("mobile")
-                ? "mobile"
-                : "default";
-        const variant: TkadPinVariant =
-          selectedId != null && mk.id === selectedId
-            ? baseType === "digital"
-              ? "digitalSelected"
-              : baseType === "static"
-                ? "staticSelected"
-                : baseType === "mobile"
-                  ? "mobileSelected"
-                  : "selected"
-            : baseType === "digital"
-              ? "digital"
-              : baseType === "static"
-                ? "static"
-                : baseType === "mobile"
-                  ? "mobile"
-                  : "default";
-        try {
-          marker.setImage(tkadPinMarkerImage(kakao.maps, variant, mk.type));
-        } catch {
-          /* noop */
-        }
       }
 
       if (clusterer?.addMarkers && toAdd.length) {
@@ -779,7 +783,37 @@ export default function KakaoMapView({
     } catch (e) {
       console.error("[KakaoMapView] markers sync failed", e);
     }
-  }, [markers, mapReady, selectedId]);
+  }, [markers, mapReady, hoveredId, selectedId]);
+
+  useEffect(() => {
+    if (!mapReady) return;
+    const kakao = getKakaoSdk();
+    if (!kakao?.maps) return;
+    try {
+      const existing = markerObjsRef.current;
+      const variantById = pinVariantByIdRef.current;
+      const highlightId = hoveredId ?? selectedId;
+      const list = markersRef.current;
+
+      for (const mk of list) {
+        const marker = existing.get(mk.id) as
+          | { setImage?: (im: unknown) => void }
+          | undefined;
+        if (!marker || typeof marker.setImage !== "function") continue;
+        const base = mediaPinBaseType(mk.type);
+        const variant = mediaPinVariant(base, mk.id === highlightId);
+        if (variantById.get(mk.id) === variant) continue;
+        variantById.set(mk.id, variant);
+        try {
+          marker.setImage(cachedPinMarkerImage(kakao.maps, variant, mk.type));
+        } catch {
+          /* noop */
+        }
+      }
+    } catch (e) {
+      console.error("[KakaoMapView] marker visuals failed", e);
+    }
+  }, [selectedId, hoveredId, mapReady]);
 
   useEffect(() => {
     if (!mapReady) return;
@@ -877,60 +911,6 @@ export default function KakaoMapView({
       console.error("[KakaoMapView] panTo failed", e);
     }
   }, [selectedId, mapReady]);
-
-  // hoveredId 변경 시 해당 핀을 selected 변형으로 표시 (panTo 없음)
-  useEffect(() => {
-    if (!mapReady) return;
-    const kakao = getKakaoSdk();
-    if (!kakao?.maps) return;
-    try {
-      const id = hoveredId;
-      if (!id) return;
-      const m = markersRef.current.find((x) => x.id === id);
-      if (!m) return;
-      const marker = markerObjsRef.current.get(id) as
-        | { setImage?: (im: unknown) => void }
-        | undefined;
-      if (!marker || typeof marker.setImage !== "function") return;
-      const baseType: "digital" | "static" | "mobile" | "default" =
-        m.type?.toLowerCase().includes("digital")
-          ? "digital"
-          : m.type?.toLowerCase().includes("static")
-            ? "static"
-            : m.type?.toLowerCase().includes("mobile")
-              ? "mobile"
-              : "default";
-      const variant: TkadPinVariant =
-        baseType === "digital"
-          ? "digitalSelected"
-          : baseType === "static"
-            ? "staticSelected"
-            : baseType === "mobile"
-              ? "mobileSelected"
-              : "selected";
-      marker.setImage(tkadPinMarkerImage(kakao.maps, variant, m.type));
-      return () => {
-        // 호버 해제 시 원래 variant 로 복귀 (단, 이게 진짜 selected 면 그대로 두기)
-        const isStillSelected = selectedId === id;
-        const restoreVariant: TkadPinVariant = isStillSelected
-          ? variant
-          : baseType === "digital"
-            ? "digital"
-            : baseType === "static"
-              ? "static"
-              : baseType === "mobile"
-                ? "mobile"
-                : "default";
-        try {
-          marker.setImage?.(tkadPinMarkerImage(kakao.maps, restoreVariant, m.type));
-        } catch {
-          /* noop */
-        }
-      };
-    } catch (e) {
-      console.error("[KakaoMapView] hover highlight failed", e);
-    }
-  }, [hoveredId, selectedId, mapReady]);
 
   // 외부 programmaticView (URL 하이드레이션 / "내 주변" 클릭 등) 반영
   useEffect(() => {
@@ -1042,7 +1022,12 @@ export default function KakaoMapView({
   }
 
   return (
-    <div className="tkad-kakao-map-root relative h-full w-full min-h-[200px] text-[#0a0a0c] [color-scheme:light]">
+    <div
+      className={cn(
+        "tkad-kakao-map-root relative h-full w-full min-h-[200px] text-[#0a0a0c] [color-scheme:light]",
+        monochromeTiles && "tkad-kakao-map-root--mono",
+      )}
+    >
       <div ref={containerRef} className="h-full w-full min-h-[200px]" />
       {!mapReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/25 p-4">

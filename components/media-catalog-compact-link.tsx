@@ -11,7 +11,10 @@ import {
   getCheapestMediaPriceOption,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
-import { MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS } from "@/components/media-catalog-shared";
+import {
+  MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
+  MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS,
+} from "@/components/media-catalog-shared";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -59,7 +62,7 @@ export function MediaCatalogCompactLinkRow({
       aria-label={isKo ? media.name : (media.nameEn || media.name)}
       className={cn(
         MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+        "group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
         className,
       )}
     >
@@ -72,7 +75,10 @@ export function MediaCatalogCompactLinkRow({
         media={media}
         primaryImageUrl={primaryThumb}
         placeholderLabel={imagePreparingLabel}
-        className="relative z-10 h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden border-2 border-border sm:h-24 sm:w-28"
+        className={cn(
+          "relative z-10 h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden border-2 border-border sm:h-24 sm:w-28",
+          MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS,
+        )}
         bottomGradientClassName={null}
         placeholderSize="xs"
       >

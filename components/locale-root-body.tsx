@@ -5,6 +5,7 @@ import ToastProvider from "@/components/toast-provider";
 import ConditionalPublicChrome from "@/components/conditional-public-chrome";
 import TopLoader from "@/components/top-loader";
 import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
+import { PublicNavAside } from "@/components/public-chrome/public-nav-aside";
 import DeferredPublicWidgetsGate from "@/components/deferred-public-widgets-gate";
 import PwaRegister from "@/components/pwa-register";
 import PageTransition from "@/components/page-transition";
@@ -25,17 +26,24 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
       <a href="#main-content" className="skip-link">
         {skipLinkLabel}
       </a>
-      <ConditionalPublicChrome>
-        <TopLoader />
-        {header}
-      </ConditionalPublicChrome>
-      <main id="main-content" className="flex min-h-0 flex-1 flex-col">
-        <PageTransition>{children}</PageTransition>
-      </main>
-      <ConditionalPublicChrome>
-        <FooterBrutal />
-        <DeferredPublicWidgetsGate />
-      </ConditionalPublicChrome>
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        <ConditionalPublicChrome>
+          <PublicNavAside />
+        </ConditionalPublicChrome>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <ConditionalPublicChrome>
+            <TopLoader />
+            {header}
+          </ConditionalPublicChrome>
+          <main id="main-content" className="flex min-h-0 flex-1 flex-col">
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <ConditionalPublicChrome>
+            <FooterBrutal />
+            <DeferredPublicWidgetsGate />
+          </ConditionalPublicChrome>
+        </div>
+      </div>
       <PwaRegister />
     </ToastProvider>
   );

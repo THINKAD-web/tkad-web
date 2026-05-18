@@ -1,9 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { BarChart3, Bolt, Sparkles } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
-import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import type { MediaItem } from "@/lib/media-data";
 
 export default function MediaDetailStickyCta({
@@ -15,8 +14,12 @@ export default function MediaDetailStickyCta({
   compareHref: string;
   instantBookEligible?: boolean;
 }) {
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const t = useTranslations("media.detail");
   const tCta = useTranslations("mediaDetail.cta");
+  const displayName = isKo ? media.name : media.nameEn || media.name;
+  const contactHref = `/contact?media=${encodeURIComponent(media.id)}`;
 
   return (
     <div
@@ -29,53 +32,51 @@ export default function MediaDetailStickyCta({
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-25 tkad-neon-grid"
         />
-        <div className="relative flex items-center justify-between border-b border-white/10 px-3 py-2">
-          <span className="font-mono text-[9px] font-black uppercase tracking-[0.28em] text-white/80">
-            [ MEDIA ACTIONS ]
-          </span>
-          <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-white/45">
-            {instantBookEligible ? `// ` + "4 OPTIONS" : `// ` + "3 OPTIONS"}
-          </span>
-        </div>
-        {instantBookEligible ? (
-          <div className="border-b border-white/10 p-2.5">
+        <div className="relative space-y-2 p-2.5">
+          <p className="truncate px-0.5 text-sm font-bold leading-snug text-white">
+            {displayName}
+          </p>
+          <BtnBlock
+            href={contactHref}
+            variant="primary"
+            size="sm"
+            className="min-h-12 w-full justify-center rounded-[15px] border-0 bg-gradient-to-r from-violet-500 to-cyan-400 text-sm font-black tracking-[0.04em] text-white shadow-lg shadow-violet-500/30 hover:opacity-95"
+          >
+            {t("inquireThisMedia")}
+          </BtnBlock>
+          {instantBookEligible ? (
             <BtnBlock
               href={`/media/${encodeURIComponent(media.id)}/book`}
-              variant="primary"
+              variant="secondary"
               size="sm"
-              className="min-h-11 w-full justify-center rounded-[15px] px-2 text-[11px] font-black tracking-[0.06em]"
+              className="min-h-10 w-full justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[11px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
             >
               <Bolt className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {tCta("instantBook")}
             </BtnBlock>
+          ) : null}
+          <div className="grid grid-cols-2 gap-2">
+            <BtnBlock
+              href={`/planner?addMedia=${encodeURIComponent(media.id)}`}
+              variant="secondary"
+              size="sm"
+              className="min-h-10 min-w-0 justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
+            >
+              <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="truncate">{tCta("plannerShort")}</span>
+            </BtnBlock>
+            <BtnBlock
+              href={compareHref}
+              variant="secondary"
+              size="sm"
+              className="min-h-10 min-w-0 justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
+            >
+              <BarChart3 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="min-w-0 truncate text-center">
+                {t("stickyCtaCompare")}
+              </span>
+            </BtnBlock>
           </div>
-        ) : null}
-        <div className="grid grid-cols-3 gap-2 p-2.5">
-          <BtnBlock
-            href={`/planner?addMedia=${encodeURIComponent(media.id)}`}
-            variant="secondary"
-            size="sm"
-            className="min-h-11 min-w-0 justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
-          >
-            <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            <span className="truncate">{tCta("plannerShort")}</span>
-          </BtnBlock>
-          <div className="min-w-0">
-            <MediaQuoteCtaButton
-              media={media}
-              variant="sticky"
-              className="min-h-11 rounded-[15px] px-2 shadow-[0_12px_30px_rgba(0,0,0,0.42)]"
-            />
-          </div>
-          <BtnBlock
-            href={compareHref}
-            variant="secondary"
-            size="sm"
-            className="min-h-11 min-w-0 justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
-          >
-            <BarChart3 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            <span className="min-w-0 truncate text-center">{t("stickyCtaCompare")}</span>
-          </BtnBlock>
         </div>
       </div>
     </div>

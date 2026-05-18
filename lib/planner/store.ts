@@ -20,6 +20,8 @@ import {
   type PlannerWizardStep,
 } from "@/lib/planner/types";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
+import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
+import { hydratePlannerFromSavedPlan } from "@/lib/planner/hydrate-from-saved-plan";
 
 /**
  * localStorage key. 과거 `tkad-planner-plan-v2` 포맷(v2/v3)과 호환되도록
@@ -74,6 +76,8 @@ export type PlannerStoreActions = {
   resetAllMediaPlacements: () => void;
   applyPreset: (id: PlannerPresetId) => void;
   reset: () => void;
+  /** 저장된 공유 플랜 JSON으로 입력 상태 복원 */
+  importFromSavedPlan: (plan: SavedPlannerPlanJson) => void;
 };
 
 export type PlannerStore = PlannerStoreState & PlannerStoreActions;
@@ -214,6 +218,14 @@ export const usePlannerStore = create<PlannerStore>()(
         }),
 
       reset: () => set({ ...INITIAL_STATE }),
+
+      importFromSavedPlan: (plan) =>
+        set({
+          ...INITIAL_STATE,
+          ...hydratePlannerFromSavedPlan(plan),
+          wizardStep: 1,
+          creativeObjectUrl: null,
+        }),
     }),
     {
       name: PLANNER_STORAGE_KEY,

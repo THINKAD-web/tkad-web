@@ -134,7 +134,7 @@ export default function AcademyPageClient({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon">
+      <div className="tkad-landing-neon tkad-planner-neon pb-4 sm:pb-6">
         <CategoryExploreHero
           code="// 03 · ACADEMY"
           showBeta
@@ -194,7 +194,7 @@ export default function AcademyPageClient({
           </div>
         </section>
 
-        <div className="mx-auto max-w-7xl space-y-16 bg-muted px-4 pb-0 pt-14 text-foreground sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl space-y-16 bg-muted px-4 pb-16 pt-14 text-foreground sm:px-6 sm:pb-20 lg:px-8">
           <section id="academy-basics" className="scroll-mt-24">
             <div className="mb-8 text-center">
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
@@ -542,7 +542,7 @@ export default function AcademyPageClient({
 
           <section
             id="academy-consult"
-            className="scroll-mt-24 border-2 border-primary bg-hero-void px-6 pb-0 pt-12 text-center"
+            className="scroll-mt-24 border-2 border-primary bg-hero-void px-6 pb-12 pt-12 text-center sm:pb-16"
           >
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
               [ {t("consultSectionTitle")} ]

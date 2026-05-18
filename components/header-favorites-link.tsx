@@ -69,11 +69,13 @@ export function HeaderFavoritesLink({
   const count = loggedIn === true ? serverCount : guestCount;
   const aria =
     count > 0 ? t("headerAriaCount", { count }) : t("headerAria");
+  const favoritesHref =
+    loggedIn === true ? "/my?tab=favorites" : "/media/favorites";
 
   if (variant === "menu") {
     return (
       <Link
-        href="/media/favorites"
+        href={favoritesHref}
         onClick={onNavigate}
         className={className}
         aria-label={aria}
@@ -91,7 +93,7 @@ export function HeaderFavoritesLink({
 
   return (
     <Link
-      href="/media/favorites"
+      href={favoritesHref}
       onClick={onNavigate}
       className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:text-violet-600 hover:bg-secondary/60 active:scale-95 transition-all duration-150 dark:hover:text-cyan-300"
       aria-label={aria}

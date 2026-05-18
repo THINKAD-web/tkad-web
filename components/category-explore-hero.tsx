@@ -54,7 +54,7 @@ export function CategoryHeroBetaBadge({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "category-hero-beta-badge inline-flex shrink-0 items-center rounded-md border border-violet-400/45 bg-violet-500/30 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-violet-100",
+        "category-hero-beta-badge inline-flex shrink-0 items-center rounded-md border border-violet-500/50 bg-violet-100 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-violet-900 dark:border-violet-400/45 dark:bg-violet-500/30 dark:text-violet-100",
         className,
       )}
     >

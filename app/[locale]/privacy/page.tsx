@@ -2,6 +2,8 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { setRequestLocale } from "next-intl/server";
 import dynamic from "next/dynamic";
 import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/constants";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { CategoryExploreHero } from "@/components/category-explore-hero";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
 
@@ -24,27 +26,18 @@ function PrivacyContent({
   const isKo = locale === "ko";
 
   return (
-    <>
-      {/* Hero Section */}
-      <section className="bg-hero-void py-16 sm:py-24">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <ScrollAnimate>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
-              {`// 22 / Privacy`}
-            </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
-              {isKo ? "개인정보 처리방침" : "Privacy Policy"}
-            </h1>
-            <p className="mt-5 font-mono text-sm tracking-tight text-hero-fg/75 sm:text-base">
-              {isKo
-                ? "주식회사 싱커드(THINKAD)는 고객의 개인정보 보호를 최우선으로 합니다"
-                : "THINKAD Co., Ltd. is committed to protecting your personal information"}
-            </p>
-          </ScrollAnimate>
-        </div>
-      </section>
+    <HomeLandingDayNight>
+      <CategoryExploreHero
+        code="// 22 · PRIVACY"
+        headlineBefore={isKo ? "개인정보 " : "Privacy "}
+        headlineGradient={isKo ? "처리방침" : "Policy"}
+        subtitle={
+          isKo
+            ? "주식회사 싱커드(THINKAD)는 고객의 개인정보 보호를 최우선으로 합니다"
+            : "THINKAD Co., Ltd. is committed to protecting your personal information"
+        }
+      />
 
-      {/* Content Section */}
       <section className="bg-card py-16 sm:py-24">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <ScrollAnimate>
@@ -268,6 +261,6 @@ function PrivacyContent({
           </ScrollAnimate>
         </div>
       </section>
-    </>
+    </HomeLandingDayNight>
   );
 }

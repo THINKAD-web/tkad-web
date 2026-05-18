@@ -964,6 +964,24 @@ model SavedPlannerPlan {
   @@map("saved_planner_plans")
 }
 
+/// AI 캠페인 제안서 저장·공유 (30일 TTL)
+model SavedCampaignProposal {
+  id           String   @id @default(cuid())
+  expiresAt    DateTime @map("expires_at")
+  userEmail    String?  @map("user_email")
+  brandName    String   @map("brand_name")
+  campaignName String   @map("campaign_name")
+  inputJson    Json     @map("input_json")
+  proposalJson Json     @map("proposal_json")
+  viewCount    Int      @default(0) @map("view_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([expiresAt])
+  @@index([userEmail])
+  @@map("saved_campaign_proposals")
+}
+
 model UserFavoriteMedia {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")

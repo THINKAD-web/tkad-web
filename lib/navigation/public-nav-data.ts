@@ -1,0 +1,104 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  BookMarked,
+  BookOpen,
+  ClipboardList,
+  Compass,
+  GraduationCap,
+  Images,
+  Lightbulb,
+  LineChart,
+  ListVideo,
+  MapPin,
+  Package,
+  Palette,
+  Search,
+  Sparkles,
+  Trophy,
+  Wand2,
+} from "lucide-react";
+
+/** 메인 카테고리 ID — 5개 고정 */
+export type PublicNavGroupId =
+  | "discovery"
+  | "planning"
+  | "creative"
+  | "insights"
+  | "academy";
+
+export type PublicNavItemId =
+  | "media-search"
+  | "map-search"
+  | "ai-recommend"
+  | "media-planner"
+  | "package-proposal"
+  | "creative-library"
+  | "dooh-playlists"
+  | "creative-studio"
+  | "trend-report"
+  | "success-cases"
+  | "academy-content"
+  | "advertiser-guide";
+
+export type PublicNavItemDef = {
+  id: PublicNavItemId;
+  href: string;
+  icon: LucideIcon;
+  /** BETA는 세부 메뉴에만 */
+  beta?: boolean;
+};
+
+export type PublicNavGroupDef = {
+  id: PublicNavGroupId;
+  icon: LucideIcon;
+  items: PublicNavItemDef[];
+};
+
+/**
+ * OOH 플랫폼 공개 네비게이션 — 라벨은 i18n(`nav.groups.*`, `nav.items.*`).
+ * href·계층·BETA 위치의 단일 소스.
+ */
+export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
+  {
+    id: "discovery",
+    icon: Compass,
+    items: [
+      { id: "media-search", href: "/media", icon: Search },
+      { id: "map-search", href: "/media/map", icon: MapPin },
+      { id: "ai-recommend", href: "/recommend", icon: Sparkles, beta: true },
+    ],
+  },
+  {
+    id: "planning",
+    icon: ClipboardList,
+    items: [
+      { id: "media-planner", href: "/planner", icon: Lightbulb },
+      { id: "package-proposal", href: "/media/packages", icon: Package, beta: true },
+    ],
+  },
+  {
+    id: "creative",
+    icon: Palette,
+    items: [
+      { id: "creative-library", href: "/creatives", icon: Images },
+      { id: "dooh-playlists", href: "/creatives/playlists", icon: ListVideo },
+      { id: "creative-studio", href: "/creatives/upload", icon: Wand2, beta: true },
+    ],
+  },
+  {
+    id: "insights",
+    icon: LineChart,
+    items: [
+      { id: "trend-report", href: "/report", icon: LineChart },
+      { id: "success-cases", href: "/cases", icon: Trophy },
+    ],
+  },
+  {
+    id: "academy",
+    icon: GraduationCap,
+    items: [
+      { id: "academy-content", href: "/academy", icon: BookOpen },
+      { id: "advertiser-guide", href: "/guides", icon: BookMarked },
+    ],
+  },
+];

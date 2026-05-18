@@ -235,7 +235,7 @@ export default async function MediaDetailPage({ params }: Props) {
           <div className="flex items-start justify-between gap-3">
             <Link
               href="/media"
-              className="-ml-1 inline-flex items-center gap-1.5 border-2 border-hero-fg px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg transition-colors hover:bg-card hover:text-foreground"
+              className="tkad-media-detail-hero__back -ml-1 inline-flex items-center gap-1.5 rounded-xl border border-white/18 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/90 transition-colors hover:bg-white/8 hover:text-white"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {t("back")}
@@ -714,6 +714,8 @@ export default async function MediaDetailPage({ params }: Props) {
             mediaId={media.id}
             mediaName={isKo ? media.name : (media.nameEn || media.name)}
             instantBookingEligible={isInstantBookingEligible(media).eligible}
+            catalogPrice={media.price}
+            pricePeriod={media.pricePeriod}
           />
 
           <section

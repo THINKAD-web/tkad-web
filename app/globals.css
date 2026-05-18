@@ -141,6 +141,8 @@
 :root {
   /* BrutalNav: mobile h-14 (components/brutalist/nav.tsx) */
   --nav-height: 3.5rem;
+  /* PublicNavAside — lg+ 고정 사이드바 (components/public-chrome/public-nav-aside.tsx) */
+  --tkad-nav-sidebar-width: 17.5rem;
   /* Phase 1: --radius 도 0. 일부 컴포넌트가 var(--radius) 를 직접 참조해도 사각이 되도록. */
   --radius: 0;
   --hermes: #ff6200;
@@ -967,7 +969,7 @@ main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
   color: rgb(255 255 255 / 0.55) !important;
 }
 
-/* BETA 뱃지 — 낮 테마·네온 서피스 오버라이드에도 대비 유지 */
+/* BETA 뱃지 — 다크/네온 표면 기본 */
 .tkad-category-explore-hero .category-hero-beta-badge,
 .category-hero-beta-badge {
   color: rgb(237 233 254) !important;
@@ -976,16 +978,147 @@ main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
   border-color: rgb(167 139 250 / 0.5) !important;
 }
 
+/* 라이트 테마 — 헤더 서브카테고리(드롭다운·모바일 패널) */
+html:not(.dark) .tkad-nav-chrome .category-hero-beta-badge {
+  color: rgb(76 29 149) !important;
+  -webkit-text-fill-color: currentColor !important;
+  background-color: rgb(237 233 254) !important;
+  border-color: rgb(124 58 237 / 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgb(139 92 246 / 0.14),
+    0 1px 4px rgb(91 33 182 / 0.14);
+}
+
 .tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-beta-badge {
   color: rgb(237 233 254) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .category-hero-beta-badge {
-  color: rgb(91 33 182) !important;
+/* Media detail hero (`/media/[id]`) — 라이트 테마에서도 항상 다크 풀블리드 */
+.tkad-media-detail-hero {
+  background: #05050a !important;
+  color: rgb(255 255 255) !important;
+  color-scheme: dark;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero {
+  background: #05050a !important;
+  color: rgb(255 255 255) !important;
   -webkit-text-fill-color: currentColor !important;
-  background-color: rgb(139 92 246 / 0.14) !important;
-  border-color: rgb(139 92 246 / 0.35) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero > [aria-hidden] {
+  opacity: revert !important;
+  visibility: visible !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .text-white {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .text-muted-foreground {
+  color: rgb(255 255 255 / 0.55) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .text-foreground {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/35"] {
+  color: rgb(255 255 255 / 0.35) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/55"] {
+  color: rgb(255 255 255 / 0.55) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/60"] {
+  color: rgb(255 255 255 / 0.6) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/75"] {
+  color: rgb(255 255 255 / 0.75) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/80"] {
+  color: rgb(255 255 255 / 0.8) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/82"] {
+  color: rgb(255 255 255 / 0.82) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/85"] {
+  color: rgb(255 255 255 / 0.85) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/90"] {
+  color: rgb(255 255 255 / 0.9) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .bg-clip-text,
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-home-accent-text {
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-home-accent-text {
+  background-image: var(--home-accent-gradient) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  text-shadow: none !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="border-white"] {
+  border-color: rgb(255 255 255 / 0.14) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="bg-white/"] {
+  background-color: rgb(255 255 255 / 0.06) !important;
+  box-shadow: 0 28px 120px rgb(0 0 0 / 0.75) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="bg-black/"] {
+  background-color: rgb(0 0 0 / 0.3) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-neon-border::before {
+  opacity: revert !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-media-detail-hero__back {
+  border-color: rgb(255 255 255 / 0.18) !important;
+  color: rgb(255 255 255 / 0.92) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-media-detail-hero__back:hover {
+  background-color: rgb(255 255 255 / 0.08) !important;
+  color: rgb(255 255 255) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .category-hero-beta-badge {
+  color: rgb(76 29 149) !important;
+  -webkit-text-fill-color: currentColor !important;
+  background-color: rgb(233 213 255) !important;
+  border-color: rgb(124 58 237 / 0.5) !important;
+  box-shadow: 0 0 0 1px rgb(139 92 246 / 0.12);
 }
 
 /* 각 히어로·Neon 섹션 = 떠 있는 라이트 패널 — 프리미엄 깊이(입체 그림자) */
@@ -2203,6 +2336,17 @@ html:not(.dark) .group:hover .tkad-catalog-card-shell {
     0 32px 72px rgba(0, 0, 0, 0.65),
     0 0 0 1px rgba(255, 98, 0, 0.35),
     0 0 60px rgba(255, 98, 0, 0.22);
+}
+
+/* 공개 사이드바 — 헤더와 동일 토큰·다크 글래스 */
+.dark .tkad-public-nav-aside {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgb(248 250 252 / 0.96) !important;
+}
+
+html:not(.dark) .tkad-public-nav-aside {
+  color: var(--foreground);
 }
 
 /* 공개 헤더 — 글래스/블러는 다크만 (라이트에선 본문이 비쳐 메뉴 글자가 뭉개짐) */

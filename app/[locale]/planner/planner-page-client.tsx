@@ -26,6 +26,7 @@ import {
   CalendarRange,
   ArrowRight,
   MessageCircle,
+  Sparkles,
 } from "lucide-react";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import type { MediaItem } from "@/lib/media-data";
@@ -81,6 +82,7 @@ import {
   type PlannerCategory,
   type PlannerMapRegion,
 } from "@/lib/planner/types";
+import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
 import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
 import { canProceedFromStep } from "@/lib/planner/validation";
 import {
@@ -208,6 +210,7 @@ export default function PlannerPageClient({
     (s) => s.setCreativeUploadedUrl,
   );
   const applyPresetAction = usePlannerStore((s) => s.applyPreset);
+  const importFromSavedPlan = usePlannerStore((s) => s.importFromSavedPlan);
 
   const selectedRegions = useMemo(() => new Set(regions), [regions]);
   const categories = useMemo(
@@ -366,7 +369,9 @@ export default function PlannerPageClient({
   const searchParams = useSearchParams();
   const addMediaId = searchParams.get("addMedia");
   const mediaIdsParam = searchParams.get("mediaIds");
+  const loadPlanParam = searchParams.get("loadPlan");
   const handledQueryRef = useRef<string | null>(null);
+  const handledLoadPlanRef = useRef<string | null>(null);
 
   const stripPlannerQueryKeys = useCallback((keys: string[]) => {
     if (typeof window === "undefined") return;
@@ -447,6 +452,58 @@ export default function PlannerPageClient({
     stripPlannerQueryKeys,
   ]);
 
+  useEffect(() => {
+    if (!loadPlanParam) return;
+    if (handledLoadPlanRef.current === loadPlanParam) return;
+    handledLoadPlanRef.current = loadPlanParam;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/planner/shared/${loadPlanParam}`, {
+          cache: "no-store",
+        });
+        if (!res.ok) {
+          toast(
+            "error",
+            isKo
+              ? "플랜을 불러오지 못했습니다. 만료되었을 수 있습니다."
+              : "Could not load this plan. It may have expired.",
+          );
+          stripPlannerQueryKeys(["loadPlan"]);
+          return;
+        }
+        const data = (await res.json()) as { planJson?: SavedPlannerPlanJson };
+        if (cancelled || !data.planJson) return;
+        importFromSavedPlan(data.planJson);
+        setSavedPlanId(loadPlanParam);
+        const mediaCount = data.planJson.campaignMediaIds?.length ?? 0;
+        setWizardStep(mediaCount > 0 ? 4 : 2);
+        toast(
+          "success",
+          isKo ? "저장된 플랜을 불러왔습니다." : "Saved plan loaded.",
+        );
+        stripPlannerQueryKeys(["loadPlan"]);
+      } catch {
+        if (!cancelled) {
+          toast(
+            "error",
+            isKo ? "플랜 불러오기에 실패했습니다." : "Failed to load plan.",
+          );
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    loadPlanParam,
+    importFromSavedPlan,
+    setWizardStep,
+    toast,
+    isKo,
+    stripPlannerQueryKeys,
+  ]);
+
   /**
    * 현재 플래너 입력을 DB 에 저장하고 공유 가능한 URL 을 반환.
    * 기존 localStorage persist 는 유지 — DB 저장은 "공유/이메일 발송" 시점에만.
@@ -467,10 +524,23 @@ export default function PlannerPageClient({
         mediaPlacements: state.mediaPlacements,
       };
 
+      let userEmail: string | undefined;
+      try {
+        const sessionRes = await fetch("/api/auth/session", {
+          cache: "no-store",
+        });
+        const sessionData = await sessionRes.json();
+        if (sessionData?.ok && sessionData.data?.email) {
+          userEmail = sessionData.data.email as string;
+        }
+      } catch {
+        /* ignore */
+      }
+
       const res = await fetch("/api/planner/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planJson, saveMode }),
+        body: JSON.stringify({ planJson, saveMode, userEmail }),
       });
 
       if (!res.ok) {
@@ -628,6 +698,7 @@ export default function PlannerPageClient({
         <div className="tkad-landing-neon">
           <CategoryExploreHero
           code="// 05 · PLANNER"
+          showBeta
           headlineBefore={isKo ? "예산에 맞는 " : "Media plans for "}
           headlineGradient={isKo ? "미디어 플랜" : "your budget"}
           subtitle={t("subtitle")}
@@ -662,6 +733,7 @@ export default function PlannerPageClient({
       <div className="tkad-landing-neon">
         <CategoryExploreHero
           code="// 05 · PLANNER"
+          showBeta
           headlineBefore={isKo ? "예산에 맞는 " : "Media plans for "}
           headlineGradient={isKo ? "미디어 플랜" : "your budget"}
           subtitle={t("subtitle")}
@@ -1083,17 +1155,31 @@ export default function PlannerPageClient({
                   {t("ctaCompareSelection")}
                 </BtnBlock>
                 <BtnBlock
-                  variant="accent"
+                  href="/proposal?fromPlanner=1"
+                  variant="secondary"
                   size="md"
-                  className="!text-white"
-                  onClick={() => void goToContactQuote()}
-                  disabled={saving || navigatingContact}
+                  className="w-full border-emerald-400/35 bg-emerald-500/10 sm:w-auto"
                 >
-                  <Send className="h-4 w-4" />
-                  {navigatingContact
-                    ? t("savingInProgress")
-                    : t("ctaQuoteWithPlan")}
+                  <Sparkles className="h-4 w-4 text-emerald-400" />
+                  {t("ctaCreateProposal")}
                 </BtnBlock>
+                <div className="flex w-full flex-col sm:w-auto">
+                  <BtnBlock
+                    variant="accent"
+                    size="lg"
+                    className="min-h-14 w-full !text-white bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
+                    onClick={() => void goToContactQuote()}
+                    disabled={saving || navigatingContact}
+                  >
+                    <Send className="h-5 w-5" />
+                    {navigatingContact
+                      ? t("savingInProgress")
+                      : t("ctaQuoteWithPlan")}
+                  </BtnBlock>
+                  <p className="mt-2 text-center text-xs text-muted-foreground">
+                    {t("quoteTrustLine")}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -1538,20 +1624,37 @@ export default function PlannerPageClient({
                         {t("ctaBannerDesc")}
                       </p>
                     </div>
-                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[240px]">
+                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[280px]">
+                      <div>
+                        <BtnBlock
+                          variant="accent"
+                          size="lg"
+                          className="min-h-14 w-full !text-white bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
+                          onClick={() => void goToContactQuote()}
+                          disabled={saving || navigatingContact}
+                        >
+                          <Send className="h-5 w-5" />
+                          {navigatingContact
+                            ? t("savingInProgress")
+                            : t("ctaQuoteWithPlan")}
+                          <ArrowRight className="h-5 w-5" />
+                        </BtnBlock>
+                        <p className="mt-2 text-center text-xs text-muted-foreground">
+                          {t("quoteTrustLine")}
+                        </p>
+                      </div>
                       <BtnBlock
-                        variant="accent"
+                        href="/proposal?fromPlanner=1"
+                        variant="secondary"
                         size="lg"
-                        className="w-full !text-white"
-                        onClick={() => void goToContactQuote()}
-                        disabled={saving || navigatingContact}
+                        className="w-full border-emerald-400/35 bg-emerald-500/10"
                       >
-                        <Send className="h-4 w-4" />
-                        {navigatingContact
-                          ? t("savingInProgress")
-                          : t("ctaQuoteWithPlan")}
-                        <ArrowRight className="h-4 w-4" />
+                        <Sparkles className="h-4 w-4 text-emerald-400" />
+                        {t("ctaCreateProposal")}
                       </BtnBlock>
+                      <p className="-mt-1 text-center text-xs text-muted-foreground">
+                        {t("ctaCreateProposalHint")}
+                      </p>
                       <BtnBlock
                         href="/contact"
                         variant="secondary"

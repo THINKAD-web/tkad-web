@@ -8,6 +8,8 @@ import { Link } from "@/i18n/navigation";
 import type { HomeHeroMapPin } from "@/lib/public-media-catalog";
 import { HomeHeroMarquee } from "@/components/home/home-hero-marquee";
 import { accentTag } from "@/lib/render-accent-title";
+import { useTkadAppearance } from "@/lib/use-tkad-appearance";
+import { cn } from "@/lib/utils";
 
 const HomeHeroMapCard = dynamic(
   () => import("@/components/home/home-hero-map-card"),
@@ -32,11 +34,20 @@ type Props = {
   mapPins: HomeHeroMapPin[];
 };
 
-function MarqueeBackground({ imageUrls }: { imageUrls: string[] }) {
+function MarqueeBackground({
+  imageUrls,
+  darkHero,
+}: {
+  imageUrls: string[];
+  darkHero: boolean;
+}) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none flex h-full w-full items-center justify-center overflow-hidden opacity-[0.22] blur-[2px] dark:opacity-[0.42]"
+      className={cn(
+        "pointer-events-none flex h-full w-full items-center justify-center overflow-hidden blur-[2px]",
+        darkHero ? "opacity-[0.32]" : "opacity-[0.22] dark:opacity-[0.42]",
+      )}
       style={{
         maskImage: MARQUEE_MASK,
         WebkitMaskImage: MARQUEE_MASK,
@@ -52,9 +63,11 @@ function MarqueeBackground({ imageUrls }: { imageUrls: string[] }) {
 function LiveBar({
   impressions,
   activeBrands,
+  darkHero,
 }: {
   impressions: number;
   activeBrands: number;
+  darkHero: boolean;
 }) {
   const t = useTranslations("homePage");
   const locale = useLocale();
@@ -74,25 +87,33 @@ function LiveBar({
     },
   ];
 
+  const chipClass = darkHero
+    ? "inline-flex items-center gap-2 rounded-lg border border-white/14 bg-white/6 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-white backdrop-blur-sm"
+    : "inline-flex items-center gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-foreground shadow-sm backdrop-blur-sm";
+  const mutedClass = darkHero ? "text-white/55" : "text-muted-foreground";
+  const valueClass = darkHero ? "tabular-nums text-white" : "tabular-nums text-foreground";
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       {items.map((item) => (
-        <div
-          key={item.label}
-          className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-foreground shadow-sm backdrop-blur-sm"
-        >
+        <div key={item.label} className={chipClass}>
           {item.live ? (
             <span className="inline-flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-violet-500" aria-hidden />
               LIVE
-              <span className="text-muted-foreground">•</span>
+              <span className={mutedClass}>•</span>
             </span>
           ) : null}
-          <span className="text-muted-foreground">{item.label}</span>
-          <span className="tabular-nums text-foreground">{item.value}</span>
+          <span className={mutedClass}>{item.label}</span>
+          <span className={valueClass}>{item.value}</span>
         </div>
       ))}
-      <p className="hidden font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground sm:block">
+      <p
+        className={cn(
+          "hidden font-mono text-[11px] font-bold uppercase tracking-widest sm:block",
+          mutedClass,
+        )}
+      >
         {t("heroVerifiedOnly")}
       </p>
     </div>
@@ -101,6 +122,8 @@ function LiveBar({
 
 export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
   const t = useTranslations("homePage");
+  const appearance = useTkadAppearance();
+  const darkHero = appearance === "day";
   const [seed, setSeed] = useState(0);
   const [tick, setTick] = useState(0);
 
@@ -121,27 +144,51 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
   const liveActiveBrands = useMemo(() => 128 + ((tick % 9) - 4), [tick]);
 
   const tags = [t("heroTag1"), t("heroTag2"), t("heroTag3")];
+  const mutedClass = darkHero ? "text-white/55" : "text-muted-foreground";
 
   return (
     <section
       style={{ minHeight: HERO_MIN_HEIGHT }}
-      className="relative flex w-full shrink-0 items-center overflow-hidden bg-background text-foreground"
+      className={cn(
+        "tkad-home-hero-neo relative flex w-full shrink-0 items-center overflow-hidden",
+        darkHero ? "bg-[#05050a] text-white" : "bg-background text-foreground",
+      )}
     >
       <div className="absolute inset-0 z-0">
-        <MarqueeBackground imageUrls={marqueeImageUrls} />
+        <MarqueeBackground imageUrls={marqueeImageUrls} darkHero={darkHero} />
       </div>
+
+      {darkHero ? (
+        <>
+          <div aria-hidden className="absolute inset-0 z-[1] tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 z-[1] opacity-20 tkad-neon-grid" />
+          <div
+            aria-hidden
+            className="absolute inset-0 z-[1] tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+          />
+        </>
+      ) : null}
 
       <div
         aria-hidden
-        className="absolute inset-0 z-[1] bg-gradient-to-br from-background/78 via-background/55 to-background/28 dark:from-background/70 dark:via-background/45 dark:to-background/20"
+        className={cn(
+          "absolute inset-0 z-[1]",
+          darkHero
+            ? "bg-[linear-gradient(to_bottom,rgba(5,5,10,0.55),rgba(5,5,10,0.82),rgba(5,5,10,0.94))]"
+            : "bg-gradient-to-br from-background/78 via-background/55 to-background/28 dark:from-background/70 dark:via-background/45 dark:to-background/20",
+        )}
       />
 
       <div className="relative z-[2] mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
-        <LiveBar impressions={liveImpressions} activeBrands={liveActiveBrands} />
+        <LiveBar
+          impressions={liveImpressions}
+          activeBrands={liveActiveBrands}
+          darkHero={darkHero}
+        />
 
         <div className="mt-8 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div className="flex flex-col gap-6">
-            <p className="font-mono text-xs tracking-widest text-muted-foreground">
+            <p className={cn("font-mono text-xs tracking-widest", mutedClass)}>
               {t("heroEyebrow")}
             </p>
 
@@ -151,19 +198,29 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
               {t("heroTitleLine2")}
             </h1>
 
-            <p className="max-w-md text-base text-muted-foreground">{t("heroSubtitle")}</p>
+            <p className={cn("max-w-md text-base", mutedClass)}>{t("heroSubtitle")}</p>
 
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/media"
-                className="tkad-neon-cta inline-flex items-center gap-2 rounded-[14px] px-6 py-3 font-bold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a855f7] focus-visible:ring-offset-2"
+                className={cn(
+                  "tkad-neon-cta inline-flex items-center gap-2 rounded-[14px] px-6 py-3 font-bold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a855f7]",
+                  darkHero
+                    ? "focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    : "focus-visible:ring-offset-2",
+                )}
               >
                 {t("heroCtaStart")}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link
                 href="/planner"
-                className="inline-flex items-center border-2 border-foreground px-6 py-3 font-bold transition-colors hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2"
+                className={cn(
+                  "inline-flex items-center px-6 py-3 font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                  darkHero
+                    ? "rounded-2xl border border-white/14 bg-white/6 text-white hover:border-white/22 hover:bg-white/10 focus-visible:ring-white/40 focus-visible:ring-offset-black"
+                    : "border-2 border-foreground hover:bg-foreground hover:text-background focus-visible:ring-foreground",
+                )}
               >
                 {t("heroCtaPlanner")}
               </Link>
@@ -173,7 +230,10 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="border border-foreground/30 px-3 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground"
+                  className={cn(
+                    "border px-3 py-1 font-mono text-xs uppercase tracking-wide",
+                    darkHero ? "border-white/20 text-white/55" : "border-foreground/30 text-muted-foreground",
+                  )}
                 >
                   {tag}
                 </span>
@@ -182,11 +242,28 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
           </div>
 
           <div className="w-full min-w-0">
-            <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p
+              className={cn(
+                "mb-3 font-mono text-[11px] font-bold uppercase tracking-widest",
+                mutedClass,
+              )}
+            >
               {t("heroMapTitle")}
             </p>
-            <HomeHeroMapCard pins={mapPins} />
-            <p className="mt-3 font-mono text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div
+              className={cn(
+                darkHero &&
+                  "[&>div]:border-white/10 [&>div]:bg-white/5 [&>div]:shadow-[0_18px_48px_rgba(0,0,0,0.45)]",
+              )}
+            >
+              <HomeHeroMapCard pins={mapPins} />
+            </div>
+            <p
+              className={cn(
+                "mt-3 font-mono text-[10px] font-semibold uppercase tracking-wider",
+                mutedClass,
+              )}
+            >
               {t("heroMapHint", { count: mapPins.length })}
             </p>
           </div>
