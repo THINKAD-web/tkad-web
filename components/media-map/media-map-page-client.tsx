@@ -463,6 +463,7 @@ export default function MediaMapPageClient() {
     <>
       <CategoryExploreHero
         code="// 02 · MAP"
+        showBeta
         headlineBefore={isKo ? "지도로 찾는 " : "Find "}
         headlineGradient={isKo ? "옥외광고" : "OOH on the map"}
         headlineAfter={isKo ? "" : ""}

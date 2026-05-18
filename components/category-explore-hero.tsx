@@ -49,15 +49,25 @@ export type CategoryExploreHeroProps = {
   showBeta?: boolean;
 };
 
+/** 히어로·네비 공통 BETA 뱃지 — 라이트/다크 CSS는 `category-hero-beta-badge` */
+export function CategoryHeroBetaBadge({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "category-hero-beta-badge inline-flex shrink-0 items-center rounded-md border border-violet-400/45 bg-violet-500/30 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-violet-100",
+        className,
+      )}
+    >
+      BETA
+    </span>
+  );
+}
+
 function CategoryHeroCodeLine({ code, showBeta }: { code: string; showBeta?: boolean }) {
   return (
     <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-mono text-sm font-medium tracking-widest text-cyan-400/60">
       <span>{code}</span>
-      {showBeta ? (
-        <span className="rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-violet-500/20 text-violet-300">
-          BETA
-        </span>
-      ) : null}
+      {showBeta ? <CategoryHeroBetaBadge /> : null}
     </p>
   );
 }

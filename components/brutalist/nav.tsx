@@ -227,7 +227,7 @@ export function BrutalNav({
                         >
                           {leaf.label}
                           {leaf.badge ? (
-                            <span className="rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-violet-500/20 text-violet-300">
+                            <span className="category-hero-beta-badge rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide">
                               {leaf.badge}
                             </span>
                           ) : null}
@@ -375,7 +375,7 @@ function BrutalNavDropdown({ entry }: { entry: BrutalNavGroup }) {
                   >
                     {leaf.label}
                     {leaf.badge ? (
-                      <span className="rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-violet-500/20 text-violet-300">
+                      <span className="category-hero-beta-badge rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide">
                         {leaf.badge}
                       </span>
                     ) : null}

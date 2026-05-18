@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
+import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
 
 type Cta = { href: string; label: string };
 
@@ -14,6 +15,7 @@ export function MediaKeywordLandingHero({
   icon,
   primaryCta,
   secondaryCta,
+  showBeta = true,
 }: {
   eyebrow: string;
   title: string;
@@ -21,9 +23,10 @@ export function MediaKeywordLandingHero({
   icon: ReactNode;
   primaryCta: Cta;
   secondaryCta: Cta;
+  showBeta?: boolean;
 }) {
   return (
-    <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+    <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] text-white">
       <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
       <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
       <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
@@ -33,8 +36,9 @@ export function MediaKeywordLandingHero({
       />
 
       <div className="tkad-media-keyword-hero relative mx-auto max-w-7xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-28 lg:px-8 lg:pb-36 lg:pt-32">
-        <p className="tkad-media-keyword-hero__eyebrow font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-          {eyebrow}
+        <p className="tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-cyan-400/60">
+          <span>{eyebrow}</span>
+          {showBeta ? <CategoryHeroBetaBadge /> : null}
         </p>
 
         <div className="mt-6 flex flex-col items-center gap-5 sm:flex-row sm:justify-center sm:gap-6">
