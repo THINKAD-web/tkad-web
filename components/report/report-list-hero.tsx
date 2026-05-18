@@ -10,6 +10,7 @@ export function ReportListHero() {
   return (
     <CategoryExploreHero
       code="// 02 · REPORT"
+      showBeta
       headlineBefore={isKo ? "OOH 시장 " : "OOH market "}
       headlineGradient={isKo ? "트렌드 리포트" : "trend reports"}
       subtitle={

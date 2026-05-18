@@ -488,6 +488,7 @@ export default function MediaBrowseClient({
       {hideHero ? null : (
         <CategoryExploreHero
           code="// 01 · MEDIA"
+          showBeta
           headlineBefore={isKo ? "전국 " : "Search "}
           headlineGradient={isKo ? "OOH 매체" : "OOH media"}
           headlineAfter={isKo ? " 검색" : " nationwide"}

@@ -19,7 +19,8 @@ export default async function CreativesLibraryPage({
       eyebrow=""
       title=""
       categoryHero={{
-        code: "// 06 · CREATIVES ✦ BETA",
+        code: "// 06 · CREATIVES",
+        showBeta: true,
         headlineBefore: isKo ? "소재를 올리고 " : "Upload creatives and ",
         headlineGradient: isKo ? "바로 집행" : "go live",
         subtitle: isKo
