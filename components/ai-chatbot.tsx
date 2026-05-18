@@ -36,11 +36,30 @@ const SUGGESTION_KEYS = ["suggestion1", "suggestion2", "suggestion3"] as const;
 
 type PanelTab = "chat" | "compare" | "inquiry";
 
-export default function AiChatbot() {
+export type AiChatbotProps = {
+  /** 플로팅 도크 등 외부 트리거 사용 시 기본 FAB 숨김 */
+  hideFab?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+
+export default function AiChatbot({
+  hideFab = false,
+  open: controlledOpen,
+  onOpenChange,
+}: AiChatbotProps = {}) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const t = useTranslations("aiChatbot");
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = useCallback(
+    (next: boolean) => {
+      if (controlledOpen === undefined) setInternalOpen(next);
+      onOpenChange?.(next);
+    },
+    [controlledOpen, onOpenChange],
+  );
   const [panelTab, setPanelTab] = useState<PanelTab>("chat");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatTurn[]>([]);
@@ -166,39 +185,40 @@ export default function AiChatbot() {
 
   return (
     <>
-      {/* === Floating trigger button === */}
-      <div className="group/button fixed bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))] right-[max(1rem,env(safe-area-inset-right,0px))] z-[55] sm:bottom-6 sm:right-6">
-        {showFabPulse ? (
+      {!hideFab ? (
+        <div className="group/button fixed bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))] right-[max(1rem,env(safe-area-inset-right,0px))] z-[55] sm:bottom-6 sm:right-6">
+          {showFabPulse ? (
+            <span
+              className="pointer-events-none absolute inset-0 z-0 animate-ping rounded-full bg-[linear-gradient(90deg,rgba(168,85,247,0.55),rgba(34,211,238,0.55),rgba(236,72,153,0.55))]"
+              aria-hidden
+            />
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            className={cn(
+              "relative z-10 flex h-12 w-12 items-center justify-center rounded-[18px] border border-white/12 bg-black/40 text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-white/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25",
+              open
+                ? "bg-black/55"
+                : "bg-[linear-gradient(135deg,rgba(168,85,247,0.9),rgba(34,211,238,0.9),rgba(236,72,153,0.9))] text-white border-white/14",
+            )}
+            aria-expanded={open}
+            aria-label={open ? t("closeAria") : t("openAria")}
+          >
+            {open ? (
+              <X className="h-5 w-5" strokeWidth={2.5} />
+            ) : (
+              <MessageCircle className="h-5 w-5" strokeWidth={2} />
+            )}
+          </button>
           <span
-            className="pointer-events-none absolute inset-0 z-0 animate-ping rounded-full bg-[linear-gradient(90deg,rgba(168,85,247,0.55),rgba(34,211,238,0.55),rgba(236,72,153,0.55))]"
-            aria-hidden
-          />
-        ) : null}
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className={cn(
-            "relative z-10 flex h-12 w-12 items-center justify-center rounded-[18px] border border-white/12 bg-black/40 text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-white/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25",
-            open
-              ? "bg-black/55"
-              : "bg-[linear-gradient(135deg,rgba(168,85,247,0.9),rgba(34,211,238,0.9),rgba(236,72,153,0.9))] text-white border-white/14",
-          )}
-          aria-expanded={open}
-          aria-label={open ? t("closeAria") : t("openAria")}
-        >
-          {open ? (
-            <X className="h-5 w-5" strokeWidth={2.5} />
-          ) : (
-            <MessageCircle className="h-5 w-5" strokeWidth={2} />
-          )}
-        </button>
-        <span
-          className="pointer-events-none absolute bottom-full right-0 mb-2 hidden max-w-[14rem] rounded-2xl border border-white/12 bg-black/55 px-3 py-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 opacity-0 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-opacity group-hover/button:opacity-100 sm:block"
-          role="tooltip"
-        >
-          {t("tooltip")}
-        </span>
-      </div>
+            className="pointer-events-none absolute bottom-full right-0 mb-2 hidden max-w-[14rem] rounded-2xl border border-white/12 bg-black/55 px-3 py-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 opacity-0 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-opacity group-hover/button:opacity-100 sm:block"
+            role="tooltip"
+          >
+            {t("tooltip")}
+          </span>
+        </div>
+      ) : null}
 
       {/* === Dialog overlay + panel === */}
       {open ? (

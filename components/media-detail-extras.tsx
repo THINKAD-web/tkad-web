@@ -171,6 +171,7 @@ export default function MediaDetailExtras({
               zoom={4}
               coverageGeoJson={effectiveCoverageGeoJson}
               fitCoverageBounds={Boolean(media.coverageDistrictCodes?.length)}
+              monochromeTiles
             />
           </div>
         </div>

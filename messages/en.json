@@ -15,6 +15,13 @@
     "scrollNavLabel": "Page scroll navigation",
     "pdfGenerationFailed": "PDF generation failed. Please try again in a moment."
   },
+  "supportDock": {
+    "regionLabel": "Quote, chat, and AI assistant",
+    "packageLabel": "SUPPORT",
+    "quoteEyebrow": "[ Get a quote ]",
+    "kakaoShort": "KakaoTalk",
+    "aiShort": "AI chat"
+  },
   "quoteFab": {
     "regionLabel": "Quote and consultation shortcuts",
     "buttonLabel": "Get a quote",
@@ -1808,7 +1815,7 @@
     "ceo": "CEO: Jaehan Lee",
     "bizNumber": "Business Reg: 319-86-00382",
     "ecommerce": "E-Commerce Permit: 2017-Seoul Seongdong-0681",
-    "mediaPartnerRegister": "List your media (partners)",
+    "mediaPartnerRegister": "List your media",
     "quickLinks": "Quick Links",
     "discoveryPlanning": "Discover & Plan",
     "creativeInsights": "Creative & Insights",
@@ -2252,12 +2259,14 @@
     "autoFeedbackQueueNote": "Auto feedback scheduling is on. In production, {count} ended campaign(s) would enqueue for D+7 (demo shows the badge only)."
   },
   "error": {
+    "eyebrow": "[ SYSTEM ERROR ]",
     "title": "Something went wrong",
     "description": "We're having a temporary problem. Please try again in a moment.",
     "retry": "Try again",
     "home": "Back to home"
   },
   "notFound": {
+    "eyebrow": "[ NOT FOUND ]",
     "title": "Page Not Found",
     "description": "The page you are looking for may have been removed or the address may have changed.",
     "backHome": "Back to Home",

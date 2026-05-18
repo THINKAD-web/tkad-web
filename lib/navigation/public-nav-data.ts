@@ -72,7 +72,7 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     id: "planning",
     icon: ClipboardList,
     items: [
-      { id: "media-planner", href: "/planner", icon: Lightbulb },
+      { id: "media-planner", href: "/planner", icon: Lightbulb, beta: true },
       { id: "package-proposal", href: "/media/packages", icon: Package, beta: true },
     ],
   },
@@ -80,8 +80,8 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     id: "creative",
     icon: Palette,
     items: [
-      { id: "creative-library", href: "/creatives", icon: Images },
-      { id: "dooh-playlists", href: "/creatives/playlists", icon: ListVideo },
+      { id: "creative-library", href: "/creatives", icon: Images, beta: true },
+      { id: "dooh-playlists", href: "/creatives/playlists", icon: ListVideo, beta: true },
       { id: "creative-studio", href: "/creatives/upload", icon: Wand2, beta: true },
     ],
   },
@@ -89,16 +89,16 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     id: "insights",
     icon: LineChart,
     items: [
-      { id: "trend-report", href: "/report", icon: LineChart },
-      { id: "success-cases", href: "/cases", icon: Trophy },
+      { id: "trend-report", href: "/report", icon: LineChart, beta: true },
+      { id: "success-cases", href: "/cases", icon: Trophy, beta: true },
     ],
   },
   {
     id: "academy",
     icon: GraduationCap,
     items: [
-      { id: "academy-content", href: "/academy", icon: BookOpen },
-      { id: "advertiser-guide", href: "/guides", icon: BookMarked },
+      { id: "academy-content", href: "/academy", icon: BookOpen, beta: true },
+      { id: "advertiser-guide", href: "/guides", icon: BookMarked, beta: true },
     ],
   },
 ];

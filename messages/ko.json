@@ -15,6 +15,13 @@
     "scrollNavLabel": "페이지 스크롤 이동",
     "pdfGenerationFailed": "PDF 생성에 실패했습니다. 잠시 후 다시 시도해주세요."
   },
+  "supportDock": {
+    "regionLabel": "견적·상담·AI 챗봇",
+    "packageLabel": "SUPPORT",
+    "quoteEyebrow": "[ 견적 요청 ]",
+    "kakaoShort": "카카오톡",
+    "aiShort": "AI 상담"
+  },
   "quoteFab": {
     "regionLabel": "견적·상담 바로가기",
     "buttonLabel": "견적 요청",
@@ -1807,7 +1814,7 @@
     "ceo": "대표: 이재한",
     "bizNumber": "사업자등록번호: 319-86-00382",
     "ecommerce": "통신판매업신고: 2017-서울성동-0681",
-    "mediaPartnerRegister": "매체 등록 신청 (매체사)",
+    "mediaPartnerRegister": "매체 등록 신청",
     "quickLinks": "바로가기",
     "discoveryPlanning": "발견·기획",
     "creativeInsights": "크리에이티브·인사이트",
@@ -2232,12 +2239,14 @@
     "autoFeedbackQueueNote": "자동 피드백 예약이 켜져 있습니다. 운영 연동 시 종료 캠페인 {count}건이 D+7 큐에 올라갑니다(현재는 데모 표시만)."
   },
   "error": {
+    "eyebrow": "[ SYSTEM ERROR ]",
     "title": "일시적 오류가 발생했습니다",
     "description": "서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
     "retry": "다시 시도",
     "home": "홈으로"
   },
   "notFound": {
+    "eyebrow": "[ NOT FOUND ]",
     "title": "페이지를 찾을 수 없습니다",
     "description": "요청하신 페이지가 삭제되었거나, 주소가 변경되었을 수 있습니다.",
     "backHome": "홈으로 가기",

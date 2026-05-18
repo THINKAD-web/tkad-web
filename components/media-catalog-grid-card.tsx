@@ -109,7 +109,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         </div>
       ) : null}
       {props.availabilityTier && props.availabilityTier !== "unknown" ? (
-        <div className="absolute bottom-2 left-2 z-10 max-w-[calc(100%-1rem)]">
+        <div className="absolute bottom-2 left-2 z-10 w-max max-w-[calc(100%-1rem)]">
           <MediaAvailabilityBadge tier={props.availabilityTier} compact />
         </div>
       ) : null}

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
+import { MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS } from "@/components/media-catalog-shared";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -186,8 +187,11 @@ export default function MediaSimilarCarousel({
               <MediaCatalogThumbnail
                 media={m}
                 placeholderLabel={tMedia("imagePreparing")}
-                className="relative aspect-[4/3] w-full border-b border-border/70"
-                imgClassName="grayscale transition-[filter,transform] duration-500 ease-out group-hover:grayscale-0 group-hover:scale-[1.02]"
+                className={cn(
+                  "relative aspect-[4/3] w-full border-b border-border/70",
+                  MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS,
+                  "group-hover:[&_img]:scale-[1.02]",
+                )}
                 bottomGradientClassName={null}
                 placeholderSize="xs"
               />

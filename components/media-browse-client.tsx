@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import {
-  ShieldCheck,
   Calculator,
   LayoutList,
   Map as MapIcon,
@@ -17,6 +16,7 @@ import {
   Search,
   ArrowRight,
   Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
@@ -93,7 +93,6 @@ import {
   useMediaCatalogFilters,
 } from "@/lib/use-media-catalog-filters";
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
-import MediaAiRecommendPanel from "@/components/media-ai-recommend-panel";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import {
@@ -132,7 +131,6 @@ export default function MediaBrowseClient({
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
 
-  const [mainTab, setMainTab] = useState<"search" | "ai">("search");
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
   const [catalogSearchQuery, setCatalogSearchQuery] = useState("");
   const [debouncedCatalogSearch, setDebouncedCatalogSearch] = useState("");
@@ -430,14 +428,6 @@ export default function MediaBrowseClient({
     return () => window.removeEventListener("keydown", onKey);
   }, [browseMode, mapSelectedId]);
 
-  const regions = [
-    { value: "all", label: t("media.allRegions") },
-    { value: "seoul", label: t("media.regions.seoul") },
-    { value: "busan", label: t("media.regions.busan") },
-    { value: "jeju", label: t("media.regions.jeju") },
-    { value: "national", label: t("media.regions.national") },
-  ];
-
   const resetFilters = () => {
     setSearchTarget(null);
     setCatalogSearchQuery("");
@@ -569,57 +559,8 @@ export default function MediaBrowseClient({
         </CategoryExploreHero>
       )}
 
-      <section className="tkad-media-browse-main border-t border-border/60 bg-card py-12 sm:py-16">
+      <section className="tkad-media-browse-main border-t border-border/60 bg-card py-10 sm:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* removed: "검색 결과 · 보기 옵션" */}
-          <div className="mb-10 flex justify-center">
-            <div
-              className="tkad-media-main-tabs inline-flex rounded-2xl border border-border/80 bg-muted/60 p-1 shadow-sm backdrop-blur-md"
-              role="tablist"
-              aria-label={isKo ? "매체 탐색 방식" : "Browse mode"}
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={mainTab === "search"}
-                onClick={() => setMainTab("search")}
-                className={cn(
-                  "touch-manipulation rounded-[14px] px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5",
-                  mainTab === "search"
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-foreground hover:bg-background/70",
-                )}
-              >
-                {t("media.ai.tabSearch")}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={mainTab === "ai"}
-                onClick={() => setMainTab("ai")}
-                className={cn(
-                  "touch-manipulation rounded-[14px] px-5 py-3 text-sm font-semibold transition-colors sm:px-10 sm:py-3.5",
-                  mainTab === "ai"
-                    ? "bg-accent text-accent-foreground shadow-sm"
-                    : "text-foreground hover:bg-background/70",
-                )}
-              >
-                {t("media.ai.tabAi")}
-              </button>
-            </div>
-          </div>
-
-          {mainTab === "ai" ? (
-            <MediaAiRecommendPanel
-              locale={locale}
-              regionOptions={regions}
-              catalog={effectiveCatalog}
-              compareItems={compareItems}
-              toggleCompare={toggleCompare}
-              isInCompare={isInCompare}
-              addManyToCompare={addManyToCompare}
-            />
-          ) : (
             <div className="flex flex-col gap-6">
               <MediaScarcitySection
                 catalog={effectiveCatalog}
@@ -627,6 +568,26 @@ export default function MediaBrowseClient({
                 isKo={isKo}
                 imagePreparingLabel={t("media.imagePreparing")}
               />
+
+              <aside
+                className="flex items-start gap-2.5 rounded-xl border border-violet-500/20 bg-violet-500/[0.06] px-3.5 py-2.5 sm:items-center sm:gap-3 sm:px-4"
+                aria-label={tMedia("browseCatalogVerifiedBadge")}
+              >
+                <ShieldCheck
+                  className="mt-0.5 h-4 w-4 shrink-0 text-violet-600 dark:text-cyan-400 sm:mt-0"
+                  aria-hidden
+                />
+                <p className="min-w-0 text-[13px] leading-snug text-foreground sm:text-sm">
+                  <span className="font-semibold">
+                    {tMedia("browseCatalogVerifiedBadge")}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {" · "}
+                    {tMedia("browseCatalogVerifiedListHint")}
+                  </span>
+                </p>
+              </aside>
+
               {/* #MEDIA-1: 정밀필터 진입점 숨김 (코드 보존) */}
               <div className="hidden flex-col gap-3">
                 <button
@@ -709,8 +670,9 @@ export default function MediaBrowseClient({
               </Sheet>
 
               <div className="min-w-0">
-                <div className="mb-6 flex flex-wrap items-center gap-2">
-                    <span className="mr-1 shrink-0 text-base font-semibold text-foreground sm:text-lg">
+                <div className="mb-5 space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-base font-semibold text-foreground sm:text-lg">
                       {t("media.results")}:{" "}
                       <span className="tabular-nums text-accent">
                         {gridDisplayList.length}
@@ -722,15 +684,22 @@ export default function MediaBrowseClient({
                           })}
                         </span>
                       ) : null}
-                    </span>
+                    </p>
                     {debouncedCatalogSearch.trim() ? (
-                      <span className="inline-flex max-w-full items-center gap-1.5 border-2 border-border bg-muted px-3 py-1.5 text-xs font-medium text-foreground sm:text-sm">
+                      <span className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-border bg-muted/80 px-2.5 py-1 text-xs font-medium text-foreground">
                         <Search className="size-3.5 shrink-0 text-accent" aria-hidden />
                         <span className="min-w-0 truncate">
                           {t("media.activeKeywordLabel")}: {debouncedCatalogSearch}
                         </span>
                       </span>
                     ) : null}
+                  </div>
+
+                  <div
+                    className="flex flex-wrap items-center gap-2 rounded-xl border border-border/70 bg-muted/30 p-2 sm:gap-2.5"
+                    role="toolbar"
+                    aria-label={isKo ? "목록 필터 및 보기" : "List filters and view"}
+                  >
                     <button
                       type="button"
                       onClick={() => {
@@ -738,7 +707,7 @@ export default function MediaBrowseClient({
                         setCatalogPage(1);
                       }}
                       className={cn(
-                        "inline-flex h-10 items-center gap-1.5 border-2 px-3 text-xs font-semibold transition-colors sm:text-sm",
+                        "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-md border px-3 text-xs font-semibold leading-none transition-colors sm:text-sm",
                         instantOnlyFilter
                           ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
                           : "border-border bg-card text-foreground hover:border-emerald-500/40",
@@ -748,12 +717,12 @@ export default function MediaBrowseClient({
                       {tMedia("availabilityLive.filterInstant")}
                     </button>
                     {browseMode === "list" ? (
-                      <label className="inline-flex h-10 items-center gap-2 border-2 border-border bg-card px-3 text-sm text-foreground">
-                        <span className="shrink-0 text-muted-foreground">
+                      <label className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-sm text-foreground">
+                        <span className="shrink-0 text-xs text-muted-foreground">
                           {t("media.sortLabel")}
                         </span>
                         <select
-                          className="h-10 max-w-[11rem] min-w-0 border-l border-border bg-transparent pl-2 pr-1 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+                          className="h-7 max-w-[10rem] min-w-0 bg-transparent text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
                           value={sortBy}
                           onChange={(e) =>
                             setSortBy(e.target.value as typeof sortBy)
@@ -777,20 +746,17 @@ export default function MediaBrowseClient({
                         </select>
                       </label>
                     ) : null}
-                    {/* /media → /media/map 진입 링크 — 현재 검색어를 그대로 넘김 */}
                     <Link
                       href={`/media/map${
                         debouncedCatalogSearch.trim()
                           ? `?q=${encodeURIComponent(debouncedCatalogSearch.trim())}`
                           : ""
                       }`}
-                      className="inline-flex h-10 items-center gap-1.5 border-2 border-border bg-card px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:border-accent hover:text-accent"
-                      aria-label="지도로 보기"
+                      className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
                     >
-                      <MapIcon className="h-3.5 w-3.5" />
+                      <MapIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
                       {t("media.browseViewMap")}
                     </Link>
-                    {/* #MEDIA-1: 목록/지도 뷰 토글 진입점 숨김 (코드 보존) */}
                     <div className="hidden border-2 border-border bg-card">
                       <button
                         type="button"
@@ -835,7 +801,7 @@ export default function MediaBrowseClient({
                       />
                     ) : null}
                     {browseMode === "list" ? (
-                      <>
+                      <div className="ml-auto flex flex-wrap items-center gap-2">
                         <BtnBlock
                           onClick={() =>
                             addManyToCompare(
@@ -848,7 +814,7 @@ export default function MediaBrowseClient({
                           variant="secondary"
                           size="sm"
                         >
-                          전체선택
+                          {isKo ? "전체선택" : "Select page"}
                         </BtnBlock>
                         <BtnBlock
                           onClick={() => setCompareItems([])}
@@ -856,24 +822,11 @@ export default function MediaBrowseClient({
                           variant="secondary"
                           size="sm"
                         >
-                          전체삭제
+                          {isKo ? "비교 비우기" : "Clear compare"}
                         </BtnBlock>
-                      </>
-                    ) : null}
-                    <div className="flex min-h-10 min-w-0 shrink-0 items-center gap-2 border-2 border-border bg-card px-3 py-2 sm:ml-auto sm:max-w-[24rem]">
-                      <ShieldCheck
-                        className="mt-0.5 h-4 w-4 shrink-0 text-hermes"
-                        aria-hidden
-                      />
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-foreground sm:text-sm">
-                          {tMedia("browseCatalogVerifiedBadge")}
-                        </p>
-                        <p className="mt-1 text-[10px] leading-snug text-muted-foreground sm:text-[11px]">
-                          {tMedia("browseCatalogVerifiedListHint")}
-                        </p>
                       </div>
-                    </div>
+                    ) : null}
+                  </div>
                 </div>
 
                 {precisionFilterRelaxed ? (
@@ -1167,7 +1120,6 @@ export default function MediaBrowseClient({
                 )}
               </div>
             </div>
-          )}
 
           <RecentlyViewedMedia locale={locale} />
         </div>

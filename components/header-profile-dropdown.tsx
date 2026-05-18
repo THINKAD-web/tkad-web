@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { ChevronDown, Megaphone, User as UserIcon } from "lucide-react";
+import { ChevronDown, LogOut, Megaphone, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type SessionUser = { id: string; email: string; name: string; role: string };
@@ -12,14 +13,24 @@ export function HeaderProfileDropdown({
   onNavigate,
   myPageLabel,
   campaignsLabel,
+  logoutLabel,
 }: {
   session: SessionUser;
   onNavigate?: () => void;
   myPageLabel: string;
   campaignsLabel: string;
+  logoutLabel: string;
 }) {
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  const logout = async () => {
+    setOpen(false);
+    onNavigate?.();
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+    window.location.href = `/${locale}/login`;
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -81,6 +92,15 @@ export function HeaderProfileDropdown({
             <Megaphone className="h-4 w-4 opacity-70" />
             {campaignsLabel}
           </Link>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => void logout()}
+            className="flex w-full items-center gap-2 border-t border-border/60 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:border-white/10 dark:text-white dark:hover:bg-white/8"
+          >
+            <LogOut className="h-4 w-4 opacity-70" />
+            {logoutLabel}
+          </button>
         </div>
       ) : null}
     </div>

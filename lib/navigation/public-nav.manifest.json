@@ -16,7 +16,7 @@
       "id": "planning",
       "icon": "clipboard-list",
       "items": [
-        { "id": "media-planner", "href": "/planner" },
+        { "id": "media-planner", "href": "/planner", "beta": true },
         { "id": "package-proposal", "href": "/media/packages", "beta": true }
       ]
     },
@@ -24,8 +24,8 @@
       "id": "creative",
       "icon": "palette",
       "items": [
-        { "id": "creative-library", "href": "/creatives" },
-        { "id": "dooh-playlists", "href": "/creatives/playlists" },
+        { "id": "creative-library", "href": "/creatives", "beta": true },
+        { "id": "dooh-playlists", "href": "/creatives/playlists", "beta": true },
         { "id": "creative-studio", "href": "/creatives/upload", "beta": true }
       ]
     },
@@ -41,8 +41,8 @@
       "id": "academy",
       "icon": "graduation-cap",
       "items": [
-        { "id": "academy-content", "href": "/academy" },
-        { "id": "advertiser-guide", "href": "/guides" }
+        { "id": "academy-content", "href": "/academy", "beta": true },
+        { "id": "advertiser-guide", "href": "/guides", "beta": true }
       ]
     }
   ]
