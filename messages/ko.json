@@ -20,7 +20,17 @@
     "packageLabel": "SUPPORT",
     "quoteEyebrow": "[ 견적 요청 ]",
     "kakaoShort": "카카오톡",
-    "aiShort": "AI 상담"
+    "aiShort": "AI 상담",
+    "scrollTopTitle": "맨 위로",
+    "scrollTopHint": "페이지 상단으로 이동",
+    "scrollBottomTitle": "맨 아래로",
+    "scrollBottomHint": "페이지 하단으로 이동",
+    "quotePreviewTitle": "견적 요청",
+    "quotePreviewHint": "매체·캠페인·플래너 바로가기",
+    "kakaoPreviewTitle": "카카오톡 상담",
+    "kakaoPreviewHint": "실시간 1:1 문의",
+    "aiPreviewTitle": "AI 미디어 플래너",
+    "aiPreviewHint": "매체 추천·질문"
   },
   "quoteFab": {
     "regionLabel": "견적·상담 바로가기",
