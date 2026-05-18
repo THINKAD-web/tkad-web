@@ -137,6 +137,7 @@ export default function AcademyPageClient({
       <div className="tkad-landing-neon tkad-planner-neon">
         <CategoryExploreHero
           code="// 03 · ACADEMY"
+          showBeta
           headlineBefore={isKo ? "OOH 광고를 " : "Learn OOH "}
           headlineGradient={isKo ? "제대로 배우다" : "the right way"}
           subtitle={t("heroSubtitle")}

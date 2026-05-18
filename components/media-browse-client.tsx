@@ -488,35 +488,61 @@ export default function MediaBrowseClient({
       {hideHero ? null : (
         <CategoryExploreHero
           code="// 01 · MEDIA"
+          showBeta
           headlineBefore={isKo ? "전국 " : "Search "}
           headlineGradient={isKo ? "OOH 매체" : "OOH media"}
           headlineAfter={isKo ? " 검색" : " nationwide"}
           subtitle={t("media.subtitle")}
         >
-          <div className="tkad-media-hero-search relative mx-auto mt-2 max-w-2xl">
-            <Search
-              className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-white/45 sm:left-5 sm:size-[1.35rem]"
-              aria-hidden
-            />
-            <input
-              type="search"
-              value={catalogSearchQuery}
-              onChange={(e) => setCatalogSearchQuery(e.target.value)}
-              placeholder={
-                isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
-              }
-              className="h-14 w-full rounded-[20px] border border-white/18 bg-white/8 pl-12 pr-4 text-base text-white shadow-[0_24px_80px_rgba(0,0,0,0.45)] placeholder:text-white/45 backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 sm:h-16 sm:pl-14 sm:pr-5 sm:text-[1.05rem]"
-              aria-label={isKo ? "매체 검색" : "Search media"}
-            />
+          <div className="mx-auto mt-1 w-full max-w-xl">
+            <div className="tkad-media-hero-search relative">
+              <Search
+                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/45 sm:left-4"
+                aria-hidden
+              />
+              <input
+                type="search"
+                value={catalogSearchQuery}
+                onChange={(e) => setCatalogSearchQuery(e.target.value)}
+                placeholder={
+                  isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
+                }
+                className="h-11 w-full rounded-2xl border border-white/18 bg-white/8 pl-10 pr-3 text-sm text-white shadow-[0_18px_56px_rgba(0,0,0,0.4)] placeholder:text-white/45 backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 sm:h-12 sm:pl-11 sm:pr-4"
+                aria-label={isKo ? "매체 검색" : "Search media"}
+              />
+            </div>
           </div>
-          <CategoryHeroCtaRow>
-            <Link href="/contact" className={categoryHeroCtaPrimaryClass}>
-              {isKo ? "맞춤형 OOH 캠페인 제안 받기" : "Get Custom OOH Campaign Proposal"}
-              <ArrowRight className="h-4 w-4" aria-hidden />
+          <CategoryHeroCtaRow className="mx-auto mt-2 w-full max-w-xl flex-row gap-1.5 sm:mt-2.5 sm:gap-2">
+            <Link
+              href="/media/packages"
+              className={cn(
+                categoryHeroCtaSecondaryClass,
+                "h-10 min-w-0 flex-1 justify-center gap-1 whitespace-nowrap px-2 text-[10px] sm:h-11 sm:flex-none sm:gap-2 sm:px-5 sm:text-sm",
+              )}
+            >
+              <Sparkles className="hidden h-3.5 w-3.5 shrink-0 text-violet-300 sm:inline" aria-hidden />
+              {tMedia("packagesBrowseLink")}
+              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 text-white/75 sm:inline" aria-hidden />
             </Link>
-            <Link href="/planner" className={categoryHeroCtaSecondaryClass}>
-              {isKo ? "AI 캠페인 설계" : "AI campaign planner"}
-              <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
+            <Link
+              href="/contact"
+              className={cn(
+                categoryHeroCtaPrimaryClass,
+                "h-10 min-w-0 flex-1 justify-center gap-1 whitespace-nowrap px-2 text-[10px] sm:h-11 sm:flex-none sm:gap-2 sm:px-6 sm:text-sm",
+              )}
+            >
+              {tMedia("heroCtaProposal")}
+              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 sm:inline sm:h-4 sm:w-4" aria-hidden />
+            </Link>
+            <Link
+              href="/planner"
+              className={cn(
+                categoryHeroCtaSecondaryClass,
+                "h-10 min-w-0 flex-1 justify-center gap-1 whitespace-nowrap px-2 text-[10px] sm:h-11 sm:flex-none sm:gap-2 sm:px-6 sm:text-sm",
+              )}
+            >
+              {tMedia("heroCtaPlanner")}
+              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 text-white/75 sm:inline sm:h-4 sm:w-4" aria-hidden />
             </Link>
           </CategoryHeroCtaRow>
         </CategoryExploreHero>
@@ -656,9 +682,8 @@ export default function MediaBrowseClient({
               </Sheet>
 
               <div className="min-w-0">
-                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <span className="text-base font-semibold text-foreground sm:text-lg">
+                <div className="mb-6 flex flex-wrap items-center gap-2">
+                    <span className="mr-1 shrink-0 text-base font-semibold text-foreground sm:text-lg">
                       {t("media.results")}:{" "}
                       <span className="tabular-nums text-accent">
                         {gridDisplayList.length}
@@ -679,8 +704,6 @@ export default function MediaBrowseClient({
                         </span>
                       </span>
                     ) : null}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
                     {browseMode === "list" ? (
                       <label className="inline-flex h-10 items-center gap-2 border-2 border-border bg-card px-3 text-sm text-foreground">
                         <span className="shrink-0 text-muted-foreground">
@@ -794,24 +817,7 @@ export default function MediaBrowseClient({
                         </BtnBlock>
                       </>
                     ) : null}
-                    <Link
-                      href="/media/packages"
-                      className="inline-flex min-w-0 max-w-full items-start gap-2 border-2 border-border bg-card px-3 py-2 transition-colors hover:border-accent/50 sm:max-w-[14rem]"
-                    >
-                      <Sparkles
-                        className="mt-0.5 h-4 w-4 shrink-0 text-violet-500"
-                        aria-hidden
-                      />
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-foreground sm:text-sm">
-                          {tMedia("packagesBrowseLink")}
-                        </p>
-                        <p className="mt-1 text-[10px] leading-snug text-muted-foreground sm:text-[11px]">
-                          {t("nav.packageProposalDesc")}
-                        </p>
-                      </div>
-                    </Link>
-                    <div className="flex min-w-0 max-w-full items-start gap-2 border-2 border-border bg-card px-3 py-2 sm:max-w-[24rem]">
+                    <div className="flex min-h-10 min-w-0 shrink-0 items-center gap-2 border-2 border-border bg-card px-3 py-2 sm:ml-auto sm:max-w-[24rem]">
                       <ShieldCheck
                         className="mt-0.5 h-4 w-4 shrink-0 text-hermes"
                         aria-hidden
@@ -825,7 +831,6 @@ export default function MediaBrowseClient({
                         </p>
                       </div>
                     </div>
-                  </div>
                 </div>
 
                 {precisionFilterRelaxed ? (

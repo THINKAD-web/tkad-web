@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { Link } from "@/i18n/navigation";
 import { ReportDashboardClient } from "@/components/report/report-dashboard-client";
+import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -36,8 +37,9 @@ export default async function ReportDashboardPage({
     <div className="min-h-screen bg-background">
       <section className="border-b-2 border-black bg-hero-void py-12 sm:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#FF6600]">
-            [ Report ] / Dashboard // ooh activity
+          <p className="flex flex-wrap items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#FF6600]">
+            <span>[ Report ] / Dashboard // ooh activity</span>
+            <CategoryHeroBetaBadge />
           </p>
           <h1 className="mt-3 text-balance text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl">
             {isKo ? "OOH 트렌드 대시보드" : "OOH Trend Dashboard"}

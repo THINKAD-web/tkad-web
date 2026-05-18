@@ -906,6 +906,88 @@ main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
   --ring: #6366f1;
 }
 
+/* Category explore hero (`/media/packages` 기준) — 라이트 테마에서도 항상 다크 풀블리드 */
+.tkad-category-explore-hero {
+  background: #05050a !important;
+  color: rgb(255 255 255) !important;
+  color-scheme: dark;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero {
+  background: #05050a !important;
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero > [aria-hidden] {
+  opacity: revert !important;
+  visibility: visible !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .text-white {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .text-white\/50 {
+  color: rgb(255 255 255 / 0.5) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .text-cyan-400\/60 {
+  color: rgb(34 211 238 / 0.6) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .bg-clip-text {
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-primary,
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-primary *,
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-secondary,
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-secondary * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-secondary {
+  border-color: rgb(255 255 255 / 0.14) !important;
+  background-color: rgb(255 255 255 / 0.06) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-stat-card {
+  border-color: rgb(255 255 255 / 0.1) !important;
+  background-color: rgb(255 255 255 / 0.05) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-stat-card dt {
+  color: rgb(255 255 255 / 0.55) !important;
+}
+
+/* BETA 뱃지 — 낮 테마·네온 서피스 오버라이드에도 대비 유지 */
+.tkad-category-explore-hero .category-hero-beta-badge,
+.category-hero-beta-badge {
+  color: rgb(237 233 254) !important;
+  -webkit-text-fill-color: currentColor !important;
+  background-color: rgb(139 92 246 / 0.32) !important;
+  border-color: rgb(167 139 250 / 0.5) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-beta-badge {
+  color: rgb(237 233 254) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .category-hero-beta-badge {
+  color: rgb(91 33 182) !important;
+  -webkit-text-fill-color: currentColor !important;
+  background-color: rgb(139 92 246 / 0.14) !important;
+  border-color: rgb(139 92 246 / 0.35) !important;
+}
+
 /* 각 히어로·Neon 섹션 = 떠 있는 라이트 패널 — 프리미엄 깊이(입체 그림자) */
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-surface {
   position: relative;

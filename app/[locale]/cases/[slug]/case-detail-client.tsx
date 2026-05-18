@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
+import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { formatCaseStudyMetricValue } from "@/lib/campaign-case-study";
 import type { PublicSuccessCaseDetail } from "@/lib/success-case-public";
@@ -82,8 +83,9 @@ export default function CaseDetailClient({ row, prev, next }: Props) {
               {t("detailBack")}
             </Link>
 
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
-              {`// CASE / ${row.id.slice(0, 8).toUpperCase()}`}
+            <p className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-primary">
+              <span>{`// CASE / ${row.id.slice(0, 8).toUpperCase()}`}</span>
+              <CategoryHeroBetaBadge />
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">

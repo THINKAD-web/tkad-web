@@ -12,6 +12,7 @@ import {
   CategoryHeroCtaRow,
   categoryHeroCtaPrimaryClass,
   categoryHeroCtaSecondaryClass,
+  categoryHeroStatCardClass,
 } from "@/components/category-explore-hero";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ export function PackagesPageClient({ packages }: Props) {
     <div className="min-h-screen bg-[#F4F4F2] text-foreground transition-colors dark:bg-[#0A0A0A]">
       <CategoryExploreHero
         code="// 03 · PACKAGES"
+        showBeta
         headlineBefore={isKo ? "목적에 맞는 " : "OOH packages for "}
         headlineGradient={isKo ? "OOH 패키지" : "your goals"}
         subtitle={t("hero.subtitle")}
@@ -72,9 +74,9 @@ export function PackagesPageClient({ packages }: Props) {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-black/5 bg-white/70 px-4 py-4 backdrop-blur dark:border-white/10 dark:bg-white/5"
+                  className={cn("category-hero-stat-card", categoryHeroStatCardClass)}
                 >
-                  <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                  <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                     {stat.label}
                   </dt>
                   <dd className="mt-2 bg-gradient-to-r from-violet-500 to-cyan-400 bg-clip-text font-mono text-2xl font-black tracking-tight text-transparent sm:text-3xl">

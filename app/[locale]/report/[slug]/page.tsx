@@ -10,6 +10,7 @@ import { listRelatedCommunityPostsForReport } from "@/lib/report-related-communi
 import { COMMUNITY_CATEGORY_LABELS } from "@/lib/community/types";
 import { cn } from "@/lib/utils";
 import { InsightMarkdownBody } from "@/components/insights/markdown-body";
+import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
 import { pageAlternates, siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -70,7 +71,7 @@ export default async function ReportDetailPage({ params }: Params) {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+        <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] text-white">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div
             aria-hidden
@@ -94,6 +95,7 @@ export default async function ReportDetailPage({ params }: Params) {
               <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
                 <span className="tkad-home-accent-text">Report</span>
               </span>
+              <CategoryHeroBetaBadge />
               <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
                 {labelForReportCategory(row.category, isKo)}
               </span>

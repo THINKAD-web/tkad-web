@@ -53,15 +53,15 @@ type Props = {
   contentStatus?: NavContentStatus;
 };
 
-export function HeaderBrutal({ contentStatus }: Props) {
+export function HeaderBrutal({ contentStatus: _contentStatus }: Props) {
   const t = useTranslations();
   const locale = useLocale();
   const isKo = locale === "ko";
-  const comingSoonBadge = t("nav.comingSoonBadge");
+  const betaBadge = "BETA";
 
   const links: BrutalNavEntry[] = [
     { href: "/", label: t("nav.home") },
-    { href: "/services", label: t("nav.services") },
+    { href: "/services", label: t("nav.services"), badge: betaBadge },
     {
       label: t("nav.media"),
       items: [
@@ -70,22 +70,26 @@ export function HeaderBrutal({ contentStatus }: Props) {
           label: isKo ? "매체 검색" : "Media search",
           desc: isKo ? "전국 OOH 매체 목록" : "Nationwide OOH catalog",
           navKey: "media-search",
+          badge: betaBadge,
         },
         {
           href: "/media/map",
           label: isKo ? "지도에서 찾기" : "Map search",
           desc: isKo ? "위치 기반 탐색" : "Browse by location",
+          badge: betaBadge,
         },
         {
           href: "/media/packages",
           label: t("nav.packageProposal"),
           desc: t("nav.packageProposalDesc"),
           navKey: "packages-dropdown",
+          badge: betaBadge,
         },
         {
           href: "/recommend",
           label: t("nav.recommend"),
           desc: isKo ? "AI 기반 맞춤 추천" : "AI-powered picks",
+          badge: betaBadge,
         },
         {
           href: "/planner",
@@ -105,22 +109,23 @@ export function HeaderBrutal({ contentStatus }: Props) {
     {
       label: t("nav.insights"),
       items: [
-        { href: "/cases", label: t("nav.cases"), desc: "집행 사례 모음" },
+        {
+          href: "/cases",
+          label: t("nav.cases"),
+          desc: "집행 사례 모음",
+          badge: betaBadge,
+        },
         {
           href: "/report",
           label: t("nav.insights"),
           desc: t("nav.insightsReportDesc"),
-          ...(contentStatus && contentStatus.reportCount === 0
-            ? { badge: comingSoonBadge }
-            : {}),
+          badge: betaBadge,
         },
         {
           href: "/academy",
           label: t("nav.academy"),
           desc: "광고주 교육 콘텐츠",
-          ...(contentStatus && contentStatus.academyLessonCount === 0
-            ? { badge: comingSoonBadge }
-            : {}),
+          badge: betaBadge,
         },
       ],
     },
