@@ -494,7 +494,7 @@ export default function MediaBrowseClient({
           headlineAfter={isKo ? " 검색" : " nationwide"}
           subtitle={t("media.subtitle")}
         >
-          <div className="mx-auto mt-1 w-full max-w-xl space-y-2.5">
+          <div className="mx-auto mt-1 w-full max-w-xl">
             <div className="tkad-media-hero-search relative">
               <Search
                 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/45 sm:left-4"
@@ -511,35 +511,38 @@ export default function MediaBrowseClient({
                 aria-label={isKo ? "매체 검색" : "Search media"}
               />
             </div>
+          </div>
+          <CategoryHeroCtaRow className="mx-auto mt-2 w-full max-w-xl flex-row gap-1.5 sm:mt-2.5 sm:gap-2">
             <Link
               href="/media/packages"
-              className="category-hero-cta-secondary flex h-10 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl border border-white/14 bg-white/6 px-3 text-[11px] font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10 sm:gap-2 sm:px-4 sm:text-xs"
+              className={cn(
+                categoryHeroCtaSecondaryClass,
+                "h-10 min-w-0 flex-1 justify-center gap-1 whitespace-nowrap px-2 text-[10px] sm:h-11 sm:flex-none sm:gap-2 sm:px-5 sm:text-sm",
+              )}
             >
-              <Sparkles className="h-3.5 w-3.5 shrink-0 text-violet-300" aria-hidden />
+              <Sparkles className="hidden h-3.5 w-3.5 shrink-0 text-violet-300 sm:inline" aria-hidden />
               {tMedia("packagesBrowseLink")}
-              <ArrowRight className="h-3 w-3 shrink-0 text-white/75 sm:h-3.5 sm:w-3.5" aria-hidden />
+              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 text-white/75 sm:inline" aria-hidden />
             </Link>
-          </div>
-          <CategoryHeroCtaRow className="mt-1 flex-row gap-2">
             <Link
               href="/contact"
               className={cn(
                 categoryHeroCtaPrimaryClass,
-                "h-10 min-w-0 flex-1 whitespace-nowrap px-3 text-[11px] sm:h-11 sm:flex-none sm:px-6 sm:text-sm",
+                "h-10 min-w-0 flex-1 justify-center gap-1 whitespace-nowrap px-2 text-[10px] sm:h-11 sm:flex-none sm:gap-2 sm:px-6 sm:text-sm",
               )}
             >
               {tMedia("heroCtaProposal")}
-              <ArrowRight className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" aria-hidden />
+              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 sm:inline sm:h-4 sm:w-4" aria-hidden />
             </Link>
             <Link
               href="/planner"
               className={cn(
                 categoryHeroCtaSecondaryClass,
-                "h-10 min-w-0 flex-1 whitespace-nowrap px-3 text-[11px] sm:h-11 sm:flex-none sm:px-6 sm:text-sm",
+                "h-10 min-w-0 flex-1 justify-center gap-1 whitespace-nowrap px-2 text-[10px] sm:h-11 sm:flex-none sm:gap-2 sm:px-6 sm:text-sm",
               )}
             >
               {tMedia("heroCtaPlanner")}
-              <ArrowRight className="h-3 w-3 shrink-0 text-white/75 sm:h-4 sm:w-4" aria-hidden />
+              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 text-white/75 sm:inline sm:h-4 sm:w-4" aria-hidden />
             </Link>
           </CategoryHeroCtaRow>
         </CategoryExploreHero>
