@@ -6,11 +6,7 @@ import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { cn } from "@/lib/utils";
-import {
-  COMMUNITY_MEMBER_ROLE_LABELS,
-  COMMUNITY_MEMBER_ROLES,
-  type CommunityMemberRole,
-} from "@/lib/community/types";
+import type { CommunityMemberRole } from "@/lib/community/types";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -19,7 +15,25 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
-  const [communityRole, setCommunityRole] = useState<CommunityMemberRole>("ADVERTISER");
+  const [communityRole, setCommunityRole] =
+    useState<CommunityMemberRole>("ADVERTISER");
+
+  const signupRoleOptions: {
+    value: CommunityMemberRole;
+    title: string;
+    desc: string;
+  }[] = [
+    {
+      value: "ADVERTISER",
+      title: "광고주로 시작하기",
+      desc: "캠페인·매체 탐색·플래너",
+    },
+    {
+      value: "MEDIA",
+      title: "매체사로 시작하기",
+      desc: "매체 등록·부킹·송출 관리",
+    },
+  ];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -141,24 +155,29 @@ export default function RegisterPage() {
                   />
                 </Field>
 
-                <Field label="업계 역할" htmlFor="role-advertiser" hint="(필수)">
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="radiogroup" aria-label="업계 역할">
-                    {COMMUNITY_MEMBER_ROLES.map((role) => (
+                <Field label="시작 역할" htmlFor="role-advertiser" hint="(필수)">
+                  <div className="space-y-2" role="radiogroup" aria-label="시작 역할">
+                    {signupRoleOptions.map((opt) => (
                       <button
-                        key={role}
-                        id={role === "ADVERTISER" ? "role-advertiser" : undefined}
+                        key={opt.value}
+                        id={opt.value === "ADVERTISER" ? "role-advertiser" : undefined}
                         type="button"
                         role="radio"
-                        aria-checked={communityRole === role}
-                        onClick={() => setCommunityRole(role)}
+                        aria-checked={communityRole === opt.value}
+                        onClick={() => setCommunityRole(opt.value)}
                         className={cn(
-                          "rounded-[18px] border px-3 py-3 text-center font-mono text-[11px] font-bold uppercase tracking-[0.12em] transition-all sm:text-[10px]",
-                          communityRole === role
+                          "w-full rounded-[18px] border px-4 py-3 text-left transition-all",
+                          communityRole === opt.value
                             ? "border-white/28 bg-white/14 text-white shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
                             : "border-white/10 bg-black/25 text-white/65 hover:border-white/16 hover:text-white/85",
                         )}
                       >
-                        {COMMUNITY_MEMBER_ROLE_LABELS[role].ko}
+                        <p className="font-mono text-sm font-bold tracking-tight">
+                          {opt.title}
+                        </p>
+                        <p className="mt-1 font-mono text-[11px] text-white/55">
+                          {opt.desc}
+                        </p>
                       </button>
                     ))}
                   </div>

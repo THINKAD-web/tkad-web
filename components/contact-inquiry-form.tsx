@@ -104,6 +104,8 @@ export default function ContactInquiryForm() {
   } | null>(null);
   const proposalPrefillDone = useRef<string | null>(null);
   const packageSlug = searchParams.get("package");
+  const rerunCampaignId = searchParams.get("rerun")?.trim() ?? "";
+  const rerunPrefillDone = useRef<string | null>(null);
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
   const periodPrefillDone = useRef(false);
@@ -157,6 +159,30 @@ export default function ContactInquiryForm() {
   useEffect(() => {
     periodPrefillDone.current = false;
   }, [fromParam, toParam]);
+
+  useEffect(() => {
+    rerunPrefillDone.current = null;
+  }, [rerunCampaignId]);
+
+  useEffect(() => {
+    if (!rerunCampaignId || rerunPrefillDone.current === rerunCampaignId) return;
+    rerunPrefillDone.current = rerunCampaignId;
+    const snippet = isKo
+      ? `[이전 캠페인 재집행 문의 · 캠페인 ID: ${rerunCampaignId}]\n동일/유사 조건으로 다시 집행하고 싶습니다.\n`
+      : `[Re-run prior campaign · campaign ID: ${rerunCampaignId}]\nI'd like to run a similar flight again.\n`;
+    const cur = getValues("additionalNotes").trim();
+    if (!cur.includes(rerunCampaignId)) {
+      setValue("additionalNotes", cur ? `${snippet}\n${cur}` : snippet, {
+        shouldDirty: true,
+      });
+    }
+    if (!getValues("inquiryType")) {
+      setValue("inquiryType", "campaign_plan", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [rerunCampaignId, getValues, isKo, setValue]);
 
   useEffect(() => {
     if (periodPrefillDone.current) return;

@@ -1,172 +1,106 @@
 "use client";
 
-import { ArrowRight, Calendar, Layers, Wallet } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { BtnBlock } from "@/components/brutalist";
-import { formatCaseStudyMetricValue } from "@/lib/campaign-case-study";
+import { Link } from "@/i18n/navigation";
+import { buildCaseHeadline, primaryRegionLabel } from "@/lib/success-case-hub";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
 import { cn } from "@/lib/utils";
-
-function formatPeriod(
-  start: string | null,
-  end: string | null,
-  isKo: boolean,
-): string | null {
-  if (!start && !end) return null;
-  const opts: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-  };
-  const a = start
-    ? new Date(start).toLocaleDateString(isKo ? "ko-KR" : "en-US", opts)
-    : "";
-  const b = end
-    ? new Date(end).toLocaleDateString(isKo ? "ko-KR" : "en-US", opts)
-    : "";
-  if (a && b) return `${a} – ${b}`;
-  return a || b || null;
-}
 
 type Props = {
   item: PublicSuccessCaseListItem;
   className?: string;
+  compact?: boolean;
 };
 
-export function CaseStudyCard({ item, className }: Props) {
+export function CaseStudyCard({ item, className, compact }: Props) {
   const t = useTranslations("cases");
   const locale = useLocale();
   const isKo = locale === "ko";
   const title = isKo ? item.titleKo : item.titleEn ?? item.titleKo;
-  const period = formatPeriod(item.periodStartIso, item.periodEndIso, isKo);
-  const summary = isKo
-    ? item.summaryKo
-    : "Campaign background, media mix, and verified OOH performance metrics.";
+  const region = primaryRegionLabel(item, isKo);
+  const headline = buildCaseHeadline(item, locale);
 
   return (
     <article
       className={cn(
-        "group -mt-[2px] -ml-[2px] flex flex-col overflow-hidden border-2 border-border bg-card",
+        "group relative flex flex-col overflow-hidden rounded-[22px] border border-white/12 bg-black/40 backdrop-blur transition-all duration-300 hover:border-[#22d3ee]/35 hover:shadow-[0_12px_48px_rgba(34,211,238,0.12)]",
         className,
       )}
     >
-      <div className="relative flex h-44 items-center justify-center overflow-hidden border-b-2 border-border bg-muted">
+      <Link href={`/cases/${item.id}`} className="relative block aspect-[16/10] overflow-hidden">
         {item.thumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.thumbnailUrl}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex flex-col items-center gap-2 px-4 text-center">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-              [ CASE STUDY ]
+          <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#a855f7]/25 via-[#0a0a0f] to-[#22d3ee]/20 p-4">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+              [ CASE ]
             </span>
-            <p className="max-w-[14rem] text-sm font-bold leading-snug text-foreground">
+            <p className="mt-2 text-center text-sm font-bold text-white/90">
               {item.clientName}
             </p>
           </div>
         )}
-        <span className="absolute right-3 top-3 border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
-          [ {item.industry} ]
-        </span>
-      </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+            {t("hoverViewDetails")}
+            <ArrowRight className="h-4 w-4" />
+          </span>
+        </div>
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+          <span className="rounded-full border border-[#a855f7]/40 bg-[#a855f7]/20 px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#e9d5ff]">
+            {item.industry}
+          </span>
+          {region ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/50 px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-white/80">
+              <MapPin className="h-2.5 w-2.5" aria-hidden />
+              {region}
+            </span>
+          ) : null}
+        </div>
+      </Link>
 
-      <div className="flex flex-1 flex-col p-5">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+      <div className={cn("flex flex-1 flex-col p-4", compact && "p-3")}>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
           {item.clientName}
         </p>
-        <h3 className="mt-2 text-lg font-bold leading-snug tracking-tight text-foreground">
+        <h3 className="mt-1.5 line-clamp-2 text-base font-black leading-snug tracking-tight text-white">
           {title}
         </h3>
-        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-          {summary}
-        </p>
-
-        <div className="mt-4 space-y-2 border-2 border-border bg-muted/60 p-3 font-mono text-[11px]">
-          {period ? (
-            <p className="flex items-center gap-2 text-muted-foreground">
-              <Calendar
-                className="h-3.5 w-3.5 shrink-0 text-primary"
-                aria-hidden
-              />
-              <span>{period}</span>
-            </p>
-          ) : null}
-          {item.budgetRange ? (
-            <p className="flex items-center gap-2 text-muted-foreground">
-              <Wallet
-                className="h-3.5 w-3.5 shrink-0 text-primary"
-                aria-hidden
-              />
-              <span>
-                {t("budgetRangeLabel")}: {item.budgetRange}
-              </span>
-            </p>
-          ) : null}
-        </div>
-
-        {item.highlightMetrics.length > 0 ? (
-          <div className="mt-4 grid grid-cols-3 gap-0 border-2 border-border">
-            {item.highlightMetrics.map((m) => (
-              <div
-                key={m.key}
-                className="-ml-[2px] -mt-[2px] border-2 border-border bg-card p-2 text-center first:ml-0 first:mt-0"
-              >
-                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-primary">
-                  {isKo ? m.labelKo : m.labelEn}
-                </p>
-                <p className="mt-1 text-sm font-bold tabular-nums text-foreground">
-                  {formatCaseStudyMetricValue(m, locale)}
-                </p>
-              </div>
-            ))}
-          </div>
+        {headline ? (
+          <p className="mt-2 font-mono text-[11px] font-semibold tracking-tight text-[#22d3ee]">
+            {headline}
+          </p>
         ) : null}
-
-        <div className="mt-4 border-2 border-border bg-card p-3">
-          <div className="flex items-start gap-2">
-            <Layers
-              className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary"
-              aria-hidden
-            />
-            <div className="min-w-0">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                [ {t("mediaLabel")} ]
-              </p>
-              <div className="mt-2 flex flex-wrap gap-1">
-                {item.mediaUsed.slice(0, 4).map((m) => (
-                  <span
-                    key={m}
-                    className="border border-border bg-muted px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em]"
-                  >
-                    {m}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+        {!compact ? (
+          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/55">
+            {item.summaryKo}
+          </p>
+        ) : null}
+        <div className="mt-3 flex flex-wrap gap-1">
+          {item.mediaUsed.slice(0, 3).map((m) => (
+            <span
+              key={m}
+              className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-white/60"
+            >
+              {m}
+            </span>
+          ))}
         </div>
-
-        <div className="mt-auto flex flex-col gap-2 pt-4">
-          <BtnBlock
-            href={`/cases/${item.id}`}
-            variant="accent"
-            size="sm"
-            className="w-full"
-          >
-            {t("viewDetails")}
-            <ArrowRight className="h-3.5 w-3.5" />
-          </BtnBlock>
-          <BtnBlock
-            href={`/contact?case=${encodeURIComponent(item.id)}`}
-            variant="secondary"
-            size="sm"
-            className="w-full"
-          >
-            {t("ctaSimilar")}
-          </BtnBlock>
-        </div>
+        <Link
+          href={`/contact?case=${encodeURIComponent(item.id)}`}
+          className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-white/45 transition-colors hover:text-[#22d3ee]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {t("ctaSimilar")}
+          <ArrowRight className="h-3 w-3" />
+        </Link>
       </div>
     </article>
   );

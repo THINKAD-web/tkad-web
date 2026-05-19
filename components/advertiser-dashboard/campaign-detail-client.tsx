@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, Download, MapPin } from "lucide-react";
+import { ArrowLeft, BarChart3, Download, MapPin } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { CampaignMonitoringMap } from "@/components/campaign-monitoring-map";
 import type { CampaignMapPin } from "@/lib/campaign-monitoring-mock";
@@ -67,6 +67,16 @@ export function AdvertiserCampaignDetailClient({
       <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
         {initial.startDate ?? "—"} ~ {initial.endDate ?? "—"} · {initial.status}
       </p>
+
+      <div className="mt-5">
+        <Link
+          href={`/dashboard/campaigns/${initial.id}/analytics`}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-[18px] border border-[#22d3ee]/35 bg-[#22d3ee]/10 px-4 py-3 text-sm font-bold text-[#0e7490] transition-colors hover:bg-[#22d3ee]/20 dark:text-[#22d3ee]"
+        >
+          <BarChart3 className="h-4 w-4" />
+          {isKo ? "성과 분석 보기" : "View performance analytics"}
+        </Link>
+      </div>
 
       <section className="mt-6">
         <h2 className="mb-3 font-mono text-[11px] font-black uppercase tracking-[0.24em]">

@@ -15,13 +15,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const title = isKo ? "매체 검색" : "Media search";
+  const title = isKo
+    ? "전국 OOH 매체 검색 | THINKAD 싱커드"
+    : "OOH media search nationwide | THINKAD";
   const description = isKo
-    ? "전국 500+ 검증된 옥외광고 매체를 한눈에 검색하고 비교하세요. 빌보드, 디지털 사이니지, 교통광고, 지하철 광고 등."
-    : "Search and compare 500+ verified OOH media nationwide: billboards, digital signage, transit, and subway ads.";
-  const ogTitle = isKo
-    ? "옥외광고 매체 검색 | THINKAD 싱커드"
-    : "OOH media search | THINKAD";
+    ? "강남, 홍대, 성수 등 전국 500+ 검증된 옥외광고 매체를 지역·유형·예산별로 검색하세요."
+    : "Search 500+ verified OOH media across Korea by region, format, and budget — Gangnam, Hongdae, Seongsu, and more.";
+  const ogTitle = title;
   return {
     title,
     description,

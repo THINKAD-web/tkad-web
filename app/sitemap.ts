@@ -11,7 +11,14 @@ const origin = siteUrl.replace(/\/$/, "");
 /** 핵심 랜딩(검색 유입·전환) 우선순위 살짝 상향 */
 function staticPathPriority(path: string): number {
   if (path === "") return 1;
-  if (path === "/media" || path === "/planner" || path === "/quote") return 0.95;
+  if (
+    path === "/media" ||
+    path === "/media/packages" ||
+    path === "/packages" ||
+    path === "/planner" ||
+    path === "/quote"
+  )
+    return 0.95;
   if (
     path === "/compare" ||
     path === "/insights" ||

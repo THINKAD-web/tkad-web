@@ -91,6 +91,15 @@ async function enrichCaseMediaLinks(
   return { ...detail, mediaLinks };
 }
 
+/** 홈·허브용 최신 published N건 */
+export async function getLatestPublishedSuccessCases(
+  locale = "ko",
+  limit = 3,
+): Promise<PublicSuccessCaseListItem[]> {
+  const all = await getPublishedSuccessCases(locale);
+  return all.slice(0, limit);
+}
+
 export async function getPublishedSuccessCases(
   locale = "ko",
 ): Promise<PublicSuccessCaseListItem[]> {

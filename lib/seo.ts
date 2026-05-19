@@ -93,6 +93,8 @@ export const publicSeoPaths = [
   "/about",
   "/services",
   "/media",
+  "/media/packages",
+  "/packages",
   "/recommend",
   "/cases",
   "/insights",

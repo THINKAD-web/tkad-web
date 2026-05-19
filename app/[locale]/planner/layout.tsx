@@ -11,13 +11,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const title = isKo ? "옥외광고 시뮬레이션 플래너" : "OOH advertising simulation";
+  const title = isKo
+    ? "OOH 미디어 플래너 | THINKAD 싱커드"
+    : "OOH media planner | THINKAD";
   const description = isKo
-    ? "옥외광고가 실제로 걸린 듯한 시뮬레이션으로 예상 노출·ROI를 확인하세요. 지역·매체·예산·기간을 맞춰 맞춤 플랜을 만듭니다."
-    : "Simulate how your OOH campaign could perform—estimated impressions and ROI from region, media mix, budget, and duration.";
-  const ogTitle = isKo
-    ? "옥외광고 시뮬레이션 | THINKAD"
-    : "OOH advertising simulation | THINKAD";
+    ? "예산과 타겟을 입력하면 AI가 최적 매체 조합과 예상 성과를 3분 안에 제안합니다."
+    : "Enter budget and target audience—get an AI-recommended media mix and forecast in about 3 minutes.";
+  const ogTitle = title;
   return {
     title,
     description,

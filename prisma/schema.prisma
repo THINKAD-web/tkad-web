@@ -845,6 +845,7 @@ model User {
   createdAt       DateTime             @default(now()) @map("created_at")
   updatedAt       DateTime             @updatedAt @map("updated_at")
 
+  accounts                Account[]
   sessions                UserSession[]
   bookingRequests         MediaBooking[]         @relation("BookingRequester")
   ownedCampaigns          Campaign[]             @relation("CampaignOwner")
@@ -925,6 +926,27 @@ model NewsletterDispatch {
 
   @@index([createdAt])
   @@map("newsletter_dispatches")
+}
+
+/// OAuth provider linkage (Kakao 등). NextAuth 콜백과 앱 User 를 연결합니다.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  accessToken       String? @map("access_token") @db.Text
+  refreshToken      String? @map("refresh_token") @db.Text
+  expiresAt         Int?    @map("expires_at")
+  tokenType         String? @map("token_type")
+  scope             String?
+  idToken           String? @map("id_token") @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
 }
 
 model UserSession {

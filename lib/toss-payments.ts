@@ -1,27 +1,20 @@
 import { randomBytes } from "node:crypto";
 
+export {
+  getTossClientKey,
+  isTossPaymentsConfigured,
+} from "@/lib/toss-payments-client";
+
 const TOSS_API = "https://api.tosspayments.com/v1";
-
-/** Toss orderId — 영문·숫자·하이픈·언더스코어, 6~64자 */
-export function generateOrderId(): string {
-  const suffix = randomBytes(4).toString("hex");
-  return `ib_${Date.now()}_${suffix}`;
-}
-
-function readTossClientKey(): string | null {
-  return process.env.NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY?.trim() || null;
-}
 
 function readTossSecretKey(): string | null {
   return process.env.TOSS_PAYMENTS_SECRET_KEY?.trim() || null;
 }
 
-export function isTossPaymentsConfigured(): boolean {
-  return Boolean(readTossClientKey() && readTossSecretKey());
-}
-
-export function getTossClientKey(): string | null {
-  return readTossClientKey();
+/** Toss orderId — 영문·숫자·하이픈·언더스코어, 6~64자 */
+export function generateOrderId(): string {
+  const suffix = randomBytes(4).toString("hex");
+  return `ib_${Date.now()}_${suffix}`;
 }
 
 function authHeader(): string {
