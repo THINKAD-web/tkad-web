@@ -133,6 +133,10 @@ export interface MediaItem {
   } | null;
   /** 등록일(ISO) — `신규 등록순` 정렬용. DB Media.createdAt. */
   createdAt?: string;
+  /** 승인된 리뷰 평균 (1–5) */
+  averageRating?: number;
+  /** 승인된 리뷰 수 */
+  reviewCount?: number;
   /** 이동형(`mobile`) 서비스 구역 — 전국 시·군·구 행정코드(5자리). 공개 지도 폴리곤에 사용 */
   coverageDistrictCodes?: string[];
 }

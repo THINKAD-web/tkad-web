@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { AppUserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
+import { issueEmailVerification } from "@/lib/email-verification";
 import { rateLimit } from "@/lib/rate-limit";
 import {
   USER_SESSION_COOKIE,
@@ -99,6 +100,10 @@ export async function POST(req: Request) {
       token,
       userAgent: req.headers.get("user-agent") ?? undefined,
       ip,
+    });
+
+    void issueEmailVerification(user.id, locale).catch((err) => {
+      console.error("[auth/register] verification email failed:", err);
     });
 
     const res = apiOk(user, { status: 201 });

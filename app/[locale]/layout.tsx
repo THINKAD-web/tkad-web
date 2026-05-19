@@ -8,14 +8,15 @@ import { routing } from "@/i18n/routing";
 import {
   defaultOgImages,
   pageAlternates,
-  serializeJsonLd,
   siteKeywords,
   siteUrl,
 } from "@/lib/seo";
 import { buildStructuredDataGraph } from "@/lib/structured-data";
+import { JsonLd } from "@/components/seo/json-ld";
 import { ThemeProvider } from "@/components/theme-provider";
 import LocaleRootBody from "@/components/locale-root-body";
 import { SiteHeader } from "@/components/public-chrome/site-header";
+import { OnboardingProgressBar } from "@/components/onboarding/onboarding-progress-bar";
 import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
 import "../globals.css";
 import "leaflet/dist/leaflet.css";
@@ -164,12 +165,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-full min-h-[100dvh] flex-col antialiased`}
       >
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: serializeJsonLd(structuredData),
-          }}
-        />
+        <JsonLd data={structuredData} />
         <PublicAnalyticsLoader />
         <ThemeProvider>
           <NextIntlClientProvider
@@ -181,7 +177,12 @@ export default async function LocaleLayout({ children, params }: Props) {
               skipLinkLabel={
                 locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"
               }
-              header={<SiteHeader />}
+              header={
+                <>
+                  <SiteHeader />
+                  <OnboardingProgressBar />
+                </>
+              }
             >
               {children}
             </LocaleRootBody>

@@ -320,7 +320,7 @@ export function CompareSpecTable({
                         key={`${row.key}-${m.id}`}
                         className={`max-w-[16rem] border-b border-border/40 px-2 py-2.5 text-[11px] sm:px-3 sm:text-sm ${
                           isBest
-                            ? "bg-accent/12 font-bold text-foreground"
+                            ? "bg-emerald-500/12 font-bold text-foreground"
                             : isPriceRow
                               ? "font-bold text-foreground"
                               : isEmpty
@@ -333,7 +333,7 @@ export function CompareSpecTable({
                             {value}
                           </span>
                           {isBest ? (
-                            <span className="shrink-0 rounded-full border border-accent bg-accent px-1.5 py-[1px] font-mono text-[8px] font-bold uppercase tracking-[0.14em] text-accent-foreground shadow-[0_2px_10px_rgba(67,56,202,0.35)]">
+                            <span className="shrink-0 rounded-full border border-emerald-500/50 bg-emerald-500/20 px-1.5 py-[1px] font-mono text-[8px] font-bold uppercase tracking-[0.14em] text-emerald-800 shadow-[0_2px_10px_rgba(16,185,129,0.25)] dark:text-emerald-200">
                               {row.better === "higher"
                                 ? isKo
                                   ? "최고"

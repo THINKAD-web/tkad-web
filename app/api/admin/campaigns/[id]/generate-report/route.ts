@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { buildCampaignCompletionReportPdfBuffer } from "@/lib/campaign-completion-report";
+import { createNotification } from "@/lib/notifications";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -39,8 +40,18 @@ export async function POST(request: NextRequest, { params }: Params) {
     });
     const c = await db.campaign.findUnique({
       where: { id },
-      select: { clientCompany: true },
+      select: { clientCompany: true, name: true, ownerUserId: true },
     });
+    if (c?.ownerUserId) {
+      void createNotification({
+        userId: c.ownerUserId,
+        type: "REPORT_READY",
+        title: "성과 보고서가 준비되었습니다",
+        body: c.name,
+        link: `/dashboard/campaigns/${id}`,
+        dedupeKey: `report_ready:${id}`,
+      });
+    }
     const filename = buildClientReportFilename(c?.clientCompany);
     return new Response(new Uint8Array(buf), {
       status: 200,

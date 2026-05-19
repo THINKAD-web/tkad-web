@@ -108,7 +108,9 @@ export default function ContactInquiryForm() {
   const rerunPrefillDone = useRef<string | null>(null);
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
+  const quoteParam = searchParams.get("quote");
   const periodPrefillDone = useRef(false);
+  const quotePrefillDone = useRef(false);
   const [packageRef, setPackageRef] = useState<
     ReturnType<typeof getMediaPackageBySlug> | undefined
   >(undefined);
@@ -159,6 +161,35 @@ export default function ContactInquiryForm() {
   useEffect(() => {
     periodPrefillDone.current = false;
   }, [fromParam, toParam]);
+
+  useEffect(() => {
+    quotePrefillDone.current = false;
+  }, [quoteParam]);
+
+  useEffect(() => {
+    const raw = quoteParam?.trim();
+    if (!raw || quotePrefillDone.current) return;
+    quotePrefillDone.current = true;
+    const decoded = (() => {
+      try {
+        return decodeURIComponent(raw);
+      } catch {
+        return raw;
+      }
+    })();
+    const cur = getValues("additionalNotes").trim();
+    if (!cur.includes(decoded.slice(0, 24))) {
+      setValue("additionalNotes", cur ? `${decoded}\n\n${cur}` : decoded, {
+        shouldDirty: true,
+      });
+    }
+    if (!getValues("inquiryType")) {
+      setValue("inquiryType", "media_quote", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [quoteParam, getValues, setValue]);
 
   useEffect(() => {
     rerunPrefillDone.current = null;

@@ -20,6 +20,10 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { CompareSpecTable } from "@/components/compare-spec-table";
+import { CompareWinnerCard } from "@/components/compare/compare-winner-card";
+import { CompareRadarChart } from "@/components/compare/compare-radar-chart";
+import { CompareQuoteCalculator } from "@/components/compare/compare-quote-calculator";
+import { buildPlannerHrefWithMediaIds } from "@/lib/planner-media-href";
 import { CompareQuotePdf } from "@/components/compare-pdf-quote";
 import {
   MEDIA_CATALOG_GRID_CLASS,
@@ -235,6 +239,10 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                 </div>
               )}
 
+              <CompareWinnerCard items={visibleItems} isKo={isKo} className="mb-6" />
+
+              <CompareRadarChart items={visibleItems} isKo={isKo} className="mb-6" />
+
               <div
                 ref={comparePdfRef}
                 className={cn("tkad-glass-surface p-1 sm:p-2", "bg-card/80 text-foreground")}
@@ -251,13 +259,23 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                 quoteRef={quoteRef}
               />
 
+              <CompareQuoteCalculator items={visibleItems} isKo={isKo} />
+
               <div className="mt-10 flex flex-col items-stretch gap-4 sm:mt-12 sm:items-center md:gap-5">
                 <div className="flex w-full max-w-4xl flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
+                  <BtnBlock
+                    href={buildPlannerHrefWithMediaIds(items.map((m) => m.id))}
+                    variant="accent"
+                    size="md"
+                    className="w-full min-h-12 justify-center rounded-[22px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[12rem]"
+                  >
+                    {isKo ? "이 조합으로 플래너 시작" : "Start planner with selection"}
+                  </BtnBlock>
                   <BtnBlock
                     href={`/quote?media=${items.map((m) => m.id).join(",")}`}
                     variant="accent"
                     size="md"
-                    className="w-full min-h-12 justify-center rounded-[22px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[10rem]"
+                    className="w-full min-h-12 justify-center rounded-[22px] border-2 border-foreground/85 bg-foreground text-background transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[10rem] disabled:opacity-50 dark:border-white/85 dark:bg-white dark:text-black"
                   >
                     {isKo ? "견적 요청" : "Request a quote"}
                   </BtnBlock>

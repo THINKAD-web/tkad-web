@@ -95,7 +95,9 @@
     "packageProposal": "Package proposals",
     "packageProposalDesc": "Curated OOH bundles by goal and region",
     "searchPlaceholder": "Search media or area",
+    "searchPlaceholderUnified": "Search media, packages, cases, reports…",
     "searchAria": "Search media",
+    "searchAriaUnified": "Open unified search",
     "searchSubmit": "Search",
     "comingSoonBadge": "Soon",
     "beta": "BETA",
@@ -216,9 +218,11 @@
   "auth": {
     "login": "Log in",
     "signup": "Sign up",
+    "logout": "Log out",
     "myCampaigns": "My campaigns",
     "myPage": "My page",
     "kakaoLogin": "Continue with Kakao",
+    "naverLogin": "Continue with Naver",
     "backToLogin": "Back to login",
     "orEmail": "Or with email"
   },
@@ -230,7 +234,8 @@
       "campaigns": "My campaigns",
       "favorites": "Saved media",
       "planner": "My planner",
-      "recent": "Recently viewed"
+      "recent": "Recently viewed",
+      "team": "Team"
     },
     "campaigns": {
       "loading": "Loading campaigns…",
@@ -264,6 +269,18 @@
       "emptyDesc": "Browse media listings — up to 20 recent items appear here.",
       "emptyCta": "Explore media"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "viewAll": "View all",
+    "markAllRead": "Mark all read",
+    "filterAll": "All",
+    "filterUnread": "Unread",
+    "emptyTitle": "No notifications",
+    "emptyDesc": "Campaign, quote, and favorite media updates appear here.",
+    "loading": "Loading notifications…",
+    "headerAria": "Notifications",
+    "headerAriaCount": "Notifications ({count})"
   },
   "hero": {
     "title": "Korea OOH media search & campaign execution",
@@ -499,6 +516,7 @@
     "sortPriceAsc": "Price · low to high",
     "sortPriceDesc": "Price · high to low",
     "sortTrafficDesc": "Foot traffic · high to low",
+    "sortRatingDesc": "Highest rated",
     "quickInquiryFavorite": "Save ♡",
     "quickInquiryCta": "Quick inquiry",
     "availabilityLive": {
@@ -658,6 +676,7 @@
       "empty": "Ask us for details",
       "adminEdit": "Edit in admin",
       "similarTitle": "How about this?",
+      "viewedAlsoTitle": "Others who viewed this also viewed",
       "caseStudiesTitle": "Campaign highlights",
       "galleryLightboxClose": "Close",
       "galleryLightboxPrev": "Previous image",
@@ -721,6 +740,20 @@
         "maintenance": "Maintenance"
       },
       "quoteStripHint": "Add placements you like to your quote request"
+    },
+    "reviews": {
+      "writeTitle": "Write a review",
+      "writeSubtitle": "Share your experience with {name}. Reviews are published after moderation.",
+      "rating": "Rating",
+      "reviewTitle": "Title",
+      "reviewBody": "Review",
+      "campaignPeriod": "Campaign period",
+      "industry": "Industry (display label)",
+      "submit": "Submit review",
+      "back": "Back to media",
+      "pendingNote": "Your review was submitted and will appear after approval.",
+      "loginRequired": "Please sign in to write a review.",
+      "alreadyReviewed": "You have already reviewed this placement."
     },
     "ai": {
       "tabSearch": "Media search",
@@ -1921,7 +1954,34 @@
     "backToSite": "Back to site",
     "signOut": "Sign out",
     "instantBookings": "Instant bookings",
-    "mediaApplications": "Media Applications"
+    "mediaApplications": "Media Applications",
+    "mediaReviews": "Media reviews",
+    "searchStats": "Search stats"
+  },
+  "search": {
+    "modalTitle": "Unified search",
+    "modalPlaceholder": "Media, region, brand, report…",
+    "recent": "Recent",
+    "popular": "Popular",
+    "mediaSuggest": "Media matches",
+    "sectionMedia": "Media",
+    "sectionPackages": "Packages",
+    "sectionCases": "Success cases",
+    "sectionReports": "Reports",
+    "sectionAcademy": "Academy",
+    "viewAll": "View all results ({count})",
+    "noResultsShort": "No results",
+    "pageSubtitleEmpty": "Enter a search term",
+    "submit": "Search",
+    "tabAll": "All",
+    "tabMedia": "Media",
+    "tabPackages": "Packages",
+    "tabContent": "Content",
+    "noResults": "No results found",
+    "noResultsHint": "Try another keyword or start with the AI planner.",
+    "similarQueries": "Similar searches",
+    "plannerCta": "Start AI planner",
+    "browseMedia": "Browse media"
   },
   "adminApplications": {
     "title": "Media registration applications",
@@ -2609,7 +2669,51 @@
     "packagesTitle": "Regional <accent>OOH packages</accent>",
     "packagesMeta": "editorial bundles · 5 routes",
     "packagesLead": "Propose faster with curated real-media bundles for Gangnam, Seongsu, downtown, and more.",
-    "packagesCta": "Browse packages"
+    "packagesCta": "Browse packages",
+    "personalizedKicker": "For you",
+    "personalizedTitle": "Hi {name}, your <accent>picked media</accent>",
+    "personalizedMeta": "Curated from your onboarding profile",
+    "personalizedCtaRecommend": "More AI picks",
+    "personalizedCtaPlanner": "Try AI Planner"
+  },
+  "onboarding": {
+    "kicker": "Welcome",
+    "title": "Set up your profile",
+    "skip": "Skip",
+    "next": "Next",
+    "back": "Back",
+    "stepLabel": "Step {current} / {total}",
+    "saveError": "Could not save. Please try again.",
+    "industryRequired": "Select at least one industry.",
+    "progressMessage": "Profile {percent}% complete — finish for better recommendations",
+    "step1Title": "How will you use Syncad?",
+    "step1Desc": "We use this to personalize features and picks.",
+    "roleAdvertiser": "Advertiser",
+    "roleAdvertiserDesc": "Run campaigns",
+    "roleAgency": "Agency",
+    "roleAgencyDesc": "Run for clients",
+    "roleMedia": "Media owner",
+    "roleMediaDesc": "List and manage inventory",
+    "roleBrowser": "Just browsing",
+    "roleBrowserDesc": "Explore first",
+    "step2Title": "Which industries do you usually run?",
+    "step2Desc": "Select all that apply.",
+    "industryBeauty": "Beauty / fashion",
+    "industryFnb": "F&B",
+    "industryTech": "IT / tech",
+    "industryFinance": "Finance",
+    "industryEntertainment": "Entertainment",
+    "industryOther": "Other",
+    "step3Title": "Typical monthly budget?",
+    "step3Desc": "Choose a range (KRW).",
+    "budgetUnder500": "Under ₩5M",
+    "budget500to3000": "₩5M – ₩30M",
+    "budgetOver3000": "Over ₩30M",
+    "budgetUndecided": "Not sure yet",
+    "step4Title": "Your picks are ready!",
+    "step4Desc": "Recommended media based on your profile.",
+    "ctaExplore": "Browse media",
+    "ctaPlanner": "Try AI Planner"
   },
   "instantBooking": {
     "eyebrow": "Small DOOH",

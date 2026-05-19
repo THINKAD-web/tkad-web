@@ -8,6 +8,7 @@ import {
   serializeQuote,
   parseValidUntilDate,
 } from "@/lib/admin-sales-quote";
+import { notifyUserByEmail } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -107,6 +108,25 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
         include: { items: { orderBy: { id: "asc" } } },
       });
     });
+
+    const newStatus =
+      typeof data.status === "string" ? data.status : existing.status;
+    if (
+      newStatus === "contracted" &&
+      existing.status !== "contracted" &&
+      updated.clientEmail
+    ) {
+      void notifyUserByEmail(updated.clientEmail, {
+        type: "QUOTE_ACCEPTED",
+        title: "견적이 확정되었습니다",
+        body: updated.isKo
+          ? `견적번호 ${updated.quoteNumber}`
+          : `Quote ${updated.quoteNumber}`,
+        link: `/quote/${id}`,
+        dedupeKey: `quote_contracted:${id}`,
+      });
+    }
+
     return json({ quote: serializeQuote(updated) });
   } catch (e) {
     console.error("[admin-quotes PATCH]", e);

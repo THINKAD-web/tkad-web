@@ -28,6 +28,10 @@
     {
       "path": "/api/cron/generate-trend-report",
       "schedule": "0 0 * * 1,4"
+    },
+    {
+      "path": "/api/cron/campaign-notifications",
+      "schedule": "30 0 * * *"
     }
   ]
 }

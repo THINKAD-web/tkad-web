@@ -160,7 +160,12 @@ export default function MediaBrowseClient({
   const skipFirstComparePersist = useRef(true);
   const popularIds = new Set(["1", "2", "3", "8", "9"]);
   const [sortBy, setSortBy] = useState<
-    "default" | "newest" | "priceAsc" | "priceDesc" | "trafficDesc"
+    | "default"
+    | "newest"
+    | "priceAsc"
+    | "priceDesc"
+    | "trafficDesc"
+    | "ratingDesc"
   >("default");
   const [instantOnlyFilter, setInstantOnlyFilter] = useState(false);
   const { summary: availabilitySummary } = useMediaAvailabilitySummary();
@@ -349,6 +354,13 @@ export default function MediaBrowseClient({
           (a, b) =>
             (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0),
         );
+      case "ratingDesc":
+        return arr.sort((a, b) => {
+          const ar = a.averageRating ?? 0;
+          const br = b.averageRating ?? 0;
+          if (br !== ar) return br - ar;
+          return (b.reviewCount ?? 0) - (a.reviewCount ?? 0);
+        });
       case "newest":
         return arr.sort((a, b) => {
           const at = a.createdAt ? Date.parse(a.createdAt) : 0;
@@ -742,6 +754,9 @@ export default function MediaBrowseClient({
                           </option>
                           <option value="trafficDesc">
                             {t("media.sortTrafficDesc")}
+                          </option>
+                          <option value="ratingDesc">
+                            {t("media.sortRatingDesc")}
                           </option>
                         </select>
                       </label>

@@ -19,6 +19,7 @@ import {
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS } from "@/components/media-catalog-shared";
 import { MediaAvailabilityBadge } from "@/components/media-availability-badge";
+import { MediaRatingBadge } from "@/components/media/media-rating-badge";
 import type { AvailabilityTier } from "@/lib/media-availability-stats";
 
 /**
@@ -169,6 +170,12 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         >
           {formatMediaLocationShort(media, isKo)}
         </p>
+        <MediaRatingBadge
+          averageRating={media.averageRating}
+          reviewCount={media.reviewCount}
+          isKo={isKo}
+          className="mt-0.5"
+        />
         <p
           className={cn(
             "mt-0.5 break-words font-black tabular-nums leading-snug",

@@ -1,25 +1,48 @@
 "use client";
 
 import { useEffect } from "react";
-import { addRecentlyViewedId } from "@/lib/recently-viewed";
+import {
+  addRecentlyViewedRecord,
+  type RecentlyViewedRecord,
+} from "@/lib/recently-viewed";
+import { postRecentlyViewedToServer } from "@/lib/recently-viewed-sync";
 import {
   pushOfflineRecentMediaCard,
   type OfflineRecentMediaCard,
 } from "@/lib/recently-viewed-offline";
 
 type Props = {
-  mediaId: string;
+  record: RecentlyViewedRecord;
   offlineCard?: OfflineRecentMediaCard;
 };
 
-export default function TrackMediaView({ mediaId, offlineCard }: Props) {
+export default function TrackMediaView({ record, offlineCard }: Props) {
   useEffect(() => {
-    addRecentlyViewedId(mediaId);
+    addRecentlyViewedRecord(record);
     if (offlineCard) {
       pushOfflineRecentMediaCard(offlineCard);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- offlineCard는 매체당 1회 기록
-  }, [mediaId]);
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/auth/session", {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        const data = await res.json();
+        if (cancelled || !data.ok || !data.data) return;
+        await postRecentlyViewedToServer([record]);
+      } catch {
+        // ignore
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- record.id 기준 1회 기록
+  }, [record.id]);
 
   return null;
 }

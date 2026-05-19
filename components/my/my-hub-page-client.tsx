@@ -10,8 +10,12 @@ import {
   LayoutList,
   LogOut,
   Megaphone,
+  Settings,
   Sparkles,
+  Users,
 } from "lucide-react";
+import { EmailVerificationBanner } from "@/components/auth/email-verification-banner";
+import { TeamManagementSection } from "@/components/my/team-management-section";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MyHubTabs, type MyHubTab } from "@/components/my/my-hub-tabs";
 import {
@@ -25,12 +29,20 @@ import type { CampaignStatus } from "@prisma/client";
 import { buildPlannerHrefWithMediaIds } from "@/lib/planner-media-href";
 import {
   fetchRecentlyViewedItems,
+  readRecentlyViewedRecords,
   subscribeRecentlyViewedChanged,
 } from "@/lib/recently-viewed";
+import { syncRecentlyViewedWithServer } from "@/lib/recently-viewed-sync";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
-type Me = { id: string; email: string; name: string; role: string };
+type Me = {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  needsEmailVerification?: boolean;
+};
 
 type CampaignItem = {
   id: string;
@@ -50,6 +62,7 @@ type PlannerPlanItem = {
   title: string;
   budgetManwon: number;
   mediaCount: number;
+  isTeamShared?: boolean;
 };
 
 type ProposalItem = {
@@ -90,7 +103,8 @@ function parseHubTab(value: string | null): MyHubTab | null {
     value === "campaigns" ||
     value === "favorites" ||
     value === "planner" ||
-    value === "recent"
+    value === "recent" ||
+    value === "team"
   ) {
     return value;
   }
@@ -144,6 +158,7 @@ export function MyHubPageClient() {
       { key: "favorites" as const, label: t("tabs.favorites"), icon: Heart },
       { key: "planner" as const, label: t("tabs.planner"), icon: LayoutList },
       { key: "recent" as const, label: t("tabs.recent"), icon: Clock },
+      { key: "team" as const, label: t("tabs.team"), icon: Users },
     ],
     [t],
   );
@@ -227,15 +242,29 @@ export function MyHubPageClient() {
   const loadRecent = useCallback(async () => {
     setRecentLoading(true);
     try {
+      await syncRecentlyViewedWithServer();
       const items = await fetchRecentlyViewedItems();
+      if (items.length > 0) {
+        setRecentItems(
+          items.map((m) => ({
+            id: m.id,
+            name: m.name,
+            region: m.region,
+            type: m.type,
+            price: catalogPriceFieldToWon(m.price ?? 0),
+            image: m.sampleImages?.[0] ?? null,
+          })),
+        );
+        return;
+      }
       setRecentItems(
-        items.map((m) => ({
-          id: m.id,
-          name: m.name,
-          region: m.region,
-          type: m.type,
-          price: catalogPriceFieldToWon(m.price ?? 0),
-          image: m.sampleImages?.[0] ?? null,
+        readRecentlyViewedRecords().map((r) => ({
+          id: r.id,
+          name: r.name,
+          region: r.region,
+          type: r.type,
+          price: catalogPriceFieldToWon(r.price),
+          image: r.thumbnail || null,
         })),
       );
     } finally {
@@ -305,15 +334,25 @@ export function MyHubPageClient() {
                 {me.email}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={logout}
-              className={cn(outlineBtn, "gap-1.5")}
-            >
-              <LogOut className="h-4 w-4" />
-              {t("logout")}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/my/settings" className={cn(outlineBtn, "gap-1.5")}>
+                <Settings className="h-4 w-4" />
+                {isKo ? "설정" : "Settings"}
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className={cn(outlineBtn, "gap-1.5")}
+              >
+                <LogOut className="h-4 w-4" />
+                {t("logout")}
+              </button>
+            </div>
           </header>
+
+          {me.needsEmailVerification && (
+            <EmailVerificationBanner className="mb-6" />
+          )}
 
           <MyHubTabs
             tabs={tabDefs}
@@ -533,6 +572,12 @@ export function MyHubPageClient() {
                   ) : null}
                 </div>
               )}
+            </section>
+          )}
+
+          {tab === "team" && (
+            <section aria-labelledby="my-team-heading">
+              <TeamManagementSection />
             </section>
           )}
 

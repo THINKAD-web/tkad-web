@@ -23,13 +23,15 @@ export function NeonSectionHead({
         className,
       )}
     >
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="tkad-neon-border rounded-2xl bg-white/5 px-4 py-2 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white/78 backdrop-blur">
+      <div className="flex flex-nowrap items-center gap-3 overflow-hidden">
+        <span className="tkad-neon-border inline-flex max-w-full shrink-0 items-center whitespace-nowrap rounded-2xl bg-white/5 px-4 py-2 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white/78 backdrop-blur">
           <span className="tkad-home-accent-text">[{number}]</span>
-          {kicker ? <span className="text-white/55"> / {kicker}</span> : null}
+          {kicker ? (
+            <span className="truncate text-white/55"> / {kicker}</span>
+          ) : null}
         </span>
         {meta ? (
-          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+          <span className="hidden min-w-0 truncate font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55 sm:inline">
             {"// "}
             {meta}
           </span>

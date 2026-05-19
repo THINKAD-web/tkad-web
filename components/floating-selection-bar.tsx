@@ -11,11 +11,13 @@ type Props = {
   children: ReactNode;
   /** 하단 바 래퍼 (motion)에 합쳐지는 클래스 — 브루탈리스트 등 룩 오버라이드 */
   className?: string;
+  /** 견적·플래너 네온 페이지용 다크 글래스 바 */
+  variant?: "default" | "neon";
 };
 
 /** 바가 열렸을 때 본문 하단에 넣는 여백(콘텐츠가 가려지지 않도록). */
 export const FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS =
-  "h-[7.25rem] bg-white sm:h-[6.75rem]";
+  "h-[7.25rem] bg-transparent sm:h-[6.75rem]";
 
 /**
  * 매체 비교/견적 등 선택 시 하단 고정 바.
@@ -27,6 +29,7 @@ export function FloatingSelectionBar({
   ariaLabel,
   children,
   className,
+  variant = "default",
 }: Props) {
   const [footerOverlap, setFooterOverlap] = useState(0);
 
@@ -67,8 +70,16 @@ export function FloatingSelectionBar({
           }}
           className={cn(
             "fixed left-0 right-0 z-[60]",
-            "bg-white/95 backdrop-blur-sm border-t border-navy/10",
-            "shadow-[0_-8px_32px_-4px_rgba(15,23,42,0.12)]",
+            variant === "neon"
+              ? [
+                  "border-t border-white/12 bg-[#05050a]/92 backdrop-blur-xl",
+                  "shadow-[0_-16px_48px_-8px_rgba(0,0,0,0.65)]",
+                  "text-foreground",
+                ]
+              : [
+                  "bg-white/95 backdrop-blur-sm border-t border-navy/10",
+                  "shadow-[0_-8px_32px_-4px_rgba(15,23,42,0.12)]",
+                ],
             "px-2 pb-2 sm:px-4 sm:pb-3",
             className,
           )}

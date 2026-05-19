@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/user-session";
+import { getTeamMembershipForUser } from "@/lib/team-context";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +22,24 @@ export async function GET(
       planJson: true,
       viewCount: true,
       createdAt: true,
+      userEmail: true,
+      teamId: true,
+      isTeamShared: true,
     },
   });
   if (!plan) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (plan.isTeamShared && plan.teamId) {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Login required" }, { status: 401 });
+    }
+    const membership = await getTeamMembershipForUser(user.id);
+    if (!membership || membership.team.id !== plan.teamId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
   }
   if (plan.expiresAt.getTime() < Date.now()) {
     return NextResponse.json({ error: "Expired" }, { status: 410 });

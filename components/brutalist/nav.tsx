@@ -111,13 +111,13 @@ export function BrutalNav({
   const Logo = (
     <Link
       href="/"
-      className="whitespace-nowrap text-[16px] font-black tracking-tight text-foreground sm:text-[18px] md:text-[20px] dark:text-white"
+      className="inline-flex shrink-0 items-baseline whitespace-nowrap text-[15px] font-black leading-none tracking-tight text-foreground sm:text-[16px] md:text-[20px] dark:text-white"
     >
       {logo ?? (
-        <>
+        <span className="inline-flex items-baseline whitespace-nowrap">
           <span className="font-black">THINK</span>
           <span className="tkad-home-accent-text font-black">AD</span>
-        </>
+        </span>
       )}
     </Link>
   );
@@ -222,7 +222,7 @@ export function BrutalNav({
       {/* 모바일: 로고 + 문의 CTA + 햄버거 */}
       <div className="md:hidden">
         <div className="flex h-14 items-center justify-between gap-2 px-4 sm:h-16 sm:px-5">
-          <div className="min-w-0 shrink-0">{Logo}</div>
+          <div className="shrink-0">{Logo}</div>
           <div className="flex shrink-0 items-center gap-1.5">
             {cta ? (
               <Link

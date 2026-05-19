@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarClock, LineChart, Megaphone, Wallet } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Props = {
   activeCount: number;
@@ -13,6 +14,13 @@ type Props = {
 function fmt(n: number, isKo: boolean) {
   return n.toLocaleString(isKo ? "ko-KR" : "en-US");
 }
+
+const ACCENT = [
+  "text-primary",
+  "text-accent",
+  "text-[#22d3ee]",
+  "text-[#a855f7]",
+] as const;
 
 export function AdvertiserSummaryCards({
   activeCount,
@@ -49,20 +57,24 @@ export function AdvertiserSummaryCards({
   ];
 
   return (
-    <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 snap-x snap-mandatory sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
-      {cards.map((c) => (
+    <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-2 snap-x snap-mandatory sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+      {cards.map((c, i) => (
         <div
           key={c.label}
-          className="min-w-[72%] shrink-0 snap-center rounded-[20px] border border-border bg-card p-4 shadow-sm sm:min-w-0"
+          className={cn(
+            "tkad-glass-surface tkad-neon-border min-w-[78%] shrink-0 snap-center rounded-[28px] border p-6 backdrop-blur-md",
+            "transition-all hover:-translate-y-0.5 hover:border-primary/25",
+            "sm:min-w-0",
+          )}
         >
-          <c.icon className="h-5 w-5 text-primary" aria-hidden />
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <c.icon className={cn("h-7 w-7", ACCENT[i % ACCENT.length])} aria-hidden />
+          <p className="mt-4 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
             {c.label}
           </p>
-          <p className="mt-1 text-2xl font-black tabular-nums tracking-tight">
+          <p className="mt-2 text-3xl font-black tabular-nums tracking-tight text-foreground sm:text-[2rem]">
             {c.value}
           </p>
-          <p className="text-xs text-muted-foreground">{c.sub}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{c.sub}</p>
         </div>
       ))}
     </div>

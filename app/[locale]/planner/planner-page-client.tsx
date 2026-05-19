@@ -91,6 +91,7 @@ import {
 } from "@/lib/media-price-format";
 import type { HomeAppearance } from "@/lib/home-appearance";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
+import { useTeamPermissions } from "@/lib/use-team-permissions";
 
 /** 밤: 메인 NeonSection 과 동일한 #05050a + 네온 뎁스(히어로 아래 본문만 밝은 페이지 배경이 비지 않도록) */
 function PlannerNeonPageBody({
@@ -361,6 +362,8 @@ export default function PlannerPageClient({
   const [saving, setSaving] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
+  const [shareWithTeam, setShareWithTeam] = useState(false);
+  const teamPerms = useTeamPermissions();
   const router = useRouter();
   const [navigatingContact, setNavigatingContact] = useState(false);
 
@@ -540,7 +543,13 @@ export default function PlannerPageClient({
       const res = await fetch("/api/planner/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planJson, saveMode, userEmail }),
+        body: JSON.stringify({
+          planJson,
+          saveMode,
+          userEmail,
+          shareWithTeam: shareWithTeam && saveMode === "share",
+          planId: savedPlanId ?? undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -569,11 +578,20 @@ export default function PlannerPageClient({
       }
       return data.id;
     },
-    [],
+    [savedPlanId, shareWithTeam],
   );
 
   const goToContactQuote = useCallback(async () => {
     if (navigatingContact || saving) return;
+    if (teamPerms.loaded && !teamPerms.canContactOrPay) {
+      toast(
+        "error",
+        isKo
+          ? "뷰어 권한은 견적 요청을 할 수 없습니다."
+          : "Viewers cannot request quotes.",
+      );
+      return;
+    }
     setNavigatingContact(true);
     try {
       let planId = savedPlanId;
@@ -609,6 +627,8 @@ export default function PlannerPageClient({
     savedPlanId,
     saving,
     toast,
+    teamPerms.loaded,
+    teamPerms.canContactOrPay,
   ]);
 
   const savePlan = useCallback(async (saveMode: "share" | "draft" = "share") => {
@@ -1132,11 +1152,26 @@ export default function PlannerPageClient({
                 {t("editInputs")}
               </BtnBlock>
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                {teamPerms.hasTeam && teamPerms.canUsePlanner ? (
+                  <label className="flex w-full items-center gap-2 rounded-xl border border-white/12 bg-white/5 px-3 py-2 text-sm text-white/80 sm:w-auto">
+                    <input
+                      type="checkbox"
+                      checked={shareWithTeam}
+                      onChange={(e) => setShareWithTeam(e.target.checked)}
+                      className="h-4 w-4 rounded border-white/30"
+                    />
+                    <span>
+                      {isKo
+                        ? `${teamPerms.teamName ?? "팀"}과 공유`
+                        : `Share with ${teamPerms.teamName ?? "team"}`}
+                    </span>
+                  </label>
+                ) : null}
                 <BtnBlock
                   variant="primary"
                   size="md"
                   onClick={() => void savePlan("share")}
-                  disabled={saving}
+                  disabled={saving || (teamPerms.loaded && !teamPerms.canUsePlanner)}
                 >
                   <Download className="h-4 w-4" />
                   {saving ? t("savingInProgress") : t("ctaSave")}
@@ -1145,7 +1180,7 @@ export default function PlannerPageClient({
                   variant="secondary"
                   size="md"
                   onClick={() => void savePlan("draft")}
-                  disabled={saving}
+                  disabled={saving || (teamPerms.loaded && !teamPerms.canUsePlanner)}
                 >
                   <Download className="h-4 w-4" />
                   {t("ctaSaveDraft24h")}
@@ -1169,7 +1204,11 @@ export default function PlannerPageClient({
                     size="lg"
                     className="min-h-14 w-full !text-white bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
                     onClick={() => void goToContactQuote()}
-                    disabled={saving || navigatingContact}
+                    disabled={
+                      saving ||
+                      navigatingContact ||
+                      (teamPerms.loaded && !teamPerms.canContactOrPay)
+                    }
                   >
                     <Send className="h-5 w-5" />
                     {navigatingContact
