@@ -31,6 +31,7 @@ import { pageAlternates } from "@/lib/seo";
 import {
   buildMediaBreadcrumbJsonLd,
   buildMediaPlaceJsonLd,
+  buildMediaProductJsonLd,
 } from "@/lib/structured-data";
 import {
   getAllKeywordFilterMediaIds,
@@ -202,17 +203,28 @@ export default async function MediaDetailPage({ params }: Props) {
   })();
 
   const placeJsonLd = buildMediaPlaceJsonLd(media, locale);
+  const productJsonLd = buildMediaProductJsonLd(media, locale);
   const breadcrumbJsonLd = buildMediaBreadcrumbJsonLd(media, locale);
 
   return (
     <>
-      <TrackMediaView mediaId={media.id} />
+      <TrackMediaView
+        mediaId={media.id}
+        offlineCard={{
+          id: media.id,
+          name: isKo ? media.name : media.nameEn || media.name,
+          location: formatMediaLocationShort(media, isKo),
+          type: typeLabel,
+          price: media.price,
+          imageUrl: heroImage || undefined,
+        }}
+      />
       <script
         type="application/ld+json"
         // SEO: Place + BreadcrumbList JSON-LD. dangerouslySetInnerHTML 는
         // 매체 데이터에서 생성된 안전한 객체이므로 XSS 위험 없음.
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([placeJsonLd, breadcrumbJsonLd]),
+          __html: JSON.stringify([placeJsonLd, productJsonLd, breadcrumbJsonLd]),
         }}
       />
 

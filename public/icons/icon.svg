@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="108" fill="#020202"/>
+  <rect x="32" y="32" width="448" height="448" rx="88" stroke="url(#g)" stroke-width="4"/>
+  <defs>
+    <linearGradient id="g" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <text x="256" y="290" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="168" font-weight="900" fill="url(#g)">TK</text>
+  <text x="256" y="368" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="700" letter-spacing="6" fill="#ffffff" opacity="0.92">THINKAD</text>
+</svg>

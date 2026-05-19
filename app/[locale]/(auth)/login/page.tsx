@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import { KakaoLoginButton } from "@/components/auth/kakao-login-button";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { useAppToast } from "@/lib/use-toast";
 
-export default function LoginPage() {
+function LoginForm() {
   const t = useTranslations("auth");
   const router = useRouter();
-  const toast = useAppToast();
   const search = useSearchParams();
   const redirect = search.get("redirect") || "/my";
 
@@ -78,19 +77,7 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => toast.warning(t("kakaoComingSoon"))}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-[18px] border border-[#FEE500]/40 bg-[#FEE500] px-4 font-mono text-sm font-bold text-[#191600] shadow-[0_12px_40px_rgba(254,229,0,0.22)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
-              >
-                <span
-                  aria-hidden
-                  className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-[#191600] text-[10px] font-black text-[#FEE500]"
-                >
-                  K
-                </span>
-                {t("kakaoLogin")}
-              </button>
+              <KakaoLoginButton />
 
               <div className="relative py-1">
                 <div className="absolute inset-0 flex items-center" aria-hidden>
@@ -171,5 +158,13 @@ export default function LoginPage() {
         </div>
       </div>
     </HomeLandingDayNight>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

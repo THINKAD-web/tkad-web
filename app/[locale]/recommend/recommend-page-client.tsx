@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations, useLocale } from "next-intl";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useToast } from "@/components/toast-provider";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
@@ -24,6 +25,7 @@ import type { ScoredMedia } from "@/lib/ai-media-recommend";
 import {
   recommendMedia,
   filterCatalogByRegionCodes,
+  type AiRecommendInput,
 } from "@/lib/ai-media-recommend";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
@@ -46,8 +48,12 @@ export default function RecommendPageClient({
   const { toast } = useToast();
   const locale = useLocale();
   const isKo = locale === "ko";
+  const searchParams = useSearchParams();
+  const similarCampaignId = searchParams.get("similar")?.trim() ?? "";
+  const similarPrefillDone = useRef<string | null>(null);
 
   const [cartItems, setCartItems] = useState<MediaItem[]>([]);
+  const [similarBanner, setSimilarBanner] = useState<string | null>(null);
 
   const [phase, setPhase] = useState<Phase>("form");
   const [fullList, setFullList] = useState<ScoredMedia[] | null>(null);
@@ -118,6 +124,74 @@ export default function RecommendPageClient({
     [runAnalysis],
   );
 
+  useEffect(() => {
+    if (!similarCampaignId || similarPrefillDone.current === similarCampaignId) {
+      return;
+    }
+    similarPrefillDone.current = similarCampaignId;
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const res = await fetch(
+          `/api/my/dashboard/campaigns/${encodeURIComponent(similarCampaignId)}`,
+          { credentials: "include" },
+        );
+        const json = (await res.json()) as {
+          ok?: boolean;
+          data?: {
+            name?: string;
+            mediaIds?: string[];
+            startDate?: string | null;
+            endDate?: string | null;
+          };
+        };
+        if (cancelled || !res.ok || !json.ok || !json.data) return;
+
+        const { name, mediaIds = [], startDate, endDate } = json.data;
+        const idSet = new Set(mediaIds);
+        const matched = catalog.filter((m) => idSet.has(m.id));
+        if (matched.length > 0) {
+          setCartItems(matched.slice(0, CART_MAX));
+        }
+
+        const period =
+          startDate && endDate
+            ? isKo
+              ? `${startDate} ~ ${endDate}`
+              : `${startDate} – ${endDate}`
+            : null;
+        setSimilarBanner(
+          isKo
+            ? `「${name ?? "캠페인"}」과 유사한 매체를 추천합니다.${period ? ` (이전 집행: ${period})` : ""}`
+            : `Picks similar to “${name ?? "campaign"}”.${period ? ` (Prior flight: ${period})` : ""}`,
+        );
+
+        if (matched.length > 0) {
+          const pool = matched.length >= 3 ? matched : catalog;
+          const similarInput: AiRecommendInput = {
+            goal: "awareness",
+            target: "mass",
+            budgetMaxMan: 0,
+            region: "all",
+            industry: "other",
+          };
+          const scored = recommendMedia(similarInput, pool, catalog);
+          if (scored.length > 0) {
+            setFullList(scored);
+            setPhase("dashboard");
+          }
+        }
+      } catch (e) {
+        console.error("[recommend] similar campaign", e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [similarCampaignId, catalog, isKo]);
+
   const handleRemix = useCallback(() => {
     if (!lastPayload) return;
     const tweaked: MediaAiRecommendFormSubmit = {
@@ -168,6 +242,11 @@ export default function RecommendPageClient({
 
         <section className="tkad-media-browse-main border-t border-border/60 bg-card py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {similarBanner ? (
+            <p className="mb-6 rounded-2xl border border-[#22d3ee]/30 bg-[#22d3ee]/10 px-4 py-3 text-center text-sm font-semibold text-[#0e7490] dark:text-[#22d3ee]">
+              {similarBanner}
+            </p>
+          ) : null}
           {phase === "form" && (
             <MediaAiRecommendForm
               locale={locale}

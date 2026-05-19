@@ -15,23 +15,28 @@ import {
 } from "lucide-react";
 
 import { TestimonialsCarousel } from "@/components/testimonials-carousel";
-import { HomeMediaCarousel } from "@/components/home-media-carousel";
+import { HomeHeroServer } from "@/components/home/home-hero-server";
+import { HomeMediaGridServer } from "@/components/home/home-media-grid-server";
 import { testimonials } from "@/data/testimonials";
 import { Link } from "@/i18n/navigation";
 import { HomeClientLogos } from "@/components/home-client-logos";
 import { FloatingCta } from "@/components/floating-cta";
 import { HomeVerificationSteps } from "@/components/home-verification-steps";
-import { HomeHeroNeo } from "@/components/home-hero-neo";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { HomeCommunitySection } from "@/components/home-community-section";
 import { listHomeCommunityPosts } from "@/lib/community/queries";
+import { getLatestPublishedSuccessCases } from "@/lib/public-content-queries";
+import { HomeSuccessCasesSection } from "@/components/home/home-success-cases-section";
 import type { CommunityPostListItem } from "@/lib/community/types";
 import { accentTag } from "@/lib/render-accent-title";
 import { HomeMediaPartnerCta } from "@/components/home-media-partner-cta";
 
 const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
+
+/** 홈 — ISR 60초 (히어로·매체 그리드·통계 크롤러 노출) */
+export const revalidate = 60;
 type Props = {
   params: Promise<{ locale: string }>;
 };
@@ -45,12 +50,13 @@ export default async function HomePage({ params }: Props) {
    * 추천 매체: Prisma `isFeatured`·`featuredOrder` (관리자에서 지정).
    * 인기 매체: Prisma `isPopular`·`popularOrder` (관리자에서 별도 지정).
    */
-  const [featuredCatalog, popularCatalog, communityPosts, heroVisuals] =
+  const [featuredCatalog, popularCatalog, communityPosts, heroVisuals, latestCases] =
     await Promise.all([
       fetchHomeFeaturedMedia(8),
       fetchHomePopularMedia(12),
       listHomeCommunityPosts(),
       fetchHomeHeroVisualAssets(),
+      getLatestPublishedSuccessCases(locale, 3),
     ]);
 
   return (
@@ -62,6 +68,7 @@ export default async function HomePage({ params }: Props) {
       popularCatalog={popularCatalog}
       communityPosts={communityPosts}
       heroVisuals={heroVisuals}
+      latestCases={latestCases}
     />
   );
 }
@@ -74,6 +81,7 @@ function HomeContent({
   popularCatalog,
   communityPosts,
   heroVisuals,
+  latestCases,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
@@ -82,6 +90,7 @@ function HomeContent({
   popularCatalog: MediaItem[];
   communityPosts: CommunityPostListItem[];
   heroVisuals: Awaited<ReturnType<typeof fetchHomeHeroVisualAssets>>;
+  latestCases: Awaited<ReturnType<typeof getLatestPublishedSuccessCases>>;
 }) {
   /** 캐러셀 — 추천 매체 전체 활용 (TOP3 라벨은 첫 3개에만) */
   const featuredItems = featuredCatalog.slice(0, 8);
@@ -113,7 +122,8 @@ function HomeContent({
 
   return (
     <HomeLandingDayNight>
-      <HomeHeroNeo
+      <HomeHeroServer
+        locale={locale}
         marqueeImageUrls={heroVisuals.marqueeImageUrls}
         mapPins={heroVisuals.mapPins}
       />
@@ -182,9 +192,9 @@ function HomeContent({
             </p>
           ) : (
             <div className="mt-5 sm:mt-8 lg:mt-10">
-              <HomeMediaCarousel
+              <HomeMediaGridServer
                 items={featuredItems}
-                variant="featured"
+                locale={locale}
                 showRankBadge
               />
             </div>
@@ -212,7 +222,11 @@ function HomeContent({
               </div>
             </ScrollAnimate>
             <div className="mt-5 sm:mt-8 lg:mt-10">
-              <HomeMediaCarousel items={popularItems} variant="popular" />
+              <HomeMediaGridServer
+                items={popularItems}
+                locale={locale}
+                density="compact"
+              />
             </div>
           </NeonSection>
         )}
@@ -269,9 +283,13 @@ function HomeContent({
               meta={th("testimonialsMeta")}
             />
           </ScrollAnimate>
-          <div className="mt-5 sm:mt-8 lg:mt-10">
-            <TestimonialsCarousel items={testimonials} />
-          </div>
+          {latestCases.length > 0 ? (
+            <HomeSuccessCasesSection cases={latestCases} />
+          ) : (
+            <div className="mt-5 sm:mt-8 lg:mt-10">
+              <TestimonialsCarousel items={testimonials} />
+            </div>
+          )}
         </NeonSection>
 
         <ScrollAnimate>

@@ -235,6 +235,7 @@ export async function fetchAdvertiserCampaignDetail(
     reportGeneratedAt: c.reportGeneratedAt?.toISOString() ?? null,
     mediaBookings: c.mediaBookings.map((b) => ({
       id: b.id,
+      mediaId: b.media?.id,
       title: b.title,
       mediaName: b.media?.name ?? b.title,
       location: b.media?.location ?? "",
@@ -242,6 +243,9 @@ export async function fetchAdvertiserCampaignDetail(
       endsAt: b.endsAt.toISOString().slice(0, 10),
       status: b.status,
     })),
+    mediaIds: c.mediaBookings.map((b) => b.media?.id).filter((x): x is string =>
+      Boolean(x),
+    ),
   };
 }
 

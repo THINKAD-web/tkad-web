@@ -16,9 +16,7 @@ export function PageHeaderSkeleton() {
   return (
     <section className="relative overflow-hidden bg-background py-20 dark:bg-hero-void">
       <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground dark:text-white/55">
-          {`// LOADING…`}
-        </p>
+        <p className="sr-only">Loading</p>
         <div className="mx-auto mt-6 h-9 w-64">
           <Bone className="h-full w-full" />
         </div>

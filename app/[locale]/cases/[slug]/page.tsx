@@ -4,6 +4,9 @@ import {
   getPublishedSuccessCaseById,
   getPublishedSuccessCases,
 } from "@/lib/public-content-queries";
+import { serializeJsonLd } from "@/lib/seo";
+import { buildSuccessCaseArticleJsonLd } from "@/lib/structured-data";
+import { scoreSimilarCases } from "@/lib/success-case-hub";
 import CaseDetailClient from "./case-detail-client";
 
 type Props = {
@@ -35,5 +38,21 @@ export default async function CaseStudyDetailPage({ params }: Props) {
         }
       : null;
 
-  return <CaseDetailClient row={row} prev={prev} next={next} />;
+  const similar = scoreSimilarCases(row, ordered, 3);
+  const articleLd = buildSuccessCaseArticleJsonLd(row, locale);
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleLd) }}
+      />
+      <CaseDetailClient
+        row={row}
+        prev={prev}
+        next={next}
+        similarCases={similar}
+      />
+    </>
+  );
 }

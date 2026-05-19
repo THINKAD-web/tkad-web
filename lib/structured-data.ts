@@ -5,7 +5,9 @@ import {
   collectMediaSeoKeywordStrings,
 } from "@/lib/media-seo";
 import type { MediaItem } from "@/lib/media-data";
-import { getPrimaryMediaImageUrl } from "@/lib/media-data";
+import { getPrimaryMediaImageUrl, typeLabels } from "@/lib/media-data";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import type { PublicSuccessCaseDetail } from "@/lib/success-case-public";
 import { CONTACT_EMAIL } from "@/lib/constants";
 
 /** 푸터·SNS와 동일 (Organization sameAs / E-E-A-T) */
@@ -166,6 +168,101 @@ export function buildMediaPlaceJsonLd(
   const kw = collectMediaSeoKeywordStrings(media, locale, 28);
   if (kw.length) {
     data.keywords = kw.join(", ");
+  }
+
+  return data;
+}
+
+/**
+ * 매체 상세 — Product + Offer JSON-LD (가격·위치·매체명).
+ * Place 스키마와 함께 사용합니다.
+ */
+export function buildMediaProductJsonLd(
+  media: MediaItem,
+  locale: string,
+): Record<string, unknown> {
+  const isKo = locale === "ko";
+  const name = isKo ? media.name : media.nameEn || media.name;
+  const description = buildMediaSeoJsonDescription(media, locale, 1100);
+  const image = getPrimaryMediaImageUrl(media);
+  const url = `${siteUrl}/${locale}/media/${media.id}`;
+  const locationLabel = isKo
+    ? media.location
+    : media.locationEn || media.location;
+
+  const data: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "@id": `${url}#product`,
+    name,
+    description,
+    url,
+    sku: media.id,
+    brand: { "@id": ORG_ID },
+    category: typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? "OOH Media",
+  };
+
+  if (image) data.image = image;
+
+  if (media.price > 0) {
+    data.offers = {
+      "@type": "Offer",
+      price: catalogPriceFieldToWon(media.price),
+      priceCurrency: "KRW",
+      availability: "https://schema.org/InStock",
+      url,
+      seller: { "@id": ORG_ID },
+      ...(locationLabel
+        ? {
+            availableAtOrFrom: {
+              "@type": "Place",
+              name: locationLabel,
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: locationLabel,
+                addressCountry: "KR",
+              },
+            },
+          }
+        : {}),
+    };
+  }
+
+  return data;
+}
+
+/** 성공 사례 상세 — Article JSON-LD */
+export function buildSuccessCaseArticleJsonLd(
+  row: PublicSuccessCaseDetail,
+  locale: string,
+): Record<string, unknown> {
+  const isKo = locale === "ko";
+  const url = `${siteUrl}/${locale}/cases/${row.id}`;
+  const headline = (isKo ? row.titleKo : row.titleEn?.trim() || row.titleKo).slice(
+    0,
+    110,
+  );
+  const description = row.summaryKo.slice(0, 280);
+
+  const data: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${url}#article`,
+    headline,
+    description,
+    url,
+    inLanguage: isKo ? "ko-KR" : "en-US",
+    author: { "@id": ORG_ID },
+    publisher: { "@id": ORG_ID },
+    mainEntityOfPage: url,
+    articleSection: isKo ? "OOH 성공 사례" : "OOH Case Studies",
+    about: row.industry,
+  };
+
+  if (row.thumbnailUrl) data.image = row.thumbnailUrl;
+  if (row.publishedAtIso) {
+    data.datePublished = row.publishedAtIso;
+    data.dateModified = row.publishedAtIso;
   }
 
   return data;

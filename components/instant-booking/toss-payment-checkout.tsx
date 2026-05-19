@@ -7,7 +7,10 @@ import { useTranslations } from "next-intl";
 import { ANONYMOUS, loadPaymentWidget } from "@tosspayments/payment-widget-sdk";
 import { Loader2 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
-import { getTossClientKey, isTossPaymentsConfigured } from "@/lib/toss-payments";
+import {
+  getTossClientKey,
+  isTossPaymentsConfigured,
+} from "@/lib/toss-payments-client";
 
 type PaymentWidgetInstance = Awaited<ReturnType<typeof loadPaymentWidget>>;
 

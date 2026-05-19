@@ -7,7 +7,7 @@ import TopLoader from "@/components/top-loader";
 import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
 import { PublicNavAside } from "@/components/public-chrome/public-nav-aside";
 import DeferredPublicWidgetsGate from "@/components/deferred-public-widgets-gate";
-import PwaRegister from "@/components/pwa-register";
+import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import PageTransition from "@/components/page-transition";
 
 type Props = {
@@ -44,7 +44,7 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
           </ConditionalPublicChrome>
         </div>
       </div>
-      <PwaRegister />
+      <PwaInstallBanner />
     </ToastProvider>
   );
 }

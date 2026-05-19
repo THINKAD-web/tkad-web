@@ -16,15 +16,16 @@ export async function GET(
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #0D1B2E 0%, #0A1420 100%)",
+          background: "#020202",
           borderRadius: s * 0.2,
+          border: `${Math.max(2, s * 0.012)}px solid rgba(34, 211, 238, 0.35)`,
         }}
       >
         <span
           style={{
             fontSize: s * 0.45,
             fontWeight: 900,
-            color: "#C8913C",
+            color: "#22d3ee",
             letterSpacing: s * -0.02,
           }}
         >

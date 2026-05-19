@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
+import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
+  BarChart3,
   CalendarRange,
   Camera,
   Eye,
@@ -964,6 +966,15 @@ export default function AdminCampaignsPage() {
                   <FileDown className="h-3.5 w-3.5" />
                   완료 보고서 PDF
                 </a>
+                {selectedId ? (
+                  <Link
+                    href={`/admin/campaigns/${selectedId}/analytics`}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#a855f7]/40 bg-[linear-gradient(135deg,rgba(168,85,247,0.22),rgba(34,211,238,0.12))] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_40px_rgba(168,85,247,0.12)] transition-all hover:brightness-110"
+                  >
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    성과 분석
+                  </Link>
+                ) : null}
               </div>
               <p className="font-mono text-[10px] tracking-tight text-muted-foreground">
                 {`// `}서버 PDF(완료 보고서)는 KPI·패턴·매체·일정·문서를 반영합니다. 이미지 저장은 화면 캡처용입니다.
