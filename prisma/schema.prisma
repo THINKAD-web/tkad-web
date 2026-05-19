@@ -42,6 +42,30 @@ enum MediaPricePeriod {
   day
 }
 
+enum NotificationType {
+  CAMPAIGN_START
+  CAMPAIGN_END
+  QUOTE_RECEIVED
+  QUOTE_ACCEPTED
+  MEDIA_AVAILABLE
+  REPORT_READY
+  REVIEW_REQUEST
+  SYSTEM
+}
+
+enum MediaReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TeamMemberRole {
+  OWNER
+  ADMIN
+  PLANNER
+  VIEWER
+}
+
 enum CrmTier {
   vip
   standard
@@ -180,6 +204,7 @@ model Media {
   bookings             MediaBooking[]
   instantBookings      Booking[]
   advertiserExecutions MediaAdvertiserExecution[]
+  reviews              MediaReview[]
 
   /// 네트워크 패키지 내 개별 지점과의 연결 (선택)
   networkLocations MediaNetworkLocation[]
@@ -346,6 +371,7 @@ model Campaign {
   proofPhotos    CampaignProofPhoto[]
   successCase    SuccessCase?
   oohQuote       OoHQuote?
+  mediaReviews   MediaReview[]
 
   @@index([status])
   @@index([ownerUserId])
@@ -839,8 +865,10 @@ model User {
    * 커뮤니티 멤버 디렉터리·프로필용 지역 (서울/부산/대구 등)
    */
   region          String?              @map("region")
-  emailVerifiedAt DateTime?            @map("email_verified_at")
-  lastLoginAt     DateTime?            @map("last_login_at")
+  emailVerifiedAt           DateTime? @map("email_verified_at")
+  emailVerifyToken          String?   @unique @map("email_verify_token")
+  emailVerifyTokenExpiresAt DateTime? @map("email_verify_token_expires_at")
+  lastLoginAt               DateTime? @map("last_login_at")
   deletedAt       DateTime?            @map("deleted_at")
   createdAt       DateTime             @default(now()) @map("created_at")
   updatedAt       DateTime             @updatedAt @map("updated_at")
@@ -857,9 +885,51 @@ model User {
   creatives               Creative[]             @relation("UserCreatives")
   playlists               CreativePlaylist[]     @relation("UserPlaylists")
   newsletterSubscriptions NewsletterSubscriber[] @relation("UserNewsletters")
+  notifications           Notification[]
+  ownedTeams              Team[]                 @relation("TeamOwner")
+  teamMemberships         TeamMember[]
+  mediaReviews            MediaReview[]
+  mediaReviewHelpfuls     MediaReviewHelpful[]
+  passwordResetTokens     PasswordResetToken[]
+  searchLogs              SearchLog[]
+  preference              UserPreference?
 
   @@index([email])
   @@map("users")
+}
+
+/// 가입 온보딩·맞춤 추천용 프로필
+model UserPreference {
+  id                    String    @id @default(cuid())
+  userId                String    @unique @map("user_id")
+  /// ADVERTISER | AGENCY | MEDIA | BROWSER
+  onboardingRole        String?   @map("onboarding_role")
+  /// beauty_fashion, fnb, tech, finance, entertainment, other
+  industries            String[]  @default([])
+  /// under_500 | 500_3000 | over_3000 | undecided
+  budgetRange           String?   @map("budget_range")
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+/// 비밀번호 재설정 (1시간 유효, 사용 후 삭제)
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }
 
 /// 트렌드 리포트 뉴스레터 구독자.
@@ -974,6 +1044,8 @@ model SavedPlannerPlan {
    * 저장 시 선택적으로 입력. 재편집·이메일 재전송 플로우에 활용
    */
   userEmail String?  @map("user_email")
+  teamId    String?  @map("team_id")
+  isTeamShared Boolean @default(false) @map("is_team_shared")
   /**
    * PlannerStore partialize 결과 그대로 직렬화된 입력 상태 전체
    */
@@ -982,8 +1054,62 @@ model SavedPlannerPlan {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  team Team? @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
   @@index([expiresAt])
+  @@index([teamId, isTeamShared])
   @@map("saved_planner_plans")
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(120)
+  ownerId   String   @map("owner_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  owner        User               @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members      TeamMember[]
+  invites      TeamInvite[]
+  plannerPlans SavedPlannerPlan[]
+
+  @@index([ownerId])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String         @id @default(cuid())
+  teamId    String         @map("team_id")
+  userId    String         @map("user_id")
+  role      TeamMemberRole
+  invitedAt DateTime?      @map("invited_at")
+  joinedAt  DateTime       @default(now()) @map("joined_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@unique([userId])
+  @@index([teamId])
+  @@map("team_members")
+}
+
+model TeamInvite {
+  id         String         @id @default(cuid())
+  teamId     String         @map("team_id")
+  email      String         @db.VarChar(254)
+  role       TeamMemberRole @default(VIEWER)
+  token      String         @unique @db.VarChar(64)
+  expiresAt  DateTime       @map("expires_at")
+  invitedBy  String         @map("invited_by")
+  acceptedAt DateTime?      @map("accepted_at")
+  createdAt  DateTime       @default(now()) @map("created_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([email])
+  @@map("team_invites")
 }
 
 /// AI 캠페인 제안서 저장·공유 (30일 TTL)
@@ -1013,6 +1139,86 @@ model UserFavoriteMedia {
   @@unique([userId, mediaId])
   @@index([mediaId])
   @@map("user_favorite_medias")
+}
+
+/// 로그인 사용자 최근 본 매체 (다기기 동기화, 최대 20개는 앱 레이어에서 유지)
+model UserRecentlyViewedMedia {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  mediaId   String   @map("media_id")
+  name      String   @db.VarChar(200)
+  type      String   @db.VarChar(64)
+  region    String   @db.VarChar(64)
+  thumbnail String?  @db.VarChar(512)
+  price     Int      @default(0)
+  visitedAt DateTime @map("visited_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, mediaId])
+  @@index([userId, visitedAt(sort: Desc)])
+  @@map("user_recently_viewed_medias")
+}
+
+/// 사용자 인앱 알림 (캠페인·견적·매체·리포트 등)
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String           @db.VarChar(200)
+  body      String           @db.Text
+  link      String?          @db.VarChar(512)
+  isRead    Boolean          @default(false) @map("is_read")
+  /// cron·훅 중복 방지 (예: campaign_start:{campaignId}:{ymd})
+  dedupeKey String?          @map("dedupe_key")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+/// 매체 상세 리뷰·평점 (어드민 승인 후 공개)
+model MediaReview {
+  id             String            @id @default(cuid())
+  mediaId        String            @map("media_id")
+  userId         String            @map("user_id")
+  rating         Int
+  title          String            @db.VarChar(120)
+  body           String            @db.Text
+  campaignPeriod String?           @map("campaign_period") @db.VarChar(80)
+  industry       String?           @db.VarChar(60)
+  isVerified     Boolean           @default(false) @map("is_verified")
+  helpfulCount   Int               @default(0) @map("helpful_count")
+  status         MediaReviewStatus @default(PENDING)
+  campaignId     String?           @map("campaign_id")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  media    Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  helpfuls MediaReviewHelpful[]
+
+  @@unique([mediaId, userId])
+  @@index([mediaId, status])
+  @@index([status, createdAt(sort: Desc)])
+  @@map("media_reviews")
+}
+
+model MediaReviewHelpful {
+  id        String   @id @default(cuid())
+  reviewId  String   @map("review_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  review MediaReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@map("media_review_helpfuls")
 }
 
 // ── Community (Phase 3a) ─────────────────────────────────────────
@@ -1367,4 +1573,21 @@ model PaymentLog {
 
   @@index([bookingId])
   @@map("payment_logs")
+}
+
+/// 통합 검색 로그 (인기·무결과 검색어 분석)
+model SearchLog {
+  id          String   @id @default(cuid())
+  query       String
+  locale      String   @default("ko")
+  resultCount Int      @default(0) @map("result_count")
+  userId      String?  @map("user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([query])
+  @@index([resultCount])
+  @@map("search_logs")
 }

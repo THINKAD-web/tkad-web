@@ -15,6 +15,16 @@ function buildGtmBootstrap(containerId: string): string {
   `;
 }
 
+function buildGa4Bootstrap(measurementId: string): string {
+  return `
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = window.gtag || gtag;
+    gtag('js', new Date());
+    gtag('config', '${measurementId}');
+  `;
+}
+
 export function PublicAnalyticsLoader() {
   const pathname = usePathname();
   const [config, setConfig] = useState<PublicAnalyticsConfig | null>(null);
@@ -52,9 +62,13 @@ export function PublicAnalyticsLoader() {
   return (
     <>
       {config.gtm ? (
-        <Script id={`gtm-loader-${config.gtm.containerId}`} strategy="afterInteractive">
-          {buildGtmBootstrap(config.gtm.containerId)}
-        </Script>
+        <Script
+          id={`gtm-loader-${config.gtm.containerId}`}
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: buildGtmBootstrap(config.gtm.containerId),
+          }}
+        />
       ) : null}
 
       {config.ga4 ? (
@@ -67,15 +81,10 @@ export function PublicAnalyticsLoader() {
           <Script
             id={`ga4-config-${config.ga4.measurementId}`}
             strategy="afterInteractive"
-          >
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              window.gtag = window.gtag || gtag;
-              gtag('js', new Date());
-              gtag('config', '${config.ga4.measurementId}');
-            `}
-          </Script>
+            dangerouslySetInnerHTML={{
+              __html: buildGa4Bootstrap(config.ga4.measurementId),
+            }}
+          />
         </>
       ) : null}
     </>

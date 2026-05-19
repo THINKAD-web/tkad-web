@@ -15,10 +15,15 @@ const FloatingSupportDock = dynamic(
   () => import("@/components/floating-support-dock"),
   { ssr: false },
 );
+const RecentlyViewedSync = dynamic(
+  () => import("@/components/recently-viewed-sync"),
+  { ssr: false },
+);
 
 export default function DeferredPublicWidgets() {
   return (
     <>
+      <RecentlyViewedSync />
       <ExitIntentPopup />
       <FloatingSupportDock />
     </>

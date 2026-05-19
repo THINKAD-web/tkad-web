@@ -16,6 +16,7 @@ import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options"
 import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverage-codes";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
+import { notifyFavoriteUsersMediaAvailability } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -477,6 +478,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         id: media.id,
         name: media.name,
       });
+    }
+    if (
+      body.availability != null &&
+      media.availability !== existing.availability
+    ) {
+      void notifyFavoriteUsersMediaAvailability(
+        media.id,
+        media.name,
+        existing.availability,
+        media.availability,
+      );
     }
     try {
       for (const locale of ["ko", "en"] as const) {

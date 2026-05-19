@@ -22,6 +22,7 @@ import {
   getSimilarMediaFromCatalog,
   typeLabels,
 } from "@/lib/media-data";
+import { mediaItemToRecentlyViewedRecord } from "@/lib/recently-viewed";
 import {
   buildMediaMetaDescription,
   buildMediaMetaKeywordsList,
@@ -58,9 +59,11 @@ import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { TrafficCharts } from "@/components/media-detail/traffic-charts";
 import { MediaAvailabilityCalendar } from "@/components/media-detail/availability-calendar";
+import { MediaQuoteCalculator } from "@/components/media-detail/media-quote-calculator";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import MediaDetailStickyCta from "@/components/media-detail-sticky-cta";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
+import { MediaReviewsSection } from "@/components/media-detail/media-reviews-section";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
 import TrackMediaView from "@/components/track-media-view";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
@@ -209,7 +212,7 @@ export default async function MediaDetailPage({ params }: Props) {
   return (
     <>
       <TrackMediaView
-        mediaId={media.id}
+        record={mediaItemToRecentlyViewedRecord(media, { isKo })}
         offlineCard={{
           id: media.id,
           name: isKo ? media.name : media.nameEn || media.name,
@@ -663,6 +666,10 @@ export default async function MediaDetailPage({ params }: Props) {
             </section>
           ) : null}
 
+          {media.price > 0 ? (
+            <MediaQuoteCalculator media={media} isKo={isKo} className="mt-10" />
+          ) : null}
+
           <div className="mt-16">
             <SectionHead
               number="03"
@@ -852,14 +859,21 @@ export default async function MediaDetailPage({ params }: Props) {
             </>
           ) : null}
 
+          {!media.keywordFilter ? (
+            <MediaReviewsSection
+              mediaId={media.id}
+              mediaName={isKo ? media.name : media.nameEn || media.name}
+            />
+          ) : null}
+
           <MediaSimilarCarousel
             items={similar}
             isKo={isKo}
-            title={t("similarTitle")}
+            title={media.keywordFilter ? t("similarTitle") : t("viewedAlsoTitle")}
             sortable={
               media.keywordFilter
                 ? undefined
-                : { catalog, currentMedia: media, limit: 6 }
+                : { catalog, currentMedia: media, limit: 3 }
             }
           />
         </div>

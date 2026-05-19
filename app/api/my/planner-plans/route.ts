@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/user-session";
+import { getTeamMembershipForUser } from "@/lib/team-context";
 import { getPrisma } from "@/lib/prisma";
 import { apiError, apiOk, apiServerError } from "@/lib/api-response";
 import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
@@ -18,19 +19,51 @@ export async function GET(request: NextRequest) {
     const isKo = locale !== "en";
 
     const db = getPrisma();
-    const rows = await db.savedPlannerPlan.findMany({
-      where: {
-        userEmail: user.email,
-        expiresAt: { gt: new Date() },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 40,
-      select: {
-        id: true,
-        createdAt: true,
-        expiresAt: true,
-        planJson: true,
-      },
+    const teamCtx = await getTeamMembershipForUser(user.id);
+    const now = new Date();
+
+    const [mine, teamRows] = await Promise.all([
+      db.savedPlannerPlan.findMany({
+        where: {
+          userEmail: user.email,
+          expiresAt: { gt: now },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 40,
+        select: {
+          id: true,
+          createdAt: true,
+          expiresAt: true,
+          planJson: true,
+          isTeamShared: true,
+        },
+      }),
+      teamCtx
+        ? db.savedPlannerPlan.findMany({
+            where: {
+              teamId: teamCtx.team.id,
+              isTeamShared: true,
+              expiresAt: { gt: now },
+            },
+            orderBy: { createdAt: "desc" },
+            take: 40,
+            select: {
+              id: true,
+              createdAt: true,
+              expiresAt: true,
+              planJson: true,
+              isTeamShared: true,
+              userEmail: true,
+            },
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const seen = new Set<string>();
+    const rows = [...mine, ...teamRows].filter((row) => {
+      if (seen.has(row.id)) return false;
+      seen.add(row.id);
+      return true;
     });
 
     const items = rows.map((row) => {
@@ -47,6 +80,7 @@ export async function GET(request: NextRequest) {
         title: summary.title,
         budgetManwon: summary.budgetManwon,
         mediaCount: summary.mediaCount,
+        isTeamShared: Boolean(row.isTeamShared),
       };
     });
 

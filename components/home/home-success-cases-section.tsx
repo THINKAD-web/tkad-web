@@ -18,12 +18,12 @@ export function HomeSuccessCasesSection({ cases }: Props) {
   return (
     <div className="mt-5 sm:mt-8 lg:mt-10">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ {t("homeCasesKicker")} ]
         </p>
         <Link
           href="/cases"
-          className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-white/70 transition-colors hover:text-[#22d3ee]"
+          className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-primary"
         >
           {t("homeCasesViewAll")}
           <ArrowRight className="h-4 w-4" />

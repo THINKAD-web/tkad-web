@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
-export type MyHubTab = "campaigns" | "favorites" | "planner" | "recent";
+export type MyHubTab = "campaigns" | "favorites" | "planner" | "recent" | "team";
 
 type TabDef = {
   key: MyHubTab;

@@ -3,6 +3,7 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
 import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export async function generateMetadata({
   params,
@@ -52,10 +53,7 @@ export default async function QuoteLayout({
   ]);
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
-      />
+      <JsonLd data={breadcrumb} />
       {children}
     </>
   );

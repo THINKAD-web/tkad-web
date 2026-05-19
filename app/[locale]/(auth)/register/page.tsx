@@ -71,7 +71,7 @@ export default function RegisterPage() {
         );
         return;
       }
-      router.push("/my");
+      router.push("/onboarding");
       router.refresh();
     } catch {
       setError("네트워크 오류가 발생했습니다.");

@@ -1,0 +1,111 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { BtnBlock } from "@/components/brutalist";
+import { Spinner } from "@/components/ui/spinner";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+
+export default function ForgotPasswordPage() {
+  const locale = useLocale();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const inputCls =
+    "tkad-auth-input h-11 w-full rounded-[18px] border border-white/12 bg-black/28 px-4 font-mono text-sm font-semibold text-white placeholder:text-white/45 outline-none backdrop-blur transition-all focus:border-white/18 focus:ring-2 focus:ring-white/12";
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, locale }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setError(data?.error?.message ?? "요청 처리에 실패했습니다.");
+        return;
+      }
+      setDone(true);
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
+        <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
+          <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border border-white/12 bg-black/45 p-6 text-white shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
+            <div className="mb-6 text-center">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
+                [ FORGOT PASSWORD ]
+              </p>
+              <h1 className="mt-2 text-2xl font-black tracking-tight text-white">
+                비밀번호 찾기
+              </h1>
+              <p className="mt-2 font-mono text-[12px] tracking-tight text-white/55">
+                {`// `}가입 이메일로 재설정 링크를 보내드립니다
+              </p>
+            </div>
+
+            {done ? (
+              <div className="rounded-[18px] border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 font-mono text-[12px] text-emerald-100">
+                등록된 이메일이 있다면 재설정 링크를 보냈습니다. 받은편지함을 확인해 주세요.
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65"
+                  >
+                    [ 이메일 ]
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+                {error && (
+                  <div className="rounded-[18px] border border-white/14 bg-black/35 px-3 py-2 font-mono text-[12px] text-white/85">
+                    {`// `}{error}
+                  </div>
+                )}
+                <BtnBlock
+                  type="submit"
+                  variant="accent"
+                  size="lg"
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading && <Spinner size="sm" />}
+                  {loading ? "발송 중…" : "재설정 링크 보내기"}
+                </BtnBlock>
+              </form>
+            )}
+
+            <p className="mt-6 text-center font-mono text-[12px] text-white/60">
+              <Link href="/login" className="font-bold text-white hover:underline">
+                로그인으로 돌아가기
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </HomeLandingDayNight>
+  );
+}

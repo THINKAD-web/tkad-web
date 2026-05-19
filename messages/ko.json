@@ -95,7 +95,9 @@
     "packageProposal": "패키지 제안",
     "packageProposalDesc": "목적·지역별 검증 OOH 패키지",
     "searchPlaceholder": "매체명·지역 검색",
+    "searchPlaceholderUnified": "매체·패키지·사례·리포트 검색",
     "searchAria": "매체 검색",
+    "searchAriaUnified": "통합 검색 열기",
     "searchSubmit": "검색",
     "comingSoonBadge": "준비중",
     "beta": "BETA",
@@ -216,9 +218,11 @@
   "auth": {
     "login": "로그인",
     "signup": "회원가입",
+    "logout": "로그아웃",
     "myCampaigns": "내 캠페인",
     "myPage": "마이페이지",
     "kakaoLogin": "카카오로 시작하기",
+    "naverLogin": "네이버로 로그인",
     "backToLogin": "로그인으로 돌아가기",
     "orEmail": "또는 이메일로"
   },
@@ -230,7 +234,8 @@
       "campaigns": "내 캠페인",
       "favorites": "저장한 매체",
       "planner": "내 플래너",
-      "recent": "최근 본 매체"
+      "recent": "최근 본 매체",
+      "team": "팀 관리"
     },
     "campaigns": {
       "loading": "캠페인 불러오는 중…",
@@ -264,6 +269,18 @@
       "emptyDesc": "매체를 둘러보면 이곳에 최대 20개까지 표시됩니다.",
       "emptyCta": "매체 탐색하기"
     }
+  },
+  "notifications": {
+    "title": "알림",
+    "viewAll": "전체 보기",
+    "markAllRead": "전체 읽음",
+    "filterAll": "전체",
+    "filterUnread": "안 읽음",
+    "emptyTitle": "알림이 없습니다",
+    "emptyDesc": "캠페인·견적·찜한 매체 소식이 여기에 표시됩니다.",
+    "loading": "알림 불러오는 중…",
+    "headerAria": "알림",
+    "headerAriaCount": "알림 {count}건"
   },
   "hero": {
     "title": "한국 OOH 광고의 모든 것",
@@ -499,6 +516,7 @@
     "sortPriceAsc": "가격 낮은순",
     "sortPriceDesc": "가격 높은순",
     "sortTrafficDesc": "유동인구 많은순",
+    "sortRatingDesc": "평점 높은순",
     "quickInquiryFavorite": "찜하기 ♡",
     "quickInquiryCta": "빠른 문의",
     "availabilityLive": {
@@ -658,6 +676,7 @@
       "empty": "문의 시 안내",
       "adminEdit": "관리자 수정",
       "similarTitle": "이 매체 어때?",
+      "viewedAlsoTitle": "이 매체를 본 사람들이 많이 본 매체",
       "caseStudiesTitle": "진행·집행 사례",
       "galleryLightboxClose": "닫기",
       "galleryLightboxPrev": "이전 이미지",
@@ -715,12 +734,27 @@
       "similarSortPrice": "가격 유사",
       "similarSortVisibility": "가시성 높은 순",
       "similarDistance": "거리 약 {km}km",
+      "reviewsTitle": "광고주 리뷰",
       "availability": {
         "available": "예약 가능",
         "reserved": "예약 진행 중",
         "maintenance": "점검 중"
       },
       "quoteStripHint": "관심 가는 매체라면 견적서에 담아보세요"
+    },
+    "reviews": {
+      "writeTitle": "매체 리뷰 작성",
+      "writeSubtitle": "{name} 집행 경험을 공유해 주세요. 검수 후 게시됩니다.",
+      "rating": "별점",
+      "reviewTitle": "제목",
+      "reviewBody": "내용",
+      "campaignPeriod": "집행 기간",
+      "industry": "업종 (표시명)",
+      "submit": "리뷰 제출",
+      "back": "매체 상세로",
+      "pendingNote": "리뷰가 접수되었습니다. 검수 후 게시됩니다.",
+      "loginRequired": "리뷰 작성은 로그인 후 가능합니다.",
+      "alreadyReviewed": "이미 이 매체에 리뷰를 작성하셨습니다."
     },
     "ai": {
       "tabSearch": "매체 검색",
@@ -1920,7 +1954,34 @@
     "backToSite": "사이트로 돌아가기",
     "signOut": "로그아웃",
     "instantBookings": "즉시 예약",
-    "mediaApplications": "매체 등록 신청"
+    "mediaApplications": "매체 등록 신청",
+    "mediaReviews": "매체 리뷰",
+    "searchStats": "검색 통계"
+  },
+  "search": {
+    "modalTitle": "통합 검색",
+    "modalPlaceholder": "매체, 지역, 브랜드, 리포트…",
+    "recent": "최근 검색",
+    "popular": "인기 검색어",
+    "mediaSuggest": "매체 추천",
+    "sectionMedia": "매체",
+    "sectionPackages": "패키지",
+    "sectionCases": "성공 사례",
+    "sectionReports": "리포트",
+    "sectionAcademy": "아카데미",
+    "viewAll": "전체 결과 보기 ({count}건)",
+    "noResultsShort": "검색 결과가 없습니다",
+    "pageSubtitleEmpty": "검색어를 입력하세요",
+    "submit": "검색",
+    "tabAll": "전체",
+    "tabMedia": "매체",
+    "tabPackages": "패키지",
+    "tabContent": "콘텐츠",
+    "noResults": "검색 결과가 없습니다",
+    "noResultsHint": "다른 키워드를 시도하거나 AI 플래너로 캠페인을 설계해 보세요.",
+    "similarQueries": "비슷한 검색어",
+    "plannerCta": "AI 플래너 시작",
+    "browseMedia": "매체 탐색"
   },
   "adminApplications": {
     "title": "매체 등록 신청",
@@ -2651,6 +2712,50 @@
     "packagesMeta": "에디토리얼 묶음 · 5개 루트",
     "packagesLead": "강남·성수·도심 등 목적에 맞춘 실매체 패키지로 빠르게 제안하세요.",
     "packagesCta": "패키지 보기",
-    "packagesTitle": "지역별 <accent>패키지</accent> 큐레이션"
+    "packagesTitle": "지역별 <accent>패키지</accent> 큐레이션",
+    "personalizedKicker": "For you",
+    "personalizedTitle": "안녕하세요, {name}님! <accent>맞춤 추천</accent> 매체예요",
+    "personalizedMeta": "온보딩 프로필 기반 큐레이션",
+    "personalizedCtaRecommend": "AI 추천 더 보기",
+    "personalizedCtaPlanner": "AI 플래너 써보기"
+  },
+  "onboarding": {
+    "kicker": "Welcome",
+    "title": "프로필 설정",
+    "skip": "건너뛰기",
+    "next": "다음",
+    "back": "이전",
+    "stepLabel": "단계 {current} / {total}",
+    "saveError": "저장에 실패했습니다. 다시 시도해주세요.",
+    "industryRequired": "업종을 하나 이상 선택해주세요.",
+    "progressMessage": "프로필 완성도 {percent}% — 완성하면 맞춤 추천이 더 정확해져요",
+    "step1Title": "어떤 목적으로 사용하실 건가요?",
+    "step1Desc": "맞춤 기능과 추천에 활용됩니다.",
+    "roleAdvertiser": "광고주",
+    "roleAdvertiserDesc": "캠페인 집행",
+    "roleAgency": "광고 대행사",
+    "roleAgencyDesc": "클라이언트 대신 집행",
+    "roleMedia": "매체사",
+    "roleMediaDesc": "매체 등록·관리",
+    "roleBrowser": "그냥 둘러보기",
+    "roleBrowserDesc": "우선 탐색만 할게요",
+    "step2Title": "주로 어떤 업종 캠페인을 진행하세요?",
+    "step2Desc": "복수 선택 가능합니다.",
+    "industryBeauty": "뷰티/패션",
+    "industryFnb": "F&B",
+    "industryTech": "IT/테크",
+    "industryFinance": "금융",
+    "industryEntertainment": "엔터",
+    "industryOther": "기타",
+    "step3Title": "주로 어느 정도 예산으로 집행하세요?",
+    "step3Desc": "월 기준 예산 범위를 선택해주세요.",
+    "budgetUnder500": "500만원 미만",
+    "budget500to3000": "500만원 ~ 3,000만원",
+    "budgetOver3000": "3,000만원 이상",
+    "budgetUndecided": "아직 미정",
+    "step4Title": "맞춤 추천 준비됐어요!",
+    "step4Desc": "입력하신 프로필을 바탕으로 추천 매체입니다.",
+    "ctaExplore": "매체 탐색 시작하기",
+    "ctaPlanner": "AI 플래너 써보기"
   }
 }

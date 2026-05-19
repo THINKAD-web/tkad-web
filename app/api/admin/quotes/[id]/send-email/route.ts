@@ -8,6 +8,7 @@ import {
   isEmailConfigured,
   sendEmailWithPdfAttachment,
 } from "@/lib/email/client";
+import { notifyUserByEmail } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -93,6 +94,16 @@ export async function POST(request: NextRequest, ctx: Ctx) {
       sentAt: new Date(),
       clientEmail: toRaw,
     },
+  });
+
+  void notifyUserByEmail(toRaw, {
+    type: "QUOTE_RECEIVED",
+    title: "견적서가 도착했습니다",
+    body: q.isKo
+      ? `견적번호 ${q.quoteNumber}`
+      : `Quote ${q.quoteNumber}`,
+    link: `/quote/${id}`,
+    dedupeKey: `quote_sent:${id}`,
   });
 
   return json({

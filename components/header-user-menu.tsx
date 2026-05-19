@@ -12,6 +12,7 @@ import {
 import { HeaderProfileDropdown } from "@/components/header-profile-dropdown";
 import { useCart } from "@/lib/cart";
 import { HeaderFavoritesLink } from "@/components/header-favorites-link";
+import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 
 type Session = { id: string; email: string; name: string; role: string } | null;
@@ -62,6 +63,11 @@ export function HeaderUserMenu({
       <div className="divide-y divide-zinc-200 dark:divide-white/10">
         <FavoritesSessionSync />
         <HeaderFavoritesLink
+          onNavigate={onNavigate}
+          variant="menu"
+          className={menuRowClass}
+        />
+        <HeaderNotificationsBell
           onNavigate={onNavigate}
           variant="menu"
           className={menuRowClass}
@@ -117,6 +123,7 @@ export function HeaderUserMenu({
     <div className="flex items-center gap-1.5">
       <FavoritesSessionSync />
       <HeaderFavoritesLink onNavigate={onNavigate} />
+      <HeaderNotificationsBell onNavigate={onNavigate} />
       <Link
         href="/cart"
         onClick={onNavigate}

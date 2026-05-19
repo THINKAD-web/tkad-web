@@ -7,10 +7,14 @@ import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { type Testimonial } from "@/data/testimonials";
+import { cn } from "@/lib/utils";
 
 type Props = {
   items: Testimonial[];
 };
+
+const cardClass =
+  "group relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden rounded-[28px] border border-border/60 bg-card/90 p-7 shadow-[0_14px_44px_rgba(0,0,0,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 tkad-neon-border dark:border-white/12 dark:bg-white/6 dark:shadow-[0_18px_72px_rgba(0,0,0,0.45)] sm:p-8 md:basis-[48%] lg:basis-[32%]";
 
 /**
  * Embla 기반 캐러셀 — 5초 간격 자동 재생, hover 정지, 모바일은 스와이프·데스크톱은 화살표.
@@ -52,17 +56,14 @@ export function TestimonialsCarousel({ items }: Props) {
   }, [emblaApi]);
 
   return (
-    <div className="relative">
+    <div className="tkad-testimonials-carousel relative">
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex gap-5 sm:gap-6">
           {items.map((t) => (
-            <article
-              key={t.id}
-              className="group relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden rounded-[28px] bg-white/6 p-7 backdrop-blur transition-all duration-300 hover:-translate-y-1 tkad-neon-border tkad-neon-glow sm:p-8 md:basis-[48%] lg:basis-[32%]"
-            >
+            <article key={t.id} className={cardClass}>
               <Quote
                 aria-hidden
-                className="absolute right-5 top-5 h-10 w-10 text-white/10 transition-colors group-hover:text-white/16"
+                className="absolute right-5 top-5 h-10 w-10 text-foreground/10 transition-colors group-hover:text-foreground/16 dark:text-white/10 dark:group-hover:text-white/16"
                 strokeWidth={1.5}
                 fill="currentColor"
               />
@@ -78,19 +79,19 @@ export function TestimonialsCarousel({ items }: Props) {
                 ) : (
                   <span
                     aria-hidden
-                    className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-hero-void text-base font-extrabold text-hero-fg"
+                    className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-muted text-base font-extrabold text-foreground dark:bg-hero-void dark:text-hero-fg"
                   >
                     {t.initials}
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-bold tracking-tight text-white">
+                  <div className="truncate text-sm font-bold tracking-tight text-foreground">
                     {isKo ? t.nameKo : t.nameEn}
                   </div>
-                  <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">
+                  <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                     {isKo ? t.roleKo : t.roleEn}
                   </div>
-                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] tracking-tight text-white/65">
+                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] tracking-tight text-muted-foreground">
                     {t.logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={t.logoUrl} alt="" className="h-4 w-auto" />
@@ -98,7 +99,7 @@ export function TestimonialsCarousel({ items }: Props) {
                     <span className="truncate">
                       {isKo ? t.companyKo : t.companyEn}
                     </span>
-                    <span className="text-white/20">·</span>
+                    <span className="text-border">·</span>
                     <span className="truncate">
                       {isKo ? t.industryKo : t.industryEn}
                     </span>
@@ -107,29 +108,32 @@ export function TestimonialsCarousel({ items }: Props) {
               </header>
 
               <div
-                className="mb-6 inline-flex w-fit items-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-3 py-1.5 text-white shadow-[0_18px_72px_rgba(0,0,0,0.65)] backdrop-blur"
+                className="mb-6 inline-flex w-fit items-center gap-2 rounded-2xl border border-border/60 bg-muted/50 px-3 py-1.5 shadow-sm dark:border-white/14 dark:bg-white/6 dark:shadow-[0_18px_72px_rgba(0,0,0,0.65)]"
                 aria-label={isKo ? "성과 수치" : "Key outcome"}
               >
-                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em]">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                   {isKo ? "RESULT" : "RESULT"}
                 </span>
-                <span className="text-sm font-extrabold tracking-tight bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_45%,#ec4899_100%)] bg-clip-text text-transparent">
+                <span className="tkad-home-accent-text text-sm font-extrabold tracking-tight">
                   {isKo ? t.metricKo : t.metricEn}
                 </span>
               </div>
 
-              <p className="flex-1 text-[15px] leading-relaxed text-white/82">
+              <p className="flex-1 text-[15px] leading-relaxed text-foreground/85">
                 &ldquo;{isKo ? t.bodyKo : t.bodyEn}&rdquo;
               </p>
 
-              <footer className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+              <footer className="mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 dark:border-white/10">
                 <div className="flex items-center gap-0.5" aria-label={`별점 ${t.rating}`}>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-3.5 w-3.5 ${
-                        i < t.rating ? "fill-white text-white" : "text-white/14"
-                      }`}
+                      className={cn(
+                        "h-3.5 w-3.5",
+                        i < t.rating
+                          ? "fill-primary text-primary"
+                          : "text-muted-foreground/35",
+                      )}
                       strokeWidth={1.5}
                     />
                   ))}
@@ -137,7 +141,7 @@ export function TestimonialsCarousel({ items }: Props) {
                 {t.caseHref && (
                   <Link
                     href={t.caseHref}
-                    className="font-mono text-[11px] font-black uppercase tracking-[0.18em] text-white/80 hover:text-white"
+                    className="font-mono text-[11px] font-black uppercase tracking-[0.18em] text-primary hover:text-primary/80"
                   >
                     {isKo ? "사례 →" : "Case →"}
                   </Link>
@@ -154,7 +158,7 @@ export function TestimonialsCarousel({ items }: Props) {
           onClick={scrollPrev}
           disabled={!canPrev}
           aria-label="이전 후기"
-          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center border border-white/12 bg-white/6 text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:border-white/22 hover:bg-white/10 disabled:opacity-40"
+          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 dark:bg-white/6 dark:text-white dark:hover:border-white/22 dark:hover:bg-white/10"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -163,7 +167,7 @@ export function TestimonialsCarousel({ items }: Props) {
           onClick={scrollNext}
           disabled={!canNext}
           aria-label="다음 후기"
-          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center border border-white/12 bg-white/6 text-white backdrop-blur transition-all hover:-translate-y-0.5 hover:border-white/22 hover:bg-white/10 disabled:opacity-40"
+          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 dark:bg-white/6 dark:text-white dark:hover:border-white/22 dark:hover:bg-white/10"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -177,11 +181,12 @@ export function TestimonialsCarousel({ items }: Props) {
             onClick={() => scrollTo(i)}
             aria-label={`${i + 1}번 후기로 이동`}
             aria-current={selected === i}
-            className={`h-2 transition-all ${
+            className={cn(
+              "h-2 transition-all",
               selected === i
                 ? "w-8 bg-[linear-gradient(90deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)]"
-                : "w-2 bg-white/12 hover:bg-white/22"
-            }`}
+                : "w-2 bg-muted-foreground/25 hover:bg-muted-foreground/40 dark:bg-white/12 dark:hover:bg-white/22",
+            )}
           />
         ))}
       </div>

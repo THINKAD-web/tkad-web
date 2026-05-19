@@ -26,6 +26,8 @@ import {
   ShieldCheck,
   UserCog,
   Inbox,
+  Star,
+  Search,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -60,6 +62,7 @@ const navDefs = [
   { href: "/admin/community", key: "community" as const, icon: MessageSquareText },
   // 5) 매체/검증/네트워크
   { href: "/admin/applications", key: "mediaApplications" as const, icon: ClipboardList },
+  { href: "/admin/reviews", key: "mediaReviews" as const, icon: Star },
   { href: "/admin/medias", key: "medias" as const, icon: Monitor },
   { href: "/admin/verification", key: "verification" as const, icon: ShieldCheck },
   { href: "/admin/networks", key: "networks" as const, icon: Share2 },
@@ -68,6 +71,7 @@ const navDefs = [
   { href: "/admin/users", key: "users" as const, icon: UserCog },
   // 7) 분석/도구
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
+  { href: "/admin/search-stats", key: "searchStats" as const, icon: Search },
   { href: "/admin/ai-content", key: "aiContent" as const, icon: Sparkles },
 ];
 

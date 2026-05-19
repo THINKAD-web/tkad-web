@@ -1,149 +1,120 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
-import { Clock, MapPin, ArrowRight, RotateCcw } from "lucide-react";
-import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { ArrowRight, MapPin } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
-  clearRecentlyViewed,
-  fetchRecentlyViewedItems,
-  readRecentlyViewedIds,
+  readRecentlyViewedRecords,
   subscribeRecentlyViewedChanged,
+  type RecentlyViewedRecord,
 } from "@/lib/recently-viewed";
-import { typeLabels, type MediaItem } from "@/lib/media-data";
-import { formatMediaLocationShort } from "@/lib/media-location-format";
-import {
-  formatMediaPriceWonWithSymbol,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
+import { typeLabels } from "@/lib/media-data";
+import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
 import ScrollAnimate from "@/components/scroll-animate";
+import { cn } from "@/lib/utils";
 
 interface Props {
   locale: string;
 }
 
+const HOME_DISPLAY_MAX = 5;
+
 export default function HomeRecentlyViewed({ locale }: Props) {
   const isKo = locale === "ko";
-  const tMedia = useTranslations("media");
-  const [items, setItems] = useState<MediaItem[]>([]);
+  const [items, setItems] = useState<RecentlyViewedRecord[]>([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const ids = readRecentlyViewedIds();
-    if (ids.length === 0) {
-      const frame = window.requestAnimationFrame(() => {
-        setReady(true);
-      });
-      return () => window.cancelAnimationFrame(frame);
-    }
-    let cancelled = false;
-    void fetchRecentlyViewedItems()
-      .then((data) => {
-        if (!cancelled) {
-          setItems(data);
-          setReady(true);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setItems([]);
-          setReady(true);
-        }
-      });
-    return () => {
-      cancelled = true;
+    const load = () => {
+      setItems(readRecentlyViewedRecords());
+      setReady(true);
     };
-  }, []);
-
-  useEffect(() => {
-    return subscribeRecentlyViewedChanged(() => {
-      void fetchRecentlyViewedItems()
-        .then(setItems)
-        .catch(() => setItems([]));
-    });
+    load();
+    return subscribeRecentlyViewedChanged(load);
   }, []);
 
   if (!ready) return null;
   if (items.length === 0) return null;
 
+  const visible = items.slice(0, HOME_DISPLAY_MAX);
+
   return (
-    <section className="bg-white py-16">
+    <section
+      className="border-t border-white/10 bg-black/20 py-14 sm:py-16"
+      aria-label={isKo ? "최근에 보신 매체" : "Recently viewed media"}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollAnimate>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-1.5 text-sm font-semibold text-navy/70">
-                <Clock className="h-4 w-4" />
-                {isKo ? "최근 본 매체" : "Recently Viewed"}
-              </div>
-              <h2 className="mt-1 text-2xl font-bold text-navy">
-                {isKo ? "최근 확인한 매체" : "Recently Viewed Media"}
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-white/55">
+                {isKo ? "// PERSONAL" : "// PERSONAL"}
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                {isKo ? "최근에 보신 매체" : "Recently viewed"}
               </h2>
             </div>
-            <div className="flex items-center gap-3 self-start sm:self-auto">
-              <button
-                type="button"
-                onClick={() => {
-                  clearRecentlyViewed();
-                  setItems([]);
-                }}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-white px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors sm:min-h-0"
-                aria-label={isKo ? "최근 본 매체 초기화" : "Reset recently viewed"}
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                {isKo ? "초기화" : "Reset"}
-              </button>
-              <Link
-                href="/media"
-                className="link-underline-grow inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-gold transition-colors hover:text-gold-dark sm:min-h-0"
-              >
-                {isKo ? "전체 보기" : "View All"} <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
+            <Link
+              href="/my?tab=recent"
+              className="link-underline-grow inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-cyan-300 transition-colors hover:text-cyan-200 sm:min-h-0 sm:self-auto"
+            >
+              {isKo ? "전체 보기" : "View all"}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
           </div>
         </ScrollAnimate>
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-          {items.slice(0, 3).map((media, i) => (
-            <ScrollAnimate key={media.id} delay={i * 100}>
-              <Link href={`/media/${media.id}`} className="block touch-manipulation">
-                <Card className="group min-w-0 cursor-pointer overflow-hidden border-0 shadow-md transition-all hover:shadow-lg hover:-translate-y-1">
-                  <MediaCatalogThumbnail
-                    media={media}
-                    placeholderLabel={tMedia("imagePreparing")}
-                    className="flex h-48 items-center justify-center"
-                    imgClassName="transition duration-300 group-hover:scale-105"
-                    bottomGradientClassName={null}
-                    placeholderSize="xs"
-                  />
-                  <CardHeader className="min-w-0 p-3 pb-1.5">
-                    <Badge variant="secondary" className="w-fit bg-navy/5 text-navy text-[10px]">
-                      {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
-                    </Badge>
-                    <CardTitle className="truncate text-sm font-bold leading-snug">
-                      {isKo ? media.name : (media.nameEn || media.name)}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="min-w-0 px-3 pb-3">
-                    <div className="flex min-w-0 items-start gap-1 text-xs leading-snug text-muted-foreground">
-                      <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-                      <span className="min-w-0 truncate">
-                        {formatMediaLocationShort(media, isKo)}
-                      </span>
+
+        <div
+          className={cn(
+            "mt-8 flex gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none]",
+            "snap-x snap-mandatory",
+            "[&::-webkit-scrollbar]:hidden",
+          )}
+        >
+          {visible.map((media, i) => {
+            const typeLabel =
+              (isKo
+                ? typeLabels[media.type as keyof typeof typeLabels]?.ko
+                : typeLabels[media.type as keyof typeof typeLabels]?.en) ?? media.type;
+            return (
+              <ScrollAnimate key={media.id} delay={i * 80} className="shrink-0 snap-start">
+                <Link
+                  href={`/media/${media.id}`}
+                  className="group flex w-[min(82vw,240px)] flex-col overflow-hidden rounded-2xl border border-white/12 bg-white/5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur transition-transform hover:-translate-y-0.5"
+                >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-white/5">
+                    {media.thumbnail ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={media.thumbnail}
+                        alt=""
+                        className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
+                        {isKo ? "이미지 준비 중" : "No image"}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col gap-1.5 p-3">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/90">
+                      {typeLabel}
+                    </span>
+                    <p className="line-clamp-2 text-sm font-bold leading-snug text-white group-hover:text-cyan-100">
+                      {media.name}
+                    </p>
+                    <div className="flex min-w-0 items-start gap-1 text-xs text-white/60">
+                      <MapPin className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
+                      <span className="truncate">{media.region}</span>
                     </div>
-                    <div className="mt-1 text-sm font-bold text-navy">
+                    <p className="text-sm font-bold tabular-nums text-white">
                       {formatMediaPriceWonWithSymbol(media.price)}
-                      <span className="ml-1 text-[10px] font-normal text-muted-foreground">
-                        · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </ScrollAnimate>
-          ))}
+                    </p>
+                  </div>
+                </Link>
+              </ScrollAnimate>
+            );
+          })}
         </div>
       </div>
     </section>

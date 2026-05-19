@@ -59,7 +59,7 @@ function KakaoRegisterForm() {
         return;
       }
       const dest = data.data?.redirect || redirect;
-      router.push(dest);
+      router.push(dest === "/my" ? "/onboarding" : dest);
       router.refresh();
     } catch {
       setError("네트워크 오류가 발생했습니다.");

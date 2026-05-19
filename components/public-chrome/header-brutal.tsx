@@ -10,7 +10,7 @@ import { useRouter, usePathname } from "@/i18n/navigation";
 import { Globe } from "lucide-react";
 import { BrutalNav } from "@/components/brutalist";
 import { HeaderUserMenu } from "@/components/header-user-menu";
-import { HeaderMediaSearch } from "@/components/header-media-search";
+import { UnifiedSearchTrigger } from "@/components/search/unified-search-trigger";
 import { headerChromeIconButtonClass } from "@/components/public-chrome/header-chrome-buttons";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { NavContentStatus } from "@/lib/nav-content-status";
@@ -66,7 +66,7 @@ export function HeaderBrutal({ contentStatus: _contentStatus }: Props) {
             />
           }
         >
-          <HeaderMediaSearch />
+          <UnifiedSearchTrigger />
         </Suspense>
       }
       cta={{ href: "/contact", label: t("nav.contact") }}

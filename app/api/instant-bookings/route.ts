@@ -106,6 +106,15 @@ export async function POST(request: Request) {
     }
 
     const user = await getCurrentUser();
+    if (user) {
+      const { assertUserCanContactOrPay } = await import(
+        "@/lib/team-access-guard"
+      );
+      const guard = await assertUserCanContactOrPay(user.id);
+      if (!guard.ok) {
+        return NextResponse.json({ error: guard.message }, { status: 403 });
+      }
+    }
     const orderId = generateOrderId();
 
     // 라이브러리/플레이리스트 ID 가 들어왔다면 본인 소유 여부 검증 후에만 링크

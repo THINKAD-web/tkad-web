@@ -77,7 +77,7 @@ export function MediaCard({
           ? cn(
               "rounded-2xl border border-border/60 bg-card/85 backdrop-blur hover:-translate-y-1 hover:border-border/80 shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:shadow-[0_18px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_18px_60px_rgba(0,0,0,0.45)]",
               neon,
-              compact && "@container/card",
+              "@container/card",
             )
           : "border-2 border-border hover:-translate-y-0.5 hover:border-hermes/55 hover:shadow-[0_18px_55px_rgba(255,98,0,0.12)] dark:hover:shadow-[0_20px_60px_rgba(255,98,0,0.18)]",
         className,
@@ -159,11 +159,11 @@ export function MediaCard({
         {price ? (
           <p
             className={cn(
-              "mt-1 max-w-full font-mono font-black tabular-nums text-foreground",
+              "mt-1 min-w-0 max-w-full font-mono font-black tabular-nums text-foreground",
               premium
                 ? compact
-                  ? "min-w-0 break-words text-[clamp(0.8125rem,8cqi,1.625rem)] leading-[1.08] tracking-tight sm:text-[clamp(0.875rem,7.5cqi,1.75rem)]"
-                  : "text-[clamp(1.25rem,5vw,2.625rem)] leading-none sm:text-[clamp(1.35rem,4.5vw,2.625rem)]"
+                  ? "break-words text-[clamp(0.8125rem,7cqi,1.375rem)] leading-[1.12] tracking-tight"
+                  : "break-words text-[clamp(0.875rem,7.5cqi,1.5rem)] leading-[1.12] tracking-tight"
                 : compact
                   ? "text-2xl sm:text-3xl"
                   : "text-3xl sm:text-4xl",

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { KakaoLoginButton } from "@/components/auth/kakao-login-button";
+import { NaverLoginButton } from "@/components/auth/naver-login-button";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -77,7 +78,10 @@ function LoginForm() {
                 </p>
               </div>
 
-              <KakaoLoginButton />
+              <div className="space-y-3">
+                <KakaoLoginButton />
+                <NaverLoginButton />
+              </div>
 
               <div className="relative py-1">
                 <div className="absolute inset-0 flex items-center" aria-hidden>
@@ -108,12 +112,20 @@ function LoginForm() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="password"
-                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65"
-                  >
-                    [ 비밀번호 ]
-                  </label>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <label
+                      htmlFor="password"
+                      className="block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65"
+                    >
+                      [ 비밀번호 ]
+                    </label>
+                    <Link
+                      href="/forgot-password"
+                      className="font-mono text-[10px] text-white/50 transition-colors hover:text-white"
+                    >
+                      비밀번호 찾기
+                    </Link>
+                  </div>
                   <input
                     id="password"
                     type="password"
