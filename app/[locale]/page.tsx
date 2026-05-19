@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { type MediaItem } from "@/lib/media-data";
@@ -14,32 +13,34 @@ import {
   FileCheck,
 } from "lucide-react";
 
-import { TestimonialsCarousel } from "@/components/testimonials-carousel";
 import { HomeHeroServer } from "@/components/home/home-hero-server";
 import { HomeMediaHorizontalScroll } from "@/components/home/home-media-horizontal-scroll";
 import { testimonials } from "@/data/testimonials";
 import { Link } from "@/i18n/navigation";
-import { HomeClientLogos } from "@/components/home-client-logos";
-import { FloatingCta } from "@/components/floating-cta";
-import { HomeVerificationSteps } from "@/components/home-verification-steps";
+import { HomeVerificationStepsServer } from "@/components/home/home-verification-steps-server";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { HomeCommunitySection } from "@/components/home-community-section";
+import { HomeAppearanceShell } from "@/components/home/home-appearance-shell";
 import { listHomeCommunityPosts } from "@/lib/community/queries";
 import { getLatestPublishedSuccessCases } from "@/lib/public-content-queries";
 import { HomeSuccessCasesSection } from "@/components/home/home-success-cases-section";
 import type { CommunityPostListItem } from "@/lib/community/types";
 import { accentTag } from "@/lib/render-accent-title";
 import { HomeMediaPartnerCta } from "@/components/home-media-partner-cta";
-import HomeRecentlyViewed from "@/components/home-recently-viewed";
 import { getCurrentUser } from "@/lib/user-session";
 import { getUserPreferenceByUserId } from "@/lib/user-preference";
 import { recommendMediaForPreference } from "@/lib/onboarding-recommend";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { HomePersonalizedMedia } from "@/components/home/home-personalized-media";
 
-const ScrollAnimate = dynamic(() => import("@/components/scroll-animate"));
+import {
+  HomeClientLogosLazy,
+  HomeCommunitySectionLazy,
+  HomeFloatingCta,
+  HomeRecentlyViewedLazy,
+  HomeScrollAnimate,
+  HomeTestimonialsCarouselLazy,
+} from "@/components/home/home-client-widgets";
 
 /** 홈 — ISR 60초 (히어로·매체 그리드·통계 크롤러 노출) */
 export const revalidate = 60;
@@ -152,7 +153,7 @@ function HomeContent({
   ] as const;
 
   return (
-    <HomeLandingDayNight>
+    <HomeAppearanceShell>
       <HomeHeroServer
         locale={locale}
         marqueeImageUrls={heroVisuals.marqueeImageUrls}
@@ -173,29 +174,29 @@ function HomeContent({
 
       <div className="tkad-landing-neon">
         <NeonSection className="mt-0 pt-0 pb-12 sm:pb-16 md:pb-24 lg:pb-32 xl:pb-40 2xl:pb-48">
-          <ScrollAnimate>
+          <HomeScrollAnimate>
             <NeonSectionHead
               number="01"
               kicker={th("verificationKicker")}
               title={th.rich("verificationTitle", { accent: accentTag })}
               meta={th("verificationMeta")}
             />
-          </ScrollAnimate>
+          </HomeScrollAnimate>
 
-          <HomeVerificationSteps />
+          <HomeVerificationStepsServer />
         </NeonSection>
 
-        <HomeClientLogos />
+        <HomeClientLogosLazy />
 
         <NeonSection className="pt-10 pb-[calc(3rem+14px)] sm:pt-16 sm:pb-[calc(5rem+14px)] md:pt-24 md:pb-[calc(7rem+14px)]">
-          <ScrollAnimate>
+          <HomeScrollAnimate>
             <NeonSectionHead
               number="02"
               kicker={th("packagesKicker")}
               title={th.rich("packagesTitle", { accent: accentTag })}
               meta={th("packagesMeta")}
             />
-          </ScrollAnimate>
+          </HomeScrollAnimate>
           <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-white/78 sm:mt-8 sm:text-base">
             {th("packagesLead")}
           </p>
@@ -218,14 +219,14 @@ function HomeContent({
         </NeonSection>
 
         <NeonSection className="pt-10 pb-[calc(3rem+14px)] sm:pt-16 sm:pb-[calc(5rem+14px)] md:pt-24 md:pb-[calc(7rem+14px)] lg:pt-40 lg:pb-[calc(10rem+14px)] xl:pt-48 xl:pb-[calc(12rem+14px)]">
-          <ScrollAnimate>
+          <HomeScrollAnimate>
             <NeonSectionHead
               number="03"
               kicker={th("featuredKicker")}
               title={th.rich("featuredTitle", { accent: accentTag })}
               meta={th("featuredMeta")}
             />
-          </ScrollAnimate>
+          </HomeScrollAnimate>
 
           {featuredItems.length === 0 ? (
             <p className="mt-6 text-center font-mono text-[12px] font-bold uppercase tracking-[0.22em] text-white/60 sm:mt-8">
@@ -243,7 +244,7 @@ function HomeContent({
 
         {popularItems.length > 0 && (
           <NeonSection className="pt-[calc(3rem+14px)] pb-12 sm:pt-[calc(5rem+14px)] sm:pb-20 md:pt-[calc(7rem+14px)] md:pb-28 lg:pt-[calc(10rem+14px)] lg:pb-40 xl:pt-[calc(12rem+14px)] xl:pb-48">
-            <ScrollAnimate>
+            <HomeScrollAnimate>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
                 <NeonSectionHead
                   number="04"
@@ -260,7 +261,7 @@ function HomeContent({
                   <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
-            </ScrollAnimate>
+            </HomeScrollAnimate>
             <HomeMediaHorizontalScroll
               items={popularItems}
               locale={locale}
@@ -271,18 +272,18 @@ function HomeContent({
         )}
 
         <NeonSection>
-          <ScrollAnimate>
+          <HomeScrollAnimate>
             <NeonSectionHead
               number="05"
               kicker={th("whyKicker")}
               title={th.rich("whyTitle", { accent: accentTag })}
               meta={th("whyMeta")}
             />
-          </ScrollAnimate>
+          </HomeScrollAnimate>
 
           <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-10 sm:gap-4 md:mt-12 md:gap-5 lg:grid-cols-3">
             {whyCards.map((item, i) => (
-              <ScrollAnimate key={item.title} delay={i * 100}>
+              <HomeScrollAnimate key={item.title} delay={i * 100}>
                 <div className="group relative h-full rounded-[28px] bg-white/6 p-5 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border tkad-neon-glow sm:p-7 lg:p-8">
                   <div className="mb-6 flex items-center justify-between">
                     <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
@@ -308,37 +309,37 @@ function HomeContent({
                     {item.highlight}
                   </div>
                 </div>
-              </ScrollAnimate>
+              </HomeScrollAnimate>
             ))}
           </div>
         </NeonSection>
 
         <NeonSection>
-          <ScrollAnimate>
+          <HomeScrollAnimate>
             <NeonSectionHead
               number="06"
               kicker={th("testimonialsKicker")}
               title={th.rich("testimonialsTitle", { accent: accentTag })}
               meta={th("testimonialsMeta")}
             />
-          </ScrollAnimate>
+          </HomeScrollAnimate>
           {latestCases.length > 0 ? (
             <HomeSuccessCasesSection cases={latestCases} />
           ) : (
             <div className="mt-5 sm:mt-8 lg:mt-10">
-              <TestimonialsCarousel items={testimonials} />
+              <HomeTestimonialsCarouselLazy items={testimonials} />
             </div>
           )}
         </NeonSection>
 
-        <ScrollAnimate>
-          <HomeCommunitySection posts={communityPosts} locale={locale} />
-        </ScrollAnimate>
+        <HomeScrollAnimate>
+          <HomeCommunitySectionLazy posts={communityPosts} locale={locale} />
+        </HomeScrollAnimate>
 
-        <HomeRecentlyViewed locale={locale} />
+        <HomeRecentlyViewedLazy locale={locale} />
 
         <NeonSection innerClassName="text-center">
-          <ScrollAnimate className="mx-auto max-w-4xl">
+          <HomeScrollAnimate className="mx-auto max-w-4xl">
             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-white/65">
               {`// ${th("ctaKicker")}`}
             </p>
@@ -367,11 +368,11 @@ function HomeContent({
             <p className="mx-auto mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60 sm:mt-6 md:mt-7">
               {th("ctaFooter")}
             </p>
-          </ScrollAnimate>
+          </HomeScrollAnimate>
         </NeonSection>
 
-        <FloatingCta />
+        <HomeFloatingCta />
       </div>
-    </HomeLandingDayNight>
+    </HomeAppearanceShell>
   );
 }
