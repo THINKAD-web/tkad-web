@@ -15,6 +15,7 @@ import {
   type ResolvedPublicNavItem,
 } from "@/lib/navigation/build-public-nav";
 import type { PublicNavGroupId } from "@/lib/navigation/public-nav-data";
+import { INDUSTRY_SLUGS } from "@/lib/industry-landing";
 
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
@@ -61,8 +62,17 @@ export function FooterBrutal() {
     const insights = pickGroup(navGroups, "insights");
     const academy = pickGroup(navGroups, "academy");
 
+    const industryGuide: BrutalFooterColumn = {
+      title: t("footer.industryGuide"),
+      items: INDUSTRY_SLUGS.map((slug) => ({
+        href: `/industry/${slug}`,
+        label: t(`industryPage.common.industryLabels.${slug}`),
+      })),
+    };
+
     return [
       mergeNavGroups([discovery, planning], t("footer.discoveryPlanning")),
+      industryGuide,
       mergeNavGroups([creative, insights, academy], t("footer.creativeInsights"), [
         { href: "/register/media", label: t("footer.mediaPartnerRegister") },
         { href: "/privacy", label: t("footer.privacy") },

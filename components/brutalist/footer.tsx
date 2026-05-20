@@ -45,8 +45,9 @@ export function BrutalFooter({
 
   return (
     <footer
+      id="site-footer"
       className={cn(
-        "relative overflow-hidden border-t border-white/10 bg-[#05050a] text-white",
+        "tkad-site-footer relative shrink-0 overflow-hidden border-t border-white/10 bg-[#05050a] text-white",
         className,
       )}
     >
@@ -55,7 +56,7 @@ export function BrutalFooter({
       <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.06] mix-blend-overlay" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {/* 1번 셀 — 브랜드 컬럼 또는 일반 컬럼 0번 */}
         {useBrandCell ? (
           <BrandCell

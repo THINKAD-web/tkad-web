@@ -90,15 +90,15 @@ export function NotificationsPageClient() {
 
   if (loading) {
     return (
-      <HomeLandingDayNight>
+      <HomeLandingDayNight portal>
         <FullPageSpinner label={isKo ? "알림 불러오는 중…" : "Loading notifications…"} />
       </HomeLandingDayNight>
     );
   }
 
   return (
-    <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <HomeLandingDayNight portal>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell mx-auto max-w-3xl min-h-[calc(100dvh-4rem)] px-4 py-10 sm:px-6 sm:py-14">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-300/80">

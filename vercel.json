@@ -27,7 +27,7 @@
     },
     {
       "path": "/api/cron/generate-trend-report",
-      "schedule": "0 0 * * 1,4"
+      "schedule": "0 0 1 * *"
     },
     {
       "path": "/api/cron/campaign-notifications",

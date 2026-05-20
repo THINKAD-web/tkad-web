@@ -1,0 +1,56 @@
+import { Link } from "@/i18n/navigation";
+import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
+
+type Props = {
+  isKo: boolean;
+  title: string;
+  mediaCta: string;
+  plannerCta: string;
+  contactCta: string;
+};
+
+export function GuidesBeginnerCta({
+  isKo,
+  title,
+  mediaCta,
+  plannerCta,
+  contactCta,
+}: Props) {
+  return (
+    <section className="relative overflow-hidden rounded-[32px] border border-white/12 bg-white/6 px-6 py-12 text-center backdrop-blur tkad-neon-border sm:px-10 sm:py-16">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(168,85,247,0.2),transparent_55%),radial-gradient(circle_at_50%_100%,rgba(34,211,238,0.16),transparent_55%)]"
+      />
+      <div className="relative">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300/90">
+          [ {isKo ? "시작하기" : "GET STARTED"} ]
+        </p>
+        <h2 className="mt-3 text-2xl font-black text-white sm:text-3xl">{title}</h2>
+        <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap">
+          <Link
+            href="/media"
+            className="tkad-neon-cta-clean inline-flex h-12 items-center justify-center gap-2 rounded-[18px] px-6 text-sm font-black text-white"
+          >
+            {mediaCta}
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+          <Link
+            href="/planner"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-[18px] border border-white/14 bg-white/8 px-6 text-sm font-bold text-white hover:bg-white/12"
+          >
+            <Sparkles className="h-4 w-4 text-pink-300" aria-hidden />
+            {plannerCta}
+          </Link>
+          <Link
+            href="/contact"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-[18px] border border-white/14 bg-white/8 px-6 text-sm font-bold text-white hover:bg-white/12"
+          >
+            <MessageCircle className="h-4 w-4 text-cyan-300" aria-hidden />
+            {contactCta}
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}

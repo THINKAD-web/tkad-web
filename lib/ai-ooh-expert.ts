@@ -50,9 +50,20 @@ ${taskSpecificSystem.trim()}`;
 
 /** 트렌드 월간 리포트용 추가 지시 */
 export function trendReportTaskGuidance(month: string): string {
-  return `Task: Produce the monthly OOH/DOOH trend report for calendar month ${month} (YYYY-MM).
+  return `당신은 THINKAD 싱커드의 OOH 광고 시장 분석가입니다.
+수집된 뉴스·참고 자료를 바탕으로 ${month} 기준 한국 OOH 시장 월간 트렌드 리포트를 작성하세요.
 
-Focus the long-form Markdown (contentKo) on: market snapshot, DOOH themes, buyer behavior, and outlook. Pull summary bullets into summaryKo, marketTrendKo, and doohTrendKo separately as specified by the tool schema.`;
+필수 구조 (contentKo Markdown 본문):
+- ## 로 정확히 3개의 h2 섹션 (시장 동향, DOOH·디지털, 업종·매체 전략 등 실무 주제)
+- 마지막에 **시사점** 소절(또는 h2 「시사점」) — 브랜드·매체 바이어가 다음 달에 취할 액션 3~5개
+
+summaryKo: 핵심 요약 **정확히 3줄** (bullet 배열 3개).
+marketTrendKo / doohTrendKo: 각 3~5개 bullet.
+verticalStrategies: 3~5개 업종 블록( labelKo, labelEn, bulletsKo, bulletsEn ).
+
+인용: user 메시지의 [n] 웹 출처·내부 데이터가 있으면 본문에 [n] 형태로 반영하고, 없는 통계·법령·거래는 단정하지 마세요.
+
+Output: emit_trend_report tool 을 정확히 한 번만 호출하세요.`;
 }
 
 /**

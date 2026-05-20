@@ -1,11 +1,16 @@
 import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
-import { generateTrendReport } from "@/lib/ai-content-generator";
+import { runTrendReportDraftPipeline } from "@/lib/insights/trend-report-pipeline";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
+/**
+ * @deprecated Prefer POST /api/admin/reports/generate-ai (Tavily + SSE).
+ * Kept for ai-content hub backward compatibility.
+ */
 export async function POST(request: NextRequest) {
   const deny = assertAdminDb(request);
   if (deny) return deny;
@@ -22,26 +27,23 @@ export async function POST(request: NextRequest) {
     return json({ error: "Invalid month (expected YYYY-MM)" }, 400);
   }
 
+  const db = getPrisma();
+  const dup = await db.trendReport.findUnique({ where: { month } });
+  if (dup) {
+    return json(
+      { error: "이미 동일 월(YYYY-MM)의 보고서가 있습니다.", existingId: dup.id },
+      409,
+    );
+  }
+
   try {
-    const g = await generateTrendReport(month);
-    const db = getPrisma();
-    const saved = await db.trendReport.create({
-      data: {
-        month: g.month,
-        status: "draft",
-        titleKo: g.titleKo,
-        titleEn: g.titleEn,
-        contentKo: g.contentKo,
-        summaryKo: g.summaryKo,
-        marketTrendKo: g.marketTrendKo,
-        doohTrendKo: g.doohTrendKo,
-        verticalStrategies:
-          g.verticalStrategies === null || g.verticalStrategies === undefined
-            ? undefined
-            : (g.verticalStrategies as Prisma.InputJsonValue),
-        thumbnailUrl: g.thumbnailUrl,
-        publishedAt: null,
-      },
+    const result = await runTrendReportDraftPipeline({
+      month,
+      generationMethod: "manual",
+      monthField: month,
+    });
+    const saved = await db.trendReport.findUnique({
+      where: { id: result.trendReport.id },
     });
     return json({ trendReport: saved }, 201);
   } catch (e) {

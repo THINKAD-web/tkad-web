@@ -6,18 +6,24 @@ import { cn } from "@/lib/utils";
 type Props = {
   label?: string;
   className?: string;
+  /** `/dashboard`, `/my` 로딩 — 푸터 이음새와 동일 */
+  portal?: boolean;
 };
 
 /** 플래너·대시보드 등 `tkad-planner-neon` 페이지용 풀스크린 로딩 */
 export function NeonFullPageSpinner({
   label = "불러오는 중…",
   className,
+  portal,
 }: Props) {
   return (
-    <HomeLandingDayNight>
+    <HomeLandingDayNight portal={portal}>
       <div
         className={cn(
-          "tkad-landing-neon tkad-planner-neon flex min-h-[calc(100vh-72px)] items-center justify-center px-4",
+          "tkad-landing-neon tkad-planner-neon flex items-center justify-center px-4",
+          portal
+            ? "tkad-portal-shell min-h-[calc(100dvh-4rem)]"
+            : "min-h-[calc(100vh-72px)]",
           className,
         )}
       >

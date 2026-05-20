@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
-  Bot,
   ChevronDown,
   ChevronUp,
   ClipboardList,
@@ -14,16 +13,13 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import dynamic from "next/dynamic";
-import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import {
   FLOATING_SUPPORT_DOCK_BOTTOM,
   FLOATING_SUPPORT_DOCK_RIGHT,
 } from "@/lib/floating-support-dock-layout";
 import { usePageScrollEdges } from "@/lib/use-page-scroll-edges";
 import { cn } from "@/lib/utils";
-
-const AiChatbot = dynamic(() => import("@/components/ai-chatbot"), { ssr: false });
+import { SupportChatWidget } from "@/components/support/support-chat-widget";
 
 const dockBtnBase =
   "relative flex h-11 w-full items-center justify-center rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/45";
@@ -104,10 +100,8 @@ export default function FloatingSupportDock() {
   const tCommon = useTranslations("common");
   const tQuote = useTranslations("quoteFab");
   const tDock = useTranslations("supportDock");
-  const tAi = useTranslations("aiChatbot");
-
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMenuOpen, setChatMenuOpen] = useState(false);
   const quotePanelRef = useRef<HTMLDivElement>(null);
 
   const { mounted, scrollable, nearTop, nearBottom, goTop, goBottom } =
@@ -129,25 +123,18 @@ export default function FloatingSupportDock() {
 
   useEffect(() => {
     setQuoteOpen(false);
-    setChatOpen(false);
+    setChatMenuOpen(false);
   }, [pathname]);
 
   if (hidden) return null;
 
   const openQuote = () => {
-    setChatOpen(false);
+    setChatMenuOpen(false);
     setQuoteOpen((v) => !v);
-  };
-
-  const openChat = () => {
-    setQuoteOpen(false);
-    setChatOpen((v) => !v);
   };
 
   return (
     <>
-      <AiChatbot hideFab open={chatOpen} onOpenChange={setChatOpen} />
-
       <div
         className={cn(
           "fixed z-[55] flex flex-col items-end gap-2 sm:bottom-6 sm:right-6",
@@ -298,48 +285,16 @@ export default function FloatingSupportDock() {
 
             <DockActionWithPreview
               icon={<MessageCircle className="h-3.5 w-3.5" aria-hidden />}
-              title={tDock("kakaoPreviewTitle")}
-              hint={tDock("kakaoPreviewHint")}
+              title={tDock("chatPreviewTitle")}
+              hint={tDock("chatPreviewHint")}
             >
-              <a
-                href={KAKAO_CHANNEL_PUBLIC_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  dockBtnBase,
-                  "bg-[#FEE500] text-[#191600] shadow-sm hover:brightness-105",
-                )}
-                aria-label={tQuote("kakaoAria")}
-                title={tQuote("kakaoAria")}
-              >
-                <MessageCircle className="h-4 w-4" strokeWidth={2.25} />
-              </a>
-            </DockActionWithPreview>
-
-            <DockActionWithPreview
-              icon={<Bot className="h-3.5 w-3.5" aria-hidden />}
-              title={tDock("aiPreviewTitle")}
-              hint={tDock("aiPreviewHint")}
-            >
-              <button
-                type="button"
-                onClick={openChat}
-                aria-expanded={chatOpen}
-                className={cn(
-                  dockBtnBase,
-                  chatOpen
-                    ? "bg-white/15 text-white ring-2 ring-white/25"
-                    : "bg-[linear-gradient(135deg,rgba(168,85,247,0.9),rgba(34,211,238,0.9),rgba(236,72,153,0.85))] text-white shadow-md shadow-violet-500/25 hover:brightness-110",
-                )}
-                aria-label={chatOpen ? tAi("closeAria") : tAi("openAria")}
-                title={tAi("tooltip")}
-              >
-                {chatOpen ? (
-                  <X className="h-4 w-4" strokeWidth={2.25} />
-                ) : (
-                  <Bot className="h-4 w-4" strokeWidth={2.25} />
-                )}
-              </button>
+              <SupportChatWidget
+                menuOpen={chatMenuOpen}
+                onMenuOpenChange={(open) => {
+                  if (open) setQuoteOpen(false);
+                  setChatMenuOpen(open);
+                }}
+              />
             </DockActionWithPreview>
           </div>
         </div>

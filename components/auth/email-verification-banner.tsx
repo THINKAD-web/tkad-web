@@ -55,18 +55,21 @@ export function EmailVerificationBanner({ className, onDismiss }: Props) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-amber-400/25 bg-gradient-to-r from-amber-500/10 via-violet-500/10 to-cyan-500/10 px-4 py-3 backdrop-blur sm:px-5",
+        "relative overflow-hidden rounded-2xl border border-amber-500/35 bg-gradient-to-r from-amber-500/15 via-violet-500/10 to-cyan-500/10 px-4 py-3 backdrop-blur-sm dark:border-amber-400/25 dark:from-amber-500/10 sm:px-5",
         className,
       )}
       role="status"
     >
       <div className="flex flex-wrap items-start gap-3 sm:items-center">
-        <Mail className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" aria-hidden />
+        <Mail
+          className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-300"
+          aria-hidden
+        />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-foreground">
             {isKo ? "이메일 인증이 필요합니다" : "Verify your email"}
           </p>
-          <p className="mt-0.5 text-xs text-white/65">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             {sent
               ? isKo
                 ? "인증 메일을 다시 보냈습니다. 받은편지함을 확인해 주세요."
@@ -76,7 +79,7 @@ export function EmailVerificationBanner({ className, onDismiss }: Props) {
                 : "Use the link we sent at signup, or resend from settings."}
           </p>
           {error && (
-            <p className="mt-1 font-mono text-[11px] text-red-300">{error}</p>
+            <p className="mt-1 font-mono text-[11px] text-destructive">{error}</p>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -84,21 +87,21 @@ export function EmailVerificationBanner({ className, onDismiss }: Props) {
             type="button"
             onClick={() => void resend()}
             disabled={sending || sent}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white/15 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/90 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
           >
             {sending && <Spinner size="sm" />}
             {isKo ? "인증 메일 재발송" : "Resend email"}
           </button>
           <Link
             href="/my/settings"
-            className="rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/90 transition-colors hover:bg-white/10"
+            className="rounded-lg border border-border bg-card/80 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 dark:border-white/15 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
           >
             {isKo ? "설정" : "Settings"}
           </Link>
           <button
             type="button"
             onClick={dismiss}
-            className="rounded-lg p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground dark:hover:bg-white/10 dark:hover:text-white"
             aria-label={isKo ? "닫기" : "Dismiss"}
           >
             <X className="h-4 w-4" />

@@ -22,7 +22,15 @@ import {
   MyHubMediaGridCard,
   type MyHubMediaItem,
 } from "@/components/my/my-hub-media-grid-card";
-import { FullPageSpinner, Spinner, EmptyState } from "@/components/ui/spinner";
+import { AdvertiserCampaignCard } from "@/components/advertiser-dashboard/campaign-card";
+import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
+import { Spinner, EmptyState } from "@/components/ui/spinner";
+import {
+  myHubFilterPill,
+  myHubGlassCard,
+  myHubOutlineBtn,
+  myHubPrimaryBtn,
+} from "@/lib/my-hub-ui";
 import { useAppToast } from "@/lib/use-toast";
 import type { CampaignTab } from "@/lib/advertiser-campaign-metrics";
 import type { CampaignStatus } from "@prisma/client";
@@ -88,15 +96,6 @@ const TAB_FILTER_LABEL: Record<CampaignTab, { ko: string; en: string }> = {
   completed: { ko: "완료", en: "Completed" },
   upcoming: { ko: "예정", en: "Upcoming" },
 };
-
-const glassCard =
-  "rounded-2xl border border-white/12 bg-white/5 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-5";
-
-const gradientBtn =
-  "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_28px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95";
-
-const outlineBtn =
-  "inline-flex items-center justify-center rounded-xl border border-white/18 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10";
 
 function parseHubTab(value: string | null): MyHubTab | null {
   if (
@@ -310,7 +309,7 @@ export function MyHubPageClient() {
   }
 
   if (meLoading || !me) {
-    return <FullPageSpinner label={t("loading")} />;
+    return <NeonFullPageSpinner label={t("loading")} portal />;
   }
 
   const plannerPlannerHref = buildPlannerHrefWithMediaIds(
@@ -318,41 +317,43 @@ export function MyHubPageClient() {
   );
 
   return (
-    <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 sm:px-6 sm:py-10">
-        <div className="relative mx-auto max-w-5xl">
-          <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
+    <HomeLandingDayNight portal>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)]">
+        <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] py-14 text-white sm:py-20 lg:py-24">
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.55),rgba(0,0,0,0.92))]"
+          />
+          <div className="relative mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
             <div className="min-w-0">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
-                [ MY HUB ]
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-400/60">
+                {isKo ? "// 마이 허브" : "// My hub"}
               </p>
-              <h1 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
+              <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] font-[950] leading-[0.95] tracking-[-0.05em] text-white">
                 {t("greeting", { name: me.name })}
               </h1>
-              <p className="mt-1 truncate font-mono text-[11px] tracking-tight text-white/45">
-                {`// `}
+              <p className="mt-3 truncate text-base text-white/65 sm:text-lg">
                 {me.email}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Link href="/my/settings" className={cn(outlineBtn, "gap-1.5")}>
+            <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
+              <Link href="/my/settings" className={myHubOutlineBtn}>
                 <Settings className="h-4 w-4" />
                 {isKo ? "설정" : "Settings"}
               </Link>
-              <button
-                type="button"
-                onClick={logout}
-                className={cn(outlineBtn, "gap-1.5")}
-              >
+              <button type="button" onClick={logout} className={myHubOutlineBtn}>
                 <LogOut className="h-4 w-4" />
                 {t("logout")}
               </button>
             </div>
-          </header>
+          </div>
+        </section>
 
-          {me.needsEmailVerification && (
-            <EmailVerificationBanner className="mb-6" />
-          )}
+        <section className="py-8 sm:py-12 lg:py-14">
+          <div className="relative mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:space-y-10 lg:px-8">
+          {me.needsEmailVerification && <EmailVerificationBanner />}
 
           <MyHubTabs
             tabs={tabDefs}
@@ -376,9 +377,7 @@ export function MyHubPageClient() {
                       onClick={() => setCampaignFilter(key)}
                       className={cn(
                         "rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] transition-colors",
-                        campaignFilter === key
-                          ? "border-violet-400/50 bg-violet-500/20 text-white"
-                          : "border-white/12 bg-white/5 text-white/60 hover:text-white/85",
+                        myHubFilterPill(campaignFilter === key),
                       )}
                     >
                       {TAB_FILTER_LABEL[key][isKo ? "ko" : "en"]}
@@ -399,15 +398,30 @@ export function MyHubPageClient() {
                   title={t("campaigns.emptyTitle")}
                   description={t("campaigns.emptyDesc")}
                   action={
-                    <Link href="/media" className={gradientBtn}>
+                    <Link href="/media" className={myHubPrimaryBtn}>
                       {t("campaigns.emptyCta")}
                     </Link>
                   }
                 />
               ) : (
-                <ul className="space-y-3">
+                <ul className="space-y-4">
                   {campaigns.map((c) => (
-                    <CampaignHubCard key={c.id} item={c} isKo={isKo} t={t} />
+                    <li key={c.id}>
+                      <AdvertiserCampaignCard
+                        item={{
+                          id: c.id,
+                          name: c.name,
+                          status: c.status,
+                          startDate: c.startDate,
+                          endDate: c.endDate,
+                          mediaNames: c.mediaNames,
+                          impressionsTotal: c.impressionsTotal,
+                          proofThumbUrl: null,
+                          proofCount: 0,
+                        }}
+                        isKo={isKo}
+                      />
+                    </li>
                   ))}
                 </ul>
               )}
@@ -429,14 +443,14 @@ export function MyHubPageClient() {
                   title={t("favorites.emptyTitle")}
                   description={t("favorites.emptyDesc")}
                   action={
-                    <Link href="/media" className={gradientBtn}>
+                    <Link href="/media" className={myHubPrimaryBtn}>
                       {t("favorites.emptyCta")}
                     </Link>
                   }
                 />
               ) : (
                 <>
-                  <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {favorites.map((m) => (
                       <MyHubMediaGridCard
                         key={m.id}
@@ -447,7 +461,7 @@ export function MyHubPageClient() {
                     ))}
                   </ul>
                   <div className="mt-6 flex justify-center">
-                    <Link href={plannerPlannerHref} className={gradientBtn}>
+                    <Link href={plannerPlannerHref} className={myHubPrimaryBtn}>
                       <Sparkles className="mr-2 h-4 w-4" />
                       {t("favorites.plannerCta")}
                     </Link>
@@ -473,10 +487,10 @@ export function MyHubPageClient() {
                   description={t("planner.emptyDesc")}
                   action={
                     <div className="flex flex-wrap justify-center gap-2">
-                      <Link href="/planner" className={gradientBtn}>
+                      <Link href="/planner" className={myHubPrimaryBtn}>
                         {t("planner.emptyCta")}
                       </Link>
-                      <Link href="/proposal" className={outlineBtn}>
+                      <Link href="/proposal" className={myHubOutlineBtn}>
                         {t("planner.emptyProposalCta")}
                       </Link>
                     </div>
@@ -486,21 +500,21 @@ export function MyHubPageClient() {
                 <div className="space-y-8">
                   {proposals.length > 0 ? (
                     <div>
-                      <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-violet-300">
+                      <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         {t("planner.proposalsSection")}
                       </h3>
                       <ul className="space-y-3">
                         {proposals.map((p) => (
-                          <li key={p.id} className={glassCard}>
+                          <li key={p.id} className={myHubGlassCard}>
                             <div className="flex flex-wrap items-start justify-between gap-3">
                               <div className="min-w-0">
-                                <p className="truncate text-base font-bold text-white">
+                                <p className="truncate text-base font-bold text-foreground">
                                   {p.campaignName}
                                 </p>
-                                <p className="mt-1 text-sm text-white/60">
+                                <p className="mt-1 text-sm text-muted-foreground">
                                   {p.brandName}
                                 </p>
-                                <p className="mt-1 font-mono text-[11px] text-white/55">
+                                <p className="mt-1 font-mono text-[11px] text-muted-foreground">
                                   {isKo
                                     ? `예산 ${p.budgetManwon.toLocaleString("ko-KR")}만원`
                                     : `Budget ${p.budgetManwon.toLocaleString("en-US")}×10k KRW`}
@@ -509,13 +523,13 @@ export function MyHubPageClient() {
                               <div className="flex shrink-0 flex-wrap gap-2">
                                 <Link
                                   href={`/proposal/${p.id}`}
-                                  className={outlineBtn}
+                                  className={myHubOutlineBtn}
                                 >
                                   {t("planner.viewProposal")}
                                 </Link>
                                 <Link
                                   href={`/contact?proposal=${p.id}`}
-                                  className={gradientBtn}
+                                  className={myHubPrimaryBtn}
                                 >
                                   {t("planner.requestQuote")}
                                 </Link>
@@ -528,23 +542,23 @@ export function MyHubPageClient() {
                   ) : null}
                   {plannerPlans.length > 0 ? (
                     <div>
-                      <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300">
+                      <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         {t("planner.plansSection")}
                       </h3>
                       <ul className="space-y-3">
                   {plannerPlans.map((plan) => (
-                    <li key={plan.id} className={glassCard}>
+                    <li key={plan.id} className={myHubGlassCard}>
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="truncate text-base font-bold text-white">
+                          <p className="truncate text-base font-bold text-foreground">
                             {plan.title}
                           </p>
-                          <p className="mt-1 font-mono text-[11px] text-white/55">
+                          <p className="mt-1 font-mono text-[11px] text-muted-foreground">
                             {isKo
                               ? `총 예산 ${plan.budgetManwon.toLocaleString("ko-KR")}만원 · 매체 ${plan.mediaCount}개`
                               : `Budget ${plan.budgetManwon.toLocaleString("en-US")}×10k KRW · ${plan.mediaCount} media`}
                           </p>
-                          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-white/40">
+                          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80">
                             {new Date(plan.createdAt).toLocaleDateString(
                               isKo ? "ko-KR" : "en-US",
                             )}
@@ -553,13 +567,13 @@ export function MyHubPageClient() {
                         <div className="flex shrink-0 flex-wrap gap-2">
                           <Link
                             href={`/planner?loadPlan=${plan.id}`}
-                            className={outlineBtn}
+                            className={myHubOutlineBtn}
                           >
                             {t("planner.continueEdit")}
                           </Link>
                           <Link
                             href={`/contact?plan=${plan.id}`}
-                            className={gradientBtn}
+                            className={myHubPrimaryBtn}
                           >
                             {t("planner.requestQuote")}
                           </Link>
@@ -596,13 +610,13 @@ export function MyHubPageClient() {
                   title={t("recent.emptyTitle")}
                   description={t("recent.emptyDesc")}
                   action={
-                    <Link href="/media" className={gradientBtn}>
+                    <Link href="/media" className={myHubPrimaryBtn}>
                       {t("recent.emptyCta")}
                     </Link>
                   }
                 />
               ) : (
-                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {recentItems.map((m) => (
                     <MyHubMediaGridCard key={m.id} item={m} isKo={isKo} />
                   ))}
@@ -610,68 +624,9 @@ export function MyHubPageClient() {
               )}
             </section>
           )}
-        </div>
+          </div>
+        </section>
       </div>
     </HomeLandingDayNight>
-  );
-}
-
-function CampaignHubCard({
-  item,
-  isKo,
-  t,
-}: {
-  item: CampaignItem;
-  isKo: boolean;
-  t: ReturnType<typeof useTranslations<"myHub">>;
-}) {
-  const period =
-    item.startDate && item.endDate
-      ? `${item.startDate} ~ ${item.endDate}`
-      : item.startDate ?? "—";
-  const mediaLabel =
-    item.mediaNames.length > 0
-      ? item.mediaNames.slice(0, 2).join(", ") +
-        (item.mediaNames.length > 2
-          ? ` +${item.mediaNames.length - 2}`
-          : "")
-      : isKo
-        ? "매체 배정 전"
-        : "Media TBD";
-  const status =
-    STATUS_LABEL[item.status]?.[isKo ? "ko" : "en"] ?? item.status;
-  const tabBadge = TAB_FILTER_LABEL[item.tab][isKo ? "ko" : "en"];
-
-  return (
-    <li className={glassCard}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-base font-bold text-white">{item.name}</p>
-          <p className="mt-1 truncate text-sm text-white/65">{mediaLabel}</p>
-          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-white/45">
-            {period}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-cyan-400/35 bg-cyan-500/15 px-2.5 py-0.5 text-[10px] font-semibold text-cyan-200">
-              {tabBadge}
-            </span>
-            <span className="rounded-full border border-white/15 bg-white/8 px-2.5 py-0.5 text-[10px] font-semibold text-white/80">
-              {status}
-            </span>
-            <span className="font-mono text-[10px] tabular-nums text-white/50">
-              {isKo ? "노출 " : "Imp "}
-              {item.impressionsTotal.toLocaleString(isKo ? "ko-KR" : "en-US")}
-              {isKo ? " (추정)" : " (est.)"}
-            </span>
-          </div>
-        </div>
-        <Link
-          href={`/dashboard/campaigns/${item.id}`}
-          className={cn(outlineBtn, "shrink-0")}
-        >
-          {t("campaigns.viewDetail")}
-        </Link>
-      </div>
-    </li>
   );
 }
