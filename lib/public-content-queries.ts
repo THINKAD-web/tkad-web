@@ -23,6 +23,10 @@ import {
   isSampleSuccessCaseId,
 } from "@/lib/sample-success-case";
 import { resolveCaseMediaLinks } from "@/lib/case-media-links";
+import {
+  filterCasesForMediaContext,
+  type MediaCaseMatchContext,
+} from "@/lib/success-case-media-match";
 
 export async function getPublishedInsightReports(): Promise<InsightReport[]> {
   if (!isDatabaseConfigured()) return [];
@@ -57,14 +61,27 @@ export async function getPublishedAcademyLessonsForUi(): Promise<AcademyLesson[]
 }
 
 /**
- * 특정 매체에서 진행된 공개 사례 목록 (mediaIds 배열 contains 검색).
- * 비활성·미입력 사례는 제외. 결과 0건이면 매체 상세에서 섹션 자체 숨김.
+ * 특정 매체에서 진행된 공개 사례 목록.
+ * 1) DB `mediaIds` 직접 연결 2) 없으면 공개 목록·샘플에서 지명/역명 텍스트 매칭.
  */
 export async function getSuccessCasesForMedia(
   mediaId: string,
   limit = 6,
+  locale = "ko",
+  mediaContext?: Omit<MediaCaseMatchContext, "mediaId">,
 ): Promise<PublicSuccessCaseListItem[]> {
-  if (!isDatabaseConfigured()) return [];
+  const ctx: MediaCaseMatchContext = { mediaId, ...mediaContext };
+
+  const fallbackFromPool = async (): Promise<PublicSuccessCaseListItem[]> => {
+    const pool = await getPublishedSuccessCases(locale);
+    const matched = filterCasesForMediaContext(pool, ctx, limit);
+    return matched.length > 0 ? matched : pool.slice(0, limit);
+  };
+
+  if (!isDatabaseConfigured()) {
+    return fallbackFromPool();
+  }
+
   try {
     const rows = await prisma.successCase.findMany({
       where: {
@@ -74,11 +91,13 @@ export async function getSuccessCasesForMedia(
       orderBy: [{ publishedAt: "desc" }, { updatedAt: "desc" }],
       take: limit,
     });
-    return rows.map((row) => successCaseToPublicListItem(row));
+    const mapped = rows.map((row) => successCaseToPublicListItem(row, locale));
+    if (mapped.length > 0) return mapped;
+    return fallbackFromPool();
   } catch (e) {
-    if (isMissingContentTableError(e)) return [];
-    if (isDatabaseAuthError(e)) return [];
-    if (isDatabaseUnreachableError(e)) return [];
+    if (isMissingContentTableError(e)) return fallbackFromPool();
+    if (isDatabaseAuthError(e)) return fallbackFromPool();
+    if (isDatabaseUnreachableError(e)) return fallbackFromPool();
     throw e;
   }
 }

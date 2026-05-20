@@ -606,5 +606,7 @@ export function filterCasesForLocalLanding(
     })
     .filter((x) => x.score > 0)
     .sort((a, b) => b.score - a.score);
-  return scored.slice(0, limit).map((x) => x.c);
+  const picked = scored.slice(0, limit).map((x) => x.c);
+  if (picked.length > 0) return picked;
+  return cases.slice(0, limit);
 }

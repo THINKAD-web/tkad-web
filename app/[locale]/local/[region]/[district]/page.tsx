@@ -126,12 +126,7 @@ export default async function LocalSeoLandingPage({ params }: Props) {
   const traits = isKo ? landing.traitsKo : landing.traitsEn;
   const faqs = isKo ? landing.faqsKo : landing.faqsEn;
 
-  let cases: Awaited<ReturnType<typeof getPublishedSuccessCases>> = [];
-  try {
-    cases = await getPublishedSuccessCases(locale);
-  } catch {
-    /* no cases */
-  }
+  const cases = await getPublishedSuccessCases(locale);
   const localCases = filterCasesForLocalLanding(cases, landing, 3);
 
   const itemListLd = buildMediaCatalogItemListJsonLd(
