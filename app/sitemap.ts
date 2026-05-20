@@ -173,7 +173,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // ── Guides — 비-draft 만 포함
+  // ── AI Guide articles (DB)
+  let dbGuidePart: MetadataRoute.Sitemap = [];
+  let dbEducationPart: MetadataRoute.Sitemap = [];
+  if (isDatabaseConfigured()) {
+    try {
+      const db = getPrisma();
+      const [guides, education] = await Promise.all([
+        db.guideArticle.findMany({
+          where: { status: "published" },
+          select: { slug: true, publishedAt: true, updatedAt: true },
+          take: 500,
+        }),
+        db.educationArticle.findMany({
+          where: { status: "published" },
+          select: { slug: true, publishedAt: true, updatedAt: true },
+          take: 500,
+        }),
+      ]);
+      dbGuidePart = guides.map((g) =>
+        sitemapEntry(
+          `/guides/${g.slug}`,
+          g.updatedAt ?? g.publishedAt ?? buildTime,
+        ),
+      );
+      dbEducationPart = education.map((e) =>
+        sitemapEntry(
+          `/academy/learn/${e.slug}`,
+          e.updatedAt ?? e.publishedAt ?? buildTime,
+        ),
+      );
+    } catch {
+      // DB guide/education fetch 실패
+    }
+  }
+
+  // ── Guides — static 비-draft
   const guidePart: MetadataRoute.Sitemap = listGuideMeta()
     .filter((g) => !g.draft)
     .map((g) =>
@@ -215,5 +250,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...insightPart,
     ...reportPart,
     ...guidePart,
+    ...dbGuidePart,
+    ...dbEducationPart,
   ];
 }

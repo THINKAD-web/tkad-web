@@ -106,6 +106,9 @@ export async function POST(req: Request) {
       console.error("[auth/register] verification email failed:", err);
     });
 
+    const { startProTrialIfEligible } = await import("@/lib/report-access");
+    void startProTrialIfEligible(user.id).catch(console.error);
+
     const res = apiOk(user, { status: 201 });
     res.cookies.set(USER_SESSION_COOKIE, token, userSessionCookieOptions());
     return res;

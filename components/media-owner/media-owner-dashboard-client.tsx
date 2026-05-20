@@ -53,7 +53,7 @@ export function MediaOwnerDashboardClient() {
       icon: MessageSquare,
       label: isKo ? "이번 달 문의" : "Inquiries (month)",
       value: stats.inquiriesThisMonth,
-      href: "/media-owner/media",
+      href: "/media-owner/matches",
     },
     {
       icon: Megaphone,

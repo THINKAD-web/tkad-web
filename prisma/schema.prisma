@@ -51,6 +51,9 @@ enum NotificationType {
   REPORT_READY
   REVIEW_REQUEST
   SYSTEM
+  MATCH_INQUIRY
+  OPEN_BID
+  BID_SELECTED
 }
 
 enum MediaReviewStatus {
@@ -227,6 +230,8 @@ model Media {
   instantBookings      Booking[]
   advertiserExecutions MediaAdvertiserExecution[]
   reviews              MediaReview[]
+  dataFusion           MediaDataFusion?
+  ownerBids            MediaOwnerBid[]
 
   /// 네트워크 패키지 내 개별 지점과의 연결 (선택)
   networkLocations MediaNetworkLocation[]
@@ -606,6 +611,7 @@ model ContactInquiry {
 
   oohQuote       OoHQuote?
   pipelineCard   PipelineCard?
+  openBidRequest OpenBidRequest?
 
   @@map("contact_inquiries")
 }
@@ -655,6 +661,7 @@ model QuoteRequest {
 
   campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   oohQuote OoHQuote?
+  openBidRequest OpenBidRequest?
 
   @@index([campaignId])
   @@map("quote_requests")
@@ -952,8 +959,61 @@ model TrendReport {
   validationScore    Int?      @map("validation_score")
   /// PR-3 자동 검증 결과 ({verdict, scores, issues[], shouldPublish, requiresHumanReview, validatedAt, modelUsed})
   validationResult   Json?     @map("validation_result")
+  metaDescription    String?   @map("meta_description") @db.Text
+  tags               String[]  @default([])
+  scheduledAt        DateTime? @map("scheduled_at")
 
   @@map("trend_reports")
+}
+
+/// AI 자동 생성 — OOH 입문 교육 콘텐츠 (주 1회)
+model EducationArticle {
+  id               String    @id @default(cuid())
+  slug             String    @unique
+  status           String    @default("draft")
+  titleKo          String    @map("title_ko")
+  titleEn          String?   @map("title_en")
+  excerptKo        String    @map("excerpt_ko") @db.Text
+  contentKo        String    @map("content_ko") @db.Text
+  metaDescription  String?   @map("meta_description") @db.Text
+  tags             String[]  @default([])
+  thumbnailUrl     String?   @map("thumbnail_url")
+  topicKey         String?   @map("topic_key")
+  generationMethod String    @default("auto") @map("generation_method")
+  aiModel          String?   @map("ai_model")
+  internalLinks    Json?     @default("[]") @map("internal_links")
+  scheduledAt      DateTime? @map("scheduled_at")
+  publishedAt      DateTime? @map("published_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@index([status, publishedAt])
+  @@map("education_articles")
+}
+
+/// AI 자동 생성 — 광고주 OOH 가이드 (주 2회)
+model GuideArticle {
+  id               String    @id @default(cuid())
+  slug             String    @unique
+  status           String    @default("draft")
+  titleKo          String    @map("title_ko")
+  titleEn          String?   @map("title_en")
+  excerptKo        String    @map("excerpt_ko") @db.Text
+  contentKo        String    @map("content_ko") @db.Text
+  metaDescription  String?   @map("meta_description") @db.Text
+  tags             String[]  @default([])
+  thumbnailUrl     String?   @map("thumbnail_url")
+  topicKey         String?   @map("topic_key")
+  generationMethod String    @default("auto") @map("generation_method")
+  aiModel          String?   @map("ai_model")
+  internalLinks    Json?     @default("[]") @map("internal_links")
+  scheduledAt      DateTime? @map("scheduled_at")
+  publishedAt      DateTime? @map("published_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@index([status, publishedAt])
+  @@map("guide_articles")
 }
 
 model SuccessCase {
@@ -1039,6 +1099,27 @@ enum ApiKeyPlan {
   ENTERPRISE
 }
 
+enum ReportAccessLevel {
+  FREE
+  MEMBER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
 enum CommunityMemberRole {
   ADVERTISER
   MEDIA
@@ -1066,6 +1147,10 @@ model User {
   emailVerifyTokenExpiresAt DateTime? @map("email_verify_token_expires_at")
   lastLoginAt               DateTime? @map("last_login_at")
   deletedAt       DateTime?            @map("deleted_at")
+  proTrialEndsAt          DateTime? @map("pro_trial_ends_at")
+  freeReportDownloads     Int       @default(0) @map("free_report_downloads")
+  plannerLeadCaptured     Boolean   @default(false) @map("planner_lead_captured")
+  trialReminderSentAt     DateTime? @map("trial_reminder_sent_at")
   createdAt       DateTime             @default(now()) @map("created_at")
   updatedAt       DateTime             @updatedAt @map("updated_at")
 
@@ -1094,9 +1179,17 @@ model User {
   ownedMedia              Media[]                  @relation("MediaOwner")
   mediaPriceChangeRequests MediaPriceChangeRequest[]
   mediaOwnerSettlements   MediaOwnerSettlement[]
+  mediaOwnerBranding      MediaOwnerBranding?
+  mediaOwnerReportDownloads MediaOwnerReportDownload[]
   crmAccount              CrmAccount?
   pushSubscriptions       PushSubscription[]
   customerNotes           CustomerNote[]
+  subscriptions           Subscription[]
+  mediaOwnerStats         MediaOwnerStats?
+  mediaOwnerBids          MediaOwnerBid[]          @relation("MediaOwnerBids")
+  mediaOwnerReviews       MediaOwnerReview[]       @relation("MediaOwnerReviews")
+  mediaOwnerReviewsGiven  MediaOwnerReview[]       @relation("AdvertiserReviews")
+  marketInsightsDigests   MarketInsightsWeeklyDigest[]
 
   @@index([email])
   @@map("users")
@@ -1117,6 +1210,28 @@ model PushSubscription {
 
   @@index([userId])
   @@map("push_subscriptions")
+}
+
+/// SaaS 구독 (PRO / ENTERPRISE)
+model Subscription {
+  id          String             @id @default(cuid())
+  userId      String             @map("user_id")
+  plan        SubscriptionPlan   @default(FREE)
+  status      SubscriptionStatus @default(ACTIVE)
+  startDate   DateTime           @default(now()) @map("start_date")
+  endDate     DateTime?          @map("end_date")
+  trialEndsAt DateTime?          @map("trial_ends_at")
+  paymentId   String?            @map("payment_id")
+  orderId     String?            @map("order_id")
+  amountKrw   Int?               @map("amount_krw")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([orderId])
+  @@map("subscriptions")
 }
 
 /// 로그인 사용자 상담 AI 대화 로그 (선택 저장)
@@ -1701,6 +1816,249 @@ model MediaOwnerSettlement {
   @@unique([ownerUserId, periodMonth])
   @@index([ownerUserId, status])
   @@map("media_owner_settlements")
+}
+
+enum MediaOwnerReportTheme {
+  ORANGE
+  BLUE
+  VIOLET
+}
+
+enum MediaOwnerReportType {
+  SPEC_SHEET
+  MONTHLY
+  ANNUAL
+  CATALOG
+}
+
+/// 매체사 보고서 브랜딩 / 자동 발송 설정
+model MediaOwnerBranding {
+  id                String                @id @default(cuid())
+  ownerUserId       String                @unique @map("owner_user_id")
+  logoUrl           String?               @map("logo_url")
+  companyName       String?               @map("company_name")
+  businessNumber    String?               @map("business_number") @db.VarChar(20)
+  contactPhone      String?               @map("contact_phone") @db.VarChar(30)
+  contactEmail      String?               @map("contact_email")
+  theme             MediaOwnerReportTheme @default(ORANGE)
+  autoMonthlyReport Boolean               @default(false) @map("auto_monthly_report")
+  autoReportEmail   String?               @map("auto_report_email")
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
+
+  ownerUser User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@map("media_owner_branding")
+}
+
+/// 무료 매체사 월 3회 다운로드 제한 추적
+model MediaOwnerReportDownload {
+  id          String               @id @default(cuid())
+  ownerUserId String               @map("owner_user_id")
+  mediaId     String?              @map("media_id")
+  reportType  MediaOwnerReportType @map("report_type")
+  createdAt   DateTime             @default(now()) @map("created_at")
+
+  ownerUser User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@index([ownerUserId, createdAt(sort: Desc)])
+  @@map("media_owner_report_downloads")
+}
+
+/// API·외부 연동용 일회성 PDF 다운로드 토큰
+model MediaOwnerReportToken {
+  id          String               @id @default(cuid())
+  token       String               @unique
+  ownerUserId String               @map("owner_user_id")
+  mediaId     String               @map("media_id")
+  reportType  MediaOwnerReportType @map("report_type")
+  mediaIds    String[]             @default([]) @map("media_ids")
+  periodMonth String?              @map("period_month") @db.VarChar(7)
+  year        Int?
+  expiresAt   DateTime             @map("expires_at")
+  createdAt   DateTime             @default(now()) @map("created_at")
+
+  @@index([token, expiresAt])
+  @@map("media_owner_report_tokens")
+}
+
+/// 매체별 통합 외부 데이터 (data-fusion 캐시)
+model MediaDataFusion {
+  id          String   @id @default(cuid())
+  mediaId     String   @unique @map("media_id")
+  payload     Json
+  confidence  Int      @default(0)
+  sources     String[] @default([])
+  refreshedAt DateTime @map("refreshed_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([refreshedAt])
+  @@map("media_data_fusion")
+}
+
+/// 외부 API 응답 캐시 (서울 공공데이터·SGIS·기상 등)
+model ExternalDataCache {
+  id        String   @id @default(cuid())
+  sourceKey String   @unique @map("source_key")
+  payload   Json
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([expiresAt])
+  @@map("external_data_cache")
+}
+
+// ── 매체사 매칭·오픈 비딩 ─────────────────────────────────────
+
+enum OpenBidMode {
+  STANDARD
+  OPEN_BID
+}
+
+enum OpenBidStatus {
+  OPEN
+  REVIEWING
+  SELECTED
+  CLOSED
+  CANCELLED
+  EXPIRED
+}
+
+enum MediaOwnerBidStatus {
+  NOTIFY
+  INTERESTED
+  SUBMITTED
+  APPROVED
+  SELECTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum MediaOwnerTier {
+  BRONZE
+  SILVER
+  GOLD
+}
+
+/// 광고주 문의·오픈 비딩 요청 (조건 기반 매체사 매칭)
+model OpenBidRequest {
+  id                 String        @id @default(cuid())
+  mode               OpenBidMode   @default(STANDARD)
+  status             OpenBidStatus @default(OPEN)
+  contactInquiryId   String?       @unique @map("contact_inquiry_id")
+  quoteRequestId     String?       @unique @map("quote_request_id")
+  regionLabel        String?       @map("region_label")
+  districtLabel      String?       @map("district_label")
+  mediaTypes         String[]      @default([]) @map("media_types")
+  budgetMin          Int?          @map("budget_min")
+  budgetMax          Int?          @map("budget_max")
+  periodLabel        String?       @map("period_label")
+  industryAnonymized String?       @map("industry_anonymized")
+  purpose            String?
+  summaryKo          String        @map("summary_ko") @db.Text
+  summaryEn          String?       @map("summary_en") @db.Text
+  deadlineAt         DateTime      @map("deadline_at")
+  selectedBidId      String?       @unique @map("selected_bid_id")
+  adminNote          String?       @map("admin_note") @db.Text
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  contactInquiry ContactInquiry? @relation(fields: [contactInquiryId], references: [id], onDelete: SetNull)
+  quoteRequest   QuoteRequest?   @relation(fields: [quoteRequestId], references: [id], onDelete: SetNull)
+  bids           MediaOwnerBid[] @relation("OpenBidBids")
+  selectedBid    MediaOwnerBid?  @relation("SelectedBid", fields: [selectedBidId], references: [id], onDelete: SetNull)
+
+  @@index([status, deadlineAt])
+  @@index([createdAt(sort: Desc)])
+  @@map("open_bid_requests")
+}
+
+/// 매체사별 매칭·비딩 응답
+model MediaOwnerBid {
+  id               String              @id @default(cuid())
+  openBidRequestId String              @map("open_bid_request_id")
+  ownerUserId      String              @map("owner_user_id")
+  mediaId          String              @map("media_id")
+  status           MediaOwnerBidStatus @default(NOTIFY)
+  priceAmount      Int?                @map("price_amount")
+  benefits         String?             @db.Text
+  message          String?             @db.Text
+  tierAtNotify     MediaOwnerTier?     @map("tier_at_notify")
+  interestedAt     DateTime?           @map("interested_at")
+  submittedAt      DateTime?           @map("submitted_at")
+  approvedAt       DateTime?           @map("approved_at")
+  notifiedAt       DateTime?           @map("notified_at")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+
+  openBidRequest OpenBidRequest  @relation("OpenBidBids", fields: [openBidRequestId], references: [id], onDelete: Cascade)
+  ownerUser      User            @relation("MediaOwnerBids", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  media          Media           @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  selectedFor    OpenBidRequest? @relation("SelectedBid")
+
+  @@unique([openBidRequestId, mediaId])
+  @@index([ownerUserId, status])
+  @@index([openBidRequestId, status])
+  @@map("media_owner_bids")
+}
+
+/// 매체사 등급·누적 실적 (비딩 우선 노출·인센티브)
+model MediaOwnerStats {
+  id                      String         @id @default(cuid())
+  ownerUserId             String         @unique @map("owner_user_id")
+  tier                    MediaOwnerTier @default(BRONZE)
+  cumulativeContractWon     Int            @default(0) @map("cumulative_contract_won")
+  registrationFeeWaived     Boolean        @default(false) @map("registration_fee_waived")
+  successfulBidCount        Int            @default(0) @map("successful_bid_count")
+  avgRating               Float?         @map("avg_rating")
+  reviewCount             Int            @default(0) @map("review_count")
+  avgResponseMinutes      Int?           @map("avg_response_minutes")
+  lastResponseAt          DateTime?      @map("last_response_at")
+  createdAt               DateTime       @default(now()) @map("created_at")
+  updatedAt               DateTime       @updatedAt @map("updated_at")
+
+  ownerUser User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@map("media_owner_stats")
+}
+
+/// 광고주 → 매체사 캠페인 완료 후 평가
+model MediaOwnerReview {
+  id                 String   @id @default(cuid())
+  ownerUserId        String   @map("owner_user_id")
+  reviewerUserId     String?  @map("reviewer_user_id")
+  campaignId         String?  @map("campaign_id")
+  oohQuoteId         String?  @map("ooh_quote_id")
+  responseSpeed      Int      @map("response_speed")
+  materialAccuracy   Int      @map("material_accuracy")
+  executionQuality   Int      @map("execution_quality")
+  proofPhotoProvided Int      @map("proof_photo_provided")
+  overallRating      Float    @map("overall_rating")
+  comment            String?  @db.Text
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  ownerUser    User  @relation("MediaOwnerReviews", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  reviewerUser User? @relation("AdvertiserReviews", fields: [reviewerUserId], references: [id], onDelete: SetNull)
+
+  @@index([ownerUserId, createdAt(sort: Desc)])
+  @@map("media_owner_reviews")
+}
+
+/// PRO 시장 인사이트 주간 이메일 발송 dedup
+model MarketInsightsWeeklyDigest {
+  id      String   @id @default(cuid())
+  userId  String   @map("user_id")
+  weekKey String   @map("week_key") @db.VarChar(10)
+  sentAt  DateTime @default(now()) @map("sent_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekKey])
+  @@index([weekKey])
+  @@map("market_insights_weekly_digests")
 }
 
 // ── Instant DOOH booking (소액 온라인 결제) ─────────────────────

@@ -58,6 +58,15 @@ import { RelatedCases } from "@/components/media-detail/related-cases";
 import { MediaStickyCta } from "@/components/media-detail/sticky-cta";
 import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
+import { getCurrentUser } from "@/lib/user-session";
+import { checkReportAccess } from "@/lib/report-access";
+import { buildMediaAnalyticsReportFused } from "@/lib/media-report-analytics";
+import { MediaAnalyticsReportSection } from "@/components/media-detail/media-analytics-report";
+import {
+  CompetitorOohSection,
+  DataMethodologyPanel,
+  WeatherEventPanel,
+} from "@/components/media-detail/data-fusion-panels";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import MediaDetailExtras from "@/components/media-detail-extras";
 import { RoadviewCard } from "@/components/media-detail/roadview-card";
@@ -135,6 +144,14 @@ export default async function MediaDetailPage({ params }: Props) {
   if (!media) notFound();
 
   const catalog = await fetchPublicMediaCatalog();
+  const user = await getCurrentUser();
+  const detailAccess = await checkReportAccess(user?.id ?? null, "detail_data");
+  const competitorAccess = await checkReportAccess(user?.id ?? null, "competitor");
+  const analyticsReport = await buildMediaAnalyticsReportFused(
+    media,
+    catalog,
+    media.trafficPattern ?? null,
+  );
   const relatedCases = await getSuccessCasesForMedia(media.id, 6, locale, {
     location: media.location,
     locationEn: media.locationEn,
@@ -748,10 +765,30 @@ export default async function MediaDetailPage({ params }: Props) {
               mediaType={media.type}
               region={media.region}
               stored={media.trafficPattern ?? null}
-              dailyFootfall={media.dailyFootTraffic ?? null}
+              fusedStored={analyticsReport.fusedTrafficPattern ?? null}
+              dailyFootfall={
+                analyticsReport.fusedDailyFootfall ?? media.dailyFootTraffic ?? null
+              }
+              attributions={analyticsReport.attributions}
               isKo={isKo}
             />
           </div>
+
+          <MediaAnalyticsReportSection
+            report={analyticsReport}
+            isKo={isKo}
+            access={detailAccess}
+          />
+
+          <WeatherEventPanel report={analyticsReport} isKo={isKo} />
+
+          <CompetitorOohSection
+            report={analyticsReport}
+            isKo={isKo}
+            access={competitorAccess}
+          />
+
+          <DataMethodologyPanel report={analyticsReport} isKo={isKo} />
 
           <MediaAvailabilityCalendar
             mediaId={media.id}

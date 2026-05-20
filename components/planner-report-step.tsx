@@ -32,6 +32,8 @@ import {
   PlannerMonthCompareChart,
 } from "@/components/planner-charts";
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
+import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
+import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 
@@ -456,6 +458,26 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         />
       </div>
 
+      <PlannerEffectSimulationPanel
+        isKo={props.isKo}
+        portfolio={props.portfolio}
+        budgetMan={props.budgetNum}
+        months={props.months}
+        totalImpressionsFromMetrics={
+          props.metrics?.estimatedTotalImpressions ?? null
+        }
+      />
+
+      <PlannerReportPremiumBlock
+        isKo={props.isKo}
+        portfolio={props.portfolio}
+        budgetMan={props.budgetNum}
+        months={props.months}
+        regionsText={props.regionsText}
+        goal={props.campaignGoal}
+        industryText={props.industryText}
+      />
+
       <div className="border-2 border-border bg-card">
         <div className="flex flex-col gap-4 border-b-2 border-border p-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -470,19 +492,27 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <BtnBlock
-              variant="secondary"
-              size="md"
-              onClick={downloadPdf}
-              disabled={loading || downloading || capturing}
+            <PlannerPdfDownloadGate
+              isKo={props.isKo}
+              userEmail={userEmail}
+              onAllowedDownload={downloadPdf}
             >
-              {downloading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <FileDown className="h-4 w-4" />
+              {({ onDownloadClick, checking }) => (
+                <BtnBlock
+                  variant="secondary"
+                  size="md"
+                  onClick={onDownloadClick}
+                  disabled={loading || downloading || capturing || checking}
+                >
+                  {downloading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileDown className="h-4 w-4" />
+                  )}
+                  {t("reportDownloadPdf")}
+                </BtnBlock>
               )}
-              {t("reportDownloadPdf")}
-            </BtnBlock>
+            </PlannerPdfDownloadGate>
             <BtnBlock
               variant="secondary"
               size="md"
@@ -761,6 +791,16 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
               totalImpressionsFromMetrics={
                 props.metrics?.estimatedTotalImpressions ?? null
               }
+            />
+
+            <PlannerReportPremiumBlock
+              isKo={props.isKo}
+              portfolio={props.portfolio}
+              budgetMan={props.budgetNum}
+              months={props.months}
+              regionsText={props.regionsText}
+              goal={props.campaignGoal}
+              industryText={props.industryText}
             />
 
             {props.metrics ? (

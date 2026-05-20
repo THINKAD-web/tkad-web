@@ -65,6 +65,19 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ? null
         : String(body.thumbnailUrl).trim() || null;
   }
+  if (typeof body.metaDescription === "string" || body.metaDescription === null) {
+    data.metaDescription =
+      body.metaDescription === null
+        ? null
+        : String(body.metaDescription).trim() || null;
+  }
+  const tags = asStringArray(body.tags);
+  if (tags) data.tags = { set: tags };
+  if (typeof body.slug === "string") data.slug = body.slug.trim();
+  if (body.scheduledAt === null) data.scheduledAt = null;
+  else if (typeof body.scheduledAt === "string") {
+    data.scheduledAt = new Date(body.scheduledAt);
+  }
 
   if (Object.keys(data).length === 0) {
     return json({ error: "No valid fields to update" }, 400);

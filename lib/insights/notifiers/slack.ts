@@ -138,6 +138,14 @@ function siteBaseUrl(): string {
   ).replace(/\/$/, "");
 }
 
+function adminContentEditUrl(id: string, kind: string): string {
+  return `${siteBaseUrl()}/ko/admin/content/edit/${id}?type=${kind}`;
+}
+
+function adminContentListUrl(): string {
+  return `${siteBaseUrl()}/ko/admin/content`;
+}
+
 function adminEditUrl(reportId: string): string {
   return `${siteBaseUrl()}/ko/admin/reports/new?edit=${reportId}`;
 }
@@ -251,4 +259,37 @@ export async function notifyMonthlyDraftReady(
   opts?: { sourcesCount?: number },
 ): Promise<void> {
   return notifyTrendDraftReady(report, opts);
+}
+
+export type AutoContentKind =
+  | "trend_report"
+  | "education_article"
+  | "guide_article";
+
+const CONTENT_KIND_LABEL: Record<AutoContentKind, string> = {
+  trend_report: "트렌드 리포트",
+  education_article: "교육 콘텐츠",
+  guide_article: "광고주 가이드",
+};
+
+/**
+ * AI 자동 생성 초안 알림 (cron → 운영 검토).
+ */
+export async function notifyContentDraftReady(opts: {
+  kind: AutoContentKind;
+  id: string;
+  titleKo: string;
+}): Promise<void> {
+  const label = CONTENT_KIND_LABEL[opts.kind];
+  await sendSlackInsightAlert({
+    severity: "info",
+    title: `새 ${label} 초안이 생성됐어요`,
+    summary: `*${opts.titleKo}*\n검토 후 발행해주세요 → ${adminContentListUrl()}`,
+    fields: [
+      { label: "유형", value: label },
+      { label: "상태", value: "draft (검토 대기)" },
+      { label: "When", value: new Date().toISOString() },
+    ],
+    adminUrl: adminContentEditUrl(opts.id, opts.kind),
+  });
 }

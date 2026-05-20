@@ -1,11 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { AcademyLesson, SuccessCase, TrendReport } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
+import { trendAnalystSystemOverlay } from "@/lib/content-auto/generators";
 import {
   CAMPAIGN_COMPLETION_PDF_GUIDANCE,
   CAMPAIGN_REPORT_TASK_GUIDANCE,
   SUCCESS_CASE_TASK_GUIDANCE,
-  trendReportTaskGuidance,
   withOohExpertContext,
 } from "@/lib/ai-ooh-expert";
 import prisma, {
@@ -612,7 +612,7 @@ export async function generateTrendReport(
   const model = resolveModel();
   const client = getAnthropicClient();
 
-  const system = withOohExpertContext(trendReportTaskGuidance(month));
+  const system = withOohExpertContext(trendAnalystSystemOverlay(month));
 
   const baseUser = `Call emit_trend_report once with every required field for month ${month}.
 - titleKo and optional titleEn
@@ -657,6 +657,9 @@ export async function generateTrendReport(
       internalDataUsed: (context?.internalInsights ?? []).map((i) => i.title),
       validationScore: null,
       validationResult: null,
+      metaDescription: null,
+      tags: [],
+      scheduledAt: null,
       ...newRowTimestamps(),
     };
 
