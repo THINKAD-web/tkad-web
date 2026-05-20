@@ -1,0 +1,148 @@
+"use client";
+
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useLocale } from "next-intl";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import {
+  Building2,
+  CalendarRange,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  Megaphone,
+  Wallet,
+} from "lucide-react";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { FullPageSpinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
+import { isMediaOwnerPortalRole } from "@/lib/media-owner-role";
+
+const NAV = [
+  { href: "/media-owner/dashboard", icon: LayoutDashboard, ko: "대시보드", en: "Dashboard" },
+  { href: "/media-owner/media", icon: Building2, ko: "내 매체", en: "My media" },
+  { href: "/media-owner/campaigns", icon: Megaphone, ko: "집행 현황", en: "Campaigns" },
+  { href: "/media-owner/settlements", icon: Wallet, ko: "정산", en: "Settlements" },
+] as const;
+
+type Me = { id: string; name: string; email: string; role: string };
+
+export function MediaOwnerShell({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
+  const isKo = locale === "ko";
+
+  const [loading, setLoading] = useState(true);
+  const [me, setMe] = useState<Me | null>(null);
+
+  const loadSession = useCallback(async () => {
+    const res = await fetch("/api/auth/session", { cache: "no-store" });
+    const json = await res.json();
+    if (!res.ok || !json.ok || !json.data) {
+      router.replace("/login?redirect=/media-owner/dashboard");
+      return null;
+    }
+    const user = json.data as Me;
+    if (!isMediaOwnerPortalRole(user.role)) {
+      router.replace("/my");
+      return null;
+    }
+    return user;
+  }, [router]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const user = await loadSession();
+      if (cancelled) return;
+      if (user) setMe(user);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadSession]);
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.replace("/login");
+  }
+
+  if (loading) {
+    return (
+      <HomeLandingDayNight>
+        <FullPageSpinner />
+      </HomeLandingDayNight>
+    );
+  }
+
+  if (!me) return null;
+
+  return (
+    <HomeLandingDayNight>
+      <div className="mx-auto flex min-h-[80vh] max-w-6xl flex-col gap-6 px-4 py-8 lg:flex-row lg:py-12">
+        <aside className="lg:w-56 lg:shrink-0">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-violet-300/80">
+            {isKo ? "매체사 포털" : "Media owner"}
+          </p>
+          <h1 className="mt-2 text-lg font-bold text-white">{me.name}</h1>
+          <p className="truncate text-xs text-white/50">{me.email}</p>
+
+          <nav className="mt-6 flex flex-row flex-wrap gap-2 lg:flex-col lg:gap-1">
+            {NAV.map(({ href, icon: Icon, ko, en }) => {
+              const active = pathname?.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-violet-500/20 text-violet-100"
+                      : "text-white/70 hover:bg-white/5 hover:text-white",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {isKo ? ko : en}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="mt-6 flex flex-col gap-2">
+            <Link
+              href="/register/media"
+              className="text-xs text-violet-300 hover:underline"
+            >
+              {isKo ? "+ 매체 추가 등록" : "+ Register media"}
+            </Link>
+            <button
+              type="button"
+              onClick={() => void logout()}
+              className="inline-flex items-center gap-2 text-xs text-white/50 hover:text-white"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              {isKo ? "로그아웃" : "Log out"}
+            </button>
+          </div>
+        </aside>
+
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
+    </HomeLandingDayNight>
+  );
+}
+
+export function MediaOwnerPageLoader() {
+  return (
+    <div className="flex justify-center py-20">
+      <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
+    </div>
+  );
+}
+
+export const ownerGlassCard =
+  "rounded-2xl border border-white/12 bg-white/5 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
+
+export const ownerInputCls =
+  "h-10 w-full rounded-xl border border-white/12 bg-black/30 px-3 font-mono text-sm text-white outline-none focus:border-violet-400/40";

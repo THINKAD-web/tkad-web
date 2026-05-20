@@ -14,7 +14,7 @@ import {
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
 import { pageAlternates } from "@/lib/seo";
-import MediaBrowseClient from "@/components/media-browse-client";
+import { MediaBrowseClientSuspense } from "@/components/media-browse-client-suspense";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { MapPin } from "lucide-react";
@@ -157,7 +157,7 @@ export default async function AreaLandingPage({ params }: Props) {
             }}
           />
 
-          <MediaBrowseClient catalog={filtered} hideHero />
+          <MediaBrowseClientSuspense catalog={filtered} hideHero />
 
           {otherAreas.length > 0 ? (
             <section className="tkad-media-links-footer border-t border-border/80 bg-muted py-12 text-foreground sm:py-16">

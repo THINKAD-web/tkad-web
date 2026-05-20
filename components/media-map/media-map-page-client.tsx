@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { Crosshair, LayoutList } from "lucide-react";
+import { ClipboardCheck, Crosshair, LayoutList } from "lucide-react";
+import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "./kakao-map-view";
 import { Spinner } from "@/components/ui/spinner";
@@ -147,6 +148,10 @@ export default function MediaMapPageClient() {
     lng: number;
   } | null>(null);
   const [locating, setLocating] = useState(false);
+  const [surveyMode, setSurveyMode] = useState(false);
+  const [surveyCheckedIds, setSurveyCheckedIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   /** "내 주변" / URL 하이드레이션으로 지도 중심·줌을 강제 이동시킬 때 사용 */
   const [programmaticView, setProgrammaticView] = useState<{
     lat: number;
@@ -187,6 +192,12 @@ export default function MediaMapPageClient() {
 
   useEffect(() => {
     setCartIds(readCart());
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get("survey") === "1") {
+        setSurveyMode(true);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -429,6 +440,11 @@ export default function MediaMapPageClient() {
     );
   }, [toast]);
 
+  const startSurveyMode = useCallback(() => {
+    setSurveyMode(true);
+    handleLocateMe();
+  }, [handleLocateMe]);
+
   // 지도 idle 시 view state 갱신 → URL 동기화 effect 가 받아 처리
   const handleViewChange = useCallback(
     (v: { lat: number; lng: number; zoom: number }) => {
@@ -493,7 +509,41 @@ export default function MediaMapPageClient() {
             />
           ) : null}
 
+          {surveyMode ? (
+            <FieldSurveyPanel
+              items={items}
+              userLocation={userLocation}
+              isKo={isKo}
+              onClose={() => setSurveyMode(false)}
+              onLocationTick={setUserLocation}
+              onCenterMap={(loc) =>
+                setProgrammaticView({
+                  lat: loc.lat,
+                  lng: loc.lng,
+                  zoom: 4,
+                  nonce: Date.now(),
+                })
+              }
+              checkedIds={surveyCheckedIds}
+              onCheckedChange={setSurveyCheckedIds}
+            />
+          ) : null}
+
           <div className="pointer-events-none absolute right-3 top-3 z-[10] flex flex-col gap-2 sm:right-4 sm:top-4">
+            <button
+              type="button"
+              onClick={startSurveyMode}
+              className={cn(
+                "pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all max-md:h-9 max-md:justify-center max-md:px-2.5",
+                surveyMode
+                  ? "border-cyan-400/50 bg-cyan-400/20"
+                  : "border-white/14 bg-black/55 hover:bg-black/70",
+              )}
+              aria-label={isKo ? "답사 모드" : "Field survey"}
+            >
+              <ClipboardCheck className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">{isKo ? "답사 모드" : "Survey"}</span>
+            </button>
             <button
               type="button"
               onClick={handleLocateMe}

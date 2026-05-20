@@ -1,13 +1,16 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, BarChart3, Download, MapPin } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { CampaignMonitoringMap } from "@/components/campaign-monitoring-map";
 import type { CampaignMapPin } from "@/lib/campaign-monitoring-mock";
 import { AdvertiserImpressionsChart } from "@/components/advertiser-dashboard/impressions-chart";
+import {
+  CampaignProofSection,
+  type ProofPhotoItem,
+} from "@/components/advertiser-dashboard/campaign-proof-section";
 import { useState } from "react";
 
 export type CampaignDetailData = {
@@ -18,15 +21,18 @@ export type CampaignDetailData = {
   endDate: string | null;
   impressionsTotal: number;
   dailySeries: { date: string; impressions: number }[];
-  proofPhotos: { id: string; imageUrl: string; caption: string | null }[];
+  latestProofAt: string | null;
+  proofPhotos: ProofPhotoItem[];
   mapPins: CampaignMapPin[];
   reportReady: boolean;
 };
 
 export function AdvertiserCampaignDetailClient({
   initial,
+  initialTab,
 }: {
   initial: CampaignDetailData;
+  initialTab?: "proof";
 }) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -113,42 +119,13 @@ export function AdvertiserCampaignDetailClient({
         </p>
       </section>
 
-      <section className="mt-8">
-        <h2 className="mb-3 font-mono text-[11px] font-black uppercase tracking-[0.24em]">
-          {isKo ? "인증 사진" : "Proof photos"}
-        </h2>
-        {initial.proofPhotos.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {isKo ? "업로드된 인증 사진이 없습니다." : "No proof photos yet."}
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {initial.proofPhotos.map((p) => (
-              <a
-                key={p.id}
-                href={p.imageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative aspect-[4/3] overflow-hidden rounded-[14px] border border-border bg-muted"
-              >
-                <Image
-                  src={p.imageUrl}
-                  alt={p.caption ?? ""}
-                  fill
-                  className="object-cover transition-transform group-hover:scale-105"
-                  sizes="(max-width:640px) 50vw, 33vw"
-                  unoptimized
-                />
-                {p.caption ? (
-                  <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-[10px] text-white">
-                    {p.caption}
-                  </span>
-                ) : null}
-              </a>
-            ))}
-          </div>
-        )}
-      </section>
+      <CampaignProofSection
+        campaignId={initial.id}
+        initialPhotos={initial.proofPhotos}
+        initialLatestAt={initial.latestProofAt}
+        isKo={isKo}
+        scrollOnMount={initialTab === "proof"}
+      />
 
       {initial.reportReady ? (
         <div className="mt-8">

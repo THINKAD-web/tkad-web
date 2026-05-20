@@ -10,6 +10,8 @@ import {
   LayoutList,
   LogOut,
   Megaphone,
+  Building2,
+  KeyRound,
   Settings,
   Sparkles,
   Users,
@@ -339,6 +341,16 @@ export function MyHubPageClient() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
+              {me.role === "owner" || me.role === "admin" ? (
+                <Link href="/media-owner/dashboard" className={myHubOutlineBtn}>
+                  <Building2 className="h-4 w-4" />
+                  {isKo ? "매체사 포털" : "Media portal"}
+                </Link>
+              ) : null}
+              <Link href="/my/api-keys" className={myHubOutlineBtn}>
+                <KeyRound className="h-4 w-4" />
+                {isKo ? "API 키" : "API keys"}
+              </Link>
               <Link href="/my/settings" className={myHubOutlineBtn}>
                 <Settings className="h-4 w-4" />
                 {isKo ? "설정" : "Settings"}
@@ -418,6 +430,7 @@ export function MyHubPageClient() {
                           impressionsTotal: c.impressionsTotal,
                           proofThumbUrl: null,
                           proofCount: 0,
+                          latestProofAt: null,
                         }}
                         isKo={isKo}
                       />

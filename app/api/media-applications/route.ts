@@ -8,6 +8,7 @@ import {
 } from "@/lib/email/media-application-notify";
 import { parseMediaApplicationSubmit } from "@/lib/media-application";
 import { geocodeAddressWithKakao } from "@/lib/kakao-address-geocode";
+import { getCurrentUser } from "@/lib/user-session";
 
 export const dynamic = "force-dynamic";
 
@@ -75,11 +76,16 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  const me = await getCurrentUser();
+  const submitUserId =
+    me && (me.role === "owner" || me.role === "admin") ? me.id : null;
+
   let app;
   try {
     const db = getPrisma();
     app = await db.mediaApplication.create({
       data: {
+        userId: submitUserId,
         companyName: d.companyName,
         contactName: d.contactName,
         contactPhone: d.contactPhone,

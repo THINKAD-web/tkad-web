@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
-import { CrmTier } from "@prisma/client";
+import { CrmTier, SalesPipelineStage } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
+import { updatePipelineStage } from "@/lib/crm-customer-profile";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -99,9 +100,30 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
     data.tier = t as CrmTier;
   }
+  if (body.assignedTo !== undefined)
+    data.assignedTo = String(body.assignedTo ?? "").trim() || null;
+  if (body.expectedAmountWon != null) {
+    const n = Number(body.expectedAmountWon);
+    if (Number.isFinite(n) && n >= 0) data.expectedAmountWon = Math.round(n);
+  }
+  if (body.tags != null && Array.isArray(body.tags)) {
+    data.tags = body.tags.map((t) => String(t).trim()).filter(Boolean);
+  }
+  if (body.touchContact === true) data.lastContactAt = new Date();
 
   const db = getPrisma();
   try {
+    if (body.pipelineStage != null) {
+      const s = String(body.pipelineStage);
+      if (!Object.values(SalesPipelineStage).includes(s as SalesPipelineStage)) {
+        return json({ error: "Invalid pipelineStage" }, 400);
+      }
+      const account = await updatePipelineStage(id, s as SalesPipelineStage);
+      if (Object.keys(data).length > 0) {
+        await db.crmAccount.update({ where: { id }, data });
+      }
+      return json({ account });
+    }
     const account = await db.crmAccount.update({ where: { id }, data });
     return json({ account });
   } catch {

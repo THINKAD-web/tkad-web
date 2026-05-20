@@ -33,4 +33,22 @@ module.exports = [
       networkTimeoutSeconds: 10,
     },
   },
+  {
+    urlPattern: /\/(ko|en)\/media\/[^/]+$/i,
+    handler: "NetworkFirst",
+    options: {
+      cacheName: "thinkad-media-pages-v1",
+      expiration: { maxEntries: 24, maxAgeSeconds: 7 * 24 * 60 * 60 },
+      networkTimeoutSeconds: 8,
+    },
+  },
+  {
+    urlPattern: /\/(ko|en)\/offline-saved$/i,
+    handler: "NetworkFirst",
+    options: {
+      cacheName: "thinkad-offline-pages-v1",
+      expiration: { maxEntries: 4, maxAgeSeconds: 30 * 24 * 60 * 60 },
+      networkTimeoutSeconds: 8,
+    },
+  },
 ];

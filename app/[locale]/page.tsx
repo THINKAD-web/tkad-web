@@ -41,6 +41,7 @@ import {
   HomeCommunitySectionLazy,
   HomeFloatingCta,
   HomeRecentlyViewedLazy,
+  HomePwaWidget,
   HomeScrollAnimate,
   HomeTestimonialsCarouselLazy,
 } from "@/components/home/home-client-widgets";
@@ -191,6 +192,9 @@ function HomeContent({
 
   return (
     <HomeAppearanceShell>
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+        <HomePwaWidget />
+      </div>
       <HomeHeroServer
         locale={locale}
         marqueeImageUrls={heroVisuals.marqueeImageUrls}

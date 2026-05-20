@@ -72,6 +72,16 @@ enum CrmTier {
   lead
 }
 
+enum SalesPipelineStage {
+  new_inquiry
+  consulting
+  quote_sent
+  contract_negotiation
+  contract_closed
+  in_flight
+  completed
+}
+
 enum FinancialDocKind {
   quote
   contract
@@ -204,11 +214,16 @@ model Media {
   popularityScore     Int       @default(0) @map("popularity_score")
   popularityUpdatedAt DateTime? @map("popularity_updated_at")
 
+  /// 매체 소유자(매체사) — 포털 `/media-owner`
+  ownerUserId String? @map("owner_user_id")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  ownerUser            User?                    @relation("MediaOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
   priceSnapshots       MediaPriceSnapshot[]
   bookings             MediaBooking[]
+  priceChangeRequests  MediaPriceChangeRequest[]
   instantBookings      Booking[]
   advertiserExecutions MediaAdvertiserExecution[]
   reviews              MediaReview[]
@@ -219,6 +234,7 @@ model Media {
   @@index([isFeatured, featuredOrder])
   @@index([isPopular, popularOrder])
   @@index([isActive, popularityScore(sort: Desc)])
+  @@index([ownerUserId])
   @@map("media")
 }
 
@@ -258,6 +274,8 @@ model MediaBooking {
   /// 어드민이 status 결정한 시각 (requested → tentative/confirmed/cancelled)
   decidedAt         DateTime? @map("decided_at")
   decidedByAdminId  String?   @map("decided_by_admin_id")
+  /// 매체사가 설정한 집행 불가 구간 (`/media-owner` 캘린더)
+  isOwnerBlock      Boolean   @default(false) @map("is_owner_block")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
@@ -295,15 +313,97 @@ model CrmAccount {
   name      String
   phone     String?
   tier      CrmTier  @default(standard)
+  /// 연결된 가입 사용자
+  userId    String?  @unique @map("user_id")
+  /// 영업 담당자 (이메일 또는 이름)
+  assignedTo String? @map("assigned_to") @db.VarChar(120)
+  pipelineStage SalesPipelineStage @default(new_inquiry) @map("pipeline_stage")
+  expectedAmountWon Int? @map("expected_amount_won")
+  lastContactAt DateTime? @map("last_contact_at")
+  firstInquiryAt DateTime? @map("first_inquiry_at")
+  quoteSentAt DateTime? @map("quote_sent_at")
+  stageChangedAt DateTime? @map("stage_changed_at")
+  tags      String[] @default([])
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
   campaigns   Campaign[]
-  contactLogs CrmContactLog[]
-  notes       CrmNote[]
-  followUps   CrmFollowUp[]
+  contactLogs    CrmContactLog[]
+  notes          CrmNote[]
+  customerNotes  CustomerNote[]
+  followUps      CrmFollowUp[]
+  pipelineCard   PipelineCard?
 
+  @@index([pipelineStage])
+  @@index([assignedTo])
+  @@index([lastContactAt])
   @@map("crm_accounts")
+}
+
+/// 영업 파이프라인 칸반 카드 (문의·견적·CRM 계정 연동)
+model PipelineCard {
+  id              String             @id @default(cuid())
+  stage           SalesPipelineStage @default(new_inquiry)
+  company         String
+  contactName     String             @map("contact_name")
+  email           String?
+  phone           String?
+  expectedAmount  Int                @default(0) @map("expected_amount")
+  assignedTo      String?            @map("assigned_to") @db.VarChar(120)
+  lastContactAt   DateTime?          @map("last_contact_at")
+  firstInquiryAt  DateTime?          @map("first_inquiry_at")
+  quoteSentAt     DateTime?          @map("quote_sent_at")
+  stageChangedAt  DateTime?          @map("stage_changed_at")
+  tags            String[]           @default([])
+  sourceType      String             @default("manual") @map("source_type")
+  crmAccountId    String?            @unique @map("crm_account_id")
+  userId          String?            @map("user_id")
+  contactInquiryId String?           @unique @map("contact_inquiry_id")
+  oohQuoteId      String?            @unique @map("ooh_quote_id")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  crmAccount      CrmAccount?      @relation(fields: [crmAccountId], references: [id], onDelete: SetNull)
+  contactInquiry  ContactInquiry?  @relation(fields: [contactInquiryId], references: [id], onDelete: SetNull)
+  oohQuote        OoHQuote?        @relation(fields: [oohQuoteId], references: [id], onDelete: SetNull)
+
+  @@index([stage])
+  @@index([assignedTo])
+  @@index([email])
+  @@map("pipeline_cards")
+}
+
+/// 광고주 프로필 타임라인 메모
+model CustomerNote {
+  id            String   @id @default(cuid())
+  userId        String?  @map("user_id")
+  crmAccountId  String?  @map("crm_account_id")
+  body          String   @db.Text
+  kind          String   @default("note")
+  authorLabel   String?  @map("author_label") @db.VarChar(80)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user       User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  crmAccount CrmAccount? @relation(fields: [crmAccountId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([crmAccountId, createdAt(sort: Desc)])
+  @@map("customer_notes")
+}
+
+/// CRM 이메일 템플릿 (어드민 편집·원클릭 발송)
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  subject   String
+  bodyHtml  String   @map("body_html") @db.Text
+  bodyText  String?  @map("body_text") @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("email_templates")
 }
 
 model CrmContactLog {
@@ -311,6 +411,8 @@ model CrmContactLog {
   accountId String   @map("account_id")
   channel   String
   summary   String
+  /// pipeline_change | call | email | meeting | note
+  kind      String   @default("contact")
   createdAt DateTime @default(now()) @map("created_at")
 
   account CrmAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
@@ -376,7 +478,9 @@ model Campaign {
   financialDocs  CampaignFinancialDoc[]
   mediaBookings  MediaBooking[]
   quoteRequests  QuoteRequest[]
-  proofPhotos    CampaignProofPhoto[]
+  proofPhotos         CampaignProofPhoto[]
+  proofUploadTokens   CampaignProofUploadToken[]
+  proofWeeklyDigests  CampaignProofWeeklyDigest[]
   successCase    SuccessCase?
   oohQuote       OoHQuote?
   mediaReviews   MediaReview[]
@@ -390,14 +494,54 @@ model Campaign {
 model CampaignProofPhoto {
   id         String   @id @default(cuid())
   campaignId String   @map("campaign_id")
+  /// 원본 Cloudinary URL
   imageUrl   String   @map("image_url")
+  /// 워터마크 적용 URL (공개·광고주 노출 기본)
+  imageUrlWatermarked String? @map("image_url_watermarked")
   caption    String?
+  mediaName  String?  @map("media_name")
+  latitude   Float?
+  longitude  Float?
+  capturedAt DateTime? @map("captured_at")
+  uploadSource String? @map("upload_source") @db.VarChar(16)
+  /// 매체사·현장·어드민 업로더
+  uploadedByUserId String? @map("uploaded_by_user_id")
   createdAt  DateTime @default(now()) @map("created_at")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
-  @@index([campaignId])
+  @@index([campaignId, createdAt(sort: Desc)])
   @@map("campaign_proof_photos")
+}
+
+/// 현장 QR 업로드용 토큰 (ProofUploadToken — 로그인 없이 캠페인별 업로드)
+model CampaignProofUploadToken {
+  id         String    @id @default(cuid())
+  campaignId String    @map("campaign_id")
+  token      String    @unique
+  label      String?   @db.VarChar(80)
+  expiresAt  DateTime? @map("expires_at")
+  usageCount Int       @default(0) @map("usage_count")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("campaign_proof_upload_tokens")
+}
+
+/// 주간 인증 리포트 이메일 발송 이력 (중복 방지)
+model CampaignProofWeeklyDigest {
+  id          String   @id @default(cuid())
+  campaignId  String   @map("campaign_id")
+  periodKey   String   @map("period_key") @db.VarChar(10)
+  recipient   String
+  sentAt      DateTime @default(now()) @map("sent_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, periodKey])
+  @@map("campaign_proof_weekly_digests")
 }
 
 model CampaignScheduleEvent {
@@ -460,7 +604,8 @@ model ContactInquiry {
   message     String
   createdAt   DateTime @default(now()) @map("created_at")
 
-  oohQuote OoHQuote?
+  oohQuote       OoHQuote?
+  pipelineCard   PipelineCard?
 
   @@map("contact_inquiries")
 }
@@ -557,6 +702,7 @@ model OoHQuote {
 
   contactInquiryId String?         @unique @map("contact_inquiry_id")
   contactInquiry   ContactInquiry? @relation(fields: [contactInquiryId], references: [id], onDelete: SetNull)
+  pipelineCard     PipelineCard?
 
   /// `lib/quote-calculator.ts` 산출 JSON (라인·VAT·유효기간 등)
   quoteBreakdown Json? @map("quote_breakdown")
@@ -676,11 +822,34 @@ model OohContract {
 
   status OohContractStatus @default(pending)
 
+  auditLogs SignatureAuditLog[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([status])
   @@map("ooh_contracts")
+}
+
+/// 전자서명 감사 로그 (전자서명법 증거 보존)
+model SignatureAuditLog {
+  id                 String      @id @default(cuid())
+  contractId         String      @map("contract_id")
+  contract           OohContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  signerUserId       String?     @map("signer_user_id")
+  signerEmail        String      @map("signer_email") @db.VarChar(320)
+  signerIp           String      @map("signer_ip") @db.VarChar(64)
+  signerUserAgent    String      @map("signer_user_agent") @db.Text
+  signedAt           DateTime    @map("signed_at")
+  documentHash       String      @map("document_hash") @db.VarChar(64)
+  signatureImageHash String      @map("signature_image_hash") @db.VarChar(64)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([contractId])
+  @@index([signerEmail])
+  @@index([signedAt])
+  @@map("signature_audit_logs")
 }
 
 /**
@@ -864,6 +1033,12 @@ enum AppUserRole {
   admin
 }
 
+enum ApiKeyPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
 enum CommunityMemberRole {
   ADVERTISER
   MEDIA
@@ -915,9 +1090,33 @@ model User {
   searchLogs              SearchLog[]
   preference              UserPreference?
   chatLogs                ChatLog[]
+  apiKeys                 ApiKey[]
+  ownedMedia              Media[]                  @relation("MediaOwner")
+  mediaPriceChangeRequests MediaPriceChangeRequest[]
+  mediaOwnerSettlements   MediaOwnerSettlement[]
+  crmAccount              CrmAccount?
+  pushSubscriptions       PushSubscription[]
+  customerNotes           CustomerNote[]
 
   @@index([email])
   @@map("users")
+}
+
+/// Web Push 구독 (PWA 알림)
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  endpoint  String   @unique @db.VarChar(512)
+  p256dh    String   @db.VarChar(200)
+  auth      String   @db.VarChar(100)
+  userAgent String?  @map("user_agent") @db.VarChar(300)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 /// 로그인 사용자 상담 AI 대화 로그 (선택 저장)
@@ -1406,6 +1605,18 @@ enum MediaApplicationStatus {
   REJECTED
 }
 
+enum MediaPriceChangeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MediaOwnerSettlementStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
 model MediaApplication {
   id             String                 @id @default(cuid())
   companyName    String                 @map("company_name")
@@ -1439,11 +1650,57 @@ model MediaApplication {
   reviewedAt     DateTime?              @map("reviewed_at")
   createdMediaId String?                @map("created_media_id")
   submitterIp    String?                @map("submitter_ip")
+  /// 로그인 매체사가 제출한 경우
+  userId         String?                @map("user_id")
   createdAt      DateTime               @default(now()) @map("created_at")
   updatedAt      DateTime               @updatedAt @map("updated_at")
 
   @@index([status, createdAt])
+  @@index([userId])
   @@map("media_applications")
+}
+
+/// 매체사 단가 수정 요청 (어드민 검토)
+model MediaPriceChangeRequest {
+  id              String                 @id @default(cuid())
+  mediaId         String                 @map("media_id")
+  ownerUserId     String                 @map("owner_user_id")
+  currentPrice    Int                    @map("current_price")
+  requestedPrice  Int                    @map("requested_price")
+  reason          String?                @db.Text
+  status          MediaPriceChangeStatus @default(PENDING)
+  reviewNote      String?                @map("review_note") @db.Text
+  reviewedAt      DateTime?              @map("reviewed_at")
+  createdAt       DateTime               @default(now()) @map("created_at")
+
+  media     Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  ownerUser User  @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@index([ownerUserId, createdAt(sort: Desc)])
+  @@index([mediaId, status])
+  @@map("media_price_change_requests")
+}
+
+/// 매체사 월별 정산
+model MediaOwnerSettlement {
+  id                    String                   @id @default(cuid())
+  ownerUserId           String                   @map("owner_user_id")
+  periodMonth           String                   @map("period_month") @db.VarChar(7)
+  grossWon              Int                      @map("gross_won")
+  feeWon                Int                      @map("fee_won")
+  netWon                Int                      @map("net_won")
+  status                MediaOwnerSettlementStatus @default(SCHEDULED)
+  taxInvoiceRequestedAt DateTime?                @map("tax_invoice_requested_at")
+  completedAt           DateTime?                @map("completed_at")
+  notes                 String?                  @db.Text
+  createdAt             DateTime                 @default(now()) @map("created_at")
+  updatedAt             DateTime                 @updatedAt @map("updated_at")
+
+  ownerUser User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerUserId, periodMonth])
+  @@index([ownerUserId, status])
+  @@map("media_owner_settlements")
 }
 
 // ── Instant DOOH booking (소액 온라인 결제) ─────────────────────
@@ -1724,4 +1981,46 @@ model OpsErrorLog {
 
   @@index([createdAt(sort: Desc)])
   @@map("ops_error_logs")
+}
+
+/// B2B 공개 API 키 (대행사·파트너 연동) — 평문 key는 keyHash(SHA-256)에만 저장
+model ApiKey {
+  id           String     @id @default(cuid())
+  userId       String     @map("user_id")
+  name         String     @db.VarChar(80)
+  keyHash      String     @unique @map("key_hash")
+  keyPrefix    String     @map("key_prefix") @db.VarChar(24)
+  keyLast4     String     @default("") @map("key_last4") @db.VarChar(4)
+  plan         ApiKeyPlan @default(FREE)
+  requestCount Int        @default(0) @map("request_count")
+  usageMonth   String     @default("") @map("usage_month") @db.VarChar(7)
+  lastUsedAt   DateTime?  @map("last_used_at")
+  lastBurstAlertAt DateTime? @map("last_burst_alert_at")
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageLogs ApiUsageLog[]
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("api_keys")
+}
+
+/// 공개 API 호출 로그 (ApiRequestLog — 어드민 모니터링·이상 트래픽 감지)
+model ApiUsageLog {
+  id        String   @id @default(cuid())
+  apiKeyId  String   @map("api_key_id")
+  endpoint  String   @db.VarChar(256)
+  method    String   @db.VarChar(8)
+  status    Int
+  ip        String?  @db.VarChar(64)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId, createdAt(sort: Desc)])
+  @@index([endpoint, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("api_usage_logs")
 }

@@ -3,7 +3,10 @@
 import { useLocale, useTranslations } from "next-intl";
 import { BarChart3, Bolt, Sparkles } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
+import { MediaQuickInquiryActions } from "@/components/media-quick-inquiry-actions";
 import type { MediaItem } from "@/lib/media-data";
+import { formatMediaLocationShort } from "@/lib/media-location-format";
+import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 
 export default function MediaDetailStickyCta({
   media,
@@ -20,6 +23,8 @@ export default function MediaDetailStickyCta({
   const tCta = useTranslations("mediaDetail.cta");
   const displayName = isKo ? media.name : media.nameEn || media.name;
   const contactHref = `/contact?media=${encodeURIComponent(media.id)}`;
+  const heroImage = getPrimaryMediaImageUrl(media);
+  const location = formatMediaLocationShort(media, isKo);
 
   return (
     <div
@@ -36,6 +41,14 @@ export default function MediaDetailStickyCta({
           <p className="truncate px-0.5 text-sm font-bold leading-snug text-white">
             {displayName}
           </p>
+          <MediaQuickInquiryActions
+            mediaId={media.id}
+            mediaName={displayName}
+            mediaType={media.type}
+            location={location}
+            imageUrl={heroImage || undefined}
+            compact
+          />
           <BtnBlock
             href={contactHref}
             variant="primary"

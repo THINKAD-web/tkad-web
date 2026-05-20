@@ -76,13 +76,33 @@ function buildTimeline(
   start: Date | null,
   end: Date | null,
   validUntil: Date | null,
+  isKo: boolean,
 ): QuotePdfTimelineStep[] {
   const fmt = (d: Date) => d.toISOString().slice(0, 10);
-  const steps: QuotePdfTimelineStep[] = [];
-  if (start) steps.push({ label: "Campaign start", date: fmt(start) });
-  if (end) steps.push({ label: "Campaign end", date: fmt(end) });
+  const issued = fmt(new Date());
+  const steps: QuotePdfTimelineStep[] = [
+    {
+      label: isKo ? "견적 발행" : "Quote issued",
+      date: issued,
+    },
+  ];
+  if (start) {
+    steps.push({
+      label: isKo ? "집행 시작" : "Campaign start",
+      date: fmt(start),
+    });
+  }
+  if (end) {
+    steps.push({
+      label: isKo ? "집행 종료" : "Campaign end",
+      date: fmt(end),
+    });
+  }
   if (validUntil) {
-    steps.push({ label: "Quote valid until", date: fmt(validUntil) });
+    steps.push({
+      label: isKo ? "견적 유효기간" : "Quote valid until",
+      date: fmt(validUntil),
+    });
   }
   return steps;
 }
@@ -230,6 +250,7 @@ export async function buildOoHQuotePdfParams(
       start && !Number.isNaN(start.getTime()) ? start : null,
       end && !Number.isNaN(end.getTime()) ? end : null,
       validUntil && !Number.isNaN(validUntil.getTime()) ? validUntil : null,
+      isKo,
     ),
     accountManagerName: accountManagerName(),
   };

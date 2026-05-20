@@ -13,9 +13,18 @@ export type OohContractPdfVars = {
 };
 
 export type OohContractSignAudit = {
+  /** 문서 고유번호 (계약 레코드 ID) */
+  documentNumber: string;
+  signerName: string;
+  signerEmail: string;
   signedAtIso: string;
+  signedAtKst: string;
   signerIp: string;
   signerAgent: string;
+  /** 서명 직전 계약서 본문 해시 */
+  documentContentSha256: string;
+  /** 서명 이미지 해시 */
+  signatureImageSha256: string;
 };
 
 function wrapLines(
@@ -198,24 +207,35 @@ export async function buildOohContractPdf(
   }
 
   if (options?.audit) {
+    if (y > 250) {
+      doc.addPage();
+      y = 18;
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(15, 23, 42);
+    doc.text(
+      isKo ? "전자서명 증거 기록" : "Electronic signature evidence",
+      margin,
+      y,
+    );
+    y += 7;
+
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
-    doc.setTextColor(80, 80, 80);
+    doc.setTextColor(50, 50, 50);
     const a = options.audit;
-    const fp = createHash("sha256")
-      .update(vars.contractId)
-      .update(vars.advertiserLine)
-      .update(vars.period)
-      .update(vars.amountLine)
-      .update(options.signaturePngBase64 ?? "")
-      .update(a.signedAtIso)
-      .digest("hex");
     const block = [
-      isKo ? "— 전자서명 감사 기록 —" : "— E-signature audit —",
-      `${isKo ? "서명시각" : "Signed"}: ${a.signedAtIso}`,
+      isKo
+        ? "본 문서는 전자서명법에 따른 전자서명이 적용되었습니다."
+        : "This document bears an electronic signature under applicable e-signature law.",
+      `${isKo ? "문서 고유번호" : "Document ID"}: ${a.documentNumber}`,
+      `${isKo ? "서명자" : "Signer"}: ${a.signerName} <${a.signerEmail}>`,
+      `${isKo ? "서명 일시(KST)" : "Signed at (KST)"}: ${a.signedAtKst}`,
       `IP: ${a.signerIp}`,
-      `${isKo ? "기기" : "UA"}: ${a.signerAgent.slice(0, 180)}${a.signerAgent.length > 180 ? "…" : ""}`,
-      `${isKo ? "콘텐츠 지문(SHA-256)" : "Content fingerprint (SHA-256)"}: ${fp}`,
+      `${isKo ? "계약서 내용 해시(SHA-256)" : "Document content SHA-256"}: ${a.documentContentSha256}`,
+      `${isKo ? "서명 이미지 해시(SHA-256)" : "Signature image SHA-256"}: ${a.signatureImageSha256}`,
+      `${isKo ? "기기" : "User-Agent"}: ${a.signerAgent.slice(0, 160)}${a.signerAgent.length > 160 ? "…" : ""}`,
     ];
     for (const row of block) {
       if (y > 285) {

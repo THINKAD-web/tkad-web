@@ -76,6 +76,7 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import MediaDetailHeroGallery from "@/components/media-detail-hero-gallery";
 import { MediaDetailAddToCart } from "@/components/media-detail-add-to-cart";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
+import { MediaDetailPwaActions } from "@/components/media-detail-pwa-actions";
 import { SectionHead } from "@/components/brutalist/section-head";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
@@ -423,7 +424,18 @@ export default async function MediaDetailPage({ params }: Props) {
               {`// 관심 가는 매체라면 견적서에 담아보세요`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <MediaDetailPwaActions
+              media={{
+                id: media.id,
+                name: media.name,
+                nameEn: media.nameEn,
+                location: formatMediaLocationShort(media, isKo),
+                type: typeLabel,
+                price: media.price,
+                imageUrl: heroImage || undefined,
+              }}
+            />
             <MediaFavoriteButton
               mediaId={media.id}
               mediaName={media.name}

@@ -9,7 +9,10 @@ import {
   type AlimtalkTemplateCode,
 } from "@/lib/kakao-alimtalk";
 
+/** 광고주 대상 5종 (문의·견적·확정·D-1·리포트) */
 const CAMPAIGN_TEMPLATES: AlimtalkTemplateCode[] = [
+  "TKAD_INQUIRY_RECEIVED",
+  "TKAD_QUOTE_SENT",
   "TKAD_CAMPAIGN_CONFIRMED",
   "TKAD_CAMPAIGN_TOMORROW",
   "TKAD_REPORT_READY",
@@ -43,6 +46,11 @@ export function CampaignAlimtalkSend({
 
   const send = useCallback(async () => {
     if (!campaignId) return;
+    const label = ALIMTALK_TEMPLATE_LABELS[templateCode];
+    const ok = window.confirm(
+      `${label} 알림톡을 ${to.trim()} (${recvName.trim() || "이름 없음"})에게 발송할까요?`,
+    );
+    if (!ok) return;
     setBusy(true);
     setMsg(null);
     try {

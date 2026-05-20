@@ -5,11 +5,13 @@ type Props = {
   children: ReactNode;
   className?: string;
   innerClassName?: string;
+  id?: string;
 };
 
-export function NeonSection({ children, className, innerClassName }: Props) {
+export function NeonSection({ children, className, innerClassName, id }: Props) {
   return (
     <section
+      id={id}
       className={cn(
         "tkad-neon-surface relative overflow-hidden bg-[#05050a] py-12 text-white sm:py-16 md:py-24 lg:py-32 xl:py-40 2xl:py-48",
         className,

@@ -79,6 +79,7 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           agree: true,
+          agreeEsignLaw: true,
           signaturePngBase64: dataUrl,
           signerName: signerName.trim(),
           signerEmail: signerEmail.trim(),

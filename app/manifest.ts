@@ -39,6 +39,20 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       {
+        name: "오프라인 저장",
+        short_name: "오프라인",
+        description: "저장한 매체를 오프라인에서 엽니다.",
+        url: "/ko/offline-saved",
+        icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+      },
+      {
+        name: "답사 모드",
+        short_name: "답사",
+        description: "현장 GPS 답사 및 보고서.",
+        url: "/ko/media/map?survey=1",
+        icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+      },
+      {
         name: "매체 검색",
         short_name: "매체",
         description: "전국 OOH 매체를 검색하고 비교합니다.",

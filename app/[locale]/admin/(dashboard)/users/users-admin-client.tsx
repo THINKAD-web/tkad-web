@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, UserCog } from "lucide-react";
@@ -39,6 +41,8 @@ function formatDate(s: string | null): string {
 }
 
 export default function UsersAdminClient() {
+  const pathname = usePathname();
+  const locale = pathname.split("/")[1] || "ko";
   const [items, setItems] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState("");
@@ -130,6 +134,7 @@ export default function UsersAdminClient() {
                   <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider hidden sm:table-cell">가입일</th>
                   <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider hidden lg:table-cell">마지막 로그인</th>
                   <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">역할</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">CRM</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -163,6 +168,16 @@ export default function UsersAdminClient() {
                           <option value="admin">관리자</option>
                         </select>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {(u.role === "advertiser" || u.role === "agency") && (
+                        <Link
+                          href={`/${locale}/admin/customers/${u.id}`}
+                          className="text-xs text-primary underline-offset-2 hover:underline"
+                        >
+                          프로필
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -16,6 +16,8 @@ import {
   Link2,
   Loader2,
   Plus,
+  QrCode,
+  Smartphone,
   Trash2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -1091,6 +1093,45 @@ export default function AdminCampaignsPage() {
                   <Camera className="h-4 w-4" />
                   송출 증빙 사진
                 </h3>
+                {selectedId ? (
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    <Link
+                      href={`/admin/campaigns/${selectedId}/proof-upload`}
+                      className="inline-flex items-center gap-1.5 rounded border border-violet-300 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-900 hover:bg-violet-100"
+                    >
+                      <Smartphone className="h-3.5 w-3.5" />
+                      현장 모바일 업로드
+                    </Link>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 rounded border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-900 hover:bg-emerald-100"
+                      onClick={async () => {
+                        if (!selectedId) return;
+                        const res = await fetch(
+                          `/api/admin/campaigns/${selectedId}/proof-upload-token`,
+                        );
+                        if (!res.ok) {
+                          setProofMsg("QR 생성 실패");
+                          return;
+                        }
+                        const data = (await res.json()) as {
+                          uploadUrl?: string;
+                        };
+                        if (data.uploadUrl) {
+                          await navigator.clipboard.writeText(data.uploadUrl);
+                          setProofMsg("업로드 링크가 복사되었습니다.");
+                        }
+                        window.open(
+                          `/api/admin/campaigns/${selectedId}/proof-qr`,
+                          "_blank",
+                        );
+                      }}
+                    >
+                      <QrCode className="h-3.5 w-3.5" />
+                      업로드 QR 생성
+                    </button>
+                  </div>
+                ) : null}
                 <label className="mb-2 inline-flex cursor-pointer items-center gap-2 rounded border border-dashed border-slate-300 px-3 py-2 text-xs hover:bg-slate-50">
                   이미지 업로드
                   <input

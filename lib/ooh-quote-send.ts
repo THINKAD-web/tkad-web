@@ -6,7 +6,9 @@ import {
 } from "@/lib/email/client";
 import { ooHQuotePdfToBase64 } from "@/lib/server-ooh-quote-pdf";
 import { notifyQuoteSent } from "@/lib/kakao-alimtalk-notify";
+import { notifyUserByEmail } from "@/lib/notifications";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { notifySlackQuoteSent } from "@/lib/quote-slack-notify";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 
@@ -105,6 +107,24 @@ export async function sendOoHQuoteToClient(
     body: `${ooh.clientName} · ₩${ooh.totalAmount.toLocaleString("ko-KR")}만`,
     meta: { oohQuoteId: ooh.id },
   }).catch(() => {});
+
+  void notifySlackQuoteSent({
+    quoteId: ooh.id,
+    clientName: ooh.clientName,
+    totalAmountManwon: ooh.totalAmount,
+    emailed,
+    alimtalk,
+  }).catch(() => {});
+
+  if (clientEmail) {
+    void notifyUserByEmail(clientEmail, {
+      type: "QUOTE_RECEIVED",
+      title: "견적서가 도착했어요",
+      body: "견적서를 확인해 주세요.",
+      link: `/${localeStr}/quote/${ooh.id}/preview`,
+      dedupeKey: `quote_sent:${ooh.id}`,
+    }).catch((e) => console.error("[ooh-quote-send] push:", e));
+  }
 
   return { emailed, alimtalk, quote: updated };
 }

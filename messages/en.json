@@ -1985,6 +1985,9 @@
     "campaigns": "Campaigns",
     "community": "Community",
     "crmRecords": "CRM records",
+    "pipeline": "Sales pipeline",
+    "forecast": "Revenue forecast",
+    "emailTemplates": "Email templates",
     "medias": "Media",
     "verification": "Verification",
     "users": "Users",
@@ -2002,9 +2005,11 @@
     "signOut": "Sign out",
     "instantBookings": "Instant bookings",
     "mediaApplications": "Media Applications",
+    "mediaOwnerOps": "Media owner ops",
     "mediaReviews": "Media reviews",
     "searchStats": "Search stats",
-    "abTest": "A/B test"
+    "abTest": "A/B test",
+    "apiUsage": "API usage"
   },
   "search": {
     "modalTitle": "Unified search",
@@ -2285,7 +2290,7 @@
     "signerEmail": "Signer email",
     "padLabel": "Sign below",
     "clearPad": "Clear",
-    "agreeLabel": "I agree to the contract.",
+    "agreeLabel": "I agree to the contract above by electronic means under applicable e-signature law (Art. 2).",
     "submit": "Complete signature",
     "needAgree": "Please check the agreement box.",
     "needContact": "Enter name and email.",

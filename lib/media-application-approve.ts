@@ -154,6 +154,18 @@ export async function approveMediaApplication(
 
   const base = mapQuickAddToDb(withFoot);
 
+  let ownerUserId: string | null = app.userId ?? null;
+  if (!ownerUserId && app.contactEmail) {
+    const linked = await db.user.findFirst({
+      where: {
+        email: app.contactEmail.trim().toLowerCase(),
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+    ownerUserId = linked?.id ?? null;
+  }
+
   const result = await db.$transaction(async (tx) => {
     const media = await tx.media.create({
       data: {
@@ -163,6 +175,7 @@ export async function approveMediaApplication(
         autoPopulatedAt: autoNear?.autoPopulatedAt ?? null,
         isActive: true,
         availability: "available",
+        ownerUserId,
       },
     });
     await tx.mediaPriceSnapshot.create({
