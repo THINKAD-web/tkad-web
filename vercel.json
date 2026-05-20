@@ -57,7 +57,7 @@
     },
     {
       "path": "/api/cron/api-usage-alerts",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/cron/daily-ops-report",
