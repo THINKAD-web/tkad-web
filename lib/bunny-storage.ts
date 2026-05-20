@@ -79,3 +79,32 @@ export async function uploadToBunnyStorage(opts: {
   };
 }
 
+/** CDN 공개 URL → 스토리지 존 내 경로 (삭제용) */
+export function bunnyPathFromPublicUrl(publicUrl: string): string | null {
+  const cdnBase = process.env.BUNNY_CDN_BASE_URL?.trim()?.replace(/\/+$/, "");
+  if (!cdnBase || !publicUrl.startsWith(cdnBase)) return null;
+  const path = publicUrl.slice(cdnBase.length).replace(/^\/+/, "");
+  return path || null;
+}
+
+export async function deleteFromBunnyStorage(path: string): Promise<void> {
+  const zone = process.env.BUNNY_STORAGE_ZONE?.trim();
+  const key = process.env.BUNNY_STORAGE_API_KEY?.trim();
+  if (!zone || !key) {
+    throw new Error("BUNNY_STORAGE_NOT_CONFIGURED");
+  }
+  const normalizedPath = path.replace(/^\/+/, "");
+  const delUrl = `${bunnyStorageBaseUrl()}/${encodeURIComponent(zone)}/${normalizedPath}`;
+
+  const res = await fetch(delUrl, {
+    method: "DELETE",
+    headers: { AccessKey: key },
+    cache: "no-store",
+  });
+
+  if (!res.ok && res.status !== 404) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`BUNNY_DELETE_FAILED:${res.status}:${t.slice(0, 200)}`);
+  }
+}
+

@@ -33,15 +33,17 @@ export default function robots(): MetadataRoute.Robots {
   return {
     host: origin,
     rules: [
-      // 글로벌 검색 봇 (Google / Bing 등)
+      // Google
+      { userAgent: "Googlebot", allow: "/", disallow },
+      // 글로벌 검색 봇 (Bing 등)
       { userAgent: "*", allow: "/", disallow },
-      // Naver — 한국 1위 검색엔진
+      // Naver
       { userAgent: "Yeti", allow: "/", disallow },
       // Daum / Kakao
       { userAgent: "Daumoa", allow: "/", disallow },
       // Zum
       { userAgent: "Zumbot", allow: "/", disallow },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: `${origin}/sitemap.xml`,
   };
 }

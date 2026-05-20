@@ -18,8 +18,10 @@ import LocaleRootBody from "@/components/locale-root-body";
 import { SiteHeader } from "@/components/public-chrome/site-header";
 import { OnboardingProgressBar } from "@/components/onboarding/onboarding-progress-bar";
 import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
+import { AbGaVariantSync } from "@/components/ab/ab-ga-variant";
+import { WebVitalsReporter } from "@/components/web-vitals-reporter";
+import { pretendard } from "@/lib/fonts/pretendard";
 import "../globals.css";
-import "leaflet/dist/leaflet.css";
 
 const geistSans = localFont({
   src: "../fonts/geist-latin.woff2",
@@ -67,8 +69,12 @@ export async function generateMetadata({
       ? "대한민국 No.1 OOH 광고 에이전시. 전국 500+ 검증된 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 계약~사후관리 원스톱 서비스."
       : "Korea's leading OOH agency. Search 500+ verified OOH media nationwide, data-driven campaign consulting, and end-to-end execution.";
 
-  const googleVer = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
-  const naverVer = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION?.trim();
+  const googleVer =
+    process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim() ||
+    process.env.GOOGLE_SITE_VERIFICATION?.trim();
+  const naverVer =
+    process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION?.trim() ||
+    process.env.NAVER_SITE_VERIFICATION?.trim();
 
   return {
     title: {
@@ -105,19 +111,9 @@ export async function generateMetadata({
         "max-video-preview": -1,
       },
     },
-    ...(googleVer || naverVer
-      ? {
-          verification: {
-            ...(googleVer ? { google: googleVer } : {}),
-            ...(naverVer
-              ? {
-                  other: {
-                    "naver-site-verification": naverVer,
-                  },
-                }
-              : {}),
-          },
-        }
+    ...(googleVer ? { verification: { google: googleVer } } : {}),
+    ...(naverVer
+      ? { other: { "naver-site-verification": naverVer } }
       : {}),
     openGraph: {
       type: "website",
@@ -163,10 +159,12 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-full min-h-[100dvh] flex-col antialiased`}
+        className={`${pretendard.variable} ${geistSans.variable} ${geistMono.variable} flex min-h-full min-h-[100dvh] flex-col antialiased`}
       >
         <JsonLd data={structuredData} />
+        <WebVitalsReporter />
         <PublicAnalyticsLoader />
+        <AbGaVariantSync />
         <ThemeProvider>
           <NextIntlClientProvider
             locale={locale}

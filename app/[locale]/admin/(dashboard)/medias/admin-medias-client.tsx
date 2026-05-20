@@ -33,7 +33,16 @@ import {
   Star,
   Flame,
   ShieldCheck,
+  Copy,
+  FileSpreadsheet,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { MediaGalleryEditor } from "@/components/admin/media-gallery-editor";
+import {
+  clearAdminMediaFormDraft,
+  loadAdminMediaFormDraft,
+  saveAdminMediaFormDraft,
+} from "@/lib/admin-media-form-draft";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
 import type { AdminMediaDto, MediaAvailability } from "@/lib/admin-media-dto";
@@ -190,6 +199,23 @@ type AdminMediaForm = {
   /** 이동형 — 전국 시·군·구 행정코드(5자리) 다중 선택 */
   coverageDistrictCodes: string[];
 };
+
+function galleryUrlsFromForm(form: AdminMediaForm): string[] {
+  const gallery = form.extractedImagesText.trim().split("\n").filter(Boolean);
+  const primary = form.image.trim();
+  if (primary) return [primary, ...gallery.filter((u) => u !== primary)];
+  return gallery;
+}
+
+function applyGalleryUrlsToForm(
+  urls: string[],
+): Pick<AdminMediaForm, "image" | "extractedImagesText"> {
+  if (urls.length === 0) return { image: "", extractedImagesText: "" };
+  return {
+    image: urls[0]!,
+    extractedImagesText: urls.slice(1).join("\n"),
+  };
+}
 
 const emptyForm: AdminMediaForm = {
   name: "",
@@ -518,7 +544,10 @@ export default function AdminMediasClient({
   initialListError,
   initialEngagement = {},
 }: Props) {
+  const searchParams = useSearchParams();
   const [medias, setMedias] = useState<AdminMediaDto[]>(() => initialMedias);
+  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const [duplicateBusyId, setDuplicateBusyId] = useState<string | null>(null);
   const [listLoading, setListLoading] = useState(
     () => initialMedias.length === 0 && initialListError == null,
   );
@@ -597,8 +626,6 @@ export default function AdminMediasClient({
   const [uploadRunning, setUploadRunning] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const formPrimaryImageInputRef = useRef<HTMLInputElement>(null);
-  const formGalleryImageInputRef = useRef<HTMLInputElement>(null);
   const [formImageUploadBusy, setFormImageUploadBusy] = useState(false);
   /** 목록 GET이 저장/삭제보다 늦게 끝나면 옛 데이터로 덮어쓰는 레이스 방지 */
   const listFetchGenRef = useRef(0);
@@ -892,9 +919,9 @@ export default function AdminMediasClient({
     setPage((p) => Math.min(p, maxPage));
   }, [filtered.length, pageSize]);
 
-  const openAdd = useCallback(() => {
+  const openAdd = useCallback((prefill?: AdminMediaForm) => {
     setEditing(null);
-    setForm(emptyForm);
+    setForm(prefill ?? emptyForm);
     setPriceOptDrafts([]);
     setSaveError(null);
     setModalOpen(true);
@@ -908,6 +935,78 @@ export default function AdminMediasClient({
     setSaveError(null);
     setModalOpen(true);
   }, []);
+
+  const duplicateMedia = useCallback(
+    async (media: AdminMediaDto) => {
+      setDuplicateBusyId(media.id);
+      try {
+        const res = await adminFetchJson(
+          `/api/admin/medias/${media.id}/duplicate`,
+          { method: "POST", credentials: "include" },
+        );
+        if (!res.ok) {
+          setListError(res.message || "복제에 실패했습니다.");
+          return;
+        }
+        const data = res.data as { media?: unknown; error?: string };
+        const row = data.media
+          ? normalizeAdminMediaRow(data.media)
+          : null;
+        if (row) {
+          setMedias((prev) => [row, ...prev]);
+          openEdit(row);
+        }
+      } finally {
+        setDuplicateBusyId(null);
+      }
+    },
+    [openEdit],
+  );
+
+  const deleteBunnyImage = useCallback(async (url: string) => {
+    await fetch("/api/admin/upload/bunny/delete", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+  }, []);
+
+  const queryHandledRef = useRef(false);
+  useEffect(() => {
+    if (queryHandledRef.current) return;
+    const action = searchParams.get("action");
+    const dupId = searchParams.get("duplicate");
+    if (!action && !dupId) return;
+    queryHandledRef.current = true;
+    if (action === "new") {
+      const draft = loadAdminMediaFormDraft();
+      if (draft && !draft.editingId) {
+        setForm(draft.form as AdminMediaForm);
+        setPriceOptDrafts((draft.priceOptDrafts as PriceOptDraft[]) ?? []);
+        setDraftSavedAt(draft.savedAt);
+      }
+      setEditing(null);
+      setModalOpen(true);
+    } else if (dupId) {
+      const src = medias.find((m) => m.id === dupId);
+      if (src) void duplicateMedia(src);
+    }
+  }, [searchParams, medias, duplicateMedia]);
+
+  useEffect(() => {
+    if (!modalOpen || editing) return;
+    const id = window.setInterval(() => {
+      saveAdminMediaFormDraft({
+        form: form as unknown as Record<string, unknown>,
+        priceOptDrafts,
+        editingId: null,
+        savedAt: new Date().toISOString(),
+      });
+      setDraftSavedAt(new Date().toISOString());
+    }, 30_000);
+    return () => window.clearInterval(id);
+  }, [modalOpen, editing, form, priceOptDrafts]);
 
   const applyPriceOptDrafts = useCallback((rows: PriceOptDraft[]) => {
     setPriceOptDrafts(rows);
@@ -979,6 +1078,8 @@ export default function AdminMediasClient({
           await loadMedias({ showSpinner: false });
         }
       }
+      clearAdminMediaFormDraft();
+      setDraftSavedAt(null);
       setModalOpen(false);
     } catch (e) {
       setSaveError(
@@ -1420,56 +1521,23 @@ export default function AdminMediasClient({
     return upJson.url;
   }, []);
 
-  const handleFormPrimaryImagePicked = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      e.target.value = "";
-      if (!file?.type.startsWith("image/")) return;
-      setFormImageUploadBusy(true);
-      setSaveError(null);
-      try {
-        const url = await uploadFileToBunny(file);
-        setForm((f) => ({ ...f, image: url }));
-      } catch (e) {
-        setSaveError(
-          e instanceof Error
-            ? `대표 이미지 업로드 실패: ${e.message}`
-            : "대표 이미지 업로드에 실패했습니다.",
-        );
-      } finally {
-        setFormImageUploadBusy(false);
-      }
-    },
-    [uploadFileToBunny],
-  );
-
-  const handleFormGalleryImagePicked = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files ?? []).filter(f => f.type.startsWith("image/"));
-      e.target.value = "";
-      if (files.length === 0) return;
+  const uploadGalleryFiles = useCallback(
+    async (files: File[]): Promise<string[]> => {
       setFormImageUploadBusy(true);
       setSaveError(null);
       try {
         const urls: string[] = [];
         for (const file of files) {
-          const url = await uploadFileToBunny(file);
-          urls.push(url);
+          urls.push(await uploadFileToBunny(file));
         }
-        setForm((f) => {
-          const cur = f.extractedImagesText.trim();
-          const added = urls.join("\n");
-          return {
-            ...f,
-            extractedImagesText: cur ? `${cur}\n${added}` : added,
-          };
-        });
+        return urls;
       } catch (e) {
         setSaveError(
           e instanceof Error
-            ? `추가 이미지 업로드 실패: ${e.message}`
-            : "추가 이미지 업로드에 실패했습니다.",
+            ? `이미지 업로드 실패: ${e.message}`
+            : "이미지 업로드에 실패했습니다.",
         );
+        throw e;
       } finally {
         setFormImageUploadBusy(false);
       }
@@ -1642,15 +1710,24 @@ export default function AdminMediasClient({
             </Button>
             <Button variant="outline" className="w-full justify-center sm:w-auto" asChild>
               <Link
+                href="/admin/medias/import"
+                className="inline-flex items-center justify-center gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                <span className="hidden sm:inline">CSV 등록</span>
+              </Link>
+            </Button>
+            <Button variant="outline" className="w-full justify-center sm:w-auto" asChild>
+              <Link
                 href="/admin/medias/bulk-import"
                 className="inline-flex items-center justify-center gap-2"
               >
                 <Layers className="h-4 w-4" />
-                <span className="hidden sm:inline">일괄 가져오기</span>
+                <span className="hidden sm:inline">JSON 일괄</span>
               </Link>
             </Button>
             <Button
-              onClick={openAdd}
+              onClick={() => openAdd()}
               className="col-span-2 w-full justify-center border-2 border-border bg-primary text-primary-foreground transition-colors hover:bg-foreground hover:border-border sm:col-span-1 sm:w-auto"
             >
               <Plus className="h-4 w-4" />
@@ -2112,6 +2189,20 @@ export default function AdminMediasClient({
                               <Button
                                 variant="outline"
                                 size="sm"
+                                className="h-8 shrink-0 px-2"
+                                title="복제"
+                                disabled={duplicateBusyId === media.id}
+                                onClick={() => void duplicateMedia(media)}
+                              >
+                                {duplicateBusyId === media.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Copy className="h-3.5 w-3.5" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
                                 className="h-8 shrink-0 px-2 text-destructive hover:text-destructive"
                                 onClick={() => setDeleteConfirm(media.id)}
                                 aria-label="삭제"
@@ -2444,6 +2535,19 @@ export default function AdminMediasClient({
                             <Button
                               variant="ghost"
                               size="icon-xs"
+                              title="복제"
+                              disabled={duplicateBusyId === media.id}
+                              onClick={() => void duplicateMedia(media)}
+                            >
+                              {duplicateBusyId === media.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Copy className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
                               onClick={() => openEdit(media)}
                             >
                               <Pencil className="h-3.5 w-3.5" />
@@ -2530,9 +2634,18 @@ export default function AdminMediasClient({
           />
           <Card className="relative z-10 flex max-h-[min(92dvh,900px)] w-full max-w-3xl flex-col gap-0 overflow-hidden rounded-t-2xl border-border bg-card py-0 text-card-foreground shadow-2xl ring-1 ring-black/[0.05] hover:translate-y-0 hover:shadow-2xl motion-safe:hover:translate-y-0 sm:rounded-2xl dark:border-white/12 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-white/10 dark:hover:shadow-[0_28px_80px_rgba(0,0,0,0.55)]">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between gap-2 border-b border-border/70 px-4 pb-3 pt-4 sm:px-6">
-              <CardTitle className="min-w-0 flex-1 text-lg text-foreground">
-                {editing ? "매체 수정" : "매체 추가"}
-              </CardTitle>
+              <div className="min-w-0 flex-1">
+                <CardTitle className="text-lg text-foreground">
+                  {editing ? "매체 수정" : "매체 추가"}
+                </CardTitle>
+                {!editing ? (
+                  <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                    {draftSavedAt
+                      ? `임시저장 ${new Date(draftSavedAt).toLocaleTimeString("ko-KR")} · 30초마다 자동 저장`
+                      : "필수(*) 항목만 채워도 저장 가능 · 주소 입력 시 좌표 자동 변환"}
+                  </p>
+                ) : null}
+              </div>
               <Button
                 variant="ghost"
                 size="icon-xs"
@@ -2545,6 +2658,9 @@ export default function AdminMediasClient({
               {saveError && (
                 <p className="text-sm text-red-600">{saveError}</p>
               )}
+              <p className="rounded-md border border-cyan-500/30 bg-cyan-500/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-cyan-800 dark:text-cyan-200">
+                필수 정보
+              </p>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   매체명 (한국어) *
@@ -2580,31 +2696,42 @@ export default function AdminMediasClient({
                     onChange={(e) =>
                       setForm((f) => ({ ...f, location: e.target.value }))
                     }
+                    onBlur={() => {
+                      if (form.location.trim()) void onGeocodeFromAddress();
+                    }}
                     placeholder="서울 강남구 테헤란로 123"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     className="shrink-0 border-2 border-border bg-card text-foreground hover:bg-muted/50"
-                    disabled={geoLookupLoading}
+                    disabled={geoLookupLoading || !form.location.trim()}
                     onClick={() => void onGeocodeFromAddress()}
                   >
                     {geoLookupLoading ? (
                       <>
                         <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                        검색 중…
+                        변환 중…
                       </>
                     ) : (
-                      "주소로 지도 이동"
+                      "좌표 변환"
                     )}
                   </Button>
                 </div>
                 {geoLookupError && (
                   <p className="mt-1 text-xs text-amber-700">{geoLookupError}</p>
                 )}
-                <p className="mt-1 text-[10px] text-muted-foreground">
-                  카카오 주소 검색(KAKAO_REST_API_KEY)으로 위도·경도·시·구를 채웁니다.
-                </p>
+                {form.latitude && form.longitude ? (
+                  <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                    좌표: {form.latitude}, {form.longitude}
+                    {form.city ? ` · ${form.city}` : ""}
+                    {form.district ? ` ${form.district}` : ""}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-[10px] text-muted-foreground">
+                    주소 입력 후 포커스를 벗어나면 카카오 API로 좌표·시·구가 자동 설정됩니다.
+                  </p>
+                )}
               </div>
 
               <AdminMediaDraggableMap
@@ -2677,7 +2804,7 @@ export default function AdminMediasClient({
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground">
-                    위도·경도를 입력하거나 지도에서 핀을 놓으면 표시됩니다.
+                    주소를 입력하거나 지도에서 핀을 놓으면 표시됩니다.
                   </p>
                 )}
               </div>
@@ -2975,32 +3102,9 @@ export default function AdminMediasClient({
                   placeholder="35000000"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    위도
-                  </label>
-                  <Input
-                    value={form.latitude}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, latitude: e.target.value }))
-                    }
-                    placeholder="37.498"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    경도
-                  </label>
-                  <Input
-                    value={form.longitude}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, longitude: e.target.value }))
-                    }
-                    placeholder="127.0276"
-                  />
-                </div>
-              </div>
+              <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                선택 정보
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -3304,114 +3408,15 @@ export default function AdminMediasClient({
                   />
                 </div>
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  대표 이미지 URL
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    className="min-w-0 flex-1"
-                    value={form.image}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, image: e.target.value }))
-                    }
-                    placeholder="https://…"
-                  />
-                  <input
-                    ref={formPrimaryImageInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => void handleFormPrimaryImagePicked(e)}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0 gap-1.5"
-                    disabled={formImageUploadBusy}
-                    onClick={() => formPrimaryImageInputRef.current?.click()}
-                  >
-                    {formImageUploadBusy ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4" />
-                    )}
-                    업로드
-                  </Button>
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Bunny CDN에 업로드한 뒤 URL이 대표 이미지에 채워집니다. 저장을 눌러
-                  반영하세요.
-                </p>
-                {form.image && (
-                  <div className="mt-2 overflow-hidden rounded-lg border-2 border-border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={form.image} alt="대표 이미지" className="h-32 w-full object-cover" />
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  추가 이미지 URL (한 줄에 하나)
-                </label>
-                <Textarea
-                  rows={3}
-                  value={form.extractedImagesText}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      extractedImagesText: e.target.value,
-                    }))
-                  }
-                />
-                <input
-                  ref={formGalleryImageInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => void handleFormGalleryImagePicked(e)}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 gap-1.5"
-                  disabled={formImageUploadBusy}
-                  onClick={() => formGalleryImageInputRef.current?.click()}
-                >
-                  {formImageUploadBusy ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ImagePlus className="h-4 w-4" />
-                  )}
-                  여러 장 한번에 추가
-                </Button>
-                {/* 미리보기 그리드 */}
-                {form.extractedImagesText.trim() && (
-                  <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                    {form.extractedImagesText.trim().split("\n").filter(Boolean).map((url, i) => (
-                      <div
-                        key={i}
-                        className="group relative overflow-hidden rounded-lg border-2 border-border"
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={url} alt="" className="h-20 w-full object-cover" />
-                        <button
-                          type="button"
-                          className="absolute right-1 top-1 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white group-hover:flex"
-                          onClick={() => {
-                            const lines = form.extractedImagesText.trim().split("\n").filter(Boolean);
-                            lines.splice(i, 1);
-                            setForm(f => ({ ...f, extractedImagesText: lines.join("\n") }));
-                          }}
-                        >✕</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <MediaGalleryEditor
+                urls={galleryUrlsFromForm(form)}
+                onChange={(urls) =>
+                  setForm((f) => ({ ...f, ...applyGalleryUrlsToForm(urls) }))
+                }
+                onUploadFiles={uploadGalleryFiles}
+                onDeleteRemote={deleteBunnyImage}
+                busy={formImageUploadBusy}
+              />
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   설명

@@ -19,6 +19,7 @@ import {
   adminOohQuoteUrl,
   sendTelegramMessage,
 } from "@/lib/telegram-notify";
+import { notifyQuoteSent } from "@/lib/kakao-alimtalk-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -243,6 +244,17 @@ export async function POST(request: NextRequest) {
         quotePdfSentAt: pdfEmailed ? new Date() : null,
       },
     });
+
+    const quotePhone =
+      typeof phone === "string" && PHONE_RE.test(phone) ? phone.trim() : "";
+    if (quotePhone) {
+      void notifyQuoteSent({
+        phone: quotePhone,
+        name: typeof name === "string" ? name.trim() : "고객",
+        quoteId: ooh.id,
+        link: `${siteUrl}/${localeStr}/quote/${ooh.id}`,
+      }).catch((err) => console.error("[quote] alimtalk:", err));
+    }
 
     void postInternalAlert({
       type: "quote_request",

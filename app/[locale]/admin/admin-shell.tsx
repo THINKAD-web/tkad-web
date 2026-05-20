@@ -28,6 +28,7 @@ import {
   Inbox,
   Star,
   Search,
+  FlaskConical,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -72,6 +73,7 @@ const navDefs = [
   // 7) 분석/도구
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
   { href: "/admin/search-stats", key: "searchStats" as const, icon: Search },
+  { href: "/admin/ab-test", key: "abTest" as const, icon: FlaskConical },
   { href: "/admin/reports/new", key: "trendReports" as const, icon: FileText },
   { href: "/admin/academy/new", key: "academyNew" as const, icon: Sparkles },
   { href: "/admin/ai-content", key: "aiContent" as const, icon: Sparkles },

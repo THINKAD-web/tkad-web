@@ -9,7 +9,9 @@
  * 리스트(/ko/media)·상세 페이지·홈 캐러셀 등에서 재사용.
  */
 import { Link } from "@/i18n/navigation";
+import Image from "next/image";
 import type { ReactNode } from "react";
+import { optimizeThumbnailUrl } from "@/lib/optimized-image-url";
 import { cn } from "@/lib/utils";
 
 export type MediaCardProps = {
@@ -38,6 +40,9 @@ export type MediaCardProps = {
   glowTheme?: "orange" | "purple";
   /** 카드 하단 추가 메타 영역 */
   footer?: ReactNode;
+  /** LCP — 상위 카드에 priority 로드 */
+  imagePriority?: boolean;
+  imageSizes?: string;
   className?: string;
 };
 
@@ -57,8 +62,11 @@ export function MediaCard({
   density = "default",
   glowTheme = "orange",
   footer,
+  imagePriority = false,
+  imageSizes = "(max-width: 640px) 45vw, 320px",
   className,
 }: MediaCardProps) {
+  const optimizedSrc = imageSrc ? optimizeThumbnailUrl(imageSrc) : null;
   const compact = density === "compact";
   const topRightClass =
     premium && glowTheme === "purple"
@@ -90,14 +98,14 @@ export function MediaCard({
           imageAspect === "16/9" ? "aspect-[16/9]" : "aspect-[4/3]",
         )}
       >
-        {imageSrc ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={imageSrc}
+        {optimizedSrc ? (
+          <Image
+            src={optimizedSrc}
             alt={imageAlt ?? ""}
-            className="h-full w-full object-cover grayscale transition-[filter,transform] duration-700 ease-out group-hover:grayscale-0 group-hover:scale-[1.1] group-focus-within:grayscale-0 group-focus-within:scale-[1.1]"
-            loading="lazy"
-            decoding="async"
+            fill
+            sizes={imageSizes}
+            priority={imagePriority}
+            className="object-cover grayscale transition-[filter,transform] duration-700 ease-out group-hover:grayscale-0 group-hover:scale-[1.1] group-focus-within:grayscale-0 group-focus-within:scale-[1.1]"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">

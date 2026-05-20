@@ -9,6 +9,8 @@ import {
   sendEmailWithPdfAttachment,
 } from "@/lib/email/client";
 import { notifyUserByEmail } from "@/lib/notifications";
+import { notifyQuoteSent } from "@/lib/kakao-alimtalk-notify";
+import { siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +107,22 @@ export async function POST(request: NextRequest, ctx: Ctx) {
     link: `/quote/${id}`,
     dedupeKey: `quote_sent:${id}`,
   });
+
+  const quotePhone = q.clientPhone?.trim();
+  if (quotePhone) {
+    const base = (
+      process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+      process.env.SITE_URL?.trim() ||
+      siteUrl
+    ).replace(/\/$/, "");
+    void notifyQuoteSent({
+      phone: quotePhone,
+      name: q.clientName?.trim() || "고객",
+      quoteNumber: q.quoteNumber,
+      quoteId: id,
+      link: `${base}/ko/quote/${id}`,
+    }).catch((err) => console.error("[admin-quotes send-email] alimtalk:", err));
+  }
 
   return json({
     ok: true,

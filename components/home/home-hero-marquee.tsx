@@ -1,3 +1,6 @@
+import Image from "next/image";
+import { optimizeHeroMarqueeUrl } from "@/lib/optimized-image-url";
+
 type Props = {
   imageUrls: string[];
 };
@@ -7,8 +10,13 @@ type Props = {
  * 부모가 `pointer-events-none` + 마스크·opacity 처리.
  */
 export function HomeHeroMarquee({ imageUrls }: Props) {
+  const optimized = imageUrls
+    .map((u) => optimizeHeroMarqueeUrl(u))
+    .filter((u): u is string => Boolean(u));
   const base =
-    imageUrls.length >= 6 ? imageUrls : [...imageUrls, ...imageUrls, ...imageUrls];
+    optimized.length >= 6
+      ? optimized
+      : [...optimized, ...optimized, ...optimized];
   const topTrack = [...base, ...base];
   const bottomBase = [...base].reverse();
   const bottomTrack = [...bottomBase, ...bottomBase];
@@ -19,15 +27,16 @@ export function HomeHeroMarquee({ imageUrls }: Props) {
         {topTrack.map((src, i) => (
           <div
             key={`t-${i}-${src.slice(-24)}`}
-            className="h-28 w-48 shrink-0 overflow-hidden rounded-none border border-white/10 bg-black/40"
+            className="relative h-28 w-48 shrink-0 overflow-hidden rounded-none border border-white/10 bg-black/40"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={src}
               alt=""
-              className="aspect-video h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
+              fill
+              sizes="192px"
+              className="object-cover"
+              loading={i < 4 ? "eager" : "lazy"}
+              priority={i < 2}
             />
           </div>
         ))}
@@ -36,15 +45,15 @@ export function HomeHeroMarquee({ imageUrls }: Props) {
         {bottomTrack.map((src, i) => (
           <div
             key={`b-${i}-${src.slice(-24)}`}
-            className="h-28 w-48 shrink-0 overflow-hidden rounded-none border border-white/10 bg-black/40"
+            className="relative h-28 w-48 shrink-0 overflow-hidden rounded-none border border-white/10 bg-black/40"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={src}
               alt=""
-              className="aspect-video h-full w-full object-cover"
+              fill
+              sizes="192px"
+              className="object-cover"
               loading="lazy"
-              decoding="async"
             />
           </div>
         ))}

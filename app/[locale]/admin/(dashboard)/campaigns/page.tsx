@@ -28,6 +28,7 @@ import {
   STATUS_LABEL,
   FINANCIAL_DOC_KIND_LABEL,
 } from "./constants";
+import { CampaignAlimtalkSend } from "@/components/admin/campaign-alimtalk-send";
 
 const CampaignReportPreview = dynamic(() => import("@/components/campaign-report-preview"), { ssr: false });
 
@@ -147,6 +148,7 @@ export default function AdminCampaignsPage() {
     clientCompany: string;
     clientName: string;
     clientEmail: string;
+    clientPhone: string | null;
     status: string;
     notes: string | null;
     startDate: string | null;
@@ -218,6 +220,7 @@ export default function AdminCampaignsPage() {
         clientCompany: string;
         clientName: string;
         clientEmail: string;
+        clientPhone?: string | null;
         status: string;
         notes?: string | null;
         startDate?: string | Date | null;
@@ -230,6 +233,7 @@ export default function AdminCampaignsPage() {
         clientCompany: campFull.clientCompany,
         clientName: campFull.clientName,
         clientEmail: campFull.clientEmail,
+        clientPhone: campFull.clientPhone?.trim() || null,
         status: campFull.status,
         notes: campFull.notes ?? null,
         startDate: campFull.startDate
@@ -1013,6 +1017,12 @@ export default function AdminCampaignsPage() {
             </p>
           ) : (
             <>
+              <CampaignAlimtalkSend
+                campaignId={selectedId}
+                defaultPhone={reportCampaignMeta?.clientPhone}
+                defaultName={reportCampaignMeta?.clientName}
+                campaignName={reportCampaignMeta?.name}
+              />
               <div>
                 <h3 className="mb-2 flex items-center gap-1 text-sm font-semibold text-foreground">
                   <Link2 className="h-4 w-4" />

@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
 import { json } from "@/lib/admin-guard";
 import { createNotification, seoulYmd, addSeoulDays } from "@/lib/notifications";
+import {
+  notifyCampaignTomorrow,
+  resolveCampaignNotifyPhone,
+} from "@/lib/kakao-alimtalk-notify";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -59,6 +63,7 @@ export async function GET(request: NextRequest) {
   });
 
   let created = 0;
+  let alimtalkSent = 0;
   for (const c of campaigns) {
     const userId = c.ownerUserId;
     if (!userId) continue;
@@ -118,6 +123,7 @@ export async function GET(request: NextRequest) {
   return json({
     ok: true,
     created,
+    alimtalkSent,
     checked: campaigns.length,
     date: tomorrowYmd,
     reviewWindow: yesterdayYmd,

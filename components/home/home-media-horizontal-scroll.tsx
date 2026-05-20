@@ -53,6 +53,7 @@ export function HomeMediaHorizontalScroll({
         <MediaCard
           href={mediaItemDetailPath(m.id)}
           imageSrc={getPrimaryMediaImageUrl(m)}
+          imagePriority={index < 4}
           imageAlt={name}
           index={showRankBadge ? String(index + 1).padStart(2, "0") : undefined}
           type={typeLabel}

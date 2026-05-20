@@ -14,6 +14,8 @@ import {
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { loadAdminDashboardData } from "@/lib/admin-dashboard-data";
 import { AdminDashboardCharts } from "@/components/admin/admin-dashboard-charts";
+import { AdminWebVitalsCard } from "@/components/admin/admin-web-vitals-card";
+import { loadWebVitalsSummary } from "@/lib/web-vitals-summary";
 
 export const dynamic = "force-dynamic";
 
@@ -95,7 +97,10 @@ function FeedList({
 export default async function AdminOverviewPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   const prefix = `/${locale}`;
-  const data = await loadAdminDashboardData(locale);
+  const [data, webVitals] = await Promise.all([
+    loadAdminDashboardData(locale),
+    loadWebVitalsSummary(7),
+  ]);
 
   const quickActions = [
     {
@@ -212,6 +217,8 @@ export default async function AdminOverviewPage({ params }: Props) {
           ))}
         </div>
       </section>
+
+      <AdminWebVitalsCard summary={webVitals} />
 
       {data.configured ? (
         <AdminDashboardCharts

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { LazyWhenVisible } from "@/components/lazy-when-visible";
 import type { Testimonial } from "@/data/testimonials";
 import type { CommunityPostListItem } from "@/lib/community/types";
 
@@ -36,6 +37,14 @@ const TestimonialsCarouselInner = dynamic(
   { ssr: false },
 );
 
+export function HomeClientLogosWhenVisible() {
+  return (
+    <LazyWhenVisible minHeight={140}>
+      <HomeClientLogosLazy />
+    </LazyWhenVisible>
+  );
+}
+
 export function HomeCommunitySectionLazy({
   posts,
   locale,
@@ -43,13 +52,25 @@ export function HomeCommunitySectionLazy({
   posts: CommunityPostListItem[];
   locale: string;
 }) {
-  return <HomeCommunitySectionInner posts={posts} locale={locale} />;
+  return (
+    <LazyWhenVisible minHeight={200}>
+      <HomeCommunitySectionInner posts={posts} locale={locale} />
+    </LazyWhenVisible>
+  );
 }
 
 export function HomeRecentlyViewedLazy({ locale }: { locale: string }) {
-  return <HomeRecentlyViewedInner locale={locale} />;
+  return (
+    <LazyWhenVisible minHeight={160}>
+      <HomeRecentlyViewedInner locale={locale} />
+    </LazyWhenVisible>
+  );
 }
 
 export function HomeTestimonialsCarouselLazy({ items }: { items: Testimonial[] }) {
-  return <TestimonialsCarouselInner items={items} />;
+  return (
+    <LazyWhenVisible minHeight={280}>
+      <TestimonialsCarouselInner items={items} />
+    </LazyWhenVisible>
+  );
 }
