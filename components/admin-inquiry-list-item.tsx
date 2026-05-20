@@ -8,11 +8,14 @@ import {
   Building2,
   ChevronDown,
   Clock3,
+  FileText,
   Mail,
   Phone,
+  Send,
   Trash2,
   UserRound,
 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import AdminInquiryStatusControls from "@/components/admin-inquiry-status-controls";
 import type { InquiryAdminStatusCode } from "@/lib/contact-inquiry-labels";
 
@@ -38,6 +41,9 @@ export type AdminInquiryListItemData = {
   createdAtLabel: string;
   recencyLabel: string;
   isHighBudget: boolean;
+  oohQuoteId?: string | null;
+  oohQuoteStatus?: string | null;
+  oohQuoteAmount?: number | null;
 };
 
 type Props = {
@@ -93,6 +99,7 @@ export default function AdminInquiryListItem({
   const [actionBusy, setActionBusy] = useState(false);
   const [actionError, setActionError] = useState("");
   const [confirmTrashOpen, setConfirmTrashOpen] = useState(false);
+  const [quoteSendBusy, setQuoteSendBusy] = useState(false);
 
   useEffect(() => {
     setOpen(initiallyOpen);
@@ -267,6 +274,71 @@ export default function AdminInquiryListItem({
                 setAdminNote(meta.note);
               }}
             />
+
+            {item.oohQuoteId ? (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50/80 p-3">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-800">
+                  [ 자동 견적 초안 ]
+                </p>
+                <p className="mt-1 text-xs text-emerald-900">
+                  상태: {item.oohQuoteStatus ?? "draft"}
+                  {item.oohQuoteAmount != null
+                    ? ` · ₩${item.oohQuoteAmount.toLocaleString("ko-KR")}만`
+                    : ""}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Link
+                    href={`/admin/quotes?tab=booking&highlight=${item.oohQuoteId}`}
+                    className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-white px-2 py-1 text-xs font-medium text-emerald-900 hover:bg-emerald-50"
+                  >
+                    <FileText className="h-3 w-3" />
+                    부킹 견적 관리
+                  </Link>
+                  <Link
+                    href={`/quote/${item.oohQuoteId}/preview`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-white px-2 py-1 text-xs font-medium text-emerald-900 hover:bg-emerald-50"
+                  >
+                    <ArrowUpRight className="h-3 w-3" />
+                    미리보기
+                  </Link>
+                  {(item.oohQuoteStatus === "draft" ||
+                    item.oohQuoteStatus === "sent") && (
+                    <button
+                      type="button"
+                      disabled={quoteSendBusy}
+                      className="inline-flex items-center gap-1 rounded-md bg-hermes px-2 py-1 text-xs font-bold text-white hover:bg-hermes/90 disabled:opacity-50"
+                      onClick={() => {
+                        void (async () => {
+                          setQuoteSendBusy(true);
+                          try {
+                            const res = await fetch(
+                              `/api/admin/ooh-quotes/${item.oohQuoteId}/send-quote`,
+                              {
+                                method: "POST",
+                                credentials: "include",
+                              },
+                            );
+                            if (!res.ok) throw new Error("send_failed");
+                            router.refresh();
+                          } catch {
+                            setActionError("견적 발송에 실패했습니다.");
+                          } finally {
+                            setQuoteSendBusy(false);
+                          }
+                        })();
+                      }}
+                    >
+                      <Send className="h-3 w-3" />
+                      {item.oohQuoteStatus === "draft"
+                        ? "검토 완료 → 발송"
+                        : "재발송"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : null}
 
             <div className="space-y-1">
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">

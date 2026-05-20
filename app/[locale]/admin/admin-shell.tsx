@@ -29,6 +29,7 @@ import {
   Star,
   Search,
   FlaskConical,
+  Radar,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -50,6 +51,7 @@ function SignOutButton({ locale, label }: { locale: string; label: string }) {
 const navDefs = [
   // 1) 홈/요약
   { href: "/admin", key: "dashboard" as const, icon: LayoutDashboard },
+  { href: "/admin/monitoring", key: "monitoring" as const, icon: Radar },
   // 2) 영업/리드
   { href: "/admin/inquiries", key: "inquiries" as const, icon: MessageSquareText },
   { href: "/admin/crm", key: "crm" as const, icon: UsersRound },

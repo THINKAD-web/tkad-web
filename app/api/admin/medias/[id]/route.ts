@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { kakaoFillForMediaPatch } from "@/lib/media-location-enrich";
+import { applyNormalizedMediaLocation } from "@/lib/apply-media-location-normalize";
 import { maybeEstimateDailyFootfall } from "@/lib/media-daily-footfall-estimate";
 import { maybeAutoFillNearbyMediaFields } from "@/lib/media-nearby-facilities";
 import { getPrisma } from "@/lib/prisma";
@@ -62,6 +63,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     data.nameEn = String(body.nameEn ?? "").trim() || null;
   if (body.location != null) data.location = String(body.location).trim();
   if (body.region != null) data.region = String(body.region).trim();
+  if (body.regionZone !== undefined) {
+    if (body.regionZone === null) data.regionZone = null;
+    else data.regionZone = String(body.regionZone).trim() || null;
+  }
   if (body.type != null) {
     const nextType = String(body.type).trim();
     if (!isValidCatalogMediaType(nextType)) {
@@ -461,6 +466,30 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (Object.prototype.hasOwnProperty.call(dataAsRecord, "coverageDistrictCodes")) {
     delete dataAsRecord.coverageDistrictCodes;
   }
+
+  const mergedLocation =
+    data.location != null ? String(data.location) : existing.location;
+  const mergedRegion =
+    data.region != null ? String(data.region) : existing.region;
+  const mergedRegionZone =
+    body.regionZone !== undefined
+      ? body.regionZone === null
+        ? null
+        : String(body.regionZone).trim() || null
+      : existing.regionZone;
+
+  const locNorm = {
+    location: mergedLocation,
+    city: mergedCity,
+    district: mergedDistrict,
+    region: mergedRegion,
+    regionZone: mergedRegionZone,
+  };
+  applyNormalizedMediaLocation(locNorm);
+  data.region = locNorm.region;
+  data.regionZone = locNorm.regionZone;
+  if (locNorm.city) data.city = locNorm.city;
+  if (locNorm.district) data.district = locNorm.district;
 
   try {
     const media = await db.$transaction(async (tx) => {

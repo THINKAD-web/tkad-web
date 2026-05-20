@@ -10,6 +10,7 @@ import {
   pushOfflineRecentMediaCard,
   type OfflineRecentMediaCard,
 } from "@/lib/recently-viewed-offline";
+import { trackConversion } from "@/lib/tracking/client";
 
 type Props = {
   record: RecentlyViewedRecord;
@@ -19,6 +20,7 @@ type Props = {
 export default function TrackMediaView({ record, offlineCard }: Props) {
   useEffect(() => {
     addRecentlyViewedRecord(record);
+    trackConversion({ type: "media_view", mediaId: record.id });
     if (offlineCard) {
       pushOfflineRecentMediaCard(offlineCard);
     }

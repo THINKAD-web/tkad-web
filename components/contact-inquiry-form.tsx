@@ -710,6 +710,9 @@ export default function ContactInquiryForm() {
           ...data,
           locale,
           turnstileToken,
+          mediaIds: mediaIdParam
+            ? mediaIdParam.split(/[,，\s]+/).filter(Boolean)
+            : undefined,
         }),
       });
       if (!res.ok) {

@@ -9,6 +9,7 @@ export type AdminMediaDto = {
   nameEn: string | null;
   location: string;
   region: string;
+  regionZone: string | null;
   type: string;
   price: number;
   image: string | null;
@@ -152,6 +153,7 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
   const name = typeof r.name === "string" ? r.name : "";
   const location = typeof r.location === "string" ? r.location : "";
   const region = typeof r.region === "string" ? r.region : "";
+  const regionZone = pickStr(r, "regionZone", "region_zone");
   const type = typeof r.type === "string" ? r.type : "";
   const priceRaw = r.price;
   const price =
@@ -178,6 +180,7 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     nameEn: pickStr(r, "nameEn", "name_en"),
     location,
     region,
+    regionZone,
     type,
     price,
     image: pickStr(r, "image", "image"),
@@ -268,6 +271,7 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     nameEn: m.nameEn,
     location: m.location,
     region: m.region,
+    regionZone: m.regionZone,
     type: m.type,
     price: m.price,
     image: m.image,

@@ -14,6 +14,7 @@ const OOH_STATUSES = [
   "all",
   "draft",
   "sent",
+  "expired",
   "booking_requested",
   "booking_pending",
   "booking_confirmed",
@@ -323,6 +324,25 @@ export default function AdminOohQuotesClient() {
                               {t("openDetail")}
                             </Link>
                           </Button>
+                          {(row.status === "draft" || row.status === "sent") && (
+                            <Button
+                              size="sm"
+                              className="bg-hermes text-white hover:bg-hermes/90"
+                              disabled={busyId === row.id}
+                              onClick={() =>
+                                void run(row.id, () =>
+                                  act(
+                                    `/api/admin/ooh-quotes/${row.id}/send-quote`,
+                                    "POST",
+                                  ),
+                                )
+                              }
+                            >
+                              {row.status === "draft"
+                                ? t("sendQuote")
+                                : t("resendQuote")}
+                            </Button>
+                          )}
                           {(row.status === "booking_requested" ||
                             row.status === "booking_pending") && (
                             <Button

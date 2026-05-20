@@ -13,6 +13,7 @@ import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail"
 import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 import { optimizeHeroMarqueeUrl } from "@/lib/optimized-image-url";
+import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 
 /** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
 export type MediaWithAdvertiserExecutions = Media & {
@@ -150,6 +151,8 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     location: m.location,
     locationEn,
     region: m.region,
+    regionZone: m.regionZone?.trim() || undefined,
+    popularityScore: m.popularityScore ?? 0,
     availability: (m as unknown as { availability?: string }).availability as
       | "available"
       | "reserved"
@@ -326,7 +329,89 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
   }
 }
 
-/** 홈 인기 매체: `isPopular=true` 우선, 없으면 최근 업데이트 순 폴백. */
+/** 홈 — 이번 주 인기 (`popularityScore` 상위). */
+export async function fetchHomeWeeklyPopularMedia(
+  max = 6,
+): Promise<MediaItem[]> {
+  if (!isDatabaseConfigured()) return [];
+  try {
+    const db = getPrisma();
+    let rows = await db.media.findMany({
+      where: { isActive: true, popularityScore: { gt: 0 } },
+      orderBy: [{ popularityScore: "desc" }, { updatedAt: "desc" }],
+      take: max,
+      include: catalogInclude,
+    });
+    if (rows.length < max) {
+      const extra = await db.media.findMany({
+        where: {
+          isActive: true,
+          id: { notIn: rows.map((r) => r.id) },
+        },
+        orderBy: [{ popularityScore: "desc" }, { updatedAt: "desc" }],
+        take: max - rows.length,
+        include: catalogInclude,
+      });
+      rows = [...rows, ...extra];
+    }
+    if (rows.length === 0) return [];
+    const withCoverage = await attachCoverageDistrictCodesById(db, rows);
+    return withCoverage.map(prismaMediaToMediaItem);
+  } catch (e) {
+    console.warn(
+      "[fetchHomeWeeklyPopularMedia] query failed (run popularity migration?)",
+      e instanceof Error ? e.message : e,
+    );
+    return fetchHomePopularMedia(max);
+  }
+}
+
+/** 홈 — 새로 등록 (`createdAt` 최신). */
+export async function fetchHomeNewMedia(max = 6): Promise<MediaItem[]> {
+  if (!isDatabaseConfigured()) return [];
+  try {
+    const db = getPrisma();
+    const rows = await db.media.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+      take: max,
+      include: catalogInclude,
+    });
+    const withCoverage = await attachCoverageDistrictCodesById(db, rows);
+    return withCoverage.map(prismaMediaToMediaItem);
+  } catch {
+    return [];
+  }
+}
+
+/** 홈 — 즉시 예약 가능 (digital·available·소액 DOOH). */
+export async function fetchHomeInstantBookingMedia(
+  max = 6,
+): Promise<MediaItem[]> {
+  if (!isDatabaseConfigured()) return [];
+  try {
+    const db = getPrisma();
+    const rows = await db.media.findMany({
+      where: {
+        isActive: true,
+        type: "digital",
+        availability: "available",
+      },
+      orderBy: [{ popularityScore: "desc" }, { price: "asc" }],
+      take: 48,
+      include: catalogInclude,
+    });
+    const withCoverage = await attachCoverageDistrictCodesById(db, rows);
+    const items = withCoverage
+      .map(prismaMediaToMediaItem)
+      .filter((m) => isInstantBookingEligible(m).eligible);
+    return items.slice(0, max);
+  } catch {
+    return [];
+  }
+}
+
+/** @deprecated 홈 인기 폴백 — `fetchHomeWeeklyPopularMedia` 우선 */
 export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
   if (!isDatabaseConfigured()) return [];
   const db = getPrisma();

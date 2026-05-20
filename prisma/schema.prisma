@@ -90,6 +90,7 @@ enum FinancialDocStatus {
 enum OoHQuoteStatus {
   draft
   sent
+  expired
   booking_requested
   booking_pending
   booking_confirmed
@@ -116,6 +117,8 @@ model Media {
   nameEn       String?          @map("name_en")
   location     String
   region       String
+  /// 서울 권역·수도권·지방 세부 코드 (`lib/media-regions.ts`)
+  regionZone   String?  @map("region_zone")
   /// Catalog code: `digital` | `static` | `mobile` (OOH 유형)
   type         String
   price        Int
@@ -197,6 +200,10 @@ model Media {
   /// 홈 인기 정렬: 오름차순, null은 뒤로
   popularOrder Int?    @map("popular_order")
 
+  /// 7일·30일 참여 지표 가중 합산 (`lib/media-popularity.ts`, 일일 cron 갱신)
+  popularityScore     Int       @default(0) @map("popularity_score")
+  popularityUpdatedAt DateTime? @map("popularity_updated_at")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -211,6 +218,7 @@ model Media {
 
   @@index([isFeatured, featuredOrder])
   @@index([isPopular, popularOrder])
+  @@index([isActive, popularityScore(sort: Desc)])
   @@map("media")
 }
 
@@ -452,6 +460,8 @@ model ContactInquiry {
   message     String
   createdAt   DateTime @default(now()) @map("created_at")
 
+  oohQuote OoHQuote?
+
   @@map("contact_inquiries")
 }
 
@@ -545,6 +555,16 @@ model OoHQuote {
   quoteRequestId String?       @unique @map("quote_request_id")
   quoteRequest   QuoteRequest? @relation(fields: [quoteRequestId], references: [id], onDelete: SetNull)
 
+  contactInquiryId String?         @unique @map("contact_inquiry_id")
+  contactInquiry   ContactInquiry? @relation(fields: [contactInquiryId], references: [id], onDelete: SetNull)
+
+  /// `lib/quote-calculator.ts` 산출 JSON (라인·VAT·유효기간 등)
+  quoteBreakdown Json? @map("quote_breakdown")
+  validUntil     DateTime? @map("valid_until")
+  discountRate   Float     @default(0) @map("discount_rate")
+  /// 만료 D-3 알림톡 발송 시각
+  expiryNoticeSentAt DateTime? @map("expiry_notice_sent_at")
+
   /**
    * 네트워크 매체 선택 시 [{ networkId, units, regions, lineTotal만원 }]
    */
@@ -557,6 +577,7 @@ model OoHQuote {
 
   @@index([status])
   @@index([createdAt])
+  @@index([validUntil, status])
   @@map("ooh_quotes")
 }
 
@@ -1646,4 +1667,61 @@ model WebVital {
   @@index([name, createdAt(sort: Desc)])
   @@index([createdAt(sort: Desc)])
   @@map("web_vitals")
+}
+
+// ── Ops monitoring (PageView, ConversionEvent) ─────────────────
+
+enum ConversionEventType {
+  visit
+  media_view
+  favorite
+  quote_request
+  contract
+}
+
+/// 공개 사이트 페이지뷰 (익명 sessionId)
+model PageView {
+  id        String   @id @default(cuid())
+  sessionId String   @map("session_id")
+  path      String
+  locale    String?
+  referrer  String?
+  userAgent String?  @map("user_agent") @db.VarChar(512)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([sessionId, createdAt(sort: Desc)])
+  @@index([path, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("page_views")
+}
+
+/// 전환 퍼널 이벤트
+model ConversionEvent {
+  id        String              @id @default(cuid())
+  sessionId String?             @map("session_id")
+  type      ConversionEventType
+  path      String?
+  mediaId   String?             @map("media_id")
+  userId    String?             @map("user_id")
+  metadata  Json?
+  createdAt DateTime            @default(now()) @map("created_at")
+
+  @@index([type, createdAt(sort: Desc)])
+  @@index([mediaId, type, createdAt(sort: Desc)])
+  @@index([sessionId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("conversion_events")
+}
+
+/// API 500 등 운영 에러 로그
+model OpsErrorLog {
+  id        String   @id @default(cuid())
+  tag       String?
+  path      String?
+  status    Int      @default(500)
+  message   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@map("ops_error_logs")
 }

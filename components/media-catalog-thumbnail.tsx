@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
+import { buildMediaImageAlt } from "@/lib/media-image-seo";
 import { optimizeThumbnailUrl } from "@/lib/optimized-image-url";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 
@@ -63,12 +64,9 @@ export function MediaCatalogThumbnail({
    *   alt 명시 안 됨 → 매체명 + 위치 자동 조합 ("강남대로 LED 빌보드 OOH 광고 매체 - 서울 강남구")
    *   alt="" (빈 문자열) → decorative 의도로 존중
    */
-  const mediaName = altEn ? (media.nameEn || media.name) : media.name;
-  const mediaLocation = altEn ? (media.locationEn || media.location) : media.location;
-  const autoAlt = altEn
-    ? `${mediaName} OOH advertising media${mediaLocation ? ` - ${mediaLocation}` : ""}`
-    : `${mediaName} OOH 광고 매체${mediaLocation ? ` - ${mediaLocation}` : ""}`;
-  const finalAlt = alt === undefined ? autoAlt : alt;
+  const locale = altEn ? "en" : "ko";
+  const finalAlt =
+    alt === undefined ? buildMediaImageAlt(media, locale) : alt;
 
   return (
     <div

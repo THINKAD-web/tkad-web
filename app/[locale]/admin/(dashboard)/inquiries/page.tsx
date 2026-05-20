@@ -54,6 +54,9 @@ type InquiryItem = {
   messageBody: string;
   createdAt: Date;
   isHighBudget: boolean;
+  oohQuoteId: string | null;
+  oohQuoteStatus: string | null;
+  oohQuoteAmount: number | null;
 };
 
 const TYPE_OPTIONS: Array<{ value: TypeFilter; label: string }> = [
@@ -273,6 +276,9 @@ async function loadInquiryData(): Promise<{
         budget: true,
         message: true,
         createdAt: true,
+        oohQuote: {
+          select: { id: true, status: true, totalAmount: true },
+        },
       },
     });
 
@@ -309,6 +315,9 @@ async function loadInquiryData(): Promise<{
           messageBody,
           createdAt: row.createdAt,
           isHighBudget: isHighBudget(budgetCode),
+          oohQuoteId: row.oohQuote?.id ?? null,
+          oohQuoteStatus: row.oohQuote?.status ?? null,
+          oohQuoteAmount: row.oohQuote?.totalAmount ?? null,
         };
       }),
     };
@@ -462,6 +471,9 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
             createdAtLabel: formatDateTime(item.createdAt),
             recencyLabel: getRecencyLabel(item.createdAt),
             isHighBudget: item.isHighBudget,
+            oohQuoteId: item.oohQuoteId,
+            oohQuoteStatus: item.oohQuoteStatus,
+            oohQuoteAmount: item.oohQuoteAmount,
           }}
         />
       ))}

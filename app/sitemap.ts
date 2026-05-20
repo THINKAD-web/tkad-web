@@ -5,6 +5,9 @@ import { INDUSTRY_SLUGS } from "@/lib/industry-landing";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
 import { listGuideMeta } from "@/lib/guides-data";
+import { BLOG_SEO_POSTS } from "@/lib/blog-seo-posts";
+import { LOCAL_SEO_LANDINGS, localSeoPath } from "@/lib/local-seo-landings";
+import { MARKETING_MEDIA_TYPE_SLUGS } from "@/lib/marketing-media-types";
 
 const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
@@ -184,9 +187,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     sitemapEntry(`/industry/${slug}`),
   );
 
+  const localSeoPart: MetadataRoute.Sitemap = LOCAL_SEO_LANDINGS.map((l) =>
+    sitemapEntry(localSeoPath(l), buildTime),
+  );
+
+  const marketingTypePart: MetadataRoute.Sitemap =
+    MARKETING_MEDIA_TYPE_SLUGS.map((t) => sitemapEntry(`/type/${t}`));
+
+  const blogSeoPart: MetadataRoute.Sitemap = BLOG_SEO_POSTS.map((p) =>
+    sitemapEntry(
+      `/blog/${p.slug}`,
+      p.updatedAt ? new Date(p.updatedAt) : new Date(p.publishedAt),
+    ),
+  );
+
   return [
     ...staticPart,
     ...industryPart,
+    ...localSeoPart,
+    ...marketingTypePart,
+    ...blogSeoPart,
     ...regionLandingPart,
     ...typeLandingPart,
     ...areaLandingPart,

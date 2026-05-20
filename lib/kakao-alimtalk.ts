@@ -11,6 +11,7 @@ const SMS_API_HOST = "https://apis.aligo.in";
 export const ALIMTALK_TEMPLATE_CODES = [
   "TKAD_INQUIRY_RECEIVED",
   "TKAD_QUOTE_SENT",
+  "TKAD_QUOTE_EXPIRING",
   "TKAD_CAMPAIGN_CONFIRMED",
   "TKAD_CAMPAIGN_TOMORROW",
   "TKAD_REPORT_READY",
@@ -31,6 +32,10 @@ export const ALIMTALK_TEMPLATE_DEFAULTS: Record<
     subject: "견적서 발송",
     body: "#{name}님, 견적서가 발송되었습니다.\n#{link}",
   },
+  TKAD_QUOTE_EXPIRING: {
+    subject: "견적 만료 예정",
+    body: "#{name}님, 견적 유효기간이 #{validUntil}까지입니다.\n#{link}",
+  },
   TKAD_CAMPAIGN_CONFIRMED: {
     subject: "캠페인 확정",
     body: "#{name}님, 캠페인「#{campaignName}」계약이 확정되었습니다.\n송출 일정은 담당자가 안내드립니다.",
@@ -48,6 +53,7 @@ export const ALIMTALK_TEMPLATE_DEFAULTS: Record<
 export const ALIMTALK_TEMPLATE_LABELS: Record<AlimtalkTemplateCode, string> = {
   TKAD_INQUIRY_RECEIVED: "문의 접수",
   TKAD_QUOTE_SENT: "견적 발송",
+  TKAD_QUOTE_EXPIRING: "견적 만료 예정",
   TKAD_CAMPAIGN_CONFIRMED: "계약 확정",
   TKAD_CAMPAIGN_TOMORROW: "집행 D-1",
   TKAD_REPORT_READY: "리포트 완료",

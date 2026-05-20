@@ -1,5 +1,5 @@
 import { CATALOG_MEDIA_TYPES, isValidCatalogMediaType } from "@/lib/media-auto-categorize";
-import { deriveRegionFromAddress } from "@/lib/media-json-enrich";
+import { normalizeMediaLocationFields } from "@/lib/media-regions";
 
 export const MEDIA_CSV_HEADERS = [
   "매체명",
@@ -191,7 +191,7 @@ export function parseMediaCsv(text: string): MediaCsvParseResult {
 
     const { width, height } = parseSpec(spec);
     const region = location
-      ? deriveRegionFromAddress("", "", location)
+      ? normalizeMediaLocationFields({ location }).region
       : "seoul";
 
     if (name && location && isValidCatalogMediaType(type)) {

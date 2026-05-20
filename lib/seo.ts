@@ -193,3 +193,18 @@ export function caseStudyOpenGraphImages(
     },
   ];
 }
+
+/** Dynamic media detail OG at `/[locale]/media/[id]/opengraph-image` (1200×630). */
+export function mediaOpenGraphImages(
+  locale: string,
+  id: string,
+  alt: { ko: string; en: string },
+): NonNullable<NonNullable<Metadata["openGraph"]>["images"]> {
+  return [
+    {
+      url: `/${locale}/media/${id}/opengraph-image`,
+      ...OG_DIM,
+      alt: locale === "ko" ? alt.ko : alt.en,
+    },
+  ];
+}

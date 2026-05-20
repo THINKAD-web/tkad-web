@@ -4,8 +4,12 @@ import { type MediaItem } from "@/lib/media-data";
 import {
   fetchHomeFeaturedMedia,
   fetchHomeHeroVisualAssets,
-  fetchHomePopularMedia,
+  fetchHomeInstantBookingMedia,
+  fetchHomeNewMedia,
+  fetchHomeWeeklyPopularMedia,
 } from "@/lib/public-media-catalog";
+import { attachRecommendReason } from "@/lib/media-recommend-reasons";
+import { recommendPersonalizedHomeMedia } from "@/lib/media-personalized-recommend";
 import {
   ArrowRight,
   BarChart3,
@@ -29,7 +33,6 @@ import { accentTag } from "@/lib/render-accent-title";
 import { HomeMediaPartnerCta } from "@/components/home-media-partner-cta";
 import { getCurrentUser } from "@/lib/user-session";
 import { getUserPreferenceByUserId } from "@/lib/user-preference";
-import { recommendMediaForPreference } from "@/lib/onboarding-recommend";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { HomePersonalizedMedia } from "@/components/home/home-personalized-media";
 
@@ -61,7 +64,9 @@ export default async function HomePage({ params }: Props) {
 
   const [
     featuredCatalog,
-    popularCatalog,
+    weeklyPopularCatalog,
+    newMediaCatalog,
+    instantBookingCatalog,
     communityPosts,
     heroVisuals,
     latestCases,
@@ -69,7 +74,9 @@ export default async function HomePage({ params }: Props) {
     fullCatalog,
   ] = await Promise.all([
     fetchHomeFeaturedMedia(8),
-    fetchHomePopularMedia(12),
+    fetchHomeWeeklyPopularMedia(6),
+    fetchHomeNewMedia(6),
+    fetchHomeInstantBookingMedia(6),
     listHomeCommunityPosts(),
     fetchHomeHeroVisualAssets(),
     getLatestPublishedSuccessCases(locale, 3),
@@ -77,10 +84,31 @@ export default async function HomePage({ params }: Props) {
     user ? fetchPublicMediaCatalog() : Promise.resolve([] as MediaItem[]),
   ]);
 
-  const personalizedItems =
-    user && pref?.onboardingCompletedAt
-      ? recommendMediaForPreference(pref, fullCatalog, 3)
-      : [];
+  const personalizedItems = user
+    ? await recommendPersonalizedHomeMedia(
+        user.id,
+        pref,
+        fullCatalog,
+        locale,
+        6,
+      )
+    : [];
+
+  const weeklyPopularItems = attachRecommendReason(
+    weeklyPopularCatalog,
+    "weekly_popular",
+    locale,
+  );
+  const newMediaItems = attachRecommendReason(
+    newMediaCatalog,
+    "new_listing",
+    locale,
+  );
+  const instantBookingItems = attachRecommendReason(
+    instantBookingCatalog,
+    "instant_booking",
+    locale,
+  );
   const displayName = user
     ? (user.name ?? user.email.split("@")[0])
     : null;
@@ -91,7 +119,9 @@ export default async function HomePage({ params }: Props) {
       t={t}
       th={th}
       featuredCatalog={featuredCatalog}
-      popularCatalog={popularCatalog}
+      weeklyPopularItems={weeklyPopularItems}
+      newMediaItems={newMediaItems}
+      instantBookingItems={instantBookingItems}
       communityPosts={communityPosts}
       heroVisuals={heroVisuals}
       latestCases={latestCases}
@@ -106,7 +136,9 @@ function HomeContent({
   t,
   th,
   featuredCatalog,
-  popularCatalog,
+  weeklyPopularItems,
+  newMediaItems,
+  instantBookingItems,
   communityPosts,
   heroVisuals,
   latestCases,
@@ -117,7 +149,9 @@ function HomeContent({
   t: Awaited<ReturnType<typeof getTranslations>>;
   th: Awaited<ReturnType<typeof getTranslations<"homePage">>>;
   featuredCatalog: MediaItem[];
-  popularCatalog: MediaItem[];
+  weeklyPopularItems: MediaItem[];
+  newMediaItems: MediaItem[];
+  instantBookingItems: MediaItem[];
   communityPosts: CommunityPostListItem[];
   heroVisuals: Awaited<ReturnType<typeof fetchHomeHeroVisualAssets>>;
   latestCases: Awaited<ReturnType<typeof getLatestPublishedSuccessCases>>;
@@ -126,10 +160,13 @@ function HomeContent({
 }) {
   /** 캐러셀 — 추천 매체 전체 활용 (TOP3 라벨은 첫 3개에만) */
   const featuredItems = featuredCatalog.slice(0, 8);
-  /** 추천과 겹치는 항목은 인기 섹션에서 제외해 중복 노출 방지 */
-  const popularItems = popularCatalog
-    .filter((m) => !featuredItems.some((f) => f.id === m.id))
-    .slice(0, 12);
+  const featuredIds = new Set(featuredItems.map((m) => m.id));
+  const dedupe = (list: MediaItem[]) =>
+    list.filter((m) => !featuredIds.has(m.id));
+
+  const weeklyPopularDeduped = dedupe(weeklyPopularItems).slice(0, 6);
+  const newMediaDeduped = dedupe(newMediaItems).slice(0, 6);
+  const instantBookingDeduped = dedupe(instantBookingItems).slice(0, 6);
 
   const whyCards = [
     {
@@ -242,15 +279,15 @@ function HomeContent({
           )}
         </NeonSection>
 
-        {popularItems.length > 0 && (
+        {weeklyPopularDeduped.length > 0 && (
           <NeonSection className="pt-[calc(3rem+14px)] pb-12 sm:pt-[calc(5rem+14px)] sm:pb-20 md:pt-[calc(7rem+14px)] md:pb-28 lg:pt-[calc(10rem+14px)] lg:pb-40 xl:pt-[calc(12rem+14px)] xl:pb-48">
             <HomeScrollAnimate>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
                 <NeonSectionHead
                   number="04"
-                  kicker={th("popularKicker")}
-                  title={th.rich("popularTitle", { accent: accentTag })}
-                  meta={th("popularMeta")}
+                  kicker={th("weeklyPopularKicker")}
+                  title={th.rich("weeklyPopularTitle", { accent: accentTag })}
+                  meta={th("weeklyPopularMeta")}
                   className="mb-0 flex-1"
                 />
                 <Link
@@ -263,9 +300,47 @@ function HomeContent({
               </div>
             </HomeScrollAnimate>
             <HomeMediaHorizontalScroll
-              items={popularItems}
+              items={weeklyPopularDeduped}
               locale={locale}
-              rows={2}
+              rows={1}
+              density="compact"
+            />
+          </NeonSection>
+        )}
+
+        {newMediaDeduped.length > 0 && (
+          <NeonSection className="pt-[calc(2rem+14px)] pb-12 sm:pt-[calc(4rem+14px)] sm:pb-16 md:pb-24">
+            <HomeScrollAnimate>
+              <NeonSectionHead
+                number="05"
+                kicker={th("newMediaKicker")}
+                title={th.rich("newMediaTitle", { accent: accentTag })}
+                meta={th("newMediaMeta")}
+              />
+            </HomeScrollAnimate>
+            <HomeMediaHorizontalScroll
+              items={newMediaDeduped}
+              locale={locale}
+              rows={1}
+              density="compact"
+            />
+          </NeonSection>
+        )}
+
+        {instantBookingDeduped.length > 0 && (
+          <NeonSection className="pt-[calc(2rem+14px)] pb-12 sm:pt-[calc(4rem+14px)] sm:pb-20 md:pb-28">
+            <HomeScrollAnimate>
+              <NeonSectionHead
+                number="06"
+                kicker={th("instantBookingKicker")}
+                title={th.rich("instantBookingTitle", { accent: accentTag })}
+                meta={th("instantBookingMeta")}
+              />
+            </HomeScrollAnimate>
+            <HomeMediaHorizontalScroll
+              items={instantBookingDeduped}
+              locale={locale}
+              rows={1}
               density="compact"
             />
           </NeonSection>
@@ -274,7 +349,7 @@ function HomeContent({
         <NeonSection>
           <HomeScrollAnimate>
             <NeonSectionHead
-              number="05"
+              number="07"
               kicker={th("whyKicker")}
               title={th.rich("whyTitle", { accent: accentTag })}
               meta={th("whyMeta")}

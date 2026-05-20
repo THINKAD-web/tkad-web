@@ -64,6 +64,13 @@ export function HomeMediaHorizontalScroll({
           glowTheme="purple"
           density={density}
           className="h-full"
+          footer={
+            m.recommendReason ? (
+              <p className="mt-1 line-clamp-1 font-mono text-[10px] font-semibold tracking-wide text-white/65">
+                {m.recommendReason}
+              </p>
+            ) : undefined
+          }
           topRight={
             m.isVerified ? (
               <span className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">

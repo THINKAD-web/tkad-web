@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { ZodError } from "zod";
+import { logOpsError } from "@/lib/tracking/record";
 
 export function apiOk<T>(data: T, init?: ResponseInit) {
   return NextResponse.json({ ok: true, data }, init);
@@ -25,6 +26,11 @@ export function apiError(
 
 export function apiServerError(e: unknown, tag: string) {
   console.error(`[api:${tag}]`, e);
+  void logOpsError({
+    tag,
+    status: 500,
+    message: e instanceof Error ? e.message : String(e),
+  });
   return apiError("SERVER_ERROR", 500, {
     message: "요청을 처리하는 중 오류가 발생했습니다.",
   });

@@ -143,6 +143,8 @@ const leadFieldsSchema = z.object({
   budget: z.enum(CONTACT_BUDGET_V2),
   startDate: z.string().trim().optional(),
   additionalNotes: z.string().trim().optional(),
+  /** URL·비교 견적에서 전달된 매체 ID */
+  mediaIds: z.array(z.string().min(1)).max(12).optional(),
   website: z.string().optional(),
 });
 

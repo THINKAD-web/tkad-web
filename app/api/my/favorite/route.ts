@@ -8,6 +8,7 @@ import {
   apiZodError,
   readJson,
 } from "@/lib/api-response";
+import { recordConversion } from "@/lib/tracking/record";
 
 export const runtime = "nodejs";
 
@@ -44,6 +45,11 @@ export async function POST(req: Request) {
         });
       }
       favorited = true;
+      void recordConversion({
+        type: "favorite",
+        mediaId,
+        userId: user.id,
+      });
     } else {
       if (existing) {
         await prisma.userFavoriteMedia.delete({

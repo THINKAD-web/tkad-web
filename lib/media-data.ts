@@ -1,4 +1,5 @@
 import type { CampaignMapMediaType, CampaignMapPin } from "@/lib/campaign-monitoring-mock";
+import { getDataDrivenSimilarMedia } from "@/lib/media-similar";
 
 export type MediaCaseStudyPhoto = {
   url: string;
@@ -45,6 +46,12 @@ export interface MediaItem {
   location: string;
   locationEn: string;
   region: string;
+  /** 서울 권역·수도권·지방 세부 (`lib/media-regions.ts`, DB `region_zone`) */
+  regionZone?: string;
+  /** 7일·30일 참여 지표 블렌드 (`lib/media-popularity.ts`) */
+  popularityScore?: number;
+  /** 홈·카드 추천 이유 (한 줄) */
+  recommendReason?: string;
   /** 공개 카탈로그에서의 운영 상태 (DB `availability`) */
   availability?: "available" | "reserved" | "maintenance";
   /** 세부 카테고리 (DB `sub_category`) */
@@ -175,16 +182,6 @@ export function haversineKm(
 
 export type SimilarSortKey = "score" | "distance" | "price" | "visibility";
 
-function scoreSimilarPair(item: MediaItem, m: MediaItem): number {
-  let s = 0;
-  if (m.region === item.region) s += 4;
-  if (m.type === item.type) s += 3;
-  const pr = Math.abs(m.price - item.price) / Math.max(item.price, 1);
-  if (pr < 0.25) s += 2;
-  else if (pr < 0.5) s += 1;
-  return s;
-}
-
 /** Same region/type 우선, 가격대 유사도 보조 */
 export function getSimilarMedia(item: MediaItem, limit = 4): MediaItem[] {
   return getSimilarMediaFromCatalog(mediaData, item, limit);
@@ -219,13 +216,7 @@ export function getSimilarMediaFromCatalog(
       )
       .slice(0, limit);
   }
-  const scored = others.map((m) => ({ m, s: scoreSimilarPair(item, m) }));
-  scored.sort(
-    (a, b) =>
-      b.s - a.s ||
-      Math.abs(a.m.price - item.price) - Math.abs(b.m.price - item.price),
-  );
-  return scored.slice(0, limit).map((x) => x.m);
+  return getDataDrivenSimilarMedia(catalog, item, limit);
 }
 
 /** 동일 URL이 `image` + `extractedImages` 등으로 중복될 때 한 번만 노출 */
