@@ -13,6 +13,8 @@
     "seed": "npx tsx prisma/seed.ts",
     "db:check": "node scripts/db-check.mjs",
     "db:push": "node scripts/ensure-database-url.mjs && prisma db push",
+    "db:migrate": "node scripts/ensure-database-url.mjs && prisma migrate deploy",
+    "db:migrate:status": "node scripts/ensure-database-url.mjs && prisma migrate status",
     "postinstall": "prisma generate && node scripts/ensure-noto-kr-font.mjs",
     "generate:pwa-icons": "node scripts/generate-pwa-icons.mjs"
   },
