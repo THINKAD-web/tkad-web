@@ -4,17 +4,14 @@ import {
   resolveModel,
   type TrendReportGenerationContext,
 } from "@/lib/ai-content-generator";
+import { applySeoPackage } from "@/lib/content-auto/seo";
+import { TREND_SEARCH_QUERIES } from "@/lib/content-auto/prompts";
 import { fetchInternalMediaInsights } from "@/lib/insights/sources/internal";
 import { fetchOOHWebSources } from "@/lib/insights/sources/tavily";
 import { getPrisma } from "@/lib/prisma";
 
-/** Admin·월간 cron 공통 Tavily 검색어 */
-export const ADMIN_TREND_SEARCH_KEYWORDS = [
-  "OOH advertising Korea 2026",
-  "옥외광고 트렌드",
-  "DOOH Korea market",
-  "디지털 옥외광고 트렌드",
-] as const;
+/** Admin·cron 공통 Tavily 검색어 */
+export const ADMIN_TREND_SEARCH_KEYWORDS = [...TREND_SEARCH_QUERIES] as const;
 
 export type TrendReportPipelinePhase =
   | "searching"
@@ -105,20 +102,27 @@ export async function runTrendReportDraftPipeline(
   });
 
   const g = await generateTrendReport(month, context);
+  const seo = applySeoPackage({
+    title: g.titleKo,
+    content: g.contentKo,
+    slugPrefix: "trend",
+  });
 
   emit(onProgress, { phase: "saving", message: "초안 저장 중…" });
 
   const db = getPrisma();
   const data = {
     month: opts.monthField === undefined ? month : opts.monthField,
-    slug: opts.slug ?? null,
+    slug: opts.slug ?? seo.slug,
     status: "draft" as const,
     titleKo: g.titleKo,
     titleEn: g.titleEn,
-    contentKo: g.contentKo,
+    contentKo: seo.contentKo,
     summaryKo: g.summaryKo,
     marketTrendKo: g.marketTrendKo,
     doohTrendKo: g.doohTrendKo,
+    metaDescription: seo.metaDescription,
+    tags: seo.tags,
     verticalStrategies:
       g.verticalStrategies === null || g.verticalStrategies === undefined
         ? undefined

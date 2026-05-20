@@ -56,6 +56,12 @@ export default async function ReportDashboardPage({
             >
               ← {isKo ? "리포트 아카이브" : "Report archive"}
             </Link>
+            <Link
+              href="/insights/market"
+              className="inline-flex items-center gap-1.5 border-2 border-[#FF6600] bg-[#FF6600]/10 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#FF6600] transition-colors hover:bg-[#FF6600] hover:text-white"
+            >
+              PRO · {isKo ? "시장 인사이트" : "Market insights"} →
+            </Link>
           </div>
         </div>
       </section>

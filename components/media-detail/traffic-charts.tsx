@@ -20,6 +20,8 @@ import {
   resolveTrafficPattern,
   type StoredTrafficPattern,
 } from "@/lib/media-traffic-estimate";
+import type { DataSourceAttribution } from "@/lib/data-source-types";
+import { DataAttributionList } from "@/components/data-confidence-badge";
 
 /** Brutalist 차트 색상 팔레트 — 다색 유지 + bx-* 톤. */
 const CHART_PRIMARY = "#e2e8f0"; // slate-200 (dark-friendly)
@@ -37,6 +39,10 @@ type Props = {
   /** 절대값 환산용. 시간당/요일별/월별 평균 노출 = base × pattern[i] × N */
   dailyFootfall?: number | null;
   isKo: boolean;
+  /** data-fusion 출처 (있으면 추정 뱃지 대신 표시) */
+  attributions?: DataSourceAttribution[];
+  /** fusion 패턴이 있으면 stored 대신 사용 */
+  fusedStored?: StoredTrafficPattern | null;
 };
 
 const HOUR_TICKS = [0, 6, 12, 18, 23];
@@ -69,14 +75,20 @@ export function TrafficCharts({
   stored,
   dailyFootfall,
   isKo,
+  attributions,
+  fusedStored,
 }: Props) {
   const t = useTranslations("mediaDetail.traffic");
   const [tab, setTab] = useState<Tab>("hourly");
 
+  const effectiveStored = fusedStored ?? stored;
+
   const { pattern, isEstimated } = useMemo(
-    () => resolveTrafficPattern(stored, mediaType, region),
-    [stored, mediaType, region],
+    () => resolveTrafficPattern(effectiveStored, mediaType, region),
+    [effectiveStored, mediaType, region],
   );
+
+  const showEstimatedBadge = isEstimated && !attributions?.length;
 
   const insights = useMemo(
     () => buildInsights(pattern, isKo),
@@ -133,10 +145,13 @@ export function TrafficCharts({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {isEstimated ? (
+          {showEstimatedBadge ? (
             <span className="rounded-xl border border-accent/70 bg-card/70 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-accent shadow-xs backdrop-blur">
               {t("estimatedBadge")}
             </span>
+          ) : null}
+          {attributions?.length ? (
+            <DataAttributionList attributions={attributions} isKo={isKo} />
           ) : null}
           <div
             role="tablist"

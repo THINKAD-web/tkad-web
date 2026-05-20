@@ -4,6 +4,8 @@ import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getGuideBySlug, GUIDES } from "@/lib/guides-data";
+import { getPublishedGuideBySlug } from "@/lib/public-auto-content";
+import { DbGuideArticlePage } from "@/components/guides/db-guide-article-page";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import { pageAlternates, serializeJsonLd, siteUrl } from "@/lib/seo";
 import { regionLabel, typeLabel } from "@/lib/media-keyword-landing";
@@ -20,6 +22,22 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params;
   const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
+  const dbGuide = await getPublishedGuideBySlug(slug);
+  if (dbGuide) {
+    return {
+      title: `${dbGuide.titleKo} | THINKAD`,
+      description: dbGuide.metaDescription ?? dbGuide.excerptKo?.slice(0, 160) ?? "",
+      keywords: dbGuide.tags,
+      alternates: pageAlternates(locale, `/guides/${slug}`),
+      openGraph: {
+        title: dbGuide.titleKo,
+        description: dbGuide.metaDescription ?? dbGuide.excerptKo,
+        type: "article",
+        publishedTime: dbGuide.publishedAt?.toISOString(),
+        modifiedTime: dbGuide.updatedAt.toISOString(),
+      },
+    };
+  }
   const guide = getGuideBySlug(slug);
   if (!guide) return { title: locale === "ko" ? "가이드 없음" : "Guide not found" };
   const isKo = locale === "ko";
@@ -90,6 +108,12 @@ export default async function GuideDetailPage({ params }: Props) {
   const { locale: rawLocale, slug } = await params;
   const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
   setRequestLocale(locale);
+
+  const dbGuide = await getPublishedGuideBySlug(slug);
+  if (dbGuide) {
+    return <DbGuideArticlePage article={dbGuide} locale={locale} />;
+  }
+
   const guide = getGuideBySlug(slug);
   if (!guide) notFound();
 

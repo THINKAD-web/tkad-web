@@ -6,11 +6,14 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   Building2,
   CalendarRange,
+  Gavel,
   LayoutDashboard,
   Loader2,
   LogOut,
   Megaphone,
   Wallet,
+  FileBarChart,
+  Palette,
 } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { FullPageSpinner } from "@/components/ui/spinner";
@@ -19,8 +22,11 @@ import { isMediaOwnerPortalRole } from "@/lib/media-owner-role";
 
 const NAV = [
   { href: "/media-owner/dashboard", icon: LayoutDashboard, ko: "대시보드", en: "Dashboard" },
+  { href: "/media-owner/matches", icon: Gavel, ko: "매칭·비딩", en: "Matches" },
   { href: "/media-owner/media", icon: Building2, ko: "내 매체", en: "My media" },
   { href: "/media-owner/campaigns", icon: Megaphone, ko: "집행 현황", en: "Campaigns" },
+  { href: "/media-owner/reports", icon: FileBarChart, ko: "데이터 보고서", en: "Reports" },
+  { href: "/media-owner/branding", icon: Palette, ko: "브랜딩", en: "Branding" },
   { href: "/media-owner/settlements", icon: Wallet, ko: "정산", en: "Settlements" },
 ] as const;
 

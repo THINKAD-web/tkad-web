@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
+import { BEGINNER_TRUST_METRICS } from "@/lib/guides-beginner-content";
 
 type Props = {
   isKo: boolean;
@@ -27,6 +28,23 @@ export function GuidesBeginnerCta({
           [ {isKo ? "시작하기" : "GET STARTED"} ]
         </p>
         <h2 className="mt-3 text-2xl font-black text-white sm:text-3xl">{title}</h2>
+
+        <ul className="mx-auto mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
+          {BEGINNER_TRUST_METRICS.map((m) => (
+            <li
+              key={m.labelKo}
+              className="rounded-2xl border border-white/12 bg-black/25 px-4 py-4"
+            >
+              <p className="text-2xl font-black text-cyan-200">
+                {isKo ? m.valueKo : m.valueEn}
+              </p>
+              <p className="mt-1 text-xs font-semibold leading-snug text-white/65">
+                {isKo ? m.labelKo : m.labelEn}
+              </p>
+            </li>
+          ))}
+        </ul>
+
         <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap">
           <Link
             href="/media"

@@ -24,6 +24,26 @@ async function resolveOwnerNotifyPhone(
   return null;
 }
 
+export async function notifyMediaOwnerMatchInquiry(input: {
+  ownerUserId: string;
+  mediaName: string;
+  summaryKo: string;
+  link: string;
+}): Promise<SendAlimtalkResult> {
+  const phone = await resolveOwnerNotifyPhone(input.ownerUserId);
+  if (!phone) {
+    return { sent: false, channel: "noop", detail: "no owner phone" };
+  }
+  return sendAlimtalk({
+    to: phone,
+    templateCode: "TKAD_OWNER_NEW_INQUIRY",
+    variables: {
+      mediaName: input.mediaName,
+      link: input.link,
+    },
+  });
+}
+
 export async function notifyMediaOwnerNewInquiry(input: {
   ownerUserId: string;
   mediaName: string;

@@ -83,7 +83,7 @@ function buildArticleJsonLd(locale: string) {
     description: isKo ? BEGINNER_GUIDE_META.descriptionKo : BEGINNER_GUIDE_META.descriptionEn,
     url,
     datePublished: BEGINNER_GUIDE_META.publishedAt,
-    dateModified: BEGINNER_GUIDE_META.publishedAt,
+    dateModified: BEGINNER_GUIDE_META.modifiedAt,
     inLanguage: isKo ? "ko-KR" : "en-US",
     author: { "@id": `${siteUrl}/#organization` },
     publisher: { "@id": `${siteUrl}/#organization` },
@@ -205,7 +205,7 @@ export default async function GuidesIndexPage({ params }: Props) {
               title={sectionCopy.timelineTitle}
               meta={sectionCopy.timelineMeta}
             />
-            <div className="mx-auto max-w-2xl">
+            <div className="mx-auto max-w-3xl">
               <GuidesBeginnerTimeline steps={BEGINNER_TIMELINE} isKo={isKo} />
             </div>
           </NeonSection>

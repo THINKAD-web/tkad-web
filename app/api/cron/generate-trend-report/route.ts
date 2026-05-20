@@ -1,12 +1,15 @@
 import { NextRequest } from "next/server";
-import { Prisma } from "@prisma/client";
-import { runTrendReportDraftPipeline } from "@/lib/insights/trend-report-pipeline";
 import {
+  buildBiMonthlyTrendSlug,
+  runBiMonthlyTrendPipeline,
+} from "@/lib/content-auto/pipelines";
+import {
+  notifyContentDraftReady,
   notifyPipelineError,
-  notifyTrendDraftReady,
 } from "@/lib/insights/notifiers/slack";
 import { json } from "@/lib/admin-guard";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -18,26 +21,21 @@ function authOk(request: NextRequest): boolean {
   return h === `Bearer ${secret}`;
 }
 
-/** 월간 idempotent 슬러그: `monthly-2026-05` */
-function buildMonthlySlug(month: string): string {
-  return `monthly-${month}`;
-}
-
-function currentMonthSeoul(): string {
+function seoulParts(d = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
     year: "numeric",
     month: "2-digit",
-  }).formatToParts(new Date());
+    day: "2-digit",
+  }).formatToParts(d);
   const y = parts.find((p) => p.type === "year")?.value ?? "1970";
   const m = parts.find((p) => p.type === "month")?.value ?? "01";
-  return `${y}-${m}`;
+  const day = Number(parts.find((p) => p.type === "day")?.value ?? "1");
+  return { month: `${y}-${m}`, day };
 }
 
 /**
- * Vercel Cron — 매월 1일 00:00 UTC (09:00 KST) 트렌드 리포트 초안 생성.
- * - Tavily + Claude → status=draft (운영 검토 후 수동 발행)
- * - Slack: "이번 달 트렌드 리포트 초안이 생성됐어요. 검토 후 발행해주세요"
+ * Vercel Cron — 매월 1·15일 00:00 UTC (09:00 KST) 트렌드 리포트 초안.
  */
 export async function GET(request: NextRequest) {
   if (!authOk(request)) {
@@ -47,15 +45,15 @@ export async function GET(request: NextRequest) {
     return json({ error: "Database not configured" }, 503);
   }
 
-  const month = currentMonthSeoul();
-  const slug = buildMonthlySlug(month);
+  const { month, day } = seoulParts();
+  const slug = buildBiMonthlyTrendSlug(month, day);
   const db = getPrisma();
 
   const existing = await db.trendReport.findUnique({ where: { slug } });
   if (existing) {
     return json({
       skipped: true,
-      reason: "already-generated-this-month",
+      reason: "already-generated-this-period",
       slug,
       id: existing.id,
       status: existing.status,
@@ -64,25 +62,14 @@ export async function GET(request: NextRequest) {
 
   const startedAt = Date.now();
   try {
-    const result = await runTrendReportDraftPipeline({
-      month,
-      slug,
-      generationMethod: "auto",
-      monthField: month,
+    const result = await runBiMonthlyTrendPipeline({ month, slug });
+
+    void notifyContentDraftReady({
+      kind: "trend_report",
+      id: result.trendReport.id,
+      titleKo: result.trendReport.titleKo,
     });
 
-    const saved = await db.trendReport.findUnique({
-      where: { id: result.trendReport.id },
-    });
-    if (saved) {
-      void notifyTrendDraftReady(saved, {
-        sourcesCount: Array.isArray(saved.sources)
-          ? (saved.sources as unknown[]).length
-          : undefined,
-      });
-    }
-
-    const elapsedMs = Date.now() - startedAt;
     return json(
       {
         ok: true,
@@ -90,7 +77,7 @@ export async function GET(request: NextRequest) {
         id: result.trendReport.id,
         status: result.trendReport.status,
         month,
-        elapsedMs,
+        elapsedMs: Date.now() - startedAt,
         message: "draft created — awaiting admin review",
       },
       201,

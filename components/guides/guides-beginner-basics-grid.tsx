@@ -1,45 +1,298 @@
+import type { ReactNode } from "react";
 import type { BeginnerBasicsCard } from "@/lib/guides-beginner-content";
+import {
+  BUDGET_INDUSTRY_GUIDES,
+  CREATIVE_SPEC_ROWS,
+  CREATIVE_WARNINGS_EN,
+  CREATIVE_WARNINGS_KO,
+  CPM_BEYOND_EN,
+  CPM_BEYOND_KO,
+  CPM_BENCHMARKS_EN,
+  CPM_BENCHMARKS_KO,
+  CPM_EXAMPLE_EN,
+  CPM_EXAMPLE_KO,
+  FIRST_CAMPAIGN_TIPS_EN,
+  FIRST_CAMPAIGN_TIPS_KO,
+  MEDIA_TYPE_DETAILS,
+  OOH_EFFECTIVE_CAMPAIGNS_EN,
+  OOH_EFFECTIVE_CAMPAIGNS_KO,
+  OOH_GANGNAM_STAT_EN,
+  OOH_GANGNAM_STAT_KO,
+  OOH_VS_DIGITAL_COMPARISON,
+} from "@/lib/guides-beginner-content";
 
 type Props = {
   cards: BeginnerBasicsCard[];
   isKo: boolean;
 };
 
+function CardShell({
+  card,
+  index,
+  isKo,
+  children,
+}: {
+  card: BeginnerBasicsCard;
+  index: number;
+  isKo: boolean;
+  children?: ReactNode;
+}) {
+  const Icon = card.icon;
+  return (
+    <article
+      className={`rounded-[28px] border border-white/12 bg-white/6 p-6 backdrop-blur tkad-neon-border sm:p-8 ${
+        card.wide ? "md:col-span-2 lg:col-span-3" : ""
+      }`}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+          [{String(index + 1).padStart(2, "0")}]
+        </span>
+        <Icon className="h-6 w-6 text-cyan-300/90" aria-hidden />
+      </div>
+      <h3 className="text-lg font-black text-white">
+        {isKo ? card.titleKo : card.titleEn}
+      </h3>
+      <p className="mt-3 text-sm leading-relaxed text-white/76">
+        {isKo ? card.summaryKo : card.summaryEn}
+      </p>
+      {children}
+    </article>
+  );
+}
+
+function BulletList({ items }: { items: string[] }) {
+  return (
+    <ul className="mt-4 space-y-2">
+      {items.map((b) => (
+        <li
+          key={b}
+          className="flex gap-2 text-xs leading-relaxed text-white/65 before:shrink-0 before:content-['·']"
+        >
+          {b}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function SubLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="mt-5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/80">
+      [ {children} ]
+    </p>
+  );
+}
+
+function ComparisonTable({ isKo }: { isKo: boolean }) {
+  return (
+    <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+      <table className="w-full min-w-[480px] text-left text-xs">
+        <thead>
+          <tr className="border-b border-white/10 bg-white/5">
+            <th className="px-3 py-2.5 font-bold text-white/55">
+              {isKo ? "항목" : "Factor"}
+            </th>
+            <th className="px-3 py-2.5 font-bold text-cyan-200/90">OOH</th>
+            <th className="px-3 py-2.5 font-bold text-pink-200/90">
+              {isKo ? "디지털" : "Digital"}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {OOH_VS_DIGITAL_COMPARISON.map((row) => (
+            <tr key={row.labelKo} className="border-b border-white/6 last:border-0">
+              <td className="px-3 py-2.5 font-semibold text-white/80">
+                {isKo ? row.labelKo : row.labelEn}
+              </td>
+              <td className="px-3 py-2.5 text-white/68">{isKo ? row.oohKo : row.oohEn}</td>
+              <td className="px-3 py-2.5 text-white/68">
+                {isKo ? row.digitalKo : row.digitalEn}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function WhatIsOohDetail({ isKo }: { isKo: boolean }) {
+  const campaigns = isKo ? OOH_EFFECTIVE_CAMPAIGNS_KO : OOH_EFFECTIVE_CAMPAIGNS_EN;
+  return (
+    <>
+      <BulletList items={isKo ? ["브랜드 인지·신뢰 구축에 유리", "지역·상권 타깃팅 가능", "디지털(DOOH)과 결합 시 유연한 운영"] : ["Strong for awareness and trust", "Geo and district targeting", "Flexible when paired with DOOH"]} />
+      <SubLabel>{isKo ? "디지털 광고 vs OOH" : "Digital vs OOH"}</SubLabel>
+      <ComparisonTable isKo={isKo} />
+      <SubLabel>{isKo ? "OOH가 특히 효과적인 캠페인" : "Campaigns where OOH shines"}</SubLabel>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {campaigns.map((c) => (
+          <span
+            key={c}
+            className="rounded-lg border border-white/12 bg-white/8 px-2.5 py-1 text-xs font-semibold text-white/80"
+          >
+            {c}
+          </span>
+        ))}
+      </div>
+      <p className="mt-4 rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-100">
+        {isKo ? OOH_GANGNAM_STAT_KO : OOH_GANGNAM_STAT_EN}
+      </p>
+    </>
+  );
+}
+
+function MediaTypesDetail({ isKo }: { isKo: boolean }) {
+  return (
+    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      {MEDIA_TYPE_DETAILS.map((m) => (
+        <div
+          key={m.nameKo}
+          className="rounded-2xl border border-white/10 bg-black/20 p-4"
+        >
+          <h4 className="text-sm font-black text-white">
+            {isKo ? m.nameKo : m.nameEn}
+          </h4>
+          <BulletList items={isKo ? m.traitsKo : m.traitsEn} />
+          <p className="mt-2 text-xs text-white/62">{isKo ? m.formatsKo : m.formatsEn}</p>
+          <p className="mt-1 text-xs text-white/62">{isKo ? m.suitableKo : m.suitableEn}</p>
+          <p className="mt-2 text-xs font-semibold text-cyan-200/90">
+            {isKo ? m.priceKo : m.priceEn}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CpmDetail({ isKo }: { isKo: boolean }) {
+  const example = isKo ? CPM_EXAMPLE_KO : CPM_EXAMPLE_EN;
+  const benchmarks = isKo ? CPM_BENCHMARKS_KO : CPM_BENCHMARKS_EN;
+  const beyond = isKo ? CPM_BEYOND_KO : CPM_BEYOND_EN;
+  return (
+    <>
+      <BulletList items={isKo ? ["CPM = 광고비 ÷ (예상 노출 ÷ 1,000)"] : ["CPM = spend ÷ (estimated impressions ÷ 1,000)"]} />
+      <SubLabel>{example.title}</SubLabel>
+      <div className="mt-2 rounded-xl border border-white/10 bg-black/25 p-4 font-mono text-xs leading-relaxed text-white/78">
+        {example.lines.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
+      <SubLabel>{isKo ? "좋은 CPM / 나쁜 CPM" : "Good vs weak CPM"}</SubLabel>
+      <BulletList items={benchmarks} />
+      <SubLabel>{isKo ? "CPM 이외에 봐야 할 것" : "Beyond CPM"}</SubLabel>
+      <BulletList items={beyond} />
+    </>
+  );
+}
+
+function CreativeDetail({ isKo }: { isKo: boolean }) {
+  const warnings = isKo ? CREATIVE_WARNINGS_KO : CREATIVE_WARNINGS_EN;
+  return (
+    <>
+      <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+        <table className="w-full min-w-[520px] text-left text-xs">
+          <thead>
+            <tr className="border-b border-white/10 bg-white/5">
+              <th className="px-3 py-2.5 font-bold text-white/55">
+                {isKo ? "매체" : "Format"}
+              </th>
+              <th className="px-3 py-2.5 font-bold text-white/55">
+                {isKo ? "규격" : "Size"}
+              </th>
+              <th className="px-3 py-2.5 font-bold text-white/55">
+                {isKo ? "파일" : "File"}
+              </th>
+              <th className="px-3 py-2.5 font-bold text-white/55">
+                {isKo ? "기간" : "Lead time"}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {CREATIVE_SPEC_ROWS.map((row) => (
+              <tr key={row.formatKo} className="border-b border-white/6 last:border-0">
+                <td className="px-3 py-2.5 font-semibold text-white/82">
+                  {isKo ? row.formatKo : row.formatEn}
+                </td>
+                <td className="px-3 py-2.5 text-white/68">{isKo ? row.sizeKo : row.sizeEn}</td>
+                <td className="px-3 py-2.5 text-white/68">{isKo ? row.fileKo : row.fileEn}</td>
+                <td className="px-3 py-2.5 text-white/68">{isKo ? row.leadKo : row.leadEn}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <SubLabel>{isKo ? "주의사항" : "Important notes"}</SubLabel>
+      <BulletList items={warnings} />
+    </>
+  );
+}
+
+function BudgetDetail({ isKo }: { isKo: boolean }) {
+  const tips = isKo ? FIRST_CAMPAIGN_TIPS_KO : FIRST_CAMPAIGN_TIPS_EN;
+  return (
+    <>
+      <div className="mt-5 space-y-5">
+        {BUDGET_INDUSTRY_GUIDES.map((g) => {
+          const tiers = isKo ? g.tiersKo : g.tiersEn;
+          return (
+            <div
+              key={g.industryKo}
+              className="rounded-2xl border border-white/10 bg-black/20 p-4"
+            >
+              <h4 className="text-sm font-black text-white">
+                {isKo ? g.industryKo : g.industryEn}
+              </h4>
+              <ul className="mt-3 space-y-2">
+                {tiers.map((t) => (
+                  <li
+                    key={t.label}
+                    className="rounded-lg border border-white/8 bg-white/4 px-3 py-2 text-xs leading-relaxed text-white/72"
+                  >
+                    <span className="font-bold text-white/90">{t.label}</span>
+                    <span className="mx-1.5 text-white/40">·</span>
+                    <span className="font-semibold text-cyan-200/90">{t.budget}</span>
+                    <span className="mt-0.5 block text-white/58">→ {t.placement}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+      <SubLabel>{isKo ? "첫 캠페인 팁" : "First campaign tips"}</SubLabel>
+      <BulletList items={tips} />
+    </>
+  );
+}
+
+function renderCardDetail(card: BeginnerBasicsCard, isKo: boolean) {
+  switch (card.id) {
+    case "what-is-ooh":
+      return <WhatIsOohDetail isKo={isKo} />;
+    case "media-types":
+      return <MediaTypesDetail isKo={isKo} />;
+    case "cpm":
+      return <CpmDetail isKo={isKo} />;
+    case "creative":
+      return <CreativeDetail isKo={isKo} />;
+    case "budget":
+      return <BudgetDetail isKo={isKo} />;
+    default:
+      return (
+        <BulletList items={isKo ? card.bulletsKo : card.bulletsEn} />
+      );
+  }
+}
+
 export function GuidesBeginnerBasicsGrid({ cards, isKo }: Props) {
   return (
     <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {cards.map((card, i) => {
-        const Icon = card.icon;
-        return (
-          <article
-            key={card.id}
-            className="rounded-[28px] border border-white/12 bg-white/6 p-6 backdrop-blur tkad-neon-border sm:p-8"
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
-                [{String(i + 1).padStart(2, "0")}]
-              </span>
-              <Icon className="h-6 w-6 text-cyan-300/90" aria-hidden />
-            </div>
-            <h3 className="text-lg font-black text-white">
-              {isKo ? card.titleKo : card.titleEn}
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-white/76">
-              {isKo ? card.summaryKo : card.summaryEn}
-            </p>
-            <ul className="mt-4 space-y-2">
-              {(isKo ? card.bulletsKo : card.bulletsEn).map((b) => (
-                <li
-                  key={b}
-                  className="flex gap-2 text-xs leading-relaxed text-white/65 before:shrink-0 before:content-['·']"
-                >
-                  {b}
-                </li>
-              ))}
-            </ul>
-          </article>
-        );
-      })}
+      {cards.map((card, i) => (
+        <CardShell key={card.id} card={card} index={i} isKo={isKo}>
+          {renderCardDetail(card, isKo)}
+        </CardShell>
+      ))}
     </div>
   );
 }

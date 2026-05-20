@@ -22,6 +22,7 @@ import {
   contactLeadSchema,
   isContactLeadV2Payload,
   type ContactBudgetV2,
+  type ContactIndustry,
   type ContactRegion,
 } from "@/lib/contact-lead-schema";
 import { createInquiryQuoteDraft } from "@/lib/inquiry-quote-draft";
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
   let leadMediaIds: string[] = [];
   let leadRegions: ContactRegion[] = [];
   let leadBudgetCode: ContactBudgetV2 | undefined;
+  let leadIndustry: ContactIndustry | undefined;
   let leadStartDateRaw = "";
 
   if (isContactLeadV2Payload(raw)) {
@@ -127,6 +129,7 @@ export async function POST(request: NextRequest) {
     leadRegions = lead.regions;
     leadBudgetCode = lead.budget;
     leadStartDateRaw = lead.startDate?.trim() ?? "";
+    leadIndustry = lead.industry;
   } else {
     const name = typeof raw.name === "string" ? raw.name : "";
     const phone = typeof raw.phone === "string" ? raw.phone : "";
@@ -220,30 +223,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (inquiryId) {
-      void recordConversion({ type: "quote_request", metadata: { inquiryId } });
-      void createInquiryQuoteDraft(db, {
-        inquiryId,
-        company: companyVal,
-        name: nameVal,
-        phone: phoneVal,
-        email: hasValidEmail ? emailStr : null,
-        message: composedMessage,
-        budgetLabel: budgetLbl,
-        locale,
-        explicitMediaIds,
-        startDateRaw: leadStartDateRaw,
-        regions: leadRegions,
-        budgetCode: leadBudgetCode,
-      }).catch((err) => {
-        console.error("[contact] inquiry quote draft:", err);
-      });
-      if (explicitMediaIds.length > 0) {
-        void notifyMediaOwnersForMediaIds(explicitMediaIds).catch((err) =>
-          console.error("[contact] media owner notify:", err),
+      if (inquiryId) {
+        void recordConversion({ type: "quote_request", metadata: { inquiryId } });
+        void createInquiryQuoteDraft(db, {
+          inquiryId,
+          company: companyVal,
+          name: nameVal,
+          phone: phoneVal,
+          email: hasValidEmail ? emailStr : null,
+          message: composedMessage,
+          budgetLabel: budgetLbl,
+          locale,
+          explicitMediaIds,
+          startDateRaw: leadStartDateRaw,
+          regions: leadRegions,
+          budgetCode: leadBudgetCode,
+        }).catch((err) => {
+          console.error("[contact] inquiry quote draft:", err);
+        });
+        if (explicitMediaIds.length > 0) {
+          void notifyMediaOwnersForMediaIds(explicitMediaIds).catch((err) =>
+            console.error("[contact] media owner notify:", err),
+          );
+        }
+        void import("@/lib/media-owner-match").then(({ createMatchFromContactInquiry }) =>
+          createMatchFromContactInquiry({
+            contactInquiryId: inquiryId!,
+            message: composedMessage,
+            budgetLabel: budgetLbl,
+            budgetCode: leadBudgetCode,
+            regions: leadRegions,
+            industryCode: leadIndustry,
+            periodLabel: startDateLbl || undefined,
+            explicitMediaIds,
+          }).catch((err) => console.error("[contact] owner match:", err)),
         );
       }
-    }
   } catch (err) {
     console.error("[contact] DB error:", err);
     return json({ error: "save_failed" }, { status: 500 });

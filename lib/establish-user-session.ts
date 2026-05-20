@@ -30,7 +30,15 @@ export async function establishUserSession(
     ip: req ? getClientIp(req) : undefined,
   });
 
+  await ensureProTrialOnSession(userId);
+
   const cookieStore = await cookies();
   cookieStore.set(USER_SESSION_COOKIE, token, userSessionCookieOptions());
   return true;
+}
+
+/** 로그인·가입 직후 PRO 14일 체험 (미설정 사용자만) */
+export async function ensureProTrialOnSession(userId: string): Promise<void> {
+  const { startProTrialIfEligible } = await import("@/lib/report-access");
+  await startProTrialIfEligible(userId);
 }

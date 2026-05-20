@@ -58,6 +58,7 @@ const navDefs = [
   { href: "/admin/monitoring", key: "monitoring" as const, icon: Radar },
   // 2) 영업/리드
   { href: "/admin/inquiries", key: "inquiries" as const, icon: MessageSquareText },
+  { href: "/admin/biddings", key: "biddings" as const, icon: ClipboardList },
   { href: "/admin/pipeline", key: "pipeline" as const, icon: Kanban },
   { href: "/admin/crm-records", key: "crmRecords" as const, icon: ContactRound },
   { href: "/admin/forecast", key: "forecast" as const, icon: TrendingUp },
@@ -87,6 +88,7 @@ const navDefs = [
   { href: "/admin/ab-test", key: "abTest" as const, icon: FlaskConical },
   { href: "/admin/reports/new", key: "trendReports" as const, icon: FileText },
   { href: "/admin/academy/new", key: "academyNew" as const, icon: Sparkles },
+  { href: "/admin/content", key: "content" as const, icon: FileText },
   { href: "/admin/ai-content", key: "aiContent" as const, icon: Sparkles },
 ];
 
