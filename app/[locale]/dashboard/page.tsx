@@ -137,6 +137,7 @@ export default function AdvertiserDashboardPage() {
     return (
       <NeonFullPageSpinner
         label={isKo ? "대시보드 불러오는 중…" : "Loading dashboard…"}
+        portal
       />
     );
   }
@@ -161,8 +162,8 @@ export default function AdvertiserDashboardPage() {
   ];
 
   return (
-    <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)]">
+    <HomeLandingDayNight portal>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)]">
         <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] py-16 text-white sm:py-20 lg:py-24">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />

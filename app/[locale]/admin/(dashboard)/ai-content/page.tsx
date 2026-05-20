@@ -279,14 +279,13 @@ export default function AdminAiContentPage() {
             ) : null}
             <Button
               type="button"
-              className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
-              disabled={genTrendBusy || loading}
-              onClick={() => void generateTrend()}
+              variant="outline"
+              className="w-full"
+              asChild
             >
-              {genTrendBusy ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              AI로 초안 생성 · DB 저장
+              <Link href={`/${locale}/admin/reports/new`}>
+                트렌드 리포트 작성 (Tavily+AI)
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -322,16 +321,10 @@ export default function AdminAiContentPage() {
             {genLessonErr ? (
               <p className="text-sm text-red-600">{genLessonErr}</p>
             ) : null}
-            <Button
-              type="button"
-              className="border-2 border-border bg-foreground text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
-              disabled={genLessonBusy || loading}
-              onClick={() => void generateLesson()}
-            >
-              {genLessonBusy ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              AI로 초안 생성 · DB 저장
+            <Button type="button" variant="outline" className="w-full" asChild>
+              <Link href={`/${locale}/admin/academy/new`}>
+                아카데미 작성 (AI)
+              </Link>
             </Button>
           </CardContent>
         </Card>

@@ -893,9 +893,25 @@ model User {
   passwordResetTokens     PasswordResetToken[]
   searchLogs              SearchLog[]
   preference              UserPreference?
+  chatLogs                ChatLog[]
 
   @@index([email])
   @@map("users")
+}
+
+/// 로그인 사용자 상담 AI 대화 로그 (선택 저장)
+model ChatLog {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  locale    String   @default("ko") @db.VarChar(8)
+  role      String   @db.VarChar(16)
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("chat_logs")
 }
 
 /// 가입 온보딩·맞춤 추천용 프로필

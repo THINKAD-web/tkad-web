@@ -72,6 +72,8 @@ const navDefs = [
   // 7) 분석/도구
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
   { href: "/admin/search-stats", key: "searchStats" as const, icon: Search },
+  { href: "/admin/reports/new", key: "trendReports" as const, icon: FileText },
+  { href: "/admin/academy/new", key: "academyNew" as const, icon: Sparkles },
   { href: "/admin/ai-content", key: "aiContent" as const, icon: Sparkles },
 ];
 

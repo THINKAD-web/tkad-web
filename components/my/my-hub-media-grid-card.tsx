@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { X } from "lucide-react";
+import { myHubGlassCard } from "@/lib/my-hub-ui";
 import { cn } from "@/lib/utils";
 
 export type MyHubMediaItem = {
@@ -35,7 +36,8 @@ export function MyHubMediaGridCard({
   return (
     <li
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-white/12 bg-white/5 p-3 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur transition-colors hover:border-white/20 hover:bg-white/8",
+        myHubGlassCard,
+        "group relative overflow-hidden p-4 transition-all hover:-translate-y-0.5 hover:border-primary/25 sm:p-5",
         className,
       )}
     >
@@ -45,7 +47,7 @@ export function MyHubMediaGridCard({
         aria-label={item.name}
       />
       <div className="relative z-[1] pointer-events-none">
-        <div className="mb-3 aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-black/30">
+        <div className="mb-3 aspect-[4/3] overflow-hidden rounded-[18px] border border-border/60 bg-muted/40 dark:border-white/10 dark:bg-black/30">
           {item.image ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
@@ -55,11 +57,11 @@ export function MyHubMediaGridCard({
             />
           ) : null}
         </div>
-        <p className="truncate text-sm font-bold text-white">{item.name}</p>
-        <p className="mt-1 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
+        <p className="truncate text-base font-bold text-foreground">{item.name}</p>
+        <p className="mt-1 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
           {item.region} · {item.type}
         </p>
-        <p className="mt-2 font-mono text-xs font-bold tabular-nums text-cyan-300/95">
+        <p className="mt-2 font-mono text-sm font-bold tabular-nums text-primary">
           {formatKRW(item.price, isKo)}
         </p>
       </div>
@@ -71,7 +73,7 @@ export function MyHubMediaGridCard({
             e.stopPropagation();
             onRemove(item.id);
           }}
-          className="pointer-events-auto absolute right-2 top-2 z-[2] inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-black/50 text-white/80 transition-colors hover:bg-white/15 hover:text-white"
+          className="pointer-events-auto absolute right-3 top-3 z-[2] inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card/95 text-muted-foreground backdrop-blur transition-colors hover:border-destructive/40 hover:text-destructive dark:border-white/14 dark:bg-black/40 dark:hover:text-red-300"
           aria-label={isKo ? "찜 해제" : "Remove favorite"}
         >
           <X className="h-4 w-4" />

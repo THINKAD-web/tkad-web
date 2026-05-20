@@ -37,6 +37,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
 import type { AdminMediaDto, MediaAvailability } from "@/lib/admin-media-dto";
+import type { MediaEngagementMap } from "@/lib/admin-media-engagement";
 import {
   normalizeAdminMediaRow,
   parseAdminMediaListFromApiJson,
@@ -60,9 +61,17 @@ const AdminMediaDraggableMap = dynamic(
   },
 );
 
+type MediaSortOrder =
+  | "updated"
+  | "views"
+  | "favorites"
+  | "inquiries"
+  | "popular";
+
 type Props = {
   initialMedias: AdminMediaDto[];
   initialListError: string | null;
+  initialEngagement?: MediaEngagementMap;
 };
 
 type BunnyUploadApiResponse = {
@@ -495,9 +504,19 @@ function clampPageSize(n: number): PageSizeOption {
 type PublicListFilter = "all" | "public" | "hidden";
 type AvailabilityListFilter = "all" | MediaAvailability;
 
+function engagementScore(
+  map: MediaEngagementMap,
+  id: string,
+): number {
+  const e = map[id];
+  if (!e) return 0;
+  return e.viewCount + e.favoriteCount * 2 + e.inquiryCount * 3;
+}
+
 export default function AdminMediasClient({
   initialMedias,
   initialListError,
+  initialEngagement = {},
 }: Props) {
   const [medias, setMedias] = useState<AdminMediaDto[]>(() => initialMedias);
   const [listLoading, setListLoading] = useState(
@@ -506,6 +525,9 @@ export default function AdminMediasClient({
   const [listError, setListError] = useState<string | null>(initialListError);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState<MediaSortOrder>("updated");
+  const [engagement, setEngagement] =
+    useState<MediaEngagementMap>(initialEngagement);
   const [publicFilter, setPublicFilter] = useState<PublicListFilter>("all");
   const [availabilityFilter, setAvailabilityFilter] =
     useState<AvailabilityListFilter>("all");
@@ -536,11 +558,28 @@ export default function AdminMediasClient({
 
   const resetListFilters = useCallback(() => {
     setTypeFilter("all");
+    setSortOrder("updated");
     setSearch("");
     setPublicFilter("all");
     setAvailabilityFilter("all");
     setPage(1);
     setSelectedIds(new Set());
+  }, []);
+
+  const refreshEngagement = useCallback(async () => {
+    try {
+      const result = await adminFetchJson("/api/admin/medias/engagement", {
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (result.ok && result.data && typeof result.data === "object") {
+        const eng = (result.data as { engagement?: MediaEngagementMap })
+          .engagement;
+        if (eng && typeof eng === "object") setEngagement(eng);
+      }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -752,6 +791,7 @@ export default function AdminMediasClient({
       }
       if (gen !== listFetchGenRef.current) return;
       setMedias(next);
+      void refreshEngagement();
     } catch (e) {
       if (showSpinner && gen === listFetchGenRef.current) {
         const msg = e instanceof Error ? e.message : "목록을 불러오지 못했습니다.";
@@ -763,7 +803,7 @@ export default function AdminMediasClient({
         setListLoading(false);
       }
     }
-  }, []);
+  }, [refreshEngagement]);
 
   useEffect(() => {
     const hasServerData = initialMedias.length > 0;
@@ -791,7 +831,7 @@ export default function AdminMediasClient({
   }, [loadMedias, resetListFilters]);
 
   const filtered = useMemo(() => {
-    return medias.filter((m) => {
+    const list = medias.filter((m) => {
       if (!matchesCategoryFilter(m.type, typeFilter)) return false;
       if (publicFilter === "public" && !m.isActive) return false;
       if (publicFilter === "hidden" && m.isActive) return false;
@@ -810,7 +850,36 @@ export default function AdminMediasClient({
       }
       return true;
     });
-  }, [medias, typeFilter, search, publicFilter, availabilityFilter]);
+
+    if (sortOrder === "updated") return list;
+
+    const sorted = [...list];
+    const stat = (id: string, key: "viewCount" | "favoriteCount" | "inquiryCount") =>
+      engagement[id]?.[key] ?? 0;
+
+    sorted.sort((a, b) => {
+      if (sortOrder === "popular") {
+        return engagementScore(engagement, b.id) - engagementScore(engagement, a.id);
+      }
+      if (sortOrder === "views") return stat(b.id, "viewCount") - stat(a.id, "viewCount");
+      if (sortOrder === "favorites") {
+        return stat(b.id, "favoriteCount") - stat(a.id, "favoriteCount");
+      }
+      if (sortOrder === "inquiries") {
+        return stat(b.id, "inquiryCount") - stat(a.id, "inquiryCount");
+      }
+      return 0;
+    });
+    return sorted;
+  }, [
+    medias,
+    typeFilter,
+    search,
+    publicFilter,
+    availabilityFilter,
+    sortOrder,
+    engagement,
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = filtered.slice(
@@ -1172,6 +1241,20 @@ export default function AdminMediasClient({
       ),
     [runBulkForSelected, patchMediaJson],
   );
+  const bulkActivate = useCallback(
+    () =>
+      void runBulkForSelected("목록 활성화", (m) =>
+        patchMediaJson(m.id, { isActive: true }),
+      ),
+    [runBulkForSelected, patchMediaJson],
+  );
+  const bulkDeactivate = useCallback(
+    () =>
+      void runBulkForSelected("목록 비활성화", (m) =>
+        patchMediaJson(m.id, { isActive: false }),
+      ),
+    [runBulkForSelected, patchMediaJson],
+  );
 
   const bulkFeaturedOrderByList = useCallback(async () => {
     const ordered = filtered.filter((m) => selectedIds.has(m.id));
@@ -1512,6 +1595,21 @@ export default function AdminMediasClient({
                 className="h-9 w-full pl-8 text-sm"
               />
             </div>
+            <select
+              value={sortOrder}
+              onChange={(e) => {
+                setSortOrder(e.target.value as MediaSortOrder);
+                setPage(1);
+              }}
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-xs font-semibold sm:w-auto"
+              aria-label="정렬"
+            >
+              <option value="updated">최근 수정순</option>
+              <option value="popular">인기 매체순</option>
+              <option value="views">조회수순</option>
+              <option value="favorites">찜순</option>
+              <option value="inquiries">문의순</option>
+            </select>
             <div className="grid w-full grid-cols-2 gap-1.5 sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
             <Button
               variant="outline"
@@ -1757,6 +1855,26 @@ export default function AdminMediasClient({
                     onClick={() => void bulkPopularOrderByList()}
                   >
                     인기 순서(목록순)
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    disabled={bulkBusy}
+                    className="h-7 text-[11px] border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                    onClick={() => bulkActivate()}
+                  >
+                    활성화
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    disabled={bulkBusy}
+                    className="h-7 text-[11px] border-amber-500/40 text-amber-800 dark:text-amber-200"
+                    onClick={() => bulkDeactivate()}
+                  >
+                    비활성화
                   </Button>
                   <Button
                     type="button"
@@ -2029,6 +2147,9 @@ export default function AdminMediasClient({
                     </th>
                     <th className="w-[5.5rem] px-2 py-2.5">유형</th>
                     <th className="w-28 px-2 py-2.5">가격</th>
+                    <th className="w-12 px-1 py-2.5 text-center">조회</th>
+                    <th className="w-12 px-1 py-2.5 text-center">찜</th>
+                    <th className="w-12 px-1 py-2.5 text-center">문의</th>
                     <th className="w-44 px-2 py-2.5 text-center">노출</th>
                     <th className="w-11 px-1.5 py-2.5 text-center">검증</th>
                     <th className="w-11 px-1.5 py-2.5 text-center">추천</th>
@@ -2042,7 +2163,7 @@ export default function AdminMediasClient({
                   {listLoading ? (
                     <tr>
                       <td
-                        colSpan={11}
+                        colSpan={14}
                         className="px-3 py-8 text-center text-muted-foreground"
                       >
                         <Loader2 className="mx-auto h-7 w-7 animate-spin text-muted-foreground" />
@@ -2052,7 +2173,7 @@ export default function AdminMediasClient({
                   ) : paginated.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={11}
+                        colSpan={14}
                         className="px-3 py-8 text-center text-muted-foreground"
                       >
                         {medias.length === 0
@@ -2106,6 +2227,16 @@ export default function AdminMediasClient({
                             ₩{media.price.toLocaleString()}
                           </div>
                         </td>
+                        {(["viewCount", "favoriteCount", "inquiryCount"] as const).map(
+                          (key) => (
+                            <td
+                              key={key}
+                              className="px-1 py-2.5 text-center align-middle font-mono text-xs tabular-nums text-muted-foreground"
+                            >
+                              {engagement[media.id]?.[key] ?? 0}
+                            </td>
+                          ),
+                        )}
                         <td className="px-2 py-2.5 align-middle">
                           <div className="mx-auto flex min-w-0 items-center justify-center gap-3">
                             <div className="flex shrink-0 flex-col items-center gap-1">

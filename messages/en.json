@@ -30,7 +30,35 @@
     "kakaoPreviewTitle": "KakaoTalk",
     "kakaoPreviewHint": "Live 1:1 chat",
     "aiPreviewTitle": "AI media planner",
-    "aiPreviewHint": "Recommendations & Q&A"
+    "aiPreviewHint": "Recommendations & Q&A",
+    "chatPreviewTitle": "Chat support",
+    "chatPreviewHint": "Kakao · AI · phone"
+  },
+  "supportChat": {
+    "openMenu": "Open support menu",
+    "close": "Close",
+    "menuLabel": "Choose how to reach us",
+    "brandEyebrow": "[ THINKAD ]",
+    "brandTitle": "THINKAD",
+    "greeting": "Hello! How can we help you today?",
+    "hoursOpen": "We're available for live support now",
+    "hoursClosed": "Outside business hours — message us on KakaoTalk and we'll reply on the next business day",
+    "kakaoCta": "Chat on KakaoTalk",
+    "aiCta": "Ask AI first",
+    "phoneCta": "Call 02-515-2772",
+    "aiDialogLabel": "AI OOH consultation",
+    "aiEyebrow": "[ AI CHAT ]",
+    "aiTitle": "OOH FAQ assistant",
+    "aiEmpty": "Ask about media picks, budgets, or how campaigns work.",
+    "aiPlaceholder": "Type your question",
+    "send": "Send",
+    "thinking": "Thinking…",
+    "errorGeneric": "Could not get a response. Please try again.",
+    "kakaoHandoff": "Continue on KakaoTalk",
+    "aiDisclaimer": "AI answers are for guidance only; confirmed quotes need a human consultant.",
+    "suggestion1": "Media in Gangnam",
+    "suggestion2": "₩5M monthly budget",
+    "suggestion3": "How does booking work?"
   },
   "quoteFab": {
     "regionLabel": "Quote and consultation shortcuts",
@@ -102,11 +130,26 @@
     "comingSoonBadge": "Soon",
     "beta": "BETA",
     "groups": {
-      "discovery": { "label": "Discover", "labelEn": "Discovery" },
-      "planning": { "label": "Plan", "labelEn": "Planning" },
-      "creative": { "label": "Create", "labelEn": "Creative" },
-      "insights": { "label": "Insights", "labelEn": "Insights" },
-      "academy": { "label": "Learn", "labelEn": "Academy" }
+      "discovery": {
+        "label": "Discover",
+        "labelEn": "Discovery"
+      },
+      "planning": {
+        "label": "Plan",
+        "labelEn": "Planning"
+      },
+      "creative": {
+        "label": "Create",
+        "labelEn": "Creative"
+      },
+      "insights": {
+        "label": "Insights",
+        "labelEn": "Insights"
+      },
+      "academy": {
+        "label": "Learn",
+        "labelEn": "Academy"
+      }
     },
     "items": {
       "media-search": {
@@ -1901,7 +1944,8 @@
     "kakaoChannel": "KakaoTalk chat",
     "copyright": "© {year} THINKAD Inc. All rights reserved.",
     "linkFeaturedMedia": "Featured Media",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "industryGuide": "Industry guides"
   },
   "networkMedia": {
     "backToList": "Media search",
@@ -1949,6 +1993,8 @@
     "quotesList": "Quotes",
     "quotesNew": "New quote",
     "analytics": "Analytics",
+    "trendReports": "Trend reports",
+    "academyNew": "Academy editor",
     "aiContent": "AI content",
     "crm": "CRM (demo)",
     "backToSite": "Back to site",
@@ -2775,6 +2821,427 @@
       "continuePay": "Continue payment",
       "backMedia": "Media detail",
       "emailHint": "Confirmation sent to {email}"
+    }
+  },
+  "industryPage": {
+    "common": {
+      "budgetPerMonth": "Monthly budget (₩10k units)",
+      "budgetMatchCount": "About {count} placements in range",
+      "otherIndustriesEyebrow": "Other industries",
+      "otherIndustriesTitle": "Other industry guides",
+      "industryLabels": {
+        "beauty": "뷰티·화장품",
+        "fashion": "패션·의류",
+        "food": "식음료·F&B",
+        "tech": "IT·테크·앱",
+        "finance": "금융·보험",
+        "entertainment": "엔터·공연",
+        "retail": "유통·쇼핑"
+      },
+      "faq": {
+        "c1": {
+          "q": "How do we start OOH?",
+          "a": "Share budget, region, and timing — THINKAD proposes a mix and quote. Start with a free consultation."
+        },
+        "c2": {
+          "q": "Minimum flight length?",
+          "a": "Usually 2 weeks to 1 month depending on the placement."
+        }
+      }
+    },
+    "slugs": {
+      "beauty": {
+        "metaTitle": "Beauty brand OOH advertising | THINKAD",
+        "metaDescription": "OOH media for beauty and cosmetics — Gangnam, Hongdae, Seongsu.",
+        "navLabel": "Beauty",
+        "heroTitle": "OOH strategy for beauty brands",
+        "heroTarget": "Women 20s–30s and MZ.",
+        "heroReason": "Premium districts and transit DOOH maximize brand experience.",
+        "ctaConsult": "Free consultation",
+        "mediaTypesKicker": "Media mix",
+        "mediaTypesTitle": "Effective <accent>formats</accent> for this industry",
+        "mediaTypesMeta": "현장 데이터 기반 추천",
+        "mediaTypes": {
+          "type1": {
+            "title": "강남·압구정 미디어폴",
+            "reason": "프리미엄 뷰티 쇼핑 동선과 고소득 유동이 겹치는 구간입니다."
+          },
+          "type2": {
+            "title": "지하철 스크린도어·역사 DOOH",
+            "reason": "출퇴근·데이트 동선에서 반복 노출로 인지도를 빠르게 올립니다."
+          },
+          "type3": {
+            "title": "백화점·플래그십 디지털",
+            "reason": "시승·체험 직전 구매 의도가 높은 쇼핑 맥락과 맞습니다."
+          }
+        },
+        "mediaGridKicker": "Recommended",
+        "mediaGridTitle": "Recommended <accent>media</accent>",
+        "mediaGridMeta": "{count} verified placements",
+        "mediaGridEmpty": "매체를 준비 중입니다. 전체 목록에서 찾아보세요.",
+        "casesKicker": "Cases",
+        "casesTitle": "업종별 <accent>성공 사례</accent>",
+        "casesMeta": "실제 집행 데이터",
+        "budgetKicker": "Budget",
+        "budgetTitle": "Find media by <accent>budget</accent>",
+        "budgetMeta": "월 예산에 맞는 믹스",
+        "budgetLead": "Set monthly budget to see matching placement count.",
+        "budgetAria": "월 예산 슬라이더",
+        "budgetCta": "View matching media",
+        "faqKicker": "FAQ",
+        "faqTitle": "Frequently asked <accent>questions</accent>",
+        "faqMeta": "업종별 OOH 가이드",
+        "faq": {
+          "q1": {
+            "q": "MZ 타겟 OOH는 어디가 좋나요?",
+            "a": "홍대·성수·강남역 일대 DOOH와 미디어폴을 병행하면 2030 여성 타깃 도달 효율이 높습니다."
+          },
+          "q2": {
+            "q": "홍대 vs 강남 어디가 효과적?",
+            "a": "브랜드 포지션에 따라 다릅니다. 대중 인지는 홍대·성수, 프리미엄 이미지는 강남·압구정이 유리합니다."
+          },
+          "q3": {
+            "q": "뷰티 론칭 캠페인 예산은?",
+            "a": "월 300–1,000만 원 구간에서 2–3개 핵심 매체 믹스가 가장 많이 사용됩니다."
+          }
+        }
+      },
+      "fashion": {
+        "metaTitle": "패션·의류 브랜드 OOH 광고 추천 | THINKAD 싱커드",
+        "metaDescription": "패션·의류 브랜드에 맞는 옥외광고 매체와 상권을 추천합니다. 스트릿·프리미엄 채널을 한곳에서 비교하세요.",
+        "navLabel": "패션·의류",
+        "heroTitle": "패션 브랜드를 위한 OOH 광고 전략",
+        "heroTarget": "트렌드 민감 2030·2040 타깃.",
+        "heroReason": "가로수길·성수·한남 등 패션 트래픽이 모이는 구간에서 시즌 캠페인 효과를 극대화합니다.",
+        "ctaConsult": "Free consultation",
+        "mediaTypesKicker": "Media mix",
+        "mediaTypesTitle": "Effective <accent>formats</accent> for this industry",
+        "mediaTypesMeta": "현장 데이터 기반 추천",
+        "mediaTypes": {
+          "type1": {
+            "title": "가로수·한남 스트릿 미디어",
+            "reason": "패션 트렌드 소비자의 실제 동선에 노출됩니다."
+          },
+          "type2": {
+            "title": "지하철·버스쉘터",
+            "reason": "시즌 메시지를 고빈도로 반복 노출하기 좋습니다."
+          },
+          "type3": {
+            "title": "대형 전광판·랩핑",
+            "reason": "신규 컬렉션 론칭 시 임팩트를 극대화합니다."
+          }
+        },
+        "mediaGridKicker": "Recommended",
+        "mediaGridTitle": "Recommended <accent>media</accent>",
+        "mediaGridMeta": "{count} verified placements",
+        "mediaGridEmpty": "매체를 준비 중입니다. 전체 목록에서 찾아보세요.",
+        "casesKicker": "Cases",
+        "casesTitle": "업종별 <accent>성공 사례</accent>",
+        "casesMeta": "실제 집행 데이터",
+        "budgetKicker": "Budget",
+        "budgetTitle": "Find media by <accent>budget</accent>",
+        "budgetMeta": "월 예산에 맞는 믹스",
+        "budgetLead": "Set monthly budget to see matching placement count.",
+        "budgetAria": "월 예산 슬라이더",
+        "budgetCta": "View matching media",
+        "faqKicker": "FAQ",
+        "faqTitle": "Frequently asked <accent>questions</accent>",
+        "faqMeta": "업종별 OOH 가이드",
+        "faq": {
+          "q1": {
+            "q": "신규 브랜드 런칭에 적합한 매체는?",
+            "a": "홍대·성수·강남 핵심 1–2면 + 지하철 DOOH 조합이 일반적입니다."
+          },
+          "q2": {
+            "q": "오프라인 매장과 연계하려면?",
+            "a": "매장 반경 1–3km 미디어폴·쉘터로 방문 유도 CTA를 넣는 방식이 효과적입니다."
+          },
+          "q3": {
+            "q": "시즌 세일 기간 집행 팁은?",
+            "a": "4–6주 단기 집중 + 디지털 DOOH로 실시간 소재 교체를 권장합니다."
+          }
+        }
+      },
+      "food": {
+        "metaTitle": "식음료·F&B OOH 광고 추천 | THINKAD 싱커드",
+        "metaDescription": "식음료·프랜차이즈 브랜드에 맞는 옥외광고 매체를 추천합니다. 대학가·역세권·번화가 채널을 비교하세요.",
+        "navLabel": "식음료·F&B",
+        "heroTitle": "식음료 브랜드를 위한 OOH 광고 전략",
+        "heroTarget": "외식·배달 이용층·가족 단위.",
+        "heroReason": "역세권·대학가·오피스 상권에서 식음 유입과 프로모션 전환을 동시에 노립니다.",
+        "ctaConsult": "Free consultation",
+        "mediaTypesKicker": "Media mix",
+        "mediaTypesTitle": "Effective <accent>formats</accent> for this industry",
+        "mediaTypesMeta": "현장 데이터 기반 추천",
+        "mediaTypes": {
+          "type1": {
+            "title": "대학가·역세권 쉘터",
+            "reason": "즉시 방문·주문 전환에 가까운 동선입니다."
+          },
+          "type2": {
+            "title": "번화가 미디어폴",
+            "reason": "저녁·주말 외식 수요가 집중됩니다."
+          },
+          "type3": {
+            "title": "오피스 밀집 DOOH",
+            "reason": "점심·야근 시간대 프로모션에 적합합니다."
+          }
+        },
+        "mediaGridKicker": "Recommended",
+        "mediaGridTitle": "Recommended <accent>media</accent>",
+        "mediaGridMeta": "{count} verified placements",
+        "mediaGridEmpty": "매체를 준비 중입니다. 전체 목록에서 찾아보세요.",
+        "casesKicker": "Cases",
+        "casesTitle": "업종별 <accent>성공 사례</accent>",
+        "casesMeta": "실제 집행 데이터",
+        "budgetKicker": "Budget",
+        "budgetTitle": "Find media by <accent>budget</accent>",
+        "budgetMeta": "월 예산에 맞는 믹스",
+        "budgetLead": "Set monthly budget to see matching placement count.",
+        "budgetAria": "월 예산 슬라이더",
+        "budgetCta": "View matching media",
+        "faqKicker": "FAQ",
+        "faqTitle": "Frequently asked <accent>questions</accent>",
+        "faqMeta": "업종별 OOH 가이드",
+        "faq": {
+          "q1": {
+            "q": "프랜차이즈 오픈 홍보는?",
+            "a": "매장 반경 쉘터 + 지역 미디어폴 2주 집중이 효과적입니다."
+          },
+          "q2": {
+            "q": "배달 앱 연동 캠페인은?",
+            "a": "QR·프로모 코드를 DOOH에 넣고 역세권·주거 상권을 병행하세요."
+          },
+          "q3": {
+            "q": "F&B 최소 예산 가이드는?",
+            "a": "월 200만 원부터 테스트 믹스가 가능하며, 500만 원 이상부터 다면 집행을 권장합니다."
+          }
+        }
+      },
+      "tech": {
+        "metaTitle": "IT·테크·앱 OOH 광고 추천 | THINKAD 싱커드",
+        "metaDescription": "IT·테크·앱 서비스에 맞는 옥외광고 매체를 추천합니다. 판교·강남·성수 테크 클러스터 채널을 확인하세요.",
+        "navLabel": "IT·테크·앱",
+        "heroTitle": "테크 브랜드를 위한 OOH 광고 전략",
+        "heroTarget": "직장인·얼리어답터·B2B 의사결정자.",
+        "heroReason": "판교·강남·성수 등 테크·스타트업 동선이 겹치는 구간에서 앱 설치·리드 전환을 돕습니다.",
+        "ctaConsult": "Free consultation",
+        "mediaTypesKicker": "Media mix",
+        "mediaTypesTitle": "Effective <accent>formats</accent> for this industry",
+        "mediaTypesMeta": "현장 데이터 기반 추천",
+        "mediaTypes": {
+          "type1": {
+            "title": "판교·강남 오피스 DOOH",
+            "reason": "B2B·SaaS 타깃 의사결정자 도달에 유리합니다."
+          },
+          "type2": {
+            "title": "지하철·버스 디지털",
+            "reason": "앱 다운로드·웨이트리스트 CTA에 적합합니다."
+          },
+          "type3": {
+            "title": "성수·강남 미디어폴",
+            "reason": "스타트업·테크 브랜드 인지도 확장에 효과적입니다."
+          }
+        },
+        "mediaGridKicker": "Recommended",
+        "mediaGridTitle": "Recommended <accent>media</accent>",
+        "mediaGridMeta": "{count} verified placements",
+        "mediaGridEmpty": "매체를 준비 중입니다. 전체 목록에서 찾아보세요.",
+        "casesKicker": "Cases",
+        "casesTitle": "업종별 <accent>성공 사례</accent>",
+        "casesMeta": "실제 집행 데이터",
+        "budgetKicker": "Budget",
+        "budgetTitle": "Find media by <accent>budget</accent>",
+        "budgetMeta": "월 예산에 맞는 믹스",
+        "budgetLead": "Set monthly budget to see matching placement count.",
+        "budgetAria": "월 예산 슬라이더",
+        "budgetCta": "View matching media",
+        "faqKicker": "FAQ",
+        "faqTitle": "Frequently asked <accent>questions</accent>",
+        "faqMeta": "업종별 OOH 가이드",
+        "faq": {
+          "q1": {
+            "q": "앱 설치 캠페인 OOH는?",
+            "a": "QR·딥링크 + 지하철 DOOH 고빈도 노출 조합을 권장합니다."
+          },
+          "q2": {
+            "q": "B2B 리드 확보에는?",
+            "a": "판교·여의도·강남 오피스 밀집 구간 DOOH가 효율적입니다."
+          },
+          "q3": {
+            "q": "테크 브랜드 크리에이티브 팁은?",
+            "a": "짧은 카피 + 제품 UI 스냅샷이 DOOH에서 가독성이 좋습니다."
+          }
+        }
+      },
+      "finance": {
+        "metaTitle": "금융·보험 OOH 광고 추천 | THINKAD 싱커드",
+        "metaDescription": "금융·보험 브랜드에 맞는 옥외광고 매체를 추천합니다. 여의도·강남·광화문 금융 상권 채널을 비교하세요.",
+        "navLabel": "금융·보험",
+        "heroTitle": "금융·보험 브랜드를 위한 OOH 광고 전략",
+        "heroTarget": "직장인·자산가·가구 경제권.",
+        "heroReason": "신뢰·안정 이미지가 중요한 금융 카테고리에 맞는 프리미엄·오피스 상권을 추천합니다.",
+        "ctaConsult": "Free consultation",
+        "mediaTypesKicker": "Media mix",
+        "mediaTypesTitle": "Effective <accent>formats</accent> for this industry",
+        "mediaTypesMeta": "현장 데이터 기반 추천",
+        "mediaTypes": {
+          "type1": {
+            "title": "여의도·광화문 DOOH",
+            "reason": "금융·공공 이미지와 맞는 상징적 위치입니다."
+          },
+          "type2": {
+            "title": "강남·판교 오피스",
+            "reason": "직장인 금융 상품 프로모션에 적합합니다."
+          },
+          "type3": {
+            "title": "대형 전광판",
+            "reason": "브랜드 신뢰·인지 캠페인에 활용됩니다."
+          }
+        },
+        "mediaGridKicker": "Recommended",
+        "mediaGridTitle": "Recommended <accent>media</accent>",
+        "mediaGridMeta": "{count} verified placements",
+        "mediaGridEmpty": "매체를 준비 중입니다. 전체 목록에서 찾아보세요.",
+        "casesKicker": "Cases",
+        "casesTitle": "업종별 <accent>성공 사례</accent>",
+        "casesMeta": "실제 집행 데이터",
+        "budgetKicker": "Budget",
+        "budgetTitle": "Find media by <accent>budget</accent>",
+        "budgetMeta": "월 예산에 맞는 믹스",
+        "budgetLead": "Set monthly budget to see matching placement count.",
+        "budgetAria": "월 예산 슬라이더",
+        "budgetCta": "View matching media",
+        "faqKicker": "FAQ",
+        "faqTitle": "Frequently asked <accent>questions</accent>",
+        "faqMeta": "업종별 OOH 가이드",
+        "faq": {
+          "q1": {
+            "q": "금융광고 규제 유의점은?",
+            "a": "심의·고지 문구가 필요합니다. 집행 전 싱커드가 가이드해 드립니다."
+          },
+          "q2": {
+            "q": "보험·카드 프로모션은?",
+            "a": "오피스·주거 상권 DOOH + 기간 한정 오퍼 조합이 일반적입니다."
+          },
+          "q3": {
+            "q": "신뢰 이미지 강화에는?",
+            "a": "여의도·시청·강남 프리미엄 면을 단기 집중 노출하는 방식을 권장합니다."
+          }
+        }
+      },
+      "entertainment": {
+        "metaTitle": "엔터·공연 OOH 광고 추천 | THINKAD 싱커드",
+        "metaDescription": "엔터·공연·게임 브랜드에 맞는 옥외광고 매체를 추천합니다. 팬덤·이벤트 연계 채널을 확인하세요.",
+        "navLabel": "엔터·공연",
+        "heroTitle": "엔터·공연 브랜드를 위한 OOH 광고 전략",
+        "heroTarget": "팬덤·10–30대·이벤트 참여층.",
+        "heroReason": "팬 서포트·공연·게임 론칭에 맞는 고트래픽·디지털 채널을 큐레이션합니다.",
+        "ctaConsult": "Free consultation",
+        "mediaTypesKicker": "Media mix",
+        "mediaTypesTitle": "Effective <accent>formats</accent> for this industry",
+        "mediaTypesMeta": "현장 데이터 기반 추천",
+        "mediaTypes": {
+          "type1": {
+            "title": "홍대·강남 미디어폴",
+            "reason": "팬덤·젊은 층 트래픽이 집중됩니다."
+          },
+          "type2": {
+            "title": "지하철·대형 DOOH",
+            "reason": "공연·앨범 홍보 고빈도 노출에 적합합니다."
+          },
+          "type3": {
+            "title": "스타디움·이벤트 인근",
+            "reason": "콘서트·팬미팅 시즌 연계에 효과적입니다."
+          }
+        },
+        "mediaGridKicker": "Recommended",
+        "mediaGridTitle": "Recommended <accent>media</accent>",
+        "mediaGridMeta": "{count} verified placements",
+        "mediaGridEmpty": "매체를 준비 중입니다. 전체 목록에서 찾아보세요.",
+        "casesKicker": "Cases",
+        "casesTitle": "업종별 <accent>성공 사례</accent>",
+        "casesMeta": "실제 집행 데이터",
+        "budgetKicker": "Budget",
+        "budgetTitle": "Find media by <accent>budget</accent>",
+        "budgetMeta": "월 예산에 맞는 믹스",
+        "budgetLead": "Set monthly budget to see matching placement count.",
+        "budgetAria": "월 예산 슬라이더",
+        "budgetCta": "View matching media",
+        "faqKicker": "FAQ",
+        "faqTitle": "Frequently asked <accent>questions</accent>",
+        "faqMeta": "업종별 OOH 가이드",
+        "faq": {
+          "q1": {
+            "q": "K-POP 팬 서포트 광고는?",
+            "a": "강남·홍대 핵심 면 + 생일·컴백 시즌 2–4주 집중이 일반적입니다."
+          },
+          "q2": {
+            "q": "게임 론칭 OOH는?",
+            "a": "지하철 DOOH + 게이밍·MZ 상권 미디어폴 병행을 권장합니다."
+          },
+          "q3": {
+            "q": "공연 티켓 판매 연계는?",
+            "a": "QR·예매 링크와 공연장 인근·역세권 채널을 매칭하세요."
+          }
+        }
+      },
+      "retail": {
+        "metaTitle": "유통·쇼핑 OOH 광고 추천 | THINKAD 싱커드",
+        "metaDescription": "유통·리테일·쇼핑 브랜드에 맞는 옥외광고 매체를 추천합니다. 백화점·명동·몰 상권 채널을 비교하세요.",
+        "navLabel": "유통·쇼핑",
+        "heroTitle": "유통·리테일 브랜드를 위한 OOH 광고 전략",
+        "heroTarget": "쇼핑객·가족·프로모션 민감층.",
+        "heroReason": "명동·잠실·백화점·아울렛 상권에서 방문·세일 전환을 높이는 매체를 추천합니다.",
+        "ctaConsult": "Free consultation",
+        "mediaTypesKicker": "Media mix",
+        "mediaTypesTitle": "Effective <accent>formats</accent> for this industry",
+        "mediaTypesMeta": "현장 데이터 기반 추천",
+        "mediaTypes": {
+          "type1": {
+            "title": "명동·강남 쇼핑 거리",
+            "reason": "내국인·관광 쇼핑 트래픽이 집중됩니다."
+          },
+          "type2": {
+            "title": "백화점·몰 디지털",
+            "reason": "시즌 세일·오픈 프로모션에 적합합니다."
+          },
+          "type3": {
+            "title": "지하철·버스 쉘터",
+            "reason": "주거·상업 상권 고빈도 도달에 유리합니다."
+          }
+        },
+        "mediaGridKicker": "Recommended",
+        "mediaGridTitle": "Recommended <accent>media</accent>",
+        "mediaGridMeta": "{count} verified placements",
+        "mediaGridEmpty": "매체를 준비 중입니다. 전체 목록에서 찾아보세요.",
+        "casesKicker": "Cases",
+        "casesTitle": "업종별 <accent>성공 사례</accent>",
+        "casesMeta": "실제 집행 데이터",
+        "budgetKicker": "Budget",
+        "budgetTitle": "Find media by <accent>budget</accent>",
+        "budgetMeta": "월 예산에 맞는 믹스",
+        "budgetLead": "Set monthly budget to see matching placement count.",
+        "budgetAria": "월 예산 슬라이더",
+        "budgetCta": "View matching media",
+        "faqKicker": "FAQ",
+        "faqTitle": "Frequently asked <accent>questions</accent>",
+        "faqMeta": "업종별 OOH 가이드",
+        "faq": {
+          "q1": {
+            "q": "오픈·세일 프로모션은?",
+            "a": "매장 인근 + 지역 미디어폴 2–3주 집중이 효과적입니다."
+          },
+          "q2": {
+            "q": "관광객 타깃 리테일은?",
+            "a": "명동·홍대·공항·호텔 동선 DOOH를 병행하세요."
+          },
+          "q3": {
+            "q": "리테일 OOH 예산 가이드는?",
+            "a": "월 300–800만 원 구간에서 상권 2–4면 테스트가 일반적입니다."
+          }
+        }
+      }
     }
   }
 }

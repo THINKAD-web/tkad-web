@@ -876,6 +876,38 @@ main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
   color-scheme: dark;
 }
 
+/* 포털(`/dashboard`, `/my`) — 라이트 `100dvh` 래퍼·main 배경 차로 푸터 직전 높이가 달라 보이는 현상 방지 */
+.tkad-home-appearance.tkad-portal-appearance[data-appearance="day"],
+.tkad-home-appearance.tkad-portal-appearance[data-appearance="night"] {
+  min-height: 0;
+}
+
+.tkad-portal-appearance > .tkad-portal-shell.tkad-landing-neon {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: calc(100dvh - 4rem);
+}
+
+main#main-content:has(.tkad-portal-appearance[data-appearance="night"]) {
+  background-color: #05050a;
+  background-image: none;
+}
+
+main#main-content:has(.tkad-portal-appearance[data-appearance="day"]) {
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(115% 70% at 0% -6%, rgba(99, 102, 241, 0.07), transparent 50%),
+    radial-gradient(90% 55% at 100% 8%, rgba(13, 148, 136, 0.06), transparent 48%),
+    radial-gradient(75% 42% at 50% 100%, rgba(15, 23, 42, 0.015), transparent 52%),
+    linear-gradient(180deg, #ffffff 0%, #f7f8ff 44%, #ffffff 100%);
+}
+
+.tkad-site-footer {
+  flex-shrink: 0;
+}
+
 /* 공통 포인트 텍스트 (홈/섹션 헤드에서 재사용) */
 .tkad-home-accent-text {
   display: inline-block;

@@ -23,6 +23,7 @@ import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { MediaScarcitySection } from "@/components/media-scarcity-section";
 import { useMediaAvailabilitySummary } from "@/lib/use-media-availability-summary";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
+import { INDUSTRY_BUDGET_SESSION_KEY } from "@/lib/industry-landing";
 import { BtnBlock } from "@/components/brutalist";
 import { Link } from "@/i18n/navigation";
 import {
@@ -202,6 +203,18 @@ export default function MediaBrowseClient({
     setBudgetMin(bounds.minPrice);
     setBudgetMax(bounds.maxPrice);
   }, [bounds.minPrice, bounds.maxPrice]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = sessionStorage.getItem(INDUSTRY_BUDGET_SESSION_KEY);
+    if (!raw) return;
+    const n = Number(raw);
+    sessionStorage.removeItem(INDUSTRY_BUDGET_SESSION_KEY);
+    if (Number.isFinite(n) && n > 0) {
+      setBudgetMin(0);
+      setBudgetMax(n);
+    }
+  }, []);
   const {
     filters,
     toggleFilter,

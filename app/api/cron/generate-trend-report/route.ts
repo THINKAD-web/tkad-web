@@ -1,30 +1,16 @@
 import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
+import { runTrendReportDraftPipeline } from "@/lib/insights/trend-report-pipeline";
 import {
-  generateTrendReport,
-  resolveModel,
-} from "@/lib/ai-content-generator";
+  notifyPipelineError,
+  notifyTrendDraftReady,
+} from "@/lib/insights/notifiers/slack";
 import { json } from "@/lib/admin-guard";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import { seoulTargetYmd, seoulWeekdayShort } from "@/lib/seoul-calendar";
-import { fetchOOHWebSources } from "@/lib/insights/sources/tavily";
-import { fetchInternalMediaInsights } from "@/lib/insights/sources/internal";
-import {
-  validateTrendReport,
-  type ValidationResult,
-} from "@/lib/insights/validators/auto-validator";
-import {
-  notifyValidationOutcome,
-  notifyPipelineError,
-} from "@/lib/insights/notifiers/slack";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300; // Anthropic + DB 작업 여유
+export const maxDuration = 300;
 
-/**
- * Vercel Cron 시크릿 검증.
- * Vercel 은 `Authorization: Bearer ${CRON_SECRET}` 헤더로 호출.
- */
 function authOk(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET?.trim();
   if (!secret) return false;
@@ -32,28 +18,26 @@ function authOk(request: NextRequest): boolean {
   return h === `Bearer ${secret}`;
 }
 
-/**
- * 자동 발행 슬러그.
- * 형식: `auto-YYYY-MM-DD-mon` (예: `auto-2026-04-27-mon`)
- * 같은 날 두 번 트리거되어도 idempotent (slug unique).
- */
-function buildAutoSlug(ymd: string, weekday: string): string {
-  return `auto-${ymd}-${weekday.toLowerCase()}`;
+/** 월간 idempotent 슬러그: `monthly-2026-05` */
+function buildMonthlySlug(month: string): string {
+  return `monthly-${month}`;
+}
+
+function currentMonthSeoul(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date());
+  const y = parts.find((p) => p.type === "year")?.value ?? "1970";
+  const m = parts.find((p) => p.type === "month")?.value ?? "01";
+  return `${y}-${m}`;
 }
 
 /**
- * Vercel Cron — 매주 월/목 09:00 KST (= 00:00 UTC) 자동 트렌드 리포트 생성.
- * vercel.json 의 crons 항목과 짝.
- *
- * 동작:
- *  1) Auth (CRON_SECRET) 검증
- *  2) 오늘 자 slug 생성 (`auto-2026-04-27-mon`)
- *  3) 같은 slug 가 이미 있으면 skip (idempotent — 같은 날 재트리거 안전)
- *  4) `generateTrendReport(month)` 호출 (month=YYYY-MM)
- *  5) `status: "draft"`, `generationMethod: "auto"`, slug 채워서 DB 저장
- *  6) PR-3 검증 레이어가 통과시키면 status → "published" 로 전환 예정
- *
- * 수동 테스트: `curl -H "Authorization: Bearer $CRON_SECRET" $URL/api/cron/generate-trend-report`
+ * Vercel Cron — 매월 1일 00:00 UTC (09:00 KST) 트렌드 리포트 초안 생성.
+ * - Tavily + Claude → status=draft (운영 검토 후 수동 발행)
+ * - Slack: "이번 달 트렌드 리포트 초안이 생성됐어요. 검토 후 발행해주세요"
  */
 export async function GET(request: NextRequest) {
   if (!authOk(request)) {
@@ -63,18 +47,15 @@ export async function GET(request: NextRequest) {
     return json({ error: "Database not configured" }, 503);
   }
 
-  const ymd = seoulTargetYmd(0);
-  const weekday = seoulWeekdayShort();
-  const slug = buildAutoSlug(ymd, weekday);
-  const month = ymd.slice(0, 7);
-
+  const month = currentMonthSeoul();
+  const slug = buildMonthlySlug(month);
   const db = getPrisma();
 
   const existing = await db.trendReport.findUnique({ where: { slug } });
   if (existing) {
     return json({
       skipped: true,
-      reason: "already-generated-today",
+      reason: "already-generated-this-month",
       slug,
       id: existing.id,
       status: existing.status,
@@ -83,73 +64,22 @@ export async function GET(request: NextRequest) {
 
   const startedAt = Date.now();
   try {
-    // PR-2: 외부 웹 출처 + 자체 매체 DB 인사이트 병렬 수집.
-    // 한 소스 실패해도 다른 소스로 진행 (각 fetcher 가 try/catch + [] 폴백).
-    const [tavily, internalInsights] = await Promise.all([
-      fetchOOHWebSources(),
-      fetchInternalMediaInsights(),
-    ]);
-
-    const g = await generateTrendReport(month, {
-      webSources: tavily.sources,
-      internalInsights: internalInsights.map((i) => ({
-        title: i.title,
-        summary: i.summary,
-      })),
+    const result = await runTrendReportDraftPipeline({
+      month,
+      slug,
+      generationMethod: "auto",
+      monthField: month,
     });
 
-    // PR-3: 검증 레이어. Anthropic 호출 실패해도 cron 흐름은 진행 — 단,
-    // 검증 결과 없으므로 status="draft" 유지. PR-4: 시스템 에러도 Slack 알림.
-    let validation: ValidationResult | null = null;
-    try {
-      validation = await validateTrendReport(g, tavily.sources);
-    } catch (vErr) {
-      const vMsg = vErr instanceof Error ? vErr.message : String(vErr);
-      console.error("[cron/generate-trend-report] validation failed:", vMsg);
-      // PR-4: 검증 단계 실패는 시스템 에러로 알림 (DB 저장은 계속 진행).
-      void notifyPipelineError("validation", vMsg, { slug, month });
-    }
-
-    const verdict = validation?.verdict ?? "fail"; // 검증 자체 실패 = 보류
-    // pass / warning → 자동 발행, fail → draft 유지 (운영 검토 후 수동 발행)
-    const willPublish = verdict === "pass" || verdict === "warning";
-    const finalStatus = willPublish ? "published" : "draft";
-    const finalPublishedAt = willPublish ? new Date() : null;
-
-    const saved = await db.trendReport.create({
-      data: {
-        slug,
-        // 자동 발행 row 는 month 의 unique 충돌을 피하기 위해 null.
-        // 어드민이 수동 생성하는 월간 리포트만 month 사용.
-        month: null,
-        status: finalStatus,
-        titleKo: g.titleKo,
-        titleEn: g.titleEn,
-        contentKo: g.contentKo,
-        summaryKo: g.summaryKo,
-        marketTrendKo: g.marketTrendKo,
-        doohTrendKo: g.doohTrendKo,
-        verticalStrategies:
-          g.verticalStrategies === null || g.verticalStrategies === undefined
-            ? undefined
-            : (g.verticalStrategies as Prisma.InputJsonValue),
-        thumbnailUrl: g.thumbnailUrl,
-        publishedAt: finalPublishedAt,
-        generationMethod: "auto",
-        aiModel: resolveModel(),
-        sources: tavily.sources as unknown as Prisma.InputJsonValue,
-        internalDataUsed: internalInsights.map((i) => i.title),
-        validationScore: validation?.totalScore ?? null,
-        validationResult: validation
-          ? (validation as unknown as Prisma.InputJsonValue)
-          : Prisma.JsonNull,
-      },
+    const saved = await db.trendReport.findUnique({
+      where: { id: result.trendReport.id },
     });
-
-    // PR-4: verdict 별 Slack 라우팅. void 로 fire-and-forget — Slack 응답
-    // 지연이 cron 응답을 막지 않게.
-    if (validation) {
-      void notifyValidationOutcome(saved, validation);
+    if (saved) {
+      void notifyTrendDraftReady(saved, {
+        sourcesCount: Array.isArray(saved.sources)
+          ? (saved.sources as unknown[]).length
+          : undefined,
+      });
     }
 
     const elapsedMs = Date.now() - startedAt;
@@ -157,23 +87,11 @@ export async function GET(request: NextRequest) {
       {
         ok: true,
         slug,
-        id: saved.id,
-        status: saved.status,
+        id: result.trendReport.id,
+        status: result.trendReport.status,
+        month,
         elapsedMs,
-        aiModel: saved.aiModel,
-        sourcesCount: tavily.sources.length,
-        internalInsightsCount: internalInsights.length,
-        keywordsUsed: tavily.keywordsUsed,
-        validation: validation
-          ? {
-              score: validation.totalScore,
-              verdict: validation.verdict,
-              issuesCount: validation.issues.length,
-              criticalCount: validation.issues.filter(
-                (i) => i.severity === "critical",
-              ).length,
-            }
-          : { score: null, verdict: "skipped" },
+        message: "draft created — awaiting admin review",
       },
       201,
     );
@@ -189,7 +107,6 @@ export async function GET(request: NextRequest) {
       return json({ error: "AI 미설정: ANTHROPIC_API_KEY" }, 503);
     }
     console.error("[cron/generate-trend-report]", msg);
-    // PR-4: cron 흐름 자체가 깨지면 운영자 즉시 알림.
     void notifyPipelineError("generate-or-save", msg, { slug, month });
     return json({ error: msg, slug }, 500);
   }

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { INDUSTRY_SLUGS } from "@/lib/industry-landing";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
 import { listGuideMeta } from "@/lib/guides-data";
@@ -179,8 +180,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ),
     );
 
+  const industryPart: MetadataRoute.Sitemap = INDUSTRY_SLUGS.map((slug) =>
+    sitemapEntry(`/industry/${slug}`),
+  );
+
   return [
     ...staticPart,
+    ...industryPart,
     ...regionLandingPart,
     ...typeLandingPart,
     ...areaLandingPart,

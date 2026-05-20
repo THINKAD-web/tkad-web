@@ -189,8 +189,8 @@ export function MySettingsPageClient() {
   const verified = !!data.emailVerifiedAt;
 
   return (
-    <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 sm:px-6 sm:py-10">
+    <HomeLandingDayNight portal>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)] px-4 py-8 sm:px-6 sm:py-10">
         <div className="relative mx-auto max-w-2xl">
           <Link
             href="/my"

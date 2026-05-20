@@ -139,7 +139,7 @@ function siteBaseUrl(): string {
 }
 
 function adminEditUrl(reportId: string): string {
-  return `${siteBaseUrl()}/ko/admin/ai-content/edit/${reportId}?kind=trend_report`;
+  return `${siteBaseUrl()}/ko/admin/reports/new?edit=${reportId}`;
 }
 
 function publicInsightUrl(): string {
@@ -222,4 +222,33 @@ export async function notifyPipelineError(
       { label: "When", value: new Date().toISOString() },
     ],
   });
+}
+
+/**
+ * 월간 cron·어드민 초안 생성 후 운영 검토 알림.
+ */
+export async function notifyTrendDraftReady(
+  report: Pick<TrendReport, "id" | "titleKo" | "month">,
+  opts?: { sourcesCount?: number },
+): Promise<void> {
+  const monthLabel = report.month ?? "—";
+  await sendSlackInsightAlert({
+    severity: "info",
+    title: "이번 달 트렌드 리포트 초안이 생성됐어요",
+    summary:
+      `*${report.titleKo}*\n검토 후 발행해주세요.\n대상 월: \`${monthLabel}\`${opts?.sourcesCount != null ? ` · 참고 출처 ${opts.sourcesCount}건` : ""}`,
+    fields: [
+      { label: "상태", value: "draft (검토 대기)" },
+      { label: "When", value: new Date().toISOString() },
+    ],
+    adminUrl: adminEditUrl(report.id),
+  });
+}
+
+/** @deprecated use notifyTrendDraftReady — kept for imports */
+export async function notifyMonthlyDraftReady(
+  report: Pick<TrendReport, "id" | "titleKo" | "month">,
+  opts?: { sourcesCount?: number },
+): Promise<void> {
+  return notifyTrendDraftReady(report, opts);
 }
