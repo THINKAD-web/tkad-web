@@ -35,3 +35,20 @@ export function isDatabaseAuthError(e: unknown): boolean {
   }
   return false;
 }
+
+/** 빌드·SSR 중 DB 연결 불가 (Vercel parallel prerender, Neon cold start 등) */
+export function isDatabaseUnreachableError(e: unknown): boolean {
+  if (
+    e instanceof Prisma.PrismaClientKnownRequestError &&
+    (e.code === "P1001" || e.code === "P1017")
+  ) {
+    return true;
+  }
+  if (e instanceof Error) {
+    const msg = e.message || "";
+    if (/Can't reach database server/i.test(msg)) return true;
+    if (/DatabaseNotReachable/i.test(msg)) return true;
+    if (/Connection terminated unexpectedly/i.test(msg)) return true;
+  }
+  return false;
+}

@@ -14,6 +14,7 @@ import type {
 import prisma, { isDatabaseConfigured } from "@/lib/prisma";
 import {
   isDatabaseAuthError,
+  isDatabaseUnreachableError,
   isMissingContentTableError,
 } from "@/lib/prisma-content-guards";
 import {
@@ -34,6 +35,7 @@ export async function getPublishedInsightReports(): Promise<InsightReport[]> {
   } catch (e) {
     if (isMissingContentTableError(e)) return [];
     if (isDatabaseAuthError(e)) return [];
+    if (isDatabaseUnreachableError(e)) return [];
     throw e;
   }
 }
@@ -49,6 +51,7 @@ export async function getPublishedAcademyLessonsForUi(): Promise<AcademyLesson[]
   } catch (e) {
     if (isMissingContentTableError(e)) return [];
     if (isDatabaseAuthError(e)) return [];
+    if (isDatabaseUnreachableError(e)) return [];
     throw e;
   }
 }
@@ -75,6 +78,7 @@ export async function getSuccessCasesForMedia(
   } catch (e) {
     if (isMissingContentTableError(e)) return [];
     if (isDatabaseAuthError(e)) return [];
+    if (isDatabaseUnreachableError(e)) return [];
     throw e;
   }
 }
@@ -123,6 +127,7 @@ export async function getPublishedSuccessCases(
       return getSampleSuccessCaseListItems(locale);
     }
     if (isDatabaseAuthError(e)) return getSampleSuccessCaseListItems(locale);
+    if (isDatabaseUnreachableError(e)) return getSampleSuccessCaseListItems(locale);
     throw e;
   }
 }
@@ -161,7 +166,11 @@ export async function getPublishedSuccessCaseById(
     }
     return null;
   } catch (e) {
-    if (isMissingContentTableError(e) || isDatabaseAuthError(e)) {
+    if (
+      isMissingContentTableError(e) ||
+      isDatabaseAuthError(e) ||
+      isDatabaseUnreachableError(e)
+    ) {
       const sample = getSampleSuccessCaseDetail(id, locale);
       return sample ? enrichCaseMediaLinks(sample, locale) : null;
     }

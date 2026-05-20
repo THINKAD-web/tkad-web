@@ -20,7 +20,7 @@ import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
-import { MediaBrowseClientSuspense } from "@/components/media-browse-client-suspense";
+import { MediaKeywordLandingCatalog } from "@/components/media-keyword-landing-catalog";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { MediaKeywordLandingEmpty } from "@/components/media-keyword-landing-empty";
@@ -201,7 +201,7 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
                     ? `${title} 매체 ${filtered.length}개`
                     : `${filtered.length} ${title} placements`}
                 </h2>
-                <MediaBrowseClientSuspense catalog={filtered} hideHero />
+                <MediaKeywordLandingCatalog items={filtered} locale={locale} />
               </section>
             )}
 

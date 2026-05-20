@@ -10,7 +10,12 @@ type Props = {
 
 export default async function CasesPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
-  const initialCases = await getPublishedSuccessCases(locale);
+  let initialCases: Awaited<ReturnType<typeof getPublishedSuccessCases>> = [];
+  try {
+    initialCases = await getPublishedSuccessCases(locale);
+  } catch {
+    initialCases = [];
+  }
   const collectionLd = buildCollectionPageJsonLd(locale, {
     path: "/cases",
     name: locale === "ko" ? "THINKAD 성공 사례" : "THINKAD Case Studies",
