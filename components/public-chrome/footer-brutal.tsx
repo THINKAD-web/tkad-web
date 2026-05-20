@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { BrutalFooter, type BrutalFooterColumn } from "@/components/brutalist";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
+import { CONTACT_EMAIL } from "@/lib/constants";
 import {
   buildPublicNavGroups,
   type ResolvedPublicNavGroup,
@@ -85,7 +86,7 @@ export function FooterBrutal() {
     items: [
       { label: t("footer.address") },
       { label: t("footer.phone") },
-      { label: t("footer.email") },
+      { label: CONTACT_EMAIL },
       {
         href: KAKAO_CHANNEL_PUBLIC_URL,
         label: t("footer.kakaoChannel"),
@@ -109,7 +110,7 @@ export function FooterBrutal() {
         </>
       }
       columns={[...columns, contactInfo]}
-      copyright={`(C) ${new Date().getFullYear()}. THINKAD Corp. All rights reserved.`}
+      copyright={t("footer.copyright", { year: new Date().getFullYear() })}
     />
   );
 }

@@ -45,7 +45,7 @@ export default function Footer() {
     { href: "/media", label: t("footer.domesticOOH"), icon: Megaphone },
     { href: "/planner", label: t("footer.crossBorderOOH"), icon: Globe },
     { href: "/contact", label: t("footer.dataConsulting"), icon: BarChart3 },
-    { href: "/tools", label: t("footer.planningTool"), icon: Wrench },
+    { href: "/planner", label: t("footer.planningTool"), icon: Wrench },
   ];
 
   return (

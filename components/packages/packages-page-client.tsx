@@ -44,7 +44,6 @@ export function PackagesPageClient({ packages }: Props) {
     <div className="min-h-screen bg-[#F4F4F2] text-foreground transition-colors dark:bg-[#0A0A0A]">
       <CategoryExploreHero
         code="// 03 · PACKAGES"
-        showBeta
         headlineBefore={isKo ? "목적에 맞는 " : "OOH packages for "}
         headlineGradient={isKo ? "OOH 패키지" : "your goals"}
         subtitle={t("hero.subtitle")}
