@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   prismaMediaToAdminDto,
   type AdminMediaDto,
@@ -33,10 +34,16 @@ export default async function AdminMediasPage() {
   }
 
   return (
-    <AdminMediasClient
-      initialMedias={initialMedias}
-      initialListError={initialListError}
-      initialEngagement={initialEngagement}
-    />
+    <Suspense
+      fallback={
+        <p className="p-6 text-sm text-muted-foreground">매체 목록 로딩…</p>
+      }
+    >
+      <AdminMediasClient
+        initialMedias={initialMedias}
+        initialListError={initialListError}
+        initialEngagement={initialEngagement}
+      />
+    </Suspense>
   );
 }

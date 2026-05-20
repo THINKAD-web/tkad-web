@@ -1,8 +1,11 @@
-import { ArrowRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { AbHeroImpression } from "@/components/ab/ab-tracker";
 import { HomeHeroMarquee } from "@/components/home/home-hero-marquee";
 import { HomeHeroMapSlot } from "@/components/home/home-hero-map-slot";
+import { HomeHeroCta } from "@/components/home/home-hero-cta";
+import { getServerAbVariant } from "@/lib/ab-server";
+import { heroCtaLabel } from "@/lib/ab-testing";
 import { fetchHomeHeroInventoryStats } from "@/lib/home-hero-stats";
 import type { HomeHeroMapPin } from "@/lib/public-media-catalog";
 import { accentTag } from "@/lib/render-accent-title";
@@ -23,6 +26,8 @@ export async function HomeHeroServer({
   mapPins,
 }: Props) {
   const t = await getTranslations("homePage");
+  const abVariant = await getServerAbVariant();
+  const cta = heroCtaLabel(abVariant, locale);
   const stats = await fetchHomeHeroInventoryStats();
 
   const impressions = stats.estimatedDailyImpressions.toLocaleString(locale);
@@ -40,7 +45,9 @@ export async function HomeHeroServer({
     <section
       style={{ minHeight: HERO_MIN_HEIGHT }}
       className="tkad-home-hero-neo relative flex w-full shrink-0 items-center overflow-hidden bg-[#05050a] text-white"
+      data-ab-variant={abVariant}
     >
+      <AbHeroImpression page="/" />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0 flex h-full w-full items-center justify-center overflow-hidden opacity-[0.32] blur-[2px]"
@@ -106,13 +113,12 @@ export async function HomeHeroServer({
               <p className="max-w-md text-base text-white/55">{t("heroSubtitle")}</p>
 
               <div className="flex flex-wrap gap-3">
-                <Link
+                <HomeHeroCta
+                  variant={abVariant}
+                  label={`${cta.label}${cta.suffix}`}
                   href="/media"
-                  className="tkad-neon-cta inline-flex items-center gap-2 rounded-[14px] px-6 py-3 font-bold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a855f7] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                >
-                  {t("heroCtaStart")}
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Link>
+                  page="/"
+                />
                 <Link
                   href="/planner"
                   className="inline-flex items-center rounded-2xl border border-white/14 bg-white/6 px-6 py-3 font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black"

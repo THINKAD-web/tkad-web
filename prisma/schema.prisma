@@ -1607,3 +1607,43 @@ model SearchLog {
   @@index([resultCount])
   @@map("search_logs")
 }
+
+/// A/B 테스트 이벤트 (CTA 클릭 등)
+model AbEvent {
+  id        String   @id @default(cuid())
+  testKey   String   @default("hero_cta") @map("test_key")
+  variant   String
+  event     String
+  page      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([testKey, variant, event])
+  @@index([testKey, createdAt])
+  @@map("ab_events")
+}
+
+/// A/B 테스트 운영 설정 (승자 고정·세대)
+model AbTestConfig {
+  testKey       String   @id @map("test_key")
+  forcedVariant String?  @map("forced_variant")
+  generation    Int      @default(1)
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("ab_test_configs")
+}
+
+/// Core Web Vitals (LCP, INP, CLS 등) — /api/vitals 수집
+model WebVital {
+  id             String   @id @default(cuid())
+  name           String
+  value          Float
+  rating         String?
+  path           String   @default("/")
+  locale         String?
+  navigationType String?  @map("navigation_type")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([name, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("web_vitals")
+}

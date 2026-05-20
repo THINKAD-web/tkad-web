@@ -34,7 +34,7 @@ import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { HomePersonalizedMedia } from "@/components/home/home-personalized-media";
 
 import {
-  HomeClientLogosLazy,
+  HomeClientLogosWhenVisible,
   HomeCommunitySectionLazy,
   HomeFloatingCta,
   HomeRecentlyViewedLazy,
@@ -186,7 +186,7 @@ function HomeContent({
           <HomeVerificationStepsServer />
         </NeonSection>
 
-        <HomeClientLogosLazy />
+        <HomeClientLogosWhenVisible />
 
         <NeonSection className="pt-10 pb-[calc(3rem+14px)] sm:pt-16 sm:pb-[calc(5rem+14px)] md:pt-24 md:pb-[calc(7rem+14px)]">
           <HomeScrollAnimate>

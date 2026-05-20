@@ -21,7 +21,19 @@ function buildGa4Bootstrap(measurementId: string): string {
     function gtag(){dataLayer.push(arguments);}
     window.gtag = window.gtag || gtag;
     gtag('js', new Date());
-    gtag('config', '${measurementId}');
+    gtag('config', '${measurementId}', {
+      custom_map: { dimension1: 'ab_variant' }
+    });
+    try {
+      var abMatch = document.cookie.split('; ').find(function(r){ return r.indexOf('tkad_ab_variant=') === 0; });
+      if (abMatch) {
+        var abVariant = decodeURIComponent(abMatch.split('=')[1] || '');
+        if (abVariant === 'a' || abVariant === 'b') {
+          gtag('set', 'user_properties', { ab_variant: abVariant });
+          gtag('event', 'ab_variant_assigned', { ab_variant: abVariant, test_key: 'hero_cta' });
+        }
+      }
+    } catch (e) {}
   `;
 }
 

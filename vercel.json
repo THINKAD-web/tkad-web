@@ -32,6 +32,10 @@
     {
       "path": "/api/cron/campaign-notifications",
       "schedule": "30 0 * * *"
+    },
+    {
+      "path": "/api/ping-sitemap",
+      "schedule": "0 4 * * 1"
     }
   ]
 }

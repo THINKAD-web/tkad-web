@@ -46,7 +46,6 @@ export function ReportDashboardClient({ isKo }: { isKo: boolean }) {
       try {
         const res = await fetch(
           `/api/report/dashboard?locale=${isKo ? "ko" : "en"}`,
-          { cache: "no-store" },
         );
         const d = await res.json();
         if (cancelled) return;

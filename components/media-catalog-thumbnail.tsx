@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
+import { optimizeThumbnailUrl } from "@/lib/optimized-image-url";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 
 type Props = {
@@ -52,7 +53,8 @@ export function MediaCatalogThumbnail({
     primaryImageUrl !== undefined
       ? primaryImageUrl?.trim() || null
       : fromItem;
-  const imageUrl = primary || fallbackUrl?.trim() || null;
+  const rawUrl = primary || fallbackUrl?.trim() || null;
+  const imageUrl = rawUrl ? optimizeThumbnailUrl(rawUrl) : null;
   const [failed, setFailed] = useState(false);
   const showPlaceholder = !imageUrl || failed;
 

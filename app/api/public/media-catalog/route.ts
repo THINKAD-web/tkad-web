@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 300;
 
 export async function GET() {
   try {
     const items = await fetchPublicMediaCatalog();
     return NextResponse.json(items, {
       headers: {
-        "Cache-Control": "no-store, max-age=0, must-revalidate",
+        "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=600",
       },
     });
   } catch {

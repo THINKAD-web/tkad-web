@@ -8,6 +8,7 @@ import {
   resolveContactAlertEmail,
 } from "@/lib/email/contact-admin-notify";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { notifyInquiryReceived } from "@/lib/kakao-alimtalk-notify";
 import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
 import {
   budgetLabel,
@@ -231,6 +232,12 @@ export async function POST(request: NextRequest) {
     } catch (err) {
       console.error("[contact] Failed to send confirmation email:", err);
     }
+  }
+
+  if (phoneVal && PHONE_RE.test(phoneVal)) {
+    void notifyInquiryReceived({ phone: phoneVal, name: nameVal }).catch((err) => {
+      console.error("[contact] alimtalk:", err);
+    });
   }
 
   return json({ success: true }, { status: 201 });

@@ -2002,7 +2002,8 @@
     "instantBookings": "즉시 예약",
     "mediaApplications": "매체 등록 신청",
     "mediaReviews": "매체 리뷰",
-    "searchStats": "검색 통계"
+    "searchStats": "검색 통계",
+    "abTest": "A/B 테스트"
   },
   "search": {
     "modalTitle": "통합 검색",

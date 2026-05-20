@@ -143,7 +143,11 @@ export async function allPublicSitemapPaths(): Promise<
   return out;
 }
 
-/** hreflang-style alternates + canonical (relative to metadataBase). */
+/**
+ * hreflang alternates + canonical.
+ * `canonical` 은 metadataBase(siteUrl) 기준 상대 경로 → 운영 시 https://tkad.co.kr/ko/… 절대 URL.
+ * vercel.app 프리뷰는 NEXT_PUBLIC_SITE_URL 미설정 시 VERCEL_URL 기준이므로 프로덕션에 도메인 고정 권장.
+ */
 export function pageAlternates(
   locale: string,
   path: string,

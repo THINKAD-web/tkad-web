@@ -2002,7 +2002,8 @@
     "instantBookings": "Instant bookings",
     "mediaApplications": "Media Applications",
     "mediaReviews": "Media reviews",
-    "searchStats": "Search stats"
+    "searchStats": "Search stats",
+    "abTest": "A/B test"
   },
   "search": {
     "modalTitle": "Unified search",

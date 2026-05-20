@@ -8,6 +8,7 @@ import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { canAdminContractConfirm } from "@/lib/ooh-quote";
 import { sendEmail } from "@/lib/email/client";
+import { notifyCampaignConfirmed } from "@/lib/kakao-alimtalk-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +86,15 @@ export async function PATCH(
     });
   } catch (e) {
     console.error("[contract-confirm email]", e);
+  }
+
+  const confirmPhone = row.clientPhone?.trim();
+  if (confirmPhone) {
+    void notifyCampaignConfirmed({
+      phone: confirmPhone,
+      name: row.clientName,
+      campaignName: campaign.name,
+    }).catch((err) => console.error("[contract-confirm] alimtalk:", err));
   }
 
   return json({

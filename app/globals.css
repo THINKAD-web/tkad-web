@@ -1,13 +1,5 @@
-/* === Brutalist redesign Phase 1 — Google Fonts (Space Grotesk + JetBrains Mono) === */
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
-/* 2026/2027 Modern stack — Inter (body) */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
-/* 2026/2027 Modern headings — General Sans (display). (Fallback: Satoshi-like) */
-@import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700,800,900&display=swap");
-/* Wanted Sans Variable — 2024-2025 한국 트렌드 폰트 (모던·세련된 sans, jsDelivr) */
-@import url("https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfontvariable/variable/WantedSansVariable.css");
-/* Pretendard 폴백 — Wanted Sans 미로드 시 백업 (jsDelivr CDN, subset woff2) */
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+/* Display / mono — 필요 웨이트만 (next/font Pretendard는 layout에서 로드) */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap");
 /* Relative import: avoids resolving `tailwindcss` from ~ when a home package.json exists */
 @import "../node_modules/tailwindcss/index.css";
 /* v4: JS 설정(darkMode: class 등)을 쓰려면 명시 필요 — 없으면 `dark:` 가 OS 미디어쿼리만 따름(일몰 후 자동 다크) */
@@ -110,12 +102,10 @@
 
   /* Font (2026/2027) — Body: Inter, Display: General Sans
    * 한글은 Pretendard/Wanted Sans로 자연스럽게 폴백. */
-  --font-display: "General Sans", "Satoshi", "Space Grotesk", "Pretendard Variable",
-    "Wanted Sans Variable", "WantedSans Variable", var(--font-geist-sans),
+  --font-display: var(--font-pretendard), "Space Grotesk", var(--font-geist-sans),
     -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard,
     "Malgun Gothic", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-sans: "Inter", "Pretendard Variable", "Wanted Sans Variable",
-    "WantedSans Variable", var(--font-geist-sans), -apple-system,
+  --font-sans: var(--font-pretendard), var(--font-geist-sans), -apple-system,
     BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard, "Malgun Gothic",
     Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", var(--font-geist-mono), ui-monospace,

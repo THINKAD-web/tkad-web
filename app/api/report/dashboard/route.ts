@@ -4,7 +4,7 @@ import { apiError, apiOk, apiServerError } from "@/lib/api-response";
 import { buildReportDashboardData } from "@/lib/report/dashboard-data";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 /**
  * GET /api/report/dashboard?locale=ko
@@ -21,7 +21,12 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url);
     const isKo = (url.searchParams.get("locale") ?? "ko") !== "en";
     const data = await buildReportDashboardData({ isKo });
-    return apiOk(data);
+    return apiOk(data, {
+      headers: {
+        "Cache-Control":
+          "public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200",
+      },
+    });
   } catch (e) {
     return apiServerError(e, "report/dashboard");
   }

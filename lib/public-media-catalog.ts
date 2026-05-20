@@ -12,6 +12,7 @@ import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail";
 import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
+import { optimizeHeroMarqueeUrl } from "@/lib/optimized-image-url";
 
 /** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
 export type MediaWithAdvertiserExecutions = Media & {
@@ -414,7 +415,9 @@ function marqueeUrlsFromMediaItems(items: MediaItem[]): string[] {
   const out: string[] = [];
   for (const m of shuffled) {
     const img = m.sampleImages?.[0]?.trim();
-    if (img) out.push(img);
+    if (img) {
+      out.push(optimizeHeroMarqueeUrl(img) ?? img);
+    }
     if (out.length >= HERO_MARQUEE_IMAGE_COUNT) break;
   }
   let p = 0;

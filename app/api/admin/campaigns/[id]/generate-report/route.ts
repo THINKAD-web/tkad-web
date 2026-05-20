@@ -2,6 +2,10 @@ import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { buildCampaignCompletionReportPdfBuffer } from "@/lib/campaign-completion-report";
 import { createNotification } from "@/lib/notifications";
+import {
+  notifyReportReady,
+  resolveCampaignNotifyPhone,
+} from "@/lib/kakao-alimtalk-notify";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +44,13 @@ export async function POST(request: NextRequest, { params }: Params) {
     });
     const c = await db.campaign.findUnique({
       where: { id },
-      select: { clientCompany: true, name: true, ownerUserId: true },
+      select: {
+        clientCompany: true,
+        clientName: true,
+        clientPhone: true,
+        name: true,
+        ownerUserId: true,
+      },
     });
     if (c?.ownerUserId) {
       void createNotification({
@@ -51,6 +61,17 @@ export async function POST(request: NextRequest, { params }: Params) {
         link: `/dashboard/campaigns/${id}`,
         dedupeKey: `report_ready:${id}`,
       });
+    }
+    if (c) {
+      const phone = await resolveCampaignNotifyPhone(c);
+      if (phone) {
+        void notifyReportReady({
+          phone,
+          name: c.clientName?.trim() || "고객",
+          campaignName: c.name,
+          campaignId: id,
+        }).catch((err) => console.error("[generate-report] alimtalk:", err));
+      }
     }
     const filename = buildClientReportFilename(c?.clientCompany);
     return new Response(new Uint8Array(buf), {

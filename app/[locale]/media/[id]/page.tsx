@@ -57,7 +57,7 @@ import MediaDetailExtras from "@/components/media-detail-extras";
 import { RoadviewCard } from "@/components/media-detail/roadview-card";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
-import { TrafficCharts } from "@/components/media-detail/traffic-charts";
+import { TrafficChartsLazy } from "@/components/media-detail/traffic-charts-lazy";
 import { MediaAvailabilityCalendar } from "@/components/media-detail/availability-calendar";
 import { MediaQuoteCalculator } from "@/components/media-detail/media-quote-calculator";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
@@ -720,7 +720,7 @@ export default async function MediaDetailPage({ params }: Props) {
           <MediaDetailPerformance metrics={performanceMetrics} />
 
           <div className="mt-8">
-            <TrafficCharts
+            <TrafficChartsLazy
               mediaType={media.type}
               region={media.region}
               stored={media.trafficPattern ?? null}
