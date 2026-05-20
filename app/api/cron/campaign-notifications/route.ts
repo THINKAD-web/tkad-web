@@ -51,6 +51,8 @@ export async function GET(request: NextRequest) {
     select: {
       id: true,
       name: true,
+      clientName: true,
+      clientPhone: true,
       ownerUserId: true,
       startDate: true,
       endDate: true,
@@ -82,6 +84,16 @@ export async function GET(request: NextRequest) {
         dedupeKey: `campaign_start:${c.id}:${tomorrowYmd}`,
       });
       if (n) created += 1;
+
+      const phone = await resolveCampaignNotifyPhone(c);
+      if (phone) {
+        const result = await notifyCampaignTomorrow({
+          phone,
+          name: c.clientName?.trim() || "고객",
+          campaignName: c.name,
+        });
+        if (result.sent) alimtalkSent += 1;
+      }
     }
 
     if (

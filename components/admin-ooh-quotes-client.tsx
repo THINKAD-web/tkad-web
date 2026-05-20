@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, RefreshCw, ExternalLink } from "lucide-react";
+import { Loader2, RefreshCw, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import type { QuoteBreakdown } from "@/lib/quote-calculator";
 import { useToast } from "@/components/toast-provider";
 
 const OOH_STATUSES = [
@@ -53,7 +54,45 @@ export default function AdminOohQuotesClient() {
   const [payAmount, setPayAmount] = useState("");
   const [cancelOpenId, setCancelOpenId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [detailById, setDetailById] = useState<
+    Record<string, { quoteBreakdown?: QuoteBreakdown | null; loading?: boolean }>
+  >({});
   const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
+
+  const loadDetail = useCallback(async (id: string) => {
+    setDetailById((prev) => ({ ...prev, [id]: { ...prev[id], loading: true } }));
+    try {
+      const res = await fetch(`/api/admin/ooh-quotes/${id}`, {
+        credentials: "include",
+        cache: "no-store",
+      });
+      const raw = (await res.json()) as {
+        quote?: { quoteBreakdown?: QuoteBreakdown };
+      };
+      if (!res.ok) throw new Error("load_failed");
+      setDetailById((prev) => ({
+        ...prev,
+        [id]: {
+          loading: false,
+          quoteBreakdown: raw.quote?.quoteBreakdown ?? null,
+        },
+      }));
+    } catch {
+      setDetailById((prev) => ({ ...prev, [id]: { loading: false } }));
+    }
+  }, []);
+
+  const toggleExpand = (id: string) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      return;
+    }
+    setExpandedId(id);
+    if (!detailById[id]?.quoteBreakdown && !detailById[id]?.loading) {
+      void loadDetail(id);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -294,7 +333,12 @@ export default function AdminOohQuotesClient() {
                   </tr>
                 </thead>
                 <tbody>
-                  {quotes.map((row) => (
+                  {quotes.map((row) => {
+                    const expanded = expandedId === row.id;
+                    const detail = detailById[row.id];
+                    const breakdown = detail?.quoteBreakdown;
+                    return (
+                    <Fragment key={row.id}>
                     <tr
                       key={row.id}
                       ref={(el) => {
@@ -303,7 +347,18 @@ export default function AdminOohQuotesClient() {
                       className="border-b border-slate-100 transition-colors"
                     >
                       <td className="px-3 py-2 font-medium text-navy">
-                        {row.clientName}
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 text-left hover:underline"
+                          onClick={() => toggleExpand(row.id)}
+                        >
+                          {expanded ? (
+                            <ChevronUp className="h-3.5 w-3.5 shrink-0" />
+                          ) : (
+                            <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+                          )}
+                          {row.clientName}
+                        </button>
                       </td>
                       <td className="max-w-[140px] truncate px-3 py-2 text-xs">
                         {row.clientEmail || "—"}
@@ -325,23 +380,40 @@ export default function AdminOohQuotesClient() {
                             </Link>
                           </Button>
                           {(row.status === "draft" || row.status === "sent") && (
-                            <Button
-                              size="sm"
-                              className="bg-hermes text-white hover:bg-hermes/90"
-                              disabled={busyId === row.id}
-                              onClick={() =>
-                                void run(row.id, () =>
-                                  act(
-                                    `/api/admin/ooh-quotes/${row.id}/send-quote`,
-                                    "POST",
-                                  ),
-                                )
-                              }
-                            >
-                              {row.status === "draft"
-                                ? t("sendQuote")
-                                : t("resendQuote")}
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={busyId === row.id}
+                                onClick={() =>
+                                  void run(row.id, async () => {
+                                    await act(`/api/admin/ooh-quotes/${row.id}`, "PATCH", {
+                                      recalculate: true,
+                                    });
+                                    await loadDetail(row.id);
+                                  })
+                                }
+                              >
+                                재계산
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-hermes text-white hover:bg-hermes/90"
+                                disabled={busyId === row.id}
+                                onClick={() =>
+                                  void run(row.id, () =>
+                                    act(
+                                      `/api/admin/ooh-quotes/${row.id}/send-quote`,
+                                      "POST",
+                                    ),
+                                  )
+                                }
+                              >
+                                {row.status === "draft"
+                                  ? t("sendQuote")
+                                  : t("resendQuote")}
+                              </Button>
+                            </>
                           )}
                           {(row.status === "booking_requested" ||
                             row.status === "booking_pending") && (
@@ -426,7 +498,48 @@ export default function AdminOohQuotesClient() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    {expanded ? (
+                      <tr key={`${row.id}-detail`} className="bg-slate-50/80">
+                        <td colSpan={7} className="px-4 py-3">
+                          {detail?.loading ? (
+                            <p className="text-xs text-muted-foreground">불러오는 중…</p>
+                          ) : breakdown ? (
+                            <div className="space-y-2 text-xs">
+                              <p className="font-semibold text-navy">견적 상세 (자동 계산)</p>
+                              <ul className="divide-y rounded border bg-white">
+                                {breakdown.lines.map((line) => (
+                                  <li
+                                    key={line.mediaId}
+                                    className="flex flex-wrap justify-between gap-2 px-3 py-2"
+                                  >
+                                    <span>
+                                      {line.mediaName} · {line.location}
+                                    </span>
+                                    <span className="tabular-nums text-muted-foreground">
+                                      ₩{line.lineSupplyWon.toLocaleString("ko-KR")} · 노출{" "}
+                                      {line.impressions.toLocaleString("ko-KR")}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                              <p className="tabular-nums text-muted-foreground">
+                                소계 ₩{breakdown.subtotalWon.toLocaleString("ko-KR")} · VAT(10%) ₩
+                                {breakdown.vatWon.toLocaleString("ko-KR")} · 합계 ₩
+                                {breakdown.totalWon.toLocaleString("ko-KR")} · 유효{" "}
+                                {breakdown.validUntil.slice(0, 10)}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              상세 없음 · 재계산을 눌러 주세요.
+                            </p>
+                          )}
+                        </td>
+                      </tr>
+                    ) : null}
+                    </Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

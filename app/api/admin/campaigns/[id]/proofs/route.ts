@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
-import { getPrisma } from "@/lib/prisma";
+import { createCampaignProofPhoto } from "@/lib/campaign-proof-service";
 
 export const dynamic = "force-dynamic";
 
@@ -23,16 +23,17 @@ export async function POST(request: NextRequest, { params }: Params) {
     return json({ error: "imageUrl must be http(s) URL" }, 400);
   }
 
-  const db = getPrisma();
-  const campaign = await db.campaign.findUnique({ where: { id: campaignId } });
-  if (!campaign) return json({ error: "Not found" }, 404);
-
-  const photo = await db.campaignProofPhoto.create({
-    data: {
+  try {
+    const photo = await createCampaignProofPhoto({
       campaignId,
       imageUrl,
       caption: String(body.caption ?? "").trim() || null,
-    },
-  });
-  return json({ photo }, 201);
+      uploadSource: "admin",
+    });
+    return json({ photo }, 201);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg === "CAMPAIGN_NOT_FOUND") return json({ error: "Not found" }, 404);
+    throw e;
+  }
 }

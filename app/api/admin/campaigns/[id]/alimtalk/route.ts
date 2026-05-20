@@ -8,12 +8,29 @@ import {
 } from "@/lib/kakao-alimtalk";
 import { notifyCampaignByTemplate } from "@/lib/kakao-alimtalk-notify";
 import { getPrisma } from "@/lib/prisma";
+import { siteUrl } from "@/lib/seo";
+
+function publicBaseUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.SITE_URL?.trim() ||
+    siteUrl
+  ).replace(/\/$/, "");
+}
 
 export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
 const CAMPAIGN_TEMPLATES = [
+  "TKAD_INQUIRY_RECEIVED",
+  "TKAD_QUOTE_SENT",
+  "TKAD_CAMPAIGN_CONFIRMED",
+  "TKAD_CAMPAIGN_TOMORROW",
+  "TKAD_REPORT_READY",
+] as const;
+
+const AUTO_NOTIFY_TEMPLATES = [
   "TKAD_CAMPAIGN_CONFIRMED",
   "TKAD_CAMPAIGN_TOMORROW",
   "TKAD_REPORT_READY",
@@ -83,13 +100,13 @@ export async function POST(request: NextRequest, { params }: Params) {
       : undefined;
 
   if (
-    (CAMPAIGN_TEMPLATES as readonly string[]).includes(templateCode) &&
+    (AUTO_NOTIFY_TEMPLATES as readonly string[]).includes(templateCode) &&
     !toOverride &&
     !variables
   ) {
     const result = await notifyCampaignByTemplate(
       id,
-      templateCode as (typeof CAMPAIGN_TEMPLATES)[number],
+      templateCode as (typeof AUTO_NOTIFY_TEMPLATES)[number],
     );
     return json({ ok: result.sent, result });
   }
@@ -98,6 +115,8 @@ export async function POST(request: NextRequest, { params }: Params) {
   const c = await db.campaign.findUnique({
     where: { id },
     select: {
+      id: true,
+      name: true,
       clientName: true,
       clientPhone: true,
     },
@@ -112,10 +131,24 @@ export async function POST(request: NextRequest, { params }: Params) {
     return json({ error: "Valid recipient phone required" }, 400);
   }
 
+  const base = publicBaseUrl();
+  const defaultLink =
+    templateCode === "TKAD_REPORT_READY"
+      ? `${base}/ko/dashboard/campaigns/${c.id}`
+      : templateCode === "TKAD_QUOTE_SENT"
+        ? `${base}/ko/my`
+        : "";
+
   const vars: Record<string, string> = {
     name: recvName ?? c.clientName ?? "고객",
-    campaignName: typeof body.campaignName === "string" ? body.campaignName : "",
-    link: typeof body.link === "string" ? body.link : "",
+    campaignName:
+      typeof body.campaignName === "string" && body.campaignName.trim()
+        ? body.campaignName
+        : c.name,
+    link:
+      typeof body.link === "string" && body.link.trim()
+        ? body.link
+        : defaultLink,
     quoteNumber: typeof body.quoteNumber === "string" ? body.quoteNumber : "",
     ...variables,
   };

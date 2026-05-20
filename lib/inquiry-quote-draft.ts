@@ -6,10 +6,11 @@ import {
 } from "@/lib/inquiry-quote-parse";
 import {
   budgetRangeManwonFromCode,
-  calculateQuote,
+  calculateQuoteFromMediaIds,
   periodLabelForDays,
 } from "@/lib/quote-calculator";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { notifySlackInquiryQuoteDraft } from "@/lib/quote-slack-notify";
 import { sendTelegramMessage } from "@/lib/telegram-notify";
 import type { ContactBudgetV2, ContactRegion } from "@/lib/contact-lead-schema";
 import { adminOohQuoteUrl } from "@/lib/telegram-notify";
@@ -96,8 +97,8 @@ export async function createInquiryQuoteDraft(
   const end = new Date(start.getTime());
   end.setDate(end.getDate() + intent.durationDays - 1);
 
-  const calculated = calculateQuote({
-    media: mediaRows,
+  const calculated = await calculateQuoteFromMediaIds(db, {
+    mediaIds: mediaRows.map((m) => m.id),
     startDate: start,
     endDate: end,
     discountRate: 0,
@@ -147,13 +148,22 @@ export async function createInquiryQuoteDraft(
 
   void postInternalAlert({
     type: "contact_inquiry",
-    title: "새 문의 + 견적 초안 생성",
+    title: "새 문의 + 견적 초안 생성됨",
     body: `${input.company || "(회사미입력)"} / ${input.name} · ₩${calculated.totalAmountManwon.toLocaleString("ko-KR")}만`,
     meta: {
       contactInquiryId: input.inquiryId,
       oohQuoteId: ooh.id,
       mediaCount: mediaRows.length,
     },
+  }).catch(() => {});
+
+  void notifySlackInquiryQuoteDraft({
+    inquiryId: input.inquiryId,
+    quoteId: ooh.id,
+    company: input.company,
+    name: input.name,
+    mediaCount: mediaRows.length,
+    totalAmountManwon: calculated.totalAmountManwon,
   }).catch(() => {});
 
   void sendTelegramMessage(

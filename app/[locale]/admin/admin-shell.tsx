@@ -30,6 +30,10 @@ import {
   Search,
   FlaskConical,
   Radar,
+  KeyRound,
+  Kanban,
+  TrendingUp,
+  Mail,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -54,8 +58,11 @@ const navDefs = [
   { href: "/admin/monitoring", key: "monitoring" as const, icon: Radar },
   // 2) 영업/리드
   { href: "/admin/inquiries", key: "inquiries" as const, icon: MessageSquareText },
-  { href: "/admin/crm", key: "crm" as const, icon: UsersRound },
+  { href: "/admin/pipeline", key: "pipeline" as const, icon: Kanban },
   { href: "/admin/crm-records", key: "crmRecords" as const, icon: ContactRound },
+  { href: "/admin/forecast", key: "forecast" as const, icon: TrendingUp },
+  { href: "/admin/email-templates", key: "emailTemplates" as const, icon: Mail },
+  { href: "/admin/crm", key: "crm" as const, icon: UsersRound },
   // 3) 견적/계약
   { href: "/admin/quotes", key: "quotesList" as const, icon: ClipboardList },
   { href: "/admin/quotes/new", key: "quotesNew" as const, icon: Calculator },
@@ -65,6 +72,7 @@ const navDefs = [
   { href: "/admin/community", key: "community" as const, icon: MessageSquareText },
   // 5) 매체/검증/네트워크
   { href: "/admin/applications", key: "mediaApplications" as const, icon: ClipboardList },
+  { href: "/admin/media-owner", key: "mediaOwnerOps" as const, icon: CalendarCheck },
   { href: "/admin/reviews", key: "mediaReviews" as const, icon: Star },
   { href: "/admin/medias", key: "medias" as const, icon: Monitor },
   { href: "/admin/verification", key: "verification" as const, icon: ShieldCheck },
@@ -75,6 +83,7 @@ const navDefs = [
   // 7) 분석/도구
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
   { href: "/admin/search-stats", key: "searchStats" as const, icon: Search },
+  { href: "/admin/api-usage", key: "apiUsage" as const, icon: KeyRound },
   { href: "/admin/ab-test", key: "abTest" as const, icon: FlaskConical },
   { href: "/admin/reports/new", key: "trendReports" as const, icon: FileText },
   { href: "/admin/academy/new", key: "academyNew" as const, icon: Sparkles },

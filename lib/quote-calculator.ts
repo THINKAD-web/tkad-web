@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@prisma/client";
 import type { MediaPricePeriodKey } from "@/lib/media-data";
 import {
   computeAdminQuoteTotals,
@@ -54,6 +55,19 @@ export type CalculateQuoteInput = {
   issuedAt?: Date;
 };
 
+/** DB 조회 기반 API — `calculateQuote({ mediaIds, startDate, endDate, discountRate })` */
+export type CalculateQuoteByMediaIdsInput = {
+  mediaIds: string[];
+  startDate: Date | string;
+  endDate: Date | string;
+  discountRate?: number;
+  issuedAt?: Date;
+};
+
+function coerceDate(v: Date | string): Date {
+  return v instanceof Date ? v : new Date(v);
+}
+
 export type CalculateQuoteResult = QuoteBreakdown & {
   /** OoHQuote.totalAmount (만원 단위) */
   totalAmountManwon: number;
@@ -86,6 +100,41 @@ function lineImpressions(
           sampleImages: [],
         }));
   return Math.round(monthly * (campaignDays / 30));
+}
+
+export async function calculateQuoteFromMediaIds(
+  db: Pick<PrismaClient, "media">,
+  input: CalculateQuoteByMediaIdsInput,
+): Promise<CalculateQuoteResult> {
+  const ids = [...new Set(input.mediaIds.map((id) => id.trim()).filter(Boolean))];
+  if (ids.length === 0) {
+    throw new Error("NO_MEDIA_IDS");
+  }
+  const rows = await db.media.findMany({
+    where: { id: { in: ids.slice(0, 24) }, isActive: true },
+  });
+  const order = new Map(ids.map((id, i) => [id, i]));
+  const media = rows
+    .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
+    .map((m) => ({
+      id: m.id,
+      name: m.name,
+      location: m.location,
+      price: m.price,
+      pricePeriod: m.pricePeriod,
+      dailyFootfall: m.dailyFootfall,
+      impressions: m.impressions,
+      latitude: m.latitude,
+      longitude: m.longitude,
+    }));
+  if (media.length === 0) throw new Error("NO_MEDIA_FOUND");
+  return calculateQuote({
+    media,
+    startDate: coerceDate(input.startDate),
+    endDate: coerceDate(input.endDate),
+    discountRate: input.discountRate,
+    issuedAt: input.issuedAt,
+  });
 }
 
 export function calculateQuote(input: CalculateQuoteInput): CalculateQuoteResult {

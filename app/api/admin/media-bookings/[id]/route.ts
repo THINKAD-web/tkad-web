@@ -11,6 +11,7 @@ import {
   sendBookingRequestDecision,
   type BookingRequestSummary,
 } from "@/lib/booking-emails";
+import { notifyMediaOwnerCampaignConfirmed } from "@/lib/media-owner-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -164,7 +165,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const booking = await db.mediaBooking.update({
       where: { id },
       data,
-      include: { media: { select: { name: true } } },
+      include: {
+        media: { select: { name: true, ownerUserId: true } },
+        campaign: { select: { name: true } },
+      },
     });
 
     // 광고주 자가 신청건 (requesterEmail 있음) + 상태 변경시 → 결과 메일 발송.
@@ -194,6 +198,21 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         booking.notes,
       ).catch((e) => {
         console.error("[admin.media-bookings.PATCH] decision email failed", e);
+      });
+    }
+
+    if (
+      statusChanged &&
+      booking.status === MediaBookingStatus.confirmed &&
+      booking.media?.ownerUserId
+    ) {
+      void notifyMediaOwnerCampaignConfirmed({
+        ownerUserId: booking.media.ownerUserId,
+        mediaName: booking.media.name,
+        campaignName:
+          booking.campaign?.name ?? booking.title ?? "캠페인",
+      }).catch((e) => {
+        console.error("[admin.media-bookings.PATCH] owner alimtalk", e);
       });
     }
 

@@ -5,9 +5,15 @@ import { fetchAdvertiserCampaignDetail } from "@/lib/advertiser-dashboard-querie
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getCurrentUser } from "@/lib/user-session";
 
-type Props = { params: Promise<{ locale: string; id: string }> };
+type Props = {
+  params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ tab?: string }>;
+};
 
-export default async function AdvertiserCampaignDetailPage({ params }: Props) {
+export default async function AdvertiserCampaignDetailPage({
+  params,
+  searchParams,
+}: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const user = await getCurrentUser();
@@ -19,5 +25,10 @@ export default async function AdvertiserCampaignDetailPage({ params }: Props) {
   const detail = await fetchAdvertiserCampaignDetail(user.id, user.email, id);
   if (!detail) notFound();
 
-  return <AdvertiserCampaignDetailClient initial={detail} />;
+  const sp = await searchParams;
+  const initialTab = sp.tab === "proof" ? "proof" : undefined;
+
+  return (
+    <AdvertiserCampaignDetailClient initial={detail} initialTab={initialTab} />
+  );
 }

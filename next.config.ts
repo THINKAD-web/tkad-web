@@ -16,6 +16,7 @@ const withPWA = require("next-pwa")({
   },
   /** 정적 자산 SWR, API NetworkFirst */
   runtimeCaching: require("./config/pwa-runtime-caching.cjs"),
+  importScripts: ["/sw-push.js"],
   buildExcludes: [/middleware-manifest\.json$/],
 });
 

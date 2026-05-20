@@ -66,7 +66,12 @@ export async function fetchAdvertiserCampaigns(
       c.endDate,
       now,
     );
-    const thumb = c.proofPhotos[0]?.imageUrl ?? c.mediaBookings[0]?.media?.image ?? null;
+    const latestProof = c.proofPhotos[0] ?? null;
+    const thumb =
+      latestProof?.imageUrlWatermarked ??
+      latestProof?.imageUrl ??
+      c.mediaBookings[0]?.media?.image ??
+      null;
     return {
       id: c.id,
       name: c.name,
@@ -80,6 +85,7 @@ export async function fetchAdvertiserCampaigns(
       impressionsTotal: series.reduce((s, p) => s + p.impressions, 0),
       proofThumbUrl: thumb,
       proofCount: c.proofPhotos.length,
+      latestProofAt: latestProof?.createdAt.toISOString() ?? null,
       reportReady: Boolean(c.reportGeneratedAt),
     };
   });
@@ -222,10 +228,13 @@ export async function fetchAdvertiserCampaignDetail(
     clientCompany: c.clientCompany,
     dailySeries,
     impressionsTotal: dailySeries.reduce((s, p) => s + p.impressions, 0),
+    latestProofAt:
+      c.proofPhotos[0]?.createdAt.toISOString() ?? null,
     proofPhotos: c.proofPhotos.map((p) => ({
       id: p.id,
-      imageUrl: p.imageUrl,
+      imageUrl: p.imageUrlWatermarked ?? p.imageUrl,
       caption: p.caption,
+      createdAt: p.createdAt.toISOString(),
     })),
     mapPins: pins,
     reportReady:

@@ -15,6 +15,7 @@ import {
   type OnboardingRole,
 } from "@/lib/onboarding-types";
 import { ArrowRight, Check } from "lucide-react";
+import { markOnboardingCompletedForPush } from "@/lib/pwa-push-client";
 
 type PreviewItem = {
   id: string;
@@ -153,6 +154,7 @@ export function OnboardingWizard({
   async function handleComplete() {
     const ok = await savePartial({ complete: true });
     if (ok) {
+      markOnboardingCompletedForPush();
       router.push("/");
       router.refresh();
     }

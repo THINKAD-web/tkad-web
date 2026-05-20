@@ -138,6 +138,39 @@ export async function notifyReportReady(input: {
 }
 
 /** 캠페인 ID로 수신자·본문 변수 해석 후 알림톡 */
+export async function notifyAdvertiserProofPhotoUploaded(input: {
+  campaignId: string;
+  locale?: string;
+}): Promise<SendAlimtalkResult> {
+  if (!isDatabaseConfigured()) {
+    return { sent: false, channel: "noop", error: "db_not_configured" };
+  }
+  const c = await getPrisma().campaign.findUnique({
+    where: { id: input.campaignId },
+    select: {
+      id: true,
+      name: true,
+      clientName: true,
+      clientPhone: true,
+      ownerUserId: true,
+    },
+  });
+  if (!c) return { sent: false, channel: "noop", error: "campaign_not_found" };
+
+  const phone = await resolveCampaignNotifyPhone(c);
+  if (!phone) return { sent: false, channel: "noop", error: "no_phone" };
+
+  const locale = input.locale ?? "ko";
+  const link = `${baseUrl()}/${locale}/dashboard/campaigns/${c.id}?tab=proof`;
+
+  return sendAlimtalk({
+    to: phone,
+    templateCode: "TKAD_PROOF_PHOTO_UPLOADED",
+    recvName: c.clientName?.trim() || "고객",
+    variables: { link },
+  });
+}
+
 export async function notifyCampaignByTemplate(
   campaignId: string,
   templateCode:

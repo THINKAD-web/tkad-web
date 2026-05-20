@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { ChevronRight, ImageIcon } from "lucide-react";
 import type { CampaignStatus } from "@prisma/client";
+import { hasUnseenProofPhotos } from "@/lib/campaign-proof-seen";
 import { cn } from "@/lib/utils";
 
 export type AdvertiserCampaignCardItem = {
@@ -16,6 +17,7 @@ export type AdvertiserCampaignCardItem = {
   impressionsTotal: number;
   proofThumbUrl: string | null;
   proofCount: number;
+  latestProofAt: string | null;
 };
 
 const STATUS_LABEL: Record<string, { ko: string; en: string }> = {
@@ -46,10 +48,11 @@ export function AdvertiserCampaignCard({ item, isKo }: Props) {
         : "Media TBD";
   const status =
     STATUS_LABEL[item.status]?.[isKo ? "ko" : "en"] ?? item.status;
+  const hasNewProof = hasUnseenProofPhotos(item.latestProofAt, item.id);
 
   return (
     <Link
-      href={`/dashboard/campaigns/${item.id}`}
+      href={`/dashboard/campaigns/${item.id}?tab=proof`}
       className={cn(
         "tkad-glass-surface tkad-neon-border flex gap-4 rounded-[28px] border p-4 backdrop-blur-md sm:p-5",
         "transition-all hover:-translate-y-0.5 hover:border-primary/25 active:scale-[0.99]",
@@ -70,6 +73,12 @@ export function AdvertiserCampaignCard({ item, isKo }: Props) {
             <ImageIcon className="h-8 w-8" aria-hidden />
           </div>
         )}
+        {hasNewProof ? (
+          <span
+            className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background"
+            aria-label={isKo ? "새 인증 사진" : "New proof photos"}
+          />
+        ) : null}
         {item.proofCount > 0 ? (
           <span className="absolute bottom-1.5 right-1.5 rounded-lg bg-foreground/80 px-2 py-0.5 font-mono text-[10px] font-bold text-background">
             {item.proofCount}

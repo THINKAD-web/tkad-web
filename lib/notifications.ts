@@ -1,5 +1,13 @@
 import type { MediaAvailability, NotificationType } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import {
+  isWebPushConfigured,
+  pushNotifyCampaignD1,
+  pushNotifyFavoriteMediaAvailable,
+  pushNotifyQuoteArrived,
+  sendWebPushToUser,
+} from "@/lib/web-push";
+import { siteUrl } from "@/lib/seo";
 
 export type NotificationDto = {
   id: string;
@@ -69,6 +77,7 @@ export async function createNotification(
           isRead: false,
         },
       });
+      void mirrorNotificationToWebPush(input);
       return rowToDto(row);
     }
     const row = await db.notification.create({
@@ -80,11 +89,51 @@ export async function createNotification(
         link: input.link ?? null,
       },
     });
+    void mirrorNotificationToWebPush(input);
     return rowToDto(row);
   } catch (e) {
     console.error("[createNotification]", e);
     return null;
   }
+}
+
+function mirrorNotificationToWebPush(input: CreateNotificationInput): void {
+  if (!isWebPushConfigured()) return;
+
+  if (input.type === "QUOTE_RECEIVED" && input.dedupeKey?.startsWith("quote_sent:")) {
+    const quoteId = input.dedupeKey.replace("quote_sent:", "");
+    const locale = input.link?.includes("/en/") ? "en" : "ko";
+    void pushNotifyQuoteArrived(input.userId, { quoteId, locale });
+    return;
+  }
+  if (input.type === "CAMPAIGN_START" && input.dedupeKey?.startsWith("campaign_start:")) {
+    const campaignId = input.dedupeKey.split(":")[1] ?? "";
+    if (campaignId) {
+      void pushNotifyCampaignD1(input.userId, {
+        campaignId,
+        campaignName: input.body,
+      });
+    }
+    return;
+  }
+  if (input.type === "MEDIA_AVAILABLE" && input.dedupeKey?.startsWith("media_avail:")) {
+    const mediaId = input.dedupeKey.split(":")[1] ?? "";
+    if (mediaId) {
+      const mediaName = input.body.split(" — ")[0] ?? input.body;
+      void pushNotifyFavoriteMediaAvailable(input.userId, { mediaId, mediaName });
+    }
+    return;
+  }
+
+  const base = siteUrl.replace(/\/$/, "");
+  const path = input.link?.startsWith("/") ? input.link : input.link ? `/${input.link}` : "";
+  const url = path ? `${base}/ko${path}` : `${base}/ko/my`;
+  void sendWebPushToUser(input.userId, {
+    title: input.title,
+    body: input.body,
+    url,
+    tag: input.dedupeKey ?? input.type,
+  });
 }
 
 export async function findUserIdByEmail(email: string): Promise<string | null> {

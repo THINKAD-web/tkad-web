@@ -22,7 +22,7 @@ import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
-import MediaBrowseClient from "@/components/media-browse-client";
+import { MediaBrowseClientSuspense } from "@/components/media-browse-client-suspense";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { MediaKeywordLandingEmpty } from "@/components/media-keyword-landing-empty";
@@ -216,7 +216,7 @@ export default async function LocalSeoLandingPage({ params }: Props) {
                     ? `${landing.placeKo} 매체 ${filtered.length}개`
                     : `${filtered.length} placements in ${landing.placeEn}`}
                 </h2>
-                <MediaBrowseClient catalog={filtered} hideHero />
+                <MediaBrowseClientSuspense catalog={filtered} hideHero />
               </section>
             )}
 

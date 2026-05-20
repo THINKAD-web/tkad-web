@@ -7,10 +7,12 @@ import {
   readOfflineRecentMediaCards,
   type OfflineRecentMediaCard,
 } from "@/lib/recently-viewed-offline";
+import { useSavedMediaList } from "@/components/pwa-save-offline-button";
 import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
 
 export function OfflineClient() {
   const [items, setItems] = useState<OfflineRecentMediaCard[]>([]);
+  const { items: saved } = useSavedMediaList();
 
   useEffect(() => {
     setItems(readOfflineRecentMediaCards());
@@ -36,6 +38,41 @@ export function OfflineClient() {
         </header>
 
         <OfflineRetry />
+
+        {saved.length > 0 ? (
+          <section className="mt-10">
+            <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/45">
+              오프라인 저장 ({saved.length})
+            </h2>
+            <ul className="mt-4 flex flex-col gap-3">
+              {saved.map((m) => (
+                <li key={m.id}>
+                  <Link
+                    href={m.pagePath}
+                    className="group flex gap-3 rounded-2xl border border-cyan-400/25 bg-cyan-400/[0.06] p-3 transition hover:border-cyan-400/40"
+                  >
+                    {m.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={m.imageUrl}
+                        alt=""
+                        className="h-16 w-16 shrink-0 rounded-xl object-cover"
+                      />
+                    ) : null}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-bold text-white group-hover:text-cyan-100">
+                        {m.name}
+                      </p>
+                      <p className="mt-1 text-xs text-white/55">
+                        {[m.location, m.type].filter(Boolean).join(" · ")}
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <section className="mt-10">
           <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/45">

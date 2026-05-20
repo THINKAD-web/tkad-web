@@ -19,11 +19,21 @@ const RecentlyViewedSync = dynamic(
   () => import("@/components/recently-viewed-sync"),
   { ssr: false },
 );
+const PwaCatalogSync = dynamic(
+  () => import("@/components/pwa-catalog-sync").then((m) => ({ default: m.PwaCatalogSync })),
+  { ssr: false },
+);
+const PwaPushOptIn = dynamic(
+  () => import("@/components/pwa-push-opt-in").then((m) => ({ default: m.PwaPushOptIn })),
+  { ssr: false },
+);
 
 export default function DeferredPublicWidgets() {
   return (
     <>
+      <PwaCatalogSync />
       <RecentlyViewedSync />
+      <PwaPushOptIn />
       <ExitIntentPopup />
       <FloatingSupportDock />
     </>

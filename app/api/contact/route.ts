@@ -25,6 +25,7 @@ import {
   type ContactRegion,
 } from "@/lib/contact-lead-schema";
 import { createInquiryQuoteDraft } from "@/lib/inquiry-quote-draft";
+import { notifyMediaOwnersForMediaIds } from "@/lib/media-owner-inquiry-notify";
 import { recordConversion } from "@/lib/tracking/record";
 
 export const dynamic = "force-dynamic";
@@ -237,6 +238,11 @@ export async function POST(request: NextRequest) {
       }).catch((err) => {
         console.error("[contact] inquiry quote draft:", err);
       });
+      if (explicitMediaIds.length > 0) {
+        void notifyMediaOwnersForMediaIds(explicitMediaIds).catch((err) =>
+          console.error("[contact] media owner notify:", err),
+        );
+      }
     }
   } catch (err) {
     console.error("[contact] DB error:", err);
@@ -245,7 +251,7 @@ export async function POST(request: NextRequest) {
 
   void postInternalAlert({
     type: "contact_inquiry",
-    title: inquiryId ? "새 문의 + 견적 초안" : "새 문의 접수",
+    title: inquiryId ? "새 문의 + 견적 초안 생성됨" : "새 문의 접수",
     body: `${companyVal || "(회사미입력)"} / ${nameVal} / ${phoneVal || emailStr} · ${inquiryLbl}`,
     meta: {
       email: emailStr,

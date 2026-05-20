@@ -9,10 +9,13 @@ import {
   resolveMediaNamesForQuote,
 } from "@/lib/ooh-contract-context";
 import { buildSignedOohContractPdf } from "@/lib/ooh-contract-pdf";
+import { sendContractSignedEvidenceEmails } from "@/lib/contract-sign-notify";
 import {
-  isEmailConfigured,
-  sendEmailWithPdfAttachment,
-} from "@/lib/email/client";
+  formatSignedAtKst,
+  hashSignatureImagePngBase64,
+  hashUnsignedContractDocument,
+} from "@/lib/signature-audit";
+import { getCurrentUser } from "@/lib/user-session";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import {
   isCloudinaryConfigured,
@@ -61,9 +64,12 @@ export async function POST(
   }
   if (body.website) return json({ success: true }, { status: 201 });
 
-  const agree = body.agree === true;
+  const agree = body.agree === true || body.agreeEsignLaw === true;
   if (!agree) {
-    return json({ error: "Must accept contract terms" }, { status: 400 });
+    return json(
+      { error: "Must accept electronic signature under the Electronic Signature Act" },
+      { status: 400 },
+    );
   }
 
   const signatureRaw = String(body.signaturePngBase64 ?? "").trim();
@@ -107,6 +113,7 @@ export async function POST(
 
   const signedAt = new Date();
   const signedAtIso = signedAt.toISOString();
+  const signedAtKst = formatSignedAtKst(signedAt);
   const isKo = row.locale !== "en";
   const mediaNames = await resolveMediaNamesForQuote(db, row.mediaIds, isKo);
   const vars = ooHQuoteToContractPdfVars(row, mediaNames, contract.id);
@@ -123,13 +130,23 @@ export async function POST(
     return json({ error: "Invalid signature encoding" }, { status: 400 });
   }
 
+  const documentHash = await hashUnsignedContractDocument(vars);
+  const signatureImageHash = hashSignatureImagePngBase64(sigB64);
+  const sessionUser = await getCurrentUser();
+
   const { pdfBase64, sha256 } = await buildSignedOohContractPdf(
     vars,
     sigB64,
     {
+      documentNumber: contract.id,
+      signerName,
+      signerEmail,
       signedAtIso,
+      signedAtKst,
       signerIp: ip,
       signerAgent: ua,
+      documentContentSha256: documentHash,
+      signatureImageSha256: signatureImageHash,
     },
   );
 
@@ -148,6 +165,19 @@ export async function POST(
       );
     }
   }
+
+  const auditLog = await db.signatureAuditLog.create({
+    data: {
+      contractId: contract.id,
+      signerUserId: sessionUser?.id ?? null,
+      signerEmail,
+      signerIp: ip,
+      signerUserAgent: ua,
+      signedAt,
+      documentHash,
+      signatureImageHash,
+    },
+  });
 
   await db.oohContract.update({
     where: { id: contract.id },
@@ -170,54 +200,33 @@ export async function POST(
     type: "ooh_contract_signed",
     title: "전자계약 서명 완료",
     body: `${signerName} · ${row.clientCompany || ""} · 견적 ${id.slice(0, 8)}…`,
-    meta: { ooHQuoteId: id, contractId: contract.id, sha256 },
+    meta: {
+      ooHQuoteId: id,
+      contractId: contract.id,
+      documentHash,
+      signatureImageHash,
+      signedPdfSha256: sha256,
+      auditLogId: auditLog.id,
+    },
   }).catch(() => {});
 
-  if (isEmailConfigured()) {
-    const subj = isKo
-      ? "[싱커드] 서명 완료된 OOH 계약서"
-      : "[THINKAD] Signed OOH contract";
-    const text = isKo
-      ? "첨부 PDF는 전자서명이 반영된 계약서입니다."
-      : "Attached is your signed contract (PDF).";
-    const html = isKo
-      ? "<p>첨부 PDF는 전자서명이 반영된 계약서입니다.</p>"
-      : "<p>Attached is your signed contract.</p>";
-
-    try {
-      await sendEmailWithPdfAttachment({
-        to: signerEmail,
-        subject: subj,
-        text,
-        html,
-        pdfFilename: "thinkad-contract-signed.pdf",
-        pdfBase64,
-      });
-    } catch (e) {
-      console.error("[contract sign] customer email", e);
-    }
-
-    const alertTo =
-      process.env.OOH_CONTRACT_ALERT_EMAIL?.trim() ||
-      process.env.CONTACT_ALERT_EMAIL?.trim();
-    if (alertTo) {
-      try {
-        await sendEmailWithPdfAttachment({
-          to: alertTo,
-          subject: `[싱커드] 계약 서명 알림 ${signerName}`,
-          text: `견적 ID: ${id}\n서명자: ${signerName} <${signerEmail}>\nIP: ${ip}\nSHA-256: ${sha256}`,
-          html: `<p>견적 <code>${id}</code></p><p>${signerName} &lt;${signerEmail}&gt;</p><p>IP ${ip}</p><p>SHA-256 ${sha256}</p>`,
-          pdfFilename: "contract-signed-copy.pdf",
-          pdfBase64,
-        });
-      } catch (e) {
-        console.error("[contract sign] admin email", e);
-      }
-    }
-  }
+  void sendContractSignedEvidenceEmails({
+    isKo,
+    signerEmail,
+    signerName,
+    auditLog,
+    signedPdfSha256: sha256,
+    pdfBase64,
+  }).catch((e) => console.error("[contract sign] evidence email", e));
 
   return json(
-    { success: true, documentSha256: sha256 },
+    {
+      success: true,
+      documentSha256: sha256,
+      documentHash,
+      signatureImageHash,
+      auditLogId: auditLog.id,
+    },
     { status: 201 },
   );
 }

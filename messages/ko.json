@@ -1985,6 +1985,9 @@
     "campaigns": "캠페인",
     "community": "커뮤니티",
     "crmRecords": "CRM 기록",
+    "pipeline": "영업 파이프라인",
+    "forecast": "매출 예측",
+    "emailTemplates": "이메일 템플릿",
     "medias": "매체 관리",
     "verification": "검증 큐",
     "users": "사용자 관리",
@@ -2002,9 +2005,11 @@
     "signOut": "로그아웃",
     "instantBookings": "즉시 예약",
     "mediaApplications": "매체 등록 신청",
+    "mediaOwnerOps": "매체사 운영",
     "mediaReviews": "매체 리뷰",
     "searchStats": "검색 통계",
-    "abTest": "A/B 테스트"
+    "abTest": "A/B 테스트",
+    "apiUsage": "API 사용량"
   },
   "search": {
     "modalTitle": "통합 검색",
@@ -2285,7 +2290,7 @@
     "signerEmail": "서명자 이메일",
     "padLabel": "아래 영역에 서명",
     "clearPad": "지우기",
-    "agreeLabel": "계약 내용에 동의합니다.",
+    "agreeLabel": "본인은 전자서명법 제2조에 따라 전자적 방식으로 위 계약 내용에 동의합니다.",
     "submit": "서명 완료",
     "needAgree": "동의에 체크해 주세요.",
     "needContact": "이름과 이메일을 입력해 주세요.",

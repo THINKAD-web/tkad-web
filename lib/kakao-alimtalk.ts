@@ -15,6 +15,10 @@ export const ALIMTALK_TEMPLATE_CODES = [
   "TKAD_CAMPAIGN_CONFIRMED",
   "TKAD_CAMPAIGN_TOMORROW",
   "TKAD_REPORT_READY",
+  "TKAD_OWNER_NEW_INQUIRY",
+  "TKAD_OWNER_CAMPAIGN_CONFIRMED",
+  "TKAD_OWNER_SETTLEMENT_DONE",
+  "TKAD_PROOF_PHOTO_UPLOADED",
 ] as const;
 
 export type AlimtalkTemplateCode = (typeof ALIMTALK_TEMPLATE_CODES)[number];
@@ -26,11 +30,11 @@ export const ALIMTALK_TEMPLATE_DEFAULTS: Record<
 > = {
   TKAD_INQUIRY_RECEIVED: {
     subject: "문의 접수",
-    body: "#{name}님, 싱커드에 문의가 접수되었습니다.\n담당자가 확인 후 연락드리겠습니다.",
+    body: "#{name}님, 문의가 접수되었습니다.\n담당자가 확인 후 연락드리겠습니다.",
   },
   TKAD_QUOTE_SENT: {
     subject: "견적서 발송",
-    body: "#{name}님, 견적서가 발송되었습니다.\n#{link}",
+    body: "#{name}님, 견적서가 도착했어요.\n확인하기 → #{link}",
   },
   TKAD_QUOTE_EXPIRING: {
     subject: "견적 만료 예정",
@@ -38,7 +42,7 @@ export const ALIMTALK_TEMPLATE_DEFAULTS: Record<
   },
   TKAD_CAMPAIGN_CONFIRMED: {
     subject: "캠페인 확정",
-    body: "#{name}님, 캠페인「#{campaignName}」계약이 확정되었습니다.\n송출 일정은 담당자가 안내드립니다.",
+    body: "#{name}님, 캠페인「#{campaignName}」이 확정되었습니다.\n송출 일정은 담당자가 안내드립니다.",
   },
   TKAD_CAMPAIGN_TOMORROW: {
     subject: "광고 집행 안내",
@@ -46,7 +50,23 @@ export const ALIMTALK_TEMPLATE_DEFAULTS: Record<
   },
   TKAD_REPORT_READY: {
     subject: "리포트 준비",
-    body: "#{name}님,「#{campaignName}」캠페인 결과 리포트가 준비되었습니다.\n#{link}",
+    body: "#{name}님,「#{campaignName}」캠페인 결과 리포트가 준비됐어요.\n#{link}",
+  },
+  TKAD_OWNER_NEW_INQUIRY: {
+    subject: "매체 문의",
+    body: "등록하신 매체「#{mediaName}」에 새 문의가 접수되었습니다.\n#{link}",
+  },
+  TKAD_OWNER_CAMPAIGN_CONFIRMED: {
+    subject: "집행 확정",
+    body: "매체「#{mediaName}」에서「#{campaignName}」집행이 확정되었습니다.",
+  },
+  TKAD_OWNER_SETTLEMENT_DONE: {
+    subject: "정산 완료",
+    body: "#{periodMonth} 정산이 완료되었습니다.\n정산 금액: #{amount}원",
+  },
+  TKAD_PROOF_PHOTO_UPLOADED: {
+    subject: "인증 사진",
+    body: "광고가 정상 집행되고 있어요!\n인증 사진을 확인해보세요 →\n#{link}",
   },
 };
 
@@ -57,6 +77,10 @@ export const ALIMTALK_TEMPLATE_LABELS: Record<AlimtalkTemplateCode, string> = {
   TKAD_CAMPAIGN_CONFIRMED: "계약 확정",
   TKAD_CAMPAIGN_TOMORROW: "집행 D-1",
   TKAD_REPORT_READY: "리포트 완료",
+  TKAD_OWNER_NEW_INQUIRY: "매체사·신규 문의",
+  TKAD_OWNER_CAMPAIGN_CONFIRMED: "매체사·집행 확정",
+  TKAD_OWNER_SETTLEMENT_DONE: "매체사·정산 완료",
+  TKAD_PROOF_PHOTO_UPLOADED: "인증 사진 업로드",
 };
 
 export type SendAlimtalkParams = {
@@ -78,7 +102,10 @@ export type SendAlimtalkResult = {
 };
 
 type AligoConfig = {
+  /** 카카오 알림톡 API (kakaoapi.aligo.in) */
   apiKey: string;
+  /** SMS 대체 발송 (apis.aligo.in) — 미설정 시 apiKey와 동일 */
+  smsApiKey: string;
   userId: string;
   senderKey: string;
   senderPhone: string;
@@ -96,15 +123,19 @@ export function isAlimtalkConfigured(): boolean {
 }
 
 function getAligoConfig(): AligoConfig | null {
-  const apiKey = process.env.KAKAO_ALIMTALK_API_KEY?.trim();
+  const apiKey =
+    process.env.KAKAO_ALIMTALK_API_KEY?.trim() ||
+    process.env.ALIGO_API_KEY?.trim();
+  const smsApiKey = process.env.ALIGO_API_KEY?.trim() || apiKey;
   const userId =
     process.env.KAKAO_ALIMTALK_USER_ID?.trim() ||
     process.env.ALIGO_USER_ID?.trim();
   const senderKey = process.env.KAKAO_ALIMTALK_SENDER_KEY?.trim();
   const senderPhone = process.env.KAKAO_ALIMTALK_PHONE?.trim();
-  if (!apiKey || !userId || !senderKey || !senderPhone) return null;
+  if (!apiKey || !smsApiKey || !userId || !senderKey || !senderPhone) return null;
   return {
     apiKey,
+    smsApiKey,
     userId,
     senderKey,
     senderPhone,
@@ -196,7 +227,7 @@ async function sendSmsFallback(
   subject: string,
 ): Promise<SendAlimtalkResult> {
   const fields: Record<string, string> = {
-    key: cfg.apiKey,
+    key: cfg.smsApiKey,
     user_id: cfg.userId,
     sender: cfg.senderPhone.replace(/\D/g, ""),
     receiver: receiver.replace(/\D/g, ""),

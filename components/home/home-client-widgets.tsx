@@ -12,6 +12,14 @@ export const HomeFloatingCta = dynamic(
   { ssr: false },
 );
 
+export const HomePwaWidget = dynamic(
+  () =>
+    import("@/components/pwa-home-widget").then((m) => ({
+      default: m.PwaHomeWidget,
+    })),
+  { ssr: false },
+);
+
 export const HomeClientLogosLazy = dynamic(
   () => import("@/components/home-client-logos").then((m) => ({ default: m.HomeClientLogos })),
   { ssr: false },

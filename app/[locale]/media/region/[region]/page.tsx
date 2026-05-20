@@ -15,7 +15,7 @@ import {
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
 import { pageAlternates } from "@/lib/seo";
-import MediaBrowseClient from "@/components/media-browse-client";
+import { MediaBrowseClientSuspense } from "@/components/media-browse-client-suspense";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { MediaKeywordLandingEmpty } from "@/components/media-keyword-landing-empty";
@@ -161,7 +161,7 @@ export default async function RegionLandingPage({ params }: Props) {
               ctaLabel={isKo ? "전체 매체 보기" : "Browse all media"}
             />
           ) : (
-            <MediaBrowseClient catalog={filtered} hideHero />
+            <MediaBrowseClientSuspense catalog={filtered} hideHero />
           )}
 
           <section className="tkad-media-links-footer border-t border-border/80 bg-muted py-12 text-foreground sm:py-16">

@@ -3,7 +3,7 @@
  * D-3: 만료 예정 알림 (이메일·알림톡·어드민 웹훅).
  *
  * 인증: Authorization: Bearer ${CRON_SECRET}
- * 스케줄: 0 15 * * * (UTC) ≈ KST 자정
+ * 스케줄: 0 15 * * * (UTC) = KST 00:00 매일
  */
 
 import { NextRequest } from "next/server";
@@ -11,6 +11,7 @@ import { OoHQuoteStatus } from "@prisma/client";
 import { json } from "@/lib/admin-guard";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { notifySlackQuoteExpiring } from "@/lib/quote-slack-notify";
 import { notifyQuoteExpiringSoon } from "@/lib/kakao-alimtalk-notify";
 import { siteUrl } from "@/lib/seo";
 import { sendEmail } from "@/lib/email/client";
@@ -98,6 +99,12 @@ export async function GET(request: NextRequest) {
       title: "견적 만료 D-3",
       body: `${q.clientName} · valid ${validStr}`,
       meta: { oohQuoteId: q.id },
+    }).catch(() => {});
+
+    void notifySlackQuoteExpiring({
+      quoteId: q.id,
+      clientName: q.clientName,
+      validUntil: validStr,
     }).catch(() => {});
   }
 

@@ -24,6 +24,7 @@ import {
   sendBookingRequestReceived,
   type BookingRequestSummary,
 } from "@/lib/booking-emails";
+import { notifyMediaOwnerNewInquiry } from "@/lib/media-owner-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -156,7 +157,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   const db = getPrisma();
   const media = await db.media.findUnique({
     where: { id: mediaId },
-    select: { id: true, name: true, isActive: true },
+    select: { id: true, name: true, isActive: true, ownerUserId: true },
   });
   if (!media || !media.isActive) {
     return Response.json({ error: "Media not found" }, { status: 404 });
@@ -215,6 +216,12 @@ export async function POST(request: NextRequest, { params }: Params) {
     void Promise.allSettled([
       sendBookingRequestReceived(requesterEmail, summary),
       sendBookingRequestAdminAlert(summary),
+      media.ownerUserId
+        ? notifyMediaOwnerNewInquiry({
+            ownerUserId: media.ownerUserId,
+            mediaName: media.name,
+          })
+        : Promise.resolve(),
     ]);
 
     return Response.json(
