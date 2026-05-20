@@ -22,7 +22,7 @@ import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
-import { MediaBrowseClientSuspense } from "@/components/media-browse-client-suspense";
+import { MediaKeywordLandingCatalog } from "@/components/media-keyword-landing-catalog";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { MediaKeywordLandingEmpty } from "@/components/media-keyword-landing-empty";
@@ -216,7 +216,15 @@ export default async function LocalSeoLandingPage({ params }: Props) {
                     ? `${landing.placeKo} 매체 ${filtered.length}개`
                     : `${filtered.length} placements in ${landing.placeEn}`}
                 </h2>
-                <MediaBrowseClientSuspense catalog={filtered} hideHero />
+                <MediaKeywordLandingCatalog items={filtered} locale={locale} />
+                <p className="mt-4 text-center">
+                  <Link
+                    href="/media"
+                    className="font-mono text-xs font-bold uppercase tracking-wider text-cyan-300 hover:underline"
+                  >
+                    {isKo ? "전체 매체·지도에서 보기 →" : "Browse all media & map →"}
+                  </Link>
+                </p>
               </section>
             )}
 
