@@ -1,7 +1,7 @@
--- Safe additive migration: new tables only (no ALTER/DROP on existing data).
+-- Safe additive migration: new tables only (idempotent — safe if db push ran first).
 
 -- CreateTable
-CREATE TABLE "ab_events" (
+CREATE TABLE IF NOT EXISTS "ab_events" (
     "id" TEXT NOT NULL,
     "test_key" TEXT NOT NULL DEFAULT 'hero_cta',
     "variant" TEXT NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE "ab_events" (
 );
 
 -- CreateTable
-CREATE TABLE "ab_test_configs" (
+CREATE TABLE IF NOT EXISTS "ab_test_configs" (
     "test_key" TEXT NOT NULL,
     "forced_variant" TEXT,
     "generation" INTEGER NOT NULL DEFAULT 1,
@@ -23,7 +23,7 @@ CREATE TABLE "ab_test_configs" (
 );
 
 -- CreateTable
-CREATE TABLE "web_vitals" (
+CREATE TABLE IF NOT EXISTS "web_vitals" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "value" DOUBLE PRECISION NOT NULL,
@@ -37,13 +37,13 @@ CREATE TABLE "web_vitals" (
 );
 
 -- CreateIndex
-CREATE INDEX "ab_events_test_key_variant_event_idx" ON "ab_events"("test_key", "variant", "event");
+CREATE INDEX IF NOT EXISTS "ab_events_test_key_variant_event_idx" ON "ab_events"("test_key", "variant", "event");
 
 -- CreateIndex
-CREATE INDEX "ab_events_test_key_created_at_idx" ON "ab_events"("test_key", "created_at");
+CREATE INDEX IF NOT EXISTS "ab_events_test_key_created_at_idx" ON "ab_events"("test_key", "created_at");
 
 -- CreateIndex
-CREATE INDEX "web_vitals_name_created_at_idx" ON "web_vitals"("name", "created_at" DESC);
+CREATE INDEX IF NOT EXISTS "web_vitals_name_created_at_idx" ON "web_vitals"("name", "created_at" DESC);
 
 -- CreateIndex
-CREATE INDEX "web_vitals_created_at_idx" ON "web_vitals"("created_at" DESC);
+CREATE INDEX IF NOT EXISTS "web_vitals_created_at_idx" ON "web_vitals"("created_at" DESC);
