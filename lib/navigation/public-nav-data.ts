@@ -73,7 +73,7 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     icon: ClipboardList,
     items: [
       { id: "media-planner", href: "/planner", icon: Lightbulb, beta: true },
-      { id: "package-proposal", href: "/media/packages", icon: Package, beta: true },
+      { id: "package-proposal", href: "/media/packages", icon: Package },
     ],
   },
   {
@@ -89,16 +89,16 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     id: "insights",
     icon: LineChart,
     items: [
-      { id: "trend-report", href: "/report", icon: LineChart, beta: true },
-      { id: "success-cases", href: "/cases", icon: Trophy, beta: true },
+      { id: "trend-report", href: "/report", icon: LineChart },
+      { id: "success-cases", href: "/cases", icon: Trophy },
     ],
   },
   {
     id: "academy",
     icon: GraduationCap,
     items: [
-      { id: "academy-content", href: "/academy", icon: BookOpen, beta: true },
-      { id: "advertiser-guide", href: "/guides", icon: BookMarked, beta: true },
+      { id: "academy-content", href: "/academy", icon: BookOpen },
+      { id: "advertiser-guide", href: "/guides", icon: BookMarked },
     ],
   },
 ];

@@ -1,6 +1,5 @@
 "use client";
 
-import { CONTACT_EMAIL } from "@/lib/constants";
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -13,7 +12,7 @@ import { ContactOfficeMap } from "@/components/contact/contact-office-map";
 
 type MainTab = "inquiry" | "feedback";
 
-export function ContactNeonClient() {
+export function ContactFormClient() {
   const t = useTranslations("contact");
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -27,41 +26,15 @@ export function ContactNeonClient() {
     "border-violet-500/40 bg-gradient-to-r from-violet-500/25 to-cyan-400/20 text-white shadow-[0_8px_32px_rgba(139,92,246,0.25)]";
   const tabIdle = "text-white/70 hover:border-white/20 hover:bg-white/10";
 
-  const infoItems = useMemo(
-    () => [
-      { label: "PHONE", value: t("phoneNumber") },
-      { label: "EMAIL", value: CONTACT_EMAIL },
-      { label: "ADDRESS", value: t("address") },
-      { label: "HOURS", value: t("hours") },
-    ],
+  const extraInfoItems = useMemo(
+    () => [{ label: "HOURS", value: t("hours") }],
     [t],
   );
 
   return (
     <>
-      <NeonSection>
-        <ScrollAnimate>
-          <NeonSectionHead
-            number="01"
-            kicker={isKo ? "Contact" : "Contact"}
-            title={
-              isKo ? (
-                <>
-                  30초 상담 신청,{" "}
-                  <span className="tkad-home-accent-text">24시간 내</span> 연락
-                </>
-              ) : (
-                <>
-                  Apply in 30s, hear back{" "}
-                  <span className="tkad-home-accent-text">within 24h</span>
-                </>
-              )
-            }
-            meta={isKo ? "free consultation · verified inventory" : "free consultation · verified inventory"}
-          />
-        </ScrollAnimate>
-
-        <div className="mt-10 grid gap-5 lg:grid-cols-5">
+      <NeonSection className="pt-0">
+        <div className="grid gap-5 lg:grid-cols-5">
           <div className="lg:col-span-3">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur sm:p-8">
               <div className="flex flex-col gap-3">
@@ -90,7 +63,11 @@ export function ContactNeonClient() {
               </div>
 
               <div className="mt-6">
-                {mainTab === "feedback" ? <ContactFeedbackSurvey /> : <ContactInquiryForm />}
+                {mainTab === "feedback" ? (
+                  <ContactFeedbackSurvey />
+                ) : (
+                  <ContactInquiryForm />
+                )}
               </div>
             </div>
           </div>
@@ -104,8 +81,11 @@ export function ContactNeonClient() {
                 {t("infoTitle")}
               </h3>
               <div className="mt-6 space-y-4">
-                {infoItems.map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
+                {extraInfoItems.map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3"
+                  >
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
                       {item.label}
                     </p>
@@ -180,4 +160,3 @@ export function ContactNeonClient() {
     </>
   );
 }
-

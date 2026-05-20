@@ -3,6 +3,7 @@ import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import { serializeJsonLd } from "@/lib/seo";
 import { buildCollectionPageJsonLd } from "@/lib/structured-data";
 import CasesPageClient from "./cases-page-client";
+import { CasesHero } from "./cases-hero";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -35,7 +36,10 @@ export default async function CasesPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionLd) }}
       />
-      <CasesPageClient initialCases={initialCases} />
+      <CasesPageClient
+        initialCases={initialCases}
+        hero={<CasesHero locale={locale} empty={initialCases.length === 0} />}
+      />
     </>
   );
 }
