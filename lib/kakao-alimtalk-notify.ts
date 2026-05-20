@@ -45,6 +45,24 @@ export async function notifyInquiryReceived(input: {
   });
 }
 
+export async function notifyQuoteExpiringSoon(input: {
+  phone: string;
+  name: string;
+  link: string;
+  validUntil: string;
+}): Promise<SendAlimtalkResult> {
+  return sendAlimtalk({
+    to: input.phone,
+    templateCode: "TKAD_QUOTE_EXPIRING",
+    recvName: input.name,
+    variables: {
+      name: input.name,
+      link: input.link,
+      validUntil: input.validUntil,
+    },
+  });
+}
+
 export async function notifyQuoteSent(input: {
   phone: string;
   name: string;

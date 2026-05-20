@@ -3,6 +3,7 @@ import { siteUrl } from "@/lib/seo";
 import { OoHQuoteStatus } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { autoLinkQuoteRequestToCampaign } from "@/lib/quote-campaign-link";
+import { recordConversion } from "@/lib/tracking/record";
 import { rateLimit } from "@/lib/rate-limit";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import {
@@ -274,6 +275,11 @@ export async function POST(request: NextRequest) {
     ).catch(() => {});
 
     await autoLinkQuoteRequestToCampaign(db, created.id, emailNorm);
+
+    void recordConversion({
+      type: "quote_request",
+      metadata: { quoteRequestId: created.id, oohQuoteId: ooh.id },
+    });
 
     return json({ success: true, quoteId: ooh.id }, { status: 201 });
   } catch (err) {

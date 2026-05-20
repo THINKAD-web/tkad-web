@@ -36,6 +36,18 @@
     {
       "path": "/api/ping-sitemap",
       "schedule": "0 4 * * 1"
+    },
+    {
+      "path": "/api/cron/update-media-popularity",
+      "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/expire-quotes",
+      "schedule": "5 15 * * *"
+    },
+    {
+      "path": "/api/cron/daily-ops-report",
+      "schedule": "0 0 * * *"
     }
   ]
 }

@@ -8,6 +8,15 @@ export type QuotePdfRow = {
   /** Preferred for PDF (English / romanized). */
   nameAscii?: string;
   locationAscii?: string;
+  /** Est. impressions for campaign period */
+  impressions?: number;
+  /** Kakao static map JPEG/PNG base64 */
+  mapImageBase64?: string | null;
+};
+
+export type QuotePdfTimelineStep = {
+  label: string;
+  date: string;
 };
 
 export type BuildQuotePdfParams = {
@@ -25,6 +34,12 @@ export type BuildQuotePdfParams = {
   monthlyCost: number;
   totalCost: number;
   rows: QuotePdfRow[];
+  validUntil?: string | null;
+  supplyWon?: number | null;
+  vatWon?: number | null;
+  totalWithVatManwon?: number | null;
+  timeline?: QuotePdfTimelineStep[];
+  accountManagerName?: string;
 };
 
 const HELV = "helvetica";
@@ -124,8 +139,13 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
   doc.setFontSize(10);
   setHelv(doc, "normal");
   doc.setTextColor(60, 60, 60);
-  doc.text(`Date: ${new Date().toISOString().slice(0, 10)}`, margin, y);
+  const issued = new Date().toISOString().slice(0, 10);
+  doc.text(`Date: ${issued}`, margin, y);
   y += 6;
+  if (p.validUntil) {
+    doc.text(`Valid until: ${p.validUntil.slice(0, 10)}`, margin, y);
+    y += 6;
+  }
 
   const companyLine = pdfSafeLine(p.company, "—");
   const nameLine = pdfSafeLine(p.name, "—");
@@ -185,7 +205,7 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
 
   setHelv(doc, "normal");
   for (const row of p.rows) {
-    if (y > 270) {
+    if (y > 250) {
       doc.addPage();
       y = 20;
     }
@@ -200,7 +220,41 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
       y,
       { align: "right" },
     );
-    y += 7;
+    y += 6;
+    if (row.impressions != null && row.impressions > 0) {
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text(
+        `Est. impressions: ${row.impressions.toLocaleString("en-US")}`,
+        margin,
+        y,
+      );
+      doc.setFontSize(9);
+      doc.setTextColor(60, 60, 60);
+      y += 5;
+    }
+    if (row.mapImageBase64) {
+      try {
+        if (y > 200) {
+          doc.addPage();
+          y = 20;
+        }
+        const mapW = pageW - 2 * margin;
+        const mapH = 42;
+        doc.addImage(
+          `data:image/png;base64,${row.mapImageBase64}`,
+          "PNG",
+          margin,
+          y,
+          mapW,
+          mapH,
+        );
+        y += mapH + 6;
+      } catch {
+        /* ignore map render errors */
+      }
+    }
+    y += 2;
   }
 
   if (y + 24 > 280) {
@@ -213,12 +267,72 @@ export async function createQuotePdfDoc(p: BuildQuotePdfParams) {
 
   setHelv(doc, "bold");
   doc.setFontSize(11);
-  doc.text(
-    `Total (excl. VAT): ₩${p.totalCost.toLocaleString("en-US")} (10K KRW)`,
-    margin,
-    y,
-  );
-  y += 10;
+  if (p.supplyWon != null && p.vatWon != null) {
+    doc.text(
+      `Subtotal: KRW ${p.supplyWon.toLocaleString("en-US")}`,
+      margin,
+      y,
+    );
+    y += 6;
+    doc.text(`VAT (10%): KRW ${p.vatWon.toLocaleString("en-US")}`, margin, y);
+    y += 6;
+    const totalMan =
+      p.totalWithVatManwon ??
+      Math.round((p.supplyWon + p.vatWon) / 10_000);
+    doc.text(
+      `Grand total: KRW ${(totalMan * 10_000).toLocaleString("en-US")} (~${totalMan.toLocaleString("en-US")} x 10K)`,
+      margin,
+      y,
+    );
+    y += 8;
+  } else {
+    doc.text(
+      `Total (excl. VAT): ₩${p.totalCost.toLocaleString("en-US")} (10K KRW)`,
+      margin,
+      y,
+    );
+    y += 10;
+  }
+
+  if (p.timeline && p.timeline.length > 0) {
+    if (y > 240) {
+      doc.addPage();
+      y = 20;
+    }
+    setHelv(doc, "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Campaign timeline", margin, y);
+    y += 7;
+    setHelv(doc, "normal");
+    doc.setFontSize(9);
+    for (const step of p.timeline) {
+      if (y > 275) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(`${step.date} — ${pdfSafeLine(step.label, "Step")}`, margin, y);
+      y += 5;
+    }
+    y += 4;
+  }
+
+  if (p.accountManagerName) {
+    if (y > 265) {
+      doc.addPage();
+      y = 20;
+    }
+    y += 4;
+    doc.line(margin, y, margin + 70, y);
+    y += 8;
+    setHelv(doc, "normal");
+    doc.setFontSize(9);
+    doc.text("THINKAD Account Manager", margin, y);
+    y += 5;
+    setHelv(doc, "bold");
+    doc.text(pdfSafeLine(p.accountManagerName, "Sales Team"), margin, y);
+    y += 10;
+  }
 
   doc.setFontSize(8);
   setHelv(doc, "italic");

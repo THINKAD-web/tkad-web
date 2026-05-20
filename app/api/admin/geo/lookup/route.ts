@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
 import { assertAdmin, json } from "@/lib/admin-guard";
 import { geocodeAddressWithKakao } from "@/lib/kakao-address-geocode";
+import {
+  normalizeMediaLocationFields,
+  regionZoneLabel,
+} from "@/lib/media-regions";
 
 export const dynamic = "force-dynamic";
 
@@ -35,11 +39,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const loc = normalizeMediaLocationFields({
+    city: hit.city,
+    district: hit.district,
+    location: hit.addressName,
+  });
+
   return json({
     latitude: hit.latitude,
     longitude: hit.longitude,
-    city: hit.city,
-    district: hit.district,
+    city: loc.city || hit.city,
+    district: loc.district || hit.district,
     addressName: hit.addressName,
+    region: loc.region,
+    regionZone: loc.regionZone,
+    regionZoneLabel: regionZoneLabel(loc.regionZone, "ko"),
   });
 }

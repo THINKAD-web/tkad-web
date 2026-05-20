@@ -12,8 +12,9 @@ import {
   Tag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BLOG_SEO_POSTS } from "@/lib/blog-seo-posts";
 
-type BlogCategoryKey = "trend" | "case" | "news";
+type BlogCategoryKey = "trend" | "case" | "news" | "guide";
 
 type BlogPost = {
   id: number;
@@ -25,6 +26,8 @@ type BlogPost = {
   titleEn: string;
   summaryKo: string;
   summaryEn: string;
+  /** SEO 롱테일 포스트 — `/blog/[slug]` 상세로 링크 */
+  seoDetail?: boolean;
 };
 
 const posts: BlogPost[] = [
@@ -93,6 +96,18 @@ const posts: BlogPost[] = [
     summaryEn:
       "A practical checklist for selecting OOH media considering budget, target audience, routes, and exposure environment.",
   },
+  ...BLOG_SEO_POSTS.map((p, i) => ({
+    id: 100 + i,
+    slug: p.slug,
+    category: "guide" as const,
+    date: p.publishedAt,
+    thumbnailColor: "bg-accent",
+    titleKo: p.titleKo,
+    titleEn: p.titleEn,
+    summaryKo: p.descriptionKo,
+    summaryEn: p.descriptionEn,
+    seoDetail: true,
+  })),
 ];
 
 const categories: {
@@ -103,6 +118,7 @@ const categories: {
   { key: "trend", getLabel: (isKo) => (isKo ? "OOH 트렌드" : "OOH Trends") },
   { key: "case", getLabel: (isKo) => (isKo ? "성공사례" : "Case Studies") },
   { key: "news", getLabel: (isKo) => (isKo ? "회사소식" : "Company News") },
+  { key: "guide", getLabel: (isKo) => (isKo ? "가이드" : "Guides") },
 ];
 
 export default function BlogPage() {
@@ -238,11 +254,8 @@ export default function BlogPage() {
                     day: "numeric",
                   });
 
-              return (
-                <article
-                  key={post.id}
-                  className="group -mt-[2px] -ml-[2px] flex h-full flex-col overflow-hidden border-2 border-border bg-card"
-                >
+              const card = (
+                <article className="group -mt-[2px] -ml-[2px] flex h-full flex-col overflow-hidden border-2 border-border bg-card transition-colors hover:border-accent">
                   <div
                     className={cn(
                       "relative h-40 border-b-2 border-border",
@@ -280,6 +293,20 @@ export default function BlogPage() {
                     </div>
                   </div>
                 </article>
+              );
+
+              if (post.seoDetail) {
+                return (
+                  <Link key={post.id} href={`/blog/${post.slug}`} className="block h-full">
+                    {card}
+                  </Link>
+                );
+              }
+
+              return (
+                <div key={post.id} className="h-full">
+                  {card}
+                </div>
               );
             })}
           </div>

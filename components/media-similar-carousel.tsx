@@ -217,6 +217,11 @@ export default function MediaSimilarCarousel({
                     })}
                   </p>
                 ) : null}
+                {m.recommendReason ? (
+                  <p className="line-clamp-1 font-mono text-[10px] font-semibold tracking-wide text-muted-foreground">
+                    {m.recommendReason}
+                  </p>
+                ) : null}
               </div>
             </Link>
           );

@@ -28,7 +28,13 @@ import {
   buildMediaMetaKeywordsList,
   buildMediaPageTitle,
 } from "@/lib/media-seo";
-import { pageAlternates } from "@/lib/seo";
+import { attachRecommendReason } from "@/lib/media-recommend-reasons";
+import { buildMediaImageAlt } from "@/lib/media-image-seo";
+import { mediaOpenGraphImages, pageAlternates } from "@/lib/seo";
+import {
+  buildMediaDetailSeoLinks,
+  SeoContextualLinks,
+} from "@/components/seo/seo-contextual-links";
 import {
   buildMediaBreadcrumbJsonLd,
   buildMediaPlaceJsonLd,
@@ -91,12 +97,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const media = await resolveMediaForDetail(id);
   if (!media) return { title: "Media" };
   const isKo = locale === "ko";
-  const name = isKo ? media.name : media.nameEn || media.name;
   const title = buildMediaPageTitle(media, locale);
   const description = buildMediaMetaDescription(media, locale);
   const keywords = buildMediaMetaKeywordsList(media, locale, 28);
 
-  const heroImage = getPrimaryMediaImageUrl(media);
+  const imageAlt = buildMediaImageAlt(media, locale);
+  const ogImages = mediaOpenGraphImages(locale, String(media.id), {
+    ko: imageAlt,
+    en: imageAlt,
+  });
   return {
     title,
     description,
@@ -106,22 +115,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       type: "website",
-      images: heroImage
-        ? [
-            {
-              url: heroImage,
-              width: 1200,
-              height: 630,
-              alt: name,
-            },
-          ]
-        : undefined,
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: heroImage ? [heroImage] : undefined,
+      images: ogImages,
     },
   };
 }
@@ -159,9 +159,10 @@ export default async function MediaDetailPage({ params }: Props) {
     media.monthlyFootTraffic ??
     Math.round(media.dailyFootTraffic * 30);
 
-  const similar = media.keywordFilter
-    ? getSimilarKeywordFilterMediaItems(media.id, 3)
-    : getSimilarMediaFromCatalog(catalog, media, 3);
+  const similarRaw = media.keywordFilter
+    ? getSimilarKeywordFilterMediaItems(media.id, 4)
+    : getSimilarMediaFromCatalog(catalog, media, 4);
+  const similar = attachRecommendReason(similarRaw, "similar_profile", locale);
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
   const caseStudyItems = buildCaseStudyGalleryItems(media);
@@ -205,6 +206,9 @@ export default async function MediaDetailPage({ params }: Props) {
     return desc ?? "";
   })();
 
+  const imageAlt = buildMediaImageAlt(media, locale);
+  const seoContextPills = buildMediaDetailSeoLinks(media, locale);
+
   const placeJsonLd = buildMediaPlaceJsonLd(media, locale);
   const productJsonLd = buildMediaProductJsonLd(media, locale);
   const breadcrumbJsonLd = buildMediaBreadcrumbJsonLd(media, locale);
@@ -237,7 +241,7 @@ export default async function MediaDetailPage({ params }: Props) {
           <MediaDetailHeroGallery
             images={galleryImages}
             heroSrc={heroImage}
-            altBase={isKo ? media.name : (media.nameEn || media.name)}
+            altBase={imageAlt}
             labels={{
               close: t("galleryLightboxClose"),
               prev: t("galleryLightboxPrev"),
@@ -832,6 +836,15 @@ export default async function MediaDetailPage({ params }: Props) {
           {relatedCases.length > 0 ? (
             <div className="mt-12">
               <RelatedCases cases={relatedCases} isKo={isKo} />
+            </div>
+          ) : null}
+
+          {seoContextPills.length > 0 ? (
+            <div className="mt-10">
+              <SeoContextualLinks
+                title={isKo ? "관련 SEO 가이드" : "Related guides"}
+                pills={seoContextPills}
+              />
             </div>
           ) : null}
 

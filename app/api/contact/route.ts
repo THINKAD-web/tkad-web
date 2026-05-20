@@ -21,7 +21,11 @@ import {
   composeContactLeadStoredMessage,
   contactLeadSchema,
   isContactLeadV2Payload,
+  type ContactBudgetV2,
+  type ContactRegion,
 } from "@/lib/contact-lead-schema";
+import { createInquiryQuoteDraft } from "@/lib/inquiry-quote-draft";
+import { recordConversion } from "@/lib/tracking/record";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +93,10 @@ export async function POST(request: NextRequest) {
   let regionsLbl = "";
   let startDateLbl = "";
   let composedMessage = "";
+  let leadMediaIds: string[] = [];
+  let leadRegions: ContactRegion[] = [];
+  let leadBudgetCode: ContactBudgetV2 | undefined;
+  let leadStartDateRaw = "";
 
   if (isContactLeadV2Payload(raw)) {
     const parsed = contactLeadSchema.safeParse({ ...raw, locale, turnstileToken });
@@ -114,6 +122,10 @@ export async function POST(request: NextRequest) {
     regionsLbl = composed.regionsLabel;
     startDateLbl = composed.startDateLabel;
     composedMessage = composed.storedMessage;
+    leadMediaIds = lead.mediaIds ?? [];
+    leadRegions = lead.regions;
+    leadBudgetCode = lead.budget;
+    leadStartDateRaw = lead.startDate?.trim() ?? "";
   } else {
     const name = typeof raw.name === "string" ? raw.name : "";
     const phone = typeof raw.phone === "string" ? raw.phone : "";
@@ -160,6 +172,8 @@ export async function POST(request: NextRequest) {
     return json({ error: "service_unavailable" }, { status: 503 });
   }
 
+  let inquiryId: string | null = null;
+
   try {
     const db = getPrisma();
     const base = {
@@ -169,8 +183,18 @@ export async function POST(request: NextRequest) {
       message: composedMessage,
     };
 
+    const legacyMediaRaw =
+      typeof raw.media === "string"
+        ? raw.media.split(/[,，\s]+/).filter(Boolean)
+        : Array.isArray(raw.mediaIds)
+          ? raw.mediaIds.map(String).filter(Boolean)
+          : [];
+    const explicitMediaIds = [
+      ...new Set([...leadMediaIds, ...legacyMediaRaw]),
+    ];
+
     try {
-      await db.contactInquiry.create({
+      const inquiry = await db.contactInquiry.create({
         data: {
           ...base,
           inquiryType: inquiryLbl,
@@ -178,19 +202,41 @@ export async function POST(request: NextRequest) {
           ...(hasValidEmail ? { email: emailStr } : {}),
         },
       });
+      inquiryId = inquiry.id;
     } catch (firstErr) {
       console.error("[contact] DB error (full row):", firstErr);
       try {
-        await db.contactInquiry.create({
+        const inquiry = await db.contactInquiry.create({
           data: {
             ...base,
             ...(hasValidEmail ? { email: emailStr } : { email: "" }),
           },
         });
+        inquiryId = inquiry.id;
       } catch (secondErr) {
         console.error("[contact] DB error (compat row):", secondErr);
         return json({ error: "save_failed" }, { status: 500 });
       }
+    }
+
+    if (inquiryId) {
+      void recordConversion({ type: "quote_request", metadata: { inquiryId } });
+      void createInquiryQuoteDraft(db, {
+        inquiryId,
+        company: companyVal,
+        name: nameVal,
+        phone: phoneVal,
+        email: hasValidEmail ? emailStr : null,
+        message: composedMessage,
+        budgetLabel: budgetLbl,
+        locale,
+        explicitMediaIds,
+        startDateRaw: leadStartDateRaw,
+        regions: leadRegions,
+        budgetCode: leadBudgetCode,
+      }).catch((err) => {
+        console.error("[contact] inquiry quote draft:", err);
+      });
     }
   } catch (err) {
     console.error("[contact] DB error:", err);
@@ -199,9 +245,13 @@ export async function POST(request: NextRequest) {
 
   void postInternalAlert({
     type: "contact_inquiry",
-    title: "새 문의 접수",
+    title: inquiryId ? "새 문의 + 견적 초안" : "새 문의 접수",
     body: `${companyVal || "(회사미입력)"} / ${nameVal} / ${phoneVal || emailStr} · ${inquiryLbl}`,
-    meta: { email: emailStr, source: "contact_form" },
+    meta: {
+      email: emailStr,
+      source: "contact_form",
+      contactInquiryId: inquiryId,
+    },
   }).catch(() => {});
 
   try {

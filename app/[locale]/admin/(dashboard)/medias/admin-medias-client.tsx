@@ -39,6 +39,12 @@ import {
 import { useSearchParams } from "next/navigation";
 import { MediaGalleryEditor } from "@/components/admin/media-gallery-editor";
 import {
+  AdminMediaQualityToolbar,
+  MediaQualityScoreBadge,
+} from "@/components/admin/admin-media-quality-toolbar";
+import { regionZoneLabel } from "@/lib/media-regions";
+import { scoreMediaQuality } from "@/lib/media-quality-score";
+import {
   clearAdminMediaFormDraft,
   loadAdminMediaFormDraft,
   saveAdminMediaFormDraft,
@@ -529,6 +535,27 @@ function clampPageSize(n: number): PageSizeOption {
 
 type PublicListFilter = "all" | "public" | "hidden";
 type AvailabilityListFilter = "all" | MediaAvailability;
+type QualityListFilter = "all" | "low";
+
+function mediaQualityScore(m: AdminMediaDto): number {
+  const images = [
+    ...(m.image?.trim() ? [m.image] : []),
+    ...(m.extractedImages ?? []),
+  ];
+  return scoreMediaQuality({
+    image: m.image,
+    extractedImages: images,
+    latitude: m.latitude,
+    longitude: m.longitude,
+    tags: m.tags,
+    impressions: m.impressions,
+    dailyFootfall: m.dailyFootfall,
+    description: m.description,
+    price: m.price,
+    name: m.name,
+    location: m.location,
+  }).score;
+}
 
 function engagementScore(
   map: MediaEngagementMap,
@@ -560,6 +587,7 @@ export default function AdminMediasClient({
   const [publicFilter, setPublicFilter] = useState<PublicListFilter>("all");
   const [availabilityFilter, setAvailabilityFilter] =
     useState<AvailabilityListFilter>("all");
+  const [qualityFilter, setQualityFilter] = useState<QualityListFilter>("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSizeOption>(8);
 
@@ -591,9 +619,15 @@ export default function AdminMediasClient({
     setSearch("");
     setPublicFilter("all");
     setAvailabilityFilter("all");
+    setQualityFilter("all");
     setPage(1);
     setSelectedIds(new Set());
   }, []);
+
+  const lowQualityCount = useMemo(
+    () => medias.filter((m) => mediaQualityScore(m) < 60).length,
+    [medias],
+  );
 
   const refreshEngagement = useCallback(async () => {
     try {
@@ -732,6 +766,8 @@ export default function AdminMediasClient({
         longitude?: number;
         city?: string;
         district?: string;
+        region?: string;
+        regionZone?: string | null;
       };
       if (!res.ok) {
         setGeoLookupError(data.error ?? "주소를 찾지 못했습니다.");
@@ -747,6 +783,10 @@ export default function AdminMediasClient({
         longitude: String(data.longitude),
         city: data.city ?? f.city,
         district: data.district ?? f.district,
+        region:
+          typeof data.region === "string" && data.region
+            ? data.region
+            : f.region,
       }));
     } catch {
       setGeoLookupError("주소 검색 요청 실패");
@@ -871,8 +911,12 @@ export default function AdminMediasClient({
       if (
         search &&
         !m.name.toLowerCase().includes(search.toLowerCase()) &&
-        !(m.nameEn ?? "").toLowerCase().includes(search.toLowerCase())
+        !(m.nameEn ?? "").toLowerCase().includes(search.toLowerCase()) &&
+        !m.location.toLowerCase().includes(search.toLowerCase())
       ) {
+        return false;
+      }
+      if (qualityFilter === "low" && mediaQualityScore(m) >= 60) {
         return false;
       }
       return true;
@@ -904,6 +948,7 @@ export default function AdminMediasClient({
     search,
     publicFilter,
     availabilityFilter,
+    qualityFilter,
     sortOrder,
     engagement,
   ]);
@@ -1737,6 +1782,16 @@ export default function AdminMediasClient({
           </div>
         </div>
 
+        <AdminMediaQualityToolbar
+          lowQualityCount={lowQualityCount}
+          qualityFilter={qualityFilter}
+          onQualityFilterChange={(v) => {
+            setQualityFilter(v);
+            setPage(1);
+          }}
+          onBatchComplete={() => void loadMedias({ showSpinner: false })}
+        />
+
         <div className="rounded-lg border border-border bg-muted/15 px-2 py-2 sm:px-2.5">
           <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             노출 필터
@@ -2005,8 +2060,19 @@ export default function AdminMediasClient({
                                 className="break-words text-sm font-semibold leading-snug text-foreground"
                                 title={media.name}
                               >
-                                {media.name}
+                                <span className="inline-flex flex-wrap items-center gap-1.5">
+                                  {media.name}
+                                  <MediaQualityScoreBadge
+                                    score={mediaQualityScore(media)}
+                                  />
+                                </span>
                               </p>
+                              {regionZoneLabel(media.regionZone, "ko") ? (
+                                <p className="text-[10px] font-mono text-muted-foreground">
+                                  // {regionZoneLabel(media.regionZone, "ko")}
+                                  {media.district ? ` · ${media.district}` : ""}
+                                </p>
+                              ) : null}
                               {media.nameEn != null && media.nameEn.trim() !== "" ? (
                                 <p
                                   className="break-words text-[11px] leading-snug text-muted-foreground"
@@ -2234,7 +2300,7 @@ export default function AdminMediasClient({
                       />
                     </th>
                     <th className="w-[42%] min-w-[14rem] px-3 py-2.5 font-medium">
-                      매체명
+                      매체명 · 품질
                     </th>
                     <th className="w-[5.5rem] px-2 py-2.5">유형</th>
                     <th className="w-28 px-2 py-2.5">가격</th>
@@ -2292,13 +2358,18 @@ export default function AdminMediasClient({
                           />
                         </td>
                         <td className="min-w-0 px-3 py-2.5 align-middle">
-                          <div className="break-words text-sm font-medium leading-snug text-foreground">
+                          <div className="flex flex-wrap items-center gap-1.5 break-words text-sm font-medium leading-snug text-foreground">
                             {media.name}
+                            <MediaQualityScoreBadge score={mediaQualityScore(media)} />
                           </div>
                           <div className="mt-1 break-words text-xs leading-snug text-muted-foreground">
                             {media.nameEn != null && media.nameEn !== ""
                               ? media.nameEn
                               : "—"}
+                            {regionZoneLabel(media.regionZone, "ko")
+                              ? ` · ${regionZoneLabel(media.regionZone, "ko")}`
+                              : ""}
+                            {media.district ? ` · ${media.district}` : ""}
                           </div>
                         </td>
                         <td className="px-2 py-2.5 align-middle">

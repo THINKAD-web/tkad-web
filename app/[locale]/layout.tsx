@@ -20,6 +20,7 @@ import { OnboardingProgressBar } from "@/components/onboarding/onboarding-progre
 import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
 import { AbGaVariantSync } from "@/components/ab/ab-ga-variant";
 import { WebVitalsReporter } from "@/components/web-vitals-reporter";
+import { OpsAnalyticsTracker } from "@/components/tracking/ops-analytics-tracker";
 import { pretendard } from "@/lib/fonts/pretendard";
 import "../globals.css";
 
@@ -171,6 +172,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             messages={messages}
             timeZone="Asia/Seoul"
           >
+            <OpsAnalyticsTracker />
             <LocaleRootBody
               skipLinkLabel={
                 locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"

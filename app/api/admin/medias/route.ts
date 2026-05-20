@@ -15,6 +15,7 @@ import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options"
 import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverage-codes";
 import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
+import { applyNormalizedMediaLocation } from "@/lib/apply-media-location-normalize";
 
 export const dynamic = "force-dynamic";
 
@@ -160,6 +161,8 @@ export async function POST(request: NextRequest) {
   if (dist !== undefined) data.district = dist;
   const city = optStr(body.city);
   if (city !== undefined) data.city = city;
+  const rz = optStr(body.regionZone);
+  if (rz !== undefined) data.regionZone = rz;
   const lat = optNum(body.latitude);
   if (lat !== undefined) data.latitude = lat;
   const lng = optNum(body.longitude);
@@ -263,6 +266,19 @@ export async function POST(request: NextRequest) {
     if (foot != null) {
       data.dailyFootfall = foot;
     }
+
+    const locNorm = {
+      location: data.location,
+      city: data.city ?? null,
+      district: data.district ?? null,
+      region: data.region,
+      regionZone: data.regionZone ?? null,
+    };
+    applyNormalizedMediaLocation(locNorm);
+    data.region = locNorm.region;
+    data.regionZone = locNorm.regionZone;
+    if (locNorm.city) data.city = locNorm.city;
+    if (locNorm.district) data.district = locNorm.district;
 
     const db = getPrisma();
     const media = await db.$transaction(async (tx) => {

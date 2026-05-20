@@ -30,6 +30,7 @@ import { IndustryMediaTypes } from "@/components/industry/industry-media-types";
 import { IndustryBudgetCalculator } from "@/components/industry/industry-budget-calculator";
 import { IndustryFaq } from "@/components/industry/industry-faq";
 import { IndustryOtherLinks } from "@/components/industry/industry-other-links";
+import { IndustryPackageLinks } from "@/components/industry/industry-package-links";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -206,6 +207,8 @@ export default async function IndustryLandingPage({ params }: Props) {
           <IndustryBudgetCalculator slug={slug} priceRefs={priceRefs} />
 
           <IndustryFaq slug={slug} />
+
+          <IndustryPackageLinks slug={slug} locale={locale} />
 
           <IndustryOtherLinks slug={slug} locale={locale} />
         </div>

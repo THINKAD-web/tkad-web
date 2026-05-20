@@ -129,6 +129,26 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
         </div>
       ) : null}
 
+      {pkg.media.length > 0 ? (
+        <div className="relative mt-4">
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            {isKo ? "구성 매체" : "Included media"}
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-1.5">
+            {pkg.media.slice(0, 6).map((m) => (
+              <li key={m.id}>
+                <Link
+                  href={`/media/${m.id}`}
+                  className="inline-flex rounded-full border border-black/10 bg-white/80 px-2 py-0.5 text-[11px] font-medium text-foreground/85 hover:border-cyan-500/40 dark:border-white/12 dark:bg-white/[0.06]"
+                >
+                  {isKo ? m.name : m.nameEn || m.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       {/* CTA */}
       <div className="relative mt-auto pt-5">
         <Link
