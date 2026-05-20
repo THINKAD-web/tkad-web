@@ -92,12 +92,7 @@ export default async function IndustryLandingPage({ params }: Props) {
   const mediaItems = filterMediaForIndustry(catalog, slug, 12);
   const priceRefs = catalog.map((m) => ({ id: m.id, price: m.price }));
 
-  let cases: Awaited<ReturnType<typeof getPublishedSuccessCases>> = [];
-  try {
-    cases = await getPublishedSuccessCases(locale);
-  } catch {
-    /* empty */
-  }
+  const cases = await getPublishedSuccessCases(locale);
   const industryCases = filterCasesForIndustry(cases, slug, 3);
 
   const heroTitle = t("heroTitle");

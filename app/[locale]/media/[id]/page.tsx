@@ -135,7 +135,15 @@ export default async function MediaDetailPage({ params }: Props) {
   if (!media) notFound();
 
   const catalog = await fetchPublicMediaCatalog();
-  const relatedCases = await getSuccessCasesForMedia(media.id);
+  const relatedCases = await getSuccessCasesForMedia(media.id, 6, locale, {
+    location: media.location,
+    locationEn: media.locationEn,
+    district: media.district,
+    region: media.region,
+    name: media.name,
+    nearbyStations: media.nearbyStations,
+    nearbyLandmarks: media.nearbyLandmarks,
+  });
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const isKo = locale === "ko";
   const periodLabel = t(

@@ -19,12 +19,7 @@ export default async function CaseStudyDetailPage({ params }: Props) {
   const row = await getPublishedSuccessCaseById(slug, locale);
   if (!row) notFound();
 
-  let ordered: Awaited<ReturnType<typeof getPublishedSuccessCases>> = [];
-  try {
-    ordered = await getPublishedSuccessCases(locale);
-  } catch {
-    ordered = [];
-  }
+  const ordered = await getPublishedSuccessCases(locale);
   const idx = ordered.findIndex((c) => c.id === row.id);
   const prev =
     idx > 0

@@ -198,9 +198,10 @@ export function filterCasesForIndustry(
   const filters = emptyCaseFilters();
   filters.industries = new Set([tag]);
 
-  return cases
+  const matched = cases
     .filter((c) => matchesCaseFilters(c, filters, ""))
     .slice(0, limit);
+  return matched.length > 0 ? matched : cases.slice(0, limit);
 }
 
 export function filterMediaByBudgetMan(
