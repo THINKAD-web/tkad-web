@@ -1,7 +1,6 @@
 /* Display / mono — 필요 웨이트만 (next/font Pretendard는 layout에서 로드) */
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap");
-/* Relative import: avoids resolving `tailwindcss` from ~ when a home package.json exists */
-@import "../node_modules/tailwindcss/index.css";
+@import "tailwindcss";
 /* v4: JS 설정(darkMode: class 등)을 쓰려면 명시 필요 — 없으면 `dark:` 가 OS 미디어쿼리만 따름(일몰 후 자동 다크) */
 @config "../tailwind.config.ts";
 @plugin "@tailwindcss/typography";

@@ -75,6 +75,12 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["lucide-react", "recharts"],
   },
   webpack(config, { dev, isServer }) {
+    config.resolve ??= {};
+    config.resolve.alias ??= {};
+    const alias = config.resolve.alias as Record<string, string>;
+    // Home `~/package.json` shadowing: always resolve tailwind from this repo
+    alias.tailwindcss = path.join(projectRoot, "node_modules/tailwindcss");
+
     if (!dev && !isServer) {
       if (Array.isArray(config.optimization?.minimizer)) {
         const [jsOnly] = config.optimization.minimizer;
@@ -85,4 +91,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(withPWA(nextConfig));
+/** next-pwa webpack hooks break PostCSS/Tailwind in `next dev` — apply only for production builds */
+export default process.env.NODE_ENV === "production"
+  ? withNextIntl(withPWA(nextConfig))
+  : withNextIntl(nextConfig);

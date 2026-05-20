@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --webpack",
-    "dev:clean": "node scripts/dev-reset.mjs && next dev --webpack",
+    "dev": "next dev",
+    "dev:webpack": "next dev --webpack",
+    "dev:clean": "node scripts/dev-reset.mjs && next dev",
     "build": "prisma generate && next build --webpack",
     "vercel-build": "prisma generate && next build --webpack",
     "start": "next start",
