@@ -35,6 +35,9 @@ import { getCurrentUser } from "@/lib/user-session";
 import { getUserPreferenceByUserId } from "@/lib/user-preference";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { HomePersonalizedMedia } from "@/components/home/home-personalized-media";
+import { HomeBudgetWidget } from "@/components/home/home-budget-widget";
+import { HomeBestDeals } from "@/components/home/home-best-deals";
+import { pickBestDeals } from "@/lib/best-deals";
 
 import {
   HomeClientLogosWhenVisible,
@@ -82,8 +85,10 @@ export default async function HomePage({ params }: Props) {
     fetchHomeHeroVisualAssets(),
     getLatestPublishedSuccessCases(locale, 3),
     user ? getUserPreferenceByUserId(user.id) : Promise.resolve(null),
-    user ? fetchPublicMediaCatalog() : Promise.resolve([] as MediaItem[]),
+    fetchPublicMediaCatalog(),
   ]);
+
+  const bestDealItems = pickBestDeals(fullCatalog, 8);
 
   const personalizedItems = user
     ? await recommendPersonalizedHomeMedia(
@@ -128,6 +133,7 @@ export default async function HomePage({ params }: Props) {
       latestCases={latestCases}
       personalizedItems={personalizedItems}
       displayName={displayName}
+      bestDealItems={bestDealItems}
     />
   );
 }
@@ -145,6 +151,7 @@ function HomeContent({
   latestCases,
   personalizedItems,
   displayName,
+  bestDealItems,
 }: {
   locale: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
@@ -158,6 +165,7 @@ function HomeContent({
   latestCases: Awaited<ReturnType<typeof getLatestPublishedSuccessCases>>;
   personalizedItems: MediaItem[];
   displayName: string | null;
+  bestDealItems: ReturnType<typeof pickBestDeals>;
 }) {
   /** 캐러셀 — 추천 매체 전체 활용 (TOP3 라벨은 첫 3개에만) */
   const featuredItems = featuredCatalog.slice(0, 8);
@@ -200,6 +208,11 @@ function HomeContent({
         marqueeImageUrls={heroVisuals.marqueeImageUrls}
         mapPins={heroVisuals.mapPins}
       />
+
+      <div className="tkad-landing-neon">
+        <HomeBudgetWidget />
+        <HomeBestDeals items={bestDealItems} locale={locale} />
+      </div>
 
       {displayName && personalizedItems.length > 0 ? (
         <div className="tkad-landing-neon">

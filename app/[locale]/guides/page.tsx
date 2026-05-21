@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
-import { BookOpen } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
@@ -17,7 +16,12 @@ import {
   buildCollectionPageJsonLd,
 } from "@/lib/structured-data";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
+import {
+  CategoryExploreHero,
+  CategoryHeroCtaRow,
+  categoryHeroCtaPrimaryClass,
+  categoryHeroCtaSecondaryClass,
+} from "@/components/category-explore-hero";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
 import { GuidesBeginnerBasicsGrid } from "@/components/guides/guides-beginner-basics-grid";
@@ -170,23 +174,26 @@ export default async function GuidesIndexPage({ params }: Props) {
 
       <HomeLandingDayNight>
         <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
-          <MediaKeywordLandingHero
-            eyebrow={`// ${isKo ? "초보자 가이드" : "BEGINNER GUIDE"}`}
-            title={isKo ? BEGINNER_GUIDE_META.heroTitleKo : BEGINNER_GUIDE_META.heroTitleEn}
-            description={
+          <CategoryExploreHero
+            code={`// ${isKo ? "초보자 가이드" : "BEGINNER GUIDE"}`}
+            headlineBefore={isKo ? "OOH 광고, " : "OOH ads, "}
+            headlineGradient={isKo ? "처음이세요?" : "new here?"}
+            subtitle={
               isKo ? BEGINNER_GUIDE_META.heroSubtitleKo : BEGINNER_GUIDE_META.heroSubtitleEn
             }
-            icon={<BookOpen className="size-7 text-white/90" aria-hidden />}
-            primaryCta={{
-              href: "/media",
-              label: isKo ? "매체 탐색하기" : "Browse media",
-            }}
-            secondaryCta={{
-              href: "/planner",
-              label: isKo ? "AI 플래너" : "AI planner",
-            }}
             showBeta={false}
-          />
+          >
+            <CategoryHeroCtaRow>
+              <Link href="/media" className={categoryHeroCtaPrimaryClass}>
+                {isKo ? "매체 탐색하기" : "Browse media"}
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              <Link href="/planner" className={categoryHeroCtaSecondaryClass}>
+                {isKo ? "AI 플래너" : "AI planner"}
+                <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
+              </Link>
+            </CategoryHeroCtaRow>
+          </CategoryExploreHero>
 
           <NeonSection className="pt-10 pb-12 sm:pt-16 sm:pb-20">
             <NeonSectionHead

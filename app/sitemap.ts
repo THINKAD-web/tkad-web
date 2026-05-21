@@ -12,49 +12,51 @@ import { MARKETING_MEDIA_TYPE_SLUGS } from "@/lib/marketing-media-types";
 const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
 
-/** 핵심 랜딩(검색 유입·전환) 우선순위 살짝 상향 */
-function staticPathPriority(path: string): number {
+type ChangeFreq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
+
+function sitemapPriority(path: string): number {
   if (path === "") return 1;
-  if (
-    path === "/media" ||
-    path === "/media/packages" ||
-    path === "/packages" ||
-    path === "/planner" ||
-    path === "/quote"
-  )
-    return 0.95;
-  if (
-    path === "/compare" ||
-    path === "/insights" ||
-    path === "/cases" ||
-    path === "/report"
-  )
-    return 0.9;
+  if (path === "/media" || path === "/packages" || path === "/media/packages")
+    return 1;
+  if (path === "/planner" || path === "/cases" || path === "/report") return 0.8;
+  if (path.startsWith("/industry/") || path.startsWith("/local/")) return 0.7;
+  if (path === "/academy" || path.startsWith("/guides")) return 0.6;
+  if (path.startsWith("/cases/")) return 0.75;
+  if (path.startsWith("/media/")) return 0.72;
+  if (path.startsWith("/report/")) return 0.72;
+  if (path.startsWith("/insights/")) return 0.72;
   return 0.8;
+}
+
+function sitemapChangeFrequency(path: string): ChangeFreq {
+  if (path === "/media" || path === "/report" || path.startsWith("/report/"))
+    return "daily";
+  if (
+    path === "/cases" ||
+    path.startsWith("/cases/") ||
+    path === "/academy" ||
+    path.startsWith("/guides")
+  )
+    return "weekly";
+  if (path.startsWith("/industry/") || path.startsWith("/local/"))
+    return "monthly";
+  if (path === "") return "daily";
+  return "weekly";
 }
 
 function sitemapEntry(
   path: string,
   lastModified: Date = buildTime,
+  overrides?: Partial<Pick<MetadataRoute.Sitemap[number], "priority" | "changeFrequency">>,
 ): MetadataRoute.Sitemap[number] {
   const suffix = path === "" ? "" : path;
   const ko = `${origin}/ko${suffix}`;
   const en = `${origin}/en${suffix}`;
-  const isHome = path === "";
-  const priority = isHome
-    ? 1
-    : path.startsWith("/cases/") && !path.includes("//")
-      ? 0.75
-      : path.startsWith("/media/") ||
-          path.startsWith("/insights/") ||
-          path.startsWith("/report/")
-        ? 0.72
-        : staticPathPriority(path);
   return {
     url: ko,
     lastModified,
-    changeFrequency: isHome ? "daily" : "weekly",
-    priority,
+    changeFrequency: overrides?.changeFrequency ?? sitemapChangeFrequency(path),
+    priority: overrides?.priority ?? sitemapPriority(path),
     alternates: {
       languages: {
         ko,
@@ -68,7 +70,6 @@ function sitemapEntry(
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPart = sitemapPaths.map((p) => sitemapEntry(p));
 
-  // ── Success cases — DB updatedAt 우선
   let casePart: MetadataRoute.Sitemap = [];
   try {
     const cases = await getPublishedSuccessCases();
@@ -82,11 +83,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return sitemapEntry(`/cases/${c.id}`, lastmod);
     });
   } catch {
-    // 사례 fetch 실패 → 사례 부분 없이 진행
+    /* 사례 fetch 실패 */
   }
 
-  // ── Media catalog — fetchPublicMediaCatalog 의 updatedAt 우선
-  // ── Tier 2 — region/type 키워드 랜딩 자동 생성 (DB unique values)
   let mediaPart: MetadataRoute.Sitemap = [];
   let regionLandingPart: MetadataRoute.Sitemap = [];
   let typeLandingPart: MetadataRoute.Sitemap = [];
@@ -122,10 +121,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       sitemapEntry(`/media/area/${encodeURIComponent(area)}`),
     );
   } catch {
-    // 카탈로그 실패 → 매체/랜딩 부분 없이 진행
+    /* 카탈로그 실패 */
   }
 
-  // ── Trend reports — published + slug 만, updatedAt/publishedAt 우선
   let insightPart: MetadataRoute.Sitemap = [];
   if (isDatabaseConfigured()) {
     try {
@@ -147,11 +145,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           ),
         );
     } catch {
-      // 인사이트 fetch 실패
+      /* 인사이트 fetch 실패 */
     }
   }
 
-  // ── Trend reports (Report model) — published + slug
   let reportPart: MetadataRoute.Sitemap = [];
   if (isDatabaseConfigured()) {
     try {
@@ -169,7 +166,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ),
       );
     } catch {
-      // 리포트 fetch 실패
+      /* 리포트 fetch 실패 */
     }
   }
 

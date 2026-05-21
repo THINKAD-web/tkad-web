@@ -12,6 +12,12 @@ const Body = z.object({
   path: z.string().min(1).max(500),
   locale: z.string().max(8).optional(),
   referrer: z.string().max(500).optional(),
+  utmSource: z.string().max(120).optional(),
+  utmMedium: z.string().max(120).optional(),
+  utmCampaign: z.string().max(120).optional(),
+  utmContent: z.string().max(120).optional(),
+  utmTerm: z.string().max(120).optional(),
+  landingPath: z.string().max(500).optional(),
 });
 
 function json(body: unknown, init?: ResponseInit) {
@@ -55,6 +61,12 @@ export async function POST(request: NextRequest) {
       locale: parsed.data.locale,
       referrer: parsed.data.referrer,
       userAgent: ua,
+      utmSource: parsed.data.utmSource,
+      utmMedium: parsed.data.utmMedium,
+      utmCampaign: parsed.data.utmCampaign,
+      utmContent: parsed.data.utmContent,
+      utmTerm: parsed.data.utmTerm,
+      landingPath: parsed.data.landingPath,
     });
     return json({ ok: true });
   } catch (e) {

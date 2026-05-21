@@ -67,7 +67,7 @@ export function PwaHomeWidget() {
   return (
     <section
       className={cn(
-        "mx-auto mb-8 max-w-6xl rounded-2xl border border-white/12 bg-black/40 p-4 backdrop-blur",
+        "tkad-glass-surface mx-auto mb-8 max-w-6xl rounded-2xl p-4",
       )}
     >
       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300/90">

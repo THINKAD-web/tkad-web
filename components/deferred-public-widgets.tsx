@@ -27,6 +27,10 @@ const PwaPushOptIn = dynamic(
   () => import("@/components/pwa-push-opt-in").then((m) => ({ default: m.PwaPushOptIn })),
   { ssr: false },
 );
+const MobileQuickQuoteFloating = dynamic(
+  () => import("@/components/mobile-quick-quote-floating"),
+  { ssr: false },
+);
 
 export default function DeferredPublicWidgets() {
   return (
@@ -35,6 +39,7 @@ export default function DeferredPublicWidgets() {
       <RecentlyViewedSync />
       <PwaPushOptIn />
       <ExitIntentPopup />
+      <MobileQuickQuoteFloating />
       <FloatingSupportDock />
     </>
   );

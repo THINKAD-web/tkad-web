@@ -6,6 +6,7 @@ import {
 } from "@/lib/media-data";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { buildMediaCardHoverOverlay } from "@/lib/media-card-hover";
 
 type Props = {
   items: MediaItem[];
@@ -49,9 +50,10 @@ export function HomeMediaGridServer({
               premium
               glowTheme="purple"
               density={density}
+              hoverOverlay={buildMediaCardHoverOverlay(m, locale)}
               footer={
                 m.recommendReason ? (
-                  <p className="mt-1 line-clamp-1 font-mono text-[10px] font-semibold tracking-wide text-white/65">
+                  <p className="mt-1 line-clamp-1 font-mono text-[10px] font-semibold tracking-wide text-muted-foreground">
                     {m.recommendReason}
                   </p>
                 ) : undefined

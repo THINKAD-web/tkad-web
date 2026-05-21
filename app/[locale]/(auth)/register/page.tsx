@@ -7,6 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { cn } from "@/lib/utils";
 import type { CommunityMemberRole } from "@/lib/community/types";
+import { getOrCreateTrackingSessionId } from "@/lib/tracking/client";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -55,6 +56,7 @@ export default function RegisterPage() {
           name,
           company: company || undefined,
           communityRole,
+          sessionId: getOrCreateTrackingSessionId() || undefined,
         }),
       });
       const data = await res.json();

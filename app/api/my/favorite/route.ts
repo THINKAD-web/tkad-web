@@ -9,6 +9,8 @@ import {
   readJson,
 } from "@/lib/api-response";
 import { recordConversion } from "@/lib/tracking/record";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { resolveMediaZoneId } from "@/lib/media-price-transparency";
 
 export const runtime = "nodejs";
 
@@ -50,6 +52,24 @@ export async function POST(req: Request) {
         mediaId,
         userId: user.id,
       });
+      void (async () => {
+        try {
+          const catalog = await fetchPublicMediaCatalog();
+          const item = catalog.find((m) => m.id === mediaId);
+          const zone = item ? resolveMediaZoneId(item) : null;
+          if (zone) {
+            await prisma.userRegionPriceAlert.upsert({
+              where: {
+                userId_regionZone: { userId: user.id, regionZone: zone },
+              },
+              create: { userId: user.id, regionZone: zone },
+              update: {},
+            });
+          }
+        } catch {
+          /* non-blocking */
+        }
+      })();
     } else {
       if (existing) {
         await prisma.userFavoriteMedia.delete({

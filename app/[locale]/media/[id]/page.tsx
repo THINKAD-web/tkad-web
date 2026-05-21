@@ -88,6 +88,12 @@ import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { MediaDetailPwaActions } from "@/components/media-detail-pwa-actions";
 import { SectionHead } from "@/components/brutalist/section-head";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import {
+  computeMediaPriceBenchmark,
+  mediaMonthlyPriceWon,
+} from "@/lib/media-price-transparency";
+import { MediaPriceTransparencyCard } from "@/components/media-detail/media-price-transparency-card";
+import { PriceProposalButton } from "@/components/media-detail/price-proposal-button";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
@@ -200,6 +206,9 @@ export default async function MediaDetailPage({ params }: Props) {
     similar.length > 0
       ? `/compare?ids=${media.id},${similar[0].id}`
       : "/media";
+
+  const priceBenchmark = computeMediaPriceBenchmark(media, catalog);
+  const listPriceWon = mediaMonthlyPriceWon(media);
 
   const heroTags = media.keywordFilter
     ? heroTagCandidatesFromKeyword(media.keywordFilter, media.size)
@@ -439,17 +448,12 @@ export default async function MediaDetailPage({ params }: Props) {
 
       <div className="sticky top-[72px] z-30 sm:static">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-[22px] border border-border/70 bg-card/75 px-4 py-3 shadow-sm backdrop-blur sm:rounded-[24px] sm:px-5 sm:py-3.5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-2xl border border-border/80 bg-muted/50 text-foreground shadow-xs backdrop-blur sm:inline-flex">
-              ✓
-            </span>
-            <p className="truncate font-mono text-[11px] uppercase tracking-[0.18em] text-foreground sm:text-[12px]">
-              {`// 관심 가는 매체라면 견적서에 담아보세요`}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="rounded-[22px] border border-border/70 bg-card/95 px-3 py-2 shadow-sm backdrop-blur sm:rounded-[24px] sm:px-4 sm:py-2.5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <p className="min-w-0 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground sm:text-[11px]">
+            {t("quoteStripHint")}
+          </p>
+          <div className="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
             <MediaDetailPwaActions
               media={{
                 id: media.id,
@@ -473,7 +477,7 @@ export default async function MediaDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <section className="bg-card py-10 pb-28 sm:py-14 sm:pb-32">
+      <section className="bg-card py-10 pb-[calc(11rem+env(safe-area-inset-bottom))] sm:py-14 sm:pb-32">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <MediaDetailExtras
             media={media}
@@ -643,6 +647,29 @@ export default async function MediaDetailPage({ params }: Props) {
               />
             </div>
           </div>
+
+          {priceBenchmark ? (
+            <MediaPriceTransparencyCard
+              benchmark={priceBenchmark}
+              locale={locale}
+            />
+          ) : null}
+
+          {listPriceWon > 0 && !media.keywordFilter ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <PriceProposalButton
+                mediaId={media.id}
+                mediaName={isKo ? media.name : media.nameEn || media.name}
+                listPriceWon={listPriceWon}
+              />
+              <Link
+                href="/pricing-guide"
+                className="text-sm font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                {isKo ? "가격 가이드 보기" : "Pricing guide"}
+              </Link>
+            </div>
+          ) : null}
 
           {hasPriceOptions && priceOptions ? (
             <section

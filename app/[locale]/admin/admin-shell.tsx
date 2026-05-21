@@ -59,6 +59,7 @@ const navDefs = [
   // 2) 영업/리드
   { href: "/admin/inquiries", key: "inquiries" as const, icon: MessageSquareText },
   { href: "/admin/biddings", key: "biddings" as const, icon: ClipboardList },
+  { href: "/admin/chat", key: "chatMonitor" as const, icon: Inbox },
   { href: "/admin/pipeline", key: "pipeline" as const, icon: Kanban },
   { href: "/admin/crm-records", key: "crmRecords" as const, icon: ContactRound },
   { href: "/admin/forecast", key: "forecast" as const, icon: TrendingUp },
@@ -70,9 +71,11 @@ const navDefs = [
   { href: "/admin/quote-templates", key: "quoteTemplates" as const, icon: FileText },
   // 4) 캠페인 운영
   { href: "/admin/campaigns", key: "campaigns" as const, icon: Megaphone },
+  { href: "/admin/calendar", key: "campaignCalendar" as const, icon: CalendarCheck },
   { href: "/admin/community", key: "community" as const, icon: MessageSquareText },
   // 5) 매체/검증/네트워크
   { href: "/admin/applications", key: "mediaApplications" as const, icon: ClipboardList },
+  { href: "/admin/leads/media", key: "mediaLeads" as const, icon: Radar },
   { href: "/admin/media-owner", key: "mediaOwnerOps" as const, icon: CalendarCheck },
   { href: "/admin/reviews", key: "mediaReviews" as const, icon: Star },
   { href: "/admin/medias", key: "medias" as const, icon: Monitor },
@@ -83,6 +86,7 @@ const navDefs = [
   { href: "/admin/users", key: "users" as const, icon: UserCog },
   // 7) 분석/도구
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
+  { href: "/admin/funnel", key: "funnel" as const, icon: BarChart3 },
   { href: "/admin/search-stats", key: "searchStats" as const, icon: Search },
   { href: "/admin/api-usage", key: "apiUsage" as const, icon: KeyRound },
   { href: "/admin/ab-test", key: "abTest" as const, icon: FlaskConical },

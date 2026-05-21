@@ -9,6 +9,8 @@ import {
   mapQuickAddToDb,
   type QuickAddMediaJson,
 } from "@/lib/media-quick-add";
+import { onMediaApplicationApproved } from "@/lib/media-owner-incentives";
+import { notifyMediaOwnerApplicationApproved } from "@/lib/media-owner-notify";
 
 function applicationToQuickAdd(
   app: MediaApplication,
@@ -195,6 +197,19 @@ export async function approveMediaApplication(
     });
     return media;
   });
+
+  void onMediaApplicationApproved({
+    ownerUserId,
+    contactEmail: app.contactEmail,
+  }).catch((err) => console.error("[approve] incentives", err));
+
+  if (ownerUserId) {
+    void notifyMediaOwnerApplicationApproved({
+      ownerUserId,
+      mediaName: result.name,
+      contactPhone: app.contactPhone,
+    }).catch((err) => console.error("[approve] alimtalk", err));
+  }
 
   return { mediaId: result.id, mediaName: result.name };
 }

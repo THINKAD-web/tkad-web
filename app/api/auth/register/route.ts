@@ -18,6 +18,8 @@ import {
   getClientIp,
   readJson,
 } from "@/lib/api-response";
+import { touchVisitorJourney } from "@/lib/visitor-journey";
+import { ensureMediaOwnerProfile } from "@/lib/media-owner-incentives";
 
 export const runtime = "nodejs";
 
@@ -42,6 +44,8 @@ const Body = z.object({
   company: z.string().max(80).optional(),
   locale: z.enum(["ko", "en", "zh", "ja"]).default("ko"),
   communityRole: z.enum(COMMUNITY_SIGNUP_ROLES).default("ADVERTISER"),
+  sessionId: z.string().min(8).max(64).optional(),
+  referralCode: z.string().max(16).optional(),
 });
 
 const limiter = rateLimit({ limit: 5, windowMs: 60 * 60 * 1000 });
@@ -61,8 +65,17 @@ export async function POST(req: Request) {
     const parsed = Body.safeParse(body);
     if (!parsed.success) return apiZodError(parsed.error);
 
-    const { email, password, name, phone, company, locale, communityRole } =
-      parsed.data;
+    const {
+      email,
+      password,
+      name,
+      phone,
+      company,
+      locale,
+      communityRole,
+      sessionId,
+      referralCode,
+    } = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -101,6 +114,22 @@ export async function POST(req: Request) {
       userAgent: req.headers.get("user-agent") ?? undefined,
       ip,
     });
+
+    if (sessionId) {
+      void touchVisitorJourney({
+        sessionId,
+        step: "signup",
+        userId: user.id,
+        mark: "signed_up",
+        metadata: { email: user.email },
+      });
+    }
+
+    if (communityRole === "MEDIA" || user.role === "owner") {
+      void ensureMediaOwnerProfile(user.id, referralCode).catch((err) =>
+        console.error("[auth/register] media owner profile", err),
+      );
+    }
 
     void issueEmailVerification(user.id, locale).catch((err) => {
       console.error("[auth/register] verification email failed:", err);

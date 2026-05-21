@@ -25,12 +25,23 @@ function thresholdHint(name: string): string {
   }
 }
 
+const CORE_DISPLAY = [
+  { key: "LCP", label: "LCP" },
+  { key: "INP", label: "FID / INP" },
+  { key: "CLS", label: "CLS" },
+] as const;
+
 export function AdminWebVitalsCard({ summary }: { summary: WebVitalsDashboardSummary }) {
+  const coreMetrics = CORE_DISPLAY.map(({ key, label }) => {
+    const m = summary.metrics.find((x) => x.name === key);
+    return m ? { ...m, label } : { name: key, label, count: 0, p75: 0, goodPct: 0 };
+  });
+
   return (
     <section className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur">
       <div className="border-b border-border/60 px-4 py-3">
         <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-          [ Core Web Vitals · {summary.periodDays}d ]
+          [ Core Web Vitals · LCP · FID · CLS · {summary.periodDays}d ]
         </h2>
         <p className="mt-1 font-mono text-[11px] text-muted-foreground">
           {summary.configured
@@ -47,9 +58,37 @@ export function AdminWebVitalsCard({ summary }: { summary: WebVitalsDashboardSum
         </p>
       ) : summary.metrics.every((m) => m.count === 0) ? (
         <p className="px-4 py-8 text-center font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-          트래픽 유입 후 p75·Green 비율이 표시됩니다
+          트래픽 유입 후 p75·Green 비율이 표시됩니다 (Vercel Speed Insights + /api/vitals)
         </p>
       ) : (
+        <>
+        <ul className="grid grid-cols-3 gap-px border-b border-border/40 bg-border/40">
+          {coreMetrics.map((m) => {
+            const green = m.goodPct >= 75;
+            const warn = m.goodPct >= 50 && m.goodPct < 75;
+            return (
+              <li key={m.name} className="bg-card/50 p-4">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  {m.label}
+                </p>
+                <p className="mt-2 text-2xl font-black tabular-nums">
+                  {m.count > 0 ? formatMetric(m.name, m.p75) : "—"}
+                </p>
+                <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                  p75 · 목표 {thresholdHint(m.name === "INP" ? "INP" : m.name)}
+                </p>
+                <p
+                  className={[
+                    "mt-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em]",
+                    green ? "text-emerald-400" : warn ? "text-amber-300" : "text-red-300",
+                  ].join(" ")}
+                >
+                  {m.count > 0 ? `Green ${m.goodPct}%` : "no data"}
+                </p>
+              </li>
+            );
+          })}
+        </ul>
         <ul className="grid grid-cols-2 gap-px bg-border/40 sm:grid-cols-3 lg:grid-cols-5">
           {summary.metrics.map((m) => {
             const green = m.goodPct >= 75;
@@ -77,6 +116,7 @@ export function AdminWebVitalsCard({ summary }: { summary: WebVitalsDashboardSum
             );
           })}
         </ul>
+        </>
       )}
     </section>
   );

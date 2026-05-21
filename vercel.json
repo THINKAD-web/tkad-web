@@ -90,6 +90,46 @@
     {
       "path": "/api/cron/market-insights-weekly",
       "schedule": "0 0 * * 1"
+    },
+    {
+      "path": "/api/cron/check-media-images",
+      "schedule": "0 5 * * 1"
+    },
+    {
+      "path": "/api/cron/web-vitals-alerts",
+      "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/cron/discover-potential-media",
+      "schedule": "0 3 * * 1"
+    },
+    {
+      "path": "/api/cron/media-owner-onboarding",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/media-application-reminders",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/region-price-index",
+      "schedule": "0 4 1 * *"
+    },
+    {
+      "path": "/api/cron/price-negotiation-expire",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/campaign-renewal",
+      "schedule": "30 1 * * *"
+    },
+    {
+      "path": "/api/cron/media-owner-monthly-settlements",
+      "schedule": "0 0 1 * *"
+    },
+    {
+      "path": "/api/cron/chat-owner-sla",
+      "schedule": "0 */4 * * *"
     }
   ]
 }

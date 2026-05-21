@@ -5,6 +5,8 @@ import {
   notifyCampaignTomorrow,
   resolveCampaignNotifyPhone,
 } from "@/lib/kakao-alimtalk-notify";
+import { runCampaignMilestoneNotifications } from "@/lib/campaign-milestone-notifications";
+import { runCampaignRenewalProposals } from "@/lib/campaign-renewal-proposal";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -132,10 +134,17 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  const milestones = await runCampaignMilestoneNotifications(db);
+  const renewal = await runCampaignRenewalProposals(db);
+
   return json({
     ok: true,
-    created,
-    alimtalkSent,
+    created: created + milestones.created,
+    alimtalkSent: alimtalkSent + milestones.alimtalk,
+    milestoneEmails: milestones.emails,
+    milestones: milestones.milestones,
+    renewalGenerated: renewal.generated,
+    renewalEmailed: renewal.emailed,
     checked: campaigns.length,
     date: tomorrowYmd,
     reviewWindow: yesterdayYmd,

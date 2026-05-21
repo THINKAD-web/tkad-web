@@ -8,6 +8,7 @@ import {
   ownerGlassCard,
   ownerInputCls,
 } from "@/components/media-owner/media-owner-shell";
+import { MediaOwnerPriceNegotiations } from "@/components/media-owner/media-owner-price-negotiations";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -168,6 +169,8 @@ export function MediaOwnerMediaClient() {
             : "Metrics, availability blocks, and price requests."}
         </p>
       </div>
+
+      <MediaOwnerPriceNegotiations />
 
       {media.length === 0 ? (
         <p className={ownerGlassCard}>

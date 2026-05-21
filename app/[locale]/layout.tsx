@@ -20,6 +20,7 @@ import { OnboardingProgressBar } from "@/components/onboarding/onboarding-progre
 import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
 import { AbGaVariantSync } from "@/components/ab/ab-ga-variant";
 import { WebVitalsReporter } from "@/components/web-vitals-reporter";
+import { SpeedInsightsLoader } from "@/components/speed-insights-loader";
 import { OpsAnalyticsTracker } from "@/components/tracking/ops-analytics-tracker";
 import { pretendard } from "@/lib/fonts/pretendard";
 import "../globals.css";
@@ -164,6 +165,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       >
         <JsonLd data={structuredData} />
         <WebVitalsReporter />
+        <SpeedInsightsLoader />
         <PublicAnalyticsLoader />
         <AbGaVariantSync />
         <ThemeProvider>

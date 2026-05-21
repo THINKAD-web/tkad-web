@@ -87,7 +87,7 @@ export default function MediaSimilarCarousel({
 
   return (
     <section
-      className="mt-12 border-t border-border/70 pt-12"
+      className="mt-12 scroll-mt-24 border-t border-border/70 pt-12 pb-4"
       aria-labelledby="media-similar-heading"
     >
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">

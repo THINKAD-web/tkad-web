@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useLocale } from "next-intl";
 import ScrollAnimate from "@/components/scroll-animate";
 import { NeonSection } from "@/components/landing/neon/neon-section";
@@ -75,7 +76,9 @@ export function MediaRegisterNeonClient() {
             : "Apply → THINKAD review → approved listings go live in our catalog. Front, side, and night photos plus a verified address are required."}
         </p>
         <div className="mt-8">
-          <MediaRegisterForm />
+          <Suspense fallback={null}>
+            <MediaRegisterForm />
+          </Suspense>
         </div>
       </div>
     </NeonSection>

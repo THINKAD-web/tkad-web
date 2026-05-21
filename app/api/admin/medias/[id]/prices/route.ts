@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
+import { notifyFavoriteUsersPriceChange } from "@/lib/notifications-price";
 
 export const dynamic = "force-dynamic";
 
@@ -48,10 +49,21 @@ export async function POST(request: NextRequest, { params }: Params) {
     },
   });
 
+  const oldPriceWon = media.price;
+
   await db.media.update({
     where: { id: mediaId },
     data: { price },
   });
+
+  if (oldPriceWon !== price) {
+    void notifyFavoriteUsersPriceChange({
+      mediaId,
+      mediaName: media.name,
+      oldPriceWon,
+      newPriceWon: price,
+    }).catch(() => {});
+  }
 
   return json({ snapshot }, 201);
 }

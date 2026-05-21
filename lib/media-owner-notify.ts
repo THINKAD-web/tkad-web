@@ -85,6 +85,30 @@ export async function notifyMediaOwnerCampaignConfirmed(input: {
   });
 }
 
+export async function notifyMediaOwnerApplicationApproved(input: {
+  ownerUserId: string;
+  mediaName: string;
+  contactPhone?: string | null;
+}): Promise<SendAlimtalkResult> {
+  const phone = await resolveOwnerNotifyPhone(
+    input.ownerUserId,
+    input.contactPhone,
+  );
+  if (!phone) {
+    return { sent: false, channel: "noop", detail: "no owner phone" };
+  }
+  const base =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://thinkad.co.kr";
+  return sendAlimtalk({
+    to: phone,
+    templateCode: "TKAD_MEDIA_APPLICATION_APPROVED",
+    variables: {
+      mediaName: input.mediaName,
+      link: `${base}/ko/media-owner/dashboard`,
+    },
+  });
+}
+
 export async function notifyMediaOwnerSettlementCompleted(input: {
   ownerUserId: string;
   periodMonth: string;
