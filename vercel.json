@@ -141,7 +141,7 @@
     },
     {
       "path": "/api/cron/launch-hourly-report",
-      "schedule": "0 * * * *"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/cron/welcome-email-drip",
@@ -149,7 +149,7 @@
     },
     {
       "path": "/api/cron/inquiry-sla-escalation",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 7 * * *"
     },
     {
       "path": "/api/cron/potential-media-outreach",
