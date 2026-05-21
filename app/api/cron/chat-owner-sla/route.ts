@@ -5,6 +5,7 @@ import { createNotification } from "@/lib/notifications";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { notifyMediaOwnerNewInquiry } from "@/lib/media-owner-notify";
 
+/** Hobby: vercel.json schedule must run ≤1×/day (currently 03:30 UTC daily). */
 export const dynamic = "force-dynamic";
 
 function authOk(request: NextRequest): boolean {

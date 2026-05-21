@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { json } from "@/lib/admin-guard";
 import { expireStaleNegotiations } from "@/lib/price-negotiation";
 
+/** Hobby: vercel.json schedule must run ≤1×/day (currently 03:15 UTC daily). */
 export const dynamic = "force-dynamic";
 
 function authOk(request: NextRequest): boolean {
