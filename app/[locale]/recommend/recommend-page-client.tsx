@@ -27,6 +27,12 @@ import {
   filterCatalogByRegionCodes,
   type AiRecommendInput,
 } from "@/lib/ai-media-recommend";
+import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
+import {
+  buildHomeBudgetRecommendInput,
+  type HomeBudgetIndustry,
+  type HomeBudgetRegion,
+} from "@/lib/home-budget-recommend";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
 const RecommendCartBar = dynamic(
@@ -51,6 +57,11 @@ export default function RecommendPageClient({
   const searchParams = useSearchParams();
   const similarCampaignId = searchParams.get("similar")?.trim() ?? "";
   const similarPrefillDone = useRef<string | null>(null);
+  const homeBudgetAutoDone = useRef(false);
+  const budgetFromUrl = searchParams.get("budget");
+  const regionFromUrl = searchParams.get("region") as HomeBudgetRegion | null;
+  const industryFromUrl = searchParams.get("industry") as HomeBudgetIndustry | null;
+  const autoFromUrl = searchParams.get("auto");
 
   const [cartItems, setCartItems] = useState<MediaItem[]>([]);
   const [similarBanner, setSimilarBanner] = useState<string | null>(null);
@@ -123,6 +134,48 @@ export default function RecommendPageClient({
     },
     [runAnalysis],
   );
+
+  useEffect(() => {
+    if (
+      autoFromUrl !== "1" ||
+      homeBudgetAutoDone.current ||
+      !budgetFromUrl ||
+      !regionFromUrl
+    ) {
+      return;
+    }
+    const budgetMan = Number.parseInt(budgetFromUrl, 10);
+    if (!Number.isFinite(budgetMan) || budgetMan < 100) return;
+    homeBudgetAutoDone.current = true;
+
+    const validRegions: HomeBudgetRegion[] = [
+      "gangnam",
+      "hongdae",
+      "seongsu",
+      "national",
+    ];
+    const region = validRegions.includes(regionFromUrl)
+      ? regionFromUrl
+      : "national";
+    const industry = industryFromUrl ?? "";
+    const input = buildHomeBudgetRecommendInput(budgetMan, region, industry);
+    const regionCodes: RegionCheckboxCode[] =
+      region === "national" ? [] : ["seoul"];
+
+    const payload: MediaAiRecommendFormSubmit = {
+      input,
+      regionCodes,
+      searchQuery: "",
+    };
+    setLastPayload(payload);
+    runAnalysis(payload);
+  }, [
+    autoFromUrl,
+    budgetFromUrl,
+    regionFromUrl,
+    industryFromUrl,
+    runAnalysis,
+  ]);
 
   useEffect(() => {
     if (!similarCampaignId || similarPrefillDone.current === similarCampaignId) {

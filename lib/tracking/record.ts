@@ -1,5 +1,6 @@
 import type { ConversionEventType, Prisma } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { touchVisitorJourney } from "@/lib/visitor-journey";
 
 const ACTIVE_WINDOW_MS = 5 * 60 * 1000;
 
@@ -9,6 +10,12 @@ export type RecordPageViewInput = {
   locale?: string | null;
   referrer?: string | null;
   userAgent?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  utmContent?: string | null;
+  utmTerm?: string | null;
+  landingPath?: string | null;
 };
 
 export type RecordConversionInput = {
@@ -48,6 +55,21 @@ export async function recordPageView(input: RecordPageViewInput): Promise<void> 
       },
     });
   }
+
+  void touchVisitorJourney({
+    sessionId: input.sessionId,
+    step: "page_view",
+    path: input.path,
+    referrer: input.referrer,
+    landingPath: input.landingPath,
+    utm: {
+      utmSource: input.utmSource,
+      utmMedium: input.utmMedium,
+      utmCampaign: input.utmCampaign,
+      utmContent: input.utmContent,
+      utmTerm: input.utmTerm,
+    },
+  });
 }
 
 export async function recordConversion(input: RecordConversionInput): Promise<void> {

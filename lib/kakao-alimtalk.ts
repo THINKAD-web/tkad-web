@@ -19,6 +19,7 @@ export const ALIMTALK_TEMPLATE_CODES = [
   "TKAD_OWNER_CAMPAIGN_CONFIRMED",
   "TKAD_OWNER_SETTLEMENT_DONE",
   "TKAD_PROOF_PHOTO_UPLOADED",
+  "TKAD_MEDIA_APPLICATION_APPROVED",
 ] as const;
 
 export type AlimtalkTemplateCode = (typeof ALIMTALK_TEMPLATE_CODES)[number];
@@ -68,6 +69,10 @@ export const ALIMTALK_TEMPLATE_DEFAULTS: Record<
     subject: "인증 사진",
     body: "광고가 정상 집행되고 있어요!\n인증 사진을 확인해보세요 →\n#{link}",
   },
+  TKAD_MEDIA_APPLICATION_APPROVED: {
+    subject: "매체 승인",
+    body: "등록하신 매체「#{mediaName}」이 승인·노출되었습니다.\n#{link}",
+  },
 };
 
 export const ALIMTALK_TEMPLATE_LABELS: Record<AlimtalkTemplateCode, string> = {
@@ -81,6 +86,7 @@ export const ALIMTALK_TEMPLATE_LABELS: Record<AlimtalkTemplateCode, string> = {
   TKAD_OWNER_CAMPAIGN_CONFIRMED: "매체사·집행 확정",
   TKAD_OWNER_SETTLEMENT_DONE: "매체사·정산 완료",
   TKAD_PROOF_PHOTO_UPLOADED: "인증 사진 업로드",
+  TKAD_MEDIA_APPLICATION_APPROVED: "매체사·승인 완료",
 };
 
 export type SendAlimtalkParams = {

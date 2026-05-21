@@ -45,15 +45,47 @@ enum MediaPricePeriod {
 enum NotificationType {
   CAMPAIGN_START
   CAMPAIGN_END
+  CAMPAIGN_MILESTONE
+  CREATIVE_REVIEW
+  CHAT_MESSAGE
   QUOTE_RECEIVED
   QUOTE_ACCEPTED
   MEDIA_AVAILABLE
   REPORT_READY
   REVIEW_REQUEST
+  PRICE_CHANGE
+  REGION_PRICE_TREND
   SYSTEM
   MATCH_INQUIRY
   OPEN_BID
   BID_SELECTED
+}
+
+enum ChatRoomStatus {
+  OPEN
+  CLOSED
+}
+
+enum ChatSenderRole {
+  advertiser
+  owner
+  system
+  admin
+}
+
+enum CreativeSubmissionStatus {
+  PENDING
+  AI_REVIEWING
+  AI_PASSED
+  AI_FAILED
+  FORWARDED_TO_OWNER
+}
+
+enum PriceNegotiationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
 }
 
 enum MediaReviewStatus {
@@ -232,6 +264,9 @@ model Media {
   reviews              MediaReview[]
   dataFusion           MediaDataFusion?
   ownerBids            MediaOwnerBid[]
+  priceNegotiations       PriceNegotiationRequest[]
+  campaignCreativeSubmissions CampaignCreativeSubmission[]
+  chatRooms                   ChatRoom[]
 
   /// 네트워크 패키지 내 개별 지점과의 연결 (선택)
   networkLocations MediaNetworkLocation[]
@@ -254,6 +289,60 @@ model MediaPriceSnapshot {
 
   @@index([mediaId])
   @@map("media_price_snapshots")
+}
+
+model RegionPriceIndex {
+  id          String   @id @default(cuid())
+  regionZone  String   @map("region_zone") @db.VarChar(32)
+  periodMonth String   @map("period_month") @db.VarChar(7)
+  avgPrice    Int      @map("avg_price")
+  minPrice    Int      @map("min_price")
+  maxPrice    Int      @map("max_price")
+  mediaCount  Int      @map("media_count")
+  changePct   Float?   @map("change_pct")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([regionZone, periodMonth])
+  @@index([periodMonth(sort: Desc)])
+  @@map("region_price_indices")
+}
+
+model UserRegionPriceAlert {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  regionZone String   @map("region_zone") @db.VarChar(32)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, regionZone])
+  @@index([regionZone])
+  @@map("user_region_price_alerts")
+}
+
+model PriceNegotiationRequest {
+  id               String                 @id @default(cuid())
+  mediaId          String                 @map("media_id")
+  userId           String?                @map("user_id")
+  contactEmail     String                 @map("contact_email") @db.VarChar(254)
+  contactPhone     String                 @map("contact_phone") @db.VarChar(20)
+  companyName      String?                @map("company_name") @db.VarChar(120)
+  proposedPriceWon Int                  @map("proposed_price_won")
+  message          String?                @db.Text
+  status           PriceNegotiationStatus @default(PENDING)
+  ownerNote        String?                @map("owner_note") @db.Text
+  expiresAt        DateTime               @map("expires_at")
+  respondedAt      DateTime?              @map("responded_at")
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  oohQuote OoHQuote?
+
+  @@index([mediaId, status, createdAt(sort: Desc)])
+  @@index([status, expiresAt])
+  @@map("price_negotiation_requests")
 }
 
 model MediaBooking {
@@ -489,11 +578,103 @@ model Campaign {
   successCase    SuccessCase?
   oohQuote       OoHQuote?
   mediaReviews   MediaReview[]
+  creativeSubmissions CampaignCreativeSubmission[]
+  renewalProposal     CampaignRenewalProposal?
 
   @@index([status])
   @@index([ownerUserId])
   @@index([clientEmail])
   @@map("campaigns")
+}
+
+/// 캠페인별 광고 소재 제출 + AI 1차 검수
+model CampaignCreativeSubmission {
+  id                String                   @id @default(cuid())
+  campaignId        String                   @map("campaign_id")
+  creativeId        String                   @map("creative_id")
+  submittedByUserId String                   @map("submitted_by_user_id")
+  mediaId           String?                  @map("media_id")
+  status            CreativeSubmissionStatus @default(PENDING)
+  aiResult          Json?                    @map("ai_result")
+  aiFeedback        String?                  @map("ai_feedback") @db.Text
+  forwardedAt       DateTime?                @map("forwarded_at")
+  createdAt         DateTime                 @default(now()) @map("created_at")
+  updatedAt         DateTime                 @updatedAt @map("updated_at")
+
+  campaign  Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  creative  Creative @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+  submitter User     @relation(fields: [submittedByUserId], references: [id], onDelete: Cascade)
+  media     Media?   @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+
+  @@unique([campaignId, creativeId])
+  @@index([campaignId, status])
+  @@index([submittedByUserId])
+  @@map("campaign_creative_submissions")
+}
+
+/// 종료 5일 후 자동 생성되는 다음 캠페인 제안
+model CampaignRenewalProposal {
+  id           String    @id @default(cuid())
+  campaignId   String    @unique @map("campaign_id")
+  proposalJson Json      @map("proposal_json")
+  summaryKo    String    @map("summary_ko") @db.Text
+  emailedAt    DateTime? @map("emailed_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_renewal_proposals")
+}
+
+/// 광고주 ↔ 매체사 익명 중개 채팅 (연락처 비공개)
+model ChatRoom {
+  id                String         @id @default(cuid())
+  mediaId           String         @map("media_id")
+  advertiserUserId  String         @map("advertiser_user_id")
+  ownerUserId       String         @map("owner_user_id")
+  status            ChatRoomStatus @default(OPEN)
+  locale            String         @default("ko")
+  ownerFirstReplyAt DateTime?      @map("owner_first_reply_at")
+  ownerNotifiedAt   DateTime?      @map("owner_notified_at")
+  slaReminderAt     DateTime?      @map("sla_reminder_at")
+  lastMessageAt     DateTime?      @map("last_message_at")
+  oohQuoteId        String?        @unique @map("ooh_quote_id")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  media      Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  advertiser User      @relation("ChatAdvertiser", fields: [advertiserUserId], references: [id], onDelete: Cascade)
+  owner      User      @relation("ChatOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  messages   ChatMessage[]
+  oohQuote   OoHQuote? @relation(fields: [oohQuoteId], references: [id], onDelete: SetNull)
+
+  @@unique([mediaId, advertiserUserId])
+  @@index([ownerUserId, status, lastMessageAt(sort: Desc)])
+  @@index([advertiserUserId, status])
+  @@map("chat_rooms")
+}
+
+model ChatMessage {
+  id              String         @id @default(cuid())
+  roomId          String         @map("room_id")
+  senderRole      ChatSenderRole @map("sender_role")
+  senderUserId    String?        @map("sender_user_id")
+  displayLabel    String         @map("display_label") @db.VarChar(32)
+  body            String         @db.Text
+  bodySanitized   String         @map("body_sanitized") @db.Text
+  contactBlocked  Boolean        @default(false) @map("contact_blocked")
+  attachmentUrl   String?        @map("attachment_url") @db.Text
+  attachmentType  String?        @map("attachment_type") @db.VarChar(16)
+  attachmentName  String?        @map("attachment_name") @db.VarChar(200)
+  isAutoReply     Boolean        @default(false) @map("is_auto_reply")
+  quoteId         String?        @map("quote_id")
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender User?    @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
+
+  @@index([roomId, createdAt])
+  @@map("chat_messages")
 }
 
 model CampaignProofPhoto {
@@ -709,6 +890,12 @@ model OoHQuote {
 
   contactInquiryId String?         @unique @map("contact_inquiry_id")
   contactInquiry   ContactInquiry? @relation(fields: [contactInquiryId], references: [id], onDelete: SetNull)
+
+  priceNegotiationId String?                 @unique @map("price_negotiation_id")
+  priceNegotiation   PriceNegotiationRequest? @relation(fields: [priceNegotiationId], references: [id], onDelete: SetNull)
+
+  chatRoom ChatRoom?
+
   pipelineCard     PipelineCard?
 
   /// `lib/quote-calculator.ts` 산출 JSON (라인·VAT·유효기간 등)
@@ -1190,6 +1377,13 @@ model User {
   mediaOwnerReviews       MediaOwnerReview[]       @relation("MediaOwnerReviews")
   mediaOwnerReviewsGiven  MediaOwnerReview[]       @relation("AdvertiserReviews")
   marketInsightsDigests   MarketInsightsWeeklyDigest[]
+  mediaOwnerProfile       MediaOwnerProfile?
+  regionPriceAlerts       UserRegionPriceAlert[]
+  priceNegotiations       PriceNegotiationRequest[]
+  campaignCreativeSubmissions CampaignCreativeSubmission[]
+  chatRoomsAsAdvertiser   ChatRoom[] @relation("ChatAdvertiser")
+  chatRoomsAsOwner        ChatRoom[] @relation("ChatOwner")
+  chatMessages            ChatMessage[]
 
   @@index([email])
   @@map("users")
@@ -1767,12 +1961,79 @@ model MediaApplication {
   submitterIp    String?                @map("submitter_ip")
   /// 로그인 매체사가 제출한 경우
   userId         String?                @map("user_id")
+  /// PENDING 24시간 초과 리마인더 발송 시각
+  pendingReminderSentAt DateTime?       @map("pending_reminder_sent_at")
   createdAt      DateTime               @default(now()) @map("created_at")
   updatedAt      DateTime               @updatedAt @map("updated_at")
 
   @@index([status, createdAt])
   @@index([userId])
   @@map("media_applications")
+}
+
+// ── 매체사 리드 발굴 · 아웃리치 · 온보딩 ───────────────────────
+
+enum PotentialMediaSource {
+  KAKAO_MAP
+  GOOGLE_MAP
+  MANUAL
+}
+
+enum PotentialMediaOutreachStatus {
+  NEW
+  CONTACT_FOUND
+  EMAILED
+  OPENED
+  REGISTERED
+  SKIPPED
+}
+
+/// 지도 검색 등으로 발굴한 잠재 매체
+model PotentialMedia {
+  id              String                       @id @default(cuid())
+  name            String                       @db.VarChar(200)
+  address         String                       @db.VarChar(500)
+  lat             Float?
+  lng             Float?
+  foundFrom       PotentialMediaSource         @map("found_from")
+  /// 전화·이메일·웹 등 JSON { phone?, email?, url? }
+  contactInfo     Json?                        @map("contact_info")
+  externalPlaceId String?                      @map("external_place_id") @db.VarChar(120)
+  outreachStatus  PotentialMediaOutreachStatus @default(NEW) @map("outreach_status")
+  outreachToken   String?                      @unique @map("outreach_token") @db.VarChar(64)
+  outreachEmail   String?                      @map("outreach_email") @db.VarChar(254)
+  emailedAt       DateTime?                    @map("emailed_at")
+  emailOpenedAt   DateTime?                    @map("email_opened_at")
+  registeredAt    DateTime?                    @map("registered_at")
+  notes           String?                      @db.Text
+  createdAt       DateTime                     @default(now()) @map("created_at")
+  updatedAt       DateTime                     @updatedAt @map("updated_at")
+
+  @@unique([foundFrom, externalPlaceId])
+  @@index([outreachStatus, createdAt(sort: Desc)])
+  @@map("potential_media")
+}
+
+/// 매체사 인센티브 · 온보딩 이메일 · 추천
+model MediaOwnerProfile {
+  userId                String    @id @map("user_id")
+  referralCode          String    @unique @map("referral_code") @db.VarChar(16)
+  referredByUserId      String?   @map("referred_by_user_id")
+  proFreeUntil          DateTime? @map("pro_free_until")
+  lifetimePro           Boolean   @default(false) @map("lifetime_pro")
+  approvedMediaCount    Int       @default(0) @map("approved_media_count")
+  onboardingStartedAt   DateTime  @default(now()) @map("onboarding_started_at")
+  emailDay0SentAt       DateTime? @map("email_day0_sent_at")
+  emailDay1SentAt       DateTime? @map("email_day1_sent_at")
+  emailDay3SentAt       DateTime? @map("email_day3_sent_at")
+  emailDay7SentAt       DateTime? @map("email_day7_sent_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([referredByUserId])
+  @@map("media_owner_profiles")
 }
 
 /// 매체사 단가 수정 요청 (어드민 검토)
@@ -1806,6 +2067,7 @@ model MediaOwnerSettlement {
   netWon                Int                      @map("net_won")
   status                MediaOwnerSettlementStatus @default(SCHEDULED)
   taxInvoiceRequestedAt DateTime?                @map("tax_invoice_requested_at")
+  statementSentAt       DateTime?                @map("statement_sent_at")
   completedAt           DateTime?                @map("completed_at")
   notes                 String?                  @db.Text
   createdAt             DateTime                 @default(now()) @map("created_at")
@@ -2163,6 +2425,7 @@ model Creative {
   user          User                   @relation("UserCreatives", fields: [userId], references: [id], onDelete: Cascade)
   playlistItems CreativePlaylistItem[]
   bookings      Booking[]
+  campaignSubmissions CampaignCreativeSubmission[]
 
   @@index([userId])
   @@index([userId, type])
@@ -2282,6 +2545,49 @@ model WebVital {
   @@index([name, createdAt(sort: Desc)])
   @@index([createdAt(sort: Desc)])
   @@map("web_vitals")
+}
+
+// ── Advertiser first-visit funnel ───────────────────────────────
+
+model VisitorJourney {
+  id                String    @id @default(cuid())
+  sessionId         String    @unique @map("session_id")
+  utmSource         String?   @map("utm_source") @db.VarChar(120)
+  utmMedium         String?   @map("utm_medium") @db.VarChar(120)
+  utmCampaign       String?   @map("utm_campaign") @db.VarChar(120)
+  utmContent        String?   @map("utm_content") @db.VarChar(120)
+  utmTerm           String?   @map("utm_term") @db.VarChar(120)
+  referrer          String?   @db.VarChar(500)
+  landingPath       String?   @map("landing_path") @db.VarChar(500)
+  userId            String?   @map("user_id")
+  firstSeenAt       DateTime  @default(now()) @map("first_seen_at")
+  lastSeenAt        DateTime  @updatedAt @map("last_seen_at")
+  signedUpAt        DateTime? @map("signed_up_at")
+  quoteRequestedAt  DateTime? @map("quote_requested_at")
+  guideDownloadedAt DateTime? @map("guide_downloaded_at")
+  quickQuoteAt      DateTime? @map("quick_quote_at")
+  budgetPreviewAt   DateTime? @map("budget_preview_at")
+
+  steps VisitorJourneyStep[]
+
+  @@index([firstSeenAt(sort: Desc)])
+  @@index([utmSource, firstSeenAt(sort: Desc)])
+  @@map("visitor_journeys")
+}
+
+model VisitorJourneyStep {
+  id        String   @id @default(cuid())
+  journeyId String   @map("journey_id")
+  step      String   @db.VarChar(64)
+  path      String?  @db.VarChar(500)
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  journey VisitorJourney @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+
+  @@index([journeyId, createdAt(sort: Asc)])
+  @@index([step, createdAt(sort: Desc)])
+  @@map("visitor_journey_steps")
 }
 
 // ── Ops monitoring (PageView, ConversionEvent) ─────────────────

@@ -443,9 +443,32 @@ export function MyHubPageClient() {
 
           {tab === "favorites" && (
             <section aria-labelledby="my-favorites-heading">
-              <h2 id="my-favorites-heading" className="sr-only">
-                {t("tabs.favorites")}
-              </h2>
+              <div className="tkad-neon-surface relative mb-8 overflow-hidden rounded-[28px] px-6 py-8 sm:px-8 sm:py-10">
+                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-400/80">
+                  {isKo ? "// 찜한 매체" : "// Saved media"}
+                </p>
+                <h2
+                  id="my-favorites-heading"
+                  className="mt-3 text-balance text-2xl font-[950] leading-tight tracking-[-0.05em] text-foreground sm:text-3xl"
+                >
+                  {isKo ? (
+                    <>
+                      관심 매체를{" "}
+                      <span className="tkad-home-accent-text">플래너</span>에 담아보세요
+                    </>
+                  ) : (
+                    <>
+                      Add saved media to your{" "}
+                      <span className="tkad-home-accent-text">planner</span>
+                    </>
+                  )}
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  {isKo
+                    ? "관심 매체를 모아 플래너·견적으로 이어가세요."
+                    : "Collect saved placements and move into planner or quotes."}
+                </p>
+              </div>
               {favLoading ? (
                 <div className="py-16 text-center">
                   <Spinner size="md" label={t("favorites.loading")} />

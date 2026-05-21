@@ -2,8 +2,7 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import { serializeJsonLd } from "@/lib/seo";
 import { buildCollectionPageJsonLd } from "@/lib/structured-data";
-import CasesPageClient from "./cases-page-client";
-import { CasesHero } from "./cases-hero";
+import { CasesPageContent } from "@/components/cases/cases-page-content";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -36,10 +35,7 @@ export default async function CasesPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionLd) }}
       />
-      <CasesPageClient
-        initialCases={initialCases}
-        hero={<CasesHero locale={locale} empty={initialCases.length === 0} />}
-      />
+      <CasesPageContent locale={locale} cases={initialCases} />
     </>
   );
 }

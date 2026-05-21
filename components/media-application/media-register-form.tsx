@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { Loader2 } from "lucide-react";
 import {
@@ -21,6 +22,9 @@ const sectionTitleCls =
 export function MediaRegisterForm() {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const searchParams = useSearchParams();
+  const outreachToken = searchParams.get("ot")?.trim() ?? "";
+  const referralRef = searchParams.get("ref")?.trim() ?? "";
 
   const [companyName, setCompanyName] = useState("");
   const [contactName, setContactName] = useState("");
@@ -90,6 +94,8 @@ export function MediaRegisterForm() {
           photoSideUrl,
           photoNightUrl,
           notes,
+          ...(outreachToken ? { outreachToken } : {}),
+          ...(referralRef ? { referralRef } : {}),
         }),
       });
       const text = await res.text();

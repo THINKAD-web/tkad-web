@@ -115,6 +115,8 @@ export const publicSeoPaths = [
   "/planner",
   "/glossary",
   "/guides",
+  "/budget-tool",
+  "/pricing-guide",
 ] as const;
 
 export function absoluteUrl(path: string): string {

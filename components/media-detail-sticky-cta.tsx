@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { BarChart3, Bolt, Sparkles } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
+import { ChatStartButton } from "@/components/chat/chat-start-button";
 import { MediaQuickInquiryActions } from "@/components/media-quick-inquiry-actions";
 import type { MediaItem } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
@@ -22,7 +23,6 @@ export default function MediaDetailStickyCta({
   const t = useTranslations("media.detail");
   const tCta = useTranslations("mediaDetail.cta");
   const displayName = isKo ? media.name : media.nameEn || media.name;
-  const contactHref = `/contact?media=${encodeURIComponent(media.id)}`;
   const heroImage = getPrimaryMediaImageUrl(media);
   const location = formatMediaLocationShort(media, isKo);
 
@@ -37,8 +37,8 @@ export default function MediaDetailStickyCta({
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-25 tkad-neon-grid"
         />
-        <div className="relative space-y-2 p-2.5">
-          <p className="truncate px-0.5 text-sm font-bold leading-snug text-white">
+        <div className="relative space-y-1.5 p-2 sm:p-2.5">
+          <p className="truncate px-0.5 text-xs font-bold leading-snug text-white sm:text-sm">
             {displayName}
           </p>
           <MediaQuickInquiryActions
@@ -49,31 +49,29 @@ export default function MediaDetailStickyCta({
             imageUrl={heroImage || undefined}
             compact
           />
-          <BtnBlock
-            href={contactHref}
+          <ChatStartButton
+            mediaId={media.id}
             variant="primary"
             size="sm"
-            className="min-h-12 w-full justify-center rounded-[15px] border-0 bg-gradient-to-r from-violet-500 to-cyan-400 text-sm font-black tracking-[0.04em] text-white shadow-lg shadow-violet-500/30 hover:opacity-95"
-          >
-            {t("inquireThisMedia")}
-          </BtnBlock>
+            className="min-h-10 w-full justify-center rounded-[14px] border-0 bg-gradient-to-r from-violet-500 to-cyan-400 text-xs font-black tracking-[0.04em] text-white shadow-lg shadow-violet-500/30 hover:opacity-95 sm:min-h-11 sm:text-sm"
+          />
           {instantBookEligible ? (
             <BtnBlock
               href={`/media/${encodeURIComponent(media.id)}/book`}
               variant="secondary"
               size="sm"
-              className="min-h-10 w-full justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[11px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
+              className="min-h-9 w-full justify-center rounded-[14px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
             >
               <Bolt className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {tCta("instantBook")}
             </BtnBlock>
           ) : null}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             <BtnBlock
               href={`/planner?addMedia=${encodeURIComponent(media.id)}`}
               variant="secondary"
               size="sm"
-              className="min-h-10 min-w-0 justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
+              className="min-h-9 min-w-0 justify-center rounded-[14px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
             >
               <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
               <span className="truncate">{tCta("plannerShort")}</span>
@@ -82,7 +80,7 @@ export default function MediaDetailStickyCta({
               href={compareHref}
               variant="secondary"
               size="sm"
-              className="min-h-10 min-w-0 justify-center rounded-[15px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
+              className="min-h-9 min-w-0 justify-center rounded-[14px] border-white/14 bg-white/8 px-2 text-[10px] tracking-[0.04em] text-white/92 backdrop-blur hover:bg-white/12 hover:text-white"
             >
               <BarChart3 className="h-3.5 w-3.5 shrink-0" aria-hidden />
               <span className="min-w-0 truncate text-center">

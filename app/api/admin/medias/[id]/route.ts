@@ -18,6 +18,7 @@ import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverag
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
 import { notifyFavoriteUsersMediaAvailability } from "@/lib/notifications";
+import { notifyFavoriteUsersPriceChange } from "@/lib/notifications-price";
 
 export const dynamic = "force-dynamic";
 
@@ -518,6 +519,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         existing.availability,
         media.availability,
       );
+    }
+    if (body.price != null && media.price !== existing.price) {
+      void notifyFavoriteUsersPriceChange({
+        mediaId: media.id,
+        mediaName: media.name,
+        oldPriceWon: existing.price,
+        newPriceWon: media.price,
+      }).catch((err) => console.error("[admin/media] price alert", err));
     }
     try {
       for (const locale of ["ko", "en"] as const) {

@@ -21,7 +21,7 @@ import { INDUSTRY_SLUGS } from "@/lib/industry-landing";
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
 function footerItemLabel(item: ResolvedPublicNavItem): string {
-  return item.badge ? `${item.label} · ${item.badge}` : item.label;
+  return item.label;
 }
 
 function mergeNavGroups(
@@ -76,7 +76,6 @@ export function FooterBrutal() {
       industryGuide,
       mergeNavGroups([creative, insights, academy], t("footer.creativeInsights"), [
         { href: "/register/media", label: t("footer.mediaPartnerRegister") },
-        { href: "/privacy", label: t("footer.privacy") },
       ]),
     ];
   }, [navGroups, t]);
@@ -84,6 +83,7 @@ export function FooterBrutal() {
   const contactInfo: BrutalFooterColumn = {
     title: t("footer.contactInfo"),
     items: [
+      { href: "/privacy", label: t("footer.privacy") },
       { label: t("footer.address") },
       { label: t("footer.phone") },
       { label: CONTACT_EMAIL },

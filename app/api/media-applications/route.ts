@@ -9,6 +9,8 @@ import {
 import { parseMediaApplicationSubmit } from "@/lib/media-application";
 import { geocodeAddressWithKakao } from "@/lib/kakao-address-geocode";
 import { getCurrentUser } from "@/lib/user-session";
+import { notifySlackMediaApplication } from "@/lib/media-application-slack";
+import { recordOutreachRegistration } from "@/lib/media-owner-outreach-register";
 
 export const dynamic = "force-dynamic";
 
@@ -153,6 +155,22 @@ export async function POST(request: NextRequest) {
     } catch (e) {
       console.error("[media-applications] confirm email", e);
     }
+  }
+
+  void notifySlackMediaApplication(app).catch((e) =>
+    console.error("[media-applications] slack", e),
+  );
+
+  const outreachToken =
+    typeof raw === "object" &&
+    raw &&
+    typeof (raw as { outreachToken?: string }).outreachToken === "string"
+      ? (raw as { outreachToken: string }).outreachToken.trim()
+      : "";
+  if (outreachToken) {
+    void recordOutreachRegistration(outreachToken).catch((e) =>
+      console.error("[media-applications] outreach", e),
+    );
   }
 
   return json({ success: true, id: app.id }, { status: 201 });
