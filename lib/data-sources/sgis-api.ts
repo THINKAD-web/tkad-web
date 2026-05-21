@@ -4,6 +4,7 @@
  */
 import type { PartialSourcePayload } from "@/lib/data-source-types";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { isMissingContentTableError } from "@/lib/prisma-content-guards";
 
 export async function fetchSgisCommerceMix(opts: {
   latitude?: number | null;
@@ -15,10 +16,14 @@ export async function fetchSgisCommerceMix(opts: {
 
   const cacheKey = `sgis:${opts.latitude.toFixed(4)}:${opts.longitude.toFixed(4)}`;
   if (isDatabaseConfigured()) {
-    const db = getPrisma();
-    const row = await db.externalDataCache.findUnique({ where: { sourceKey: cacheKey } });
-    if (row && row.expiresAt >= new Date()) {
-      return row.payload as PartialSourcePayload;
+    try {
+      const db = getPrisma();
+      const row = await db.externalDataCache.findUnique({ where: { sourceKey: cacheKey } });
+      if (row && row.expiresAt >= new Date()) {
+        return row.payload as PartialSourcePayload;
+      }
+    } catch (e) {
+      if (!isMissingContentTableError(e)) throw e;
     }
   }
 
@@ -50,19 +55,23 @@ export async function fetchSgisCommerceMix(opts: {
     };
 
     if (isDatabaseConfigured()) {
-      const db = getPrisma();
-      await db.externalDataCache.upsert({
-        where: { sourceKey: cacheKey },
-        create: {
-          sourceKey: cacheKey,
-          payload: payload as object,
-          expiresAt: new Date(Date.now() + 30 * 86400_000),
-        },
-        update: {
-          payload: payload as object,
-          expiresAt: new Date(Date.now() + 30 * 86400_000),
-        },
-      });
+      try {
+        const db = getPrisma();
+        await db.externalDataCache.upsert({
+          where: { sourceKey: cacheKey },
+          create: {
+            sourceKey: cacheKey,
+            payload: payload as object,
+            expiresAt: new Date(Date.now() + 30 * 86400_000),
+          },
+          update: {
+            payload: payload as object,
+            expiresAt: new Date(Date.now() + 30 * 86400_000),
+          },
+        });
+      } catch (e) {
+        if (!isMissingContentTableError(e)) throw e;
+      }
     }
     return payload;
   } catch {

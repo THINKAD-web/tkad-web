@@ -9,26 +9,37 @@ import { fetchMetroRawDailyPassengerTotal } from "@/lib/seoul-metro-passenger-ap
 import { kakaoPlaceToMetroStnNm } from "@/lib/subway-station-name";
 import type { PartialSourcePayload } from "@/lib/data-source-types";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { isMissingContentTableError } from "@/lib/prisma-content-guards";
 
 const CACHE_TTL_MS = 7 * 86400_000;
 
 async function getCached<T>(key: string): Promise<T | null> {
   if (!isDatabaseConfigured()) return null;
-  const db = getPrisma();
-  const row = await db.externalDataCache.findUnique({ where: { sourceKey: key } });
-  if (!row || row.expiresAt < new Date()) return null;
-  return row.payload as T;
+  try {
+    const db = getPrisma();
+    const row = await db.externalDataCache.findUnique({ where: { sourceKey: key } });
+    if (!row || row.expiresAt < new Date()) return null;
+    return row.payload as T;
+  } catch (e) {
+    if (isMissingContentTableError(e)) return null;
+    throw e;
+  }
 }
 
 async function setCache(key: string, payload: unknown, ttlMs = CACHE_TTL_MS) {
   if (!isDatabaseConfigured()) return;
-  const db = getPrisma();
-  const expiresAt = new Date(Date.now() + ttlMs);
-  await db.externalDataCache.upsert({
-    where: { sourceKey: key },
-    create: { sourceKey: key, payload: payload as object, expiresAt },
-    update: { payload: payload as object, expiresAt },
-  });
+  try {
+    const db = getPrisma();
+    const expiresAt = new Date(Date.now() + ttlMs);
+    await db.externalDataCache.upsert({
+      where: { sourceKey: key },
+      create: { sourceKey: key, payload: payload as object, expiresAt },
+      update: { payload: payload as object, expiresAt },
+    });
+  } catch (e) {
+    if (isMissingContentTableError(e)) return;
+    throw e;
+  }
 }
 
 /** 지하철 승하차 → 일 유동 추정 */

@@ -100,13 +100,17 @@ export async function checkReportAccess(
   if (rankLevel(level) >= rankLevel(minLevel)) {
     let trialDaysLeft: number | undefined;
     if (userId && isDatabaseConfigured()) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { proTrialEndsAt: true },
-      });
-      if (user?.proTrialEndsAt) {
-        const ms = user.proTrialEndsAt.getTime() - Date.now();
-        if (ms > 0) trialDaysLeft = Math.ceil(ms / (86400 * 1000));
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { proTrialEndsAt: true },
+        });
+        if (user?.proTrialEndsAt) {
+          const ms = user.proTrialEndsAt.getTime() - Date.now();
+          if (ms > 0) trialDaysLeft = Math.ceil(ms / (86400 * 1000));
+        }
+      } catch {
+        /* schema drift — treat as allowed without trial metadata */
       }
     }
     return { allowed: true, level, trialDaysLeft };

@@ -1,5 +1,6 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import type { CompetitorOohInsight } from "@/lib/data-source-types";
+import { isMissingContentTableError } from "@/lib/prisma-content-guards";
 
 const QUARTER_DAYS = 90;
 
@@ -14,6 +15,22 @@ export async function getCompetitorOohInsights(
 ): Promise<CompetitorOohInsight[]> {
   if (!isDatabaseConfigured()) return [];
 
+  const regionKey = region?.trim() || "서울";
+  const regionPrefix = regionKey.slice(0, 2) || "서울";
+
+  try {
+    return await loadCompetitorOohInsights(regionKey, regionPrefix);
+  } catch (e) {
+    if (isMissingContentTableError(e)) return [];
+    console.warn("[competitor-ooh] insights failed", e);
+    return [];
+  }
+}
+
+async function loadCompetitorOohInsights(
+  region: string,
+  regionPrefix: string,
+): Promise<CompetitorOohInsight[]> {
   const db = getPrisma();
   const since = new Date(Date.now() - QUARTER_DAYS * 86400_000);
 
@@ -43,7 +60,7 @@ export async function getCompetitorOohInsights(
       take: 300,
     }),
     db.media.findMany({
-      where: { region: { contains: region.slice(0, 2) }, isActive: true },
+      where: { region: { contains: regionPrefix }, isActive: true },
       select: { id: true, name: true, region: true },
       take: 200,
     }),
@@ -78,19 +95,21 @@ export async function getCompetitorOohInsights(
       if (m) bump(c.industry, m.name);
     }
     for (const label of c.mediaUsed.slice(0, 2)) {
-      if (regionNames.has(label) || label.includes(region.slice(0, 2))) {
+      if (regionNames.has(label) || label.includes(regionPrefix)) {
         bump(c.industry, label);
       }
     }
   }
 
   for (const e of executions) {
-    if (!e.media.region.includes(region.slice(0, 2))) continue;
+    const execRegion = e.media.region?.trim();
+    if (!execRegion || !execRegion.includes(regionPrefix)) continue;
     bump("기타", e.media.name);
   }
 
   for (const b of bookings) {
-    if (!b.media.region.includes(region.slice(0, 2))) continue;
+    const bookingRegion = b.media.region?.trim();
+    if (!bookingRegion || !bookingRegion.includes(regionPrefix)) continue;
     bump("신규 집행", b.media.name);
   }
 

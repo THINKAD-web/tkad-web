@@ -164,29 +164,33 @@ function buildMethodology(
 async function collectAllSources(media: MediaItem): Promise<PartialSourcePayload[]> {
   const sources: PartialSourcePayload[] = [];
 
-  if (media.lat && media.lng) {
-    const [kt, skt, sgis] = await Promise.all([
-      fetchKtBigdataFootfall({ latitude: media.lat, longitude: media.lng }),
-      fetchSktBigdataDemographics({ latitude: media.lat, longitude: media.lng }),
-      fetchSgisCommerceMix({
-        latitude: media.lat,
-        longitude: media.lng,
-        district: media.district,
-      }),
-    ]);
-    if (kt) sources.push(kt);
-    if (skt) sources.push(skt);
-    if (sgis) sources.push(sgis);
-  }
+  try {
+    if (media.lat && media.lng) {
+      const [kt, skt, sgis] = await Promise.all([
+        fetchKtBigdataFootfall({ latitude: media.lat, longitude: media.lng }),
+        fetchSktBigdataDemographics({ latitude: media.lat, longitude: media.lng }),
+        fetchSgisCommerceMix({
+          latitude: media.lat,
+          longitude: media.lng,
+          district: media.district,
+        }),
+      ]);
+      if (kt) sources.push(kt);
+      if (skt) sources.push(skt);
+      if (sgis) sources.push(sgis);
+    }
 
-  const seoul = await collectSeoulOpenDataForMedia({
-    latitude: media.lat,
-    longitude: media.lng,
-    nearbyStations: media.nearbyStations,
-    nearbyLandmarks: media.nearbyLandmarks ?? media.location,
-    district: media.district,
-  });
-  sources.push(...seoul);
+    const seoul = await collectSeoulOpenDataForMedia({
+      latitude: media.lat,
+      longitude: media.lng,
+      nearbyStations: media.nearbyStations,
+      nearbyLandmarks: media.nearbyLandmarks ?? media.location,
+      district: media.district,
+    });
+    sources.push(...seoul);
+  } catch (e) {
+    console.warn("[data-fusion] collectAllSources failed", media.id, e);
+  }
 
   if (media.dailyFootTraffic && media.dailyFootTraffic > 0) {
     sources.push({
@@ -267,7 +271,7 @@ export async function fuseMediaData(media: MediaItem): Promise<FusedMediaData> {
   );
 
   const eventSynergies: EventSynergy[] = buildEventSynergies(media);
-  const competitorOoh = await getCompetitorOohInsights(media.region);
+  const competitorOoh = await getCompetitorOohInsights(media.region ?? "서울");
 
   const methodology = buildMethodology(
     attributions,

@@ -60,7 +60,11 @@ import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
 import { getCurrentUser } from "@/lib/user-session";
 import { checkReportAccess } from "@/lib/report-access";
-import { buildMediaAnalyticsReportFused } from "@/lib/media-report-analytics";
+import {
+  buildMediaAnalyticsReport,
+  buildMediaAnalyticsReportFused,
+  type MediaAnalyticsReport,
+} from "@/lib/media-report-analytics";
 import { MediaAnalyticsReportSection } from "@/components/media-detail/media-analytics-report";
 import {
   CompetitorOohSection,
@@ -153,11 +157,21 @@ export default async function MediaDetailPage({ params }: Props) {
   const user = await getCurrentUser();
   const detailAccess = await checkReportAccess(user?.id ?? null, "detail_data");
   const competitorAccess = await checkReportAccess(user?.id ?? null, "competitor");
-  const analyticsReport = await buildMediaAnalyticsReportFused(
-    media,
-    catalog,
-    media.trafficPattern ?? null,
-  );
+  let analyticsReport: MediaAnalyticsReport;
+  try {
+    analyticsReport = await buildMediaAnalyticsReportFused(
+      media,
+      catalog,
+      media.trafficPattern ?? null,
+    );
+  } catch (e) {
+    console.error("[media-detail] fused analytics failed", media.id, e);
+    analyticsReport = buildMediaAnalyticsReport(
+      media,
+      catalog,
+      media.trafficPattern ?? null,
+    );
+  }
   const relatedCases = await getSuccessCasesForMedia(media.id, 6, locale, {
     location: media.location,
     locationEn: media.locationEn,
@@ -187,9 +201,15 @@ export default async function MediaDetailPage({ params }: Props) {
       )
     : periodLabel;
 
-  const monthly =
+  const monthlyRaw =
     media.monthlyFootTraffic ??
-    Math.round(media.dailyFootTraffic * 30);
+    Math.round((media.dailyFootTraffic ?? 0) * 30);
+  const monthly =
+    Number.isFinite(monthlyRaw) && monthlyRaw > 0 ? monthlyRaw : null;
+  const dailyFoot =
+    Number.isFinite(media.dailyFootTraffic) && (media.dailyFootTraffic ?? 0) > 0
+      ? media.dailyFootTraffic!
+      : null;
 
   const similarRaw = media.keywordFilter
     ? getSimilarKeywordFilterMediaItems(media.id, 4)
@@ -427,7 +447,7 @@ export default async function MediaDetailPage({ params }: Props) {
                   label={t("footTrafficTitle")}
                   value={
                     <span className="block font-mono text-lg font-black tabular-nums text-white">
-                      {monthly.toLocaleString()}
+                      {monthly != null ? monthly.toLocaleString() : "—"}
                     </span>
                   }
                 />
@@ -634,14 +654,16 @@ export default async function MediaDetailPage({ params }: Props) {
                 value={
                   <>
                     <span className="block font-mono text-lg font-bold tabular-nums leading-tight text-foreground sm:text-xl">
-                      {monthly.toLocaleString()}
+                      {monthly != null ? monthly.toLocaleString() : "—"}
                     </span>
                     <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                       {t("monthly")}
                     </span>
-                    <span className="mt-2 block font-mono text-[11px] tracking-tight text-muted-foreground">
-                      {t("daily")} {media.dailyFootTraffic.toLocaleString()}
-                    </span>
+                    {dailyFoot != null ? (
+                      <span className="mt-2 block font-mono text-[11px] tracking-tight text-muted-foreground">
+                        {t("daily")} {dailyFoot.toLocaleString()}
+                      </span>
+                    ) : null}
                   </>
                 }
               />
