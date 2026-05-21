@@ -136,16 +136,16 @@ export default function CartPage() {
   }
 
   const inputCls =
-    "tkad-auth-input h-11 w-full rounded-[18px] border border-white/12 bg-black/28 px-4 font-mono text-sm font-semibold text-white placeholder:text-white/45 outline-none backdrop-blur transition-all focus:border-white/18 focus:ring-2 focus:ring-white/12";
+    "tkad-auth-input h-11 w-full rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/28 px-4 font-mono text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-all focus:dark:border-white/18 border-gray-300 focus:ring-2 focus:ring-white/12";
   const labelCls =
-    "mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65";
+    "mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600";
 
   const kickerCls =
-    "whitespace-nowrap font-mono text-[10px] font-bold uppercase leading-none tracking-[0.22em] text-white/65";
-  const cartTitleCls = "text-lg font-black tracking-tight text-white";
-  const cartLeadCls = "font-mono text-[12px] leading-snug tracking-tight text-white/55";
+    "whitespace-nowrap font-mono text-[10px] font-bold uppercase leading-none tracking-[0.22em] dark:text-white text-gray-600";
+  const cartTitleCls = "text-lg font-black tracking-tight dark:text-white text-gray-900";
+  const cartLeadCls = "font-mono text-[12px] leading-snug tracking-tight dark:text-white text-gray-500";
   const clearCartBtnCls =
-    "inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-[18px] border border-white/12 bg-white/6 px-4 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/80 transition-colors hover:bg-white/10 hover:text-white";
+    "inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900";
 
   /** `lg` 에서 목록 열 / 폼 열 너비를 헤더·본문 두 밴드가 동일하게 쓰도록 공유 */
   const cartLgCols = "lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-x-8";
@@ -155,13 +155,13 @@ export default function CartPage() {
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page flex min-h-0 w-full flex-1 flex-col">
         <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-1 flex-col px-4 pt-8 pb-36 sm:px-5 sm:pt-10 sm:pb-40 lg:pt-12 lg:pb-48">
           <header className="mb-6 min-w-0 sm:mb-8">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
               [ CART / QUOTE REQUEST ]
             </p>
-            <h1 className="mt-2 text-balance text-3xl font-black tracking-[-0.05em] text-white sm:text-4xl">
+            <h1 className="mt-2 text-balance text-3xl font-black tracking-[-0.05em] dark:text-white text-gray-900 sm:text-4xl">
               견적서 요청
             </h1>
-            <p className="mt-3 font-mono text-[12px] tracking-tight text-white/55">
+            <p className="mt-3 font-mono text-[12px] tracking-tight dark:text-white text-gray-500">
               {`// `}선택한 매체로 30분 안에 PDF 견적서를 받아보세요
             </p>
           </header>
@@ -169,16 +169,16 @@ export default function CartPage() {
           {ids.length === 0 ? (
             <div className="tkad-glass-surface mx-auto w-full max-w-2xl p-8 sm:p-10">
               <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-              <h2 className="text-center text-xl font-black tracking-tight text-white">
+              <h2 className="text-center text-xl font-black tracking-tight dark:text-white text-gray-900">
                 장바구니가 비어있습니다
               </h2>
-              <p className="mt-3 text-center font-mono text-[12px] tracking-tight text-white/55">
+              <p className="mt-3 text-center font-mono text-[12px] tracking-tight dark:text-white text-gray-500">
                 {`// `}지도에서 관심 매체를 “견적서에 담기”로 추가해보세요.
               </p>
               <div className="mt-8 flex justify-center">
                 <Link
                   href="/media/map"
-                  className="inline-flex h-14 items-center justify-center rounded-[22px] border border-white/14 bg-white/8 px-8 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-transform hover:-translate-y-0.5 hover:bg-white/10"
+                  className="inline-flex h-14 items-center justify-center rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-8 font-mono text-[11px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-transform hover:-translate-y-0.5 hover:dark:bg-white/10"
                 >
                   매체 탐색하러 가기
                 </Link>
@@ -270,34 +270,34 @@ export default function CartPage() {
                     {items.map((it) => (
                       <li
                         key={it.id}
-                        className="flex flex-col gap-3 rounded-[22px] border border-white/12 bg-black/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:flex-row sm:items-center sm:gap-3 sm:p-4"
+                        className="flex flex-col gap-3 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:flex-row sm:items-center sm:gap-3 sm:p-4"
                       >
                         {it.image ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={it.image}
                             alt={it.name}
-                            className="h-14 w-14 shrink-0 rounded-[14px] border border-white/10 object-cover sm:h-16 sm:w-16 sm:rounded-[16px]"
+                            className="h-14 w-14 shrink-0 rounded-[14px] border dark:border-white/10 border-gray-200 object-cover sm:h-16 sm:w-16 sm:rounded-[16px]"
                           />
                         ) : (
-                          <div className="h-14 w-14 shrink-0 rounded-[14px] border border-white/10 bg-black/25 sm:h-16 sm:w-16 sm:rounded-[16px]" />
+                          <div className="h-14 w-14 shrink-0 rounded-[14px] border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 sm:h-16 sm:w-16 sm:rounded-[16px]" />
                         )}
                         <div className="min-w-0 flex-1">
-                          <div className="break-words text-sm font-black leading-snug tracking-tight text-white">
+                          <div className="break-words text-sm font-black leading-snug tracking-tight dark:text-white text-gray-900">
                             {it.name}
                           </div>
-                          <div className="mt-1 break-words font-mono text-[11px] uppercase leading-snug tracking-[0.18em] text-white/55">
+                          <div className="mt-1 break-words font-mono text-[11px] uppercase leading-snug tracking-[0.18em] dark:text-white text-gray-500">
                             {`// `}
                             {it.region} · {it.type}
                           </div>
-                          <div className="mt-1 font-mono text-sm font-black tabular-nums text-white">
+                          <div className="mt-1 font-mono text-sm font-black tabular-nums dark:text-white text-gray-900">
                             {formatKRW(it.price)}
                           </div>
                         </div>
                         <button
                           type="button"
                           onClick={() => handleRemove(it.id, it.name)}
-                          className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-[18px] border border-white/12 bg-white/6 px-4 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/80 transition-colors hover:bg-white/10 hover:text-white sm:ml-auto sm:w-auto sm:self-center"
+                          className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900 sm:ml-auto sm:w-auto sm:self-center"
                         >
                           제거
                         </button>
@@ -305,11 +305,11 @@ export default function CartPage() {
                     ))}
                   </ul>
 
-                  <div className="mt-6 flex shrink-0 items-center justify-between border-t border-white/10 pt-5">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
+                  <div className="mt-6 flex shrink-0 items-center justify-between border-t dark:border-white/10 border-gray-200 pt-5">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
                       [ TOTAL ]
                     </span>
-                    <span className="font-mono text-2xl font-black tabular-nums text-white">
+                    <span className="font-mono text-2xl font-black tabular-nums dark:text-white text-gray-900">
                       {formatKRW(total)}
                     </span>
                   </div>
@@ -407,9 +407,9 @@ export default function CartPage() {
                     </div>
                     </div>
 
-                    <div className="mt-auto flex flex-col gap-3 border-t border-white/10 pt-4">
+                    <div className="mt-auto flex flex-col gap-3 border-t dark:border-white/10 border-gray-200 pt-4">
                     {error && (
-                      <div className="rounded-[18px] border border-white/14 bg-black/35 p-3 font-mono text-[11px] tracking-tight text-white/85">
+                      <div className="rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/35 p-3 font-mono text-[11px] tracking-tight dark:text-white text-gray-800">
                         {`// `}{error}
                       </div>
                     )}
@@ -417,12 +417,12 @@ export default function CartPage() {
                     <button
                       type="submit"
                       disabled={submitting || items.length === 0}
-                      className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-6 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-50"
+                      className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-6 font-mono text-[11px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-50"
                     >
                       {submitting && <Spinner size="sm" />}
                       {submitting ? "생성 중…" : "견적서 생성"}
                     </button>
-                    <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] text-white/45">
+                    <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white">
                       {`// `}{submitting ? "processing" : "secure request"}
                     </p>
                     </div>

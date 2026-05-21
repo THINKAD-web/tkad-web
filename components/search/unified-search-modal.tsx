@@ -59,13 +59,13 @@ function HitRow({
     <Link
       href={hit.href}
       onClick={onPick}
-      className="flex min-w-0 flex-col gap-0.5 rounded-lg px-3 py-2 transition-colors hover:bg-accent/10 dark:hover:bg-white/8"
+      className="flex min-w-0 flex-col gap-0.5 rounded-lg px-3 py-2 transition-colors hover:bg-accent/10 dark:hover:dark:bg-white/8 bg-gray-100"
     >
-      <span className="truncate text-sm font-semibold text-foreground dark:text-white">
+      <span className="truncate text-sm font-semibold text-foreground dark:text-white text-gray-900">
         {hit.title}
       </span>
       {hit.subtitle ? (
-        <span className="truncate font-mono text-[11px] text-muted-foreground dark:text-white/50">
+        <span className="truncate font-mono text-[11px] text-muted-foreground dark:text-white text-gray-400">
           {hit.subtitle}
         </span>
       ) : null}
@@ -168,9 +168,9 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
       open={open}
       onClose={onClose}
       ariaLabel={t("modalTitle")}
-      className="w-full max-w-xl overflow-hidden rounded-2xl border-2 border-border bg-card p-0 shadow-2xl dark:border-white/12 dark:bg-[#0c0c12]"
+      className="w-full max-w-xl overflow-hidden rounded-2xl border-2 border-border bg-card p-0 shadow-2xl dark:border-white/12 border-gray-200 dark:bg-[#0c0c12]"
     >
-      <form onSubmit={onSubmit} className="border-b border-border dark:border-white/10">
+      <form onSubmit={onSubmit} className="border-b border-border dark:border-white/10 border-gray-200">
         <div className="flex items-center gap-2 px-4 py-3">
           <Search className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
           <input
@@ -180,7 +180,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("modalPlaceholder")}
             autoComplete="off"
-            className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground dark:text-white dark:placeholder:text-white/40"
+            className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground dark:text-white text-gray-900 dark:placeholder:dark:text-white text-gray-400"
           />
           {loading ? (
             <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
@@ -202,7 +202,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
                       key={r}
                       type="button"
                       onClick={() => goFullSearch(r)}
-                      className="rounded-full border border-border px-3 py-1 font-mono text-[11px] hover:bg-muted dark:border-white/12 dark:hover:bg-white/8"
+                      className="rounded-full border border-border px-3 py-1 font-mono text-[11px] hover:bg-muted dark:border-white/12 border-gray-200 dark:hover:dark:bg-white/8 bg-gray-100"
                     >
                       {r}
                     </button>
@@ -266,7 +266,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
               <button
                 type="button"
                 onClick={() => goFullSearch(query)}
-                className="mt-2 w-full rounded-xl border border-border py-2.5 text-center text-sm font-semibold text-accent hover:bg-accent/10 dark:border-white/12"
+                className="mt-2 w-full rounded-xl border border-border py-2.5 text-center text-sm font-semibold text-accent hover:bg-accent/10 dark:border-white/12 border-gray-200"
               >
                 {t("viewAll", { count: results.totalCount })}
               </button>

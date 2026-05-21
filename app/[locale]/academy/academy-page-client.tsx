@@ -40,8 +40,10 @@ const labelCls =
 
 export default function AcademyPageClient({
   dbLessons,
+  downloadPdfUrls = {},
 }: {
   dbLessons: AcademyLesson[];
+  downloadPdfUrls?: Record<string, string>;
 }) {
   const t = useTranslations("academy");
   const locale = useLocale();
@@ -53,6 +55,10 @@ export default function AcademyPageClient({
   const [videoEmbed, setVideoEmbed] = useState(DEMO_VIDEO_EMBED);
   const [videoTitle, setVideoTitle] = useState("");
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [pdfModalAsset, setPdfModalAsset] = useState<AcademyDownload | null>(
+    null,
+  );
+  const [pdfEmail, setPdfEmail] = useState("");
 
   const [regWebinar, setRegWebinar] = useState("");
   const [regName, setRegName] = useState("");
@@ -80,11 +86,47 @@ export default function AcademyPageClient({
     }
   };
 
-  const handleAssetPdf = async (asset: AcademyDownload) => {
+  const handleAssetPdf = (asset: AcademyDownload) => {
+    setPdfModalAsset(asset);
+    setPdfEmail("");
+  };
+
+  const submitPdfDownload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const asset = pdfModalAsset;
+    if (!asset) return;
+    const email = pdfEmail.trim();
+    if (!email.includes("@")) {
+      toast("warning", t("registerEmailInvalid"));
+      return;
+    }
     setDownloading(`asset-${asset.id}`);
     try {
-      await downloadAcademyAssetPdf(asset, isKo);
-      toast("success", t("toastAsset"));
+      const res = await fetch("/api/academy/download-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assetId: asset.id,
+          email,
+          locale,
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        pdfUrl?: string | null;
+        error?: string;
+      };
+      if (!res.ok) {
+        throw new Error(data.error ?? "download failed");
+      }
+      if (data.pdfUrl) {
+        window.open(data.pdfUrl, "_blank", "noopener,noreferrer");
+        toast("success", t("toastAsset"));
+        setPdfModalAsset(null);
+      } else {
+        await downloadAcademyAssetPdf(asset, isKo);
+        toast("success", t("toastAsset"));
+        setPdfModalAsset(null);
+      }
     } catch {
       toast("error", t("toastPdfError"));
     } finally {
@@ -101,32 +143,87 @@ export default function AcademyPageClient({
     registerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const submitRegistration = (e: React.FormEvent) => {
+  const submitRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regEmail.trim() || !regEmail.includes("@")) {
       toast("warning", t("registerEmailInvalid"));
       return;
     }
     if (!regWebinar) {
+      toast("warning", t("registerSelectRequired"));
       return;
     }
     setRegSubmitting(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/academy/webinar-register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          webinarId: regWebinar,
+          email: regEmail.trim(),
+          name: regName.trim() || undefined,
+          company: regCompany.trim() || undefined,
+          locale,
+        }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error ?? "register failed");
+      }
       toast("success", t("registerSuccess"));
       setRegName("");
       setRegEmail("");
       setRegCompany("");
+    } catch {
+      toast("error", t("registerError"));
+    } finally {
       setRegSubmitting(false);
-    }, 500);
+    }
   };
 
   const formatWebinarWhen = (iso: string) => {
     try {
       const d = new Date(iso);
-      return d.toLocaleString(isKo ? "ko-KR" : "en-US", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
+      if (isKo) {
+        const y = new Intl.DateTimeFormat("ko-KR", {
+          timeZone: "Asia/Seoul",
+          year: "numeric",
+        }).format(d);
+        const m = new Intl.DateTimeFormat("ko-KR", {
+          timeZone: "Asia/Seoul",
+          month: "2-digit",
+        }).format(d);
+        const day = new Intl.DateTimeFormat("ko-KR", {
+          timeZone: "Asia/Seoul",
+          day: "2-digit",
+        }).format(d);
+        const hour = Number(
+          new Intl.DateTimeFormat("en-US", {
+            timeZone: "Asia/Seoul",
+            hour: "numeric",
+            hour12: false,
+          }).format(d),
+        );
+        const minute = new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Seoul",
+          minute: "2-digit",
+        }).format(d);
+        const isPm = hour >= 12;
+        const h12 = hour % 12 === 0 ? 12 : hour % 12;
+        const mm = minute.padStart(2, "0");
+        return `${y}.${m}.${day} ${isPm ? "오후" : "오전"} ${h12}:${mm}`;
+      }
+      return (
+        new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Seoul",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }).format(d) + " KST"
+      );
     } catch {
       return iso;
     }
@@ -564,6 +661,58 @@ export default function AcademyPageClient({
             </div>
           </section>
         </div>
+
+        <Modal
+          open={!!pdfModalAsset}
+          onClose={() => setPdfModalAsset(null)}
+          className="max-w-md"
+          ariaLabel={isKo ? "PDF 다운로드" : "PDF download"}
+        >
+          {pdfModalAsset ? (
+            <form
+              className="border-2 border-border bg-card p-5 pt-12"
+              onSubmit={submitPdfDownload}
+            >
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                [ PDF ]
+              </p>
+              <h3 className="mt-2 text-lg font-bold text-foreground">
+                {isKo ? pdfModalAsset.titleKo : pdfModalAsset.titleEn}
+              </h3>
+              <p className="mt-2 font-mono text-[11px] text-muted-foreground">
+                {isKo
+                  ? "이메일을 입력하면 PDF 링크를 보내드립니다."
+                  : "Enter your email to receive the PDF link."}
+              </p>
+              <label className={cn(labelCls, "mt-4")} htmlFor="pdf-email">
+                [ EMAIL ]
+              </label>
+              <input
+                id="pdf-email"
+                type="email"
+                required
+                className={cn(inputCls, "mt-2")}
+                value={pdfEmail}
+                onChange={(e) => setPdfEmail(e.target.value)}
+                placeholder="you@company.com"
+              />
+              <BtnBlock
+                type="submit"
+                variant="accent"
+                size="md"
+                className="mt-4 w-full"
+                disabled={downloading === `asset-${pdfModalAsset.id}`}
+              >
+                {downloading === `asset-${pdfModalAsset.id}` ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                {t("downloadPdf")}
+              </BtnBlock>
+            </form>
+          ) : null}
+        </Modal>
 
         <Modal
           open={videoOpen}

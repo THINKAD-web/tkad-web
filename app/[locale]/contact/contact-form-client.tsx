@@ -20,11 +20,11 @@ export function ContactFormClient() {
   const [mainTab, setMainTab] = useState<MainTab>("inquiry");
 
   const tabBase =
-    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold backdrop-blur transition-all";
+    "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-3 text-sm font-semibold backdrop-blur transition-all";
 
   const tabActive =
-    "border-violet-500/40 bg-gradient-to-r from-violet-500/25 to-cyan-400/20 text-white shadow-[0_8px_32px_rgba(139,92,246,0.25)]";
-  const tabIdle = "text-white/70 hover:border-white/20 hover:bg-white/10";
+    "border-violet-500/40 bg-gradient-to-r from-violet-500/25 to-cyan-400/20 dark:text-white text-gray-900 shadow-[0_8px_32px_rgba(139,92,246,0.25)]";
+  const tabIdle = "dark:text-white text-gray-600 hover:dark:border-white/20 border-gray-300 hover:dark:bg-white/10 bg-gray-100";
 
   const extraInfoItems = useMemo(
     () => [{ label: "HOURS", value: t("hours") }],
@@ -36,7 +36,7 @@ export function ContactFormClient() {
       <NeonSection className="pt-0">
         <div className="grid gap-5 lg:grid-cols-5">
           <div className="lg:col-span-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur sm:p-8">
+            <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 backdrop-blur sm:p-8">
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <button
@@ -54,10 +54,10 @@ export function ContactFormClient() {
                     {t("tabFeedback")}
                   </button>
                 </div>
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   [ {mainTab === "inquiry" ? "INQUIRY" : "FEEDBACK"} ]
                 </p>
-                <h2 className="text-xl font-black tracking-tight text-white">
+                <h2 className="text-xl font-black tracking-tight dark:text-white text-gray-900">
                   {mainTab === "inquiry" ? t("formTitle") : t("formTitleFeedback")}
                 </h2>
               </div>
@@ -73,43 +73,43 @@ export function ContactFormClient() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur sm:p-8">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+            <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 backdrop-blur sm:p-8">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 [ INFO ]
               </p>
-              <h3 className="mt-2 text-xl font-black tracking-tight text-white">
+              <h3 className="mt-2 text-xl font-black tracking-tight dark:text-white text-gray-900">
                 {t("infoTitle")}
               </h3>
               <div className="mt-6 space-y-4">
                 {extraInfoItems.map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3"
+                    className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3"
                   >
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-white/85">{item.value}</p>
+                    <p className="mt-1 text-sm font-semibold dark:text-white text-gray-800">{item.value}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+              <div className="mt-6 rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-3">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   {t("directionsTitle")}
                 </p>
-                <div className="mt-2 space-y-2 text-sm text-white/80">
+                <div className="mt-2 space-y-2 text-sm dark:text-white text-gray-700">
                   <p>
-                    <span className="font-semibold text-white">{t("subway")}</span>{" "}
-                    <span className="text-white/70">{t("subwayDesc")}</span>
+                    <span className="font-semibold dark:text-white text-gray-900">{t("subway")}</span>{" "}
+                    <span className="dark:text-white text-gray-600">{t("subwayDesc")}</span>
                   </p>
                   <p>
-                    <span className="font-semibold text-white">{t("busTitle")}</span>{" "}
-                    <span className="text-white/70">{t("busDesc")}</span>
+                    <span className="font-semibold dark:text-white text-gray-900">{t("busTitle")}</span>{" "}
+                    <span className="dark:text-white text-gray-600">{t("busDesc")}</span>
                   </p>
                   <p>
-                    <span className="font-semibold text-white">{t("parkingTitle")}</span>{" "}
-                    <span className="text-white/70">{t("parkingDesc")}</span>
+                    <span className="font-semibold dark:text-white text-gray-900">{t("parkingTitle")}</span>{" "}
+                    <span className="dark:text-white text-gray-600">{t("parkingDesc")}</span>
                   </p>
                 </div>
               </div>
@@ -128,31 +128,31 @@ export function ContactFormClient() {
           />
         </ScrollAnimate>
 
-        <div className="mt-10 overflow-hidden rounded-[28px] bg-white/5 backdrop-blur tkad-neon-border tkad-neon-glow">
-          <div className="aspect-video w-full border-b border-white/10">
+        <div className="mt-10 overflow-hidden rounded-[28px] dark:bg-white/5 bg-gray-50 backdrop-blur tkad-neon-border tkad-neon-glow">
+          <div className="aspect-video w-full border-b dark:border-white/10 border-gray-200">
             <ContactOfficeMap
               mapHl={mapHl}
               title={isKo ? "THINKAD 오피스 위치" : "THINKAD office location"}
             />
           </div>
           <div className="grid gap-0 sm:grid-cols-3">
-            <div className="border-b border-white/10 p-5 sm:border-b-0 sm:border-r sm:border-white/10">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+            <div className="border-b dark:border-white/10 border-gray-200 p-5 sm:border-b-0 sm:border-r sm:dark:border-white/10">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 [ {t("subway")} ]
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-white/75">{t("subwayDesc")}</p>
+              <p className="mt-2 text-sm leading-relaxed dark:text-white text-gray-700">{t("subwayDesc")}</p>
             </div>
-            <div className="border-b border-white/10 p-5 sm:border-b-0 sm:border-r sm:border-white/10">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+            <div className="border-b dark:border-white/10 border-gray-200 p-5 sm:border-b-0 sm:border-r sm:dark:border-white/10">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 [ {t("busTitle")} ]
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-white/75">{t("busDesc")}</p>
+              <p className="mt-2 text-sm leading-relaxed dark:text-white text-gray-700">{t("busDesc")}</p>
             </div>
             <div className="p-5">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 [ {t("parkingTitle")} ]
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-white/75">{t("parkingDesc")}</p>
+              <p className="mt-2 text-sm leading-relaxed dark:text-white text-gray-700">{t("parkingDesc")}</p>
             </div>
           </div>
         </div>

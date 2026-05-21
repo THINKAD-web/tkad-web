@@ -61,7 +61,7 @@ export function HeaderBrutal({ contentStatus: _contentStatus }: Props) {
         <Suspense
           fallback={
             <div
-              className="h-10 min-w-0 w-full rounded-xl border-2 border-border/30 bg-muted/25 dark:border-white/10 dark:bg-white/5"
+              className="h-10 min-w-0 w-full rounded-xl border-2 border-border/30 bg-muted/25 dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50"
               aria-hidden
             />
           }

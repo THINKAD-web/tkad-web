@@ -139,7 +139,7 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
             eyebrow={`// ${isKo ? "매체 유형" : "MEDIA TYPE"}`}
             title={title}
             description={intro}
-            icon={<Monitor className="size-7 text-white/90" aria-hidden />}
+            icon={<Monitor className="size-7 dark:text-white text-gray-800" aria-hidden />}
             primaryCta={{
               href: "/media",
               label: isKo ? "전체 매체 보기" : "All media",
@@ -152,21 +152,21 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
 
           <div className="mx-auto max-w-6xl space-y-10 px-4 pt-8 sm:px-6">
             <section className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                <h2 className="text-lg font-bold text-white">
+              <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 backdrop-blur">
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">
                   {isKo ? "장점" : "Strengths"}
                 </h2>
-                <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-white/80">
+                <ul className="mt-3 list-inside list-disc space-y-1 text-sm dark:text-white text-gray-700">
                   {pros.map((p) => (
                     <li key={p}>{p}</li>
                   ))}
                 </ul>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                <h2 className="text-lg font-bold text-white">
+              <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 backdrop-blur">
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">
                   {isKo ? "고려 사항" : "Considerations"}
                 </h2>
-                <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-white/80">
+                <ul className="mt-3 list-inside list-disc space-y-1 text-sm dark:text-white text-gray-700">
                   {cons.map((c) => (
                     <li key={c}>{c}</li>
                   ))}
@@ -174,11 +174,11 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-              <h2 className="text-lg font-bold text-white">
+            <section className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 backdrop-blur">
+              <h2 className="text-lg font-bold dark:text-white text-gray-900">
                 {isKo ? "적합 업종 · 예산 가이드" : "Industries & budget"}
               </h2>
-              <p className="mt-2 text-sm text-white/80">
+              <p className="mt-2 text-sm dark:text-white text-gray-700">
                 {isKo ? "추천 업종: " : "Best for: "}
                 {industries.join(isKo ? ", " : ", ")}
               </p>
@@ -196,7 +196,7 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
               />
             ) : (
               <section>
-                <h2 className="mb-4 text-lg font-bold text-white">
+                <h2 className="mb-4 text-lg font-bold dark:text-white text-gray-900">
                   {isKo
                     ? `${title} 매체 ${filtered.length}개`
                     : `${filtered.length} ${title} placements`}
@@ -206,13 +206,13 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
             )}
 
             {faqs.length > 0 ? (
-              <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                <h2 className="text-lg font-bold text-white">FAQ</h2>
+              <section className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6">
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">FAQ</h2>
                 <dl className="mt-4 space-y-4">
                   {faqs.map((f) => (
                     <div key={f.q}>
-                      <dt className="font-semibold text-white">{f.q}</dt>
-                      <dd className="mt-1 text-sm text-white/75">{f.a}</dd>
+                      <dt className="font-semibold dark:text-white text-gray-900">{f.q}</dt>
+                      <dd className="mt-1 text-sm dark:text-white text-gray-700">{f.a}</dd>
                     </div>
                   ))}
                 </dl>

@@ -81,10 +81,10 @@ export function PublicNavSidebar({
                 onClick={() => toggle(group.id)}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors",
-                  "hover:bg-zinc-200/80 dark:hover:bg-white/8",
+                  "hover:bg-zinc-200/80 dark:hover:dark:bg-white/8 bg-gray-100",
                   groupActive &&
-                    "bg-zinc-200/90 dark:bg-white/10",
-                  expanded && "bg-zinc-200/70 dark:bg-white/8",
+                    "bg-zinc-200/90 dark:bg-white/10 bg-gray-100",
+                  expanded && "bg-zinc-200/70 dark:bg-white/8 bg-gray-100",
                 )}
               >
                 <span
@@ -92,22 +92,22 @@ export function PublicNavSidebar({
                     "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors",
                     groupActive
                       ? "border-violet-500/40 bg-gradient-to-br from-violet-500/20 to-cyan-400/15 text-violet-700 dark:border-violet-400/35 dark:text-violet-200"
-                      : "border-zinc-300/90 bg-white text-zinc-700 dark:border-white/12 dark:bg-white/5 dark:text-white/85",
+                      : "border-zinc-300/90 bg-white text-zinc-700 dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-800",
                   )}
                 >
                   <Icon className="h-4 w-4" aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-bold tracking-tight text-zinc-900 dark:text-white">
+                  <span className="block text-sm font-bold tracking-tight text-zinc-900 dark:text-white text-gray-900">
                     {group.label}
                   </span>
-                  <span className="mt-0.5 block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-white/45">
+                  <span className="mt-0.5 block font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-white">
                     {group.labelEn}
                   </span>
                 </span>
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 shrink-0 text-zinc-500 transition-transform dark:text-white/50",
+                    "h-4 w-4 shrink-0 text-zinc-500 transition-transform dark:text-white text-gray-400",
                     expanded && "rotate-180",
                   )}
                   aria-hidden
@@ -136,8 +136,8 @@ export function PublicNavSidebar({
                             className={cn(
                               "group/item flex items-start gap-2.5 rounded-lg px-3 py-2.5 transition-colors",
                               active
-                                ? "bg-violet-500/12 text-violet-900 ring-1 ring-violet-500/25 dark:bg-violet-500/18 dark:text-white dark:ring-violet-400/30"
-                                : "text-zinc-800 hover:bg-zinc-100 dark:text-white/90 dark:hover:bg-white/8",
+                                ? "bg-violet-500/12 text-violet-900 ring-1 ring-violet-500/25 dark:bg-violet-500/18 dark:text-white text-gray-900 dark:ring-violet-400/30"
+                                : "text-zinc-800 hover:bg-zinc-100 dark:text-white text-gray-800 dark:hover:dark:bg-white/8 bg-gray-100",
                             )}
                           >
                             <ItemIcon
@@ -145,7 +145,7 @@ export function PublicNavSidebar({
                                 "mt-0.5 h-4 w-4 shrink-0",
                                 active
                                   ? "text-violet-600 dark:text-cyan-300"
-                                  : "text-zinc-500 group-hover/item:text-zinc-700 dark:text-white/50 dark:group-hover/item:text-white/75",
+                                  : "text-zinc-500 group-hover/item:text-zinc-700 dark:text-white text-gray-400 dark:group-hover/item:dark:text-white text-gray-700",
                               )}
                               aria-hidden
                             />
@@ -157,7 +157,7 @@ export function PublicNavSidebar({
                                 {item.badge ? <NavBetaBadge /> : null}
                               </span>
                               {item.desc ? (
-                                <span className="mt-0.5 block text-[11px] leading-relaxed text-zinc-600 dark:text-white/50">
+                                <span className="mt-0.5 block text-[11px] leading-relaxed text-zinc-600 dark:text-white text-gray-400">
                                   {item.desc}
                                 </span>
                               ) : null}

@@ -68,10 +68,10 @@ export function MediaOwnerSettlementsClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold dark:text-white text-gray-900">
           {isKo ? "정산 내역" : "Settlements"}
         </h2>
-        <p className="mt-1 text-sm text-white/60">
+        <p className="mt-1 text-sm dark:text-white text-gray-500">
           {isKo
             ? "플랫폼 수수료 15% 제외 후 정산 예정·완료 금액입니다."
             : "Net amounts after 15% platform fee."}
@@ -90,11 +90,11 @@ export function MediaOwnerSettlementsClient() {
           <ul className="space-y-3">
             {scheduled.map((r) => (
               <li key={r.id} className={ownerGlassCard}>
-                <p className="font-mono text-sm text-white">{r.periodMonth}</p>
-                <p className="mt-2 text-2xl font-bold tabular-nums text-white">
+                <p className="font-mono text-sm dark:text-white text-gray-900">{r.periodMonth}</p>
+                <p className="mt-2 text-2xl font-bold tabular-nums dark:text-white text-gray-900">
                   ₩{r.netWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
                 </p>
-                <p className="text-xs text-white/45">
+                <p className="text-xs dark:text-white">
                   {isKo ? "총" : "Gross"} ₩{r.grossWon.toLocaleString()} ·{" "}
                   {isKo ? "수수료" : "Fee"} ₩{r.feeWon.toLocaleString()}
                 </p>
@@ -103,7 +103,7 @@ export function MediaOwnerSettlementsClient() {
                     type="button"
                     disabled={requestingId === r.id}
                     onClick={() => void requestTaxInvoice(r.id)}
-                    className="mt-3 inline-flex items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-xs text-white hover:bg-white/5"
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg border dark:border-white/15 border-gray-200 px-3 py-2 text-xs dark:text-white text-gray-900 hover:dark:bg-white/5 bg-gray-50"
                   >
                     {requestingId === r.id ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -124,7 +124,7 @@ export function MediaOwnerSettlementsClient() {
       </section>
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold text-white/70">
+        <h3 className="mb-3 text-sm font-semibold dark:text-white text-gray-600">
           {isKo ? "정산 완료" : "Completed"}
         </h3>
         {completed.length === 0 ? (
@@ -135,12 +135,12 @@ export function MediaOwnerSettlementsClient() {
           <ul className="space-y-3">
             {completed.map((r) => (
               <li key={r.id} className={ownerGlassCard}>
-                <p className="font-mono text-sm text-white">{r.periodMonth}</p>
+                <p className="font-mono text-sm dark:text-white text-gray-900">{r.periodMonth}</p>
                 <p className="mt-2 text-xl font-bold tabular-nums text-emerald-200">
                   ₩{r.netWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
                 </p>
                 {r.completedAt ? (
-                  <p className="mt-1 text-xs text-white/40">
+                  <p className="mt-1 text-xs dark:text-white text-gray-400">
                     {new Date(r.completedAt).toLocaleDateString(
                       isKo ? "ko-KR" : "en-US",
                     )}

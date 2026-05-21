@@ -152,6 +152,7 @@ export default function RecommendPageClient({
       "gangnam",
       "hongdae",
       "seongsu",
+      "downtown",
       "national",
     ];
     const region = validRegions.includes(regionFromUrl)
@@ -300,7 +301,33 @@ export default function RecommendPageClient({
               {similarBanner}
             </p>
           ) : null}
-          {phase === "form" && (
+          {autoFromUrl === "1" && phase === "dashboard" && top3.length > 0 ? (
+            <div className="mb-8 rounded-2xl border-2 border-accent/40 bg-muted/50 px-5 py-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                [ {isKo ? "홈에서 선택한 조건" : "From home widget"} ]
+              </p>
+              <p className="mt-2 text-sm font-bold text-foreground">
+                {isKo
+                  ? "조건에 맞는 TOP 3 매체 미리보기"
+                  : "TOP 3 preview for your filters"}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <BtnBlock
+                  variant="primary"
+                  size="md"
+                  onClick={() => setPhase("list")}
+                >
+                  {isKo ? "전체 결과 보기" : "View all results"}
+                </BtnBlock>
+                <Link href={quoteHref}>
+                  <BtnBlock variant="accent" size="md">
+                    {isKo ? "견적 받기" : "Get a quote"}
+                  </BtnBlock>
+                </Link>
+              </div>
+            </div>
+          ) : null}
+          {phase === "form" && autoFromUrl !== "1" && (
             <MediaAiRecommendForm
               locale={locale}
               onSubmit={handleFormSubmit}
@@ -308,7 +335,7 @@ export default function RecommendPageClient({
           )}
 
           {phase === "loading" && (
-            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-black/65 backdrop-blur-md">
+            <div className="fixed inset-0 z-[55] flex flex-col items-center justify-center dark:bg-black bg-white dark:bg-white/6 bg-gray-500/50 backdrop-blur-md">
               <LoadingOverlay isKo={isKo} />
             </div>
           )}
@@ -401,7 +428,7 @@ export default function RecommendPageClient({
                         className="flex items-center justify-between gap-2 border-t-2 border-border pt-2"
                       >
                         <span className="inline-flex min-w-0 items-center gap-2">
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/14 bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] font-mono text-[11px] font-black text-white shadow-[0_18px_60px_rgba(0,0,0,0.25)]">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] font-mono text-[11px] font-black dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.25)]">
                             {i + 1}
                           </span>
                           <span className="line-clamp-1 text-sm font-bold tracking-tight text-foreground">
@@ -509,14 +536,14 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
             className="pointer-events-none absolute -inset-6 rounded-[44px] bg-[radial-gradient(closest-side,rgba(34,211,238,0.16),transparent_70%)] blur-xl"
           />
 
-          <div className="relative flex h-24 w-24 items-center justify-center rounded-[32px] border border-white/16 bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] text-white shadow-[0_32px_140px_rgba(0,0,0,0.78)] backdrop-blur">
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-[32px] border border-white/16 bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] dark:text-white text-gray-900 shadow-[0_32px_140px_rgba(0,0,0,0.78)] backdrop-blur">
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 rounded-[32px] bg-[radial-gradient(120%_90%_at_15%_10%,rgba(168,85,247,0.28),transparent_55%),radial-gradient(110%_85%_at_90%_25%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(95%_75%_at_45%_95%,rgba(236,72,153,0.12),transparent_60%)]"
             />
             <motion.div
               aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-[32px] border border-white/10"
+              className="pointer-events-none absolute inset-0 rounded-[32px] border dark:border-white/10 border-gray-200"
               animate={{ opacity: [0.35, 0.65, 0.35] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
             />
@@ -526,22 +553,22 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           </div>
 
           <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2">
-            <div className="rounded-2xl border border-white/16 bg-black/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/85 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
+            <div className="rounded-2xl border border-white/16 dark:bg-black bg-white bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-800 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
               TKAD BOT
             </div>
           </div>
         </div>
-        <p className="mt-6 text-center font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/80">
+        <p className="mt-6 text-center font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
           [ {isKo ? "EXPLORING MEDIA UNIVERSE" : "EXPLORING MEDIA UNIVERSE"} ]
         </p>
-        <p className="text-center text-sm font-bold leading-snug tracking-tight text-white">
+        <p className="text-center text-sm font-bold leading-snug tracking-tight dark:text-white text-gray-900">
           {isKo
             ? "TKAD bot이 매체 탐험을 진행 중입니다..."
             : "TKAD bot is exploring the media universe for you..."}
         </p>
       </div>
-      <div className="space-y-3 rounded-[28px] border border-white/14 bg-white/6 p-6 text-white shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur">
-        <div className="h-3 w-full overflow-hidden rounded-full border border-white/14 bg-black/30">
+      <div className="space-y-3 rounded-[28px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur">
+        <div className="h-3 w-full overflow-hidden rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/30">
           <motion.div
             className="h-full w-2/5 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]"
             animate={{ x: ["-30%", "220%"] }}
@@ -553,12 +580,12 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           />
         </div>
         <div className="space-y-2">
-          <div className="h-3 rounded-full bg-white/10" />
-          <div className="h-3 w-4/5 rounded-full bg-white/10" />
-          <div className="h-3 w-3/5 rounded-full bg-white/10" />
+          <div className="h-3 rounded-full dark:bg-white/10 bg-gray-100" />
+          <div className="h-3 w-4/5 rounded-full dark:bg-white/10 bg-gray-100" />
+          <div className="h-3 w-3/5 rounded-full dark:bg-white/10 bg-gray-100" />
         </div>
       </div>
-      <p className="text-center font-mono text-[11px] leading-relaxed tracking-tight text-white/70">
+      <p className="text-center font-mono text-[11px] leading-relaxed tracking-tight dark:text-white text-gray-600">
         {`// `}{messages[step]}
       </p>
     </div>

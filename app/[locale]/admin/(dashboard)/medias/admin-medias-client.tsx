@@ -2699,11 +2699,11 @@ export default function AdminMediasClient({
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 bg-zinc-900/30 dark:bg-black/60 dark:backdrop-blur-sm"
+            className="absolute inset-0 bg-zinc-900/30 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 dark:backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
             aria-hidden
           />
-          <Card className="relative z-10 flex max-h-[min(92dvh,900px)] w-full max-w-3xl flex-col gap-0 overflow-hidden rounded-t-2xl border-border bg-card py-0 text-card-foreground shadow-2xl ring-1 ring-black/[0.05] hover:translate-y-0 hover:shadow-2xl motion-safe:hover:translate-y-0 sm:rounded-2xl dark:border-white/12 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-white/10 dark:hover:shadow-[0_28px_80px_rgba(0,0,0,0.55)]">
+          <Card className="relative z-10 flex max-h-[min(92dvh,900px)] w-full max-w-3xl flex-col gap-0 overflow-hidden rounded-t-2xl border-border bg-card py-0 text-card-foreground shadow-2xl ring-1 ring-black/[0.05] hover:translate-y-0 hover:shadow-2xl motion-safe:hover:translate-y-0 sm:rounded-2xl dark:border-white/12 border-gray-200 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-white/10 dark:hover:shadow-[0_28px_80px_rgba(0,0,0,0.55)]">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between gap-2 border-b border-border/70 px-4 pb-3 pt-4 sm:px-6">
               <div className="min-w-0 flex-1">
                 <CardTitle className="text-lg text-foreground">
@@ -2817,7 +2817,7 @@ export default function AdminMediasClient({
                 }
               />
 
-              <div className="rounded-lg border-2 border-border bg-muted p-3 border-border bg-muted/60">
+              <div className="rounded-lg border-2 border-border bg-muted p-3 bg-muted/60">
                 <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-foreground">
                   <MapPin className="h-3.5 w-3.5 text-primary" />
                   주변 정보 미리보기
@@ -3308,7 +3308,7 @@ export default function AdminMediasClient({
                   }
                 />
               </div>
-              <div className="rounded-xl border-2 border-border bg-muted p-4 border-border bg-muted/60">
+              <div className="rounded-xl border-2 border-border bg-muted p-4 bg-muted/60">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <label className="text-xs font-semibold text-foreground">
                     가격 옵션
@@ -3654,11 +3654,11 @@ export default function AdminMediasClient({
       {uploadModalOpen && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 bg-zinc-900/30 dark:bg-black/60 dark:backdrop-blur-sm"
+            className="absolute inset-0 bg-zinc-900/30 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 dark:backdrop-blur-sm"
             onClick={() => setUploadModalOpen(false)}
             aria-hidden
           />
-          <Card className="relative z-10 flex max-h-[min(88dvh,820px)] w-full max-w-2xl flex-col gap-0 overflow-hidden rounded-t-2xl border-border bg-card py-0 text-card-foreground shadow-2xl ring-1 ring-black/[0.05] hover:translate-y-0 hover:shadow-2xl motion-safe:hover:translate-y-0 sm:rounded-2xl dark:border-white/12 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-white/10 dark:hover:shadow-[0_28px_80px_rgba(0,0,0,0.55)]">
+          <Card className="relative z-10 flex max-h-[min(88dvh,820px)] w-full max-w-2xl flex-col gap-0 overflow-hidden rounded-t-2xl border-border bg-card py-0 text-card-foreground shadow-2xl ring-1 ring-black/[0.05] hover:translate-y-0 hover:shadow-2xl motion-safe:hover:translate-y-0 sm:rounded-2xl dark:border-white/12 border-gray-200 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-white/10 dark:hover:shadow-[0_28px_80px_rgba(0,0,0,0.55)]">
             <CardHeader className="flex shrink-0 flex-row items-start justify-between gap-2 border-b border-border/70 px-4 pb-3 pt-4 sm:px-6">
               <CardTitle className="min-w-0 flex-1 text-lg text-foreground">
                 매체 사진 일괄 업로드
@@ -3848,7 +3848,7 @@ export default function AdminMediasClient({
       {deleteConfirm !== null && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100"
             onClick={() => setDeleteConfirm(null)}
             aria-hidden
           />

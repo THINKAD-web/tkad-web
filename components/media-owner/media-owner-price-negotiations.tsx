@@ -92,11 +92,11 @@ export function MediaOwnerPriceNegotiations() {
 
   return (
     <section className={ownerGlassCard}>
-      <h3 className="flex items-center gap-2 font-semibold text-white">
+      <h3 className="flex items-center gap-2 font-semibold dark:text-white text-gray-900">
         <HandCoins className="h-4 w-4 text-emerald-300" />
         {isKo ? "가격 제안 (24시간 내 회신)" : "Price proposals (reply within 24h)"}
       </h3>
-      <p className="mt-1 text-xs text-white/50">
+      <p className="mt-1 text-xs dark:text-white text-gray-400">
         {isKo
           ? "광고주 연락처는 익명으로 전달됩니다. 수락 시 담당자가 견적·계약을 이어갑니다."
           : "Advertiser contact is anonymized. Acceptance triggers quote follow-up."}
@@ -112,18 +112,18 @@ export function MediaOwnerPriceNegotiations() {
           return (
             <li
               key={row.id}
-              className="rounded-xl border border-white/10 bg-black/25 p-4"
+              className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 p-4"
             >
-              <p className="font-medium text-white">{row.mediaName}</p>
+              <p className="font-medium dark:text-white text-gray-900">{row.mediaName}</p>
               <p className="mt-1 font-mono text-sm text-violet-200">
                 {isKo ? "표시가" : "List"} {row.listLabel} →{" "}
                 {isKo ? "제안" : "Offer"} {row.proposedLabel}
               </p>
               {row.companyName ? (
-                <p className="mt-1 text-xs text-white/55">{row.companyName}</p>
+                <p className="mt-1 text-xs dark:text-white text-gray-500">{row.companyName}</p>
               ) : null}
               {row.message ? (
-                <p className="mt-2 text-sm text-white/70">{row.message}</p>
+                <p className="mt-2 text-sm dark:text-white text-gray-600">{row.message}</p>
               ) : null}
               <p className="mt-2 text-xs text-amber-200/90">
                 {isKo ? `남은 시간 약 ${hoursLeft}시간` : `~${hoursLeft}h left`}
@@ -133,7 +133,7 @@ export function MediaOwnerPriceNegotiations() {
                   type="button"
                   disabled={actingId === row.id}
                   onClick={() => void respond(row.id, true)}
-                  className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                  className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold dark:text-white text-gray-900 disabled:opacity-50"
                 >
                   {isKo ? "수락" : "Accept"}
                 </button>
@@ -141,7 +141,7 @@ export function MediaOwnerPriceNegotiations() {
                   type="button"
                   disabled={actingId === row.id}
                   onClick={() => void respond(row.id, false)}
-                  className="rounded-lg border border-white/20 px-3 py-1.5 text-xs text-white/80 disabled:opacity-50"
+                  className="rounded-lg border dark:border-white/20 border-gray-300 px-3 py-1.5 text-xs dark:text-white text-gray-700 disabled:opacity-50"
                 >
                   {isKo ? "검토 완료" : "Decline"}
                 </button>

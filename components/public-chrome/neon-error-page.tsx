@@ -46,7 +46,7 @@ function NeonErrorActions({
 >) {
   const homeClass = cn(
     actionBtnClass,
-    "border-white/15 bg-white/5 text-white hover:bg-white/10",
+    "dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-900 hover:dark:bg-white/10 bg-gray-100",
   );
   const secondaryClass = cn(
     actionBtnClass,
@@ -54,7 +54,7 @@ function NeonErrorActions({
   );
   const retryClass = cn(
     actionBtnClass,
-    "border-transparent bg-gradient-to-r from-violet-500 to-cyan-400 text-white shadow-lg shadow-violet-500/30",
+    "border-transparent bg-gradient-to-r from-violet-500 to-cyan-400 dark:text-white text-gray-900 shadow-lg shadow-violet-500/30",
   );
 
   return (
@@ -70,7 +70,7 @@ function NeonErrorActions({
             type="button"
             variant="accent"
             size="lg"
-            className="min-h-12 w-full bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-bold text-white shadow-lg shadow-violet-500/30 sm:w-auto"
+            className="min-h-12 w-full bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-bold dark:text-white text-gray-900 shadow-lg shadow-violet-500/30 sm:w-auto"
             onClick={onReset}
           >
             <RotateCcw className="h-4 w-4" />
@@ -88,7 +88,7 @@ function NeonErrorActions({
           href={homeHref}
           variant="secondary"
           size="lg"
-          className="min-h-12 w-full border-white/15 bg-white/5 text-white hover:bg-white/10 sm:w-auto"
+          className="min-h-12 w-full dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-900 hover:dark:bg-white/10 bg-gray-100 sm:w-auto"
         >
           <Home className="h-4 w-4" />
           {homeLabel}
@@ -143,7 +143,7 @@ function NeonErrorShell({
       />
 
       <div className="relative z-10 mx-auto w-full max-w-lg">
-        <div className="tkad-glass-surface relative overflow-hidden rounded-[28px] border border-white/12 p-8 text-center shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-10">
+        <div className="tkad-glass-surface relative overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 p-8 text-center shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-10">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
@@ -169,17 +169,17 @@ function NeonErrorShell({
               {code}
             </p>
 
-            <h1 className="mt-4 text-xl font-bold tracking-tight text-white sm:text-2xl">
+            <h1 className="mt-4 text-xl font-bold tracking-tight dark:text-white text-gray-900 sm:text-2xl">
               {title}
             </h1>
-            <p className="mt-3 text-sm leading-relaxed text-white/60">
+            <p className="mt-3 text-sm leading-relaxed dark:text-white text-gray-500">
               {description}
             </p>
 
             {children}
 
             {footerNote ? (
-              <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-white/35">
+              <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] dark:text-white text-gray-400">
                 {footerNote}
               </p>
             ) : null}

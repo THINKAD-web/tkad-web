@@ -43,14 +43,14 @@ export function ReportAccessGate({
       >
         {children}
       </div>
-      <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/45 backdrop-blur-[2px]">
-        <div className="mx-4 max-w-sm rounded-2xl border border-white/14 bg-black/70 px-6 py-8 text-center shadow-xl">
+      <div className="absolute inset-0 flex items-center justify-center rounded-2xl dark:bg-black bg-white bg-white/45 backdrop-blur-[2px]">
+        <div className="mx-4 max-w-sm rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/70 px-6 py-8 text-center shadow-xl">
           <Lock className="mx-auto h-8 w-8 text-cyan-300/90" aria-hidden />
-          <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+          <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-400">
             {isEnterprise ? "ENTERPRISE" : "PRO"}
           </p>
-          <h3 className="mt-2 text-base font-black text-white">{title}</h3>
-          <p className="mt-2 text-sm text-white/72">
+          <h3 className="mt-2 text-base font-black dark:text-white text-gray-900">{title}</h3>
+          <p className="mt-2 text-sm dark:text-white">
             {isLogin
               ? isKo
                 ? "로그인 후 기본 데이터를 확인할 수 있습니다."
@@ -74,7 +74,7 @@ export function ReportAccessGate({
             {isLogin ? (
               <Link
                 href="/login"
-                className="tkad-neon-cta-clean inline-flex h-10 items-center justify-center rounded-xl px-5 text-sm font-bold text-white"
+                className="tkad-neon-cta-clean inline-flex h-10 items-center justify-center rounded-xl px-5 text-sm font-bold dark:text-white text-gray-900"
               >
                 {isKo ? "로그인" : "Sign in"}
               </Link>
@@ -82,7 +82,7 @@ export function ReportAccessGate({
               <>
                 <Link
                   href="/pricing"
-                  className="tkad-neon-cta-clean inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-5 text-sm font-bold text-white"
+                  className="tkad-neon-cta-clean inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-5 text-sm font-bold dark:text-white text-gray-900"
                 >
                   <Sparkles className="h-4 w-4" aria-hidden />
                   {isKo ? "플랜 보기" : "View plans"}
@@ -90,7 +90,7 @@ export function ReportAccessGate({
                 {!isEnterprise ? (
                   <Link
                     href="/pricing?trial=1"
-                    className="inline-flex h-10 items-center justify-center rounded-xl border border-white/14 px-5 text-sm font-bold text-white hover:bg-white/10"
+                    className="inline-flex h-10 items-center justify-center rounded-xl border dark:border-white/14 border-gray-200 px-5 text-sm font-bold dark:text-white text-gray-900 hover:dark:bg-white/10 bg-gray-100"
                   >
                     {isKo ? "무료 체험 시작" : "Start free trial"}
                   </Link>

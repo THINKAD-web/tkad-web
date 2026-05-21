@@ -41,7 +41,7 @@ function HeaderMediaSearchField({
       </label>
       <div
         className={cn(
-          "flex items-stretch overflow-hidden rounded-xl border-2 border-border/40 bg-card/80 shadow-sm backdrop-blur-sm dark:border-white/12 dark:bg-white/6",
+          "flex items-stretch overflow-hidden rounded-xl border-2 border-border/40 bg-card/80 shadow-sm backdrop-blur-sm dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50",
           compact ? "h-9" : "h-10",
         )}
       >
@@ -54,12 +54,12 @@ function HeaderMediaSearchField({
           placeholder={t("searchPlaceholder")}
           autoComplete="off"
           enterKeyHint="search"
-          className="min-w-0 flex-1 bg-transparent px-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none dark:text-white dark:placeholder:text-white/45"
+          className="min-w-0 flex-1 bg-transparent px-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none dark:text-white text-gray-900 dark:placeholder:dark:text-white"
         />
         <button
           type="submit"
           aria-label={t("searchSubmit")}
-          className="inline-flex shrink-0 items-center justify-center border-l border-border/40 px-3 text-foreground transition-colors hover:bg-foreground/5 dark:border-white/12 dark:text-white dark:hover:bg-white/8"
+          className="inline-flex shrink-0 items-center justify-center border-l border-border/40 px-3 text-foreground transition-colors hover:bg-foreground/5 dark:border-white/12 border-gray-200 dark:text-white text-gray-900 dark:hover:dark:bg-white/8 bg-gray-100"
         >
           <Search className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
         </button>

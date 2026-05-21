@@ -51,18 +51,18 @@ export async function IndustryMediaTypes({ slug }: Props) {
           return (
             <article
               key={key}
-              className="rounded-[28px] border border-white/12 bg-white/6 p-6 backdrop-blur tkad-neon-border sm:p-8"
+              className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 backdrop-blur tkad-neon-border sm:p-8"
             >
               <div className="mb-4 flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   [{String(i + 1).padStart(2, "0")}]
                 </span>
                 <Icon className="h-6 w-6 text-cyan-300/90" aria-hidden />
               </div>
-              <h3 className="text-lg font-black text-white">
+              <h3 className="text-lg font-black dark:text-white text-gray-900">
                 {t(`mediaTypes.${key}.title`)}
               </h3>
-              <p className="mt-3 text-sm leading-relaxed text-white/76">
+              <p className="mt-3 text-sm leading-relaxed dark:text-white">
                 {t(`mediaTypes.${key}.reason`)}
               </p>
             </article>

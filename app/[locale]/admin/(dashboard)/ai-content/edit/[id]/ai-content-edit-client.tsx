@@ -432,7 +432,7 @@ export default function AdminAiContentEditClient() {
                     {validation.issues.slice(0, 8).map((iss, idx) => (
                       <li
                         key={idx}
-                        className="rounded border border-black/10 bg-white/60 p-2 text-xs"
+                        className="rounded border border-black/10 dark:bg-white/6 bg-gray-500 p-2 text-xs"
                       >
                         <div className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
                           {iss.category} · {iss.severity}

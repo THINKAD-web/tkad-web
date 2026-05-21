@@ -375,7 +375,7 @@ export default function ClientMonitoringPage() {
                     variant={selectedPinId === p.id ? "default" : "outline"}
                     className={cn(
                       "rounded-full text-xs",
-                      selectedPinId === p.id ? "bg-navy text-white" : "border-navy/20",
+                      selectedPinId === p.id ? "bg-navy dark:text-white text-gray-900" : "border-navy/20",
                     )}
                     onClick={() =>
                       setSelectedPinId((cur) => (cur === p.id ? null : p.id))

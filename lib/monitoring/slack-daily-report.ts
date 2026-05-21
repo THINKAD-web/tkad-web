@@ -10,16 +10,20 @@ export async function sendDailyOpsSlackReport(now = new Date()) {
   const label = formatYmd(yesterday);
 
   const payload: InsightAlertPayload = {
-    severity: "info",
+    severity: metrics.configured && metrics.errorsYesterday > 10 ? "warning" : "info",
     title: `THINKAD 일일 운영 리포트 (${label})`,
     summary: metrics.configured
-      ? `어제 핵심 지표 — 방문(세션) ${metrics.visitors} · 신규 문의 ${metrics.newInquiries} · 신규 가입 ${metrics.newUsers} · 활성 캠페인 ${metrics.activeCampaigns}`
+      ? `어제 — 방문 ${metrics.visitors} · 가입 ${metrics.newUsers} · 문의 ${metrics.newInquiries} · 매체등록 ${metrics.newMediaApplications} · 에러 ${metrics.errorsYesterday}`
       : "DB 미연결 — 지표를 집계할 수 없습니다.",
     fields: metrics.configured
       ? [
           { label: "방문자(세션)", value: String(metrics.visitors) },
           { label: "신규 문의", value: String(metrics.newInquiries) },
           { label: "신규 가입", value: String(metrics.newUsers) },
+          { label: "매체 등록 신청", value: String(metrics.newMediaApplications) },
+          { label: "에러", value: String(metrics.errorsYesterday) },
+          { label: "주간 누적 문의", value: String(metrics.weekInquiries) },
+          { label: "주간 누적 가입", value: String(metrics.weekSignups) },
           { label: "활성 캠페인", value: String(metrics.activeCampaigns) },
         ]
       : [{ label: "상태", value: "DB not configured" }],

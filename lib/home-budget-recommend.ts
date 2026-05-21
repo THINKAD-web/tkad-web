@@ -6,15 +6,19 @@ import {
   type ScoredMedia,
 } from "@/lib/ai-media-recommend";
 
-export type HomeBudgetRegion = "gangnam" | "hongdae" | "seongsu" | "national";
+export type HomeBudgetRegion =
+  | "gangnam"
+  | "hongdae"
+  | "seongsu"
+  | "downtown"
+  | "national";
 
 export type HomeBudgetIndustry =
   | ""
   | "beauty"
   | "fnb"
-  | "tech"
-  | "finance"
-  | "entertainment"
+  | "it"
+  | "fashion"
   | "other";
 
 const REGION_CONFIG: Record<
@@ -33,6 +37,19 @@ const REGION_CONFIG: Record<
     region: "seoul",
     locationKeywords: ["성수", "뚝섬", "서울숲", "건대"],
   },
+  downtown: {
+    region: "seoul",
+    locationKeywords: [
+      "명동",
+      "을지로",
+      "종로",
+      "시청",
+      "광화문",
+      "동대문",
+      "중구",
+      "도심",
+    ],
+  },
   national: { region: "all", locationKeywords: null },
 };
 
@@ -40,9 +57,8 @@ const INDUSTRY_MAP: Record<HomeBudgetIndustry, Industry> = {
   "": "other",
   beauty: "beauty",
   fnb: "fmcg",
-  tech: "other",
-  finance: "fintech",
-  entertainment: "entertainment",
+  it: "fintech",
+  fashion: "retail",
   other: "other",
 };
 

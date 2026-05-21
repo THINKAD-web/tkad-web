@@ -125,7 +125,7 @@ export const academyWebinars: readonly AcademyWebinar[] = [
       "런칭·항속·리타겟 시나리오별 추천 패널 조합과 사례를 공유합니다.",
     descEn:
       "Panel combinations for launch, sustain, and retarget scenarios with examples.",
-    datetimeIso: "2026-04-17T15:00:00+09:00",
+    datetimeIso: "2026-04-17T19:00:00+09:00",
     seatsLeft: 42,
     levelKo: "중급",
     levelEn: "Intermediate",
@@ -138,7 +138,7 @@ export const academyWebinars: readonly AcademyWebinar[] = [
       "해상도·재생길이·안전영역, 데이터 피드 연동 시 주의점을 정리합니다.",
     descEn:
       "Resolution, length, safe zones, and pitfalls when wiring data feeds.",
-    datetimeIso: "2026-05-08T14:00:00+09:00",
+    datetimeIso: "2026-05-08T19:00:00+09:00",
     seatsLeft: 28,
     levelKo: "심화",
     levelEn: "Advanced",

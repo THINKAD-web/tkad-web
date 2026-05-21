@@ -40,7 +40,7 @@ export default async function ContactPage({
             </Link>
             <Link href="/media" className={categoryHeroCtaSecondaryClass}>
               {t("heroCtaMedia")}
-              <ArrowRight className="h-4 w-4 text-white/75" aria-hidden />
+              <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
             </Link>
           </CategoryHeroCtaRow>
         </CategoryExploreHero>

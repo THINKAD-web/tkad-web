@@ -75,12 +75,12 @@ export function PwaHomeWidget() {
       </p>
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-white/80">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold dark:text-white text-gray-700">
             <MapPin className="h-3.5 w-3.5" />
             {isKo ? "최근 본 매체" : "Recent media"}
           </p>
           {recent.length === 0 ? (
-            <p className="text-xs text-white/45">{isKo ? "없음" : "None"}</p>
+            <p className="text-xs dark:text-white">{isKo ? "없음" : "None"}</p>
           ) : (
             <ul className="space-y-1">
               {recent.map((m) => (
@@ -97,12 +97,12 @@ export function PwaHomeWidget() {
           )}
         </div>
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-white/80">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold dark:text-white text-gray-700">
             <Megaphone className="h-3.5 w-3.5" />
             {isKo ? "진행 중 캠페인" : "Active campaigns"}
           </p>
           {campaigns.length === 0 ? (
-            <p className="text-xs text-white/45">
+            <p className="text-xs dark:text-white">
               {isKo ? "로그인 후 표시" : "Sign in to view"}
             </p>
           ) : (
@@ -111,7 +111,7 @@ export function PwaHomeWidget() {
                 <li key={c.id}>
                   <Link
                     href={`/${locale}/dashboard/campaigns/${c.id}`}
-                    className="block truncate text-sm text-white/85 hover:underline"
+                    className="block truncate text-sm dark:text-white text-gray-800 hover:underline"
                   >
                     {c.name}
                   </Link>
@@ -123,14 +123,14 @@ export function PwaHomeWidget() {
         <div className="flex flex-col justify-end gap-2">
           <Link
             href={`/${locale}/contact`}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 text-sm font-black text-white"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 text-sm font-black dark:text-white text-gray-900"
           >
             <MessageSquarePlus className="h-4 w-4" />
             {isKo ? "새 문의하기" : "New inquiry"}
           </Link>
           <Link
             href={`/${locale}/media/map`}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-white/15 bg-white/8 text-xs font-bold text-white/90"
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border dark:border-white/15 border-gray-200 dark:bg-white/8 bg-gray-100 text-xs font-bold dark:text-white text-gray-800"
           >
             {isKo ? "답사 모드 (지도)" : "Field survey map"}
           </Link>

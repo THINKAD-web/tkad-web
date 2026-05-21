@@ -91,11 +91,11 @@ export default function DeployTestPage() {
               </td>
               <td className="py-2.5 text-center">
                 {c.ok ? (
-                  <span className="inline-block h-5 w-5 rounded-full bg-green-500 text-center text-xs leading-5 text-white">
+                  <span className="inline-block h-5 w-5 rounded-full bg-green-500 text-center text-xs leading-5 dark:text-white text-gray-900">
                     OK
                   </span>
                 ) : (
-                  <span className="inline-block h-5 w-5 rounded-full bg-yellow-400 text-center text-xs leading-5 text-white">
+                  <span className="inline-block h-5 w-5 rounded-full bg-yellow-400 text-center text-xs leading-5 dark:text-white text-gray-900">
                     --
                   </span>
                 )}

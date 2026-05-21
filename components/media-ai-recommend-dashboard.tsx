@@ -453,7 +453,7 @@ function Top3DashCard({
       className={cn(
         "relative flex flex-col overflow-hidden rounded-[24px] border-2 border-border bg-card p-4",
         accentRank &&
-          "border-white/14 bg-[#05050a] text-white shadow-[0_28px_120px_rgba(0,0,0,0.55)]",
+          "dark:border-white/14 border-gray-200 bg-[#05050a] dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)]",
       )}
     >
       {accentRank ? (
@@ -477,7 +477,7 @@ function Top3DashCard({
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center font-mono text-sm font-black",
                 accentRank
-                  ? "rounded-full border border-white/22 bg-white/12 text-white shadow-[0_18px_60px_rgba(0,0,0,0.25)] backdrop-blur"
+                  ? "rounded-full border border-white/22 bg-white/12 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.25)] backdrop-blur"
                   : "border-2 border-border bg-accent text-accent-foreground",
               )}
             >
@@ -487,7 +487,7 @@ function Top3DashCard({
               className={cn(
                 "inline-flex items-center gap-1 px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-[0.18em]",
                 accentRank
-                  ? "rounded-xl border border-white/22 bg-black/25 text-white backdrop-blur"
+                  ? "rounded-xl border border-white/22 dark:bg-black bg-white bg-white/25 dark:text-white text-gray-900 backdrop-blur"
                   : "border-2 border-border bg-hero-void text-accent",
               )}
             >
@@ -499,7 +499,7 @@ function Top3DashCard({
             className={cn(
               "px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-[0.18em]",
               accentRank
-                ? "rounded-xl border border-white/22 bg-white/10 text-white shadow-[0_18px_60px_rgba(0,0,0,0.2)] backdrop-blur"
+                ? "rounded-xl border border-white/22 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.2)] backdrop-blur"
                 : "border-2 border-accent bg-accent text-accent-foreground",
             )}
           >
@@ -509,7 +509,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-3 line-clamp-2 text-sm font-bold leading-snug tracking-tight",
-          accentRank ? "text-white" : "text-foreground",
+          accentRank ? "dark:text-white text-gray-900" : "text-foreground",
         )}
       >
         {isKo ? m.name : (m.nameEn || m.name)}
@@ -517,7 +517,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-1 font-mono text-[11px] uppercase tracking-[0.18em]",
-          accentRank ? "text-white/80" : "text-muted-foreground",
+          accentRank ? "dark:text-white text-gray-700" : "text-muted-foreground",
         )}
       >
         [ {isKo ? tl.ko : tl.en} ]
@@ -527,7 +527,7 @@ function Top3DashCard({
         <div
           className={cn(
             "flex items-center justify-between gap-2 font-mono text-[11px] tracking-tight",
-            accentRank ? "text-white/85" : "text-muted-foreground",
+            accentRank ? "dark:text-white text-gray-800" : "text-muted-foreground",
           )}
         >
           <span className="inline-flex items-center gap-1">
@@ -537,7 +537,7 @@ function Top3DashCard({
           <span
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-white" : "text-accent",
+              accentRank ? "dark:text-white text-gray-900" : "text-accent",
             )}
           >
             {scoreLabel}
@@ -547,7 +547,7 @@ function Top3DashCard({
           className={cn(
             "h-3 w-full border-2",
             accentRank
-              ? "border-white/18 bg-black/20"
+              ? "dark:border-white/18 border-gray-300 dark:bg-black bg-white bg-white/20"
               : "border-border bg-card",
           )}
         >
@@ -566,7 +566,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-3 font-mono text-[11px] leading-relaxed tracking-tight",
-          accentRank ? "text-white/90" : "text-muted-foreground",
+          accentRank ? "dark:text-white text-gray-800" : "text-muted-foreground",
         )}
       >
         {`// `}{maddyTagline}
@@ -575,30 +575,30 @@ function Top3DashCard({
       <dl
         className={cn(
           "mt-4 space-y-2 border-t-2 pt-3 font-mono text-xs",
-          accentRank ? "border-white/18" : "border-border",
+          accentRank ? "dark:border-white/18 border-gray-300" : "border-border",
         )}
       >
         <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "text-white/70" : "text-muted-foreground"}>
+          <dt className={accentRank ? "dark:text-white text-gray-600" : "text-muted-foreground"}>
             {tr("resultEstImpressions")}
           </dt>
           <dd
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-white" : "text-foreground",
+              accentRank ? "dark:text-white text-gray-900" : "text-foreground",
             )}
           >
             {monthly > 0 ? monthly.toLocaleString() : "—"}
           </dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "text-white/70" : "text-muted-foreground"}>
+          <dt className={accentRank ? "dark:text-white text-gray-600" : "text-muted-foreground"}>
             {tr("resultCpmLabel")}
           </dt>
           <dd
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-white" : "text-foreground",
+              accentRank ? "dark:text-white text-gray-900" : "text-foreground",
             )}
           >
             {cpm != null && Number.isFinite(cpm)
@@ -607,20 +607,20 @@ function Top3DashCard({
           </dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "text-white/70" : "text-muted-foreground"}>
+          <dt className={accentRank ? "dark:text-white text-gray-600" : "text-muted-foreground"}>
             {isKo ? "가격" : "Price"}
           </dt>
           <dd
             className={cn(
               "tabular-nums font-bold",
-              accentRank ? "text-white" : "text-foreground",
+              accentRank ? "dark:text-white text-gray-900" : "text-foreground",
             )}
           >
             {formatMediaPriceWonWithSymbol(m.price)}
             <span
               className={cn(
                 "ml-1 text-[10px] font-normal",
-                accentRank ? "text-white/60" : "text-muted-foreground",
+                accentRank ? "dark:text-white text-gray-500" : "text-muted-foreground",
               )}
             >
               · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
@@ -632,7 +632,7 @@ function Top3DashCard({
       <p
         className={cn(
           "mt-3 flex items-start gap-1 font-mono text-[11px] uppercase tracking-[0.18em]",
-          accentRank ? "text-white/80" : "text-muted-foreground",
+          accentRank ? "dark:text-white text-gray-700" : "text-muted-foreground",
         )}
       >
         <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
@@ -646,7 +646,7 @@ function Top3DashCard({
         className={cn(
           "mt-4 inline-flex w-fit items-center gap-1 border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
           accentRank
-            ? "border-white/22 bg-white/10 text-white backdrop-blur hover:border-white/30 hover:bg-white/16"
+            ? "border-white/22 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 backdrop-blur hover:border-white/30 hover:bg-white/16"
             : "border-border bg-card text-foreground hover:bg-foreground hover:text-background",
         )}
       >

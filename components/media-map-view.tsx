@@ -190,7 +190,7 @@ export function MediaMapView({
               <Button
                 type="button"
                 size="sm"
-                className="rounded-full bg-navy px-5 text-xs font-bold text-white shadow-lg hover:bg-navy/90"
+                className="rounded-full bg-navy px-5 text-xs font-bold dark:text-white text-gray-900 shadow-lg hover:bg-navy/90"
                 onClick={() => setListOpen(true)}
               >
                 {t("media.listSheetCta")}

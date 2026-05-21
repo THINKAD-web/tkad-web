@@ -24,10 +24,10 @@ type SettingsData = {
 };
 
 const glassCard =
-  "rounded-2xl border border-white/12 bg-white/5 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
+  "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
 
 const inputCls =
-  "h-11 w-full rounded-xl border border-white/12 bg-black/30 px-4 font-mono text-sm text-white placeholder:text-white/40 outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10";
+  "h-11 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 px-4 font-mono text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 outline-none focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/10";
 
 const PROVIDER_LABEL: Record<string, string> = {
   kakao: "카카오",
@@ -194,28 +194,28 @@ export function MySettingsPageClient() {
         <div className="relative mx-auto max-w-2xl">
           <Link
             href="/my"
-            className="mb-6 inline-flex items-center gap-2 font-mono text-[12px] text-white/60 transition-colors hover:text-white"
+            className="mb-6 inline-flex items-center gap-2 font-mono text-[12px] dark:text-white text-gray-500 transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-4 w-4" />
             {isKo ? "마이페이지" : "My hub"}
           </Link>
 
           <header className="mb-8">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
               [ SETTINGS ]
             </p>
-            <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+            <h1 className="mt-2 text-2xl font-black dark:text-white text-gray-900 sm:text-3xl">
               {isKo ? "계정 설정" : "Account settings"}
             </h1>
-            <p className="mt-1 font-mono text-[11px] text-white/45">{data.email}</p>
+            <p className="mt-1 font-mono text-[11px] dark:text-white">{data.email}</p>
           </header>
 
           <section className={cn(glassCard, "mb-6")}>
-            <h2 className="flex items-center gap-2 text-sm font-bold text-white">
+            <h2 className="flex items-center gap-2 text-sm font-bold dark:text-white text-gray-900">
               <Mail className="h-4 w-4 text-cyan-300" />
               {isKo ? "이메일 인증" : "Email verification"}
             </h2>
-            <p className="mt-2 text-xs text-white/60">
+            <p className="mt-2 text-xs dark:text-white text-gray-500">
               {verified
                 ? isKo
                   ? "인증이 완료된 계정입니다."
@@ -239,7 +239,7 @@ export function MySettingsPageClient() {
                   type="button"
                   onClick={() => void resendVerification()}
                   disabled={resending}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/15 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900 hover:bg-white/15 disabled:opacity-60"
                 >
                   {resending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   {isKo ? "인증 메일 재발송" : "Resend verification"}
@@ -249,21 +249,21 @@ export function MySettingsPageClient() {
           </section>
 
           <form onSubmit={saveProfile} className={cn(glassCard, "mb-6 space-y-4")}>
-            <h2 className="text-sm font-bold text-white">{isKo ? "프로필" : "Profile"}</h2>
+            <h2 className="text-sm font-bold dark:text-white text-gray-900">{isKo ? "프로필" : "Profile"}</h2>
             <div>
-              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-white/55">
+              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider dark:text-white text-gray-500">
                 {isKo ? "이름" : "Name"}
               </label>
               <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div>
-              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-white/55">
+              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider dark:text-white text-gray-500">
                 {isKo ? "회사명" : "Company"}
               </label>
               <input className={inputCls} value={company} onChange={(e) => setCompany(e.target.value)} />
             </div>
             <div>
-              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-white/55">
+              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider dark:text-white text-gray-500">
                 {isKo ? "연락처" : "Phone"}
               </label>
               <input className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} />
@@ -274,7 +274,7 @@ export function MySettingsPageClient() {
           </form>
 
           <form onSubmit={changePassword} className={cn(glassCard, "mb-6 space-y-4")}>
-            <h2 className="text-sm font-bold text-white">
+            <h2 className="text-sm font-bold dark:text-white text-gray-900">
               {data.hasPassword
                 ? isKo
                   ? "비밀번호 변경"
@@ -285,7 +285,7 @@ export function MySettingsPageClient() {
             </h2>
             {data.hasPassword && (
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-white/55">
+                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider dark:text-white text-gray-500">
                   {isKo ? "현재 비밀번호" : "Current password"}
                 </label>
                 <input
@@ -298,7 +298,7 @@ export function MySettingsPageClient() {
               </div>
             )}
             <div>
-              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-white/55">
+              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider dark:text-white text-gray-500">
                 {isKo ? "새 비밀번호" : "New password"}
               </label>
               <input
@@ -324,14 +324,14 @@ export function MySettingsPageClient() {
 
           {data.linkedProviders.length > 0 && (
             <section className={cn(glassCard, "mb-6")}>
-              <h2 className="text-sm font-bold text-white">
+              <h2 className="text-sm font-bold dark:text-white text-gray-900">
                 {isKo ? "연결된 소셜 계정" : "Linked accounts"}
               </h2>
               <ul className="mt-3 space-y-2">
                 {data.linkedProviders.map((p) => (
                   <li
                     key={p}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-sm text-white/85"
+                    className="flex items-center justify-between rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 px-3 py-2 text-sm dark:text-white text-gray-800"
                   >
                     <span>{PROVIDER_LABEL[p] ?? p}</span>
                     <span className="font-mono text-[10px] text-emerald-300/90">
@@ -348,7 +348,7 @@ export function MySettingsPageClient() {
               <Trash2 className="h-4 w-4" />
               {isKo ? "계정 삭제" : "Delete account"}
             </h2>
-            <p className="mt-2 text-xs text-white/55">
+            <p className="mt-2 text-xs dark:text-white text-gray-500">
               {isKo
                 ? "삭제 후 30일 내 복구가 어려울 수 있습니다. 진행 전 데이터를 확인해 주세요."
                 : "This action may be irreversible. Please back up important data."}
@@ -364,12 +364,12 @@ export function MySettingsPageClient() {
                 />
               </div>
             )}
-            <label className="mt-3 flex items-center gap-2 text-xs text-white/70">
+            <label className="mt-3 flex items-center gap-2 text-xs dark:text-white text-gray-600">
               <input
                 type="checkbox"
                 checked={deleteConfirm}
                 onChange={(e) => setDeleteConfirm(e.target.checked)}
-                className="rounded border-white/20"
+                className="rounded dark:border-white/20 border-gray-300"
               />
               {isKo ? "계정 삭제에 동의합니다" : "I understand this will delete my account"}
             </label>

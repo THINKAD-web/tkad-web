@@ -47,7 +47,7 @@ export function BrutalFooter({
     <footer
       id="site-footer"
       className={cn(
-        "tkad-site-footer relative shrink-0 overflow-hidden border-t border-white/10 bg-[#05050a] text-white",
+        "tkad-site-footer relative shrink-0 overflow-hidden border-t dark:border-white/10 border-gray-200 bg-[#05050a] dark:text-white text-gray-900",
         className,
       )}
     >
@@ -77,12 +77,12 @@ export function BrutalFooter({
         </div>
       </div>
 
-      <div className="relative border-t border-white/10 bg-black/30 px-6 py-5 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65 backdrop-blur">
+      <div className="relative border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/30 px-6 py-5 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600 backdrop-blur">
         <span>
           {copyright ??
             `© ${new Date().getFullYear()} THINKAD — All rights reserved`}
         </span>
-        {legal ? <span className="ml-4 text-white/45">{legal}</span> : null}
+        {legal ? <span className="ml-4 dark:text-white">{legal}</span> : null}
       </div>
     </footer>
   );
@@ -96,20 +96,20 @@ function BrandCell({
   brandMeta: ReactNode;
 }) {
   return (
-    <div className="rounded-[28px] bg-white/5 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">
+    <div className="rounded-[28px] dark:bg-white/5 bg-gray-50 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">
       <Link
         href="/"
-        className="inline-block font-mono text-[12px] font-black uppercase tracking-[0.22em] text-white"
+        className="inline-block font-mono text-[12px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-900"
       >
         THINK
         <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
           AD
         </span>
       </Link>
-      <div className="mt-4 max-w-xs space-y-3 text-sm leading-relaxed text-white/72">
-        <p className="font-medium text-white/82">{description}</p>
+      <div className="mt-4 max-w-xs space-y-3 text-sm leading-relaxed dark:text-white">
+        <p className="font-medium dark:text-white text-gray-800">{description}</p>
         {brandMeta ? (
-          <div className="font-mono text-[11px] text-white/60">
+          <div className="font-mono text-[11px] dark:text-white text-gray-500">
             {brandMeta}
           </div>
         ) : null}
@@ -124,14 +124,14 @@ function ColumnCell({
   col: BrutalFooterColumn;
 }) {
   return (
-    <div className="rounded-[28px] bg-white/5 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">
-      <h3 className="mb-4 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white/78">
+    <div className="rounded-[28px] dark:bg-white/5 bg-gray-50 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)]">
+      <h3 className="mb-4 font-mono text-[11px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700">
         {col.title}
       </h3>
       <ul className="space-y-2.5">
         {col.items.map((it, i) => {
           const cls =
-            "text-sm font-medium tracking-tight text-white/80 transition-colors hover:text-white";
+            "text-sm font-medium tracking-tight dark:text-white text-gray-700 transition-colors hover:dark:text-white text-gray-900";
           if (!it.href) {
             return (
               <li key={i} className={cls}>

@@ -51,7 +51,7 @@ function LanguageToggle() {
       disabled={isPending}
       aria-label={locale === "ko" ? "Switch to English" : "한국어로 전환"}
       title={locale === "ko" ? "English" : "한국어"}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-primary/14 bg-white/88 text-primary/70 transition-all duration-300 hover:border-silver/55 hover:bg-white hover:text-primary disabled:opacity-60"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-primary/14 dark:bg-white/8 bg-gray-1008 text-primary/70 transition-all duration-300 hover:border-silver/55 hover:bg-white hover:text-primary disabled:opacity-60"
     >
       <Globe className="h-4 w-4" />
       <span className="sr-only">{next === "ko" ? "한국어" : "English"}</span>
@@ -288,7 +288,7 @@ export default function Header() {
                               <span
                                 className={`flex h-9 w-9 items-center justify-center rounded-lg ${
                                   active
-                                    ? "bg-primary text-white"
+                                    ? "bg-primary dark:text-white text-gray-900"
                                     : "bg-secondary text-muted-foreground"
                                 }`}
                               >
@@ -331,7 +331,7 @@ export default function Header() {
                                   <span
                                     className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${
                                       active
-                                        ? "bg-primary text-white"
+                                        ? "bg-primary dark:text-white text-gray-900"
                                         : "bg-secondary text-muted-foreground"
                                     }`}
                                   >

@@ -108,7 +108,7 @@ function PlannerNeonPageBody({
   );
   if (appearance === "night") {
     return (
-      <div className="relative overflow-hidden bg-[#05050a] text-white">
+      <div className="relative overflow-hidden bg-[#05050a] dark:text-white text-gray-900">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 tkad-neon-depth"
@@ -1153,7 +1153,7 @@ export default function PlannerPageClient({
               </BtnBlock>
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 {teamPerms.hasTeam && teamPerms.canUsePlanner ? (
-                  <label className="flex w-full items-center gap-2 rounded-xl border border-white/12 bg-white/5 px-3 py-2 text-sm text-white/80 sm:w-auto">
+                  <label className="flex w-full items-center gap-2 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 text-sm dark:text-white text-gray-700 sm:w-auto">
                     <input
                       type="checkbox"
                       checked={shareWithTeam}
@@ -1202,7 +1202,7 @@ export default function PlannerPageClient({
                   <BtnBlock
                     variant="accent"
                     size="lg"
-                    className="min-h-14 w-full !text-white bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
+                    className="min-h-14 w-full !dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
                     onClick={() => void goToContactQuote()}
                     disabled={
                       saving ||
@@ -1292,7 +1292,7 @@ export default function PlannerPageClient({
                 <div className="tkad-glass-surface relative flex flex-col gap-2 overflow-hidden rounded-[22px] px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border border-white/14 bg-white/10 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-foreground backdrop-blur">
+                    <span className="rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-foreground backdrop-blur">
                       {t("estimatedModelBadge")}
                     </span>
                     <span className="min-w-0 text-left text-xs leading-relaxed sm:text-sm">
@@ -1381,7 +1381,7 @@ export default function PlannerPageClient({
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b border-white/10 p-5">
+                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ PORTFOLIO ]
                     </p>
@@ -1399,7 +1399,7 @@ export default function PlannerPageClient({
                       <Link
                         key={m.id}
                         href={mediaItemDetailPath(m.id)}
-                        className="group tkad-glass-surface flex flex-col gap-2 rounded-[22px] p-3 transition-all hover:-translate-y-0.5 hover:bg-white/10"
+                        className="group tkad-glass-surface flex flex-col gap-2 rounded-[22px] p-3 transition-all hover:-translate-y-0.5 hover:dark:bg-white/10 bg-gray-100"
                       >
                         <CompositePreview
                           mediaImageUrl={getPrimaryMediaImageUrl(m)}
@@ -1447,7 +1447,7 @@ export default function PlannerPageClient({
                 <div className="grid gap-3 lg:grid-cols-2">
                   <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                     <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                    <div className="relative border-b border-white/10 p-5">
+                    <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
                       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ {t("results")} ]
                       </p>
@@ -1500,7 +1500,7 @@ export default function PlannerPageClient({
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b border-white/10 p-5">
+                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartDailyBarTitle")} ]
                     </p>
@@ -1525,7 +1525,7 @@ export default function PlannerPageClient({
                   </div>
                   <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                     <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                    <div className="relative border-b border-white/10 p-5">
+                    <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
                       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                         [ {t("chartCpmTitle")} ]
                       </p>
@@ -1542,7 +1542,7 @@ export default function PlannerPageClient({
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b border-white/10 p-5">
+                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartMonthCompareTitle")} ]
                     </p>
@@ -1565,7 +1565,7 @@ export default function PlannerPageClient({
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b border-white/10 p-5">
+                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ ROI ]
                     </p>
@@ -1592,7 +1592,7 @@ export default function PlannerPageClient({
                             {t("roiUnit")}
                           </span>
                         </div>
-                        <div className="h-3 w-full overflow-hidden rounded-full border border-white/10 bg-black/10">
+                        <div className="h-3 w-full overflow-hidden rounded-full border dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100">
                           <div
                             className="h-full bg-primary transition-all duration-500"
                             style={{
@@ -1607,7 +1607,7 @@ export default function PlannerPageClient({
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b border-white/10 p-5">
+                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartImpLineTitle")} ]
                     </p>
@@ -1626,7 +1626,7 @@ export default function PlannerPageClient({
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b border-white/10 p-5">
+                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
                       [ {t("chartRoiLineTitle")} ]
                     </p>
@@ -1668,7 +1668,7 @@ export default function PlannerPageClient({
                         <BtnBlock
                           variant="accent"
                           size="lg"
-                          className="min-h-14 w-full !text-white bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
+                          className="min-h-14 w-full !dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
                           onClick={() => void goToContactQuote()}
                           disabled={saving || navigatingContact}
                         >

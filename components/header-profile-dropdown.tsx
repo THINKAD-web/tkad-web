@@ -48,8 +48,8 @@ export function HeaderProfileDropdown({
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "inline-flex h-9 items-center gap-1 rounded-full border border-transparent px-2 text-muted-foreground transition-colors",
-          "hover:bg-secondary/60 hover:text-foreground dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white",
-          open && "bg-secondary/60 dark:bg-white/10",
+          "hover:bg-secondary/60 hover:text-foreground dark:text-white text-gray-700 dark:hover:dark:bg-white/10 bg-gray-100 dark:hover:dark:text-white text-gray-900",
+          open && "bg-secondary/60 dark:bg-white/10 bg-gray-100",
         )}
         aria-expanded={open}
         aria-haspopup="menu"
@@ -63,9 +63,9 @@ export function HeaderProfileDropdown({
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] min-w-[11.5rem] overflow-hidden rounded-xl border border-border/60 bg-background py-1 shadow-lg dark:border-white/12 dark:bg-[#0a0a12]"
+          className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] min-w-[11.5rem] overflow-hidden rounded-xl border border-border/60 bg-background py-1 shadow-lg dark:border-white/12 border-gray-200 dark:bg-[#0a0a12]"
         >
-          <p className="truncate px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground dark:text-white/45">
+          <p className="truncate px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground dark:text-white">
             {session.name}
           </p>
           <Link
@@ -75,7 +75,7 @@ export function HeaderProfileDropdown({
               setOpen(false);
               onNavigate?.();
             }}
-            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:text-white dark:hover:bg-white/8"
+            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:text-white text-gray-900 dark:hover:dark:bg-white/8 bg-gray-100"
           >
             <UserIcon className="h-4 w-4 opacity-70" />
             {myPageLabel}
@@ -87,7 +87,7 @@ export function HeaderProfileDropdown({
               setOpen(false);
               onNavigate?.();
             }}
-            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:text-white dark:hover:bg-white/8"
+            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:text-white text-gray-900 dark:hover:dark:bg-white/8 bg-gray-100"
           >
             <Megaphone className="h-4 w-4 opacity-70" />
             {campaignsLabel}
@@ -96,7 +96,7 @@ export function HeaderProfileDropdown({
             type="button"
             role="menuitem"
             onClick={() => void logout()}
-            className="flex w-full items-center gap-2 border-t border-border/60 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:border-white/10 dark:text-white dark:hover:bg-white/8"
+            className="flex w-full items-center gap-2 border-t border-border/60 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:border-white/10 border-gray-200 dark:text-white text-gray-900 dark:hover:dark:bg-white/8 bg-gray-100"
           >
             <LogOut className="h-4 w-4 opacity-70" />
             {logoutLabel}

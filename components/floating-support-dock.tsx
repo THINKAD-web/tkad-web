@@ -26,7 +26,7 @@ const dockBtnBase =
 
 const scrollBtnClass = cn(
   dockBtnBase,
-  "border border-white/10 bg-white/8 text-white hover:bg-white/14",
+  "border dark:border-white/10 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 hover:bg-white/14",
   "disabled:pointer-events-none disabled:opacity-40",
 );
 
@@ -48,15 +48,15 @@ function DockPreviewRow({
   hint: string;
 }) {
   return (
-    <div className="flex items-start gap-2.5 rounded-xl border border-white/8 bg-white/5 px-2.5 py-2">
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/30 text-white/90">
+    <div className="flex items-start gap-2.5 rounded-xl border border-white/8 dark:bg-white/5 bg-gray-50 px-2.5 py-2">
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/30 dark:text-white text-gray-800">
         {icon}
       </span>
       <span className="min-w-0 text-left">
-        <span className="block text-[12px] font-semibold leading-tight text-white">
+        <span className="block text-[12px] font-semibold leading-tight dark:text-white text-gray-900">
           {title}
         </span>
-        <span className="mt-0.5 block text-[10px] leading-snug text-white/55">
+        <span className="mt-0.5 block text-[10px] leading-snug dark:text-white text-gray-500">
           {hint}
         </span>
       </span>
@@ -78,7 +78,7 @@ function DockActionWithPreview({
   return (
     <div className="group/dock-action relative">
       <div className={dockPreviewReveal}>
-        <div className="relative w-[min(15rem,calc(100vw-6rem))] overflow-hidden rounded-2xl border border-white/12 bg-black/70 p-2 shadow-[0_20px_64px_rgba(0,0,0,0.65)] backdrop-blur-xl">
+        <div className="relative w-[min(15rem,calc(100vw-6rem))] overflow-hidden rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/70 p-2 shadow-[0_20px_64px_rgba(0,0,0,0.65)] backdrop-blur-xl">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 opacity-[0.1] tkad-neon-grid"
@@ -151,7 +151,7 @@ export default function FloatingSupportDock() {
             ref={quotePanelRef}
             role="dialog"
             aria-label={tQuote("modalTitle")}
-            className="relative w-[min(18rem,calc(100vw-5rem))] overflow-hidden rounded-2xl border border-white/12 bg-black/60 p-4 text-white shadow-[0_24px_80px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+            className="relative w-[min(18rem,calc(100vw-5rem))] overflow-hidden rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 p-4 dark:text-white text-gray-900 shadow-[0_24px_80px_rgba(0,0,0,0.7)] backdrop-blur-xl"
           >
             <div
               aria-hidden
@@ -165,7 +165,7 @@ export default function FloatingSupportDock() {
                 <button
                   type="button"
                   onClick={() => setQuoteOpen(false)}
-                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/12 bg-white/5 text-white/80 hover:bg-white/10"
+                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100"
                   aria-label={isKo ? "닫기" : "Close"}
                 >
                   <X className="h-4 w-4" />
@@ -177,7 +177,7 @@ export default function FloatingSupportDock() {
                   <Link
                     href="/contact?type=media"
                     onClick={() => setQuoteOpen(false)}
-                    className="flex items-center gap-3 rounded-xl border border-white/12 bg-white/5 px-3 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
+                    className="flex items-center gap-3 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-3 text-sm font-semibold transition-colors hover:dark:bg-white/10 bg-gray-100"
                   >
                     <Send className="h-4 w-4 shrink-0 text-cyan-300" />
                     {tQuote("mediaQuote")}
@@ -187,7 +187,7 @@ export default function FloatingSupportDock() {
                   <Link
                     href="/contact?type=campaign"
                     onClick={() => setQuoteOpen(false)}
-                    className="flex items-center gap-3 rounded-xl border border-white/12 bg-white/5 px-3 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
+                    className="flex items-center gap-3 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-3 text-sm font-semibold transition-colors hover:dark:bg-white/10 bg-gray-100"
                   >
                     <ClipboardList className="h-4 w-4 shrink-0 text-violet-300" />
                     {tQuote("campaignConsult")}
@@ -197,7 +197,7 @@ export default function FloatingSupportDock() {
                   <Link
                     href="/planner"
                     onClick={() => setQuoteOpen(false)}
-                    className="flex items-center gap-3 rounded-xl border border-white/12 bg-white/5 px-3 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
+                    className="flex items-center gap-3 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-3 text-sm font-semibold transition-colors hover:dark:bg-white/10 bg-gray-100"
                   >
                     <Sparkles className="h-4 w-4 shrink-0 text-pink-300" />
                     {tQuote("tryPlanner")}
@@ -210,8 +210,8 @@ export default function FloatingSupportDock() {
 
         <div
           className={cn(
-            "relative w-[3.25rem] overflow-visible rounded-[22px] border border-white/12",
-            "bg-black/55 shadow-[0_20px_64px_rgba(0,0,0,0.62)] backdrop-blur-xl",
+            "relative w-[3.25rem] overflow-visible rounded-[22px] border dark:border-white/12 border-gray-200",
+            "dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 shadow-[0_20px_64px_rgba(0,0,0,0.62)] backdrop-blur-xl",
             "ring-1 ring-white/10",
           )}
         >
@@ -224,15 +224,15 @@ export default function FloatingSupportDock() {
             className="pointer-events-none absolute inset-0 overflow-hidden rounded-[22px] bg-[radial-gradient(circle_at_50%_0%,rgba(168,85,247,0.2),transparent_55%),radial-gradient(circle_at_50%_100%,rgba(34,211,238,0.16),transparent_55%)]"
           />
 
-          <div className="relative border-b border-white/10 px-2 py-2">
-            <p className="text-center font-mono text-[8px] font-bold uppercase leading-tight tracking-[0.22em] text-white/50">
+          <div className="relative border-b dark:border-white/10 border-gray-200 px-2 py-2">
+            <p className="text-center font-mono text-[8px] font-bold uppercase leading-tight tracking-[0.22em] dark:text-white text-gray-400">
               {tDock("packageLabel")}
             </p>
           </div>
 
           {scrollable ? (
             <div
-              className="relative flex flex-col gap-1 border-b border-white/10 p-1.5"
+              className="relative flex flex-col gap-1 border-b dark:border-white/10 border-gray-200 p-1.5"
               role="navigation"
               aria-label={tCommon("scrollNavLabel")}
             >
@@ -273,8 +273,8 @@ export default function FloatingSupportDock() {
                 className={cn(
                   dockBtnBase,
                   quoteOpen
-                    ? "bg-gradient-to-br from-violet-500 to-cyan-400 text-white shadow-md shadow-violet-500/30 ring-2 ring-white/25"
-                    : "bg-white/8 text-white hover:bg-white/12",
+                    ? "bg-gradient-to-br from-violet-500 to-cyan-400 dark:text-white text-gray-900 shadow-md shadow-violet-500/30 ring-2 ring-white/25"
+                    : "dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 hover:bg-white/12",
                 )}
                 aria-label={tQuote("buttonLabel")}
                 title={tQuote("buttonLabel")}

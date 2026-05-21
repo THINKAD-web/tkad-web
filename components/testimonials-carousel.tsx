@@ -14,7 +14,7 @@ type Props = {
 };
 
 const cardClass =
-  "group relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden rounded-[28px] border border-border/60 bg-card/90 p-7 shadow-[0_14px_44px_rgba(0,0,0,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 tkad-neon-border dark:border-white/12 dark:bg-white/6 dark:shadow-[0_18px_72px_rgba(0,0,0,0.45)] sm:p-8 md:basis-[48%] lg:basis-[32%]";
+  "group relative flex min-w-0 shrink-0 grow-0 basis-[88%] flex-col overflow-hidden rounded-[28px] border border-border/60 bg-card/90 p-7 shadow-[0_14px_44px_rgba(0,0,0,0.06)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 tkad-neon-border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:shadow-[0_18px_72px_rgba(0,0,0,0.45)] sm:p-8 md:basis-[48%] lg:basis-[32%]";
 
 /**
  * Embla 기반 캐러셀 — 5초 간격 자동 재생, hover 정지, 모바일은 스와이프·데스크톱은 화살표.
@@ -63,7 +63,7 @@ export function TestimonialsCarousel({ items }: Props) {
             <article key={t.id} className={cardClass}>
               <Quote
                 aria-hidden
-                className="absolute right-5 top-5 h-10 w-10 text-foreground/10 transition-colors group-hover:text-foreground/16 dark:text-white/10 dark:group-hover:text-white/16"
+                className="absolute right-5 top-5 h-10 w-10 text-foreground/10 transition-colors group-hover:text-foreground/16 dark:text-white text-gray-300 dark:group-hover:dark:text-white"
                 strokeWidth={1.5}
                 fill="currentColor"
               />
@@ -108,7 +108,7 @@ export function TestimonialsCarousel({ items }: Props) {
               </header>
 
               <div
-                className="mb-6 inline-flex w-fit items-center gap-2 rounded-2xl border border-border/60 bg-muted/50 px-3 py-1.5 shadow-sm dark:border-white/14 dark:bg-white/6 dark:shadow-[0_18px_72px_rgba(0,0,0,0.65)]"
+                className="mb-6 inline-flex w-fit items-center gap-2 rounded-2xl border border-border/60 bg-muted/50 px-3 py-1.5 shadow-sm dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 dark:shadow-[0_18px_72px_rgba(0,0,0,0.65)]"
                 aria-label={isKo ? "성과 수치" : "Key outcome"}
               >
                 <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
@@ -123,7 +123,7 @@ export function TestimonialsCarousel({ items }: Props) {
                 &ldquo;{isKo ? t.bodyKo : t.bodyEn}&rdquo;
               </p>
 
-              <footer className="mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 dark:border-white/10">
+              <footer className="mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 dark:border-white/10 border-gray-200">
                 <div className="flex items-center gap-0.5" aria-label={`별점 ${t.rating}`}>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
@@ -158,7 +158,7 @@ export function TestimonialsCarousel({ items }: Props) {
           onClick={scrollPrev}
           disabled={!canPrev}
           aria-label="이전 후기"
-          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 dark:bg-white/6 dark:text-white dark:hover:border-white/22 dark:hover:bg-white/10"
+          className="pointer-events-auto -translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -167,7 +167,7 @@ export function TestimonialsCarousel({ items }: Props) {
           onClick={scrollNext}
           disabled={!canNext}
           aria-label="다음 후기"
-          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 dark:bg-white/6 dark:text-white dark:hover:border-white/22 dark:hover:bg-white/10"
+          className="pointer-events-auto translate-x-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-card/95 text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-border hover:bg-card disabled:opacity-40 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100"
         >
           <ChevronRight className="h-5 w-5" />
         </button>

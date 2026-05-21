@@ -210,7 +210,7 @@ export default function MediaNetworkDetailClient({
               <Button
                 variant="ghost"
                 size="sm"
-                className="-ml-2 text-slate-200 hover:bg-white/10 hover:text-white"
+                className="-ml-2 text-slate-200 hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
               >
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {t("backToList")}
@@ -222,7 +222,7 @@ export default function MediaNetworkDetailClient({
               </Badge>
               <Badge
                 variant="outline"
-                className="border-white/40 bg-black/30 text-xs font-semibold text-white"
+                className="border-white/40 dark:bg-black bg-white bg-white/30 text-xs font-semibold dark:text-white text-gray-900"
               >
                 {isKo ? typeLb.ko : typeLb.en}
               </Badge>
@@ -230,7 +230,7 @@ export default function MediaNetworkDetailClient({
           </div>
 
           {heroImg ? (
-            <div className="relative flex h-[220px] items-center justify-center rounded-xl bg-black/40 sm:h-[260px] lg:h-[280px]">
+            <div className="relative flex h-[220px] items-center justify-center rounded-xl dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 sm:h-[260px] lg:h-[280px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={heroImg}
@@ -241,7 +241,7 @@ export default function MediaNetworkDetailClient({
           ) : null}
 
           <div className="mx-auto grid w-full max-w-4xl gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.3fr)] lg:items-end">
-            <div className="min-w-0 space-y-3 text-white">
+            <div className="min-w-0 space-y-3 dark:text-white text-gray-900">
               <h1 className="break-words text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
                 {isKo ? data.name : (data.nameEn || data.name) ?? data.name}
               </h1>
@@ -268,7 +268,7 @@ export default function MediaNetworkDetailClient({
               ) : null}
             </div>
 
-            <aside className="min-w-0 rounded-2xl border border-white/15 bg-black/35 p-4 text-sm text-slate-100 shadow-lg shadow-black/40 backdrop-blur-md sm:p-5">
+            <aside className="min-w-0 rounded-2xl border dark:border-white/15 border-gray-200 dark:bg-black bg-white bg-white/35 p-4 text-sm text-slate-100 shadow-lg shadow-black/40 backdrop-blur-md sm:p-5">
               <div className="grid gap-3 sm:grid-cols-2">
                 <CoreFact
                   icon={CircleDollarSign}
@@ -306,7 +306,7 @@ export default function MediaNetworkDetailClient({
                   icon={Users}
                   label={t("dailyFootfallLabel")}
                   value={
-                    <span className="block text-base font-semibold tabular-nums text-white">
+                    <span className="block text-base font-semibold tabular-nums dark:text-white text-gray-900">
                       {avgLocFootfall != null
                         ? `${avgLocFootfall.toLocaleString()}명/일`
                         : t("valueEmpty")}

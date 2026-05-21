@@ -359,7 +359,7 @@ export default function AdminMediaApplicationsPage() {
                     type="button"
                     disabled={acting || detail.status === "APPROVED"}
                     onClick={() => void approve()}
-                    className="inline-flex items-center gap-1 rounded-md bg-[#FF6600] px-3 py-1.5 text-xs font-semibold text-white"
+                    className="inline-flex items-center gap-1 rounded-md bg-[#FF6600] px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900"
                   >
                     {acting ? (
                       <Loader2 className="h-3 w-3 animate-spin" />

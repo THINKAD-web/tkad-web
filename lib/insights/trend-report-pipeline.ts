@@ -9,6 +9,7 @@ import { TREND_SEARCH_QUERIES } from "@/lib/content-auto/prompts";
 import { fetchInternalMediaInsights } from "@/lib/insights/sources/internal";
 import { fetchOOHWebSources } from "@/lib/insights/sources/tavily";
 import { getPrisma } from "@/lib/prisma";
+import { defaultContentReviewScheduledAt } from "@/lib/content-auto/review-schedule";
 
 /** Admin·cron 공통 Tavily 검색어 */
 export const ADMIN_TREND_SEARCH_KEYWORDS = [...TREND_SEARCH_QUERIES] as const;
@@ -49,6 +50,9 @@ export type TrendReportPipelineOptions = {
   generationMethod?: "manual" | "auto";
   /** 월간 cron: month unique 충돌 방지용 null */
   monthField?: string | null;
+  /** 시드·주제 지정 생성 시 리포트 초점 */
+  topicFocus?: string;
+  titleKoHint?: string;
   onProgress?: (event: TrendReportPipelineEvent) => void;
 };
 
@@ -94,6 +98,8 @@ export async function runTrendReportDraftPipeline(
       title: i.title,
       summary: i.summary,
     })),
+    topicFocus: opts.topicFocus,
+    titleKoHint: opts.titleKoHint,
   };
 
   emit(onProgress, {
@@ -129,6 +135,7 @@ export async function runTrendReportDraftPipeline(
         : (g.verticalStrategies as Prisma.InputJsonValue),
     thumbnailUrl: g.thumbnailUrl,
     publishedAt: null,
+    scheduledAt: defaultContentReviewScheduledAt(),
     generationMethod: opts.generationMethod ?? "manual",
     aiModel: resolveModel(),
     sources: tavily.sources as unknown as Prisma.InputJsonValue,

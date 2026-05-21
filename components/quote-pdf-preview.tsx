@@ -121,7 +121,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 className={cn(
                   "flex h-12 w-28 items-center justify-center border-2 font-mono text-xs font-bold uppercase tracking-[0.22em]",
                   isPremium
-                    ? "border-gold bg-gold text-white"
+                    ? "border-gold bg-gold dark:text-white text-gray-900"
                     : "border-navy bg-white text-navy",
                 )}
               >

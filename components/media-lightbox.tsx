@@ -106,7 +106,7 @@ export default function MediaLightbox({
 
   const overlay = (
     <div
-      className="fixed inset-0 z-[200] flex flex-col bg-black/92"
+      className="fixed inset-0 z-[200] flex flex-col dark:bg-black bg-white bg-white/92"
       role="dialog"
       aria-modal="true"
       aria-label={labels.expand}
@@ -114,7 +114,7 @@ export default function MediaLightbox({
       <button
         type="button"
         onClick={close}
-        className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
+        className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 backdrop-blur-sm transition hover:bg-white/20"
         aria-label={labels.close}
       >
         <X className="h-6 w-6" strokeWidth={2} />
@@ -128,7 +128,7 @@ export default function MediaLightbox({
               e.stopPropagation();
               goPrev();
             }}
-            className="absolute left-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:left-4"
+            className="absolute left-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 backdrop-blur-sm transition hover:bg-white/20 sm:left-4"
             aria-label={labels.prev}
           >
             <ChevronLeft className="h-7 w-7" strokeWidth={2} />
@@ -139,7 +139,7 @@ export default function MediaLightbox({
               e.stopPropagation();
               goNext();
             }}
-            className="absolute right-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:right-4"
+            className="absolute right-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 backdrop-blur-sm transition hover:bg-white/20 sm:right-4"
             aria-label={labels.next}
           >
             <ChevronRight className="h-7 w-7" strokeWidth={2} />
@@ -156,9 +156,9 @@ export default function MediaLightbox({
           onClick={(e) => e.stopPropagation()}
         >
           {imgFailed ? (
-            <div className="rounded-lg border border-white/20 bg-white/5 px-6 py-8 text-center text-white">
+            <div className="rounded-lg border dark:border-white/20 border-gray-300 dark:bg-white/5 bg-gray-50 px-6 py-8 text-center dark:text-white text-gray-900">
               <p className="text-sm font-medium">이미지를 불러올 수 없습니다.</p>
-              <p className="mt-2 text-xs text-white/70">
+              <p className="mt-2 text-xs dark:text-white text-gray-600">
                 Could not load image.
               </p>
               {src ? (
@@ -188,7 +188,7 @@ export default function MediaLightbox({
         </div>
 
         {n > 1 ? (
-          <p className="mt-2 text-center text-xs font-medium text-white/80">
+          <p className="mt-2 text-center text-xs font-medium dark:text-white text-gray-700">
             {idx + 1} / {n}
           </p>
         ) : null}

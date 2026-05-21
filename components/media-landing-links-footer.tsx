@@ -86,7 +86,7 @@ export function MediaLandingLinksFooter({
                   <li key={slug}>
                     <Link
                       href={`/media/region/${slug}`}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 dark:bg-white/6 dark:text-white/90 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:border-white/20 dark:hover:bg-white/10"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:dark:border-white/20 border-gray-300 dark:hover:dark:bg-white/10 bg-gray-100"
                     >
                       {regionLabel(slug, locale)}
                     </Link>
@@ -110,7 +110,7 @@ export function MediaLandingLinksFooter({
                   <li key={slug}>
                     <Link
                       href={`/media/type/${slug}`}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 dark:bg-white/6 dark:text-white/90 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:border-white/20 dark:hover:bg-white/10"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:dark:border-white/20 border-gray-300 dark:hover:dark:bg-white/10 bg-gray-100"
                     >
                       {typeLabel(slug, locale)}
                     </Link>
@@ -136,7 +136,7 @@ export function MediaLandingLinksFooter({
                   <li key={area}>
                     <Link
                       href={`/media/area/${encodeURIComponent(area)}`}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 dark:bg-white/6 dark:text-white/90 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:border-white/20 dark:hover:bg-white/10"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-muted dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] dark:hover:dark:border-white/20 border-gray-300 dark:hover:dark:bg-white/10 bg-gray-100"
                     >
                       {area}
                     </Link>

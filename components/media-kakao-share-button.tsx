@@ -62,7 +62,7 @@ export function MediaKakaoShareButton({
       type="button"
       onClick={() => void share()}
       className={cn(
-        "inline-flex items-center gap-2 rounded-xl border border-[#FEE500]/50 bg-[#FEE500]/15 px-3 py-2 text-xs font-bold uppercase tracking-wider text-yellow-100 transition hover:bg-[#FEE500]/25",
+        "inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#FEE500]/50 bg-[#FEE500]/15 px-3 py-2 text-sm font-bold uppercase tracking-wider text-yellow-950 transition hover:bg-[#FEE500]/25 dark:text-yellow-100",
         className,
       )}
     >

@@ -5,6 +5,8 @@ import {
 } from "@/lib/content-auto/publish-sync";
 import { json } from "@/lib/admin-guard";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { notifyPublishedContentSns } from "@/lib/sns-share-notify";
+import { siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +44,13 @@ export async function GET(request: NextRequest) {
     await ensureTrendReportSlug(tr.id);
     await syncTrendReportToReportTable(tr.id);
     published.push({ kind: "trend_report", id: tr.id, title: tr.titleKo });
+    if (tr.slug) {
+      void notifyPublishedContentSns({
+        kind: "trend_report",
+        title: tr.titleKo,
+        publicUrl: `${siteUrl}/ko/reports/${tr.slug}`,
+      });
+    }
   }
 
   const education = await db.educationArticle.findMany({
@@ -56,6 +65,13 @@ export async function GET(request: NextRequest) {
       data: { status: "published", publishedAt: now },
     });
     published.push({ kind: "education_article", id: row.id, title: row.titleKo });
+    if (row.slug) {
+      void notifyPublishedContentSns({
+        kind: "education_article",
+        title: row.titleKo,
+        publicUrl: `${siteUrl}/ko/academy/learn/${row.slug}`,
+      });
+    }
   }
 
   const guides = await db.guideArticle.findMany({
@@ -70,6 +86,13 @@ export async function GET(request: NextRequest) {
       data: { status: "published", publishedAt: now },
     });
     published.push({ kind: "guide_article", id: row.id, title: row.titleKo });
+    if (row.slug) {
+      void notifyPublishedContentSns({
+        kind: "guide_article",
+        title: row.titleKo,
+        publicUrl: `${siteUrl}/ko/guides/${row.slug}`,
+      });
+    }
   }
 
   return json({ ok: true, count: published.length, published });

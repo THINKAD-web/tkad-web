@@ -1,4 +1,5 @@
 import { AdminChatMonitor } from "@/components/admin/admin-chat-monitor";
+import { AdminSupportChatLogs } from "@/components/admin/admin-support-chat-logs";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ export default function AdminChatPage() {
         </p>
       </div>
       <AdminChatMonitor />
+      <AdminSupportChatLogs />
     </div>
   );
 }

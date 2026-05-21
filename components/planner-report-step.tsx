@@ -289,6 +289,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         await downloadPdfFromHtmlElement(el, asciiName, {
           timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
         });
+        const { trackGaEvent } = await import("@/lib/ga-events");
+        trackGaEvent("pdf_download", { source: "planner_report" });
         toast("success", t("reportPdfDownloaded"));
       } catch (e) {
         console.error("[planner-pdf download regenerate]", e);
@@ -617,6 +619,8 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
       await downloadPdfFromHtmlElement(el, defaultPlannerPdfFilename(), {
         timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
       });
+      const { trackGaEvent } = await import("@/lib/ga-events");
+      trackGaEvent("pdf_download", { source: "planner_report_compact" });
       toast("success", t("reportPdfDownloaded"));
     } catch (e) {
       console.error("[planner-pdf compact]", e);

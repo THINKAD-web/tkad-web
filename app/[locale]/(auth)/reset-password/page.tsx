@@ -16,7 +16,7 @@ function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null);
 
   const inputCls =
-    "tkad-auth-input h-11 w-full rounded-[18px] border border-white/12 bg-black/28 px-4 font-mono text-sm font-semibold text-white placeholder:text-white/45 outline-none backdrop-blur transition-all focus:border-white/18 focus:ring-2 focus:ring-white/12";
+    "tkad-auth-input h-11 w-full rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/28 px-4 font-mono text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-all focus:dark:border-white/18 border-gray-300 focus:ring-2 focus:ring-white/12";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -57,12 +57,12 @@ function ResetPasswordForm() {
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
         <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
-          <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border border-white/12 bg-black/45 p-6 text-white shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
+          <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/45 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
             <div className="mb-6 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
                 [ RESET PASSWORD ]
               </p>
-              <h1 className="mt-2 text-2xl font-black tracking-tight text-white">
+              <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
                 새 비밀번호 설정
               </h1>
             </div>
@@ -81,7 +81,7 @@ function ResetPasswordForm() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65"
+                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600"
                   >
                     [ 새 비밀번호 ]
                   </label>
@@ -99,7 +99,7 @@ function ResetPasswordForm() {
                 <div>
                   <label
                     htmlFor="confirm"
-                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65"
+                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600"
                   >
                     [ 비밀번호 확인 ]
                   </label>
@@ -115,7 +115,7 @@ function ResetPasswordForm() {
                   />
                 </div>
                 {error && (
-                  <div className="rounded-[18px] border border-white/14 bg-black/35 px-3 py-2 font-mono text-[12px] text-white/85">
+                  <div className="rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/35 px-3 py-2 font-mono text-[12px] dark:text-white text-gray-800">
                     {`// `}{error}
                   </div>
                 )}

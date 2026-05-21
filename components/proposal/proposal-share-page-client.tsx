@@ -30,11 +30,11 @@ export function ProposalSharePageClient({
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-300">
             THINKAD
           </p>
-          <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
+          <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900 sm:text-3xl">
             {pageTitle}
           </h1>
-          <p className="mt-1 text-lg text-white/80">{campaignName}</p>
-          <p className="text-sm text-white/50">{brandName}</p>
+          <p className="mt-1 text-lg dark:text-white text-gray-700">{campaignName}</p>
+          <p className="text-sm dark:text-white text-gray-400">{brandName}</p>
           <div className="mt-8">
             <ProposalResultDisplay
               input={input}

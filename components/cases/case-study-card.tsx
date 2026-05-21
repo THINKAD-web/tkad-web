@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { buildCaseHeadline, primaryRegionLabel } from "@/lib/success-case-hub";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
+import { isSampleSuccessCaseId } from "@/lib/sample-success-case";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -20,11 +21,12 @@ export function CaseStudyCard({ item, className, compact }: Props) {
   const title = isKo ? item.titleKo : item.titleEn ?? item.titleKo;
   const region = primaryRegionLabel(item, isKo);
   const headline = buildCaseHeadline(item, locale);
+  const showAnonymizedBadge = isSampleSuccessCaseId(item.id);
 
   return (
     <article
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-[22px] border border-white/12 bg-black/40 backdrop-blur transition-all duration-300 hover:border-[#22d3ee]/35 hover:shadow-[0_12px_48px_rgba(34,211,238,0.12)]",
+        "group relative flex flex-col overflow-hidden rounded-[22px] border border-border/80 bg-card shadow-sm backdrop-blur transition-all duration-300 hover:border-[#22d3ee]/35 hover:shadow-[0_12px_48px_rgba(34,211,238,0.12)] dark:border-white/12 dark:bg-black/40",
         className,
       )}
     >
@@ -54,6 +56,11 @@ export function CaseStudyCard({ item, className, compact }: Props) {
           </span>
         </div>
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+          {showAnonymizedBadge ? (
+            <span className="rounded-full border border-white/25 bg-black/55 px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-white/90">
+              {t("badgeAnonymized")}
+            </span>
+          ) : null}
           <span className="rounded-full border border-[#a855f7]/40 bg-[#a855f7]/20 px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#e9d5ff]">
             {item.industry}
           </span>
@@ -66,11 +73,11 @@ export function CaseStudyCard({ item, className, compact }: Props) {
         </div>
       </Link>
 
-      <div className={cn("flex flex-1 flex-col p-4", compact && "p-3")}>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+      <div className={cn("flex flex-1 flex-col p-4 text-foreground", compact && "p-3")}>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
           {item.clientName}
         </p>
-        <h3 className="mt-1.5 line-clamp-2 text-base font-black leading-snug tracking-tight text-white">
+        <h3 className="mt-1.5 line-clamp-2 text-base font-black leading-snug tracking-tight text-foreground">
           {title}
         </h3>
         {headline ? (
@@ -79,7 +86,7 @@ export function CaseStudyCard({ item, className, compact }: Props) {
           </p>
         ) : null}
         {!compact ? (
-          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/55">
+          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
             {item.summaryKo}
           </p>
         ) : null}
@@ -87,7 +94,7 @@ export function CaseStudyCard({ item, className, compact }: Props) {
           {item.mediaUsed.slice(0, 3).map((m) => (
             <span
               key={m}
-              className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-white/60"
+              className="rounded-full border border-border bg-muted px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground dark:border-white/10 dark:bg-white/5 dark:text-white/60"
             >
               {m}
             </span>
@@ -95,7 +102,7 @@ export function CaseStudyCard({ item, className, compact }: Props) {
         </div>
         <Link
           href={`/contact?case=${encodeURIComponent(item.id)}`}
-          className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-white/45 transition-colors hover:text-[#22d3ee]"
+          className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-[#22d3ee]"
           onClick={(e) => e.stopPropagation()}
         >
           {t("ctaSimilar")}

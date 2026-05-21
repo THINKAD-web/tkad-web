@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation";
 export function HomeMediaPartnerCta({ isKo }: { isKo: boolean }) {
   return (
     <section
-      className="relative isolate overflow-hidden border-y border-white/10 bg-[#05050a] text-white"
+      className="relative isolate overflow-hidden border-y dark:border-white/10 border-gray-200 bg-[#05050a] dark:text-white text-gray-900"
       aria-label={isKo ? "매체사 등록 안내" : "Media partner CTA"}
     >
       {/* 네온 깊이감 + 그리드 (compare / planner 동일 톤) */}
@@ -22,16 +22,16 @@ export function HomeMediaPartnerCta({ isKo }: { isKo: boolean }) {
       <div className="relative mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
         <div className="flex min-w-0 items-start gap-3 sm:items-center">
           <span
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/18 bg-white/10 text-white shadow-[0_8px_28px_rgba(0,0,0,0.45)] backdrop-blur"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border dark:border-white/18 border-gray-300 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 shadow-[0_8px_28px_rgba(0,0,0,0.45)] backdrop-blur"
             aria-hidden
           >
             <Radio className="h-4 w-4" />
           </span>
           <div className="min-w-0">
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-white/55 sm:text-[10px]">
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] dark:text-white text-gray-500 sm:text-[10px]">
               {`[ ${isKo ? "신규 매체" : "New media"} ]`}
             </p>
-            <p className="mt-1 text-balance text-sm font-bold leading-snug text-white sm:text-base">
+            <p className="mt-1 text-balance text-sm font-bold leading-snug dark:text-white text-gray-900 sm:text-base">
               {isKo ? (
                 <>신규 매체가 있으신가요? 싱커드 카탈로그에 매체를 등록해 보세요.</>
               ) : (
@@ -44,7 +44,7 @@ export function HomeMediaPartnerCta({ isKo }: { isKo: boolean }) {
         </div>
         <Link
           href="/register/media"
-          className="group inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border border-white/22 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_14px_44px_rgba(0,0,0,0.5)] transition-transform hover:-translate-y-0.5 sm:self-auto sm:px-5"
+          className="group inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border border-white/22 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.5)] transition-transform hover:-translate-y-0.5 sm:self-auto sm:px-5"
         >
           {isKo ? "매체 등록 신청하기" : "Apply to list media"}
           <ArrowRight

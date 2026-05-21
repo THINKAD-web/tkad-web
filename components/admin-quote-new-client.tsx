@@ -1165,33 +1165,33 @@ export default function AdminQuoteNewClient() {
             <p className="text-sm text-amber-700">{t("invalidPeriod")}</p>
           ) : (
             <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
-              <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
+              <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumSubtotal")}</dt>
                 <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.linesSubtotalWon)}
                 </dd>
               </div>
               {totals.discountTotalWon > 0 ? (
-                <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
+                <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
                   <dt className="text-muted-foreground">{t("sumDiscount")}</dt>
                   <dd className="font-semibold tabular-nums text-red-700">
                     −{formatWon(totals.discountTotalWon)}
                   </dd>
                 </div>
               ) : null}
-              <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
+              <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumAfterDiscount")}</dt>
                 <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.afterDiscountWon)}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
+              <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumSupply")}</dt>
                 <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.supplyWon)}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4 rounded-lg border bg-white/80 px-3 py-2">
+              <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumVat")}</dt>
                 <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.vatWon)}

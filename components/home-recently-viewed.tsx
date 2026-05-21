@@ -40,17 +40,17 @@ export default function HomeRecentlyViewed({ locale }: Props) {
 
   return (
     <section
-      className="border-t border-white/10 bg-black/20 py-14 sm:py-16"
+      className="border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 py-14 sm:py-16"
       aria-label={isKo ? "최근에 보신 매체" : "Recently viewed media"}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollAnimate>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-white/55">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] dark:text-white text-gray-500">
                 {isKo ? "// PERSONAL" : "// PERSONAL"}
               </p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
+              <h2 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900 sm:text-3xl">
                 {isKo ? "최근에 보신 매체" : "Recently viewed"}
               </h2>
             </div>
@@ -80,9 +80,9 @@ export default function HomeRecentlyViewed({ locale }: Props) {
               <ScrollAnimate key={media.id} delay={i * 80} className="shrink-0 snap-start">
                 <Link
                   href={`/media/${media.id}`}
-                  className="group flex w-[min(82vw,240px)] flex-col overflow-hidden rounded-2xl border border-white/12 bg-white/5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur transition-transform hover:-translate-y-0.5"
+                  className="group flex w-[min(82vw,240px)] flex-col overflow-hidden rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur transition-transform hover:-translate-y-0.5"
                 >
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-white/5">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden dark:bg-white/5 bg-gray-50">
                     {media.thumbnail ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
@@ -91,7 +91,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                         className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
+                      <div className="flex h-full items-center justify-center font-mono text-[10px] uppercase tracking-[0.2em] dark:text-white text-gray-400">
                         {isKo ? "이미지 준비 중" : "No image"}
                       </div>
                     )}
@@ -100,14 +100,14 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                     <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/90">
                       {typeLabel}
                     </span>
-                    <p className="line-clamp-2 text-sm font-bold leading-snug text-white group-hover:text-cyan-100">
+                    <p className="line-clamp-2 text-sm font-bold leading-snug dark:text-white text-gray-900 group-hover:text-cyan-100">
                       {media.name}
                     </p>
-                    <div className="flex min-w-0 items-start gap-1 text-xs text-white/60">
+                    <div className="flex min-w-0 items-start gap-1 text-xs dark:text-white text-gray-500">
                       <MapPin className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
                       <span className="truncate">{media.region}</span>
                     </div>
-                    <p className="text-sm font-bold tabular-nums text-white">
+                    <p className="text-sm font-bold tabular-nums dark:text-white text-gray-900">
                       {formatMediaPriceWonWithSymbol(media.price)}
                     </p>
                   </div>

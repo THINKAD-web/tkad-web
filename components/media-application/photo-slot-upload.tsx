@@ -52,11 +52,11 @@ export function PhotoSlotUpload({
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/55">
+    <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-4 backdrop-blur">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500">
         {label}
       </p>
-      <p className="mt-1 text-xs text-white/55">{hint}</p>
+      <p className="mt-1 text-xs dark:text-white text-gray-500">{hint}</p>
       <input
         ref={inputRef}
         type="file"
@@ -73,7 +73,7 @@ export function PhotoSlotUpload({
         type="button"
         disabled={disabled || uploading}
         onClick={() => inputRef.current?.click()}
-        className="mt-3 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-dashed border-white/20 bg-white/5 transition-colors hover:border-violet-500/40 hover:bg-white/8 disabled:opacity-50"
+        className="mt-3 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-dashed dark:border-white/20 border-gray-300 dark:bg-white/5 bg-gray-50 transition-colors hover:border-violet-500/40 hover:dark:bg-white/8 bg-gray-100 disabled:opacity-50"
       >
         {uploading ? (
           <Loader2 className="h-8 w-8 animate-spin text-violet-300" />
@@ -86,8 +86,8 @@ export function PhotoSlotUpload({
           />
         ) : (
           <>
-            <ImagePlus className="h-8 w-8 text-white/45" />
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-white/55">
+            <ImagePlus className="h-8 w-8 dark:text-white" />
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] dark:text-white text-gray-500">
               {slot}
             </span>
           </>

@@ -39,6 +39,8 @@ export default function Footer() {
     { href: "/cases", label: t("nav.cases") },
     { href: "/contact", label: t("nav.contact") },
     { href: "/privacy", label: t("footer.privacy") },
+    { href: "/terms", label: t("footer.terms") },
+    { href: "/refund", label: t("footer.refund") },
   ];
 
   const serviceItems = [
@@ -49,7 +51,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer id="site-footer" className="relative overflow-hidden border-t border-silver/15 bg-gradient-to-b from-primary via-navy-dark to-[#040914] text-white">
+    <footer id="site-footer" className="relative overflow-hidden border-t border-silver/15 bg-gradient-to-b from-primary via-navy-dark to-[#040914] dark:text-white text-gray-900">
       <div className="hero-pattern absolute inset-0 opacity-[0.14]" />
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
@@ -146,7 +148,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/10 pt-8">
+        <div className="mt-12 border-t dark:border-white/10 border-gray-200 pt-8">
           <div className="mb-4 text-center text-xs leading-relaxed text-silver/70">
             <p>{t("footer.ecommerce")} | {t("footer.address")}</p>
           </div>

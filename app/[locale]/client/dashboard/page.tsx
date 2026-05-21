@@ -341,7 +341,7 @@ export default function ClientDashboardPage() {
                 "max-w-[90%] rounded-2xl px-3 py-2 text-sm",
                 m.from === "admin"
                   ? "mr-auto bg-white text-navy shadow-sm"
-                  : "ml-auto bg-navy text-white",
+                  : "ml-auto bg-navy dark:text-white text-gray-900",
               )}
             >
               <p>{m.text}</p>
@@ -430,7 +430,7 @@ export default function ClientDashboardPage() {
                   <MessageCircle className="mr-1.5 h-4 w-4 text-gold" />
                   {isKo ? "1:1 채팅" : "Chat"}
                   {chatUnread > 0 ? (
-                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cta px-1 text-[9px] font-bold text-white">
+                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cta px-1 text-[9px] font-bold dark:text-white text-gray-900">
                       {chatUnread > 9 ? "9+" : chatUnread}
                     </span>
                   ) : null}
@@ -837,7 +837,7 @@ export default function ClientDashboardPage() {
       <button
         type="button"
         onClick={openChat}
-        className="fixed bottom-6 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-transform hover:scale-105 sm:hidden"
+        className="fixed bottom-6 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-navy dark:text-white text-gray-900 shadow-lg transition-transform hover:scale-105 sm:hidden"
         aria-label={isKo ? "1:1 채팅" : "Open chat"}
       >
         <MessageCircle className="h-6 w-6" />

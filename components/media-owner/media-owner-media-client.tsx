@@ -36,7 +36,7 @@ type BookingRow = {
 const STATUS_LABEL: Record<string, { ko: string; en: string; cls: string }> = {
   pending: { ko: "승인대기", en: "Pending", cls: "text-amber-300" },
   active: { ko: "활성", en: "Active", cls: "text-emerald-300" },
-  inactive: { ko: "비활성", en: "Inactive", cls: "text-white/40" },
+  inactive: { ko: "비활성", en: "Inactive", cls: "dark:text-white text-gray-400" },
 };
 
 export function MediaOwnerMediaClient() {
@@ -160,10 +160,10 @@ export function MediaOwnerMediaClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold dark:text-white text-gray-900">
           {isKo ? "내 매체 관리" : "My media"}
         </h2>
-        <p className="mt-1 text-sm text-white/60">
+        <p className="mt-1 text-sm dark:text-white text-gray-500">
           {isKo
             ? "조회·찜·문의 지표와 가용 캘린더, 단가 수정을 관리합니다."
             : "Metrics, availability blocks, and price requests."}
@@ -194,8 +194,8 @@ export function MediaOwnerMediaClient() {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="font-medium text-white">{m.name}</p>
-                        <p className="text-xs text-white/50">
+                        <p className="font-medium dark:text-white text-gray-900">{m.name}</p>
+                        <p className="text-xs dark:text-white text-gray-400">
                           {m.region} · {m.type}
                         </p>
                       </div>
@@ -203,7 +203,7 @@ export function MediaOwnerMediaClient() {
                         {isKo ? st.ko : st.en}
                       </span>
                     </div>
-                    <p className="mt-2 text-xs text-white/55">
+                    <p className="mt-2 text-xs dark:text-white text-gray-500">
                       {isKo ? "조회" : "Views"} {m.viewCount} ·{" "}
                       {isKo ? "찜" : "Fav"} {m.favoriteCount} ·{" "}
                       {isKo ? "문의" : "Inq."} {m.inquiryCount}
@@ -221,7 +221,7 @@ export function MediaOwnerMediaClient() {
           {selected ? (
             <div className="space-y-4">
               <div className={ownerGlassCard}>
-                <h3 className="flex items-center gap-2 font-semibold text-white">
+                <h3 className="flex items-center gap-2 font-semibold dark:text-white text-gray-900">
                   <CalendarRange className="h-4 w-4 text-violet-300" />
                   {isKo ? "집행 불가 기간" : "Blocked dates"}
                 </h3>
@@ -245,7 +245,7 @@ export function MediaOwnerMediaClient() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                    className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-bold dark:text-white text-gray-900 disabled:opacity-50"
                   >
                     {saving ? (
                       <Loader2 className="inline h-4 w-4 animate-spin" />
@@ -260,9 +260,9 @@ export function MediaOwnerMediaClient() {
                     .map((b) => (
                       <li
                         key={b.id}
-                        className="flex items-center justify-between rounded-lg bg-black/30 px-3 py-2"
+                        className="flex items-center justify-between rounded-lg dark:bg-black bg-white bg-white/30 px-3 py-2"
                       >
-                        <span className="text-white/80">
+                        <span className="dark:text-white text-gray-700">
                           {b.startsAt.slice(0, 10)} ~ {b.endsAt.slice(0, 10)}
                         </span>
                         <button
@@ -275,7 +275,7 @@ export function MediaOwnerMediaClient() {
                       </li>
                     ))}
                   {bookings.filter((b) => b.isOwnerBlock).length === 0 ? (
-                    <li className="text-white/40">
+                    <li className="dark:text-white text-gray-400">
                       {isKo ? "등록된 블록 없음" : "No blocks"}
                     </li>
                   ) : null}
@@ -283,10 +283,10 @@ export function MediaOwnerMediaClient() {
               </div>
 
               <form onSubmit={requestPriceChange} className={ownerGlassCard}>
-                <h3 className="font-semibold text-white">
+                <h3 className="font-semibold dark:text-white text-gray-900">
                   {isKo ? "단가 수정 요청" : "Price change request"}
                 </h3>
-                <p className="mt-1 text-xs text-white/50">
+                <p className="mt-1 text-xs dark:text-white text-gray-400">
                   {isKo
                     ? `현재 ₩${selected.price.toLocaleString("ko-KR")}/월 — 운영팀 검토 후 반영`
                     : `Current ₩${selected.price.toLocaleString()}/mo`}

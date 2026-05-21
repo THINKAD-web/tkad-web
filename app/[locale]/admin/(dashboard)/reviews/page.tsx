@@ -183,7 +183,7 @@ export default function AdminMediaReviewsPage() {
                         type="button"
                         disabled={actingId === r.id}
                         onClick={() => void setStatus(r.id, "APPROVED")}
-                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white"
+                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900"
                       >
                         <Check className="h-3.5 w-3.5" />
                         승인

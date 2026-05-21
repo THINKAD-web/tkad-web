@@ -7,6 +7,7 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
 import {
   defaultOgImages,
+  OG_PRODUCTION_ORIGIN,
   pageAlternates,
   siteKeywords,
   siteUrl,
@@ -60,7 +61,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
-  const base = new URL(siteUrl);
+  const base = new URL(OG_PRODUCTION_ORIGIN);
 
   const titleDefault =
     locale === "ko"

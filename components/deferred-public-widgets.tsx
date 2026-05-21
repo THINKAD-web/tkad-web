@@ -31,6 +31,14 @@ const MobileQuickQuoteFloating = dynamic(
   () => import("@/components/mobile-quick-quote-floating"),
   { ssr: false },
 );
+const ExitIntentMobileBanner = dynamic(
+  () => import("@/components/exit-intent-mobile-banner"),
+  { ssr: false },
+);
+const HomeOnboardingTour = dynamic(
+  () => import("@/components/home/home-onboarding-tour"),
+  { ssr: false },
+);
 
 export default function DeferredPublicWidgets() {
   return (
@@ -39,7 +47,9 @@ export default function DeferredPublicWidgets() {
       <RecentlyViewedSync />
       <PwaPushOptIn />
       <ExitIntentPopup />
+      <ExitIntentMobileBanner />
       <MobileQuickQuoteFloating />
+      <HomeOnboardingTour />
       <FloatingSupportDock />
     </>
   );

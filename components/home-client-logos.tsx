@@ -57,7 +57,7 @@ title={t("trustTitle")}
         </div>
       </ScrollAnimate>
 
-      <div className="relative mt-5 overflow-hidden rounded-[28px] bg-white/5 backdrop-blur tkad-neon-border tkad-neon-glow sm:mt-8 lg:mt-12">
+      <div className="relative mt-5 overflow-hidden rounded-[28px] dark:bg-white/5 bg-gray-50 backdrop-blur tkad-neon-border tkad-neon-glow sm:mt-8 lg:mt-12">
         <div
           aria-hidden
           className={cn(
@@ -77,7 +77,7 @@ title={t("trustTitle")}
             {row.map((label, idx) => (
               <div
                 key={`${label}-${idx}`}
-                className="group flex h-12 w-[10.5rem] shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/5 text-center shadow-[0_22px_84px_rgba(0,0,0,0.65)] transition-all hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/9"
+                className="group flex h-12 w-[10.5rem] shrink-0 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 text-center shadow-[0_22px_84px_rgba(0,0,0,0.65)] transition-all hover:-translate-y-0.5 hover:dark:border-white/20 border-gray-300 hover:bg-white/9"
               >
                 <span
                   className={cn(
@@ -85,10 +85,10 @@ title={t("trustTitle")}
                     "transition-all duration-300 [filter:grayscale(1)] group-hover:[filter:grayscale(0)]",
                     isDay
                       ? "text-slate-600 group-hover:text-slate-900"
-                      : "text-white/72 group-hover:text-white",
+                      : "dark:text-white group-hover:dark:text-white text-gray-900",
                     needsChip.has(label) ? "rounded-md px-2 py-1" : "",
                     needsChip.has(label)
-                      ? "bg-white/10 [text-shadow:0_0_0.5px_rgba(0,0,0,0.45)]"
+                      ? "dark:bg-white/10 bg-gray-100 [text-shadow:0_0_0.5px_rgba(0,0,0,0.45)]"
                       : "",
                   )}
                   style={{

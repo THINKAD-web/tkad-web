@@ -175,7 +175,7 @@ export default function MediaAiRecommendPanel({
             {tr("loadingTitle")}
           </p>
           <div className="space-y-3 rounded-2xl border border-gold/20 bg-navy/80 p-6 shadow-xl">
-            <div className="h-3 overflow-hidden rounded-full bg-white/10">
+            <div className="h-3 overflow-hidden rounded-full dark:bg-white/10 bg-gray-100">
               <motion.div
                 className="h-full w-2/5 rounded-full bg-gradient-to-r from-gold/70 to-gold"
                 animate={{ x: ["-30%", "220%"] }}
@@ -187,9 +187,9 @@ export default function MediaAiRecommendPanel({
               />
             </div>
             <div className="space-y-2">
-              <div className="h-3 rounded bg-white/10" />
-              <div className="h-3 w-4/5 rounded bg-white/10" />
-              <div className="h-3 w-3/5 rounded bg-white/10" />
+              <div className="h-3 rounded dark:bg-white/10 bg-gray-100" />
+              <div className="h-3 w-4/5 rounded dark:bg-white/10 bg-gray-100" />
+              <div className="h-3 w-3/5 rounded dark:bg-white/10 bg-gray-100" />
             </div>
           </div>
           <p className="text-center text-xs text-slate-400">
@@ -277,7 +277,7 @@ export default function MediaAiRecommendPanel({
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors touch-manipulation",
                   view === "list"
-                    ? "bg-navy text-white"
+                    ? "bg-navy dark:text-white text-gray-900"
                     : "text-muted-foreground hover:bg-slate-50",
                 )}
               >
@@ -290,7 +290,7 @@ export default function MediaAiRecommendPanel({
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors touch-manipulation",
                   view === "map"
-                    ? "bg-navy text-white"
+                    ? "bg-navy dark:text-white text-gray-900"
                     : "text-muted-foreground hover:bg-slate-50",
                 )}
               >
@@ -339,7 +339,7 @@ export default function MediaAiRecommendPanel({
                   className={cn(
                     "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
                     rowLayout === "card"
-                      ? "bg-navy text-white"
+                      ? "bg-navy dark:text-white text-gray-900"
                       : "text-muted-foreground hover:bg-slate-50",
                   )}
                 >
@@ -351,7 +351,7 @@ export default function MediaAiRecommendPanel({
                   className={cn(
                     "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
                     rowLayout === "compact"
-                      ? "bg-navy text-white"
+                      ? "bg-navy dark:text-white text-gray-900"
                       : "text-muted-foreground hover:bg-slate-50",
                   )}
                 >
@@ -386,7 +386,7 @@ export default function MediaAiRecommendPanel({
           </div>
         ) : (
           <div className="overflow-hidden rounded-2xl border border-navy/10 bg-gradient-to-b from-slate-100 to-slate-200 shadow-inner">
-            <p className="border-b border-navy/10 bg-white/80 px-4 py-2 text-center text-[11px] text-muted-foreground">
+            <p className="border-b border-navy/10 dark:bg-white/8 bg-gray-100 px-4 py-2 text-center text-[11px] text-muted-foreground">
               {t("media.ai.mapHint")}
             </p>
             <div className="relative mx-auto aspect-[16/11] max-h-[420px] w-full">
@@ -466,9 +466,9 @@ function AiResultCard({
       : null;
   const availability =
     m.availability === "available"
-      ? { text: isKo ? "즉시 예약 가능" : "Available now", className: "bg-emerald-500 text-white" }
+      ? { text: isKo ? "즉시 예약 가능" : "Available now", className: "bg-emerald-500 dark:text-white text-gray-900" }
       : m.availability === "reserved" || m.availability === "maintenance"
-        ? { text: isKo ? "협의 필요" : "Check availability", className: "bg-slate-700 text-white" }
+        ? { text: isKo ? "협의 필요" : "Check availability", className: "bg-slate-700 dark:text-white text-gray-900" }
         : null;
 
   return (
@@ -500,12 +500,12 @@ function AiResultCard({
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy/50 via-navy/5 to-transparent" />
           </>
         )}
-        <Badge className="absolute top-2 right-2 border-0 bg-navy text-white">
+        <Badge className="absolute top-2 right-2 border-0 bg-navy dark:text-white text-gray-900">
           {scored.score}
         </Badge>
         <div
           className={cn(
-            "absolute top-2 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white",
+            "absolute top-2 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold dark:text-white text-gray-900",
             compact ? "left-1/2 -translate-x-1/2" : "left-2",
           )}
         >

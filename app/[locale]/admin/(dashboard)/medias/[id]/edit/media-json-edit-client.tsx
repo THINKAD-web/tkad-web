@@ -243,7 +243,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
                 {preview.priceOptions && preview.priceOptions.length > 0 ? (
                   <div>
                     <p className="mb-1 text-xs font-medium text-muted-foreground">가격 옵션</p>
-                    <div className="overflow-hidden rounded-lg border-2 border-border text-xs border-border">
+                    <div className="overflow-hidden rounded-lg border-2 border-border text-xs">
                       <table className="w-full">
                         <thead>
                           <tr className="bg-muted bg-muted/60">

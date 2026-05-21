@@ -157,7 +157,7 @@ export function BookingRequestModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="booking-request-modal-title"
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto dark:bg-black bg-white dark:bg-white/5 bg-gray-500 p-4 sm:items-center"
     >
       <div className="relative w-full max-w-xl border-2 border-border bg-card">
         <div className="flex items-center justify-between border-b-2 border-border px-5 py-4">

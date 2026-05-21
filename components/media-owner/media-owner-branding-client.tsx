@@ -75,15 +75,15 @@ export default function MediaOwnerBrandingClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-white">보고서 브랜딩</h2>
-        <p className="mt-1 text-sm text-white/60">
+        <h2 className="text-xl font-bold dark:text-white text-gray-900">보고서 브랜딩</h2>
+        <p className="mt-1 text-sm dark:text-white text-gray-500">
           PRO: 로고 교체 · ENTERPRISE: 완전 화이트라벨
         </p>
       </div>
 
       <div className={`${ownerGlassCard} grid gap-4 md:grid-cols-2`}>
         <div>
-          <label className="text-xs text-white/50">로고 URL (PNG 200×60 권장)</label>
+          <label className="text-xs dark:text-white text-gray-400">로고 URL (PNG 200×60 권장)</label>
           <input
             className={`${ownerInputCls} mt-1`}
             value={form.logoUrl ?? ""}
@@ -91,7 +91,7 @@ export default function MediaOwnerBrandingClient() {
           />
         </div>
         <div>
-          <label className="text-xs text-white/50">회사명</label>
+          <label className="text-xs dark:text-white text-gray-400">회사명</label>
           <input
             className={`${ownerInputCls} mt-1`}
             value={form.companyName ?? ""}
@@ -99,7 +99,7 @@ export default function MediaOwnerBrandingClient() {
           />
         </div>
         <div>
-          <label className="text-xs text-white/50">사업자번호</label>
+          <label className="text-xs dark:text-white text-gray-400">사업자번호</label>
           <input
             className={`${ownerInputCls} mt-1`}
             value={form.businessNumber ?? ""}
@@ -109,7 +109,7 @@ export default function MediaOwnerBrandingClient() {
           />
         </div>
         <div>
-          <label className="text-xs text-white/50">연락처</label>
+          <label className="text-xs dark:text-white text-gray-400">연락처</label>
           <input
             className={`${ownerInputCls} mt-1`}
             value={form.contactPhone ?? ""}
@@ -117,7 +117,7 @@ export default function MediaOwnerBrandingClient() {
           />
         </div>
         <div>
-          <label className="text-xs text-white/50">이메일</label>
+          <label className="text-xs dark:text-white text-gray-400">이메일</label>
           <input
             className={`${ownerInputCls} mt-1`}
             value={form.contactEmail ?? ""}
@@ -125,7 +125,7 @@ export default function MediaOwnerBrandingClient() {
           />
         </div>
         <div>
-          <label className="text-xs text-white/50">컬러 테마</label>
+          <label className="text-xs dark:text-white text-gray-400">컬러 테마</label>
           <div className="mt-2 flex flex-wrap gap-2">
             {THEMES.map((t) => (
               <button
@@ -133,7 +133,7 @@ export default function MediaOwnerBrandingClient() {
                 type="button"
                 onClick={() => setForm({ ...form, theme: t.id })}
                 className={`rounded-lg border px-3 py-2 text-xs ${
-                  form.theme === t.id ? "border-violet-400 bg-white/10" : "border-white/20"
+                  form.theme === t.id ? "border-violet-400 dark:bg-white/10 bg-gray-100" : "dark:border-white/20 border-gray-300"
                 }`}
               >
                 <span
@@ -146,7 +146,7 @@ export default function MediaOwnerBrandingClient() {
           </div>
         </div>
         <div className="md:col-span-2">
-          <label className="flex items-center gap-2 text-sm text-white/80">
+          <label className="flex items-center gap-2 text-sm dark:text-white text-gray-700">
             <input
               type="checkbox"
               checked={form.autoMonthlyReport}
@@ -170,9 +170,9 @@ export default function MediaOwnerBrandingClient() {
       </div>
 
       <div className={`${ownerGlassCard}`}>
-        <p className="text-xs text-white/50">미리보기</p>
+        <p className="text-xs dark:text-white text-gray-400">미리보기</p>
         <div
-          className="mt-3 rounded-xl p-6 text-white"
+          className="mt-3 rounded-xl p-6 dark:text-white text-gray-900"
           style={{ background: `linear-gradient(135deg, ${themeColor}, #111)` }}
         >
           {form.logoUrl ? (

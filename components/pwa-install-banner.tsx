@@ -142,23 +142,23 @@ function InstallBannerPanel({
           <Download className="h-5 w-5 text-[#22d3ee]" aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-white">
+          <p className="text-sm font-bold dark:text-white text-gray-900">
             홈 화면에 추가하면 앱처럼 사용할 수 있어요
           </p>
           {ios && !canNativeInstall ? (
-            <p className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-white/65">
+            <p className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed dark:text-white text-gray-600">
               <Share className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#22d3ee]" />
-              Safari 하단 <strong className="text-white">공유</strong> →{" "}
-              <strong className="text-white">홈 화면에 추가</strong>
+              Safari 하단 <strong className="dark:text-white text-gray-900">공유</strong> →{" "}
+              <strong className="dark:text-white text-gray-900">홈 화면에 추가</strong>
             </p>
           ) : android && !canNativeInstall ? (
-            <p className="mt-1 text-xs leading-relaxed text-white/65">
-              Chrome 메뉴 <strong className="text-white">⋮</strong> →{" "}
-              <strong className="text-white">홈 화면에 추가</strong> 또는{" "}
-              <strong className="text-white">앱 설치</strong>
+            <p className="mt-1 text-xs leading-relaxed dark:text-white text-gray-600">
+              Chrome 메뉴 <strong className="dark:text-white text-gray-900">⋮</strong> →{" "}
+              <strong className="dark:text-white text-gray-900">홈 화면에 추가</strong> 또는{" "}
+              <strong className="dark:text-white text-gray-900">앱 설치</strong>
             </p>
           ) : (
-            <p className="mt-1 text-xs text-white/55">
+            <p className="mt-1 text-xs dark:text-white text-gray-500">
               현장 답사·매체 검색을 더 빠르게 실행할 수 있습니다.
             </p>
           )}
@@ -175,14 +175,14 @@ function InstallBannerPanel({
             <button
               type="button"
               onClick={onDismiss}
-              className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white/70"
+              className="rounded-full border dark:border-white/15 border-gray-200 px-4 py-2 text-xs font-semibold dark:text-white text-gray-600"
             >
               닫기
             </button>
             <button
               type="button"
               onClick={onDismissForever}
-              className="text-xs font-medium text-white/40 underline-offset-2 hover:text-white/60 hover:underline"
+              className="text-xs font-medium dark:text-white text-gray-400 underline-offset-2 hover:dark:text-white text-gray-500 hover:underline"
             >
               다시 보지 않기
             </button>
@@ -191,7 +191,7 @@ function InstallBannerPanel({
         <button
           type="button"
           onClick={onDismiss}
-          className="shrink-0 rounded-lg p-1 text-white/50 hover:bg-white/10 hover:text-white"
+          className="shrink-0 rounded-lg p-1 dark:text-white text-gray-400 hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
           aria-label="닫기"
         >
           <X className="h-5 w-5" />

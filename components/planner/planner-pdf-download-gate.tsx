@@ -70,7 +70,7 @@ export function PlannerPdfDownloadGate({
         checking: loading,
       })}
       {showGate ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center dark:bg-black bg-white dark:bg-white/6 bg-gray-500 p-4">
           <div className="w-full max-w-md">
             <ReportAccessGate
               access={access}
@@ -92,7 +92,7 @@ export function PlannerPdfDownloadGate({
             </ReportAccessGate>
             <button
               type="button"
-              className="mt-3 w-full text-center text-sm text-white/80 underline"
+              className="mt-3 w-full text-center text-sm dark:text-white text-gray-700 underline"
               onClick={() => setShowGate(false)}
             >
               {isKo ? "닫기" : "Close"}

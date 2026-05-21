@@ -53,13 +53,13 @@ function LoginForm() {
   }
 
   const inputCls =
-    "tkad-auth-input h-11 w-full rounded-[18px] border border-white/12 bg-black/28 px-4 font-mono text-sm font-semibold text-white placeholder:text-white/45 outline-none backdrop-blur transition-all focus:border-white/18 focus:ring-2 focus:ring-white/12";
+    "tkad-auth-input h-11 w-full rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/28 px-4 font-mono text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-all focus:dark:border-white/18 border-gray-300 focus:ring-2 focus:ring-white/12";
 
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
         <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
-          <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border border-white/12 bg-black/45 p-6 text-white shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
+          <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/45 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
             <div
               aria-hidden
@@ -67,13 +67,13 @@ function LoginForm() {
             />
             <div className="relative">
               <div className="mb-6 text-center">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
                   [ LOGIN ]
                 </p>
-                <h1 className="mt-2 text-2xl font-black tracking-tight text-white">
+                <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
                   로그인
                 </h1>
-                <p className="mt-2 font-mono text-[12px] tracking-tight text-white/55">
+                <p className="mt-2 font-mono text-[12px] tracking-tight dark:text-white text-gray-500">
                   {`// `}THINKAD 계정으로 로그인하세요
                 </p>
               </div>
@@ -85,9 +85,9 @@ function LoginForm() {
 
               <div className="relative py-1">
                 <div className="absolute inset-0 flex items-center" aria-hidden>
-                  <div className="w-full border-t border-white/12" />
+                  <div className="w-full border-t dark:border-white/12 border-gray-200" />
                 </div>
-                <p className="relative text-center font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/45">
+                <p className="relative text-center font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white">
                   {t("orEmail")}
                 </p>
               </div>
@@ -96,7 +96,7 @@ function LoginForm() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65"
+                    className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600"
                   >
                     [ 이메일 ]
                   </label>
@@ -115,13 +115,13 @@ function LoginForm() {
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <label
                       htmlFor="password"
-                      className="block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65"
+                      className="block font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600"
                     >
                       [ 비밀번호 ]
                     </label>
                     <Link
                       href="/forgot-password"
-                      className="font-mono text-[10px] text-white/50 transition-colors hover:text-white"
+                      className="font-mono text-[10px] dark:text-white text-gray-400 transition-colors hover:dark:text-white text-gray-900"
                     >
                       비밀번호 찾기
                     </Link>
@@ -139,7 +139,7 @@ function LoginForm() {
                 </div>
 
                 {error && (
-                  <div className="rounded-[18px] border border-white/14 bg-black/35 px-3 py-2 font-mono text-[12px] tracking-tight text-white/85">
+                  <div className="rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/35 px-3 py-2 font-mono text-[12px] tracking-tight dark:text-white text-gray-800">
                     {`// `}{error}
                   </div>
                 )}
@@ -149,7 +149,7 @@ function LoginForm() {
                   variant="accent"
                   size="lg"
                   disabled={loading}
-                  className="w-full rounded-[22px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
+                  className="w-full rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
                 >
                   {loading && <Spinner size="sm" />}
                   {loading ? "로그인 중…" : "로그인"}
@@ -158,11 +158,11 @@ function LoginForm() {
             </div>
           </div>
 
-          <p className="mt-6 text-center font-mono text-[12px] tracking-tight text-white/60">
+          <p className="mt-6 text-center font-mono text-[12px] tracking-tight dark:text-white text-gray-500">
             {`// `}계정이 없으신가요?{" "}
             <Link
               href="/signup"
-              className="border-b border-white/20 pb-0.5 font-bold text-white transition-colors hover:border-white/35 hover:text-white"
+              className="border-b dark:border-white/20 border-gray-300 pb-0.5 font-bold dark:text-white text-gray-900 transition-colors hover:border-white/35 hover:dark:text-white"
             >
               {t("signup")}
             </Link>

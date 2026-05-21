@@ -97,10 +97,10 @@ export function ProofUploadMobileClient({
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
         <CheckCircle2 className="h-16 w-16 text-emerald-400" />
-        <h1 className="mt-4 text-xl font-bold text-white">
+        <h1 className="mt-4 text-xl font-bold dark:text-white text-gray-900">
           {isKo ? "업로드 완료" : "Uploaded"}
         </h1>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-2 text-sm dark:text-white text-gray-500">
           {isKo
             ? "광고주에게 알림이 발송되었습니다."
             : "The advertiser has been notified."}
@@ -114,7 +114,7 @@ export function ProofUploadMobileClient({
       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-300/80">
         {title ?? (isKo ? "현장 인증" : "Field proof")}
       </p>
-      <h1 className="mt-2 text-2xl font-bold text-white">{campaignName || "—"}</h1>
+      <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900">{campaignName || "—"}</h1>
 
       {geo ? (
         <p className="mt-2 flex items-center gap-1 text-xs text-emerald-300/90">
@@ -122,16 +122,16 @@ export function ProofUploadMobileClient({
           GPS {geo.lat.toFixed(5)}, {geo.lng.toFixed(5)}
         </p>
       ) : (
-        <p className="mt-2 text-xs text-white/45">
+        <p className="mt-2 text-xs dark:text-white">
           {isKo ? "위치 정보를 가져오는 중…" : "Acquiring location…"}
         </p>
       )}
 
       {mediaNames.length > 1 ? (
         <label className="mt-6 block">
-          <span className="text-xs text-white/55">{isKo ? "매체" : "Media"}</span>
+          <span className="text-xs dark:text-white text-gray-500">{isKo ? "매체" : "Media"}</span>
           <select
-            className="mt-1 h-11 w-full rounded-xl border border-white/15 bg-black/40 px-3 text-sm text-white"
+            className="mt-1 h-11 w-full rounded-xl border dark:border-white/15 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-3 text-sm dark:text-white text-gray-900"
             value={mediaPick}
             onChange={(e) => setMediaPick(e.target.value)}
           >
@@ -143,7 +143,7 @@ export function ProofUploadMobileClient({
           </select>
         </label>
       ) : mediaNames[0] ? (
-        <p className="mt-4 text-sm text-white/70">
+        <p className="mt-4 text-sm dark:text-white text-gray-600">
           {isKo ? "매체" : "Media"}: {mediaNames[0]}
         </p>
       ) : null}
@@ -170,7 +170,7 @@ export function ProofUploadMobileClient({
           disabled={uploading}
           onClick={() => cameraRef.current?.click()}
           className={cn(
-            "flex h-24 items-center justify-center gap-3 rounded-2xl bg-violet-500 text-lg font-bold text-white shadow-lg shadow-violet-500/25 disabled:opacity-50",
+            "flex h-24 items-center justify-center gap-3 rounded-2xl bg-violet-500 text-lg font-bold dark:text-white text-gray-900 shadow-lg shadow-violet-500/25 disabled:opacity-50",
           )}
         >
           {uploading ? (
@@ -184,7 +184,7 @@ export function ProofUploadMobileClient({
           type="button"
           disabled={uploading}
           onClick={() => galleryRef.current?.click()}
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 text-white disabled:opacity-50"
+          className="flex h-14 items-center justify-center gap-2 rounded-2xl border dark:border-white/20 border-gray-300 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-900 disabled:opacity-50"
         >
           <ImagePlus className="h-5 w-5" />
           {isKo ? "갤러리에서 선택" : "Choose from gallery"}
@@ -193,7 +193,7 @@ export function ProofUploadMobileClient({
 
       {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
 
-      <p className="mt-8 text-center text-[11px] text-white/40">
+      <p className="mt-8 text-center text-[11px] dark:text-white text-gray-400">
         {isKo
           ? "촬영 시각·매체명이 자동 태그되며 THINKAD 워터마크가 적용됩니다."
           : "Capture time and media name are tagged; THINKAD watermark applied."}

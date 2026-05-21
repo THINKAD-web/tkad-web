@@ -32,18 +32,18 @@ import {
 
 function NeonLoadingCard({ label }: { label: string }) {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[22px] border border-white/12 bg-black/40 px-6 py-10 text-white shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-6 py-10 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
       <div
         aria-hidden
         className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.28),transparent_55%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.22),transparent_55%),radial-gradient(circle_at_left,rgba(236,72,153,0.18),transparent_60%)]"
       />
       <div className="relative flex w-full max-w-sm flex-col items-center gap-4">
-        <div className="rounded-2xl border border-white/14 bg-white/8 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/75">
+        <div className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
           LOADING
         </div>
-        <div className="text-sm font-semibold text-white/90">{label}</div>
-        <div className="h-2 w-full overflow-hidden rounded-full border border-white/12 bg-black/20">
+        <div className="text-sm font-semibold dark:text-white text-gray-800">{label}</div>
+        <div className="h-2 w-full overflow-hidden rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20">
           <div className="h-full w-[42%] animate-[tkadShimmer_1.2s_ease-in-out_infinite] bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]" />
         </div>
       </div>
@@ -477,7 +477,7 @@ export default function MediaMapPageClient() {
             : "Filter by location, type, and price. Tap a pin for a quick summary—open full details in a new tab."
         }
         compactOnMobile
-        className="border-b border-white/10"
+        className="border-b dark:border-white/10 border-gray-200"
       />
 
       <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row md:min-h-0">
@@ -534,10 +534,10 @@ export default function MediaMapPageClient() {
               type="button"
               onClick={startSurveyMode}
               className={cn(
-                "pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all max-md:h-9 max-md:justify-center max-md:px-2.5",
+                "pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all max-md:h-9 max-md:justify-center max-md:px-2.5",
                 surveyMode
                   ? "border-cyan-400/50 bg-cyan-400/20"
-                  : "border-white/14 bg-black/55 hover:bg-black/70",
+                  : "dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 hover:dark:bg-black bg-white bg-white/70",
               )}
               aria-label={isKo ? "답사 모드" : "Field survey"}
             >
@@ -548,7 +548,7 @@ export default function MediaMapPageClient() {
               type="button"
               onClick={handleLocateMe}
               disabled={locating}
-              className="pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border border-white/14 bg-black/55 px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:bg-black/70 disabled:opacity-60 max-md:h-9 max-md:w-9 max-md:justify-center max-md:px-0"
+              className="pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:dark:bg-black bg-white/70 disabled:opacity-60 max-md:h-9 max-md:w-9 max-md:justify-center max-md:px-0"
               aria-label={isKo ? "내 주변" : "Near me"}
             >
               <Crosshair className={`h-3.5 w-3.5 md:h-3.5 ${locating ? "animate-pulse" : ""}`} />
@@ -556,7 +556,7 @@ export default function MediaMapPageClient() {
             </button>
             <Link
               href="/media"
-              className="pointer-events-auto hidden h-10 items-center gap-1.5 rounded-full border border-white/14 bg-black/55 px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:bg-black/70 md:inline-flex"
+              className="pointer-events-auto hidden h-10 items-center gap-1.5 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:dark:bg-black bg-white/70 md:inline-flex"
               aria-label={isKo ? "목록으로" : "List view"}
             >
               <LayoutList className="h-3.5 w-3.5" />
@@ -568,9 +568,9 @@ export default function MediaMapPageClient() {
         {/* 매체 리스트 — 모바일: 지도·미리보기 아래 */}
         <aside className="order-3 w-full border-t border-border/60 bg-card md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r md:overflow-y-auto">
           <div className="sticky top-0 z-10 border-b border-border/60 bg-card/95 backdrop-blur-md p-3 space-y-3 md:p-4">
-            <div className="tkad-media-map-search-pill group relative flex h-12 items-center rounded-full border border-white/12 bg-black/25 shadow-sm backdrop-blur-md transition-all hover:border-white/18 focus-within:border-white/22 focus-within:ring-2 focus-within:ring-primary/25 focus-within:shadow-md">
+            <div className="tkad-media-map-search-pill group relative flex h-12 items-center rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 shadow-sm backdrop-blur-md transition-all hover:dark:border-white/18 border-gray-300 focus-within:border-white/22 focus-within:ring-2 focus-within:ring-primary/25 focus-within:shadow-md">
             <svg
-              className="ml-4 h-[18px] w-[18px] flex-none text-white/70 transition-colors group-focus-within:text-white/85"
+              className="ml-4 h-[18px] w-[18px] flex-none dark:text-white text-gray-600 transition-colors group-focus-within:dark:text-white text-gray-800"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -586,15 +586,15 @@ export default function MediaMapPageClient() {
               placeholder="매체명 · 지역으로 검색"
               value={filter.q}
               onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))}
-              className="tkad-media-map-search-input h-full w-full bg-transparent px-4 pl-3 text-sm font-semibold text-white placeholder:text-white/55 outline-none"
+              className="tkad-media-map-search-input h-full w-full bg-transparent px-4 pl-3 text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white text-gray-500 outline-none"
             />
           </div>
           <div className="flex items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/25 px-3 py-2 text-xs font-semibold text-white shadow-sm backdrop-blur">
-                <span className="text-white/65">정렬</span>
+              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 px-3 py-2 text-xs font-semibold dark:text-white text-gray-900 shadow-sm backdrop-blur">
+                <span className="dark:text-white text-gray-600">정렬</span>
                 <select
-                  className="border-l border-white/12 bg-transparent pl-2 text-xs font-semibold text-white focus:outline-none"
+                  className="border-l dark:border-white/12 border-gray-200 bg-transparent pl-2 text-xs font-semibold dark:text-white text-gray-900 focus:outline-none"
                   value={filter.sort}
                   onChange={(e) =>
                     setFilter((f) => ({
@@ -611,10 +611,10 @@ export default function MediaMapPageClient() {
                 </select>
               </label>
 
-              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/25 px-3 py-2 text-xs font-semibold text-white shadow-sm backdrop-blur">
-                <span className="text-white/65">타입</span>
+              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 px-3 py-2 text-xs font-semibold dark:text-white text-gray-900 shadow-sm backdrop-blur">
+                <span className="dark:text-white text-gray-600">타입</span>
                 <select
-                  className="border-l border-white/12 bg-transparent pl-2 text-xs font-semibold text-white focus:outline-none"
+                  className="border-l dark:border-white/12 border-gray-200 bg-transparent pl-2 text-xs font-semibold dark:text-white text-gray-900 focus:outline-none"
                   value={filter.type}
                   onChange={(e) => setFilter((f) => ({ ...f, type: e.target.value }))}
                 >
@@ -630,7 +630,7 @@ export default function MediaMapPageClient() {
 
             <div className="flex items-center gap-2 text-xs text-gray-500">
               {loading ? (
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] font-semibold text-white/80 backdrop-blur">
+                <span className="inline-flex items-center gap-2 rounded-full border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 px-2.5 py-1 text-[11px] font-semibold dark:text-white text-gray-700 backdrop-blur">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]" />
                   불러오는 중…
                 </span>
@@ -641,7 +641,7 @@ export default function MediaMapPageClient() {
                 <span className="font-medium text-primary">담김 {cartIds.length}</span>
               ) : null}
               {compareEntries.length > 0 ? (
-                <span className="font-medium text-white/80">
+                <span className="font-medium dark:text-white text-gray-700">
                   선택 {compareEntries.length}
                 </span>
               ) : null}
@@ -665,7 +665,7 @@ export default function MediaMapPageClient() {
               </svg>
               {filtersExpanded ? "필터 접기" : "필터 더보기"}
               {(filter.type || filter.region || filter.priceMin || filter.priceMax) && (
-                <span className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
+                <span className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold dark:text-white text-gray-900">
                   {[filter.type, filter.region, filter.priceMin, filter.priceMax].filter(Boolean).length}
                 </span>
               )}
@@ -780,8 +780,8 @@ export default function MediaMapPageClient() {
                       }}
                       className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${
                         isInCompare(it.id)
-                          ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 dark:bg-white dark:text-black"
-                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 dark:bg-black/10 dark:text-white/85 dark:hover:bg-black/15"
+                          ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black"
+                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white bg-white/15"
                       }`}
                       aria-label={isInCompare(it.id) ? "선택 해제" : "선택"}
                     >
@@ -795,8 +795,8 @@ export default function MediaMapPageClient() {
                       }}
                       className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${
                         inCart(it.id)
-                          ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 dark:bg-white dark:text-black"
-                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 dark:bg-black/10 dark:text-white/85 dark:hover:bg-black/15"
+                          ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black"
+                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white bg-white/15"
                       }`}
                       aria-label={inCart(it.id) ? "담기 해제" : "담기"}
                     >

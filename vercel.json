@@ -6,7 +6,11 @@
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(self)" }
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(self)" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://t1.daumcdn.net https://js.tosspayments.com https://vercel.live; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://res.cloudinary.com https://api.tosspayments.com https://vitals.vercel-insights.com https://*.vercel.app; frame-src 'self' https://t1.daumcdn.net https://js.tosspayments.com; object-src 'none'; base-uri 'self'; form-action 'self'"
+        }
       ]
     },
     {
@@ -37,15 +41,15 @@
     },
     {
       "path": "/api/cron/generate-trend-report",
-      "schedule": "0 0 1,15 * *"
-    },
-    {
-      "path": "/api/cron/generate-academy-content",
       "schedule": "0 0 * * 1"
     },
     {
+      "path": "/api/cron/generate-academy-content",
+      "schedule": "0 0 * * 1,4"
+    },
+    {
       "path": "/api/cron/generate-guide-content",
-      "schedule": "0 0 * * 3,5"
+      "schedule": "0 0 * * 3"
     },
     {
       "path": "/api/cron/media-owner-monthly-reports",
@@ -130,6 +134,26 @@
     {
       "path": "/api/cron/chat-owner-sla",
       "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/daily-db-backup",
+      "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/launch-hourly-report",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/welcome-email-drip",
+      "schedule": "30 0 * * *"
+    },
+    {
+      "path": "/api/cron/inquiry-sla-escalation",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/potential-media-outreach",
+      "schedule": "0 2 * * *"
     }
   ]
 }

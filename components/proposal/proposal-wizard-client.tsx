@@ -37,13 +37,13 @@ import {
 import { cn } from "@/lib/utils";
 
 const glassCard =
-  "rounded-2xl border border-white/12 bg-white/5 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-6";
+  "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-6";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-white/14 bg-black/30 px-3 py-2.5 text-sm text-white placeholder:text-white/35 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20";
+  "mt-1.5 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/30 px-3 py-2.5 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20";
 
 const labelClass =
-  "block font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/55";
+  "block font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500";
 
 function goalToPlanner(goal: ProposalGoal): PlannerCampaignGoal {
   if (goal === "awareness") return "brand";
@@ -272,10 +272,10 @@ export default function ProposalWizardClient({ catalog }: Props) {
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-300">
               [ {t("resultEyebrow")} ]
             </p>
-            <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
+            <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900 sm:text-3xl">
               {result.input.campaignName}
             </h1>
-            <p className="mt-1 text-sm text-white/60">{result.input.brandName}</p>
+            <p className="mt-1 text-sm dark:text-white text-gray-500">{result.input.brandName}</p>
             <div className="mt-8">
               <ProposalResultDisplay
                 input={result.input}
@@ -345,7 +345,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
 
             {step === 1 ? (
               <div className="relative space-y-4">
-                <h2 className="text-lg font-bold text-white">{t("step1Title")}</h2>
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">{t("step1Title")}</h2>
                 <label className="block">
                   <span className={labelClass}>{t("brandName")}</span>
                   <input
@@ -400,7 +400,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
 
             {step === 2 ? (
               <div className="relative space-y-4">
-                <h2 className="text-lg font-bold text-white">{t("step2Title")}</h2>
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">{t("step2Title")}</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="block">
                     <span className={labelClass}>{t("startDate")}</span>
@@ -450,7 +450,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                           "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
                           goal === val
                             ? "border-cyan-400/50 bg-cyan-400/15 text-cyan-200"
-                            : "border-white/14 bg-white/5 text-white/70 hover:bg-white/10",
+                            : "dark:border-white/14 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:dark:bg-white/10 bg-gray-100",
                         )}
                       >
                         {label}
@@ -472,8 +472,8 @@ export default function ProposalWizardClient({ catalog }: Props) {
 
             {step === 3 ? (
               <div className="relative space-y-4">
-                <h2 className="text-lg font-bold text-white">{t("step3Title")}</h2>
-                <div className="rounded-xl border border-white/10 bg-black/25 p-3">
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">{t("step3Title")}</h2>
+                <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 p-3">
                   <p className={labelClass}>{t("loadPlanner")}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <input
@@ -486,7 +486,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                       variant="secondary"
                       size="sm"
                       onClick={() => void loadPlannerPlan()}
-                      className="border-white/14 bg-white/8 text-white"
+                      className="dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900"
                     >
                       {t("loadPlannerBtn")}
                     </BtnBlock>
@@ -496,7 +496,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                   <BtnBlock
                     variant="accent"
                     size="sm"
-                    className="!text-white"
+                    className="!dark:text-white text-gray-900"
                     onClick={applyAiRecommend}
                   >
                     <Sparkles className="h-4 w-4" />
@@ -520,8 +520,8 @@ export default function ProposalWizardClient({ catalog }: Props) {
                           className={cn(
                             "flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors",
                             selected
-                              ? "border-cyan-400/40 bg-cyan-400/10 text-white"
-                              : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10",
+                              ? "border-cyan-400/40 bg-cyan-400/10 dark:text-white text-gray-900"
+                              : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100",
                           )}
                         >
                           <span className="min-w-0 truncate font-medium">
@@ -530,7 +530,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                           <span
                             className={cn(
                               "shrink-0 font-mono text-[10px]",
-                              selected ? "text-cyan-300" : "text-white/40",
+                              selected ? "text-cyan-300" : "dark:text-white text-gray-400",
                             )}
                           >
                             {selected ? "✓" : "+"}
@@ -540,7 +540,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                     );
                   })}
                 </ul>
-                <p className="font-mono text-[10px] text-white/45">
+                <p className="font-mono text-[10px] dark:text-white">
                   {t("selectedCount", { count: mediaIds.length })}
                 </p>
               </div>
@@ -558,7 +558,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                   variant="secondary"
                   size="md"
                   onClick={() => setStep((s) => s - 1)}
-                  className="border-white/14 bg-white/8 text-white"
+                  className="dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   {t("back")}
@@ -570,7 +570,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                 <BtnBlock
                   variant="accent"
                   size="md"
-                  className="!text-white bg-gradient-to-r from-violet-500 to-cyan-400"
+                  className="!dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400"
                   disabled={
                     (step === 1 && !step1Valid) || (step === 2 && !step2Valid)
                   }
@@ -583,7 +583,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                 <BtnBlock
                   variant="accent"
                   size="md"
-                  className="!text-white bg-gradient-to-r from-violet-500 to-cyan-400"
+                  className="!dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400"
                   disabled={!step3Valid || generating}
                   onClick={() => void onGenerate()}
                 >

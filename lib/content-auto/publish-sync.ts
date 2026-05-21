@@ -3,7 +3,10 @@ import { metaFromContent } from "@/lib/content-auto/seo";
 import { getPrisma } from "@/lib/prisma";
 
 /** TrendReport 발행 시 public /report 목록용 Report row 동기화 */
-export async function syncTrendReportToReportTable(trendReportId: string) {
+export async function syncTrendReportToReportTable(
+  trendReportId: string,
+  category: ReportCategory = ReportCategory.TREND,
+) {
   const db = getPrisma();
   const tr = await db.trendReport.findUnique({ where: { id: trendReportId } });
   if (!tr || tr.status !== "published") return null;
@@ -24,7 +27,7 @@ export async function syncTrendReportToReportTable(trendReportId: string) {
       title: tr.titleKo,
       summary,
       content: tr.contentKo,
-      category: ReportCategory.TREND,
+      category,
       thumbnail: tr.thumbnailUrl,
       published: true,
       publishedAt: tr.publishedAt ?? new Date(),
@@ -33,6 +36,7 @@ export async function syncTrendReportToReportTable(trendReportId: string) {
       title: tr.titleKo,
       summary,
       content: tr.contentKo,
+      category,
       thumbnail: tr.thumbnailUrl,
       published: true,
       publishedAt: tr.publishedAt ?? new Date(),

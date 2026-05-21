@@ -21,7 +21,7 @@ export default function NewsletterForm() {
         required
         placeholder={isKo ? "이메일 주소를 입력하세요" : "Enter your email address"}
         aria-label={isKo ? "뉴스레터 이메일 주소" : "Newsletter email address"}
-        className="h-12 flex-1 rounded-full border border-white/20 bg-white/10 px-5 text-sm text-white placeholder:text-slate-400 backdrop-blur-sm focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30 sm:max-w-sm"
+        className="h-12 flex-1 rounded-full border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 px-5 text-sm dark:text-white text-gray-900 placeholder:text-slate-400 backdrop-blur-sm focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30 sm:max-w-sm"
       />
       <Button
         type="submit"

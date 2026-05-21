@@ -31,7 +31,7 @@ export async function CasesHero({ locale, empty }: Props) {
         </Link>
         <Link href="/contact" className={categoryHeroCtaSecondaryClass}>
           {isKo ? "무료 상담" : "Free consult"}
-          <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
+          <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
         </Link>
       </CategoryHeroCtaRow>
     </CategoryExploreHero>

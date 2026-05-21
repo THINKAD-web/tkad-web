@@ -21,13 +21,13 @@ type NotificationItem = {
 type Filter = "all" | "unread";
 
 const glassCard =
-  "rounded-2xl border border-white/12 bg-white/5 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-5";
+  "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-5";
 
 const gradientBtn =
-  "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_28px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95 disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2.5 text-sm font-semibold dark:text-white text-gray-900 shadow-[0_8px_28px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95 disabled:opacity-50";
 
 const outlineBtn =
-  "inline-flex items-center justify-center rounded-xl border border-white/18 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-xl border dark:border-white/18 border-gray-300 dark:bg-white/5 bg-gray-50 px-4 py-2.5 text-sm font-semibold dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:opacity-50";
 
 export function NotificationsPageClient() {
   const router = useRouter();
@@ -104,7 +104,7 @@ export function NotificationsPageClient() {
             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-300/80">
               {isKo ? "// MY · ALERTS" : "// MY · ALERTS"}
             </p>
-            <h1 className="mt-2 flex items-center gap-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
+            <h1 className="mt-2 flex items-center gap-2 text-2xl font-black tracking-tight dark:text-white text-gray-900 sm:text-3xl">
               <Bell className="h-7 w-7 text-cyan-300" aria-hidden />
               {isKo ? "알림" : "Notifications"}
             </h1>
@@ -129,8 +129,8 @@ export function NotificationsPageClient() {
               className={cn(
                 "rounded-full px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
                 filter === key
-                  ? "bg-gradient-to-r from-violet-500 to-cyan-400 text-white"
-                  : "border border-white/18 bg-white/5 text-white/70 hover:bg-white/10",
+                  ? "bg-gradient-to-r from-violet-500 to-cyan-400 dark:text-white text-gray-900"
+                  : "border dark:border-white/18 border-gray-300 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:dark:bg-white/10 bg-gray-100",
               )}
             >
               {key === "all"
@@ -172,7 +172,7 @@ export function NotificationsPageClient() {
                   onClick={() => void onItemActivate(n)}
                   className={cn(
                     glassCard,
-                    "w-full text-left transition-colors hover:border-cyan-400/30 hover:bg-white/8",
+                    "w-full text-left transition-colors hover:border-cyan-400/30 hover:dark:bg-white/8 bg-gray-100",
                     !n.isRead && "border-cyan-400/25 ring-1 ring-cyan-400/20",
                   )}
                 >
@@ -181,13 +181,13 @@ export function NotificationsPageClient() {
                       <p
                         className={cn(
                           "text-base font-bold",
-                          n.isRead ? "text-white/75" : "text-white",
+                          n.isRead ? "dark:text-white text-gray-700" : "dark:text-white text-gray-900",
                         )}
                       >
                         {n.title}
                       </p>
-                      <p className="mt-1 text-sm text-white/65">{n.body}</p>
-                      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/40">
+                      <p className="mt-1 text-sm dark:text-white text-gray-600">{n.body}</p>
+                      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] dark:text-white text-gray-400">
                         {new Date(n.createdAt).toLocaleString(
                           isKo ? "ko-KR" : "en-US",
                         )}

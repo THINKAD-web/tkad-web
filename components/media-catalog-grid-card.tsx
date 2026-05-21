@@ -21,6 +21,7 @@ import { MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS } from "@/components/media-catalog
 import { MediaAvailabilityBadge } from "@/components/media-availability-badge";
 import { MediaRatingBadge } from "@/components/media/media-rating-badge";
 import type { AvailabilityTier } from "@/lib/media-availability-stats";
+import { trackGaEvent } from "@/lib/ga-events";
 
 /**
  * 매체 검색 그리드 카드 (리스트/비교/견적 공통).
@@ -81,7 +82,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const thumbnailOverlays = (
     <>
       {media.catalogSource !== "network" && media.isVerified ? (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-[linear-gradient(135deg,rgba(168,85,247,0.95)_0%,rgba(34,211,238,0.92)_55%,rgba(236,72,153,0.88)_100%)] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-[0_0_26px_rgba(168,85,247,0.28),0_0_18px_rgba(34,211,238,0.18)]">
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-[linear-gradient(135deg,rgba(168,85,247,0.95)_0%,rgba(34,211,238,0.92)_55%,rgba(236,72,153,0.88)_100%)] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-900 shadow-[0_0_26px_rgba(168,85,247,0.28),0_0_18px_rgba(34,211,238,0.18)]">
           Verified
         </div>
       ) : media.catalogSource === "network" ? (
@@ -209,6 +210,12 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         href={mediaItemDetailPath(media.id)}
         aria-label={isKo ? media.name : (media.nameEn || media.name)}
         className={wrapClass}
+        onClick={() =>
+          trackGaEvent("media_click", {
+            media_id: media.id,
+            media_type: media.type,
+          })
+        }
       >
         <div
           className={cn(
@@ -219,7 +226,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           {body}
           {props.quickInquiryOverlay ? (
             <div
-              className="absolute inset-x-0 bottom-0 z-30 flex gap-2 border-t-2 border-border bg-black/75 p-2.5 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 max-md:hidden"
+              className="absolute inset-x-0 bottom-0 z-30 flex gap-2 border-t-2 border-border dark:bg-black bg-white bg-white/75 p-2.5 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 max-md:hidden"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -242,7 +249,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
                   e.stopPropagation();
                   router.push(`/contact?media=${encodeURIComponent(media.id)}`);
                 }}
-                className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-2 text-xs font-bold text-white shadow-md shadow-violet-500/25"
+                className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-2 text-xs font-bold dark:text-white text-gray-900 shadow-md shadow-violet-500/25"
               >
                 <span className="truncate">{tMedia("quickInquiryCta")}</span>
                 <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden />

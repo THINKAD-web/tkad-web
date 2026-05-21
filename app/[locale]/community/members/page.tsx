@@ -90,8 +90,8 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
     cn(
       "inline-flex items-center justify-center rounded-full border px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
       active
-        ? "border-white/22 bg-white/12 text-white"
-        : "border-white/10 bg-black/20 text-white/58 hover:border-white/16 hover:text-white/78",
+        ? "border-white/22 bg-white/12 dark:text-white text-gray-900"
+        : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:border-white/16 hover:dark:text-white text-gray-700",
     );
 
   const regionTabCls = (active: boolean) =>
@@ -99,7 +99,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
       "inline-flex items-center justify-center rounded-full border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors sm:px-4",
       active
         ? "border-cyan-400/35 bg-cyan-500/10 text-cyan-100"
-        : "border-white/10 bg-black/20 text-white/58 hover:border-white/16 hover:text-white/78",
+        : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:border-white/16 hover:dark:text-white text-gray-700",
     );
 
   return (
@@ -108,14 +108,14 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
         <NeonSection className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href="/community"
-            className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/62 transition-colors hover:text-white"
+            className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {isKo ? "커뮤니티 홈" : "Community home"}
           </Link>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_360px]">
-            <div className="rounded-[30px] border border-white/12 bg-white/6 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
               <NeonSectionHead
                 number="08"
                 kicker="Members"
@@ -133,7 +133,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
                 meta="community directory"
                 className="mb-0"
               />
-              <p className="mt-6 max-w-3xl text-[15px] leading-relaxed text-white/78 sm:text-lg">
+              <p className="mt-6 max-w-3xl text-[15px] leading-relaxed dark:text-white text-gray-700 sm:text-lg">
                 {isKo
                   ? "광고주·매체사·대행사·프리랜서가 모여 있습니다"
                   : "Advertisers, media owners, agencies, and freelancers — all in one place."}
@@ -165,18 +165,18 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur tkad-neon-border"
+                  className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+                      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                         {item.label}
                       </p>
-                      <p className="mt-2 font-display text-2xl font-black tracking-tight text-white">
+                      <p className="mt-2 font-display text-2xl font-black tracking-tight dark:text-white text-gray-900">
                         {item.value}
                       </p>
                     </div>
-                    <item.icon className="h-5 w-5 text-white/68" />
+                    <item.icon className="h-5 w-5 dark:text-white" />
                   </div>
                 </div>
               ))}
@@ -187,16 +187,16 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
         <NeonSection className="pt-0 pb-20 sm:pb-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 {isKo ? "// directory" : "// directory"}
               </p>
-              <h2 className="mt-2 text-2xl font-black tracking-[-0.05em] text-white sm:text-3xl">
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.05em] dark:text-white text-gray-900 sm:text-3xl">
                 {isKo ? "멤버 찾기" : "Browse members"}
               </h2>
             </div>
             <Link
               href="/community/write"
-              className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white transition-colors hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
             >
               {isKo ? "글쓰기 시작" : "Start posting"}
             </Link>
@@ -204,7 +204,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
 
           <div className="mt-6 space-y-4">
             <div>
-              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/48">
+              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white">
                 {isKo ? "역할" : "Role"}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -224,7 +224,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
             </div>
 
             <div>
-              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/48">
+              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white">
                 {isKo ? "지역" : "Region"}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -245,8 +245,8 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
           </div>
 
           {members.length === 0 ? (
-            <div className="mt-6 rounded-[28px] border border-white/12 bg-white/6 p-12 text-center backdrop-blur tkad-neon-border">
-              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-white/58">
+            <div className="mt-6 rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-12 text-center backdrop-blur tkad-neon-border">
+              <p className="font-mono text-[12px] uppercase tracking-[0.22em] dark:text-white">
                 {isKo ? "// 조건에 맞는 멤버가 없습니다." : "// no members match these filters"}
               </p>
             </div>
@@ -259,7 +259,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
               </div>
 
               {totalPages > 1 ? (
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 font-mono text-[11px] text-white/72">
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 font-mono text-[11px] dark:text-white">
                   <Link
                     href={directoryHref({
                       role: roleFilter,
@@ -268,14 +268,14 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
                     })}
                     aria-disabled={page <= 1}
                     className={cn(
-                      "inline-flex items-center gap-1 rounded-full border border-white/12 px-4 py-2 transition-colors",
-                      page <= 1 ? "pointer-events-none opacity-40" : "hover:bg-white/10",
+                      "inline-flex items-center gap-1 rounded-full border dark:border-white/12 border-gray-200 px-4 py-2 transition-colors",
+                      page <= 1 ? "pointer-events-none opacity-40" : "hover:dark:bg-white/10 bg-gray-100",
                     )}
                   >
                     <ChevronLeft className="h-4 w-4" />
                     {isKo ? "이전" : "Prev"}
                   </Link>
-                  <span className="tabular-nums text-white/55">
+                  <span className="tabular-nums dark:text-white text-gray-500">
                     {page} / {totalPages}
                   </span>
                   <Link
@@ -286,8 +286,8 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
                     })}
                     aria-disabled={page >= totalPages}
                     className={cn(
-                      "inline-flex items-center gap-1 rounded-full border border-white/12 px-4 py-2 transition-colors",
-                      page >= totalPages ? "pointer-events-none opacity-40" : "hover:bg-white/10",
+                      "inline-flex items-center gap-1 rounded-full border dark:border-white/12 border-gray-200 px-4 py-2 transition-colors",
+                      page >= totalPages ? "pointer-events-none opacity-40" : "hover:dark:bg-white/10 bg-gray-100",
                     )}
                   >
                     {isKo ? "다음" : "Next"}

@@ -12,7 +12,7 @@ import { ProposalPdfContent } from "@/components/proposal/proposal-pdf-content";
 import { cn } from "@/lib/utils";
 
 const glassCard =
-  "rounded-2xl border border-white/12 bg-white/5 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
+  "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
 
 type Props = {
   input: ProposalInput;
@@ -59,7 +59,7 @@ export function ProposalResultDisplay({
         <BtnBlock
           variant="accent"
           size="md"
-          className="!text-white bg-gradient-to-r from-violet-500 to-cyan-400"
+          className="!dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400"
           onClick={() => void onPdf()}
           disabled={pdfBusy}
         >
@@ -77,7 +77,7 @@ export function ProposalResultDisplay({
             href={sharePath}
             variant="secondary"
             size="md"
-            className="border-white/14 bg-white/8 text-white"
+            className="dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900"
           >
             <Share2 className="h-4 w-4" />
             {t("openSharePage")}
@@ -89,7 +89,7 @@ export function ProposalResultDisplay({
         <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300">
           [ {t("sectionOverview")} ]
         </h2>
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-white/90">
+        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed dark:text-white text-gray-800">
           {proposal.overview}
         </p>
       </section>
@@ -98,7 +98,7 @@ export function ProposalResultDisplay({
         <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-violet-300">
           [ {t("sectionStrategy")} ]
         </h2>
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-white/90">
+        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed dark:text-white text-gray-800">
           {proposal.strategy}
         </p>
       </section>
@@ -111,16 +111,16 @@ export function ProposalResultDisplay({
           {proposal.mediaMix.map((row) => (
             <li
               key={row.mediaId}
-              className="rounded-xl border border-white/10 bg-black/20 p-4"
+              className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 p-4"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="font-bold text-white">{row.mediaName}</p>
+                <p className="font-bold dark:text-white text-gray-900">{row.mediaName}</p>
                 <span className="font-mono text-xs text-cyan-300">
                   {row.budgetSharePct}%
                 </span>
               </div>
-              <p className="mt-1 text-xs font-semibold text-white/60">{row.role}</p>
-              <p className="mt-2 text-sm text-white/80">{row.rationale}</p>
+              <p className="mt-1 text-xs font-semibold dark:text-white text-gray-500">{row.role}</p>
+              <p className="mt-2 text-sm dark:text-white text-gray-700">{row.rationale}</p>
               <Link
                 href={`/media/${encodeURIComponent(row.mediaId)}`}
                 className="mt-2 inline-block text-xs font-semibold text-cyan-400 hover:underline"
@@ -134,10 +134,10 @@ export function ProposalResultDisplay({
 
       <section className={cn(glassCard, "grid gap-4 sm:grid-cols-2")}>
         <div>
-          <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/70">
+          <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
             [ {t("sectionBudget")} ]
           </h2>
-          <ul className="mt-3 space-y-2 text-sm text-white/85">
+          <ul className="mt-3 space-y-2 text-sm dark:text-white text-gray-800">
             {proposal.budgetAllocation.map((row, i) => (
               <li key={i} className="flex justify-between gap-2 border-b border-white/8 pb-2">
                 <span>{row.label}</span>
@@ -150,29 +150,29 @@ export function ProposalResultDisplay({
           </ul>
         </div>
         <div>
-          <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/70">
+          <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
             [ {t("sectionMetrics")} ]
           </h2>
           <dl className="mt-3 space-y-3 text-sm">
             <div className="flex justify-between">
-              <dt className="text-white/60">{t("metricImpressions")}</dt>
-              <dd className="font-bold tabular-nums text-white">
+              <dt className="dark:text-white text-gray-500">{t("metricImpressions")}</dt>
+              <dd className="font-bold tabular-nums dark:text-white text-gray-900">
                 {proposal.metrics.estimatedImpressions.toLocaleString(
                   isKo ? "ko-KR" : "en-US",
                 )}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-white/60">{t("metricReach")}</dt>
-              <dd className="font-bold tabular-nums text-white">
+              <dt className="dark:text-white text-gray-500">{t("metricReach")}</dt>
+              <dd className="font-bold tabular-nums dark:text-white text-gray-900">
                 {proposal.metrics.estimatedReach.toLocaleString(
                   isKo ? "ko-KR" : "en-US",
                 )}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-white/60">CPM</dt>
-              <dd className="font-bold tabular-nums text-white">
+              <dt className="dark:text-white text-gray-500">CPM</dt>
+              <dd className="font-bold tabular-nums dark:text-white text-gray-900">
                 ₩
                 {proposal.metrics.estimatedCpm.toLocaleString(
                   isKo ? "ko-KR" : "en-US",
@@ -184,19 +184,19 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/70">
+        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
           [ {t("sectionTimeline")} ]
         </h2>
         <ol className="mt-4 space-y-4">
           {proposal.timeline.map((item, i) => (
             <li key={i} className="border-l-2 border-violet-500/50 pl-4">
-              <p className="font-bold text-white">
+              <p className="font-bold dark:text-white text-gray-900">
                 {item.phase}
-                <span className="ml-2 text-xs font-normal text-white/50">
+                <span className="ml-2 text-xs font-normal dark:text-white text-gray-400">
                   {item.period}
                 </span>
               </p>
-              <ul className="mt-2 list-disc pl-4 text-sm text-white/80">
+              <ul className="mt-2 list-disc pl-4 text-sm dark:text-white text-gray-700">
                 {item.tasks.map((task, j) => (
                   <li key={j}>{task}</li>
                 ))}
@@ -210,7 +210,7 @@ export function ProposalResultDisplay({
         <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-300">
           [ {t("sectionOutcomes")} ]
         </h2>
-        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-white/85">
+        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm dark:text-white text-gray-800">
           {proposal.expectedOutcomes.map((line, i) => (
             <li key={i}>{line}</li>
           ))}

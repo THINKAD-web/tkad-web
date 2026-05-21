@@ -185,7 +185,7 @@ export default function MediaSearchAutocomplete({
           <button
             type="button"
             onClick={submitTextSearch}
-            className="shrink-0 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-navy/90"
+            className="shrink-0 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold dark:text-white text-gray-900 transition-colors hover:bg-navy/90"
           >
             {btnLabel}
           </button>

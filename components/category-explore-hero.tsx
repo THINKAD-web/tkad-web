@@ -6,14 +6,14 @@ const HEADLINE_GRADIENT =
 
 /** `/media/packages` 히어로 CTA와 동일한 스타일 토큰 */
 export const categoryHeroCtaPrimaryClass =
-  "category-hero-cta-primary inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-7 text-sm font-bold text-white shadow-[0_18px_48px_rgba(139,92,246,0.35)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+  "category-hero-cta-primary inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-7 text-sm font-bold dark:text-white text-gray-900 shadow-[0_18px_48px_rgba(139,92,246,0.35)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 
 export const categoryHeroCtaSecondaryClass =
-  "category-hero-cta-secondary inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-7 text-sm font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+  "category-hero-cta-secondary inline-flex h-12 items-center justify-center gap-2 rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-7 text-sm font-bold dark:text-white text-gray-900 transition-colors hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 
 /** packages 히어로 통계 카드 */
 export const categoryHeroStatCardClass =
-  "rounded-2xl border border-white/10 bg-white/5 px-4 py-4 backdrop-blur";
+  "rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 backdrop-blur";
 
 export function CategoryHeroCtaRow({
   children,
@@ -93,7 +93,7 @@ export function CategoryExploreHero({
   return (
     <section
       className={cn(
-        "tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] text-white",
+        "tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] dark:text-white text-gray-900",
         className,
       )}
     >
@@ -118,7 +118,7 @@ export function CategoryExploreHero({
         <CategoryHeroCodeLine code={code} showBeta={showBeta} />
         <h1
           className={cn(
-            "mt-4 max-w-4xl text-balance font-bold leading-[1.08] tracking-tight text-white",
+            "mt-4 max-w-4xl text-balance font-bold leading-[1.08] tracking-tight dark:text-white text-gray-900",
             compactOnMobile
               ? "text-2xl sm:text-4xl md:text-6xl"
               : "text-4xl md:text-6xl",
@@ -130,7 +130,7 @@ export function CategoryExploreHero({
         </h1>
         <p
           className={cn(
-            "mx-auto max-w-xl text-lg text-white/50",
+            "mx-auto max-w-xl text-lg dark:text-white text-gray-400",
             compactOnMobile ? "mt-2 hidden sm:block" : "mt-4",
           )}
         >

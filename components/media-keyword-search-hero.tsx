@@ -77,7 +77,7 @@ export function MediaKeywordSearchHero({
           >
             {spotlightPhrase}
           </p>
-          <p className="max-w-md text-xs text-white/60 sm:text-sm">
+          <p className="max-w-md text-xs dark:text-white text-gray-500 sm:text-sm">
             {t("spotlightHint")}
           </p>
         </div>
@@ -128,10 +128,10 @@ export function MediaKeywordSearchHero({
         className={cn(
           "mt-5 text-xs font-medium",
           isFeaturedEmbed
-            ? "text-white/50 sm:text-sm"
+            ? "dark:text-white text-gray-400 sm:text-sm"
             : variant === "embed"
-              ? "text-white/65"
-              : "text-white/55",
+              ? "dark:text-white text-gray-600"
+              : "dark:text-white text-gray-500",
         )}
       >
         {t("chipHint")}
@@ -150,13 +150,13 @@ export function MediaKeywordSearchHero({
             className={cn(
               "rounded-full border px-2.5 py-1 text-left font-medium shadow-sm backdrop-blur-md",
               "transition-all duration-200 ease-out",
-              "hover:-translate-y-0.5 hover:border-gold hover:bg-gold/15 hover:text-white hover:shadow-lg hover:shadow-gold/25 motion-reduce:hover:translate-y-0",
+              "hover:-translate-y-0.5 hover:border-gold hover:bg-gold/15 hover:dark:text-white text-gray-900 hover:shadow-lg hover:shadow-gold/25 motion-reduce:hover:translate-y-0",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
               isFeaturedEmbed
-                ? "border-white/20 bg-white/10 text-[10px] text-white/90 focus-visible:ring-offset-navy"
+                ? "dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 text-[10px] dark:text-white text-gray-800 focus-visible:ring-offset-navy"
                 : variant === "embed"
-                  ? "border-white/25 bg-white/10 text-[10px] text-white/95 focus-visible:ring-offset-navy"
-                  : "border-white/18 bg-white/[0.08] text-[10px] text-white/95 focus-visible:ring-offset-navy-dark",
+                  ? "border-white/25 dark:bg-white/10 bg-gray-100 text-[10px] dark:text-white focus-visible:ring-offset-navy"
+                  : "dark:border-white/18 border-gray-300 bg-white/[0.08] text-[10px] dark:text-white focus-visible:ring-offset-navy-dark",
             )}
           >
             {phrase}
@@ -189,14 +189,14 @@ export function MediaKeywordSearchHero({
         aria-hidden
       />
       <div className="relative mx-auto max-w-3xl text-center">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-gold-light backdrop-blur-sm sm:text-xs">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-gold-light backdrop-blur-sm sm:text-xs">
           <Sparkles className="size-3.5 text-gold" aria-hidden />
           {t("badge")}
         </div>
-        <h1 className="mb-2 text-balance text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl">
+        <h1 className="mb-2 text-balance text-2xl font-bold tracking-tight dark:text-white text-gray-900 sm:text-3xl md:text-4xl">
           {t("title")}
         </h1>
-        <p className="mx-auto mb-8 max-w-xl text-pretty text-sm text-white/75 sm:text-base">
+        <p className="mx-auto mb-8 max-w-xl text-pretty text-sm dark:text-white text-gray-700 sm:text-base">
           {t("subtitle")}
         </p>
         {searchField}

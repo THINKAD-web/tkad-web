@@ -63,7 +63,7 @@ export default async function MediaRegisterPage({
             </a>
             <Link href="/contact" className={categoryHeroCtaSecondaryClass}>
               {isKo ? "문의하기" : "Contact us"}
-              <ArrowRight className="h-4 w-4 text-white/75" aria-hidden />
+              <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
             </Link>
           </CategoryHeroCtaRow>
         </CategoryExploreHero>

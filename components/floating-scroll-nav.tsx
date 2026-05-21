@@ -19,7 +19,7 @@ const scrollBtnClass = cn(
   "dark:border-cyan-400/55 dark:bg-zinc-950/95 dark:text-cyan-100",
   "dark:shadow-[0_0_24px_rgba(34,211,238,0.38),0_10px_32px_rgba(0,0,0,0.65)]",
   "dark:ring-1 dark:ring-cyan-400/25",
-  "dark:hover:border-cyan-300/80 dark:hover:bg-cyan-500/20 dark:hover:text-white dark:hover:shadow-[0_0_28px_rgba(34,211,238,0.5),0_10px_32px_rgba(0,0,0,0.65)]",
+  "dark:hover:border-cyan-300/80 dark:hover:bg-cyan-500/20 dark:hover:dark:text-white text-gray-900 dark:hover:shadow-[0_0_28px_rgba(34,211,238,0.5),0_10px_32px_rgba(0,0,0,0.65)]",
   "disabled:pointer-events-none disabled:opacity-45 dark:disabled:opacity-55",
 );
 

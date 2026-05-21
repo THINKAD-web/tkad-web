@@ -116,7 +116,7 @@ export default function MediaGallery({
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full border border-white/30 bg-navy/75 px-2.5 py-1 text-[11px] font-semibold text-white shadow-md backdrop-blur-sm transition duration-300 group-hover:bg-navy/90"
+            className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full border border-white/30 bg-navy/75 px-2.5 py-1 text-[11px] font-semibold dark:text-white text-gray-900 shadow-md backdrop-blur-sm transition duration-300 group-hover:bg-navy/90"
             aria-hidden
           >
             <ZoomIn className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -150,7 +150,7 @@ export default function MediaGallery({
               className="pointer-events-none absolute inset-0 flex items-center justify-center bg-navy/0 transition-colors duration-300 group-hover:bg-navy/20"
               aria-hidden
             >
-              <ZoomIn className="h-8 w-8 text-white opacity-0 drop-shadow-md transition-opacity duration-300 group-hover:opacity-100" />
+              <ZoomIn className="h-8 w-8 dark:text-white text-gray-900 opacity-0 drop-shadow-md transition-opacity duration-300 group-hover:opacity-100" />
             </div>
           </button>
         ))}

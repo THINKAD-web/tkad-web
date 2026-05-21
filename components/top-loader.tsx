@@ -34,7 +34,7 @@ export default function TopLoader() {
       aria-hidden
     >
       <div className="relative h-full w-full overflow-hidden">
-        <div className="absolute inset-0 bg-border/35 dark:bg-white/8" />
+        <div className="absolute inset-0 bg-border/35 dark:bg-white/8 bg-gray-100" />
         <div className="nav-loading-capsule absolute inset-y-0 left-0 h-full w-[min(32vw,12rem)] bg-gradient-to-r from-transparent via-violet-500/85 to-transparent shadow-[0_0_14px_rgba(139,92,246,0.38)] dark:via-cyan-400/75 dark:shadow-[0_0_16px_rgba(34,211,238,0.32)]" />
       </div>
     </div>

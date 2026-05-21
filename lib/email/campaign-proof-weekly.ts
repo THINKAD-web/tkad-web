@@ -91,22 +91,50 @@ export async function buildWeeklyProofDigestEmails(): Promise<
       })
       .join("");
 
+    const managerNote =
+      process.env.ADVERTISER_REPORT_MANAGER_NOTE?.trim() ||
+      "궁금한 점은 이 메일에 회신하시거나 카카오 채널로 문의해 주세요.";
+    const progressPct =
+      c.startDate && c.endDate
+        ? Math.min(
+            100,
+            Math.round(
+              ((Date.now() - c.startDate.getTime()) /
+                Math.max(1, c.endDate.getTime() - c.startDate.getTime())) *
+                100,
+            ),
+          )
+        : null;
+    const nextWeek =
+      c.endDate && c.endDate > end
+        ? `${c.endDate.toLocaleDateString("ko-KR")}까지 집행 예정`
+        : "다음 주 일정은 담당자가 별도 안내드립니다.";
+
     const subject = `[THINKAD] ${c.name} · 주간 인증 리포트`;
     const text = [
       `${c.ownerUser?.name ?? "고객"}님, 안녕하세요.`,
       "",
       "캠페인이 순조롭게 진행 중입니다.",
       `지난 주 인증 사진 ${c.proofPhotos.length}건 · 추정 노출 ${weekImpressions.toLocaleString("ko-KR")}`,
+      progressPct != null ? `진행률 약 ${progressPct}%` : "",
+      `다음 주: ${nextWeek}`,
+      "",
+      `담당자 메모: ${managerNote}`,
       "",
       `인증 사진 보기: ${link}`,
-    ].join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     const html = `
       <div style="font-family:sans-serif;max-width:560px">
         <h2 style="color:#111">${c.name}</h2>
         <p>캠페인이 <strong>순조롭게 진행 중</strong>입니다.</p>
         <p>지난 주 인증 사진 <strong>${c.proofPhotos.length}건</strong> · 추정 노출 <strong>${weekImpressions.toLocaleString("ko-KR")}</strong></p>
+        ${progressPct != null ? `<p>집행 진행률(추정) <strong>${progressPct}%</strong></p>` : ""}
+        <p><strong>다음 주:</strong> ${nextWeek}</p>
         ${photoHtml}
+        <p style="margin-top:16px;padding:12px;background:#f4f4f5;border-radius:8px;font-size:13px"><strong>담당자 메모</strong><br/>${managerNote}</p>
         <p><a href="${link}">대시보드에서 인증 사진 보기</a></p>
       </div>`;
 

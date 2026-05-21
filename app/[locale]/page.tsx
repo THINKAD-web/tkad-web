@@ -36,7 +36,9 @@ import { getUserPreferenceByUserId } from "@/lib/user-preference";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { HomePersonalizedMedia } from "@/components/home/home-personalized-media";
 import { HomeBudgetWidget } from "@/components/home/home-budget-widget";
+import { HomeSocialProof } from "@/components/home/home-social-proof";
 import { HomeBestDeals } from "@/components/home/home-best-deals";
+import { HomeLaunchBanner } from "@/components/home/home-launch-banner";
 import { pickBestDeals } from "@/lib/best-deals";
 
 import {
@@ -200,6 +202,7 @@ function HomeContent({
 
   return (
     <HomeAppearanceShell>
+      <HomeLaunchBanner />
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <HomePwaWidget />
       </div>
@@ -211,6 +214,7 @@ function HomeContent({
 
       <div className="tkad-landing-neon">
         <HomeBudgetWidget />
+        <HomeSocialProof />
         <HomeBestDeals items={bestDealItems} locale={locale} />
       </div>
 
@@ -251,23 +255,23 @@ function HomeContent({
               meta={th("packagesMeta")}
             />
           </HomeScrollAnimate>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-white/78 sm:mt-8 sm:text-base">
+          <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed dark:text-white text-gray-700 sm:mt-8 sm:text-base">
             {th("packagesLead")}
           </p>
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">
             <Link
               href="/media/packages"
-              className="tkad-neon-cta group inline-flex h-14 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+              className="tkad-neon-cta group inline-flex h-14 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
             >
               {th("packagesCta")}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex h-14 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10"
+              className="inline-flex h-14 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-10 text-base font-black dark:text-white text-gray-900 backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100"
             >
               {t("contact.heroCtaQuote")}
-              <ArrowRight className="h-4 w-4 text-white/80" />
+              <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" />
             </Link>
           </div>
         </NeonSection>
@@ -283,7 +287,7 @@ function HomeContent({
           </HomeScrollAnimate>
 
           {featuredItems.length === 0 ? (
-            <p className="mt-6 text-center font-mono text-[12px] font-bold uppercase tracking-[0.22em] text-white/60 sm:mt-8">
+            <p className="mt-6 text-center font-mono text-[12px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500 sm:mt-8">
               {th("featuredEmpty")}
             </p>
           ) : (
@@ -309,7 +313,7 @@ function HomeContent({
                 />
                 <Link
                   href="/media"
-                  className="tkad-home-section-cta group inline-flex items-center gap-2 self-end border-b border-white/25 pb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 transition-colors hover:border-white/45 hover:text-white"
+                  className="tkad-home-section-cta group inline-flex items-center gap-2 self-end border-b border-white/25 pb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] dark:text-white text-gray-800 transition-colors hover:border-white/45 hover:dark:text-white text-gray-900"
                 >
                   {th("viewAllMedia")}
                   <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
@@ -376,24 +380,24 @@ function HomeContent({
           <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-10 sm:gap-4 md:mt-12 md:gap-5 lg:grid-cols-3">
             {whyCards.map((item, i) => (
               <HomeScrollAnimate key={item.title} delay={i * 100}>
-                <div className="group relative h-full rounded-[28px] bg-white/6 p-5 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border tkad-neon-glow sm:p-7 lg:p-8">
+                <div className="group relative h-full rounded-[28px] dark:bg-white/6 bg-gray-50 p-5 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border tkad-neon-glow sm:p-7 lg:p-8">
                   <div className="mb-6 flex items-center justify-between">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       [{String(i + 1).padStart(2, "0")}]
                     </span>
                     <item.icon
-                      className="h-7 w-7 text-white/80 transition-colors group-hover:text-white"
+                      className="h-7 w-7 dark:text-white text-gray-700 transition-colors group-hover:dark:text-white text-gray-900"
                       strokeWidth={1.75}
                       aria-hidden
                     />
                   </div>
-                  <h3 className="text-xl font-black tracking-tight text-white">
+                  <h3 className="text-xl font-black tracking-tight dark:text-white text-gray-900">
                     {item.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/76">
+                  <p className="mt-3 text-sm leading-relaxed dark:text-white">
                     {item.desc}
                   </p>
-                  <div className="mt-6 inline-flex items-center gap-2 rounded-2xl border border-white/14 bg-white/6 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white shadow-[0_18px_72px_rgba(0,0,0,0.65)] backdrop-blur">
+                  <div className="mt-6 inline-flex items-center gap-2 rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 shadow-[0_18px_72px_rgba(0,0,0,0.65)] backdrop-blur">
                     <span
                       className="h-1.5 w-1.5 rounded-full bg-[#22d3ee]"
                       aria-hidden
@@ -432,32 +436,32 @@ function HomeContent({
 
         <NeonSection innerClassName="text-center">
           <HomeScrollAnimate className="mx-auto max-w-4xl">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-white/65">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] dark:text-white text-gray-600">
               {`// ${th("ctaKicker")}`}
             </p>
-            <h2 className="tkad-neon-text mt-4 text-balance text-4xl font-black leading-[1.02] tracking-[-0.06em] text-white sm:mt-6 sm:text-5xl lg:text-6xl">
+            <h2 className="tkad-neon-text mt-4 text-balance text-4xl font-black leading-[1.02] tracking-[-0.06em] dark:text-white text-gray-900 sm:mt-6 sm:text-5xl lg:text-6xl">
               {t("ctaBanner.title")}
             </h2>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/82 sm:mt-6 sm:text-lg">
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed dark:text-white text-gray-800 sm:mt-6 sm:text-lg">
               {t("ctaBanner.description")}
             </p>
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:mt-9 sm:flex-row sm:items-center sm:gap-4 lg:mt-10">
               <Link
                 href="/contact"
-                className="tkad-neon-cta group inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+                className="tkad-neon-cta group inline-flex h-16 items-center justify-center gap-2 rounded-[22px] px-10 text-base font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
               >
                 {t("ctaBanner.cta")}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
                 href="/media"
-                className="group inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+                className="group inline-flex h-16 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-10 text-base font-black dark:text-white text-gray-900 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
               >
                 {th("exploreMediaFirst")}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
-            <p className="mx-auto mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60 sm:mt-6 md:mt-7">
+            <p className="mx-auto mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500 sm:mt-6 md:mt-7">
               {th("ctaFooter")}
             </p>
           </HomeScrollAnimate>

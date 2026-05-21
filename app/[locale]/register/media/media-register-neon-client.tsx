@@ -59,18 +59,18 @@ export function MediaRegisterNeonClient() {
         {steps.map((label, i) => (
           <span
             key={label}
-            className="rounded-full border border-white/12 bg-white/6 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-white/70"
+            className="rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] dark:text-white text-gray-600"
           >
             {String(i + 1).padStart(2, "0")} {label}
           </span>
         ))}
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur sm:p-8">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+      <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur sm:p-8">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ {isKo ? "SELF REGISTRATION" : "SELF REGISTRATION"} ]
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-white/75">
+        <p className="mt-2 text-sm leading-relaxed dark:text-white text-gray-700">
           {isKo
             ? "신청 → 싱커드 심사 → 승인 시 THINKAD 매체 카탈로그에 노출됩니다. 정면·측면·야경 사진과 정확한 주소가 필요합니다."
             : "Apply → THINKAD review → approved listings go live in our catalog. Front, side, and night photos plus a verified address are required."}

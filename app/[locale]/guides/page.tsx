@@ -190,7 +190,7 @@ export default async function GuidesIndexPage({ params }: Props) {
               </Link>
               <Link href="/planner" className={categoryHeroCtaSecondaryClass}>
                 {isKo ? "AI 플래너" : "AI planner"}
-                <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
+                <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
               </Link>
             </CategoryHeroCtaRow>
           </CategoryExploreHero>
@@ -238,7 +238,7 @@ export default async function GuidesIndexPage({ params }: Props) {
 
             {otherGuides.length > 0 ? (
               <div className="mt-12">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   [ {sectionCopy.moreGuides} ]
                 </p>
                 <ul className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -246,12 +246,12 @@ export default async function GuidesIndexPage({ params }: Props) {
                     <li key={g.slug}>
                       <Link
                         href={`/guides/${g.slug}`}
-                        className="flex items-center justify-between gap-3 rounded-2xl border border-white/12 bg-white/5 px-4 py-4 text-sm font-semibold text-white transition hover:bg-white/10"
+                        className="flex items-center justify-between gap-3 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 text-sm font-semibold dark:text-white text-gray-900 transition hover:dark:bg-white/10 bg-gray-100"
                       >
                         <span className="min-w-0 truncate">
                           {isKo ? g.titleKo : g.titleEn}
                         </span>
-                        <ArrowRight className="h-4 w-4 shrink-0 text-white/50" />
+                        <ArrowRight className="h-4 w-4 shrink-0 dark:text-white text-gray-400" />
                       </Link>
                     </li>
                   ))}

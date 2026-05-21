@@ -431,7 +431,7 @@ function PreviewCard({
           <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
           {preview.location}
         </p>
-        <div className="rounded-lg border-2 border-border bg-muted px-3 py-2 text-xs border-border bg-muted/60">
+        <div className="rounded-lg border-2 border-border bg-muted px-3 py-2 text-xs bg-muted/60">
           <p className="font-semibold text-foreground">
             저장 유형:{" "}
             <span className="text-primary">{preview.type}</span>{" "}

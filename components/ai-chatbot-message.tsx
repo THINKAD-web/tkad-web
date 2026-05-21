@@ -84,7 +84,7 @@ export function AiChatbotMessage({
         className={cn(
           "max-w-[min(100%,min(20rem,calc(100%-0.25rem)))] border-2 px-3 py-2.5 text-sm sm:px-3.5",
           isUser
-            ? "border-accent bg-accent text-white"
+            ? "border-accent bg-accent dark:text-white text-gray-900"
             : "border-border bg-muted text-foreground",
         )}
       >

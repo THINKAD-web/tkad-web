@@ -26,6 +26,16 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "tkad-web.vercel.app" }],
+        destination: "https://tkad.co.kr/:path*",
+        permanent: true,
+      },
+    ];
+  },
   /** 개발 모드 상단 Next 이슈 인디케이터(예: “N Issue”) 비활성화 — 운영 빌드에는 영향 없음 */
   devIndicators: false,
   turbopack: {

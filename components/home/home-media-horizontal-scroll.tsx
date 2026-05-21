@@ -75,7 +75,7 @@ export function HomeMediaHorizontalScroll({
           }
           topRight={
             m.isVerified ? (
-              <span className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+              <span className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider dark:text-white text-gray-900">
                 VERIFIED
               </span>
             ) : undefined

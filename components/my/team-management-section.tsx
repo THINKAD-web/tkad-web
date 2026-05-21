@@ -251,10 +251,10 @@ export function TeamManagementSection() {
         <p className="mb-5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
           {isKo ? `팀원 (${members.length})` : `Members (${members.length})`}
         </p>
-        <div className="overflow-x-auto rounded-[20px] border border-border/60 dark:border-white/10">
+        <div className="overflow-x-auto rounded-[20px] border border-border/60 dark:border-white/10 border-gray-200">
           <table className="w-full min-w-[640px] border-collapse text-left text-sm">
             <thead>
-              <tr className="border-b border-border/60 bg-muted/40 dark:border-white/10 dark:bg-white/5">
+              <tr className="border-b border-border/60 bg-muted/40 dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50">
                 <th className="px-4 py-3.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                   {isKo ? "이름" : "Name"}
                 </th>

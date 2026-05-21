@@ -224,6 +224,22 @@ export async function POST(request: NextRequest) {
     }
 
       if (inquiryId) {
+        void import("@/lib/inquiry-auto-route").then(({ routeNewContactInquiry }) =>
+          routeNewContactInquiry({
+            inquiryId: inquiryId!,
+            company: companyVal,
+            name: nameVal,
+            phone: phoneVal,
+            email: hasValidEmail ? emailStr : null,
+            message: composedMessage,
+            inquiryTypeLabel: inquiryLbl,
+            budgetLabel: budgetLbl,
+            industryCode: leadIndustry,
+            budgetCode: leadBudgetCode,
+            regions: leadRegions,
+            locale,
+          }).catch((err) => console.error("[contact] auto-route:", err)),
+        );
         void recordConversion({ type: "quote_request", metadata: { inquiryId } });
         void createInquiryQuoteDraft(db, {
           inquiryId,

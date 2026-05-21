@@ -80,12 +80,12 @@ export default async function ReportListPage({ params, searchParams }: ListProps
     cn(
       "inline-flex items-center justify-center rounded-full px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-all",
       active
-        ? "tkad-neon-cta text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
-        : "border border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted/80 dark:border-white/12 dark:bg-white/6 dark:text-white/90 dark:hover:border-white/22 dark:hover:bg-white/10",
+        ? "tkad-neon-cta dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
+        : "border border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted/80 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100",
     );
 
   const cardShell =
-    "group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_100px_rgba(0,0,0,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-white/12 dark:bg-white/6 dark:shadow-[0_28px_120px_rgba(0,0,0,0.45)] dark:backdrop-blur-md dark:hover:border-white/18";
+    "group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_100px_rgba(0,0,0,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:shadow-[0_28px_120px_rgba(0,0,0,0.45)] dark:backdrop-blur-md dark:hover:dark:border-white/18 border-gray-300";
 
   return (
     <HomeLandingDayNight>
@@ -93,7 +93,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
         <ReportListHero />
 
 
-        <section className="border-b border-border bg-muted/30 py-8 dark:border-white/10 dark:bg-[#070712]">
+        <section className="border-b border-border bg-muted/30 py-8 dark:border-white/10 border-gray-200 dark:bg-[#070712]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
               <Link href={reportListHref(null, 1)} className={filterPill(!category)}>
@@ -115,7 +115,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
         <section className="bg-background py-12 text-foreground sm:py-16 dark:bg-[#030308]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {reports.length === 0 ? (
-              <div className="mx-auto max-w-xl rounded-[28px] border border-border bg-card p-10 text-center shadow-[0_24px_80px_rgba(0,0,0,0.08)] dark:border-white/12 dark:bg-white/6 dark:backdrop-blur-md dark:shadow-[0_36px_140px_rgba(0,0,0,0.72)]">
+              <div className="mx-auto max-w-xl rounded-[28px] border border-border bg-card p-10 text-center shadow-[0_24px_80px_rgba(0,0,0,0.08)] dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:backdrop-blur-md dark:shadow-[0_36px_140px_rgba(0,0,0,0.72)]">
                 <p className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
                   [ {isKo ? "준비 중" : "Coming soon"} ]
                 </p>
@@ -141,7 +141,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                     <Link key={r.id} href={`/report/${r.slug}`} className={cardShell}>
                       <div
                         className={cn(
-                          "relative aspect-[16/9] w-full overflow-hidden border-b border-border dark:border-white/10",
+                          "relative aspect-[16/9] w-full overflow-hidden border-b border-border dark:border-white/10 border-gray-200",
                           r.thumbnail ? "" : thumbPlaceholderClass(r.category),
                         )}
                       >
@@ -154,7 +154,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                           />
                         ) : (
                           <div className="flex h-full w-full items-end p-4">
-                            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/90">
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-800">
                               THINKAD REPORT
                             </span>
                           </div>
@@ -162,7 +162,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                       </div>
                       <article className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary dark:border-white/15 dark:bg-white/10 dark:text-white/90">
+                          <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800">
                             {labelForReportCategory(r.category, isKo)}
                           </span>
                           <time
@@ -172,10 +172,10 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                             {formatPublished(r.publishedAt, locale)}
                           </time>
                         </div>
-                        <h2 className="line-clamp-2 text-xl font-bold leading-snug tracking-tight text-foreground dark:text-white">
+                        <h2 className="line-clamp-2 text-xl font-bold leading-snug tracking-tight text-foreground dark:text-white text-gray-900">
                           {r.title}
                         </h2>
-                        <p className="line-clamp-3 flex-1 text-sm leading-relaxed text-muted-foreground dark:text-white/70">
+                        <p className="line-clamp-3 flex-1 text-sm leading-relaxed text-muted-foreground dark:text-white text-gray-600">
                           {r.summary}
                         </p>
                       </article>
@@ -185,13 +185,13 @@ export default async function ReportListPage({ params, searchParams }: ListProps
 
                 {totalPages > 1 ? (
                   <nav
-                    className="mt-12 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-10 font-mono text-[12px] font-bold uppercase tracking-[0.14em] dark:border-white/10"
+                    className="mt-12 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-10 font-mono text-[12px] font-bold uppercase tracking-[0.14em] dark:border-white/10 border-gray-200"
                     aria-label={isKo ? "페이지" : "Pagination"}
                   >
                     {curPage > 1 ? (
                       <Link
                         href={reportListHref(category, curPage - 1)}
-                        className="rounded-full border border-border bg-card px-5 py-2.5 transition-colors hover:border-primary hover:bg-muted/60 dark:border-white/14 dark:bg-white/6 dark:text-white dark:hover:border-white/28 dark:hover:bg-white/10"
+                        className="rounded-full border border-border bg-card px-5 py-2.5 transition-colors hover:border-primary hover:bg-muted/60 dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 dark:hover:border-white/28 dark:hover:dark:bg-white/10 bg-gray-100"
                       >
                         {isKo ? "이전" : "Prev"}
                       </Link>
@@ -202,7 +202,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                     {curPage < totalPages ? (
                       <Link
                         href={reportListHref(category, curPage + 1)}
-                        className="rounded-full border border-border bg-card px-5 py-2.5 transition-colors hover:border-primary hover:bg-muted/60 dark:border-white/14 dark:bg-white/6 dark:text-white dark:hover:border-white/28 dark:hover:bg-white/10"
+                        className="rounded-full border border-border bg-card px-5 py-2.5 transition-colors hover:border-primary hover:bg-muted/60 dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 dark:hover:border-white/28 dark:hover:dark:bg-white/10 bg-gray-100"
                       >
                         {isKo ? "다음" : "Next"}
                       </Link>

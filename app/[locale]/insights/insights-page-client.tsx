@@ -163,7 +163,7 @@ export default function InsightsPageClient({
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] dark:text-white text-gray-900">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div
             aria-hidden
@@ -179,24 +179,24 @@ export default function InsightsPageClient({
           />
 
           <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
               {`// 09 / Insights`}
             </p>
             <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
                 {t("filterMonthly")} · {t("filterQuarterly")}
               </span>
-              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
                 <span className="tkad-home-accent-text">OOH</span>
               </span>
-              <span className="tkad-neon-border rounded-2xl bg-white/5 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
                 <span className="tkad-home-accent-text">BETA</span>
               </span>
             </div>
-            <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+            <h1 className="mt-6 text-balance text-[clamp(44px,5.8vw,76px)] font-[950] leading-[0.92] tracking-[-0.065em] dark:text-white text-gray-900 [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
               {t("heroTitle")}
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-lg">
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed dark:text-white text-gray-800 sm:text-lg">
               {t("heroSubtitle")}
             </p>
           </div>

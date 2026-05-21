@@ -6,6 +6,7 @@ import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
+  Activity,
   LayoutDashboard,
   MessageSquareText,
   Monitor,
@@ -56,6 +57,8 @@ const navDefs = [
   // 1) 홈/요약
   { href: "/admin", key: "dashboard" as const, icon: LayoutDashboard },
   { href: "/admin/monitoring", key: "monitoring" as const, icon: Radar },
+  { href: "/admin/launch-monitor", key: "launchMonitor" as const, icon: Activity },
+  { href: "/admin/health", key: "linkHealth" as const, icon: Radar },
   // 2) 영업/리드
   { href: "/admin/inquiries", key: "inquiries" as const, icon: MessageSquareText },
   { href: "/admin/biddings", key: "biddings" as const, icon: ClipboardList },
@@ -150,7 +153,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
               className={[
                 "group flex items-center gap-3 rounded-[14px] border border-border/70 bg-card/60 px-3 py-2.5 font-mono text-[12px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-[1px] hover:border-border",
                 active
-                  ? "border-white/14 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] shadow-[0_18px_70px_rgba(0,0,0,0.18)]"
+                  ? "dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] shadow-[0_18px_70px_rgba(0,0,0,0.18)]"
                   : "",
               ].join(" ")}
             >
@@ -180,7 +183,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-black/55 backdrop-blur-md"
+            className="absolute inset-0 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 backdrop-blur-md"
             onClick={() => setSidebarOpen(false)}
           />
           <div className="relative h-full w-72">{sidebar}</div>

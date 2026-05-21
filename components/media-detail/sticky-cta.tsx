@@ -99,7 +99,7 @@ export function MediaStickyCta({
         className={
           inCart
             ? "w-full"
-            : "tkad-media-detail-cta-secondary w-full rounded-[18px] border border-white/14 bg-white/8 text-white backdrop-blur hover:bg-white/12"
+            : "tkad-media-detail-cta-secondary w-full rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 backdrop-blur hover:bg-white/12"
         }
       >
         {inCart ? (
@@ -115,7 +115,7 @@ export function MediaStickyCta({
         href={`/quote?media=${encodeURIComponent(mediaId)}`}
         variant="secondary"
         size="md"
-        className="tkad-media-detail-cta-secondary w-full rounded-[18px] border border-white/14 bg-white/6 text-white backdrop-blur hover:bg-white/10"
+        className="tkad-media-detail-cta-secondary w-full rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 backdrop-blur hover:dark:bg-white/10 bg-gray-100"
       >
         <Send className="h-4 w-4" aria-hidden />
         {t("quote")}

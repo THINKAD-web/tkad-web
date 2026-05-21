@@ -133,7 +133,7 @@ export default async function IndustryLandingPage({ params }: Props) {
             eyebrow={`// ${isKo ? "업종별 OOH" : "INDUSTRY OOH"}`}
             title={heroTitle}
             description={heroSubtitle}
-            icon={<Sparkles className="size-7 text-white/90" aria-hidden />}
+            icon={<Sparkles className="size-7 dark:text-white text-gray-800" aria-hidden />}
             primaryCta={{
               href: "/contact",
               label: t("ctaConsult"),
@@ -155,7 +155,7 @@ export default async function IndustryLandingPage({ params }: Props) {
               meta={t("mediaGridMeta", { count: mediaItems.length })}
             />
             {mediaItems.length === 0 ? (
-              <p className="mt-8 text-center font-mono text-sm text-white/60">
+              <p className="mt-8 text-center font-mono text-sm dark:text-white text-gray-500">
                 {t("mediaGridEmpty")}
               </p>
             ) : (
@@ -164,7 +164,7 @@ export default async function IndustryLandingPage({ params }: Props) {
                 <div className="mt-8 text-center">
                   <Link
                     href="/media"
-                    className="tkad-neon-cta-clean inline-flex h-12 items-center justify-center rounded-[18px] px-8 text-sm font-black text-white"
+                    className="tkad-neon-cta-clean inline-flex h-12 items-center justify-center rounded-[18px] px-8 text-sm font-black dark:text-white text-gray-900"
                   >
                     {isKo ? "전체 매체 보기" : "View all media"}
                   </Link>
@@ -191,7 +191,7 @@ export default async function IndustryLandingPage({ params }: Props) {
               <p className="mt-6 text-center">
                 <Link
                   href="/cases"
-                  className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-white/70 underline-offset-4 hover:text-white hover:underline"
+                  className="font-mono text-xs font-bold uppercase tracking-[0.18em] dark:text-white text-gray-600 underline-offset-4 hover:dark:text-white text-gray-900 hover:underline"
                 >
                   {isKo ? "성공 사례 더보기" : "More success stories"}
                 </Link>

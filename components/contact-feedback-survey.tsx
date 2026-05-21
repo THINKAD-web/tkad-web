@@ -8,18 +8,18 @@ import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
 
 const inputCls =
-  "h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/40 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30";
+  "h-11 w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30";
 const textareaCls =
-  "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30";
-const labelCls = "mb-2 block text-sm text-white/70";
+  "w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30";
+const labelCls = "mb-2 block text-sm dark:text-white text-gray-600";
 const btnPrimary =
-  "inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 text-sm font-bold text-white shadow-[0_12px_40px_rgba(139,92,246,0.35)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 text-sm font-bold dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(139,92,246,0.35)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50";
 const btnSecondary =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/15 disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-xl border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 px-4 text-sm font-semibold dark:text-white text-gray-900 transition hover:bg-white/15 disabled:opacity-50";
 const chipActive =
-  "border-violet-500/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 text-white shadow-[0_6px_20px_rgba(139,92,246,0.3)]";
+  "border-violet-500/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 dark:text-white text-gray-900 shadow-[0_6px_20px_rgba(139,92,246,0.3)]";
 const chipIdle =
-  "border-white/15 bg-white/5 text-white/80 hover:border-white/25 hover:bg-white/10";
+  "dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:border-white/25 hover:dark:bg-white/10 bg-gray-100";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -128,10 +128,10 @@ export function ContactFeedbackSurvey() {
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
             [ THANKS ]
           </p>
-          <p className="text-lg font-bold tracking-tight text-white">
+          <p className="text-lg font-bold tracking-tight dark:text-white text-gray-900">
             {t("thankTitle")}
           </p>
-          <p className="text-sm text-white/65">
+          <p className="text-sm dark:text-white text-gray-600">
             {t("thankDesc")}
           </p>
         </div>
@@ -145,7 +145,7 @@ export function ContactFeedbackSurvey() {
             {t("couponHint")}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <code className="rounded-xl border border-white/15 bg-white/10 px-4 py-2 font-mono text-lg font-bold tracking-wider text-cyan-300">
+            <code className="rounded-xl border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-4 py-2 font-mono text-lg font-bold tracking-wider text-cyan-300">
               {couponCode}
             </code>
             <button type="button" className={btnSecondary} onClick={copyCoupon}>
@@ -178,7 +178,7 @@ export function ContactFeedbackSurvey() {
         />
       </div>
 
-      <p className="text-sm leading-relaxed text-white/55">
+      <p className="text-sm leading-relaxed dark:text-white text-gray-500">
         {`// `}{t("intro")}
       </p>
 
@@ -239,7 +239,7 @@ export function ContactFeedbackSurvey() {
             </button>
           ))}
         </div>
-        <p className="text-xs text-white/50">
+        <p className="text-xs dark:text-white text-gray-400">
           {`// `}{t("scale15")}
         </p>
       </fieldset>
@@ -265,7 +265,7 @@ export function ContactFeedbackSurvey() {
             </button>
           ))}
         </div>
-        <p className="text-xs text-white/50">
+        <p className="text-xs dark:text-white text-gray-400">
           {`// `}{t("npsHint")}
         </p>
       </fieldset>
@@ -352,7 +352,7 @@ export function ContactFeedbackSurvey() {
         />
       </div>
 
-      <p className="text-xs text-white/50">
+      <p className="text-xs dark:text-white text-gray-400">
         {`// `}{t("timeHint")}
       </p>
 

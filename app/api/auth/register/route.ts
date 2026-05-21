@@ -135,6 +135,12 @@ export async function POST(req: Request) {
       console.error("[auth/register] verification email failed:", err);
     });
 
+    if (user.role === "advertiser" || user.role === "agency") {
+      void prisma.userWelcomeDrip
+        .create({ data: { userId: user.id } })
+        .catch(() => {});
+    }
+
     const { startProTrialIfEligible } = await import("@/lib/report-access");
     void startProTrialIfEligible(user.id).catch(console.error);
 

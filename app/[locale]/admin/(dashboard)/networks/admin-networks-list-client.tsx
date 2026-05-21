@@ -134,7 +134,7 @@ export default function AdminNetworksListClient({
                 <Badge variant="outline" className="text-[10px] font-normal">
                   {typeLabel(row.type)}
                 </Badge>
-                <Badge className="border-2 border-border bg-foreground text-[10px] font-medium text-primary-foreground border-border dark:bg-card dark:text-foreground">
+                <Badge className="border-2 border-border bg-foreground text-[10px] font-medium text-primary-foreground dark:bg-card dark:text-foreground">
                   {t("sites", { count: row.totalLocations })}
                 </Badge>
               </div>

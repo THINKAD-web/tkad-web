@@ -62,7 +62,7 @@ export default async function DevelopersPage({ params }: Props) {
               : "Media · availability · booking REST v1"
           }
         />
-        <p className="-mt-4 max-w-2xl text-sm text-white/65 sm:text-base">
+        <p className="-mt-4 max-w-2xl text-sm dark:text-white text-gray-600 sm:text-base">
           {isKo
             ? "대행사·미디어매체 툴에서 매체 조회·가용성 확인·예약 플로우를 자동화할 수 있는 공개 REST API입니다."
             : "Public REST API for agencies to query media, availability, and booking flows."}
@@ -78,7 +78,7 @@ export default async function DevelopersPage({ params }: Props) {
           </Link>
           <a
             href="#endpoints"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-6 py-3 font-mono text-sm text-white hover:bg-white/5"
+            className="inline-flex items-center gap-2 rounded-xl border dark:border-white/20 border-gray-300 px-6 py-3 font-mono text-sm dark:text-white text-gray-900 hover:dark:bg-white/5 bg-gray-50"
           >
             <Code2 className="h-4 w-4" />
             {isKo ? "엔드포인트" : "Endpoints"}
@@ -111,11 +111,11 @@ export default async function DevelopersPage({ params }: Props) {
           ].map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur"
+              className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur"
             >
               <Icon className="mb-3 h-6 w-6 text-cyan-300" />
-              <h3 className="font-semibold text-white">{title}</h3>
-              <p className="mt-1 text-sm text-white/60">{desc}</p>
+              <h3 className="font-semibold dark:text-white text-gray-900">{title}</h3>
+              <p className="mt-1 text-sm dark:text-white text-gray-500">{desc}</p>
             </div>
           ))}
         </div>
@@ -125,26 +125,26 @@ export default async function DevelopersPage({ params }: Props) {
         <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-cyan-300/80">
           {isKo ? "인증" : "Authentication"}
         </h2>
-        <p className="mt-3 max-w-2xl text-sm text-white/70">
+        <p className="mt-3 max-w-2xl text-sm dark:text-white text-gray-600">
           {isKo
             ? "모든 v1 요청에 API 키를 Bearer 토큰으로 전달합니다. 키는 /my/api-keys 에서 발급하며, 평문은 최초 1회만 표시됩니다."
             : "Send your API key as a Bearer token on every v1 request. Keys are issued at /my/api-keys and shown once."}
         </p>
-        <pre className="mt-6 overflow-x-auto rounded-xl border border-cyan-500/20 bg-black/60 p-4 font-mono text-xs text-cyan-100">
+        <pre className="mt-6 overflow-x-auto rounded-xl border border-cyan-500/20 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 p-4 font-mono text-xs text-cyan-100">
           {`Authorization: Bearer ${exampleKey}`}
         </pre>
-        <ul className="mt-6 flex flex-wrap gap-3 text-xs text-white/60">
+        <ul className="mt-6 flex flex-wrap gap-3 text-xs dark:text-white text-gray-500">
           {DEVELOPERS_PLANS.map((p) => (
             <li
               key={p.plan}
-              className="rounded-full border border-white/15 px-3 py-1"
+              className="rounded-full border dark:border-white/15 border-gray-200 px-3 py-1"
             >
               <span className="font-mono text-cyan-300">{p.plan}</span>{" "}
               {isKo ? p.limitKo : p.limitEn}
             </li>
           ))}
         </ul>
-        <p className="mt-4 text-xs text-white/50">
+        <p className="mt-4 text-xs dark:text-white text-gray-400">
           {isKo
             ? "월 한도 초과 시 HTTP 429 · 잘못된 키는 401"
             : "HTTP 429 when monthly limit exceeded · 401 for invalid keys"}
@@ -152,10 +152,10 @@ export default async function DevelopersPage({ params }: Props) {
       </NeonSection>
 
       <NeonSection className="!py-14" id="endpoints">
-        <h2 className="text-xl font-bold text-white">
+        <h2 className="text-xl font-bold dark:text-white text-gray-900">
           {isKo ? "엔드포인트" : "Endpoints"}
         </h2>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-2 text-sm dark:text-white text-gray-500">
           Base URL:{" "}
           <code className="text-cyan-200">{base}</code>
         </p>
@@ -164,31 +164,31 @@ export default async function DevelopersPage({ params }: Props) {
           {DEVELOPERS_ENDPOINTS.map((ep) => (
             <article
               key={ep.id}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"
+              className="rounded-2xl border dark:border-white/10 border-gray-200 bg-white/[0.03] p-6"
             >
               <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded bg-emerald-500/20 px-2 py-0.5 font-mono text-xs font-bold text-emerald-300">
                   {ep.method}
                 </span>
-                <code className="font-mono text-sm text-white">{ep.path}</code>
+                <code className="font-mono text-sm dark:text-white text-gray-900">{ep.path}</code>
               </div>
-              <h3 className="mt-3 text-lg font-semibold text-white">
+              <h3 className="mt-3 text-lg font-semibold dark:text-white text-gray-900">
                 {isKo ? ep.titleKo : ep.titleEn}
               </h3>
-              <p className="mt-1 text-sm text-white/60">
+              <p className="mt-1 text-sm dark:text-white text-gray-500">
                 {isKo ? ep.descKo : ep.descEn}
               </p>
 
               {ep.params.length > 0 ? (
                 <div className="mt-4">
-                  <p className="text-xs font-mono uppercase tracking-wider text-white/40">
+                  <p className="text-xs font-mono uppercase tracking-wider dark:text-white text-gray-400">
                     {isKo ? "쿼리 파라미터" : "Query params"}
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm text-white/70">
+                  <ul className="mt-2 space-y-1 text-sm dark:text-white text-gray-600">
                     {ep.params.map((p) => (
                       <li key={p.name}>
                         <code className="text-cyan-200">{p.name}</code>{" "}
-                        <span className="text-white/40">({p.type})</span> —{" "}
+                        <span className="dark:text-white text-gray-400">({p.type})</span> —{" "}
                         {p.descKo}
                       </li>
                     ))}
@@ -196,17 +196,17 @@ export default async function DevelopersPage({ params }: Props) {
                 </div>
               ) : null}
 
-              <p className="mt-6 text-xs font-mono uppercase tracking-wider text-white/40">
+              <p className="mt-6 text-xs font-mono uppercase tracking-wider dark:text-white text-gray-400">
                 {isKo ? "응답 예시" : "Response example"}
               </p>
-              <pre className="mt-2 overflow-x-auto rounded-xl border border-white/10 bg-black/50 p-4 font-mono text-xs leading-relaxed text-white/90">
+              <pre className="mt-2 overflow-x-auto rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500 p-4 font-mono text-xs leading-relaxed dark:text-white text-gray-800">
                 {ep.exampleResponse}
               </pre>
 
-              <p className="mt-6 text-xs font-mono uppercase tracking-wider text-white/40">
+              <p className="mt-6 text-xs font-mono uppercase tracking-wider dark:text-white text-gray-400">
                 cURL
               </p>
-              <pre className="mt-2 overflow-x-auto rounded-xl border border-cyan-500/15 bg-black/50 p-4 font-mono text-xs text-cyan-100/90">
+              <pre className="mt-2 overflow-x-auto rounded-xl border border-cyan-500/15 dark:bg-black bg-white dark:bg-white/5 bg-gray-500 p-4 font-mono text-xs text-cyan-100/90">
                 {ep.exampleCurl(base, exampleKey)}
               </pre>
             </article>
@@ -214,10 +214,10 @@ export default async function DevelopersPage({ params }: Props) {
         </div>
 
         <div className="mt-16 rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-8 text-center">
-          <p className="text-lg font-semibold text-white">
+          <p className="text-lg font-semibold dark:text-white text-gray-900">
             {isKo ? "지금 API 키를 발급하세요" : "Issue your API key now"}
           </p>
-          <p className="mt-2 text-sm text-white/60">
+          <p className="mt-2 text-sm dark:text-white text-gray-500">
             {isKo
               ? "로그인 후 마이페이지에서 키를 생성하고 바로 연동을 시작할 수 있습니다."
               : "Sign in, create a key in My page, and start integrating."}

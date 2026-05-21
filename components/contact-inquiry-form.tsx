@@ -596,19 +596,19 @@ export default function ContactInquiryForm() {
     };
   }, [siteKey, submitted, turnstileEnabled]);
 
-  const labelClass = "mb-2 block text-sm text-white/70";
+  const labelClass = "mb-2 block text-sm dark:text-white text-gray-600";
   const inputClass = cn(
-    "h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white",
-    "placeholder:text-white/40 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30",
+    "h-11 w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 text-sm dark:text-white text-gray-900",
+    "placeholder:dark:text-white text-gray-400 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30",
   );
   const btnPrimary =
-    "inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 text-sm font-bold text-white shadow-[0_12px_40px_rgba(139,92,246,0.35)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[160px] sm:w-auto";
+    "inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 text-sm font-bold dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(139,92,246,0.35)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[160px] sm:w-auto";
   const btnSecondary =
-    "inline-flex h-12 items-center justify-center rounded-xl border border-white/20 bg-white/10 px-6 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex h-12 items-center justify-center rounded-xl border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 px-6 text-sm font-semibold dark:text-white text-gray-900 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50";
   const chipActive =
-    "border-violet-500/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 text-white shadow-[0_8px_28px_rgba(139,92,246,0.35)]";
+    "border-violet-500/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 dark:text-white text-gray-900 shadow-[0_8px_28px_rgba(139,92,246,0.35)]";
   const chipIdle =
-    "border-white/15 bg-white/5 text-white/80 hover:border-white/25 hover:bg-white/10";
+    "dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:border-white/25 hover:dark:bg-white/10 bg-gray-100";
 
   const fieldError = useCallback(
     (name: FieldPath<ContactLeadFormValues>) => {
@@ -739,6 +739,8 @@ export default function ContactInquiryForm() {
         return;
       }
       setSubmitted(true);
+      const { trackGaEvent } = await import("@/lib/ga-events");
+      trackGaEvent("quote_submit", { source: "contact_form" });
       toast("success", tForm("toastSuccess"));
       const w = window as TurnstileWindow;
       if (turnstileWidgetId.current && w.turnstile) {
@@ -777,19 +779,19 @@ export default function ContactInquiryForm() {
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
           [ SUCCESS ]
         </p>
-        <p className="text-lg font-bold tracking-tight text-white">
+        <p className="text-lg font-bold tracking-tight dark:text-white text-gray-900">
           {tForm("successTitle")}
         </p>
-        <p className="text-sm leading-relaxed text-white/65">
+        <p className="text-sm leading-relaxed dark:text-white text-gray-600">
           {tForm("successBody")}
         </p>
 
-        <div className="mt-4 w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-          <div className="flex items-center justify-center gap-2 text-sm font-semibold text-white/85">
+        <div className="mt-4 w-full max-w-sm rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur">
+          <div className="flex items-center justify-center gap-2 text-sm font-semibold dark:text-white text-gray-800">
             <MessageCircle className="h-4 w-4 text-cyan-400" aria-hidden />
             {tForm("kakaoLead")}
           </div>
-          <p className="mt-2 text-center text-sm leading-relaxed text-white/60">
+          <p className="mt-2 text-center text-sm leading-relaxed dark:text-white text-gray-500">
             {tForm("kakaoDesc")}
           </p>
           <a
@@ -813,17 +815,17 @@ export default function ContactInquiryForm() {
       onSubmit={handleSubmit(onSubmit)}
       noValidate
     >
-      <p className="text-sm text-white/55">
+      <p className="text-sm dark:text-white text-gray-500">
         {tForm("stepLabel", { current: step + 1, total: 4 })}
       </p>
 
       {packageRef ? (
-        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm text-white/85">
+        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
             [ PACKAGE REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("packageRefBanner")}</p>
-          <p className="mt-1 text-xs text-white/50">
+          <p className="mt-1 text-xs dark:text-white text-gray-400">
             {"// "}{isKo ? packageRef.nameKo : packageRef.nameEn}
           </p>
           <Link
@@ -834,12 +836,12 @@ export default function ContactInquiryForm() {
           </Link>
         </div>
       ) : plannerPlanRef ? (
-        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm text-white/85">
+        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
             [ PLANNER REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("plannerRefBanner")}</p>
-          <p className="mt-1 text-xs text-white/50">
+          <p className="mt-1 text-xs dark:text-white text-gray-400">
             {`// ID ${plannerPlanRef.id}`}
           </p>
           <Link
@@ -850,12 +852,12 @@ export default function ContactInquiryForm() {
           </Link>
         </div>
       ) : publishedCaseRef ? (
-        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm text-white/85">
+        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
             [ CASE REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("caseRefBanner")}</p>
-          <p className="mt-1 text-xs text-white/50">
+          <p className="mt-1 text-xs dark:text-white text-gray-400">
             {"// "}
             {isKo
               ? publishedCaseRef.titleKo
@@ -869,7 +871,7 @@ export default function ContactInquiryForm() {
           </Link>
         </div>
       ) : academyTopic ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white/85 backdrop-blur">
+        <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-4 text-sm dark:text-white text-gray-800 backdrop-blur">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
             [ ACADEMY REFERENCE ]
           </p>
@@ -929,7 +931,7 @@ export default function ContactInquiryForm() {
 
       {step === 1 ? (
         <div className="space-y-4">
-          <p className="text-sm leading-relaxed text-white/55">
+          <p className="text-sm leading-relaxed dark:text-white text-gray-500">
             {tForm("contactHint")}
           </p>
           <div>

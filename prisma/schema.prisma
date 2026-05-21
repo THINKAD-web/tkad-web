@@ -788,13 +788,63 @@ model ContactInquiry {
   inquiryType String?  @map("inquiry_type")
   budget      String?
   message     String
+  /// 자동 분류: industry_budget_region 등
+  categoryCode   String?   @map("category_code") @db.VarChar(64)
+  assigneeEmail  String?   @map("assignee_email") @db.VarChar(254)
+  assignedAt     DateTime? @map("assigned_at")
+  firstResponseAt DateTime? @map("first_response_at")
+  slaEscalatedAt DateTime? @map("sla_escalated_at")
   createdAt   DateTime @default(now()) @map("created_at")
 
   oohQuote       OoHQuote?
   pipelineCard   PipelineCard?
   openBidRequest OpenBidRequest?
 
+  @@index([assigneeEmail, createdAt(sort: Desc)])
+  @@index([firstResponseAt, slaEscalatedAt])
   @@map("contact_inquiries")
+}
+
+/// 광고주 가입 환영 이메일 드립 (Day 0/1/3/7/14)
+model UserWelcomeDrip {
+  userId          String    @id @map("user_id")
+  day0SentAt      DateTime? @map("day0_sent_at")
+  day1SentAt      DateTime? @map("day1_sent_at")
+  day3SentAt      DateTime? @map("day3_sent_at")
+  day7SentAt      DateTime? @map("day7_sent_at")
+  day14SentAt     DateTime? @map("day14_sent_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_welcome_drips")
+}
+
+/// 공개 지원 AI 채팅 로그 (비로그인 sessionId 포함)
+model SupportChatLog {
+  id        String   @id @default(cuid())
+  sessionId String   @map("session_id") @db.VarChar(64)
+  userId    String?  @map("user_id")
+  locale    String   @default("ko") @db.VarChar(8)
+  role      String   @db.VarChar(16)
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("support_chat_logs")
+}
+
+/// 라운드로빈·운영 카운터
+model OpsAutomationState {
+  key       String   @id @db.VarChar(64)
+  intValue  Int      @default(0) @map("int_value")
+  jsonValue Json?    @map("json_value")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("ops_automation_state")
 }
 
 model CustomerFeedback {
@@ -1256,6 +1306,35 @@ model AcademyLesson {
   @@map("academy_lessons")
 }
 
+/// 아카데미 정적 다운로드 PDF (dl-guide, dl-checklist, dl-matrix)
+model AcademyDownloadAsset {
+  id          String    @id
+  kind        String
+  titleKo     String    @map("title_ko")
+  titleEn     String?   @map("title_en")
+  pdfUrl      String?   @map("pdf_url")
+  pdfPublicId String?   @map("pdf_public_id")
+  generatedAt DateTime? @map("generated_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("academy_download_assets")
+}
+
+model AcademyWebinarRegistration {
+  id        String   @id @default(cuid())
+  webinarId String   @map("webinar_id")
+  name      String?
+  email     String
+  company   String?
+  locale    String?  @db.VarChar(8)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([webinarId, createdAt])
+  @@index([email])
+  @@map("academy_webinar_registrations")
+}
+
 /// type: trend_report | academy_lesson | success_case | campaign_report | campaign_completion_pdf
 model GenerationLog {
   id         String   @id @default(cuid())
@@ -1362,6 +1441,8 @@ model User {
   searchLogs              SearchLog[]
   preference              UserPreference?
   chatLogs                ChatLog[]
+  supportChatLogs         SupportChatLog[]
+  welcomeDrip             UserWelcomeDrip?
   apiKeys                 ApiKey[]
   ownedMedia              Media[]                  @relation("MediaOwner")
   mediaPriceChangeRequests MediaPriceChangeRequest[]
@@ -2000,9 +2081,12 @@ model PotentialMedia {
   contactInfo     Json?                        @map("contact_info")
   externalPlaceId String?                      @map("external_place_id") @db.VarChar(120)
   outreachStatus  PotentialMediaOutreachStatus @default(NEW) @map("outreach_status")
+  outreachSequenceStep Int @default(0) @map("outreach_sequence_step")
   outreachToken   String?                      @unique @map("outreach_token") @db.VarChar(64)
   outreachEmail   String?                      @map("outreach_email") @db.VarChar(254)
   emailedAt       DateTime?                    @map("emailed_at")
+  followUp1SentAt DateTime?                    @map("follow_up1_sent_at")
+  followUp2SentAt DateTime?                    @map("follow_up2_sent_at")
   emailOpenedAt   DateTime?                    @map("email_opened_at")
   registeredAt    DateTime?                    @map("registered_at")
   notes           String?                      @db.Text
@@ -2645,6 +2729,18 @@ model OpsErrorLog {
 
   @@index([createdAt(sort: Desc)])
   @@map("ops_error_logs")
+}
+
+/// 일일 논리 DB 스냅샷(행 수) — Neon PITR 보완
+model OpsBackupRun {
+  id        String   @id @default(cuid())
+  status    String   @db.VarChar(16)
+  detail    String?  @db.VarChar(512)
+  snapshot  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@map("ops_backup_runs")
 }
 
 /// B2B 공개 API 키 (대행사·파트너 연동) — 평문 key는 keyHash(SHA-256)에만 저장

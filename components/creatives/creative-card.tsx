@@ -50,7 +50,7 @@ export function CreativeCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-violet-600/30 via-cyan-500/20 to-pink-500/20">
-            <Film className="h-10 w-10 text-white/70" />
+            <Film className="h-10 w-10 dark:text-white text-gray-600" />
           </div>
         )}
         <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md border border-border bg-card/95 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-foreground">
@@ -75,7 +75,7 @@ export function CreativeCard({
               "absolute right-2 bottom-2 flex h-7 w-7 items-center justify-center rounded-full border-2 transition-colors",
               selected
                 ? "border-accent bg-accent text-accent-foreground"
-                : "border-white/60 bg-black/30 text-white/80 backdrop-blur",
+                : "border-white/60 dark:bg-black bg-white bg-white/30 dark:text-white text-gray-700 backdrop-blur",
             )}
             aria-hidden
           >

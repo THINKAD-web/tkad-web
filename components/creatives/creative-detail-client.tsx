@@ -105,7 +105,7 @@ export function CreativeDetailClient({ id }: { id: string }) {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr,1fr]">
       <div className="space-y-4">
         <div className="overflow-hidden rounded-2xl border-2 border-border bg-card">
-          <div className="aspect-[16/10] w-full bg-black/5 dark:bg-black/30">
+          <div className="aspect-[16/10] w-full dark:bg-black bg-white dark:bg-white/5 bg-gray-50 bg-white/30">
             {detail.type === "video" ? (
               <video
                 src={detail.url}

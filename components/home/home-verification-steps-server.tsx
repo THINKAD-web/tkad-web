@@ -15,7 +15,7 @@ export async function HomeVerificationStepsServer() {
     <div className="tkad-home-verification-steps relative mt-6 sm:mt-10 lg:mt-12">
       <div
         aria-hidden
-        className="pointer-events-none absolute left-6 right-6 top-10 hidden h-px bg-white/10 lg:block"
+        className="pointer-events-none absolute left-6 right-6 top-10 hidden h-px dark:bg-white/10 bg-gray-100 lg:block"
       />
       <div
         aria-hidden
@@ -28,20 +28,20 @@ export async function HomeVerificationStepsServer() {
           return (
             <article
               key={item.step}
-              className="group relative h-full rounded-[28px] bg-white/6 p-5 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border tkad-neon-glow sm:p-7 lg:p-8"
+              className="group relative h-full rounded-[28px] dark:bg-white/6 bg-gray-50 p-5 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border tkad-neon-glow sm:p-7 lg:p-8"
             >
               <div className="mb-6 flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   [{item.step}]
                 </span>
                 <Icon
-                  className="h-7 w-7 text-white/80 transition-colors group-hover:text-white"
+                  className="h-7 w-7 dark:text-white text-gray-700 transition-colors group-hover:dark:text-white text-gray-900"
                   strokeWidth={1.75}
                   aria-hidden
                 />
               </div>
-              <h3 className="text-xl font-black tracking-tight text-white">{item.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-white/76">{item.desc}</p>
+              <h3 className="text-xl font-black tracking-tight dark:text-white text-gray-900">{item.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed dark:text-white">{item.desc}</p>
             </article>
           );
         })}

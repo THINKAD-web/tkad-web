@@ -204,7 +204,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     gridLabel={t("media.browseCardLayoutGrid")}
                     compactLabel={t("media.browseCardLayoutCompact")}
                   />
-                  <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent shadow-sm backdrop-blur dark:border-white/12 dark:bg-black/20 dark:text-foreground">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent shadow-sm backdrop-blur dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-foreground">
                     <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
                     <span>{tMedia("browseCatalogVerifiedBadge")}</span>
                   </div>
@@ -267,7 +267,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     href={buildPlannerHrefWithMediaIds(items.map((m) => m.id))}
                     variant="accent"
                     size="md"
-                    className="w-full min-h-12 justify-center rounded-[22px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[12rem]"
+                    className="w-full min-h-12 justify-center rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[12rem]"
                   >
                     {isKo ? "이 조합으로 플래너 시작" : "Start planner with selection"}
                   </BtnBlock>
@@ -302,7 +302,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     size="md"
                     disabled={comparePdfLoading}
                     onClick={() => void handleComparePdfDownload()}
-                    className="w-full min-h-12 justify-center rounded-[22px] border border-border bg-card text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-muted sm:w-auto sm:min-w-[10rem] disabled:opacity-50 dark:border-white/12 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
+                    className="w-full min-h-12 justify-center rounded-[22px] border border-border bg-card text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-muted sm:w-auto sm:min-w-[10rem] disabled:opacity-50 dark:border-white/12 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/12"
                   >
                     {comparePdfLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -317,7 +317,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     size="md"
                     disabled={captureLoading}
                     onClick={() => void handleCaptureImage()}
-                    className="w-full min-h-12 justify-center rounded-[22px] border border-border bg-card text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-muted sm:w-auto sm:min-w-[10rem] disabled:opacity-50 dark:border-white/12 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
+                    className="w-full min-h-12 justify-center rounded-[22px] border border-border bg-card text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-muted sm:w-auto sm:min-w-[10rem] disabled:opacity-50 dark:border-white/12 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/12"
                   >
                     {captureLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

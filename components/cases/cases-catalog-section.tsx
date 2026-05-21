@@ -62,7 +62,7 @@ export function CasesCatalogSection({
                   <Sparkles className="h-3.5 w-3.5" />
                   [ {t("recommendedTitle")} ]
                 </p>
-                <p className="mt-1 text-sm text-white/55">
+                <p className="mt-1 text-sm dark:text-white text-gray-500">
                   {t("recommendedSubtitle")}
                 </p>
               </div>
@@ -80,7 +80,7 @@ export function CasesCatalogSection({
               ))}
             </div>
           ) : (
-            <p className="rounded-[20px] border border-white/12 bg-white/5 py-16 text-center text-sm text-white/55">
+            <p className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 py-16 text-center text-sm dark:text-white text-gray-500">
               {isKo
                 ? "선택한 필터에 맞는 사례가 없습니다. 필터를 조정해 보세요."
                 : "No cases match your filters. Try adjusting them."}

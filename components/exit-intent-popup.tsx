@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "tkad-exit-intent-last-shown-date";
+const NEVER_KEY = "tkad-exit-intent-never";
 
 function todayKey(): string {
   const d = new Date();
@@ -29,17 +30,27 @@ export default function ExitIntentPopup() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const dismiss = useCallback(() => {
+  const dismiss = useCallback((never?: boolean) => {
     setShow(false);
     try {
-      localStorage.setItem(STORAGE_KEY, todayKey());
+      if (never) {
+        localStorage.setItem(NEVER_KEY, "1");
+      } else {
+        localStorage.setItem(STORAGE_KEY, todayKey());
+      }
     } catch {
       /* ignore */
     }
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const narrow = window.matchMedia("(max-width: 767px)").matches;
+    if (coarse || narrow) return;
+
     try {
+      if (localStorage.getItem(NEVER_KEY) === "1") return;
       const last = localStorage.getItem(STORAGE_KEY);
       if (last && last === todayKey()) return;
     } catch {
@@ -101,22 +112,22 @@ export default function ExitIntentPopup() {
   return (
     <Modal
       open={show}
-      onClose={dismiss}
+      onClose={() => dismiss()}
       ariaLabel={isKo ? "OOH 매체 가이드" : "OOH media guide"}
-      className="max-w-[min(100%,440px)] border-white/14 sm:max-w-[480px]"
+      className="max-w-[min(100%,440px)] dark:border-white/14 border-gray-200 sm:max-w-[480px]"
     >
       <div className="relative z-[1] px-6 pb-8 pt-9 sm:px-9 sm:pb-9 sm:pt-10">
-        <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/55">
+        <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] dark:text-white text-gray-500">
           <Sparkles className="h-3.5 w-3.5 text-cyan-300/90" aria-hidden />
           {isKo ? "잠시만요!" : "Wait!"}
         </div>
 
-        <h2 className="mt-4 text-balance text-[1.65rem] font-black leading-[1.12] tracking-[-0.04em] text-white sm:text-[1.85rem]">
+        <h2 className="mt-4 text-balance text-[1.65rem] font-black leading-[1.12] tracking-[-0.04em] dark:text-white text-gray-900 sm:text-[1.85rem]">
           {isKo
-            ? "무료 OOH 매체 가이드 받아가세요"
-            : "Get your free OOH media guide"}
+            ? "잠시만요! 무료 OOH 가이드북 받아가세요"
+            : "Wait! Get your free OOH guidebook"}
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-white/72 sm:text-[15px]">
+        <p className="mt-3 text-sm leading-relaxed dark:text-white sm:text-[15px]">
           {isKo
             ? "이메일을 남기시면 입문 가이드 링크를 바로 보내 드립니다. 예산·지역별 매체 선택 팁이 담겨 있습니다."
             : "Leave your email and we’ll send a starter guide with budget and region tips."}
@@ -124,17 +135,17 @@ export default function ExitIntentPopup() {
 
         <div
           className={cn(
-            "mt-6 flex gap-3 rounded-2xl border border-white/12 bg-white/[0.06] p-4 backdrop-blur-sm",
+            "mt-6 flex gap-3 rounded-2xl border dark:border-white/12 border-gray-200 bg-white/[0.06] p-4 backdrop-blur-sm",
           )}
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/12 bg-gradient-to-br from-violet-500/35 via-cyan-500/25 to-fuchsia-500/30">
-            <Gift className="h-6 w-6 text-white" aria-hidden />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border dark:border-white/12 border-gray-200 bg-gradient-to-br from-violet-500/35 via-cyan-500/25 to-fuchsia-500/30">
+            <Gift className="h-6 w-6 dark:text-white text-gray-900" aria-hidden />
           </div>
           <div className="min-w-0">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-400">
               PDF · 가이드
             </p>
-            <p className="mt-1 text-sm font-semibold text-white">
+            <p className="mt-1 text-sm font-semibold dark:text-white text-gray-900">
               {isKo ? "매체 유형·견적·집행 체크리스트" : "Media types, quotes & launch checklist"}
             </p>
           </div>
@@ -160,32 +171,39 @@ export default function ExitIntentPopup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={isKo ? "work@company.com" : "work@company.com"}
-              className="w-full rounded-2xl border border-white/14 bg-black/40 px-4 py-3 text-sm text-white placeholder:text-white/35"
+              className="w-full rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-4 py-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400"
             />
             {error ? <p className="text-sm text-red-300">{error}</p> : null}
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="submit"
                 disabled={loading}
-                className="tkad-neon-cta-clean inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl px-6 text-sm font-black text-white disabled:opacity-60"
+                className="tkad-neon-cta-clean inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl px-6 text-sm font-black dark:text-white text-gray-900 disabled:opacity-60"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                 ) : null}
-                {isKo ? "가이드 받기" : "Send guide"}
+                {isKo ? "받기" : "Get it"}
               </button>
               <button
                 type="button"
-                onClick={dismiss}
-                className="h-12 rounded-2xl border border-white/14 bg-white/[0.04] px-5 text-sm font-semibold text-white/85 hover:bg-white/[0.08]"
+                onClick={() => dismiss()}
+                className="h-12 rounded-2xl border dark:border-white/14 border-gray-200 bg-white/[0.04] px-5 text-sm font-semibold dark:text-white text-gray-800 hover:bg-white/[0.08]"
               >
                 {isKo ? "괜찮아요" : "No thanks"}
               </button>
             </div>
+            <button
+              type="button"
+              onClick={() => dismiss(true)}
+              className="w-full text-center text-xs font-semibold dark:text-white hover:dark:text-white text-gray-600"
+            >
+              {isKo ? "다시 보지 않기" : "Don't show again"}
+            </button>
           </form>
         )}
 
-        <p className="mt-5 font-mono text-[10px] tracking-tight text-white/40">
+        <p className="mt-5 font-mono text-[10px] tracking-tight dark:text-white text-gray-400">
           {`// `}
           {isKo ? "동일 기기·브라우저에서 하루 한 번만 표시됩니다." : "Shown at most once per day on this device."}
         </p>

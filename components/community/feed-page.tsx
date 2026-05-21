@@ -105,12 +105,12 @@ export async function CommunityFeedPage({
           ].map((item) => (
             <div
               key={item.label}
-              className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 shadow-[0_24px_90px_rgba(0,0,0,0.7)] backdrop-blur"
+              className="inline-flex items-center gap-3 rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-2 shadow-[0_24px_90px_rgba(0,0,0,0.7)] backdrop-blur"
             >
-              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/62">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white">
                 {item.label}
               </span>
-              <span className="font-display text-sm font-black tracking-tight text-white">
+              <span className="font-display text-sm font-black tracking-tight dark:text-white text-gray-900">
                 {item.value}
               </span>
             </div>
@@ -118,7 +118,7 @@ export async function CommunityFeedPage({
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
-          <div className="rounded-[30px] border border-white/12 bg-white/6 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+          <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
             <NeonSectionHead
               number="06"
               kicker="Community"
@@ -141,7 +141,7 @@ export async function CommunityFeedPage({
               className="mb-0"
             />
 
-            <p className="mt-6 max-w-3xl text-[15px] leading-relaxed text-white/78 sm:text-lg">
+            <p className="mt-6 max-w-3xl text-[15px] leading-relaxed dark:text-white text-gray-700 sm:text-lg">
               {activeCategory
                 ? isKo
                   ? currentCategoryLabels?.description.ko
@@ -154,14 +154,14 @@ export async function CommunityFeedPage({
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="/community/write"
-                className="tkad-neon-cta-clean group inline-flex h-14 items-center justify-center gap-2 rounded-[20px] px-7 text-sm font-black text-white transition-transform hover:-translate-y-1"
+                className="tkad-neon-cta-clean group inline-flex h-14 items-center justify-center gap-2 rounded-[20px] px-7 text-sm font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1"
               >
                 <PenLine className="h-4 w-4" />
                 {isKo ? "글쓰기 시작" : "Start posting"}
               </Link>
               <Link
                 href="/community/members"
-                className="group inline-flex h-14 items-center justify-center gap-2 rounded-[20px] border border-white/14 bg-white/6 px-7 text-sm font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10"
+                className="group inline-flex h-14 items-center justify-center gap-2 rounded-[20px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-7 text-sm font-black dark:text-white text-gray-900 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100"
               >
                 <Users className="h-4 w-4" />
                 {isKo ? "활동 멤버 보기" : "Browse members"}
@@ -170,8 +170,8 @@ export async function CommunityFeedPage({
           </div>
 
           <div className="grid gap-4">
-            <div className="rounded-[28px] border border-white/12 bg-white/6 p-5 backdrop-blur tkad-neon-border">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+            <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 {isKo ? "// 빠른 이동" : "// quick paths"}
               </p>
               <div className="mt-4 grid gap-2">
@@ -185,19 +185,19 @@ export async function CommunityFeedPage({
                       className={`rounded-2xl border px-4 py-3 transition-colors ${
                         active
                           ? "border-white/22 bg-white/12"
-                          : "border-white/10 bg-black/20 hover:bg-white/8"
+                          : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 hover:dark:bg-white/8 bg-gray-100"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white">
+                          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900">
                             {isKo ? labels.shortKo : labels.en}
                           </p>
-                          <p className="mt-1 text-sm leading-relaxed text-white/62">
+                          <p className="mt-1 text-sm leading-relaxed dark:text-white">
                             {isKo ? labels.description.ko : labels.description.en}
                           </p>
                         </div>
-                        <Compass className="h-4 w-4 shrink-0 text-white/45" />
+                        <Compass className="h-4 w-4 shrink-0 dark:text-white" />
                       </div>
                     </Link>
                   );
@@ -205,14 +205,14 @@ export async function CommunityFeedPage({
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/12 bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(34,211,238,0.08),rgba(255,255,255,0.04))] p-5 backdrop-blur tkad-neon-border">
+            <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(34,211,238,0.08),rgba(255,255,255,0.04))] p-5 backdrop-blur tkad-neon-border">
               <div className="flex items-start gap-3">
-                <Sparkles className="mt-0.5 h-5 w-5 text-white/72" />
+                <Sparkles className="mt-0.5 h-5 w-5 dark:text-white" />
                 <div>
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                     {isKo ? "// 커뮤니티 기준" : "// feed logic"}
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed text-white/72">
+                  <p className="mt-2 text-sm leading-relaxed dark:text-white">
                     {isKo
                       ? "최신성과 반응을 함께 반영한 큐레이션 피드입니다. 카테고리와 정렬 기준을 바꿔 원하는 관점으로 바로 탐색할 수 있습니다."
                       : "The feed blends recency with engagement. Switch category and sort to explore the community from different angles."}
@@ -223,7 +223,7 @@ export async function CommunityFeedPage({
           </div>
         </div>
 
-        <div className="mt-8 rounded-[28px] border border-white/12 bg-white/6 p-5 backdrop-blur tkad-neon-border sm:p-6">
+        <div className="mt-8 rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <ul className="flex flex-wrap gap-2">
               <li>
@@ -231,8 +231,8 @@ export async function CommunityFeedPage({
                   href={buildFeedHref({ sort: activeSort })}
                   className={`inline-flex rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                     !activeCategory
-                      ? "border-white/22 bg-white/12 text-white"
-                      : "border-white/10 bg-black/20 text-white/68 hover:bg-white/8 hover:text-white"
+                      ? "border-white/22 bg-white/12 dark:text-white text-gray-900"
+                      : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
                   }`}
                 >
                   {isKo ? "전체" : "All"}
@@ -247,8 +247,8 @@ export async function CommunityFeedPage({
                       href={buildFeedHref({ category: cat, sort: activeSort })}
                       className={`inline-flex rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                         active
-                          ? "border-white/22 bg-white/12 text-white"
-                          : "border-white/10 bg-black/20 text-white/68 hover:bg-white/8 hover:text-white"
+                          ? "border-white/22 bg-white/12 dark:text-white text-gray-900"
+                          : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
                       }`}
                     >
                       {isKo ? labels.shortKo : labels.en}
@@ -272,8 +272,8 @@ export async function CommunityFeedPage({
                   })}
                   className={`inline-flex rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                     activeSort === option.key
-                      ? "border-[#8b5cf6]/60 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.16))] text-white"
-                      : "border-white/10 bg-black/20 text-white/68 hover:bg-white/8 hover:text-white"
+                      ? "border-[#8b5cf6]/60 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.16))] dark:text-white text-gray-900"
+                      : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
                   }`}
                 >
                   {option.label}
@@ -289,10 +289,10 @@ export async function CommunityFeedPage({
           <div>
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   {isKo ? "// curated feed" : "// curated feed"}
                 </p>
-                <h2 className="mt-2 text-2xl font-black tracking-[-0.05em] text-white sm:text-3xl">
+                <h2 className="mt-2 text-2xl font-black tracking-[-0.05em] dark:text-white text-gray-900 sm:text-3xl">
                   {activeCategory
                     ? isKo
                       ? `${currentCategoryLabels?.ko} 글`
@@ -302,7 +302,7 @@ export async function CommunityFeedPage({
                       : "Latest community feed"}
                 </h2>
               </div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/58">
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] dark:text-white">
                 {isKo
                   ? `총 ${posts.total.toLocaleString()}개 글`
                   : `${posts.total.toLocaleString()} posts`}
@@ -315,25 +315,25 @@ export async function CommunityFeedPage({
               <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-rose-200">
                 [ DB 마이그레이션 필요 ]
               </p>
-                <p className="mt-3 font-bold text-white">
+                <p className="mt-3 font-bold dark:text-white text-gray-900">
                 {isKo
                   ? "커뮤니티 스키마가 아직 최신 상태가 아닙니다."
                   : "The community schema is not up to date yet."}
               </p>
-                <p className="mt-2 font-mono text-[11px] tracking-tight text-white/62">
+                <p className="mt-2 font-mono text-[11px] tracking-tight dark:text-white">
                 {dbError}
               </p>
               </div>
           ) : posts.items.length === 0 ? (
-              <div className="rounded-[28px] border border-white/12 bg-white/6 p-12 text-center backdrop-blur tkad-neon-border">
-                <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-white/58">
+              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-12 text-center backdrop-blur tkad-neon-border">
+                <p className="font-mono text-[12px] uppercase tracking-[0.22em] dark:text-white">
                 {isKo
                   ? "// 아직 등록된 글이 없습니다."
                   : "// there are no community posts yet"}
               </p>
               <Link
                 href="/community/write"
-                  className="mt-6 inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white transition-colors hover:bg-white/10"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
               >
                 {isKo ? "첫 글 작성하기" : "Write the first post"}
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -369,8 +369,8 @@ export async function CommunityFeedPage({
                     })}
                       className={`inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 font-mono text-[11px] font-bold tabular-nums transition-colors ${
                       active
-                          ? "border-white/22 bg-white/12 text-white"
-                          : "border-white/10 bg-black/20 text-white/62 hover:bg-white/8 hover:text-white"
+                          ? "border-white/22 bg-white/12 dark:text-white text-gray-900"
+                          : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
                     }`}
                   >
                     {n}
@@ -382,42 +382,42 @@ export async function CommunityFeedPage({
           </div>
 
           <aside className="space-y-4">
-            <div className="rounded-[28px] border border-white/12 bg-white/6 p-5 backdrop-blur tkad-neon-border">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+            <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 {isKo ? "// members" : "// members"}
               </p>
-              <h3 className="mt-3 text-xl font-black tracking-[-0.04em] text-white">
+              <h3 className="mt-3 text-xl font-black tracking-[-0.04em] dark:text-white text-gray-900">
                 {isKo ? "활동 멤버를 만나보세요" : "Meet active members"}
               </h3>
-              <p className="mt-3 text-sm leading-relaxed text-white/68">
+              <p className="mt-3 text-sm leading-relaxed dark:text-white">
                 {isKo
                   ? "광고주, 매체사, 대행사, 프리랜서 프로필을 보고 누구와 연결될지 빠르게 판단할 수 있습니다."
                   : "Explore advertiser, media, agency, and freelancer profiles to find the right connection."}
               </p>
               <Link
                 href="/community/members"
-                className="mt-5 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white hover:text-white/75"
+                className="mt-5 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 hover:dark:text-white text-gray-700"
               >
                 {isKo ? "멤버 디렉터리 열기" : "Open directory"}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
 
-            <div className="rounded-[28px] border border-white/12 bg-white/6 p-5 backdrop-blur tkad-neon-border">
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/55">
-                <Shield className="mr-2 inline h-3.5 w-3.5 text-white/72" aria-hidden />
+            <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border">
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <Shield className="mr-2 inline h-3.5 w-3.5 dark:text-white" aria-hidden />
                 {isKo
                   ? "// 회원 기반 커뮤니티 운영"
                   : "// members-first community"}
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-white/68">
+              <p className="mt-3 text-sm leading-relaxed dark:text-white">
                 {isKo
                   ? "글, 댓글, 좋아요, 북마크는 로그인 멤버 기준으로 운영됩니다. 정책과 모더레이션 원칙도 함께 확인해 주세요."
                   : "Posts, comments, likes, and bookmarks are tied to signed-in members. Review the policy and moderation rules as well."}
               </p>
               <Link
                 href="/community/policy"
-                className="mt-5 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white hover:text-white/75"
+                className="mt-5 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 hover:dark:text-white text-gray-700"
               >
                 {isKo ? "운영 정책 보기" : "View policy"}
                 <ArrowRight className="h-3.5 w-3.5" />

@@ -13,7 +13,7 @@ export function NeonSection({ children, className, innerClassName, id }: Props) 
     <section
       id={id}
       className={cn(
-        "tkad-neon-surface relative overflow-hidden bg-[#05050a] py-12 text-white sm:py-16 md:py-24 lg:py-32 xl:py-40 2xl:py-48",
+        "tkad-neon-surface relative overflow-hidden bg-[#05050a] py-12 dark:text-white text-gray-900 sm:py-16 md:py-24 lg:py-32 xl:py-40 2xl:py-48",
         className,
       )}
     >

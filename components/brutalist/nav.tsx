@@ -111,7 +111,7 @@ export function BrutalNav({
   const Logo = (
     <Link
       href="/"
-      className="inline-flex shrink-0 items-baseline whitespace-nowrap text-[15px] font-black leading-none tracking-tight text-foreground sm:text-[16px] md:text-[20px] dark:text-white"
+      className="inline-flex shrink-0 items-baseline whitespace-nowrap text-lg font-black leading-none tracking-tight text-foreground md:text-xl dark:text-white"
     >
       {logo ?? (
         <span className="inline-flex items-baseline whitespace-nowrap">
@@ -126,7 +126,7 @@ export function BrutalNav({
     <nav
       className={cn(
         /* 다크: backdrop-filter 사용 시 /45 로 더 투명해지면 낮 랜딩(밝은 본문)이 비쳐 흰 메뉴 글자가 사라짐 — 불투명도 고정 */
-        "tkad-nav-chrome sticky top-0 z-50 w-full max-w-full border-b border-border/60 bg-background text-foreground dark:border-white/10 dark:bg-[#05050a] dark:text-white",
+        "tkad-nav-chrome sticky top-0 z-50 w-full max-w-full border-b border-border/60 bg-background text-foreground dark:border-white/10 border-gray-200 dark:bg-[#05050a] dark:text-white text-gray-900",
         className,
       )}
     >
@@ -185,7 +185,7 @@ export function BrutalNav({
                     <li key={navLeafKey(entry)}>
                       <Link
                         href={entry.href}
-                        className="inline-flex h-10 items-center rounded-xl px-3 text-[12px] font-semibold tracking-tight text-foreground transition-colors hover:bg-foreground/8 hover:text-foreground lg:px-4 lg:text-[13px] dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
+                        className="inline-flex h-10 items-center rounded-xl px-3 text-[12px] font-semibold tracking-tight text-foreground transition-colors hover:bg-foreground/8 hover:text-foreground lg:px-4 lg:text-[13px] dark:text-white text-gray-900 dark:hover:dark:bg-white/10 bg-gray-100 dark:hover:dark:text-white"
                       >
                         {entry.label}
                       </Link>
@@ -209,7 +209,7 @@ export function BrutalNav({
             <Link
               href={cta.href}
               className={cn(
-                "tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 lg:px-4 lg:text-[12px] lg:tracking-[0.2em]",
+                "tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-mono text-[11px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 lg:px-4 lg:text-[12px] lg:tracking-[0.2em]",
                 sidebarLayout && "lg:hidden",
               )}
             >
@@ -227,7 +227,7 @@ export function BrutalNav({
             {cta ? (
               <Link
                 href={cta.href}
-                className="tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-mono text-[10px] font-black uppercase tracking-[0.16em] text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
+                className="tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-mono text-[10px] font-black uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
               >
                 {cta.label}
               </Link>
@@ -240,20 +240,20 @@ export function BrutalNav({
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen((v) => !v)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-card/70 text-foreground backdrop-blur transition-all duration-300 hover:border-border hover:bg-card dark:border-white/12 dark:bg-white/6 dark:text-white dark:hover:border-white/22 dark:hover:bg-white/10"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-card/70 text-foreground backdrop-blur transition-all duration-300 hover:border-border hover:bg-card dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100"
             >
               {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>
         </div>
         {search ? (
-          <div className="border-t border-border/50 bg-background px-4 pb-3 pt-2 dark:border-white/10 dark:bg-[#05050a]">
+          <div className="border-t border-border/50 bg-background px-4 pb-3 pt-2 dark:border-white/10 border-gray-200 dark:bg-[#05050a]">
             {search}
           </div>
         ) : null}
         {/* 좁은 미리보기·모바일에서도 IA 링크가 상단에 보이도록 (md 미만은 햄버거만 있으면 카테고리가 숨겨짐) */}
         <div
-          className="border-t border-zinc-200/90 bg-zinc-100 px-3 py-2 dark:border-white/10 dark:bg-[#05050a]"
+          className="border-t border-zinc-200/90 bg-zinc-100 px-3 py-2 dark:border-white/10 border-gray-200 dark:bg-[#05050a]"
           aria-label="주요 카테고리"
         >
           <ul
@@ -271,7 +271,7 @@ export function BrutalNav({
                       setMobileExpandedGroupId(group.id);
                       setMobileOpen(true);
                     }}
-                    className="inline-flex max-w-[10rem] touch-manipulation items-center gap-1.5 truncate rounded-full border border-zinc-300/90 bg-white px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 dark:bg-white/10 dark:text-white"
+                    className="inline-flex max-w-[10rem] touch-manipulation items-center gap-1.5 truncate rounded-full border border-zinc-300/90 bg-white px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900"
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
                     {group.label}
@@ -284,7 +284,7 @@ export function BrutalNav({
                   <li key={navLeafKey(leaf)} className="shrink-0">
                     <Link
                       href={leaf.href}
-                      className="inline-flex max-w-[11rem] touch-manipulation truncate rounded-full border border-zinc-300/90 bg-white px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 dark:bg-white/10 dark:text-white"
+                      className="inline-flex max-w-[11rem] touch-manipulation truncate rounded-full border border-zinc-300/90 bg-white px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900"
                     >
                       {leaf.label}
                     </Link>
@@ -297,7 +297,7 @@ export function BrutalNav({
 
       {/* 모바일 패널 — 라이트에선 솔리드 배경(네온 레이어는 다크만). 그렇지 않으면 검정 글자가 어두운 그라데이션에 묻힘 */}
       {mobileOpen && (
-        <div className="relative overflow-hidden border-t border-zinc-200/90 bg-zinc-50 text-zinc-950 md:hidden dark:border-white/10 dark:bg-[#05050a] dark:text-white">
+        <div className="relative overflow-hidden border-t border-zinc-200/90 bg-zinc-50 text-zinc-950 md:hidden dark:border-white/10 border-gray-200 dark:bg-[#05050a] dark:text-white text-gray-900">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 tkad-neon-depth hidden dark:block"
@@ -325,7 +325,7 @@ export function BrutalNav({
               {navEntries.map((entry, i) =>
                 isGroup(entry) ? (
                   <li key={`mg-${i}`}>
-                    <p className="bg-zinc-200/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-600 dark:bg-white/5 dark:text-white/70">
+                    <p className="bg-zinc-200/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-600 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600">
                       {entry.label}
                     </p>
                     <ul className="divide-y divide-zinc-200 dark:divide-white/10">
@@ -334,7 +334,7 @@ export function BrutalNav({
                           <Link
                             href={leaf.href}
                             onClick={() => setMobileOpen(false)}
-                            className="flex min-h-[3.25rem] items-center gap-2 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white dark:hover:bg-white/6"
+                            className="flex min-h-[3.25rem] items-center gap-2 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white text-gray-900 dark:hover:dark:bg-white/6 bg-gray-50"
                           >
                             {leaf.label}
                             {leaf.badge ? <NavBetaBadge /> : null}
@@ -348,7 +348,7 @@ export function BrutalNav({
                     <Link
                       href={entry.href}
                       onClick={() => setMobileOpen(false)}
-                      className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white dark:hover:bg-white/6"
+                      className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white text-gray-900 dark:hover:dark:bg-white/6 bg-gray-50"
                     >
                       {entry.label}
                     </Link>
@@ -358,25 +358,25 @@ export function BrutalNav({
             </ul>
           )}
           {mobileMenuExtras ? (
-            <div className="relative border-t border-zinc-200 dark:border-white/10">
+            <div className="relative border-t border-zinc-200 dark:border-white/10 border-gray-200">
               {typeof mobileMenuExtras === "function"
                 ? mobileMenuExtras(() => setMobileOpen(false))
                 : mobileMenuExtras}
             </div>
           ) : null}
           {cta ? (
-            <div className="relative border-t border-zinc-200 dark:border-white/10 p-4">
+            <div className="relative border-t border-zinc-200 dark:border-white/10 border-gray-200 p-4">
               <Link
                 href={cta.href}
                 onClick={() => setMobileOpen(false)}
-                className="tkad-neon-cta-clean inline-flex h-12 w-full items-center justify-center rounded-2xl px-6 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white transition-colors"
+                className="tkad-neon-cta-clean inline-flex h-12 w-full items-center justify-center rounded-2xl px-6 font-mono text-[11px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors"
               >
                 {cta.label}
               </Link>
             </div>
           ) : null}
           {mobileMenuFooter ? (
-            <div className="relative flex items-center justify-center gap-2 border-t border-zinc-200 p-4 dark:border-white/10">
+            <div className="relative flex items-center justify-center gap-2 border-t border-zinc-200 p-4 dark:border-white/10 border-gray-200">
               {mobileMenuFooter}
             </div>
           ) : null}
@@ -440,8 +440,8 @@ function BrutalNavDropdown({
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex h-10 shrink-0 items-center gap-1 rounded-xl px-3 text-[12px] font-semibold tracking-tight text-foreground transition-colors hover:bg-foreground/8 hover:text-foreground lg:gap-1.5 lg:px-4 lg:text-[13px] dark:text-white dark:hover:bg-white/10 dark:hover:text-white",
-          open && "bg-foreground/6 text-foreground dark:bg-white/12 dark:text-white",
+          "inline-flex h-10 shrink-0 items-center gap-1 rounded-xl px-3 text-[12px] font-semibold tracking-tight text-foreground transition-colors hover:bg-foreground/8 hover:text-foreground lg:gap-1.5 lg:px-4 lg:text-[13px] dark:text-white text-gray-900 dark:hover:dark:bg-white/10 bg-gray-100 dark:hover:dark:text-white",
+          open && "bg-foreground/6 text-foreground dark:bg-white/12 dark:text-white text-gray-900",
         )}
       >
         {GroupIcon ? (
@@ -463,20 +463,20 @@ function BrutalNavDropdown({
             "absolute left-1/2 top-full z-[100] mt-3 w-[min(18rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-2xl border py-1 shadow-xl ring-1",
             lightPanel
               ? "border-zinc-200/95 bg-white text-zinc-950 ring-black/[0.06] shadow-xl"
-              : "border-white/12 bg-zinc-950 text-zinc-50 shadow-[0_24px_80px_rgba(0,0,0,0.85)] ring-white/10",
+              : "dark:border-white/12 border-gray-200 bg-zinc-950 text-zinc-50 shadow-[0_24px_80px_rgba(0,0,0,0.85)] ring-white/10",
           )}
         >
           {entry.labelEn ? (
             <div
               className={cn(
                 "border-b px-4 py-3",
-                lightPanel ? "border-zinc-100 bg-zinc-50/80" : "border-white/10 bg-white/5",
+                lightPanel ? "border-zinc-100 bg-zinc-50/80" : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50",
               )}
             >
               <p
                 className={cn(
                   "text-[13px] font-bold tracking-tight",
-                  lightPanel ? "text-zinc-900" : "text-white",
+                  lightPanel ? "text-zinc-900" : "dark:text-white text-gray-900",
                 )}
               >
                 {entry.label}
@@ -484,7 +484,7 @@ function BrutalNavDropdown({
               <p
                 className={cn(
                   "mt-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em]",
-                  lightPanel ? "text-zinc-500" : "text-white/45",
+                  lightPanel ? "text-zinc-500" : "dark:text-white",
                 )}
               >
                 {entry.labelEn}
@@ -514,7 +514,7 @@ function BrutalNavDropdown({
                       <LeafIcon
                         className={cn(
                           "mt-0.5 h-4 w-4 shrink-0",
-                          lightPanel ? "text-zinc-500" : "text-white/55",
+                          lightPanel ? "text-zinc-500" : "dark:text-white text-gray-500",
                         )}
                         aria-hidden
                       />
@@ -523,7 +523,7 @@ function BrutalNavDropdown({
                       <span
                         className={cn(
                           "flex flex-wrap items-center gap-1.5 text-[13px] font-semibold leading-snug tracking-tight",
-                          lightPanel ? "text-zinc-900" : "text-white",
+                          lightPanel ? "text-zinc-900" : "dark:text-white text-gray-900",
                         )}
                       >
                         {leaf.label}

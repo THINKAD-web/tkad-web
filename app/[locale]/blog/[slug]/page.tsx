@@ -223,7 +223,7 @@ export default async function BlogSeoPostPage({ params }: Props) {
             <div className="mt-10 text-center">
               <Link
                 href="/planner"
-                className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-8 text-sm font-bold text-white"
+                className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-8 text-sm font-bold dark:text-white text-gray-900"
               >
                 {isKo ? "AI 매체 플래너 시작" : "Start AI media planner"}
               </Link>

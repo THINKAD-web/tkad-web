@@ -40,20 +40,20 @@ function CardShell({
   const Icon = card.icon;
   return (
     <article
-      className={`rounded-[28px] border border-white/12 bg-white/6 p-6 backdrop-blur tkad-neon-border sm:p-8 ${
+      className={`rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 backdrop-blur tkad-neon-border sm:p-8 ${
         card.wide ? "md:col-span-2 lg:col-span-3" : ""
       }`}
     >
       <div className="mb-4 flex items-center justify-between">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [{String(index + 1).padStart(2, "0")}]
         </span>
         <Icon className="h-6 w-6 text-cyan-300/90" aria-hidden />
       </div>
-      <h3 className="text-lg font-black text-white">
+      <h3 className="text-lg font-black dark:text-white text-gray-900">
         {isKo ? card.titleKo : card.titleEn}
       </h3>
-      <p className="mt-3 text-sm leading-relaxed text-white/76">
+      <p className="mt-3 text-sm leading-relaxed dark:text-white">
         {isKo ? card.summaryKo : card.summaryEn}
       </p>
       {children}
@@ -67,7 +67,7 @@ function BulletList({ items }: { items: string[] }) {
       {items.map((b) => (
         <li
           key={b}
-          className="flex gap-2 text-xs leading-relaxed text-white/65 before:shrink-0 before:content-['·']"
+          className="flex gap-2 text-xs leading-relaxed dark:text-white text-gray-600 before:shrink-0 before:content-['·']"
         >
           {b}
         </li>
@@ -86,11 +86,11 @@ function SubLabel({ children }: { children: ReactNode }) {
 
 function ComparisonTable({ isKo }: { isKo: boolean }) {
   return (
-    <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+    <div className="mt-4 overflow-x-auto rounded-xl border dark:border-white/10 border-gray-200">
       <table className="w-full min-w-[480px] text-left text-xs">
         <thead>
-          <tr className="border-b border-white/10 bg-white/5">
-            <th className="px-3 py-2.5 font-bold text-white/55">
+          <tr className="border-b dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50">
+            <th className="px-3 py-2.5 font-bold dark:text-white text-gray-500">
               {isKo ? "항목" : "Factor"}
             </th>
             <th className="px-3 py-2.5 font-bold text-cyan-200/90">OOH</th>
@@ -102,11 +102,11 @@ function ComparisonTable({ isKo }: { isKo: boolean }) {
         <tbody>
           {OOH_VS_DIGITAL_COMPARISON.map((row) => (
             <tr key={row.labelKo} className="border-b border-white/6 last:border-0">
-              <td className="px-3 py-2.5 font-semibold text-white/80">
+              <td className="px-3 py-2.5 font-semibold dark:text-white text-gray-700">
                 {isKo ? row.labelKo : row.labelEn}
               </td>
-              <td className="px-3 py-2.5 text-white/68">{isKo ? row.oohKo : row.oohEn}</td>
-              <td className="px-3 py-2.5 text-white/68">
+              <td className="px-3 py-2.5 dark:text-white">{isKo ? row.oohKo : row.oohEn}</td>
+              <td className="px-3 py-2.5 dark:text-white">
                 {isKo ? row.digitalKo : row.digitalEn}
               </td>
             </tr>
@@ -129,7 +129,7 @@ function WhatIsOohDetail({ isKo }: { isKo: boolean }) {
         {campaigns.map((c) => (
           <span
             key={c}
-            className="rounded-lg border border-white/12 bg-white/8 px-2.5 py-1 text-xs font-semibold text-white/80"
+            className="rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/8 bg-gray-100 px-2.5 py-1 text-xs font-semibold dark:text-white text-gray-700"
           >
             {c}
           </span>
@@ -148,14 +148,14 @@ function MediaTypesDetail({ isKo }: { isKo: boolean }) {
       {MEDIA_TYPE_DETAILS.map((m) => (
         <div
           key={m.nameKo}
-          className="rounded-2xl border border-white/10 bg-black/20 p-4"
+          className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 p-4"
         >
-          <h4 className="text-sm font-black text-white">
+          <h4 className="text-sm font-black dark:text-white text-gray-900">
             {isKo ? m.nameKo : m.nameEn}
           </h4>
           <BulletList items={isKo ? m.traitsKo : m.traitsEn} />
-          <p className="mt-2 text-xs text-white/62">{isKo ? m.formatsKo : m.formatsEn}</p>
-          <p className="mt-1 text-xs text-white/62">{isKo ? m.suitableKo : m.suitableEn}</p>
+          <p className="mt-2 text-xs dark:text-white">{isKo ? m.formatsKo : m.formatsEn}</p>
+          <p className="mt-1 text-xs dark:text-white">{isKo ? m.suitableKo : m.suitableEn}</p>
           <p className="mt-2 text-xs font-semibold text-cyan-200/90">
             {isKo ? m.priceKo : m.priceEn}
           </p>
@@ -173,7 +173,7 @@ function CpmDetail({ isKo }: { isKo: boolean }) {
     <>
       <BulletList items={isKo ? ["CPM = 광고비 ÷ (예상 노출 ÷ 1,000)"] : ["CPM = spend ÷ (estimated impressions ÷ 1,000)"]} />
       <SubLabel>{example.title}</SubLabel>
-      <div className="mt-2 rounded-xl border border-white/10 bg-black/25 p-4 font-mono text-xs leading-relaxed text-white/78">
+      <div className="mt-2 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 p-4 font-mono text-xs leading-relaxed dark:text-white text-gray-700">
         {example.lines.map((line) => (
           <p key={line}>{line}</p>
         ))}
@@ -190,20 +190,20 @@ function CreativeDetail({ isKo }: { isKo: boolean }) {
   const warnings = isKo ? CREATIVE_WARNINGS_KO : CREATIVE_WARNINGS_EN;
   return (
     <>
-      <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+      <div className="mt-4 overflow-x-auto rounded-xl border dark:border-white/10 border-gray-200">
         <table className="w-full min-w-[520px] text-left text-xs">
           <thead>
-            <tr className="border-b border-white/10 bg-white/5">
-              <th className="px-3 py-2.5 font-bold text-white/55">
+            <tr className="border-b dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50">
+              <th className="px-3 py-2.5 font-bold dark:text-white text-gray-500">
                 {isKo ? "매체" : "Format"}
               </th>
-              <th className="px-3 py-2.5 font-bold text-white/55">
+              <th className="px-3 py-2.5 font-bold dark:text-white text-gray-500">
                 {isKo ? "규격" : "Size"}
               </th>
-              <th className="px-3 py-2.5 font-bold text-white/55">
+              <th className="px-3 py-2.5 font-bold dark:text-white text-gray-500">
                 {isKo ? "파일" : "File"}
               </th>
-              <th className="px-3 py-2.5 font-bold text-white/55">
+              <th className="px-3 py-2.5 font-bold dark:text-white text-gray-500">
                 {isKo ? "기간" : "Lead time"}
               </th>
             </tr>
@@ -211,12 +211,12 @@ function CreativeDetail({ isKo }: { isKo: boolean }) {
           <tbody>
             {CREATIVE_SPEC_ROWS.map((row) => (
               <tr key={row.formatKo} className="border-b border-white/6 last:border-0">
-                <td className="px-3 py-2.5 font-semibold text-white/82">
+                <td className="px-3 py-2.5 font-semibold dark:text-white text-gray-800">
                   {isKo ? row.formatKo : row.formatEn}
                 </td>
-                <td className="px-3 py-2.5 text-white/68">{isKo ? row.sizeKo : row.sizeEn}</td>
-                <td className="px-3 py-2.5 text-white/68">{isKo ? row.fileKo : row.fileEn}</td>
-                <td className="px-3 py-2.5 text-white/68">{isKo ? row.leadKo : row.leadEn}</td>
+                <td className="px-3 py-2.5 dark:text-white">{isKo ? row.sizeKo : row.sizeEn}</td>
+                <td className="px-3 py-2.5 dark:text-white">{isKo ? row.fileKo : row.fileEn}</td>
+                <td className="px-3 py-2.5 dark:text-white">{isKo ? row.leadKo : row.leadEn}</td>
               </tr>
             ))}
           </tbody>
@@ -238,21 +238,21 @@ function BudgetDetail({ isKo }: { isKo: boolean }) {
           return (
             <div
               key={g.industryKo}
-              className="rounded-2xl border border-white/10 bg-black/20 p-4"
+              className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 p-4"
             >
-              <h4 className="text-sm font-black text-white">
+              <h4 className="text-sm font-black dark:text-white text-gray-900">
                 {isKo ? g.industryKo : g.industryEn}
               </h4>
               <ul className="mt-3 space-y-2">
                 {tiers.map((t) => (
                   <li
                     key={t.label}
-                    className="rounded-lg border border-white/8 bg-white/4 px-3 py-2 text-xs leading-relaxed text-white/72"
+                    className="rounded-lg border border-white/8 bg-white/4 px-3 py-2 text-xs leading-relaxed dark:text-white"
                   >
-                    <span className="font-bold text-white/90">{t.label}</span>
-                    <span className="mx-1.5 text-white/40">·</span>
+                    <span className="font-bold dark:text-white text-gray-800">{t.label}</span>
+                    <span className="mx-1.5 dark:text-white text-gray-400">·</span>
                     <span className="font-semibold text-cyan-200/90">{t.budget}</span>
-                    <span className="mt-0.5 block text-white/58">→ {t.placement}</span>
+                    <span className="mt-0.5 block dark:text-white">→ {t.placement}</span>
                   </li>
                 ))}
               </ul>

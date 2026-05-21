@@ -90,12 +90,12 @@ export default function CaseDetailClient({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-screen bg-[#0A0A0A] text-white">
+      <div className="tkad-landing-neon tkad-planner-neon min-h-screen bg-[#0A0A0A] dark:text-white text-gray-900">
         <section className="py-20 sm:py-24">
           <CaseDetailContainer>
             <Link
               href="/cases"
-              className="group mb-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white/55 transition-colors hover:text-[#22d3ee]"
+              className="group mb-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500 transition-colors hover:text-[#22d3ee]"
             >
               <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
               {t("detailBack")}
@@ -110,17 +110,17 @@ export default function CaseDetailClient({
               <span className="rounded-full border border-[#a855f7]/40 bg-[#a855f7]/20 px-3 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#e9d5ff]">
                 {row.industry}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/80">
+              <span className="inline-flex items-center gap-1.5 rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
                 <BadgeCheck className="h-3 w-3 text-[#22d3ee]" />
                 {t("detailVerified")}
               </span>
             </div>
 
-            <p className="mt-4 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/50">
+            <p className="mt-4 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-400">
               {row.clientName}
             </p>
 
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-5xl">
+            <h1 className="mt-2 text-3xl font-black tracking-tight dark:text-white text-gray-900 sm:text-5xl">
               {title}
             </h1>
             {headline ? (
@@ -129,16 +129,16 @@ export default function CaseDetailClient({
               </p>
             ) : null}
 
-            <div className="mt-6 rounded-[20px] border border-white/12 bg-white/5 p-5 backdrop-blur">
+            <div className="mt-6 rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur">
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
                 [ {t("backgroundLabel")} ]
               </p>
-              <p className="mt-2 max-w-3xl text-base leading-relaxed text-white/85 sm:text-lg">
+              <p className="mt-2 max-w-3xl text-base leading-relaxed dark:text-white text-gray-800 sm:text-lg">
                 {row.summaryKo}
               </p>
             </div>
 
-            <CaseDetailContainer className="mt-6 flex flex-wrap gap-4 font-mono text-[11px] uppercase tracking-[0.18em] text-white/60">
+            <CaseDetailContainer className="mt-6 flex flex-wrap gap-4 font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white text-gray-500">
               {period ? (
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="h-4 w-4 text-[#22d3ee]" aria-hidden />
@@ -156,7 +156,7 @@ export default function CaseDetailClient({
         </section>
 
         {metrics.length > 0 ? (
-          <section className="border-y border-white/10 py-12 sm:py-16">
+          <section className="border-y dark:border-white/10 border-gray-200 py-12 sm:py-16">
             <CaseDetailContainer>
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
                 [ {t("metricsSectionTitle")} ]
@@ -166,12 +166,12 @@ export default function CaseDetailClient({
                 {metrics.map((m) => (
                   <div
                     key={m.key}
-                    className="rounded-[16px] border border-white/12 bg-black/40 p-4"
+                    className="rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-4"
                   >
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       {isKo ? m.labelKo : m.labelEn}
                     </p>
-                    <p className="mt-2 font-mono text-2xl font-black tabular-nums text-white">
+                    <p className="mt-2 font-mono text-2xl font-black tabular-nums dark:text-white text-gray-900">
                       {formatCaseStudyMetricValue(m, locale)}
                     </p>
                   </div>
@@ -187,21 +187,21 @@ export default function CaseDetailClient({
               [ {t("strategySectionTitle")} ]
             </p>
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-[20px] border border-white/12 bg-white/5 p-6 sm:p-8">
+              <div className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 sm:p-8">
                 <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
                   <Target className="h-4 w-4" aria-hidden />
                   {t("challengeLabel")}
                 </div>
-                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-white/85">
+                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed dark:text-white text-gray-800">
                   {row.challengeKo}
                 </p>
               </div>
-              <div className="rounded-[20px] border border-white/12 bg-white/5 p-6 sm:p-8">
+              <div className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 sm:p-8">
                 <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
                   <Eye className="h-4 w-4" aria-hidden />
                   {t("solutionLabel")}
                 </div>
-                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-white/85">
+                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed dark:text-white text-gray-800">
                   {row.solutionKo}
                 </p>
               </div>
@@ -209,7 +209,7 @@ export default function CaseDetailClient({
           </CaseDetailContainer>
         </section>
 
-        <section className="border-t border-white/10 py-16 sm:py-20">
+        <section className="border-t dark:border-white/10 border-gray-200 py-16 sm:py-20">
           <CaseDetailContainer>
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
               [ {t("mediaLabel")} ]
@@ -223,14 +223,14 @@ export default function CaseDetailClient({
                   <Link
                     key={String(link.id)}
                     href={`/media/${link.id}`}
-                    className="rounded-full border border-white/15 bg-white/5 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:border-[#22d3ee]/40 hover:bg-[#22d3ee]/15"
+                    className="rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors hover:border-[#22d3ee]/40 hover:bg-[#22d3ee]/15"
                   >
                     {link.label}
                   </Link>
                 ) : (
                   <span
                     key={link.label}
-                    className="rounded-full border border-white/15 bg-white/5 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-white/70"
+                    className="rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-600"
                   >
                     {link.label}
                   </span>
@@ -239,13 +239,13 @@ export default function CaseDetailClient({
             </div>
 
             {row.resultsKo.length > 0 ? (
-              <div className="mt-10 rounded-[20px] border border-white/12 bg-black/40 p-5 sm:p-6">
+              <div className="mt-10 rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-5 sm:p-6">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
                   [ {t("resultsLabel")} ]
                 </p>
                 <ul className="mt-4 space-y-3">
                   {row.resultsKo.map((line, i) => (
-                    <li key={i} className="flex items-start gap-3 text-white/85">
+                    <li key={i} className="flex items-start gap-3 dark:text-white text-gray-800">
                       <span className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-[#22d3ee]" />
                       <span className="leading-relaxed">{line}</span>
                     </li>
@@ -271,7 +271,7 @@ export default function CaseDetailClient({
                       setLightboxIndex(i);
                       setLightboxOpen(true);
                     }}
-                    className="group relative aspect-video overflow-hidden rounded-[16px] border border-white/12"
+                    className="group relative aspect-video overflow-hidden rounded-[16px] border dark:border-white/12 border-gray-200"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -291,13 +291,13 @@ export default function CaseDetailClient({
         ) : null}
 
         {managerComment ? (
-          <section className="border-t border-white/10 py-16">
+          <section className="border-t dark:border-white/10 border-gray-200 py-16">
             <CaseDetailContainer className="mx-auto max-w-3xl">
               <div className="rounded-[24px] border border-[#a855f7]/30 bg-gradient-to-br from-[#a855f7]/15 to-transparent p-8">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
                   [ {t("managerCommentTitle")} ]
                 </p>
-                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-white/85">
+                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed dark:text-white text-gray-800">
                   {managerComment}
                 </p>
               </div>
@@ -332,19 +332,19 @@ export default function CaseDetailClient({
         </section>
 
         {(prev || next) && (
-          <section className="border-t border-white/10 py-12">
+          <section className="border-t dark:border-white/10 border-gray-200 py-12">
             <CaseDetailContainer>
               <div className="flex items-stretch justify-between gap-3">
                 {prev ? (
                   <Link
                     href={`/cases/${prev.id}`}
-                    className="group flex flex-1 flex-col rounded-[16px] border border-white/12 bg-white/5 p-5 transition-colors hover:border-[#22d3ee]/30"
+                    className="group flex flex-1 flex-col rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 transition-colors hover:border-[#22d3ee]/30"
                   >
                     <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
                       <ArrowLeft className="h-3 w-3" />
                       {t("detailPrev")}
                     </span>
-                    <span className="mt-2 text-sm font-bold text-white">
+                    <span className="mt-2 text-sm font-bold dark:text-white text-gray-900">
                       {isKo ? prev.titleKo : prev.titleEn ?? prev.titleKo}
                     </span>
                   </Link>
@@ -354,13 +354,13 @@ export default function CaseDetailClient({
                 {next ? (
                   <Link
                     href={`/cases/${next.id}`}
-                    className="group flex flex-1 flex-col items-end rounded-[16px] border border-white/12 bg-white/5 p-5 text-right transition-colors hover:border-[#22d3ee]/30"
+                    className="group flex flex-1 flex-col items-end rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 text-right transition-colors hover:border-[#22d3ee]/30"
                   >
                     <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
                       {t("detailNext")}
                       <ArrowRight className="h-3 w-3" />
                     </span>
-                    <span className="mt-2 text-sm font-bold text-white">
+                    <span className="mt-2 text-sm font-bold dark:text-white text-gray-900">
                       {isKo ? next.titleKo : next.titleEn ?? next.titleKo}
                     </span>
                   </Link>

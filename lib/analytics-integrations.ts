@@ -216,15 +216,26 @@ export async function saveAnalyticsSettings(
   return getAnalyticsSettingsForAdmin();
 }
 
+function envGa4MeasurementId(): string | null {
+  const id =
+    process.env.NEXT_PUBLIC_GA_ID?.trim() ||
+    process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
+  if (!id || !GA4_MEASUREMENT_ID_RE.test(id)) return null;
+  return id;
+}
+
 export async function getPublicAnalyticsConfig(): Promise<PublicAnalyticsConfig> {
   const settings = await getAnalyticsSettingsForAdmin();
   const { ga4, gtm } = settings.integrations;
+  const envGa4 = envGa4MeasurementId();
+
+  const dbGa4 =
+    settings.configured && ga4.enabled && ga4.measurementId
+      ? ga4.measurementId
+      : null;
 
   return {
-    ga4:
-      settings.configured && ga4.enabled && ga4.measurementId
-        ? { measurementId: ga4.measurementId }
-        : null,
+    ga4: dbGa4 || envGa4 ? { measurementId: dbGa4 ?? envGa4! } : null,
     gtm:
       settings.configured && gtm.enabled && gtm.containerId
         ? { containerId: gtm.containerId }

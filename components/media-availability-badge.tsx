@@ -9,10 +9,10 @@ const TIER_STYLES: Record<
   string
 > = {
   instant:
-    "border-emerald-500/40 bg-emerald-500/90 text-white shadow-emerald-500/20",
+    "border-emerald-500/40 bg-emerald-500/90 dark:text-white text-gray-900 shadow-emerald-500/20",
   partial:
-    "border-amber-500/40 bg-amber-500/90 text-white shadow-amber-500/20",
-  scarce: "border-rose-500/40 bg-rose-500/90 text-white shadow-rose-500/20",
+    "border-amber-500/40 bg-amber-500/90 dark:text-white text-gray-900 shadow-amber-500/20",
+  scarce: "border-rose-500/40 bg-rose-500/90 dark:text-white text-gray-900 shadow-rose-500/20",
 };
 
 export function MediaAvailabilityBadge({

@@ -26,18 +26,18 @@ export function FloatingCta() {
       }`}
     >
       <div className="w-[360px] max-w-[calc(100vw-48px)]">
-        <div className="tkad-home-floating-cta flex items-center justify-between gap-3 rounded-[22px] bg-white/5 px-4 py-3 backdrop-blur tkad-neon-border tkad-neon-glow">
+        <div className="tkad-home-floating-cta flex items-center justify-between gap-3 rounded-[22px] dark:bg-white/5 bg-gray-50 px-4 py-3 backdrop-blur tkad-neon-border tkad-neon-glow">
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white">
+            <p className="truncate text-sm font-semibold dark:text-white text-gray-900">
               {t("floatingTitle")}
             </p>
-            <p className="mt-0.5 hidden truncate font-mono text-[11px] uppercase tracking-[0.2em] text-white/55 sm:block">
+            <p className="mt-0.5 hidden truncate font-mono text-[11px] uppercase tracking-[0.2em] dark:text-white text-gray-500 sm:block">
               {t("floatingSub")}
             </p>
           </div>
           <Link
             href="/contact"
-            className="tkad-neon-cta inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-black text-white transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+            className="tkad-neon-cta inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
           >
             {t("floatingCta")}
             <ArrowRight className="h-4 w-4" />

@@ -56,14 +56,14 @@ function SpecBlock({
       className={cn(
         "rounded-lg border px-2.5 py-2",
         dark
-          ? "border-white/10 bg-white/5"
+          ? "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50"
           : "border-border/70 bg-muted/40",
       )}
     >
       <dt
         className={cn(
           "font-mono text-[9px] font-bold uppercase tracking-[0.12em]",
-          dark ? "text-white/45" : "text-muted-foreground",
+          dark ? "dark:text-white" : "text-muted-foreground",
         )}
       >
         {label}
@@ -71,7 +71,7 @@ function SpecBlock({
       <dd
         className={cn(
           "mt-0.5 text-sm font-semibold tabular-nums",
-          dark ? "text-white" : "text-foreground",
+          dark ? "dark:text-white text-gray-900" : "text-foreground",
         )}
       >
         {value}
@@ -190,12 +190,12 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
   const ctaPrimary = cn(
     "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors",
     dark
-      ? "border border-white/14 bg-white/8 text-white hover:bg-white/12"
+      ? "border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 hover:bg-white/12"
       : "border border-border bg-card text-foreground hover:bg-muted",
   );
 
   const ctaAccent = cn(
-    "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-transform hover:-translate-y-0.5",
+    "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold dark:text-white text-gray-900 shadow-sm transition-transform hover:-translate-y-0.5",
     "bg-gradient-to-r from-violet-500 to-cyan-400",
   );
 
@@ -207,12 +207,12 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
         </p>
         <div className="flex gap-3">
           {item.image ? (
-            <div className="h-[4.5rem] w-24 shrink-0 overflow-hidden rounded-xl border border-white/12 bg-white/5 sm:w-28">
+            <div className="h-[4.5rem] w-24 shrink-0 overflow-hidden rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 sm:w-28">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image} alt="" className="h-full w-full object-cover" />
             </div>
           ) : (
-            <div className="flex h-[4.5rem] w-24 shrink-0 items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/5 text-[9px] text-white/45 sm:w-28">
+            <div className="flex h-[4.5rem] w-24 shrink-0 items-center justify-center rounded-xl border border-dashed dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 text-[9px] dark:text-white sm:w-28">
               NO IMG
             </div>
           )}
@@ -222,15 +222,15 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
                 <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-violet-300/90">
                   {item.type}
                 </p>
-                <h2 className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug text-white sm:text-base">
+                <h2 className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug dark:text-white text-gray-900 sm:text-base">
                   {item.name}
                 </h2>
-                <p className="mt-0.5 line-clamp-1 text-[11px] text-white/55">{regionLine}</p>
+                <p className="mt-0.5 line-clamp-1 text-[11px] dark:text-white text-gray-500">{regionLine}</p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/5 text-white/80 transition-colors hover:bg-white/10"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100"
                 aria-label={isKo ? "닫기" : "Close"}
               >
                 <X className="h-4 w-4" />
@@ -352,19 +352,19 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
       <div className="flex justify-center pt-2 md:hidden">
         <span className="h-1 w-10 rounded-full bg-white/25" aria-hidden />
       </div>
-      <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
+      <div className="flex items-start justify-between gap-3 border-b dark:border-white/10 border-gray-200 px-4 py-3">
         <div className="min-w-0">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400/70">
             {item.type}
             {item.subCategory ? ` · ${item.subCategory}` : ""}
           </p>
-          <h2 className="mt-1 truncate text-lg font-bold text-white">{item.name}</h2>
-          <p className="mt-0.5 text-xs text-white/55">{regionLine}</p>
+          <h2 className="mt-1 truncate text-lg font-bold dark:text-white text-gray-900">{item.name}</h2>
+          <p className="mt-0.5 text-xs dark:text-white text-gray-500">{regionLine}</p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
           aria-label={isKo ? "닫기" : "Close"}
         >
           <X className="h-4 w-4" />
@@ -372,7 +372,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {item.image ? (
-          <div className="overflow-hidden rounded-xl border border-white/10">
+          <div className="overflow-hidden rounded-xl border dark:border-white/10 border-gray-200">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={item.image} alt="" className="aspect-[16/10] w-full object-cover" />
           </div>
@@ -389,11 +389,11 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
           <SpecBlock dark label={isKo ? "가시성" : "Visibility"} value={visibilityLabel} />
         </dl>
 
-        <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-3">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-white/45">
+        <div className="mt-4 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-3">
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] dark:text-white">
             {isKo ? "가용 캘린더 (이번 달)" : "Availability (this month)"}
           </p>
-          <p className="mt-1.5 text-sm text-white/80">{availability.label}</p>
+          <p className="mt-1.5 text-sm dark:text-white text-gray-700">{availability.label}</p>
           <div className="mt-3 flex flex-wrap gap-1.5">
             {calendarDots.map((d) => (
               <span
@@ -409,7 +409,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-white/10 p-4 sm:flex-row">
+      <div className="flex flex-col gap-2 border-t dark:border-white/10 border-gray-200 p-4 sm:flex-row">
         <Link
           href={`/media/${item.id}`}
           target="_blank"
@@ -463,7 +463,7 @@ export function MediaMapDetailSheet({
         className={cn(
           "pointer-events-auto absolute inset-x-0 bottom-0 z-[25]",
           "mx-2 mb-2 max-h-[min(42dvh,280px)] overflow-hidden rounded-2xl sm:mx-3 sm:mb-3",
-          "border border-white/12 bg-black/88 shadow-[0_-16px_48px_rgba(0,0,0,0.55)] backdrop-blur-xl",
+          "border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/8 bg-gray-1008 shadow-[0_-16px_48px_rgba(0,0,0,0.55)] backdrop-blur-xl",
         )}
       >
         <div className="flex justify-center pt-2">
@@ -481,7 +481,7 @@ export function MediaMapDetailSheet({
       aria-label={item.name}
       className={cn(
         "pointer-events-auto fixed z-[100004] flex flex-col overflow-hidden",
-        "border border-white/10 bg-black/90 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl",
+        "border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/90 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl",
         "inset-x-auto bottom-4 right-4 top-4 w-[min(420px,calc(100%-2rem))] rounded-2xl",
       )}
     >

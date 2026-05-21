@@ -182,7 +182,7 @@ export default function ClientPortalPage() {
                   )}
                   <Button
                     type="submit"
-                    className="w-full bg-navy font-semibold text-white hover:bg-navy/90"
+                    className="w-full bg-navy font-semibold dark:text-white text-gray-900 hover:bg-navy/90"
                     disabled={loading}
                   >
                     {loading ? (

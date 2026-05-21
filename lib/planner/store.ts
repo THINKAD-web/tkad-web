@@ -108,8 +108,15 @@ export const usePlannerStore = create<PlannerStore>()(
     (set) => ({
       ...INITIAL_STATE,
 
-      setWizardStep: (step) =>
-        set({ wizardStep: clampWizardStep(step) }),
+      setWizardStep: (step) => {
+        const next = clampWizardStep(step);
+        set({ wizardStep: next });
+        if (typeof window !== "undefined" && next >= 2) {
+          void import("@/lib/ga-events").then(({ trackGaEvent }) =>
+            trackGaEvent("planner_use", { wizard_step: next }),
+          );
+        }
+      },
 
       goNextStep: () =>
         set((s) => ({

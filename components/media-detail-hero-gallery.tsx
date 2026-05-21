@@ -52,7 +52,7 @@ export default function MediaDetailHeroGallery({
 
   if (!hasImage) {
     return (
-      <section className="tkad-media-detail-hero tkad-home-hero relative w-full overflow-hidden bg-[#05050a] text-white">
+      <section className="tkad-media-detail-hero tkad-home-hero relative w-full overflow-hidden bg-[#05050a] dark:text-white text-gray-900">
         <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
         <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
         <div
@@ -65,7 +65,7 @@ export default function MediaDetailHeroGallery({
         />
 
         <div className="relative mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-12">
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[28px] border border-white/12 bg-black/20">
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20">
             <MediaImagePlaceholder
               label={tMedia("imagePreparing")}
               size="lg"
@@ -78,7 +78,7 @@ export default function MediaDetailHeroGallery({
   }
 
   return (
-    <section className="tkad-media-detail-hero tkad-home-hero relative w-full overflow-hidden bg-[#05050a] text-white">
+    <section className="tkad-media-detail-hero tkad-home-hero relative w-full overflow-hidden bg-[#05050a] dark:text-white text-gray-900">
       <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
       <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
       <div
@@ -91,7 +91,7 @@ export default function MediaDetailHeroGallery({
       />
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col items-stretch px-4 py-10 sm:px-6 lg:px-12">
-        <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-[28px] border border-white/12 bg-black/20 shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur-sm">
+        <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur-sm">
           <div
             aria-hidden
             className="pointer-events-none absolute -inset-10 z-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.35),transparent_55%),radial-gradient(circle_at_right,rgba(34,211,238,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(236,72,153,0.20),transparent_60%)] blur-2xl opacity-70"
@@ -115,14 +115,14 @@ export default function MediaDetailHeroGallery({
             />
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/16 bg-black/35 text-white/85 opacity-0 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur transition-opacity duration-200 group-hover:opacity-100"
+              className="pointer-events-none absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/16 dark:bg-black bg-white bg-white/35 dark:text-white text-gray-800 opacity-0 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur transition-opacity duration-200 group-hover:opacity-100"
             >
               <ZoomIn className="h-4 w-4" />
             </span>
           </button>
         </div>
 
-        <div className="mt-8 flex flex-col gap-4 pb-4 text-white">
+        <div className="mt-8 flex flex-col gap-4 pb-4 dark:text-white text-gray-900">
           {children}
         </div>
       </div>

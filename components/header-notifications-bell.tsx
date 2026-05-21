@@ -20,7 +20,7 @@ type NotificationItem = {
 const DROPDOWN_LIMIT = 5;
 
 const menuRowClass =
-  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white dark:hover:bg-white/6";
+  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white text-gray-900 dark:hover:dark:bg-white/6 bg-gray-50";
 
 export function HeaderNotificationsBell({
   onNavigate,
@@ -134,7 +134,7 @@ export function HeaderNotificationsBell({
         <Bell className="h-4 w-4 shrink-0" strokeWidth={2} />
         <span className="flex-1">{isKo ? "알림" : "Notifications"}</span>
         {unreadCount > 0 ? (
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold dark:text-white text-gray-900">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         ) : null}
@@ -154,7 +154,7 @@ export function HeaderNotificationsBell({
       >
         <Bell className="h-4 w-4" strokeWidth={2} />
         {unreadCount > 0 ? (
-          <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-1 ring-white/30">
+          <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold dark:text-white text-gray-900 ring-1 ring-white/30">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         ) : null}
@@ -164,12 +164,12 @@ export function HeaderNotificationsBell({
         <div
           className={cn(
             "absolute right-0 top-[calc(100%+8px)] z-[200] w-[min(92vw,320px)] overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xl",
-            "dark:border-white/12 dark:bg-[#0a0a12]/95 dark:backdrop-blur-xl",
+            "dark:border-white/12 border-gray-200 dark:bg-[#0a0a12]/95 dark:backdrop-blur-xl",
           )}
           role="menu"
         >
-          <div className="border-b border-border/70 px-4 py-3 dark:border-white/10">
-            <p className="text-sm font-bold text-foreground dark:text-white">
+          <div className="border-b border-border/70 px-4 py-3 dark:border-white/10 border-gray-200">
+            <p className="text-sm font-bold text-foreground dark:text-white text-gray-900">
               {isKo ? "알림" : "Notifications"}
             </p>
           </div>
@@ -191,7 +191,7 @@ export function HeaderNotificationsBell({
                         className={cn(
                           "text-sm font-semibold leading-snug",
                           !n.isRead
-                            ? "text-foreground dark:text-white"
+                            ? "text-foreground dark:text-white text-gray-900"
                             : "text-muted-foreground",
                         )}
                       >
@@ -208,7 +208,7 @@ export function HeaderNotificationsBell({
                         <Link
                           href={n.link}
                           onClick={() => void onItemClick(n)}
-                          className="block px-4 py-3 transition-colors hover:bg-muted/60 dark:hover:bg-white/6"
+                          className="block px-4 py-3 transition-colors hover:bg-muted/60 dark:hover:dark:bg-white/6 bg-gray-50"
                         >
                           {inner}
                         </Link>
@@ -216,7 +216,7 @@ export function HeaderNotificationsBell({
                         <button
                           type="button"
                           onClick={() => void onItemClick(n)}
-                          className="block w-full px-4 py-3 text-left transition-colors hover:bg-muted/60 dark:hover:bg-white/6"
+                          className="block w-full px-4 py-3 text-left transition-colors hover:bg-muted/60 dark:hover:dark:bg-white/6 bg-gray-50"
                         >
                           {inner}
                         </button>
@@ -227,14 +227,14 @@ export function HeaderNotificationsBell({
               </ul>
             )}
           </div>
-          <div className="border-t border-border/70 p-2 dark:border-white/10">
+          <div className="border-t border-border/70 p-2 dark:border-white/10 border-gray-200">
             <Link
               href="/my/notifications"
               onClick={() => {
                 setOpen(false);
                 onNavigate?.();
               }}
-              className="block rounded-xl px-3 py-2 text-center text-xs font-semibold text-violet-600 hover:bg-muted/50 dark:text-cyan-300 dark:hover:bg-white/6"
+              className="block rounded-xl px-3 py-2 text-center text-xs font-semibold text-violet-600 hover:bg-muted/50 dark:text-cyan-300 dark:hover:dark:bg-white/6 bg-gray-50"
             >
               {isKo ? "전체 보기" : "View all"}
             </Link>

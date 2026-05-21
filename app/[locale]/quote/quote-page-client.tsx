@@ -681,7 +681,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         headlineGradient={isKo ? "견적 요청" : "Quote"}
         subtitle={t("quote.subtitle")}
       >
-        <p className="mx-auto max-w-xl font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
+        <p className="mx-auto max-w-xl font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white text-gray-500">
           {`// `}{t("quote.wizardSubtitle")}
         </p>
       </CategoryExploreHero>
@@ -712,11 +712,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                     }}
                     className={cn(
                       "flex h-12 w-12 items-center justify-center rounded-2xl border-2 font-mono text-base font-black backdrop-blur transition-colors sm:h-14 sm:w-14 sm:text-lg",
-                      "border-border bg-card text-foreground/70 dark:border-white/12 dark:bg-white/6 dark:text-white/40",
+                      "border-border bg-card text-foreground/70 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-400",
                       step === n &&
-                        "border-accent bg-accent text-accent-foreground shadow-[0_6px_24px_rgba(67,56,202,0.32)] dark:border-white/16 dark:bg-white/12 dark:text-white dark:shadow-[0_0_0_1px_rgba(34,211,238,0.24),0_24px_80px_rgba(0,0,0,0.45)]",
+                        "border-accent bg-accent text-accent-foreground shadow-[0_6px_24px_rgba(67,56,202,0.32)] dark:border-white/16 dark:bg-white/12 dark:text-white text-gray-900 dark:shadow-[0_0_0_1px_rgba(34,211,238,0.24),0_24px_80px_rgba(0,0,0,0.45)]",
                       step > n &&
-                        "border-accent/50 bg-accent/10 text-foreground hover:bg-accent/20 dark:border-white/12 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10",
+                        "border-accent/50 bg-accent/10 text-foreground hover:bg-accent/20 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-700 dark:hover:dark:bg-white/10 bg-gray-100",
                     )}
                   >
                     {step > n ? "✓" : n}
@@ -742,9 +742,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
           <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1fr_22rem] lg:items-start lg:gap-10 xl:grid-cols-[1fr_26rem]">
             <div className="order-2 min-w-0 lg:order-1">
-              <div className="tkad-glass-surface tkad-neon-border relative min-h-[380px] overflow-hidden rounded-[32px] border border-white/10 sm:min-h-[420px]">
+              <div className="tkad-glass-surface tkad-neon-border relative min-h-[380px] overflow-hidden rounded-[32px] border dark:border-white/10 border-gray-200 sm:min-h-[420px]">
                 <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                <div className="relative border-b border-white/10 p-6 sm:p-8">
+                <div className="relative border-b dark:border-white/10 border-gray-200 p-6 sm:p-8">
                   <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
                     [ STEP {step} / 4 ]
                   </p>
@@ -1384,12 +1384,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   {step === 4 && !submitted && (
                     <div className="space-y-8">
                       {selectedMedia.length > 0 ? (
-                        <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border border-white/12 bg-white/6 backdrop-blur-md">
+                        <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
                           <div
                             aria-hidden
                             className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid"
                           />
-                          <div className="relative border-b border-white/10 px-6 py-5 sm:px-8 sm:py-6">
+                          <div className="relative border-b dark:border-white/10 border-gray-200 px-6 py-5 sm:px-8 sm:py-6">
                             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary sm:text-xs">
                               {isKo ? "[ PDF 미리보기 ]" : "[ PDF PREVIEW ]"}
                             </p>
@@ -1425,12 +1425,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </div>
                       ) : null}
 
-                      <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border border-white/12 bg-white/6 backdrop-blur-md">
+                      <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
                         <div
                           aria-hidden
                           className="pointer-events-none absolute inset-0 opacity-[0.05] tkad-neon-grid"
                         />
-                        <div className="relative border-b border-white/10 px-6 py-5 sm:px-8 sm:py-6">
+                        <div className="relative border-b dark:border-white/10 border-gray-200 px-6 py-5 sm:px-8 sm:py-6">
                           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary sm:text-xs">
                             [ {t("quote.reviewTitle")} ]
                           </p>
@@ -1495,7 +1495,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </ul>
                       </div>
 
-                      <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border border-white/12 bg-white/6 backdrop-blur-md">
+                      <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
                         <div
                           aria-hidden
                           className="pointer-events-none absolute inset-0 opacity-[0.05] tkad-neon-grid"
@@ -1508,7 +1508,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             autoComplete="off"
                           />
                         </div>
-                        <div className="relative flex flex-col gap-5 border-b border-white/10 p-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6 sm:p-8">
+                        <div className="relative flex flex-col gap-5 border-b dark:border-white/10 border-gray-200 p-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6 sm:p-8">
                           <div className="min-w-0">
                             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary sm:text-xs">
                               [ PDF DOCUMENT ]
@@ -1593,12 +1593,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </div>
                       </div>
 
-                      <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border border-white/12 bg-white/6 backdrop-blur-md">
+                      <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
                         <div
                           aria-hidden
                           className="pointer-events-none absolute inset-0 opacity-[0.05] tkad-neon-grid"
                         />
-                        <div className="relative border-b border-white/10 px-6 py-5 sm:px-8 sm:py-6">
+                        <div className="relative border-b dark:border-white/10 border-gray-200 px-6 py-5 sm:px-8 sm:py-6">
                           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary sm:text-xs">
                             [ GET QUOTE ]
                           </p>
@@ -1736,7 +1736,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   )}
 
                   {step === 4 && submitted ? (
-                    <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border border-white/12 bg-white/6 backdrop-blur-md">
+                    <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
                       <div
                         aria-hidden
                         className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid"
@@ -1789,8 +1789,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
             <div className="order-1 lg:order-2 lg:sticky lg:top-24">
               <div className="space-y-0">
-                <div className="tkad-glass-surface tkad-neon-border overflow-hidden rounded-[32px] border border-white/12 bg-white/6 backdrop-blur-md">
-                  <div className="border-b border-white/10 p-6 sm:p-7">
+                <div className="tkad-glass-surface tkad-neon-border overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
+                  <div className="border-b dark:border-white/10 border-gray-200 p-6 sm:p-7">
                     <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary sm:text-xs">
                       [ ESTIMATE ]
                     </p>
@@ -1813,7 +1813,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           : `₩${(monthlyCost * 10_000).toLocaleString()}`}
                       </p>
                     </div>
-                    <div className="border-t border-white/10 pt-4">
+                    <div className="border-t dark:border-white/10 border-gray-200 pt-4">
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
                         <span className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary sm:text-xs">
                           [ {t("quote.total")} ]

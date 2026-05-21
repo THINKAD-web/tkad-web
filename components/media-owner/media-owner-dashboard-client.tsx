@@ -72,10 +72,10 @@ export function MediaOwnerDashboardClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold dark:text-white text-gray-900">
           {isKo ? "대시보드" : "Dashboard"}
         </h2>
-        <p className="mt-1 text-sm text-white/60">
+        <p className="mt-1 text-sm dark:text-white text-gray-500">
           {isKo
             ? "매체 운영·문의·집행·정산을 한곳에서 관리합니다."
             : "Manage media, inquiries, campaigns, and settlements."}
@@ -86,8 +86,8 @@ export function MediaOwnerDashboardClient() {
         {cards.map(({ icon: Icon, label, value, href }) => (
           <Link key={label} href={href} className={ownerGlassCard}>
             <Icon className="h-5 w-5 text-violet-300" />
-            <p className="mt-3 text-xs text-white/50">{label}</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-white">
+            <p className="mt-3 text-xs dark:text-white text-gray-400">{label}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums dark:text-white text-gray-900">
               {value}
             </p>
           </Link>
@@ -96,14 +96,14 @@ export function MediaOwnerDashboardClient() {
 
       {stats.mediaCount === 0 ? (
         <div className={ownerGlassCard}>
-          <p className="text-sm text-white/70">
+          <p className="text-sm dark:text-white text-gray-600">
             {isKo
               ? "아직 연결된 매체가 없습니다. 매체 등록 신청 후 승인되면 여기에 표시됩니다."
               : "No linked media yet. Apply at register/media and wait for approval."}
           </p>
           <Link
             href="/register/media"
-            className="mt-4 inline-block rounded-xl bg-violet-500 px-5 py-2 text-sm font-bold text-white hover:bg-violet-400"
+            className="mt-4 inline-block rounded-xl bg-violet-500 px-5 py-2 text-sm font-bold dark:text-white text-gray-900 hover:bg-violet-400"
           >
             {isKo ? "매체 등록 신청" : "Register media"}
           </Link>

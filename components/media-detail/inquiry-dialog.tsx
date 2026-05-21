@@ -41,7 +41,7 @@ export function MediaInquiryDialog({
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "tkad-media-detail-cta-secondary inline-flex h-12 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/8 px-6 font-mono text-xs font-black uppercase tracking-[0.18em] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12",
+          "tkad-media-detail-cta-secondary inline-flex h-12 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-6 font-mono text-xs font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12",
           className,
         )}
       >
@@ -51,7 +51,7 @@ export function MediaInquiryDialog({
 
       {open ? (
         <div
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-3 sm:items-center sm:p-6"
+          className="fixed inset-0 z-[60] flex items-end justify-center dark:bg-black bg-white dark:bg-white/6 bg-gray-500 p-3 sm:items-center sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={triggerLabel}
@@ -68,15 +68,15 @@ export function MediaInquiryDialog({
               aria-hidden
               className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
             />
-            <div className="relative flex items-start justify-between gap-3 border-b border-white/10 bg-black/20 px-5 py-4">
-              <div className="min-w-0 text-white">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
+            <div className="relative flex items-start justify-between gap-3 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 px-5 py-4">
+              <div className="min-w-0 dark:text-white text-gray-900">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
                   [ INQUIRY · QUOTE ]
                 </p>
-                <h2 className="mt-1 truncate text-lg font-black tracking-tight text-white">
+                <h2 className="mt-1 truncate text-lg font-black tracking-tight dark:text-white text-gray-900">
                   {triggerLabel}
                 </h2>
-                <p className="mt-1 truncate font-mono text-[11px] tracking-tight text-white/55">
+                <p className="mt-1 truncate font-mono text-[11px] tracking-tight dark:text-white text-gray-500">
                   {`// `}{mediaName}
                 </p>
               </div>
@@ -84,7 +84,7 @@ export function MediaInquiryDialog({
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="닫기"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-white/14 bg-white/6 text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -94,11 +94,11 @@ export function MediaInquiryDialog({
               <Link
                 href={`/contact?media=${mediaId}`}
                 onClick={() => setOpen(false)}
-                className="group flex items-center gap-3 rounded-[18px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-4 py-3 text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
+                className="group flex items-center gap-3 rounded-[18px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-4 py-3 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
               >
                 <FileText className="h-5 w-5 shrink-0" strokeWidth={2} />
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/80">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
                     [ FORM ]
                   </p>
                   <p className="text-sm font-black tracking-tight">
@@ -112,17 +112,17 @@ export function MediaInquiryDialog({
                 href={KAKAO_CHANNEL_PUBLIC_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 rounded-[18px] border border-white/12 bg-white/6 px-4 py-3 text-white/90 backdrop-blur transition-colors hover:bg-white/10"
+                className="flex items-center gap-3 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 dark:text-white text-gray-800 backdrop-blur transition-colors hover:dark:bg-white/10 bg-gray-100"
               >
                 <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border border-white/12"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border dark:border-white/12 border-gray-200"
                   style={{ backgroundColor: "#FEE500", color: "#191919" }}
                   aria-hidden
                 >
                   <MessageCircle className="h-4 w-4" strokeWidth={2.25} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                     [ KAKAOTALK ]
                   </p>
                   <p className="text-sm font-black tracking-tight">
@@ -134,13 +134,13 @@ export function MediaInquiryDialog({
 
               <a
                 href="tel:02-515-2772"
-                className="flex items-center gap-3 rounded-[18px] border border-white/12 bg-white/6 px-4 py-3 text-white/90 backdrop-blur transition-colors hover:bg-white/10"
+                className="flex items-center gap-3 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 dark:text-white text-gray-800 backdrop-blur transition-colors hover:dark:bg-white/10 bg-gray-100"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border border-white/12 bg-black/25 text-white/85">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 dark:text-white text-gray-800">
                   <Phone className="h-4 w-4" strokeWidth={2} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                     [ PHONE ]
                   </p>
                   <p className="text-sm font-black tabular-nums tracking-tight">
@@ -151,7 +151,7 @@ export function MediaInquiryDialog({
               </a>
             </div>
 
-            <p className="relative border-t border-white/10 bg-black/20 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-white/45">
+            <p className="relative border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white">
               {`// `}평일 9:30 – 18:30 / 주말·공휴일 휴무
             </p>
           </div>

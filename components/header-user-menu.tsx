@@ -42,7 +42,7 @@ function useSession() {
 }
 
 const menuRowClass =
-  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white dark:hover:bg-white/6";
+  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white text-gray-900 dark:hover:dark:bg-white/6 bg-gray-50";
 
 export function HeaderUserMenu({
   onNavigate,
@@ -81,7 +81,7 @@ export function HeaderUserMenu({
           <ShoppingCart className="h-4 w-4 shrink-0" strokeWidth={2} />
           <span className="flex-1">{locale === "ko" ? "장바구니" : "Cart"}</span>
           {ids.length > 0 ? (
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1.5 text-[10px] font-bold text-white dark:from-violet-500 dark:to-cyan-400">
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1.5 text-[10px] font-bold dark:text-white text-gray-900 dark:from-violet-500 dark:to-cyan-400">
               {ids.length}
             </span>
           ) : null}
@@ -132,7 +132,7 @@ export function HeaderUserMenu({
       >
         <ShoppingCart className="h-4 w-4" strokeWidth={2} />
         {ids.length > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1 text-[10px] font-bold text-white shadow-[0_2px_10px_rgba(124,58,237,0.38)] ring-1 ring-white/30 dark:from-violet-500 dark:to-cyan-400 dark:shadow-[0_0_14px_rgba(34,211,238,0.28)] dark:ring-white/20">
+          <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1 text-[10px] font-bold dark:text-white text-gray-900 shadow-[0_2px_10px_rgba(124,58,237,0.38)] ring-1 ring-white/30 dark:from-violet-500 dark:to-cyan-400 dark:shadow-[0_0_14px_rgba(34,211,238,0.28)] dark:ring-white/20">
             {ids.length}
           </span>
         )}
@@ -142,7 +142,7 @@ export function HeaderUserMenu({
           <Link
             href="/dashboard"
             onClick={onNavigate}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60 dark:text-white dark:hover:bg-white/10"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60 dark:text-white text-gray-900 dark:hover:dark:bg-white/10 bg-gray-100"
           >
             <Megaphone className="h-4 w-4 shrink-0" strokeWidth={2} />
             <span className="hidden sm:inline">{t("myCampaigns")}</span>

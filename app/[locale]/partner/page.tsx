@@ -282,7 +282,7 @@ export default function PartnerPortalPage() {
           <div className="border-2 border-border bg-card">
             <header>
               <div className="mb-2 flex flex-wrap gap-2">
-                <span className="border-0 bg-hero-void/90 text-white">{t("loginBadge")}</span>
+                <span className="border-0 bg-hero-void/90 dark:text-white text-gray-900">{t("loginBadge")}</span>
                 <span className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
                   {t("loginPartnerOnly")}
                 </span>
@@ -346,7 +346,7 @@ export default function PartnerPortalPage() {
                   ) : null}
                   <BtnBlock
                     type="submit"
-                    className="w-full bg-hero-void text-white hover:bg-hero-void/90"
+                    className="w-full bg-hero-void dark:text-white text-gray-900 hover:bg-hero-void/90"
                     disabled={loading}
                   >
                     {loading ? (
@@ -578,7 +578,7 @@ export default function PartnerPortalPage() {
               variant={tab === id ? "dark" : "secondary"}
               onClick={() => setTab(id)}
               className={cn(
-                tab === id ? "bg-hero-void text-white" : "text-foreground/70",
+                tab === id ? "bg-hero-void dark:text-white text-gray-900" : "text-foreground/70",
               )}
             >
               <Icon className="mr-1.5 h-4 w-4" />
@@ -951,7 +951,7 @@ export default function PartnerPortalPage() {
             </BtnBlock>
             <BtnBlock
               type="button"
-              className="flex-1 bg-hero-void text-white"
+              className="flex-1 bg-hero-void dark:text-white text-gray-900"
               onClick={saveMedia}
             >
               {t("mediaSave")}

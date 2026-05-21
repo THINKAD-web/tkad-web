@@ -51,50 +51,50 @@ function MediaDetailQuoteModalBody({
     btnBlockBase,
     "px-6 py-3 text-xs",
     "h-12 sm:h-14",
-    "rounded-[22px] border border-white/14 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95",
+    "rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95",
   );
   const secondaryLinkClass = cn(
     btnBlockBase,
     "px-6 py-3 text-xs",
     "h-12",
-    "rounded-[18px] border border-white/14 bg-white/8 text-white shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12",
+    "rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12",
   );
 
   return (
-    <div className="relative px-4 pb-5 pt-9 text-white sm:px-6 sm:pb-6 sm:pt-10">
+    <div className="relative px-4 pb-5 pt-9 dark:text-white text-gray-900 sm:px-6 sm:pb-6 sm:pt-10">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
       <div
         aria-hidden
         className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
       />
 
-      <div className="relative mb-4 flex items-start gap-3 border-b border-white/10 pb-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-white/14 bg-white/8 text-white shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur">
+      <div className="relative mb-4 flex items-start gap-3 border-b dark:border-white/10 border-gray-200 pb-4">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur">
           <Sparkles className="h-5 w-5" strokeWidth={1.75} aria-hidden />
         </span>
         <div className="min-w-0">
           <h2
             id="media-quote-modal-title"
-            className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/65"
+            className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-600"
           >
             [ {t("quoteModalTitle")} ]
           </h2>
-          <p className="mt-1.5 text-base font-black leading-snug text-white sm:text-lg">
+          <p className="mt-1.5 text-base font-black leading-snug dark:text-white text-gray-900 sm:text-lg">
             {mediaTitle}
           </p>
         </div>
       </div>
-      <p className="relative mb-4 text-sm leading-relaxed text-white/75">
+      <p className="relative mb-4 text-sm leading-relaxed dark:text-white text-gray-700">
         {t("quoteModalDescription")}
       </p>
 
       {hasOpts ? (
         <div
-          className="relative mb-5 rounded-[22px] border border-white/12 bg-black/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:p-4"
+          className="relative mb-5 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:p-4"
           role="radiogroup"
           aria-label={t("quoteModalPriceOptionLabel")}
         >
-          <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/55">
+          <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-500">
             [ {t("quoteModalPriceOptionLabel")} ]
           </p>
           <div className="flex max-h-[min(52vh,22rem)] flex-col gap-2 overflow-y-auto pr-0.5">
@@ -111,28 +111,28 @@ function MediaDetailQuoteModalBody({
                     "relative w-full rounded-[22px] border p-3 text-left transition-all sm:p-3.5",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/18 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
                     selectedCard
-                      ? "border-white/22 bg-white/10"
-                      : "border-white/10 bg-black/20 hover:border-white/16 hover:bg-black/25",
+                      ? "border-white/22 dark:bg-white/10 bg-gray-100"
+                      : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 hover:border-white/16 hover:dark:bg-black bg-white bg-white/25",
                   )}
                 >
                   <span
                     className={cn(
                       "absolute right-2.5 top-2.5 flex size-6 items-center justify-center rounded-xl border text-[9px] font-black",
                       selectedCard
-                        ? "border-white/18 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] text-white"
-                        : "border-white/12 bg-white/6 text-transparent",
+                        ? "dark:border-white/18 border-gray-300 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900"
+                        : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 text-transparent",
                     )}
                     aria-hidden
                   >
                     <Check className="size-2.5 stroke-[4]" />
                   </span>
-                  <span className="block pr-10 text-sm font-black leading-snug text-white">
+                  <span className="block pr-10 text-sm font-black leading-snug dark:text-white text-gray-900">
                     {o.label}
                   </span>
-                  <span className="mt-1.5 block text-lg font-black tabular-nums tracking-tight text-white sm:text-xl">
+                  <span className="mt-1.5 block text-lg font-black tabular-nums tracking-tight dark:text-white text-gray-900 sm:text-xl">
                     {formatCatalogPriceKrwLong(o.price, locale)}
                   </span>
-                  <span className="mt-1.5 font-mono text-[9px] font-bold uppercase tracking-wider text-white/55">
+                  <span className="mt-1.5 font-mono text-[9px] font-bold uppercase tracking-wider dark:text-white text-gray-500">
                     {t(
                       mediaDetailPricePeriodTranslationKey(
                         o.period ?? media.pricePeriod,
@@ -140,7 +140,7 @@ function MediaDetailQuoteModalBody({
                     )}
                   </span>
                   {o.description?.trim() ? (
-                    <span className="mt-2 block border-t border-white/10 pt-2 text-[11px] leading-relaxed text-white/65">
+                    <span className="mt-2 block border-t dark:border-white/10 border-gray-200 pt-2 text-[11px] leading-relaxed dark:text-white text-gray-600">
                       {o.description}
                     </span>
                   ) : null}
@@ -149,11 +149,11 @@ function MediaDetailQuoteModalBody({
             })}
           </div>
           {selected ? (
-            <p className="mt-3 border-t border-white/10 pt-3 text-sm text-white/80">
-              <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-white/55">
+            <p className="mt-3 border-t dark:border-white/10 border-gray-200 pt-3 text-sm dark:text-white text-gray-700">
+              <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500">
                 {t("quoteModalSelectedPriceLine")}{" "}
               </span>
-              <span className="font-black text-white">
+              <span className="font-black dark:text-white text-gray-900">
                 {selected.label} ·{" "}
                 {formatCatalogPriceKrwLong(selected.price, locale)}
               </span>
@@ -161,18 +161,18 @@ function MediaDetailQuoteModalBody({
           ) : null}
         </div>
       ) : media.keywordFilter?.priceText ? (
-        <p className="mb-5 rounded-[18px] border border-white/12 bg-black/20 px-3 py-2.5 text-sm font-semibold text-white/85 backdrop-blur">
+        <p className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 px-3 py-2.5 text-sm font-semibold dark:text-white text-gray-800 backdrop-blur">
           {media.keywordFilter.priceText}
         </p>
       ) : (
-        <div className="mb-5 rounded-[18px] border border-white/12 bg-black/20 px-3 py-3 text-white backdrop-blur">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-white/55">
+        <div className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 px-3 py-3 dark:text-white text-gray-900 backdrop-blur">
+          <p className="font-mono text-[9px] font-bold uppercase tracking-wider dark:text-white text-gray-500">
             {isKo ? "기준 요금" : "Base rate"}
           </p>
-          <p className="mt-1.5 text-lg font-black tabular-nums text-white">
+          <p className="mt-1.5 text-lg font-black tabular-nums dark:text-white text-gray-900">
             {formatCatalogPriceKrwLong(media.price, locale)}
           </p>
-          <p className="mt-0.5 font-mono text-[9px] text-white/55">
+          <p className="mt-0.5 font-mono text-[9px] dark:text-white text-gray-500">
             {t(
               mediaDetailPricePeriodTranslationKey(media.pricePeriod),
             )}

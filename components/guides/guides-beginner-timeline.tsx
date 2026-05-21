@@ -15,14 +15,14 @@ function RoleList({
   if (items.length === 0) return null;
   return (
     <div className="mt-3">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] dark:text-white">
         {label}
       </p>
       <ul className="mt-1.5 space-y-1">
         {items.map((item) => (
           <li
             key={item}
-            className="flex gap-2 text-xs leading-relaxed text-white/65 before:shrink-0 before:content-['·']"
+            className="flex gap-2 text-xs leading-relaxed dark:text-white text-gray-600 before:shrink-0 before:content-['·']"
           >
             {item}
           </li>
@@ -49,16 +49,16 @@ export function GuidesBeginnerTimeline({ steps, isKo }: Props) {
             <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cyan-400/40 bg-cyan-500/15 font-mono text-xs font-black text-cyan-200">
               {step.step}
             </div>
-            <div className="min-w-0 flex-1 rounded-2xl border border-white/12 bg-white/5 p-5 backdrop-blur">
+            <div className="min-w-0 flex-1 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base font-black text-white">
+                <h3 className="text-base font-black dark:text-white text-gray-900">
                   {isKo ? step.titleKo : step.titleEn}
                 </h3>
-                <span className="rounded-lg border border-white/10 bg-black/30 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-white/55">
+                <span className="rounded-lg border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/30 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-500">
                   {isKo ? step.durationKo : step.durationEn}
                 </span>
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-white/72">
+              <p className="mt-2 text-sm leading-relaxed dark:text-white">
                 {isKo ? step.bodyKo : step.bodyEn}
               </p>
               <RoleList

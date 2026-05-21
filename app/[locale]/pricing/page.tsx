@@ -55,7 +55,7 @@ export default async function PricingPage({ params, searchParams }: Props) {
               ? "매체 분석·플래너 시뮬레이션·PDF 보고서를 데이터로 차별화하세요."
               : "Media analytics, planner simulation, and PDF reports — powered by data."
           }
-          icon={<CreditCard className="size-7 text-white/90" aria-hidden />}
+          icon={<CreditCard className="size-7 dark:text-white text-gray-800" aria-hidden />}
           primaryCta={{
             href: user ? "/planner" : "/register",
             label: isKo ? (user ? "플래너 시작" : "무료 가입") : user ? "Start planner" : "Sign up",

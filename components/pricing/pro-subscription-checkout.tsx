@@ -103,7 +103,7 @@ export function ProSubscriptionCheckout({ isKo, customerName, customerEmail }: P
 
   if (!configured) {
     return (
-      <p className="text-sm text-white/65">
+      <p className="text-sm dark:text-white text-gray-600">
         {isKo
           ? "결제 설정이 준비 중입니다. 문의해 주세요."
           : "Payments are being configured. Contact us."}
@@ -113,7 +113,7 @@ export function ProSubscriptionCheckout({ isKo, customerName, customerEmail }: P
 
   if (confirming) {
     return (
-      <div className="flex items-center justify-center gap-2 py-8 text-sm text-white/72">
+      <div className="flex items-center justify-center gap-2 py-8 text-sm dark:text-white">
         <Loader2 className="h-5 w-5 animate-spin" />
         {isKo ? "결제 확인 중…" : "Confirming payment…"}
       </div>
@@ -121,7 +121,7 @@ export function ProSubscriptionCheckout({ isKo, customerName, customerEmail }: P
   }
 
   return (
-    <div className="rounded-2xl border border-white/12 bg-black/30 p-5">
+    <div className="rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 p-5">
       <div id="pro-payment-method" />
       <div id="pro-agreement" className="mt-4" />
       {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
@@ -147,7 +147,7 @@ export function ProSubscriptionCheckout({ isKo, customerName, customerEmail }: P
             setPaying(false);
           }
         }}
-        className="tkad-neon-cta-clean mt-6 flex h-12 w-full items-center justify-center rounded-xl text-sm font-black text-white disabled:opacity-50"
+        className="tkad-neon-cta-clean mt-6 flex h-12 w-full items-center justify-center rounded-xl text-sm font-black dark:text-white text-gray-900 disabled:opacity-50"
       >
         {paying ? (
           <Loader2 className="h-4 w-4 animate-spin" />

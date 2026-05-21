@@ -196,10 +196,10 @@ export function OnboardingWizard({
         <div className="mx-auto w-full max-w-2xl">
           <div className="mb-8 flex items-center justify-between gap-4">
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
                 {t("kicker")}
               </p>
-              <h1 className="mt-2 text-2xl font-black tracking-tight text-white">
+              <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
                 {t("title")}
               </h1>
             </div>
@@ -207,20 +207,20 @@ export function OnboardingWizard({
               type="button"
               onClick={() => void handleSkip()}
               disabled={saving}
-              className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-wider text-white/55 underline-offset-2 hover:text-white/80 hover:underline disabled:opacity-50"
+              className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-wider dark:text-white text-gray-500 underline-offset-2 hover:dark:text-white text-gray-700 hover:underline disabled:opacity-50"
             >
               {t("skip")}
             </button>
           </div>
 
           <div className="mb-8">
-            <div className="mb-2 flex justify-between font-mono text-[10px] font-bold uppercase tracking-wider text-white/50">
+            <div className="mb-2 flex justify-between font-mono text-[10px] font-bold uppercase tracking-wider dark:text-white text-gray-400">
               <span>
                 {t("stepLabel", { current: displayStep, total: totalSteps })}
               </span>
               <span>{progressPct}%</span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div className="h-1.5 overflow-hidden rounded-full dark:bg-white/10 bg-gray-100">
               <div
                 className="h-full rounded-full bg-[#ff6b2c] transition-all duration-300"
                 style={{ width: `${progressPct}%` }}
@@ -228,11 +228,11 @@ export function OnboardingWizard({
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-white/12 bg-black/40 p-6 backdrop-blur sm:p-8">
+          <div className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-6 backdrop-blur sm:p-8">
             {step === 1 && (
               <>
-                <h2 className="text-lg font-black text-white">{t("step1Title")}</h2>
-                <p className="mt-2 text-sm text-white/65">{t("step1Desc")}</p>
+                <h2 className="text-lg font-black dark:text-white text-gray-900">{t("step1Title")}</h2>
+                <p className="mt-2 text-sm dark:text-white text-gray-600">{t("step1Desc")}</p>
                 <ul className="mt-6 space-y-3">
                   {roleOptions.map((opt) => (
                     <li key={opt.value}>
@@ -243,11 +243,11 @@ export function OnboardingWizard({
                           "w-full rounded-[18px] border px-4 py-4 text-left transition-all",
                           role === opt.value
                             ? "border-[#ff6b2c] bg-[#ff6b2c]/15"
-                            : "border-white/12 bg-white/5 hover:border-white/25",
+                            : "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 hover:border-white/25",
                         )}
                       >
-                        <span className="block font-bold text-white">{opt.label}</span>
-                        <span className="mt-1 block text-sm text-white/60">
+                        <span className="block font-bold dark:text-white text-gray-900">{opt.label}</span>
+                        <span className="mt-1 block text-sm dark:text-white text-gray-500">
                           {opt.desc}
                         </span>
                       </button>
@@ -269,8 +269,8 @@ export function OnboardingWizard({
 
             {step === 2 && (
               <>
-                <h2 className="text-lg font-black text-white">{t("step2Title")}</h2>
-                <p className="mt-2 text-sm text-white/65">{t("step2Desc")}</p>
+                <h2 className="text-lg font-black dark:text-white text-gray-900">{t("step2Title")}</h2>
+                <p className="mt-2 text-sm dark:text-white text-gray-600">{t("step2Desc")}</p>
                 <div className="mt-6 flex flex-wrap gap-2">
                   {industryOptions.map((opt) => {
                     const selected = industries.includes(opt.value);
@@ -282,8 +282,8 @@ export function OnboardingWizard({
                         className={cn(
                           "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-all",
                           selected
-                            ? "border-[#ff6b2c] bg-[#ff6b2c]/20 text-white"
-                            : "border-white/15 bg-white/5 text-white/75 hover:border-white/30",
+                            ? "border-[#ff6b2c] bg-[#ff6b2c]/20 dark:text-white text-gray-900"
+                            : "dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:border-white/30",
                         )}
                       >
                         {selected ? <Check className="h-3.5 w-3.5" /> : null}
@@ -299,7 +299,7 @@ export function OnboardingWizard({
                   <BtnBlock
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 border border-white/20 bg-white/5 text-white hover:bg-white/10"
+                    className="flex-1 border dark:border-white/20 border-gray-300 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-900 hover:dark:bg-white/10 bg-gray-100"
                   >
                     {t("back")}
                   </BtnBlock>
@@ -317,8 +317,8 @@ export function OnboardingWizard({
 
             {step === 3 && (
               <>
-                <h2 className="text-lg font-black text-white">{t("step3Title")}</h2>
-                <p className="mt-2 text-sm text-white/65">{t("step3Desc")}</p>
+                <h2 className="text-lg font-black dark:text-white text-gray-900">{t("step3Title")}</h2>
+                <p className="mt-2 text-sm dark:text-white text-gray-600">{t("step3Desc")}</p>
                 <ul className="mt-6 space-y-3">
                   {budgetOptions.map((opt) => (
                     <li key={opt.value}>
@@ -328,8 +328,8 @@ export function OnboardingWizard({
                         className={cn(
                           "w-full rounded-[18px] border px-4 py-3.5 text-left font-semibold transition-all",
                           budgetRange === opt.value
-                            ? "border-[#ff6b2c] bg-[#ff6b2c]/15 text-white"
-                            : "border-white/12 bg-white/5 text-white/80 hover:border-white/25",
+                            ? "border-[#ff6b2c] bg-[#ff6b2c]/15 dark:text-white text-gray-900"
+                            : "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:border-white/25",
                         )}
                       >
                         {opt.label}
@@ -360,8 +360,8 @@ export function OnboardingWizard({
 
             {step === 4 && (
               <>
-                <h2 className="text-lg font-black text-white">{t("step4Title")}</h2>
-                <p className="mt-2 text-sm text-white/65">{t("step4Desc")}</p>
+                <h2 className="text-lg font-black dark:text-white text-gray-900">{t("step4Title")}</h2>
+                <p className="mt-2 text-sm dark:text-white text-gray-600">{t("step4Desc")}</p>
                 {loading ? (
                   <div className="mt-10 flex justify-center">
                     <Spinner className="h-8 w-8" />
@@ -384,7 +384,7 @@ export function OnboardingWizard({
                           density="compact"
                           topRight={
                             m.isVerified ? (
-                              <span className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                              <span className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider dark:text-white text-gray-900">
                                 VERIFIED
                               </span>
                             ) : undefined
@@ -430,7 +430,7 @@ export function OnboardingWizard({
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="mt-4 w-full text-center font-mono text-[11px] text-white/45 hover:text-white/70"
+                    className="mt-4 w-full text-center font-mono text-[11px] dark:text-white hover:dark:text-white text-gray-600"
                   >
                     {t("back")}
                   </button>
@@ -438,7 +438,7 @@ export function OnboardingWizard({
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="mt-4 w-full text-center font-mono text-[11px] text-white/45 hover:text-white/70"
+                    className="mt-4 w-full text-center font-mono text-[11px] dark:text-white hover:dark:text-white text-gray-600"
                   >
                     {t("back")}
                   </button>

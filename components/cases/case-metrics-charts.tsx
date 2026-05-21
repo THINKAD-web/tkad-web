@@ -100,15 +100,15 @@ export function CaseMetricsCharts({ metrics }: Props) {
           {metrics.map((m, i) => (
             <div
               key={m.key}
-              className="rounded-[16px] border border-white/12 bg-white/5 p-4"
+              className="rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-4"
               style={{
                 boxShadow: `0 0 24px ${BAR_COLORS[i % BAR_COLORS.length]}22`,
               }}
             >
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/55">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500">
                 {isKo ? m.labelKo : m.labelEn}
               </p>
-              <p className="mt-2 text-xl font-black tabular-nums text-white">
+              <p className="mt-2 text-xl font-black tabular-nums dark:text-white text-gray-900">
                 {formatCaseStudyMetricValue(m, locale)}
               </p>
             </div>

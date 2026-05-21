@@ -18,7 +18,7 @@ export function HomeVerificationSteps() {
       {/* Track line (desktop) */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-6 right-6 top-10 hidden h-px bg-white/10 lg:block"
+        className="pointer-events-none absolute left-6 right-6 top-10 hidden h-px dark:bg-white/10 bg-gray-100 lg:block"
       />
       <div
         aria-hidden
@@ -40,12 +40,12 @@ export function HomeVerificationSteps() {
                 ease: [0.22, 1, 0.36, 1],
               }}
               whileHover={{ y: -3 }}
-              className="group relative h-full rounded-[26px] bg-white/5 p-7 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border shadow-[0_28px_120px_rgba(0,0,0,0.78)] hover:shadow-[0_34px_140px_rgba(0,0,0,0.82)]"
+              className="group relative h-full rounded-[26px] dark:bg-white/5 bg-gray-50 p-7 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border shadow-[0_28px_120px_rgba(0,0,0,0.78)] hover:shadow-[0_34px_140px_rgba(0,0,0,0.82)]"
             >
               {/* Big step number */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute right-4 top-3 font-mono text-[44px] font-black leading-none tracking-tight text-white/10"
+                className="pointer-events-none absolute right-4 top-3 font-mono text-[44px] font-black leading-none tracking-tight dark:text-white text-gray-300"
               >
                 {item.step}
               </div>
@@ -55,7 +55,7 @@ export function HomeVerificationSteps() {
                   <motion.div
                     whileHover={{ rotate: -2 }}
                     transition={{ type: "spring", stiffness: 260, damping: 16 }}
-                    className="relative flex size-12 items-center justify-center rounded-2xl border border-white/12 bg-white/6 text-white group-hover:border-white/20"
+                    className="relative flex size-12 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 group-hover:dark:border-white/20 border-gray-300"
                   >
                     <Icon className="size-6" strokeWidth={1.85} aria-hidden />
                     <div
@@ -69,10 +69,10 @@ export function HomeVerificationSteps() {
                   </motion.div>
 
                   <div className="min-w-0">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       STEP {item.step}
                     </p>
-                    <h3 className="mt-1 text-lg font-black tracking-tight text-white">
+                    <h3 className="mt-1 text-lg font-black tracking-tight dark:text-white text-gray-900">
                       {item.title}
                     </h3>
                   </div>
@@ -80,16 +80,16 @@ export function HomeVerificationSteps() {
 
                 {/* Node dot (desktop) */}
                 <div className="hidden lg:flex">
-                  <div className="mt-2 size-5 rounded-full border border-white/12 bg-white/6 shadow-[0_0_0_6px_rgba(5,5,10,1)] transition-colors group-hover:border-white/20 group-hover:bg-white/10" />
+                  <div className="mt-2 size-5 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 shadow-[0_0_0_6px_rgba(5,5,10,1)] transition-colors group-hover:dark:border-white/20 border-gray-300 group-hover:dark:bg-white/10 bg-gray-100" />
                 </div>
               </div>
 
-              <p className="mt-4 text-sm leading-relaxed text-white/74">
+              <p className="mt-4 text-sm leading-relaxed dark:text-white">
                 {item.desc}
               </p>
 
               {/* Progress bar */}
-              <div className="mt-5 h-1 w-full overflow-hidden bg-white/10">
+              <div className="mt-5 h-1 w-full overflow-hidden dark:bg-white/10 bg-gray-100">
                 <motion.div
                   className="h-full bg-[linear-gradient(90deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)]"
                   initial={{ width: "0%" }}

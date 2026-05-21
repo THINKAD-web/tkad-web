@@ -49,7 +49,7 @@ function FilterChip({
         "rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] transition-all",
         active
           ? "border-[#22d3ee]/50 bg-[#22d3ee]/15 text-[#22d3ee] shadow-[0_0_20px_rgba(34,211,238,0.15)]"
-          : "border-white/12 bg-white/5 text-white/65 hover:border-white/25 hover:bg-white/10 hover:text-white",
+          : "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:border-white/25 hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900",
       )}
     >
       {label}
@@ -143,7 +143,7 @@ export function CasesFilterHub({
   };
 
   return (
-    <div className="mb-10 space-y-5 rounded-[24px] border border-white/12 bg-black/40 p-5 backdrop-blur sm:p-6">
+    <div className="mb-10 space-y-5 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-5 backdrop-blur sm:p-6">
       <FilterGroup
         title={t("filterIndustry")}
         values={CASE_INDUSTRY_TAGS}
@@ -193,16 +193,16 @@ export function CasesFilterHub({
         }
       />
 
-      <div className="flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-t dark:border-white/10 border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <input
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder={t("searchPlaceholder")}
-          className="h-11 w-full rounded-2xl border border-white/12 bg-white/5 px-4 font-mono text-sm text-white placeholder:text-white/40 focus:border-[#22d3ee]/40 focus:outline-none sm:max-w-md"
+          className="h-11 w-full rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 font-mono text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-[#22d3ee]/40 focus:outline-none sm:max-w-md"
           aria-label={t("searchPlaceholder")}
         />
         <div className="flex items-center gap-3">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/50">
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white text-gray-400">
             {`// `}
             {t("resultsCount", { count: resultCount })}
           </p>

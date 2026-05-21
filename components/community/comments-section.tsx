@@ -243,19 +243,19 @@ export function CommunityCommentsSection({
   };
 
   return (
-    <div className="rounded-[32px] border border-white/10 bg-black/18 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur sm:p-8">
+    <div className="rounded-[32px] border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/18 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur sm:p-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-white/45">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] dark:text-white">
             [ Conversation ]
           </p>
-          <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white sm:text-3xl">
+          <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] dark:text-white text-gray-900 sm:text-3xl">
             {isKo
               ? `댓글 ${comments.length.toLocaleString()}`
               : `Comments ${comments.length.toLocaleString()}`}
           </h2>
         </div>
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/58">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] dark:text-white">
           {isKo
             ? `${comments.length.toLocaleString()}개 댓글`
             : `${comments.length.toLocaleString()} comments`}
@@ -263,7 +263,7 @@ export function CommunityCommentsSection({
       </div>
 
       {comments.length === 0 ? (
-        <p className="mt-6 rounded-[24px] border border-white/12 bg-black/20 p-6 text-center font-mono text-[12px] uppercase tracking-[0.22em] text-white/58">
+        <p className="mt-6 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 p-6 text-center font-mono text-[12px] uppercase tracking-[0.22em] dark:text-white">
           {isKo ? "// 첫 댓글을 작성해주세요." : "// be the first to comment"}
         </p>
       ) : (
@@ -281,7 +281,7 @@ export function CommunityCommentsSection({
         </ul>
       )}
 
-      <div className="mt-8 border-t border-white/10 pt-8">
+      <div className="mt-8 border-t dark:border-white/10 border-gray-200 pt-8">
         {currentUser ? (
           <CommunityCommentForm
             postId={postId}

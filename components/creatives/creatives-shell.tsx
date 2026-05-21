@@ -55,7 +55,7 @@ export function CreativesShell({
             headlineGradient={categoryHero.headlineGradient}
             headlineAfter={categoryHero.headlineAfter}
             subtitle={categoryHero.subtitle}
-            className="border-b border-white/10"
+            className="border-b dark:border-white/10 border-gray-200"
           >
             <div className="flex flex-col items-center gap-4">
               {rightSlot ? <div className="shrink-0">{rightSlot}</div> : null}
@@ -63,7 +63,7 @@ export function CreativesShell({
             </div>
           </CategoryExploreHero>
         ) : (
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] text-white">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] dark:text-white text-gray-900">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
           <div
@@ -74,22 +74,22 @@ export function CreativesShell({
             {showBackToLibrary ? (
               <Link
                 href="/creatives"
-                className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/70 transition-colors hover:text-white"
+                className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600 transition-colors hover:dark:text-white text-gray-900"
               >
                 <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> {isKo ? "라이브러리로" : "Library"}
               </Link>
             ) : null}
-            <p className={cn("font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-white/65", showBackToLibrary ? "mt-3" : null)}>
+            <p className={cn("font-mono text-[10px] font-bold uppercase tracking-[0.28em] dark:text-white text-gray-600", showBackToLibrary ? "mt-3" : null)}>
               {eyebrow}
             </p>
             <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-              <h1 className="text-balance text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl lg:text-5xl">
+              <h1 className="text-balance text-3xl font-black tracking-[-0.04em] dark:text-white text-gray-900 sm:text-4xl lg:text-5xl">
                 {title}
               </h1>
               {rightSlot ? <div className="shrink-0">{rightSlot}</div> : null}
             </div>
             {description ? (
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed dark:text-white text-gray-700 sm:text-base">
                 {description}
               </p>
             ) : null}
@@ -137,8 +137,8 @@ function CreativesSubNav({ className }: { className?: string }) {
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-all",
               isActive
-                ? "border-white/30 bg-white/14 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
-                : "border-white/14 bg-white/5 text-white/70 hover:border-white/25 hover:text-white",
+                ? "border-white/30 bg-white/14 dark:text-white text-gray-900 shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
+                : "dark:border-white/14 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:border-white/25 hover:dark:text-white text-gray-900",
             )}
           >
             <item.icon className="h-3.5 w-3.5" aria-hidden />

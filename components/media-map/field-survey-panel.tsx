@@ -113,25 +113,25 @@ export function FieldSurveyPanel({
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[12] flex max-h-[55dvh] flex-col md:inset-x-auto md:right-4 md:top-20 md:bottom-auto md:max-h-[calc(100vh-6rem)] md:w-[360px]">
-      <div className="pointer-events-auto flex min-h-0 flex-1 flex-col rounded-t-2xl border border-white/14 bg-black/80 shadow-2xl backdrop-blur md:rounded-2xl">
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+      <div className="pointer-events-auto flex min-h-0 flex-1 flex-col rounded-t-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/8 bg-gray-100 shadow-2xl backdrop-blur md:rounded-2xl">
+        <div className="flex items-center justify-between border-b dark:border-white/10 border-gray-200 px-4 py-3">
           <div className="flex items-center gap-2">
             <MapPinned className="h-4 w-4 text-cyan-300" />
-            <span className="text-sm font-bold text-white">
+            <span className="text-sm font-bold dark:text-white text-gray-900">
               {isKo ? "답사 모드" : "Field survey"}
             </span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-white/60 hover:bg-white/10"
+            className="rounded-lg p-1 dark:text-white text-gray-500 hover:dark:bg-white/10 bg-gray-100"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="overflow-y-auto px-4 py-3 text-xs text-white/65">
+        <div className="overflow-y-auto px-4 py-3 text-xs dark:text-white text-gray-600">
           {!userLocation ? (
             <p>{isKo ? "GPS 위치를 허용해주세요." : "Allow GPS location."}</p>
           ) : (
@@ -151,7 +151,7 @@ export function FieldSurveyPanel({
                 "mb-2 rounded-xl border p-2",
                 checkedIds.has(it.id)
                   ? "border-emerald-400/40 bg-emerald-400/10"
-                  : "border-white/10 bg-white/5",
+                  : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50",
               )}
             >
               <label className="flex cursor-pointer gap-2">
@@ -162,15 +162,15 @@ export function FieldSurveyPanel({
                   className="mt-1"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-white">
+                  <p className="truncate text-sm font-semibold dark:text-white text-gray-900">
                     {it.name}
                   </p>
-                  <p className="text-[10px] text-white/50">
+                  <p className="text-[10px] dark:text-white text-gray-400">
                     {(km * 1000).toFixed(0)}m · {it.type}
                   </p>
                   {checkedIds.has(it.id) ? (
                     <textarea
-                      className="mt-2 w-full rounded-lg border border-white/15 bg-black/40 px-2 py-1 text-xs text-white"
+                      className="mt-2 w-full rounded-lg border dark:border-white/15 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-2 py-1 text-xs dark:text-white text-gray-900"
                       rows={2}
                       placeholder={isKo ? "메모" : "Note"}
                       value={notes[it.id] ?? ""}
@@ -183,12 +183,12 @@ export function FieldSurveyPanel({
           ))}
         </ul>
 
-        <div className="flex gap-2 border-t border-white/10 p-3">
+        <div className="flex gap-2 border-t dark:border-white/10 border-gray-200 p-3">
           <button
             type="button"
             disabled={visits.length === 0}
             onClick={() => void exportPdf()}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-violet-500 py-2.5 text-xs font-bold text-white disabled:opacity-40"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-violet-500 py-2.5 text-xs font-bold dark:text-white text-gray-900 disabled:opacity-40"
           >
             <FileDown className="h-3.5 w-3.5" />
             {isKo ? "답사 보고서 PDF" : "Survey PDF"}
@@ -200,7 +200,7 @@ export function FieldSurveyPanel({
               onCheckedChange(new Set());
               setVisits([]);
             }}
-            className="rounded-xl border border-white/15 px-3 py-2 text-xs text-white/70"
+            className="rounded-xl border dark:border-white/15 border-gray-200 px-3 py-2 text-xs dark:text-white text-gray-600"
           >
             {isKo ? "초기화" : "Reset"}
           </button>

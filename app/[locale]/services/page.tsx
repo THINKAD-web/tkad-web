@@ -76,7 +76,7 @@ export default async function ServicesPage({ params }: Props) {
         headlineGradient={isKo ? "현장에서 완성하는 OOH" : t("heroTitle")}
         headlineAfter={isKo ? " 파트너" : ""}
         subtitle={t("heroSubtitle")}
-        className="border-b border-white/10"
+        className="border-b dark:border-white/10 border-gray-200"
       >
         <CategoryHeroCtaRow>
           <Link href="/quote" className={categoryHeroCtaPrimaryClass}>
@@ -85,7 +85,7 @@ export default async function ServicesPage({ params }: Props) {
           </Link>
           <Link href="/media" className={categoryHeroCtaSecondaryClass}>
             {t("ctaSecondary")}
-            <ArrowRight className="h-4 w-4 text-white/80" aria-hidden />
+            <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
           </Link>
         </CategoryHeroCtaRow>
       </CategoryExploreHero>
@@ -105,19 +105,19 @@ export default async function ServicesPage({ params }: Props) {
             const Icon = p.icon;
             return (
               <AnimatedCard key={p.title} delay={i * 80}>
-                <article className="group relative h-full rounded-[28px] bg-white/5 p-7 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)] transition-all hover:-translate-y-1 hover:bg-white/6">
+                <article className="group relative h-full rounded-[28px] dark:bg-white/5 bg-gray-50 p-7 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)] transition-all hover:-translate-y-1 hover:dark:bg-white/6">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       [{String(i + 1).padStart(2, "0")}]
                     </span>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-white/6 text-white">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900">
                       <Icon className="h-6 w-6" aria-hidden />
                     </div>
                   </div>
-                  <h3 className="mt-5 text-xl font-black tracking-tight text-white">
+                  <h3 className="mt-5 text-xl font-black tracking-tight dark:text-white text-gray-900">
                     {p.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/76">
+                  <p className="mt-3 text-sm leading-relaxed dark:text-white">
                     {p.body}
                   </p>
                 </article>
@@ -141,14 +141,14 @@ export default async function ServicesPage({ params }: Props) {
         <div className="grid gap-5 md:grid-cols-5">
           {steps.map((step, i) => (
             <AnimatedCard key={step.label} delay={i * 60}>
-              <article className="h-full rounded-[26px] bg-white/5 p-6 backdrop-blur tkad-neon-border shadow-[0_28px_110px_rgba(0,0,0,0.78)] transition-all hover:-translate-y-1 hover:bg-white/6">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/6 font-mono text-sm font-black text-white">
+              <article className="h-full rounded-[26px] dark:bg-white/5 bg-gray-50 p-6 backdrop-blur tkad-neon-border shadow-[0_28px_110px_rgba(0,0,0,0.78)] transition-all hover:-translate-y-1 hover:dark:bg-white/6">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 font-mono text-sm font-black dark:text-white text-gray-900">
                   {step.label}
                 </span>
-                <h3 className="mt-4 text-base font-black tracking-tight text-white">
+                <h3 className="mt-4 text-base font-black tracking-tight dark:text-white text-gray-900">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-[12px] leading-relaxed text-white/70">
+                <p className="mt-2 text-[12px] leading-relaxed dark:text-white text-gray-600">
                   {step.body}
                 </p>
               </article>
@@ -168,12 +168,12 @@ export default async function ServicesPage({ params }: Props) {
           />
         </ScrollAnimate>
 
-        <div className="rounded-[28px] bg-white/5 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)] sm:p-10">
+        <div className="rounded-[28px] dark:bg-white/5 bg-gray-50 p-8 backdrop-blur tkad-neon-border shadow-[0_30px_120px_rgba(0,0,0,0.78)] sm:p-10">
           <ul className="grid gap-5 sm:grid-cols-2">
             {differentiators.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex gap-3 text-sm leading-relaxed text-white/82 sm:text-base">
+              <li key={text} className="flex gap-3 text-sm leading-relaxed dark:text-white text-gray-800 sm:text-base">
                 <span
-                  className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/6 text-white"
+                  className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900"
                   aria-hidden
                 >
                   <Icon className="h-4 w-4" strokeWidth={1.75} />
@@ -195,26 +195,26 @@ export default async function ServicesPage({ params }: Props) {
       {/* Final CTA */}
       <NeonSection innerClassName="text-center">
         <ScrollAnimate className="mx-auto max-w-4xl">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-white/65">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] dark:text-white text-gray-600">
             [ NEXT STEP ]
           </p>
-          <ClipboardList className="mx-auto mt-4 h-10 w-10 text-white/80" aria-hidden />
-          <h2 className="tkad-neon-text mt-5 text-balance text-3xl font-[950] leading-[1.02] tracking-[-0.06em] text-white sm:text-4xl">
+          <ClipboardList className="mx-auto mt-4 h-10 w-10 dark:text-white text-gray-700" aria-hidden />
+          <h2 className="tkad-neon-text mt-5 text-balance text-3xl font-[950] leading-[1.02] tracking-[-0.06em] dark:text-white text-gray-900 sm:text-4xl">
             {t("ctaTitle")}
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/82 sm:text-lg">
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed dark:text-white text-gray-800 sm:text-lg">
             {t("ctaSubtitle")}
           </p>
           <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-4">
             <Link
               href="/quote"
-              className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center rounded-[22px] px-10 text-base font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              className="tkad-neon-cta-clean inline-flex h-16 items-center justify-center rounded-[22px] px-10 text-base font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
             >
               {t("ctaButton")}
             </Link>
             <Link
               href="/media"
-              className="inline-flex h-16 items-center justify-center rounded-[22px] border border-white/14 bg-white/6 px-10 text-base font-black text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
+              className="inline-flex h-16 items-center justify-center rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-10 text-base font-black dark:text-white text-gray-900 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-lg"
             >
               {t("ctaSecondary")}
             </Link>

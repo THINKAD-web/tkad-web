@@ -4,10 +4,13 @@ export function OgLayout({
   title,
   subtitle,
   badge,
+  imageUrl,
 }: {
   title: string;
   subtitle?: string;
   badge?: string;
+  /** 매체 썸네일 등 — OG 카드 우측 미리보기 */
+  imageUrl?: string;
 }) {
   return (
     <div
@@ -15,8 +18,9 @@ export function OgLayout({
         width: "100%",
         height: "100%",
         display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
+        flexDirection: "row",
+        alignItems: "stretch",
+        justifyContent: "space-between",
         padding: "60px 80px",
         background: "linear-gradient(135deg, #0D1B2E 0%, #0A1420 52%, #0E1228 100%)",
         position: "relative",
@@ -45,6 +49,16 @@ export function OgLayout({
         }}
       />
 
+      <div
+        style={{
+          display: "flex",
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "center",
+          minWidth: 0,
+          paddingRight: imageUrl ? 48 : 0,
+        }}
+      >
       {badge && (
         <div
           style={{
@@ -126,6 +140,32 @@ export function OgLayout({
           </span>
         </div>
       </div>
+      </div>
+
+      {imageUrl ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageUrl}
+            alt=""
+            width={360}
+            height={360}
+            style={{
+              objectFit: "cover",
+              borderRadius: 24,
+              border: "3px solid rgba(255,255,255,0.12)",
+              boxShadow: "0 24px 80px rgba(0,0,0,0.45)",
+            }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

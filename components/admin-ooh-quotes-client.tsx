@@ -251,7 +251,7 @@ export default function AdminOohQuotesClient() {
               />
             </div>
             <Button
-              className="bg-navy text-white"
+              className="bg-navy dark:text-white text-gray-900"
               disabled={busyId === payOpenId}
               onClick={() =>
                 void run(payOpenId, async () => {
@@ -398,7 +398,7 @@ export default function AdminOohQuotesClient() {
                               </Button>
                               <Button
                                 size="sm"
-                                className="bg-hermes text-white hover:bg-hermes/90"
+                                className="bg-hermes dark:text-white text-gray-900 hover:bg-hermes/90"
                                 disabled={busyId === row.id}
                                 onClick={() =>
                                   void run(row.id, () =>
@@ -419,7 +419,7 @@ export default function AdminOohQuotesClient() {
                             row.status === "booking_pending") && (
                             <Button
                               size="sm"
-                              className="bg-navy text-white"
+                              className="bg-navy dark:text-white text-gray-900"
                               disabled={busyId === row.id}
                               onClick={() =>
                                 void run(row.id, () =>

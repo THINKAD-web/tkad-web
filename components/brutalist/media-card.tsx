@@ -115,7 +115,7 @@ export function MediaCard({
         {topRight ? (
           <div
             className={cn(
-              "absolute right-0 top-0 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white",
+              "absolute right-0 top-0 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-900",
               topRightClass,
               premium ? "rounded-bl-2xl border-b border-l border-border/60" : "border-b-2 border-l-2 border-border",
             )}

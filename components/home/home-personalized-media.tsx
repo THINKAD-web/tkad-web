@@ -39,14 +39,14 @@ export async function HomePersonalizedMedia({
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link
           href="/recommend"
-          className="tkad-neon-cta group inline-flex h-12 items-center justify-center gap-2 rounded-[22px] px-8 text-sm font-black text-white transition-transform hover:-translate-y-1"
+          className="tkad-neon-cta group inline-flex h-12 items-center justify-center gap-2 rounded-[22px] px-8 text-sm font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1"
         >
           {th("personalizedCtaRecommend")}
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </Link>
         <Link
           href="/planner"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-[22px] border border-white/14 bg-white/6 px-8 text-sm font-black text-white backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:bg-white/10"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-8 text-sm font-black dark:text-white text-gray-900 backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100"
         >
           {th("personalizedCtaPlanner")}
         </Link>

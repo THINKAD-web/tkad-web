@@ -578,6 +578,9 @@ export interface TrendReportGenerationContext {
     publishedAt?: string | null;
   }>;
   internalInsights?: Array<{ title: string; summary: string }>;
+  /** 시드·주제 지정 리포트 */
+  topicFocus?: string;
+  titleKoHint?: string;
 }
 
 function buildContextSection(ctx?: TrendReportGenerationContext): string {
@@ -614,12 +617,27 @@ export async function generateTrendReport(
 
   const system = withOohExpertContext(trendAnalystSystemOverlay(month));
 
+  const topicBlock =
+    context?.topicFocus?.trim()
+      ? `\n\nPrimary editorial focus (must drive the entire report):\n${context.topicFocus.trim()}${
+          context.titleKoHint?.trim()
+            ? `\nPreferred Korean title (use exactly or very close): ${context.titleKoHint.trim()}`
+            : ""
+        }`
+      : "";
+
+  const lengthRules = context?.topicFocus?.trim()
+    ? `
+- contentKo: **minimum 1500 Korean characters**, Markdown with **3–4 ## h2 sections**, include **concrete statistics or market figures** (cite sources from context when available)
+- End with a natural THINKAD(싱커드) CTA: AI 플래너 / 매체 탐색`
+    : "";
+
   const baseUser = `Call emit_trend_report once with every required field for month ${month}.
 - titleKo and optional titleEn
 - contentKo: long-form Markdown (snapshot, market, DOOH, outlook)
 - summaryKo: 3–6 bullets; marketTrendKo and doohTrendKo: 3–5 bullets each
 - verticalStrategies: 3–5 verticals (fashion, auto, F&B, etc.) with labelKo, labelEn, bulletsKo, bulletsEn
-- optional thumbnailUrl (omit or null if none)`;
+- optional thumbnailUrl (omit or null if none)${lengthRules}${topicBlock}`;
   const user = `${baseUser}${buildContextSection(context)}`;
 
   const promptStored = `SYSTEM:\n${system}\n\nUSER:\n${user}`;

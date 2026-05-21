@@ -4,6 +4,14 @@ import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 
 export const OG_DIM = { width: 1200, height: 630 } as const;
 
+/** Kakao/messenger crawlers must fetch OG images from the production origin. */
+export const OG_PRODUCTION_ORIGIN = "https://tkad.co.kr";
+
+export function ogImageUrl(path: string): string {
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${OG_PRODUCTION_ORIGIN}${p}`;
+}
+
 const SITE_KEYWORDS = {
   ko: [
     "OOH 광고",
@@ -51,8 +59,9 @@ export function defaultOgImages(
 ): NonNullable<NonNullable<Metadata["openGraph"]>["images"]> {
   return [
     {
-      url: `/${locale}/opengraph-image`,
+      url: ogImageUrl(`/${locale}/opengraph-image`),
       ...OG_DIM,
+      type: "image/png",
       alt: locale === "ko" ? alt.ko : alt.en,
     },
   ];
@@ -65,6 +74,9 @@ export function defaultOgImages(
  * - 로컬/폴백: tkad.co.kr
  */
 function resolvePublicSiteUrl(): string {
+  if (process.env.NODE_ENV === "production") {
+    return OG_PRODUCTION_ORIGIN;
+  }
   const explicit =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
     process.env.SITE_URL?.trim();
@@ -74,7 +86,7 @@ function resolvePublicSiteUrl(): string {
     const host = vercel.replace(/^https?:\/\//, "").replace(/\/$/, "");
     return `https://${host}`;
   }
-  return "https://tkad.co.kr";
+  return OG_PRODUCTION_ORIGIN;
 }
 
 export const siteUrl = resolvePublicSiteUrl();
@@ -174,8 +186,9 @@ export function segmentOpenGraphImages(
 ): NonNullable<NonNullable<Metadata["openGraph"]>["images"]> {
   return [
     {
-      url: `/${locale}/${segment}/opengraph-image`,
+      url: ogImageUrl(`/${locale}/${segment}/opengraph-image`),
       ...OG_DIM,
+      type: "image/png",
       alt: locale === "ko" ? alt.ko : alt.en,
     },
   ];
@@ -189,8 +202,9 @@ export function caseStudyOpenGraphImages(
 ): NonNullable<NonNullable<Metadata["openGraph"]>["images"]> {
   return [
     {
-      url: `/${locale}/cases/${slug}/opengraph-image`,
+      url: ogImageUrl(`/${locale}/cases/${slug}/opengraph-image`),
       ...OG_DIM,
+      type: "image/png",
       alt: locale === "ko" ? alt.ko : alt.en,
     },
   ];
@@ -204,8 +218,9 @@ export function mediaOpenGraphImages(
 ): NonNullable<NonNullable<Metadata["openGraph"]>["images"]> {
   return [
     {
-      url: `/${locale}/media/${id}/opengraph-image`,
+      url: ogImageUrl(`/${locale}/media/${id}/opengraph-image`),
       ...OG_DIM,
+      type: "image/png",
       alt: locale === "ko" ? alt.ko : alt.en,
     },
   ];

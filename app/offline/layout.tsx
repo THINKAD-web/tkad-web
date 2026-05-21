@@ -9,7 +9,7 @@ export default function OfflineLayout({ children }: { children: ReactNode }) {
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
-      <body className="m-0 bg-[#020202] text-white antialiased">{children}</body>
+      <body className="m-0 bg-[#020202] dark:text-white text-gray-900 antialiased">{children}</body>
     </html>
   );
 }

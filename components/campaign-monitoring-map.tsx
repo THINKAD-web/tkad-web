@@ -669,10 +669,10 @@ export function CampaignMonitoringMap({
                 className={cn(
                   "absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 shadow-lg transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2",
                   active
-                    ? "border-gold bg-navy text-white focus-visible:ring-gold"
+                    ? "border-gold bg-navy dark:text-white text-gray-900 focus-visible:ring-gold"
                     : tone === "green"
-                      ? "border-white bg-emerald-500 text-white focus-visible:ring-emerald-400"
-                      : "border-white bg-blue-500 text-white focus-visible:ring-blue-400",
+                      ? "border-white bg-emerald-500 dark:text-white text-gray-900 focus-visible:ring-emerald-400"
+                      : "border-white bg-blue-500 dark:text-white text-gray-900 focus-visible:ring-blue-400",
                   popular && !active && "ring-2 ring-gold/80",
                 )}
                 style={{ left: `${p.fallbackX}%`, top: `${p.fallbackY}%` }}

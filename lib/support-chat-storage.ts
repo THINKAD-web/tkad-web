@@ -1,6 +1,21 @@
 import type { SupportChatTurn } from "@/lib/support-chat-complete";
 
 export const SUPPORT_CHAT_SESSION_KEY = "tkad-support-chat-v1";
+const SUPPORT_SESSION_ID_KEY = "tkad-support-chat-session-id";
+
+export function getOrCreateSupportSessionId(): string {
+  if (typeof window === "undefined") return "ssr";
+  try {
+    let id = sessionStorage.getItem(SUPPORT_SESSION_ID_KEY);
+    if (!id) {
+      id = `sc_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      sessionStorage.setItem(SUPPORT_SESSION_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return `sc_${Date.now()}`;
+  }
+}
 
 export function loadSupportChatFromSession(): SupportChatTurn[] {
   if (typeof window === "undefined") return [];

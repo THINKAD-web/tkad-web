@@ -44,7 +44,7 @@ export async function HomeHeroServer({
   return (
     <section
       style={{ minHeight: HERO_MIN_HEIGHT }}
-      className="tkad-home-hero-neo relative flex w-full shrink-0 items-center overflow-hidden bg-[#05050a] text-white"
+      className="tkad-home-hero-neo relative flex w-full shrink-0 items-center overflow-hidden bg-[#05050a] dark:text-white text-gray-900"
       data-ab-variant={abVariant}
     >
       <AbHeroImpression page="/" />
@@ -77,7 +77,7 @@ export async function HomeHeroServer({
             {liveItems.map((item) => (
               <div
                 key={item.label}
-                className="inline-flex items-center gap-2 rounded-lg border border-white/14 bg-white/6 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-white backdrop-blur-sm"
+                className="inline-flex items-center gap-2 rounded-lg border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest dark:text-white text-gray-900 backdrop-blur-sm"
               >
                 {item.live ? (
                   <span className="inline-flex items-center gap-1.5">
@@ -86,21 +86,21 @@ export async function HomeHeroServer({
                       aria-hidden
                     />
                     LIVE
-                    <span className="text-white/55">•</span>
+                    <span className="dark:text-white text-gray-500">•</span>
                   </span>
                 ) : null}
-                <span className="text-white/55">{item.label}</span>
-                <span className="tabular-nums text-white">{item.value}</span>
+                <span className="dark:text-white text-gray-500">{item.label}</span>
+                <span className="tabular-nums dark:text-white text-gray-900">{item.value}</span>
               </div>
             ))}
-            <p className="hidden font-mono text-[11px] font-bold uppercase tracking-widest text-white/55 sm:block">
+            <p className="hidden font-mono text-[11px] font-bold uppercase tracking-widest dark:text-white text-gray-500 sm:block">
               {t("heroVerifiedOnly")}
             </p>
           </div>
 
           <div className="mt-8 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div className="flex flex-col gap-6">
-              <p className="font-mono text-xs tracking-widest text-white/55">
+              <p className="font-mono text-xs tracking-widest dark:text-white text-gray-500">
                 {t("heroEyebrow")}
               </p>
 
@@ -110,7 +110,7 @@ export async function HomeHeroServer({
                 {t("heroTitleLine2")}
               </h1>
 
-              <p className="max-w-md text-base text-white/55">{t("heroSubtitle")}</p>
+              <p className="max-w-md text-base dark:text-white text-gray-500">{t("heroSubtitle")}</p>
 
               <div className="flex flex-wrap gap-3">
                 <HomeHeroCta
@@ -121,7 +121,7 @@ export async function HomeHeroServer({
                 />
                 <Link
                   href="/planner"
-                  className="inline-flex items-center rounded-2xl border border-white/14 bg-white/6 px-6 py-3 font-bold text-white transition-colors hover:border-white/22 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="inline-flex items-center rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-6 py-3 font-bold dark:text-white text-gray-900 transition-colors hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   {t("heroCtaPlanner")}
                 </Link>
@@ -131,7 +131,7 @@ export async function HomeHeroServer({
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="border border-white/20 px-3 py-1 font-mono text-xs uppercase tracking-wide text-white/55"
+                    className="border dark:border-white/20 border-gray-300 px-3 py-1 font-mono text-xs uppercase tracking-wide dark:text-white text-gray-500"
                   >
                     {tag}
                   </span>

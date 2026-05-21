@@ -30,10 +30,10 @@ export function NeonFullPageSpinner({
         <div
           role="status"
           aria-live="polite"
-          className="tkad-glass-surface tkad-neon-border flex flex-col items-center gap-5 rounded-[28px] border border-white/12 px-10 py-12 text-center backdrop-blur-md sm:px-14 sm:py-14"
+          className="tkad-glass-surface tkad-neon-border flex flex-col items-center gap-5 rounded-[28px] border dark:border-white/12 border-gray-200 px-10 py-12 text-center backdrop-blur-md sm:px-14 sm:py-14"
         >
           <span
-            className="h-12 w-12 animate-spin rounded-full border-[3px] border-white/15 border-t-[#22d3ee] sm:h-14 sm:w-14"
+            className="h-12 w-12 animate-spin rounded-full border-[3px] dark:border-white/15 border-gray-200 border-t-[#22d3ee] sm:h-14 sm:w-14"
             aria-hidden
           />
           <p className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground sm:text-base">

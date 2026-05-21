@@ -54,7 +54,7 @@ export function CommunityPostCard({
       className={cn(
         "group block border-2 border-border bg-card transition-colors hover:bg-muted",
         isNeon &&
-          "rounded-[30px] border-white/12 bg-white/6 p-0 text-white backdrop-blur tkad-neon-border tkad-neon-glow hover:bg-white/10",
+          "rounded-[30px] dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-0 dark:text-white text-gray-900 backdrop-blur tkad-neon-border tkad-neon-glow hover:dark:bg-white/10 bg-gray-100",
         className,
       )}
     >
@@ -70,7 +70,7 @@ export function CommunityPostCard({
             className={cn(
               "inline-flex items-center border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground",
               isNeon &&
-                "rounded-full border-white/15 bg-white/10 px-3 py-1 text-white",
+                "rounded-full dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 dark:text-white text-gray-900",
             )}
           >
             {isKo ? labels.shortKo : labels.en}
@@ -78,7 +78,7 @@ export function CommunityPostCard({
           <span
             className={cn(
               "font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground",
-              isNeon && "text-white/55",
+              isNeon && "dark:text-white text-gray-500",
             )}
           >
             {fmtRelative(post.createdAt, locale)}
@@ -89,7 +89,7 @@ export function CommunityPostCard({
           <h3
             className={cn(
               "text-lg font-bold tracking-tight text-foreground sm:text-xl",
-              isNeon && "text-white",
+              isNeon && "dark:text-white text-gray-900",
               variant === "community" &&
                 "text-[clamp(1.2rem,2vw,1.6rem)] leading-[1.05] tracking-[-0.04em]",
             )}
@@ -99,7 +99,7 @@ export function CommunityPostCard({
           <p
             className={cn(
               "line-clamp-3 text-sm leading-relaxed text-muted-foreground",
-              isNeon && "text-white/72",
+              isNeon && "dark:text-white",
               variant === "community" && "line-clamp-4 text-[15px]",
             )}
           >
@@ -112,7 +112,7 @@ export function CommunityPostCard({
             <span
               className={cn(
                 "font-mono text-[11px] uppercase tracking-[0.18em] text-foreground",
-                isNeon && "text-white/88",
+                isNeon && "dark:text-white text-gray-800",
               )}
             >
               {post.authorName}
@@ -121,14 +121,14 @@ export function CommunityPostCard({
               <RoleBadge
                 role={post.author.role}
                 locale={locale}
-                className={isNeon ? "bg-white/10" : undefined}
+                className={isNeon ? "dark:bg-white/10 bg-gray-100" : undefined}
               />
             ) : null}
             {!post.isAnonymous && post.author?.company ? (
               <span
                 className={cn(
                   "font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground",
-                  isNeon && "text-white/55",
+                  isNeon && "dark:text-white text-gray-500",
                 )}
               >
                 {post.author.company}
@@ -139,7 +139,7 @@ export function CommunityPostCard({
           <div
             className={cn(
               "flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground",
-              isNeon && "text-white/60",
+              isNeon && "dark:text-white text-gray-500",
               variant === "community" && "justify-between gap-y-2",
             )}
           >
@@ -158,7 +158,7 @@ export function CommunityPostCard({
               </span>
             </div>
             {variant === "community" ? (
-              <span className="inline-flex items-center gap-1 text-white/78 transition-transform group-hover:translate-x-1">
+              <span className="inline-flex items-center gap-1 dark:text-white text-gray-700 transition-transform group-hover:translate-x-1">
                 {isKo ? "자세히 보기" : "Open"}
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </span>

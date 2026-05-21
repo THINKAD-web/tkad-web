@@ -146,7 +146,7 @@ export default async function AreaLandingPage({ params }: Props) {
             eyebrow={`// ${isKo ? "지구별 매체" : "BY DISTRICT"}`}
             title={title}
             description={description}
-            icon={<MapPin className="size-7 text-white/90" aria-hidden />}
+            icon={<MapPin className="size-7 dark:text-white text-gray-800" aria-hidden />}
             primaryCta={{
               href: "/media",
               label: isKo ? "전체 매체 보기" : "All media",

@@ -3,6 +3,7 @@ import {
   buildBiMonthlyTrendSlug,
   runBiMonthlyTrendPipeline,
 } from "@/lib/content-auto/pipelines";
+import { runTrendReportSeedPipeline } from "@/lib/content-auto/seed-trend-reports";
 import {
   notifyContentDraftReady,
   notifyPipelineError,
@@ -36,8 +37,54 @@ function seoulParts(d = new Date()) {
 
 /**
  * Vercel Cron — 매월 1·15일 00:00 UTC (09:00 KST) 트렌드 리포트 초안.
+ * POST — 수동 트리거. `{ "seed": true }` 이면 시드 주제 5건 초안 생성.
  */
+export async function POST(request: NextRequest) {
+  if (!authOk(request)) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+  if (!isDatabaseConfigured()) {
+    return json({ error: "Database not configured" }, 503);
+  }
+
+  let seed = false;
+  try {
+    const body = (await request.json()) as { seed?: boolean };
+    seed = body?.seed === true;
+  } catch {
+    const url = new URL(request.url);
+    seed = url.searchParams.get("seed") === "1";
+  }
+
+  if (seed) {
+    const startedAt = Date.now();
+    try {
+      const out = await runTrendReportSeedPipeline();
+      return json(
+        {
+          ok: true,
+          mode: "seed",
+          ...out,
+          elapsedMs: Date.now() - startedAt,
+          message: "seed drafts created — awaiting admin review",
+        },
+        out.errors > 0 ? 207 : 201,
+      );
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[cron/generate-trend-report] seed", msg);
+      return json({ error: msg, mode: "seed" }, 500);
+    }
+  }
+
+  return runScheduledTrendReport(request);
+}
+
 export async function GET(request: NextRequest) {
+  return runScheduledTrendReport(request);
+}
+
+async function runScheduledTrendReport(request: NextRequest) {
   if (!authOk(request)) {
     return json({ error: "Unauthorized" }, 401);
   }

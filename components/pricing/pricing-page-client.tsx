@@ -69,8 +69,8 @@ export function PricingPageClient({
             key={key}
             className={`rounded-[28px] border p-6 backdrop-blur sm:p-8 ${
               highlighted
-                ? "border-cyan-400/40 bg-white/10 tkad-neon-border shadow-[0_0_40px_rgba(34,211,238,0.12)]"
-                : "border-white/12 bg-white/6"
+                ? "border-cyan-400/40 dark:bg-white/10 bg-gray-100 tkad-neon-border shadow-[0_0_40px_rgba(34,211,238,0.12)]"
+                : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50"
             }`}
           >
             {highlighted ? (
@@ -79,7 +79,7 @@ export function PricingPageClient({
                 {isKo ? "인기" : "Popular"}
               </p>
             ) : null}
-            <h2 className="text-xl font-black uppercase text-white">
+            <h2 className="text-xl font-black uppercase dark:text-white text-gray-900">
               {key === "free" ? "FREE" : key === "pro" ? "PRO" : "ENTERPRISE"}
             </h2>
             <p className="mt-2 text-2xl font-black text-cyan-200">
@@ -94,7 +94,7 @@ export function PricingPageClient({
             ) : null}
             <ul className="mt-6 space-y-2">
               {(isKo ? plan.featuresKo : plan.featuresEn).map((f) => (
-                <li key={f} className="flex gap-2 text-sm text-white/76">
+                <li key={f} className="flex gap-2 text-sm dark:text-white">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" aria-hidden />
                   {f}
                 </li>
@@ -103,7 +103,7 @@ export function PricingPageClient({
             {key === "free" ? (
               <Link
                 href={loggedIn ? "/media" : "/register"}
-                className="mt-8 flex h-11 items-center justify-center rounded-xl border border-white/14 text-sm font-bold text-white hover:bg-white/10"
+                className="mt-8 flex h-11 items-center justify-center rounded-xl border dark:border-white/14 border-gray-200 text-sm font-bold dark:text-white text-gray-900 hover:dark:bg-white/10 bg-gray-100"
               >
                 {loggedIn ? (isKo ? "매체 탐색" : "Browse media") : isKo ? "무료 가입" : "Sign up free"}
               </Link>
@@ -111,7 +111,7 @@ export function PricingPageClient({
             {key === "enterprise" ? (
               <Link
                 href="/contact"
-                className="mt-8 flex h-11 items-center justify-center rounded-xl border border-white/14 text-sm font-bold text-white hover:bg-white/10"
+                className="mt-8 flex h-11 items-center justify-center rounded-xl border dark:border-white/14 border-gray-200 text-sm font-bold dark:text-white text-gray-900 hover:dark:bg-white/10 bg-gray-100"
               >
                 {isKo ? "엔터프라이즈 문의" : "Contact sales"}
               </Link>
@@ -122,11 +122,11 @@ export function PricingPageClient({
 
       <div className="lg:col-span-3">
         {loggedIn ? (
-          <div className="rounded-[28px] border border-white/12 bg-white/6 p-6 sm:p-8">
-            <h3 className="text-lg font-black text-white">
+          <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 sm:p-8">
+            <h3 className="text-lg font-black dark:text-white text-gray-900">
               {isKo ? "PRO 구독 결제" : "Subscribe to PRO"}
             </h3>
-            <p className="mt-2 text-sm text-white/65">
+            <p className="mt-2 text-sm dark:text-white text-gray-600">
               {isKo
                 ? "토스페이먼츠로 안전하게 결제됩니다. 구독은 1개월 단위입니다."
                 : "Secure payment via Toss Payments. Billed monthly."}
@@ -140,15 +140,15 @@ export function PricingPageClient({
             </div>
           </div>
         ) : (
-          <div className="rounded-[28px] border border-white/12 bg-white/6 p-6 text-center sm:p-8">
-            <p className="text-sm text-white/72">
+          <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 text-center sm:p-8">
+            <p className="text-sm dark:text-white">
               {isKo
                 ? "PRO 구독을 시작하려면 로그인해 주세요."
                 : "Sign in to subscribe to PRO."}
             </p>
             <Link
               href="/login?redirect=/pricing"
-              className="tkad-neon-cta-clean mt-4 inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-black text-white"
+              className="tkad-neon-cta-clean mt-4 inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-black dark:text-white text-gray-900"
             >
               {isKo ? "로그인" : "Sign in"}
             </Link>

@@ -527,7 +527,7 @@ export function MediaKeywordFilterClient({
                           sizes="(max-width:640px) 100vw, (max-width:1280px) 50vw, 33vw"
                         />
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy/90 to-transparent px-3 pt-10 pb-2">
-                          <p className="text-xs font-medium text-white/90">
+                          <p className="text-xs font-medium dark:text-white text-gray-800">
                             {m.priceText}
                           </p>
                         </div>
@@ -570,7 +570,7 @@ export function MediaKeywordFilterClient({
                             window.alert(`${m.title} 견적 문의`);
                           }}
                           className={cn(
-                            "inline-flex w-full min-w-0 flex-1 items-center justify-center rounded-lg bg-navy px-3 py-2.5 text-center text-xs font-semibold text-white shadow-sm transition-colors sm:min-w-[6.5rem]",
+                            "inline-flex w-full min-w-0 flex-1 items-center justify-center rounded-lg bg-navy px-3 py-2.5 text-center text-xs font-semibold dark:text-white text-gray-900 shadow-sm transition-colors sm:min-w-[6.5rem]",
                             "hover:bg-navy-light",
                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
                           )}

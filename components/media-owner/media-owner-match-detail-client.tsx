@@ -105,15 +105,15 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold dark:text-white text-gray-900">
           {isKo ? "매칭 응답" : "Match response"}
         </h2>
         <p className="mt-1 text-sm text-violet-200/80">D-{bid.openBid.daysLeft}</p>
       </div>
 
       <div className={ownerGlassCard}>
-        <p className="text-sm font-semibold text-white">{bid.openBid.summaryKo}</p>
-        <ul className="mt-3 space-y-1 text-xs text-white/60">
+        <p className="text-sm font-semibold dark:text-white text-gray-900">{bid.openBid.summaryKo}</p>
+        <ul className="mt-3 space-y-1 text-xs dark:text-white text-gray-500">
           {bid.openBid.industryAnonymized ? (
             <li>
               {isKo ? "광고주" : "Advertiser"}: {bid.openBid.industryAnonymized}{" "}
@@ -136,7 +136,7 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
           type="button"
           disabled={busy || isClosed}
           onClick={() => void postAction("interested")}
-          className="w-full rounded-xl bg-violet-500 px-4 py-3 text-sm font-bold text-white hover:bg-violet-400 disabled:opacity-50"
+          className="w-full rounded-xl bg-violet-500 px-4 py-3 text-sm font-bold dark:text-white text-gray-900 hover:bg-violet-400 disabled:opacity-50"
         >
           {busy ? (
             <Loader2 className="mx-auto h-5 w-5 animate-spin" />
@@ -156,10 +156,10 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
             void postAction("submit");
           }}
         >
-          <p className="text-sm font-bold text-white">
+          <p className="text-sm font-bold dark:text-white text-gray-900">
             {isKo ? "견적 제출" : "Submit quote"}
           </p>
-          <label className="block text-xs text-white/60">
+          <label className="block text-xs dark:text-white text-gray-500">
             {isKo ? "제안 가격 (만원)" : "Price (10K KRW)"}
             <input
               className={`${ownerInputCls} mt-1`}
@@ -171,7 +171,7 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
               disabled={isClosed || bid.status === "SELECTED"}
             />
           </label>
-          <label className="block text-xs text-white/60">
+          <label className="block text-xs dark:text-white text-gray-500">
             {isKo ? "추가 혜택" : "Extra benefits"}
             <textarea
               className={`${ownerInputCls} mt-1 min-h-[72px] py-2`}
@@ -183,7 +183,7 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
               disabled={isClosed || bid.status === "SELECTED"}
             />
           </label>
-          <label className="block text-xs text-white/60">
+          <label className="block text-xs dark:text-white text-gray-500">
             {isKo ? "메모" : "Message"}
             <textarea
               className={`${ownerInputCls} mt-1 min-h-[72px] py-2`}
@@ -192,7 +192,7 @@ export function MediaOwnerMatchDetailClient({ bidId }: { bidId: string }) {
               disabled={isClosed || bid.status === "SELECTED"}
             />
           </label>
-          <p className="text-[10px] text-white/45">
+          <p className="text-[10px] dark:text-white">
             {isKo
               ? "* 제출 후 THINKAD 검토를 거쳐 광고주에게 전달됩니다."
               : "* Submitted quotes are reviewed before reaching the advertiser."}

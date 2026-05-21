@@ -75,14 +75,14 @@ export default async function CommunityProfilePage({ params }: Props) {
         <NeonSection className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href="/community/members"
-            className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/62 transition-colors hover:text-white"
+            className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {isKo ? "멤버 목록" : "Members"}
           </Link>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_360px]">
-            <div className="rounded-[30px] border border-white/12 bg-white/6 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
               <NeonSectionHead
                 number="09"
                 kicker="Profile"
@@ -92,12 +92,12 @@ export default async function CommunityProfilePage({ params }: Props) {
               />
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-black tracking-[-0.04em] text-white sm:text-3xl">
+                <h1 className="text-2xl font-black tracking-[-0.04em] dark:text-white text-gray-900 sm:text-3xl">
                   {profile.member.name}
                 </h1>
                 <RoleBadge role={profile.member.role} locale={locale} />
                 {profile.member.company ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/6 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white/68">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
                     <Building2 className="h-3.5 w-3.5" />
                     {profile.member.company}
                   </span>
@@ -105,12 +105,12 @@ export default async function CommunityProfilePage({ params }: Props) {
               </div>
 
               {profile.member.region ? (
-                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-white/52">
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
                   {isKo ? "지역" : "Region"} · {profile.member.region}
                 </p>
               ) : null}
 
-              <p className="mt-6 whitespace-pre-wrap text-[15px] leading-relaxed text-white/76 sm:text-lg">
+              <p className="mt-6 whitespace-pre-wrap text-[15px] leading-relaxed dark:text-white sm:text-lg">
                 {profile.member.bio ??
                   (isKo
                     ? "아직 자기소개가 등록되지 않았습니다."
@@ -154,26 +154,26 @@ export default async function CommunityProfilePage({ params }: Props) {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur tkad-neon-border"
+                  className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+                      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                         {item.label}
                       </p>
-                      <p className="mt-2 font-display text-2xl font-black tracking-tight text-white">
+                      <p className="mt-2 font-display text-2xl font-black tracking-tight dark:text-white text-gray-900">
                         {item.value}
                       </p>
                     </div>
-                    <item.icon className="h-5 w-5 text-white/68" />
+                    <item.icon className="h-5 w-5 dark:text-white" />
                   </div>
                 </div>
               ))}
 
-              <div className="rounded-[28px] border border-white/12 bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(34,211,238,0.08),rgba(255,255,255,0.04))] p-5 backdrop-blur tkad-neon-border">
+              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(34,211,238,0.08),rgba(255,255,255,0.04))] p-5 backdrop-blur tkad-neon-border">
                 <div className="flex items-start gap-3">
-                  <Sparkles className="mt-0.5 h-5 w-5 text-white/72" />
-                  <p className="text-sm leading-relaxed text-white/72">
+                  <Sparkles className="mt-0.5 h-5 w-5 dark:text-white" />
+                  <p className="text-sm leading-relaxed dark:text-white">
                     {isKo
                       ? "최근 작성 글과 댓글 활동은 업계 관점과 관심사를 파악하는 좋은 단서가 됩니다."
                       : "Recent posts and replies give a quick read on this member’s perspective and focus areas."}
@@ -187,18 +187,18 @@ export default async function CommunityProfilePage({ params }: Props) {
         <NeonSection className="pt-0 pb-20 sm:pb-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 [ POSTS ]
               </p>
-              <h2 className="mt-2 text-2xl font-black tracking-[-0.05em] text-white sm:text-3xl">
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.05em] dark:text-white text-gray-900 sm:text-3xl">
                 {isKo ? "최근 작성 글" : "Recent posts"}
               </h2>
             </div>
           </div>
 
           {profile.recentPosts.length === 0 ? (
-            <div className="mt-6 rounded-[28px] border border-white/12 bg-white/6 p-10 text-center backdrop-blur tkad-neon-border">
-              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-white/58">
+            <div className="mt-6 rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-10 text-center backdrop-blur tkad-neon-border">
+              <p className="font-mono text-[12px] uppercase tracking-[0.22em] dark:text-white">
                 {isKo ? "// 아직 공개 글이 없습니다." : "// no public posts yet"}
               </p>
             </div>

@@ -111,7 +111,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
   );
 
   const inputCls =
-    "h-10 rounded-xl border border-border bg-card px-3 font-mono text-sm text-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-white/12 dark:bg-black/30 dark:text-white";
+    "h-10 rounded-xl border border-border bg-card px-3 font-mono text-sm text-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 dark:text-white text-gray-900";
 
   return (
     <section
@@ -139,7 +139,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
       <div className="mt-5 grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12 border-gray-200">
               <input
                 type="radio"
                 name="durationMode"
@@ -148,7 +148,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
               />
               {isKo ? "기간 단위" : "By unit"}
             </label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold dark:border-white/12 border-gray-200">
               <input
                 type="radio"
                 name="durationMode"
@@ -249,7 +249,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
             <ul className="space-y-2">
               {items.map((m) => (
                 <li key={m.id}>
-                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border/60 bg-muted/40 px-3 py-2.5 transition-colors hover:bg-muted/70 dark:border-white/10 dark:bg-white/5">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border/60 bg-muted/40 px-3 py-2.5 transition-colors hover:bg-muted/70 dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50">
                     <input
                       type="checkbox"
                       checked={selectedIds.has(m.id)}
@@ -269,7 +269,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
           </div>
         </div>
 
-        <div className="rounded-2xl border-2 border-border bg-muted/30 p-4 dark:border-white/10 dark:bg-black/25 sm:p-5">
+        <div className="rounded-2xl border-2 border-border bg-muted/30 p-4 dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 sm:p-5">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
             {isKo ? "견적 요약" : "Quote summary"}
           </p>
@@ -340,7 +340,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
             </BtnBlock>
             <Link
               href={plannerHref}
-              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-[22px] border border-border bg-card px-4 text-center text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:border-white/12"
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-[22px] border border-border bg-card px-4 text-center text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:border-white/12 border-gray-200"
             >
               {isKo ? "플래너" : "Planner"}
             </Link>

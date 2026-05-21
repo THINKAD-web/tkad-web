@@ -63,19 +63,34 @@ export async function POST(request: NextRequest) {
   if (isDatabaseConfigured()) {
     try {
       const db = getPrisma();
-      await db.contactInquiry.create({
-        data: {
-          company: "",
-          name: isKo ? "가이드 다운로드" : "Guide download",
-          phone: "—",
-          email,
-          message: isKo
-            ? `[이탈 방지] OOH 매체 가이드 요청\n이메일: ${email}`
-            : `[Exit intent] OOH media guide request\nEmail: ${email}`,
-          inquiryType: isKo ? "OOH 가이드 (이탈)" : "OOH guide (exit)",
-          budget: "—",
-        },
-      });
+      await Promise.all([
+        db.contactInquiry.create({
+          data: {
+            company: "",
+            name: isKo ? "가이드 다운로드" : "Guide download",
+            phone: "—",
+            email,
+            message: isKo
+              ? `[이탈 방지] OOH 매체 가이드 요청\n이메일: ${email}`
+              : `[Exit intent] OOH media guide request\nEmail: ${email}`,
+            inquiryType: isKo ? "OOH 가이드 (이탈)" : "OOH guide (exit)",
+            budget: "—",
+          },
+        }),
+        db.newsletterSubscriber.upsert({
+          where: { email },
+          create: {
+            email,
+            locale: isKo ? "ko" : "en",
+            source: "exit_intent",
+          },
+          update: {
+            unsubscribedAt: null,
+            locale: isKo ? "ko" : "en",
+            source: "exit_intent",
+          },
+        }),
+      ]);
     } catch (e) {
       console.error("[exit-guide] inquiry save:", e);
     }

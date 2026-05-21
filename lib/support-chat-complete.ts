@@ -14,9 +14,12 @@ const MAX_OUTPUT_TOKENS = 900;
 export async function completeSupportChat(params: {
   locale: "ko" | "en";
   messages: SupportChatTurn[];
+  afterHours?: boolean;
 }): Promise<string> {
   const client = getAnthropicClient();
-  const system = buildSupportChatSystemPrompt(params.locale);
+  const system = buildSupportChatSystemPrompt(params.locale, {
+    afterHours: params.afterHours,
+  });
 
   const response = await client.messages.create({
     model: resolveModel(),

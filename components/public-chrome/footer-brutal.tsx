@@ -84,6 +84,8 @@ export function FooterBrutal() {
     title: t("footer.contactInfo"),
     items: [
       { href: "/privacy", label: t("footer.privacy") },
+      { href: "/terms", label: t("footer.terms") },
+      { href: "/refund", label: t("footer.refund") },
       { label: t("footer.address") },
       { label: t("footer.phone") },
       { label: CONTACT_EMAIL },

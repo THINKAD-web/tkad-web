@@ -321,7 +321,7 @@ export function MyHubPageClient() {
   return (
     <HomeLandingDayNight portal>
       <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)]">
-        <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] py-14 text-white sm:py-20 lg:py-24">
+        <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] py-14 dark:text-white text-gray-900 sm:py-20 lg:py-24">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
           <div
@@ -333,10 +333,10 @@ export function MyHubPageClient() {
               <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-400/60">
                 {isKo ? "// 마이 허브" : "// My hub"}
               </p>
-              <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] font-[950] leading-[0.95] tracking-[-0.05em] text-white">
+              <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] font-[950] leading-[0.95] tracking-[-0.05em] dark:text-white text-gray-900">
                 {t("greeting", { name: me.name })}
               </h1>
-              <p className="mt-3 truncate text-base text-white/65 sm:text-lg">
+              <p className="mt-3 truncate text-base dark:text-white text-gray-600 sm:text-lg">
                 {me.email}
               </p>
             </div>

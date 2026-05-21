@@ -83,7 +83,7 @@ export function HeaderFavoritesLink({
         <Heart className="h-4 w-4 shrink-0" strokeWidth={2} />
         <span className="flex-1">{t("menuLabel")}</span>
         {count > 0 ? (
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1.5 text-[10px] font-bold text-white dark:from-violet-500 dark:to-cyan-400">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1.5 text-[10px] font-bold dark:text-white text-gray-900 dark:from-violet-500 dark:to-cyan-400">
             {count > 99 ? "99+" : count}
           </span>
         ) : null}
@@ -100,7 +100,7 @@ export function HeaderFavoritesLink({
     >
       <Heart className="h-4 w-4" strokeWidth={2} />
       {count > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1 text-[10px] font-bold text-white shadow-[0_2px_10px_rgba(124,58,237,0.38)] ring-1 ring-white/30 dark:from-violet-500 dark:to-cyan-400 dark:shadow-[0_0_14px_rgba(34,211,238,0.28)] dark:ring-white/20">
+        <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1 text-[10px] font-bold dark:text-white text-gray-900 shadow-[0_2px_10px_rgba(124,58,237,0.38)] ring-1 ring-white/30 dark:from-violet-500 dark:to-cyan-400 dark:shadow-[0_0_14px_rgba(34,211,238,0.28)] dark:ring-white/20">
           {count > 99 ? "99+" : count}
         </span>
       )}

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { completeSupportChat, type SupportChatTurn } from "@/lib/support-chat-complete";
+import { getSupportHoursStatus } from "@/lib/support-chat-hours";
+import { persistSupportChatTurn } from "@/lib/support-chat-persist";
 import { getCurrentUser } from "@/lib/user-session";
-import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 
 export const maxDuration = 45;
 
@@ -44,24 +45,6 @@ function normalizeMessages(
   return { ok: true, messages: out };
 }
 
-async function persistChatLogs(
-  userId: string,
-  locale: string,
-  userContent: string,
-  assistantContent: string,
-): Promise<void> {
-  if (!isDatabaseConfigured()) return;
-  const db = getPrisma();
-  await db.$transaction([
-    db.chatLog.create({
-      data: { userId, locale, role: "user", content: userContent },
-    }),
-    db.chatLog.create({
-      data: { userId, locale, role: "assistant", content: assistantContent },
-    }),
-  ]);
-}
-
 export async function POST(req: Request) {
   let body: unknown;
   try {
@@ -74,13 +57,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  const { message, history, locale: localeRaw } = body as {
+  const { message, history, locale: localeRaw, sessionId: sessionIdRaw } = body as {
     message?: unknown;
     history?: unknown;
     locale?: unknown;
+    sessionId?: unknown;
   };
 
   const locale = localeRaw === "en" ? "en" : "ko";
+  const sessionId =
+    typeof sessionIdRaw === "string" && sessionIdRaw.length >= 8
+      ? sessionIdRaw.slice(0, 64)
+      : `anon_${Date.now()}`;
+  const hours = getSupportHoursStatus();
   const normalized = normalizeMessages(String(message ?? ""), history);
   if (!normalized.ok) {
     return NextResponse.json({ error: normalized.error }, { status: 400 });
@@ -93,16 +82,25 @@ export async function POST(req: Request) {
     const reply = await completeSupportChat({
       locale,
       messages: normalized.messages,
+      afterHours: !hours.isOpen,
     });
 
-    const session = await getCurrentUser();
-    if (session?.id && userMessage && reply) {
-      void persistChatLogs(session.id, locale, userMessage, reply).catch(() => {
-        /* optional persistence */
-      });
+    const user = await getCurrentUser();
+    if (userMessage && reply) {
+      void persistSupportChatTurn({
+        sessionId: user?.id ? `user_${user.id}` : sessionId,
+        userId: user?.id ?? null,
+        locale,
+        userContent: userMessage,
+        assistantContent: reply,
+      }).catch(() => {});
     }
 
-    return NextResponse.json({ reply });
+    return NextResponse.json({
+      reply,
+      mode: hours.isOpen ? "business_hours" : "ai_after_hours",
+      hoursOpen: hours.isOpen,
+    });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes("ANTHROPIC_API_KEY")) {

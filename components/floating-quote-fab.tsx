@@ -49,14 +49,14 @@ export default function FloatingQuoteFab() {
           ref={panelRef}
           role="dialog"
           aria-label={t("modalTitle")}
-          className="mb-1 w-[min(18rem,calc(100vw-5rem))] overflow-hidden rounded-2xl border border-white/12 bg-black/55 p-4 text-white shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur"
+          className="mb-1 w-[min(18rem,calc(100vw-5rem))] overflow-hidden rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 p-4 dark:text-white text-gray-900 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur"
         >
           <div className="mb-3 flex items-start justify-between gap-2">
             <p className="text-sm font-bold leading-snug">{t("modalTitle")}</p>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/12 bg-white/5 text-white/80 hover:bg-white/10"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100"
               aria-label={isKo ? "닫기" : "Close"}
             >
               <X className="h-4 w-4" />
@@ -67,7 +67,7 @@ export default function FloatingQuoteFab() {
               <Link
                 href="/contact?type=media"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-xl border border-white/12 bg-white/5 px-3 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
+                className="flex items-center gap-3 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-3 text-sm font-semibold transition-colors hover:dark:bg-white/10 bg-gray-100"
               >
                 <Send className="h-4 w-4 shrink-0 text-cyan-300" />
                 {t("mediaQuote")}
@@ -77,7 +77,7 @@ export default function FloatingQuoteFab() {
               <Link
                 href="/contact?type=campaign"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-xl border border-white/12 bg-white/5 px-3 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
+                className="flex items-center gap-3 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-3 text-sm font-semibold transition-colors hover:dark:bg-white/10 bg-gray-100"
               >
                 <ClipboardList className="h-4 w-4 shrink-0 text-violet-300" />
                 {t("campaignConsult")}
@@ -87,7 +87,7 @@ export default function FloatingQuoteFab() {
               <Link
                 href="/planner"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-xl border border-white/12 bg-white/5 px-3 py-3 text-sm font-semibold transition-colors hover:bg-white/10"
+                className="flex items-center gap-3 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-3 text-sm font-semibold transition-colors hover:dark:bg-white/10 bg-gray-100"
               >
                 <Sparkles className="h-4 w-4 shrink-0 text-pink-300" />
                 {t("tryPlanner")}
@@ -102,7 +102,7 @@ export default function FloatingQuoteFab() {
           type="button"
           onClick={() => setOpen((v) => !v)}
           className={cn(
-            "inline-flex h-12 items-center gap-2 rounded-full px-4 text-sm font-bold text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50",
+            "inline-flex h-12 items-center gap-2 rounded-full px-4 text-sm font-bold dark:text-white text-gray-900 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50",
             QUOTE_GRADIENT,
             open && "ring-2 ring-white/25",
           )}

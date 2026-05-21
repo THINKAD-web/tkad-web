@@ -217,7 +217,7 @@ export function AdminBookingRequestsReviewPanel() {
                       type="button"
                       size="sm"
                       disabled={busy}
-                      className="border-2 border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
+                      className="border-2 border-emerald-600 bg-emerald-600 dark:text-white text-gray-900 hover:bg-emerald-700"
                       onClick={() => void decide(it.id, "confirmed")}
                     >
                       {busy ? (

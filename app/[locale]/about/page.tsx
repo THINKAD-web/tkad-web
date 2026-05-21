@@ -100,13 +100,13 @@ function AboutContent({
           aria-hidden
         />
         <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h1 className="text-3xl font-bold tracking-tight dark:text-white text-gray-900 sm:text-4xl lg:text-5xl">
             {t("about.title")}
           </h1>
           <p className="mt-3 text-base text-slate-300 sm:text-lg">
             {t("about.subtitle")}
           </p>
-          <p className="mx-auto mt-8 max-w-3xl text-xl font-semibold leading-snug text-white/95 sm:text-2xl lg:text-3xl lg:leading-tight">
+          <p className="mx-auto mt-8 max-w-3xl text-xl font-semibold leading-snug dark:text-white sm:text-2xl lg:text-3xl lg:leading-tight">
             {t("about.heroSlogan")}
           </p>
           <AboutHeroStats
@@ -286,7 +286,7 @@ function AboutContent({
       <section className="bg-navy py-24 sm:py-28">
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <Globe className="mx-auto h-12 w-12 text-gold" aria-hidden />
-          <h2 className="mt-4 text-2xl font-bold text-white sm:text-3xl">
+          <h2 className="mt-4 text-2xl font-bold dark:text-white text-gray-900 sm:text-3xl">
             {t("about.globalTitle")}
           </h2>
           <p className="mt-4 leading-relaxed text-slate-300">

@@ -127,7 +127,7 @@ export function CampaignProofSection({
                 unoptimized
               />
               {p.caption ? (
-                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-[10px] text-white">
+                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-[10px] dark:text-white text-gray-900">
                   {p.caption}
                 </span>
               ) : null}

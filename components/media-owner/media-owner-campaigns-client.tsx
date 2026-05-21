@@ -84,10 +84,10 @@ export function MediaOwnerCampaignsClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold dark:text-white text-gray-900">
           {isKo ? "집행 현황" : "Campaigns"}
         </h2>
-        <p className="mt-1 text-sm text-white/60">
+        <p className="mt-1 text-sm dark:text-white text-gray-500">
           {isKo
             ? "내 매체에서 진행 중인 캠페인 · 광고주 업종은 익명 처리됩니다."
             : "Active campaigns on your media · advertiser industry is anonymized."}
@@ -116,15 +116,15 @@ export function MediaOwnerCampaignsClient() {
             <li key={r.bookingId} className={ownerGlassCard}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="font-medium text-white">{r.campaignName}</p>
-                  <p className="text-sm text-white/55">{r.mediaName}</p>
+                  <p className="font-medium dark:text-white text-gray-900">{r.campaignName}</p>
+                  <p className="text-sm dark:text-white text-gray-500">{r.mediaName}</p>
                   <p className="mt-1 text-xs text-violet-200/90">
                     {isKo ? "업종" : "Industry"}: {r.industryLabel}
                   </p>
-                  <p className="mt-2 font-mono text-xs text-white/50">
+                  <p className="mt-2 font-mono text-xs dark:text-white text-gray-400">
                     {r.startsAt.slice(0, 10)} ~ {r.endsAt.slice(0, 10)}
                   </p>
-                  <p className="mt-1 text-sm tabular-nums text-white/80">
+                  <p className="mt-1 text-sm tabular-nums dark:text-white text-gray-700">
                     ₩{r.amountWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
                   </p>
                 </div>
@@ -142,7 +142,7 @@ export function MediaOwnerCampaignsClient() {
                     setUploadTarget(r.campaignId);
                     fileRef.current?.click();
                   }}
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-xs text-white hover:bg-white/5 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl border dark:border-white/15 border-gray-200 px-3 py-2 text-xs dark:text-white text-gray-900 hover:dark:bg-white/5 bg-gray-50 disabled:opacity-50"
                 >
                   {uploading && uploadTarget === r.campaignId ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

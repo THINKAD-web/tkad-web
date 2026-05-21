@@ -388,6 +388,7 @@ export async function loadMonitoringDashboard(
 export async function loadDailyOpsMetrics(now = new Date()) {
   const yesterdayStart = new Date(seoulDayStartUtc(now).getTime() - 86400000);
   const yesterdayEnd = seoulDayStartUtc(now);
+  const weekStart = new Date(yesterdayEnd.getTime() - 7 * 86400000);
 
   if (!isDatabaseConfigured()) {
     return {
@@ -396,12 +397,25 @@ export async function loadDailyOpsMetrics(now = new Date()) {
       newInquiries: 0,
       newUsers: 0,
       activeCampaigns: 0,
+      newMediaApplications: 0,
+      errorsYesterday: 0,
+      weekInquiries: 0,
+      weekSignups: 0,
     };
   }
 
   const db = getPrisma();
 
-  const [visitors, newInquiries, newUsers, activeCampaigns] = await Promise.all([
+  const [
+    visitors,
+    newInquiries,
+    newUsers,
+    activeCampaigns,
+    newMediaApplications,
+    errorsYesterday,
+    weekInquiries,
+    weekSignups,
+  ] = await Promise.all([
     countDistinctSessionsInRange(yesterdayStart, yesterdayEnd),
     db.contactInquiry.count({
       where: {
@@ -424,6 +438,18 @@ export async function loadDailyOpsMetrics(now = new Date()) {
         },
       },
     }),
+    db.mediaApplication.count({
+      where: { createdAt: { gte: yesterdayStart, lt: yesterdayEnd } },
+    }),
+    db.opsErrorLog.count({
+      where: { createdAt: { gte: yesterdayStart, lt: yesterdayEnd } },
+    }),
+    db.contactInquiry.count({
+      where: { createdAt: { gte: weekStart, lt: yesterdayEnd } },
+    }),
+    db.user.count({
+      where: { createdAt: { gte: weekStart, lt: yesterdayEnd } },
+    }),
   ]);
 
   return {
@@ -432,5 +458,9 @@ export async function loadDailyOpsMetrics(now = new Date()) {
     newInquiries,
     newUsers,
     activeCampaigns,
+    newMediaApplications,
+    errorsYesterday,
+    weekInquiries,
+    weekSignups,
   };
 }

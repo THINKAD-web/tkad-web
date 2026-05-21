@@ -170,7 +170,7 @@ export default async function LocalSeoLandingPage({ params }: Props) {
             eyebrow={`// ${isKo ? "지역별 옥외광고" : "LOCAL OOH"}`}
             title={title}
             description={description}
-            icon={<MapPin className="size-7 text-white/90" aria-hidden />}
+            icon={<MapPin className="size-7 dark:text-white text-gray-800" aria-hidden />}
             primaryCta={{
               href: "/media",
               label: isKo ? "전체 매체 보기" : "All media",
@@ -183,11 +183,11 @@ export default async function LocalSeoLandingPage({ params }: Props) {
 
           <div className="mx-auto max-w-6xl space-y-10 px-4 pt-8 sm:px-6">
             {traits.length > 0 ? (
-              <section className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                <h2 className="text-lg font-bold text-white">
+              <section className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 backdrop-blur">
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">
                   {isKo ? "지역 특성" : "Area highlights"}
                 </h2>
-                <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-white/80">
+                <ul className="mt-3 list-inside list-disc space-y-1 text-sm dark:text-white text-gray-700">
                   {traits.map((t) => (
                     <li key={t}>{t}</li>
                   ))}
@@ -206,7 +206,7 @@ export default async function LocalSeoLandingPage({ params }: Props) {
               />
             ) : (
               <section>
-                <h2 className="mb-4 text-lg font-bold text-white">
+                <h2 className="mb-4 text-lg font-bold dark:text-white text-gray-900">
                   {isKo
                     ? `${landing.placeKo} 매체 ${filtered.length}개`
                     : `${filtered.length} placements in ${landing.placeEn}`}
@@ -224,8 +224,8 @@ export default async function LocalSeoLandingPage({ params }: Props) {
             )}
 
             {localCases.length > 0 ? (
-              <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                <h2 className="text-lg font-bold text-white">
+              <section className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6">
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">
                   {isKo ? "이 지역 집행 성공 사례" : "Cases in this area"}
                 </h2>
                 <ul className="mt-4 space-y-3">
@@ -233,12 +233,12 @@ export default async function LocalSeoLandingPage({ params }: Props) {
                     <li key={c.id}>
                       <Link
                         href={`/cases/${c.id}`}
-                        className="block rounded-xl border border-white/10 bg-black/20 p-4 transition-colors hover:border-white/25"
+                        className="block rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 p-4 transition-colors hover:border-white/25"
                       >
-                        <p className="font-semibold text-white">
+                        <p className="font-semibold dark:text-white text-gray-900">
                           {isKo ? c.titleKo : c.titleEn || c.titleKo}
                         </p>
-                        <p className="mt-1 line-clamp-2 text-sm text-white/70">
+                        <p className="mt-1 line-clamp-2 text-sm dark:text-white text-gray-600">
                           {isKo ? c.summaryKo : c.summaryEn || c.summaryKo}
                         </p>
                       </Link>
@@ -249,13 +249,13 @@ export default async function LocalSeoLandingPage({ params }: Props) {
             ) : null}
 
             {faqs.length > 0 ? (
-              <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                <h2 className="text-lg font-bold text-white">FAQ</h2>
+              <section className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6">
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">FAQ</h2>
                 <dl className="mt-4 space-y-4">
                   {faqs.map((f) => (
                     <div key={f.q}>
-                      <dt className="font-semibold text-white">{f.q}</dt>
-                      <dd className="mt-1 text-sm text-white/75">{f.a}</dd>
+                      <dt className="font-semibold dark:text-white text-gray-900">{f.q}</dt>
+                      <dd className="mt-1 text-sm dark:text-white text-gray-700">{f.a}</dd>
                     </div>
                   ))}
                 </dl>

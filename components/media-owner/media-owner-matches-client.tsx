@@ -72,10 +72,10 @@ export function MediaOwnerMatchesClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold dark:text-white text-gray-900">
           {isKo ? "매칭·비딩" : "Matches & bids"}
         </h2>
-        <p className="mt-1 text-sm text-white/60">
+        <p className="mt-1 text-sm dark:text-white text-gray-500">
           {isKo
             ? "조건에 맞는 광고주 문의에 응답하고 견적을 제출하세요."
             : "Respond to advertiser inquiries and submit quotes."}
@@ -83,7 +83,7 @@ export function MediaOwnerMatchesClient() {
       </div>
 
       {profile ? (
-        <div className={`${ownerGlassCard} flex flex-wrap gap-4 text-sm text-white/80`}>
+        <div className={`${ownerGlassCard} flex flex-wrap gap-4 text-sm dark:text-white text-gray-700`}>
           <span className="inline-flex items-center gap-1">
             <Star className="h-4 w-4 text-amber-300" />
             {profile.avgRating != null
@@ -125,14 +125,14 @@ export function MediaOwnerMatchesClient() {
                           ? "매칭 문의"
                           : "Match inquiry"}
                     </p>
-                    <p className="mt-2 font-semibold text-white">
+                    <p className="mt-2 font-semibold dark:text-white text-gray-900">
                       {item.openBid.summaryKo}
                     </p>
-                    <p className="mt-1 text-xs text-white/50">
+                    <p className="mt-1 text-xs dark:text-white text-gray-400">
                       {item.media.name} · {STATUS_KO[item.status] ?? item.status}
                     </p>
                   </div>
-                  <div className="shrink-0 text-right text-xs text-white/50">
+                  <div className="shrink-0 text-right text-xs dark:text-white text-gray-400">
                     <Clock className="mx-auto h-4 w-4" />
                     <p className="mt-1">D-{item.openBid.daysLeft}</p>
                   </div>

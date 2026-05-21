@@ -87,21 +87,21 @@ export function EmailVerificationBanner({ className, onDismiss }: Props) {
             type="button"
             onClick={() => void resend()}
             disabled={sending || sent}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/90 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/90 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60 dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/15"
           >
             {sending && <Spinner size="sm" />}
             {isKo ? "인증 메일 재발송" : "Resend email"}
           </button>
           <Link
             href="/my/settings"
-            className="rounded-lg border border-border bg-card/80 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 dark:border-white/15 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+            className="rounded-lg border border-border bg-card/80 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-800 dark:hover:dark:bg-white/10 bg-gray-100"
           >
             {isKo ? "설정" : "Settings"}
           </Link>
           <button
             type="button"
             onClick={dismiss}
-            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground dark:hover:bg-white/10 dark:hover:text-white"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground dark:hover:dark:bg-white/10 bg-gray-100 dark:hover:dark:text-white text-gray-900"
             aria-label={isKo ? "닫기" : "Dismiss"}
           >
             <X className="h-4 w-4" />

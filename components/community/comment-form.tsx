@@ -96,15 +96,15 @@ export function CommunityCommentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
         [ 댓글 작성 ]
       </p>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-[20px] border border-white/12 bg-white/6 px-4 py-3 backdrop-blur tkad-neon-border">
-        <span className="font-bold text-white">{currentUser.name}</span>
+      <div className="flex flex-wrap items-center gap-2 rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 backdrop-blur tkad-neon-border">
+        <span className="font-bold dark:text-white text-gray-900">{currentUser.name}</span>
         <RoleBadge role={memberRole} locale={locale} />
         {currentUser.company ? (
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/58">
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
             {currentUser.company}
           </span>
         ) : null}
@@ -116,11 +116,11 @@ export function CommunityCommentForm({
           onChange={(e) => setBody(e.target.value)}
           rows={4}
           placeholder={`댓글을 남겨주세요. (${COMMUNITY_LIMITS.COMMENT_BODY_MIN}-${COMMUNITY_LIMITS.COMMENT_BODY_MAX}자)`}
-          className="w-full resize-none rounded-[22px] border border-white/12 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/38 focus:border-white/22 focus:outline-none"
+          className="w-full resize-none rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white focus:border-white/22 focus:outline-none"
           maxLength={COMMUNITY_LIMITS.COMMENT_BODY_MAX}
           required
         />
-        <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-white/46">
+        <p className="mt-1 text-right font-mono text-[10px] tabular-nums dark:text-white">
           {body.length} / {COMMUNITY_LIMITS.COMMENT_BODY_MAX}
         </p>
       </label>
@@ -135,7 +135,7 @@ export function CommunityCommentForm({
       <button
         type="submit"
         disabled={!canSubmit}
-        className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {busy ? "전송 중…" : "댓글 등록"}
       </button>

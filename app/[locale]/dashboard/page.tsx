@@ -164,7 +164,7 @@ export default function AdvertiserDashboardPage() {
   return (
     <HomeLandingDayNight portal>
       <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)]">
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] py-16 text-white sm:py-20 lg:py-24">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] py-16 dark:text-white text-gray-900 sm:py-20 lg:py-24">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
           <div
@@ -173,20 +173,20 @@ export default function AdvertiserDashboardPage() {
           />
           <div className="relative mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
             <div className="min-w-0">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-white/55">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] dark:text-white text-gray-500">
                 {isKo ? "// 광고주 포털" : "// Advertiser portal"}
               </p>
-              <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] font-[950] leading-[0.95] tracking-[-0.05em] text-white">
+              <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] font-[950] leading-[0.95] tracking-[-0.05em] dark:text-white text-gray-900">
                 {me.name}
               </h1>
-              <p className="mt-3 truncate text-base text-white/65 sm:text-lg">
+              <p className="mt-3 truncate text-base dark:text-white text-gray-600 sm:text-lg">
                 {me.email}
               </p>
             </div>
             <button
               type="button"
               onClick={() => void logout()}
-              className="inline-flex shrink-0 items-center gap-2 self-start rounded-[18px] border border-white/14 bg-white/6 px-5 py-3 text-sm font-bold text-white/85 backdrop-blur transition-colors hover:border-white/25 hover:bg-white/10 lg:self-auto"
+              className="inline-flex shrink-0 items-center gap-2 self-start rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-5 py-3 text-sm font-bold dark:text-white text-gray-800 backdrop-blur transition-colors hover:border-white/25 hover:dark:bg-white/10 bg-gray-100 lg:self-auto"
               aria-label={isKo ? "로그아웃" : "Log out"}
             >
               <LogOut className="h-4 w-4" />
@@ -324,7 +324,7 @@ export default function AdvertiserDashboardPage() {
             {section === "alerts" ? (
               <section className="space-y-4">
                 {notifications.length === 0 ? (
-                  <p className="rounded-[28px] border border-dashed border-white/15 py-20 text-center text-base text-white/50">
+                  <p className="rounded-[28px] border border-dashed dark:border-white/15 border-gray-200 py-20 text-center text-base dark:text-white text-gray-400">
                     {isKo ? "새 알림이 없습니다." : "No notifications."}
                   </p>
                 ) : (

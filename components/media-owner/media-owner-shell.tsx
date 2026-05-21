@@ -93,8 +93,8 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-violet-300/80">
             {isKo ? "매체사 포털" : "Media owner"}
           </p>
-          <h1 className="mt-2 text-lg font-bold text-white">{me.name}</h1>
-          <p className="truncate text-xs text-white/50">{me.email}</p>
+          <h1 className="mt-2 text-lg font-bold dark:text-white text-gray-900">{me.name}</h1>
+          <p className="truncate text-xs dark:text-white text-gray-400">{me.email}</p>
 
           <nav className="mt-6 flex flex-row flex-wrap gap-2 lg:flex-col lg:gap-1">
             {NAV.map(({ href, icon: Icon, ko, en }) => {
@@ -107,7 +107,7 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
                     "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                     active
                       ? "bg-violet-500/20 text-violet-100"
-                      : "text-white/70 hover:bg-white/5 hover:text-white",
+                      : "dark:text-white text-gray-600 hover:dark:bg-white/5 bg-gray-50 hover:dark:text-white text-gray-900",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -127,7 +127,7 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => void logout()}
-              className="inline-flex items-center gap-2 text-xs text-white/50 hover:text-white"
+              className="inline-flex items-center gap-2 text-xs dark:text-white text-gray-400 hover:dark:text-white text-gray-900"
             >
               <LogOut className="h-3.5 w-3.5" />
               {isKo ? "로그아웃" : "Log out"}
@@ -150,7 +150,7 @@ export function MediaOwnerPageLoader() {
 }
 
 export const ownerGlassCard =
-  "rounded-2xl border border-white/12 bg-white/5 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
+  "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
 
 export const ownerInputCls =
-  "h-10 w-full rounded-xl border border-white/12 bg-black/30 px-3 font-mono text-sm text-white outline-none focus:border-violet-400/40";
+  "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 px-3 font-mono text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/40";

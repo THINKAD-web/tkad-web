@@ -46,12 +46,12 @@ export async function ContactHeroServer({ locale }: Props) {
         {infoItems.map((item) => (
           <div
             key={item.label}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 backdrop-blur"
+            className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 backdrop-blur"
           >
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
               {item.label}
             </p>
-            <p className="mt-2 text-sm font-semibold text-white/85">{item.value}</p>
+            <p className="mt-2 text-sm font-semibold dark:text-white text-gray-800">{item.value}</p>
           </div>
         ))}
       </div>

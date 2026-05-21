@@ -765,7 +765,7 @@ function ReportsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm dark:bg-black/60"
+      className="fixed inset-0 z-[60] flex items-center justify-center dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur-sm dark:bg-white/6 bg-gray-500"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {

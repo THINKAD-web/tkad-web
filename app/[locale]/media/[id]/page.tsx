@@ -309,7 +309,7 @@ export default async function MediaDetailPage({ params }: Props) {
           <div className="flex items-start justify-between gap-3">
             <Link
               href="/media"
-              className="tkad-media-detail-hero__back -ml-1 inline-flex items-center gap-1.5 rounded-xl border border-white/18 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/90 transition-colors hover:bg-white/8 hover:text-white"
+              className="tkad-media-detail-hero__back -ml-1 inline-flex items-center gap-1.5 rounded-xl border dark:border-white/18 border-gray-300 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-800 transition-colors hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {t("back")}
@@ -318,12 +318,12 @@ export default async function MediaDetailPage({ params }: Props) {
           </div>
 
           <div className="grid gap-8 pb-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1.35fr)] lg:items-end">
-            <div className="min-w-0 space-y-5 text-white">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+            <div className="min-w-0 space-y-5 dark:text-white text-gray-900">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 {`// MEDIA · ${typeLabel?.toUpperCase() ?? "OOH"}`}
               </p>
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <h1 className="text-balance break-words text-[clamp(30px,3.7vw,48px)] font-[950] leading-[1.02] tracking-[-0.055em] text-white [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
+                <h1 className="text-balance break-words text-[clamp(30px,3.7vw,48px)] font-[950] leading-[1.02] tracking-[-0.055em] dark:text-white text-gray-900 [text-shadow:0_30px_160px_rgba(0,0,0,0.9)]">
                   {isKo ? media.name : (media.nameEn || media.name)}
                 </h1>
                 <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -331,18 +331,18 @@ export default async function MediaDetailPage({ params }: Props) {
                     <span
                       className={
                         media.availability === "reserved"
-                          ? "rounded-xl border border-white/18 bg-white/10 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur"
-                          : "rounded-xl border border-white/18 bg-black/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/85 backdrop-blur"
+                          ? "rounded-xl border dark:border-white/18 border-gray-300 dark:bg-white/10 bg-gray-100 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur"
+                          : "rounded-xl border dark:border-white/18 border-gray-300 dark:bg-black bg-white bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 backdrop-blur"
                       }
                     >
                       {t(`availability.${media.availability}`)}
                     </span>
                   ) : media.availability === "available" ? (
-                    <span className="rounded-xl border border-white/18 bg-black/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/85 backdrop-blur">
+                    <span className="rounded-xl border dark:border-white/18 border-gray-300 dark:bg-black bg-white bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 backdrop-blur">
                       {t("availability.available")}
                     </span>
                   ) : null}
-                  <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/18 bg-black/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/90 backdrop-blur">
+                  <span className="inline-flex items-center gap-1.5 rounded-xl border dark:border-white/18 border-gray-300 dark:bg-black bg-white bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 backdrop-blur">
                     <Eye className="h-3.5 w-3.5" aria-hidden />
                     {t("visibilityBadge", {
                       score: performanceMetrics.visibilityScore,
@@ -356,7 +356,7 @@ export default async function MediaDetailPage({ params }: Props) {
                   {heroTags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-white/14 bg-white/8 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-white/80 backdrop-blur"
+                      className="rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-700 backdrop-blur"
                     >
                       {tag}
                     </span>
@@ -364,14 +364,14 @@ export default async function MediaDetailPage({ params }: Props) {
                 </div>
               ) : null}
 
-              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.18em] text-white/80 sm:text-[12px]">
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white text-gray-700 sm:text-[12px]">
                 <span className="inline-flex items-center gap-2">
                   <MapPin className="h-4 w-4 shrink-0" aria-hidden />
                   {formatMediaLocationShort(media, isKo)}
                 </span>
                 {typeLabel ? (
                   <>
-                    <span className="hidden text-white/35 sm:inline" aria-hidden>
+                    <span className="hidden dark:text-white text-gray-400 sm:inline" aria-hidden>
                       ·
                     </span>
                     <span className="tkad-home-accent-text">{typeLabel}</span>
@@ -380,13 +380,13 @@ export default async function MediaDetailPage({ params }: Props) {
               </p>
 
               {featuresText ? (
-                <p className="max-w-2xl text-sm leading-relaxed text-white/82 sm:text-[15px]">
+                <p className="max-w-2xl text-sm leading-relaxed dark:text-white text-gray-800 sm:text-[15px]">
                   {featuresText}
                 </p>
               ) : null}
             </div>
 
-            <aside className="tkad-neon-border tkad-neon-glow min-w-0 rounded-[28px] border border-white/12 bg-white/6 p-5 text-sm text-white shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur-md sm:p-6">
+            <aside className="tkad-neon-border tkad-neon-glow min-w-0 rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 text-sm dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur-md sm:p-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <CoreFact
                   icon={CircleDollarSign}
@@ -395,47 +395,47 @@ export default async function MediaDetailPage({ params }: Props) {
                     media.keywordFilter ? (
                       <>
                         {hasPriceOptions && primaryPriceOption ? (
-                          <span className="block font-mono text-lg font-black tabular-nums text-white">
+                          <span className="block font-mono text-lg font-black tabular-nums dark:text-white text-gray-900">
                             {formatCatalogPriceFieldWon(primaryPriceOption.price)}
                           </span>
                         ) : (
-                          <span className="block font-mono text-base font-black tabular-nums text-white sm:text-lg">
+                          <span className="block font-mono text-base font-black tabular-nums dark:text-white text-gray-900 sm:text-lg">
                             {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMin)}{" "}
-                            <span className="text-white/55">~</span>{" "}
+                            <span className="dark:text-white text-gray-500">~</span>{" "}
                             {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMax)}
                           </span>
                         )}
-                        <span className="mt-1 block font-mono text-[11px] tracking-tight text-white/75">
+                        <span className="mt-1 block font-mono text-[11px] tracking-tight dark:text-white text-gray-700">
                           {media.keywordFilter.priceText}
                         </span>
                         {hasPriceOptions ? (
-                          <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
+                          <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white text-gray-500">
                             {t("priceOptionsSummaryHint")}
                           </span>
                         ) : (
-                          <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
+                          <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white text-gray-500">
                             {periodLabel}
                           </span>
                         )}
                       </>
                     ) : hasPriceOptions && primaryPriceOption ? (
                       <>
-                        <span className="block font-mono text-lg font-black tabular-nums text-white">
+                        <span className="block font-mono text-lg font-black tabular-nums dark:text-white text-gray-900">
                           {formatCatalogPriceFieldWon(primaryPriceOption.price)}
                         </span>
-                        <span className="mt-0.5 block font-mono text-[11px] tracking-tight text-white/75">
+                        <span className="mt-0.5 block font-mono text-[11px] tracking-tight dark:text-white text-gray-700">
                           {primaryPricePeriodLabel} · {primaryPriceOption.label}
                         </span>
-                        <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
+                        <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white text-gray-500">
                           {t("priceOptionsSummaryHint")}
                         </span>
                       </>
                     ) : (
                       <>
-                        <span className="block font-mono text-lg font-black tabular-nums text-white">
+                        <span className="block font-mono text-lg font-black tabular-nums dark:text-white text-gray-900">
                           {formatCatalogPriceFieldWon(media.price)}
                         </span>
-                        <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
+                        <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white text-gray-500">
                           {periodLabel}
                         </span>
                       </>
@@ -446,14 +446,14 @@ export default async function MediaDetailPage({ params }: Props) {
                   icon={Users}
                   label={t("footTrafficTitle")}
                   value={
-                    <span className="block font-mono text-lg font-black tabular-nums text-white">
+                    <span className="block font-mono text-lg font-black tabular-nums dark:text-white text-gray-900">
                       {monthly != null ? monthly.toLocaleString() : "—"}
                     </span>
                   }
                 />
               </div>
 
-              <div className="mt-6 border-t border-white/12 pt-5">
+              <div className="mt-6 border-t dark:border-white/12 border-gray-200 pt-5">
                 <MediaStickyCta
                   mediaId={media.id}
                   mediaName={media.name}

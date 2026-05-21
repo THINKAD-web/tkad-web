@@ -97,6 +97,9 @@ export async function PATCH(req: Request, { params }: Params) {
       );
     }
 
+    const markResponded =
+      status === "in_progress" || status === "done";
+
     const updated = await db.contactInquiry.update({
       where: { id },
       data: {
@@ -106,8 +109,11 @@ export async function PATCH(req: Request, { params }: Params) {
           note: parsed.data.note,
           trashed: parsed.data.trashed,
         }),
+        ...(markResponded
+          ? { firstResponseAt: new Date() }
+          : {}),
       },
-      select: { id: true, message: true },
+      select: { id: true, message: true, firstResponseAt: true },
     });
 
     return NextResponse.json({ ok: true, data: updated });

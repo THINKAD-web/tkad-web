@@ -961,7 +961,7 @@ export default function AdminCampaignsPage() {
                       ? `/api/admin/campaigns/${selectedId}/completion-report`
                       : "#"
                   }
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#22d3ee]/40 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.16))] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_40px_rgba(34,211,238,0.15)] transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#22d3ee]/40 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.16))] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(34,211,238,0.15)] transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
                   target="_blank"
                   rel="noreferrer"
                   aria-disabled={!selectedId}
@@ -975,7 +975,7 @@ export default function AdminCampaignsPage() {
                 {selectedId ? (
                   <Link
                     href={`/admin/campaigns/${selectedId}/analytics`}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#a855f7]/40 bg-[linear-gradient(135deg,rgba(168,85,247,0.22),rgba(34,211,238,0.12))] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_40px_rgba(168,85,247,0.12)] transition-all hover:brightness-110"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#a855f7]/40 bg-[linear-gradient(135deg,rgba(168,85,247,0.22),rgba(34,211,238,0.12))] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(168,85,247,0.12)] transition-all hover:brightness-110"
                   >
                     <BarChart3 className="h-3.5 w-3.5" />
                     성과 분석
@@ -1174,7 +1174,7 @@ export default function AdminCampaignsPage() {
                         />
                         <button
                           type="button"
-                          className="absolute right-0 top-0 bg-rose-600/90 px-1 text-[10px] text-white"
+                          className="absolute right-0 top-0 bg-rose-600/90 px-1 text-[10px] dark:text-white text-gray-900"
                           onClick={() => delProof(p.id)}
                         >
                           삭제

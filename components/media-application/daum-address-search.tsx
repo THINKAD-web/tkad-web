@@ -103,11 +103,11 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
   }, [open]);
 
   const inputCls =
-    "min-w-0 flex-1 h-11 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/40";
+    "min-w-0 flex-1 h-11 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400";
 
   return (
     <div className="space-y-2">
-      <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
+      <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-500">
         {isKo ? "주소" : "Address"}
       </span>
       <div className="flex flex-wrap gap-2">
@@ -122,7 +122,7 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
           type="button"
           disabled={disabled || loading}
           onClick={() => void openSearch()}
-          className="tkad-neon-cta-clean shrink-0 rounded-xl px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-white disabled:opacity-50"
+          className="tkad-neon-cta-clean shrink-0 rounded-xl px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] dark:text-white text-gray-900 disabled:opacity-50"
         >
           {loading
             ? isKo
@@ -135,12 +135,12 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
       </div>
       {open ? (
         <div
-          className="relative z-50 overflow-hidden rounded-2xl border border-white/12 bg-[#0a0a0f] shadow-[0_24px_80px_rgba(0,0,0,0.65)]"
+          className="relative z-50 overflow-hidden rounded-2xl border dark:border-white/12 border-gray-200 bg-[#0a0a0f] shadow-[0_24px_80px_rgba(0,0,0,0.65)]"
           style={{ height: 420 }}
         >
           <button
             type="button"
-            className="absolute right-2 top-2 z-10 rounded-lg border border-white/15 bg-white/10 px-2 py-1 font-mono text-[10px] font-bold text-white"
+            className="absolute right-2 top-2 z-10 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-2 py-1 font-mono text-[10px] font-bold dark:text-white text-gray-900"
             onClick={() => setOpen(false)}
           >
             {isKo ? "닫기" : "Close"}

@@ -1004,17 +1004,17 @@ export default function KakaoMapView({
   if (sdkError) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-transparent p-4">
-        <div className="relative w-full max-w-lg overflow-hidden rounded-[22px] border border-white/12 bg-black/45 px-6 py-8 text-sm text-white shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+        <div className="relative w-full max-w-lg overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/45 px-6 py-8 text-sm dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
           <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
           <div
             aria-hidden
             className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
           />
           <div className="relative">
-            <div className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/70">
+            <div className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
               MAP SDK ERROR
             </div>
-            <div className="mt-2 leading-relaxed text-white/90">{sdkError}</div>
+            <div className="mt-2 leading-relaxed dark:text-white text-gray-800">{sdkError}</div>
           </div>
         </div>
       </div>
@@ -1030,19 +1030,19 @@ export default function KakaoMapView({
     >
       <div ref={containerRef} className="h-full w-full min-h-[200px]" />
       {!mapReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/25 p-4">
-          <div className="relative w-full max-w-sm overflow-hidden rounded-[22px] border border-white/12 bg-black/45 px-6 py-8 text-white shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+        <div className="absolute inset-0 flex items-center justify-center dark:bg-black bg-white bg-white/25 p-4">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/45 px-6 py-8 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
             <div
               aria-hidden
               className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
             />
             <div className="relative flex flex-col items-center gap-4">
-              <div className="rounded-2xl border border-white/14 bg-white/8 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white/75">
+              <div className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
                 LOADING
               </div>
-              <div className="text-sm font-semibold text-white/90">지도 준비 중…</div>
-              <div className="h-2 w-full overflow-hidden rounded-full border border-white/12 bg-black/20">
+              <div className="text-sm font-semibold dark:text-white text-gray-800">지도 준비 중…</div>
+              <div className="h-2 w-full overflow-hidden rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20">
                 <div className="h-full w-[42%] animate-[tkadShimmer_1.2s_ease-in-out_infinite] bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]" />
               </div>
             </div>

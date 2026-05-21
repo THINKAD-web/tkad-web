@@ -155,11 +155,11 @@ function SearchResultsInner() {
               name="q"
               defaultValue={q}
               placeholder={t("modalPlaceholder")}
-              className="h-11 min-w-0 flex-1 rounded-xl border border-white/12 bg-black/30 px-4 font-mono text-sm text-white outline-none focus:border-white/25"
+              className="h-11 min-w-0 flex-1 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 px-4 font-mono text-sm dark:text-white text-gray-900 outline-none focus:border-white/25"
             />
             <button
               type="submit"
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/15"
+              className="inline-flex h-11 items-center gap-2 rounded-xl border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-4 text-sm font-semibold dark:text-white text-gray-900 hover:bg-white/15"
             >
               <Search className="h-4 w-4" />
               {t("submit")}
@@ -167,7 +167,7 @@ function SearchResultsInner() {
           </form>
         </CategoryExploreHero>
 
-        <section className="border-t border-border/60 bg-card py-10 dark:border-white/10">
+        <section className="border-t border-border/60 bg-card py-10 dark:border-white/10 border-gray-200">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             {q ? (
               <div className="mb-6 flex flex-wrap gap-2">
@@ -199,7 +199,7 @@ function SearchResultsInner() {
             ) : null}
 
             {empty ? (
-              <div className="rounded-2xl border-2 border-dashed border-border bg-muted/30 p-8 text-center dark:border-white/12">
+              <div className="rounded-2xl border-2 border-dashed border-border bg-muted/30 p-8 text-center dark:border-white/12 border-gray-200">
                 <p className="text-lg font-bold text-foreground">
                   {t("noResults")}
                 </p>

@@ -310,7 +310,7 @@ export default function AdminCrmRecordsPage() {
               </p>
             ) : (
               <>
-                <div className="flex flex-wrap items-center gap-2 rounded border-2 border-border bg-muted p-3 border-border bg-muted/60">
+                <div className="flex flex-wrap items-center gap-2 rounded border-2 border-border bg-muted p-3 bg-muted/60">
                   <span className="text-sm font-semibold text-foreground">
                     고객 등급
                   </span>

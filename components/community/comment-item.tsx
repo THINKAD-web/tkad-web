@@ -159,19 +159,19 @@ export function CommunityCommentItemCard({
   };
 
   return (
-    <li className="rounded-[24px] border border-white/12 bg-black/20 p-5 backdrop-blur">
+    <li className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 p-5 backdrop-blur">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white/58">
-          <User className="h-3.5 w-3.5 text-white/62" />
+        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
+          <User className="h-3.5 w-3.5 dark:text-white" />
           {comment.author ? (
             <Link
               href={`/community/profile/${comment.author.id}`}
-              className="font-bold text-white transition-colors hover:text-white/80"
+              className="font-bold dark:text-white text-gray-900 transition-colors hover:dark:text-white text-gray-700"
             >
               {comment.authorName}
             </Link>
           ) : (
-            <span className="font-bold text-white">{comment.authorName}</span>
+            <span className="font-bold dark:text-white text-gray-900">{comment.authorName}</span>
           )}
           <RoleBadge role={comment.author?.role ?? null} locale={locale} />
           <span className="tabular-nums">{fmtRelative(comment.createdAt, locale)}</span>
@@ -186,7 +186,7 @@ export function CommunityCommentItemCard({
                 setValue(comment.body);
                 setError(null);
               }}
-              className="inline-flex rounded-full border border-white/12 bg-white/6 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white/78 transition-colors hover:bg-white/10"
+              className="inline-flex rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100"
             >
               {editing ? (isKo ? "취소" : "Cancel") : isKo ? "수정" : "Edit"}
             </button>
@@ -209,17 +209,17 @@ export function CommunityCommentItemCard({
             onChange={(event) => setValue(event.target.value)}
             rows={4}
             maxLength={COMMUNITY_LIMITS.COMMENT_BODY_MAX}
-            className="w-full resize-none rounded-[20px] border border-white/12 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/38 focus:border-white/22 focus:outline-none"
+            className="w-full resize-none rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white focus:border-white/22 focus:outline-none"
           />
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="font-mono text-[10px] tabular-nums text-white/46">
+            <p className="font-mono text-[10px] tabular-nums dark:text-white">
               {value.length} / {COMMUNITY_LIMITS.COMMENT_BODY_MAX}
             </p>
             <button
               type="button"
               onClick={handleSave}
               disabled={!canSubmit}
-              className="inline-flex rounded-full border border-[#8B5CF6]/55 bg-[linear-gradient(135deg,rgba(139,92,246,0.26),rgba(59,130,246,0.16))] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex rounded-full border border-[#8B5CF6]/55 bg-[linear-gradient(135deg,rgba(139,92,246,0.26),rgba(59,130,246,0.16))] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {busy ? (isKo ? "저장 중…" : "Saving…") : isKo ? "저장" : "Save"}
             </button>
@@ -232,7 +232,7 @@ export function CommunityCommentItemCard({
           ) : null}
         </div>
       ) : (
-        <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-white/84">
+        <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed dark:text-white">
           {comment.body}
         </p>
       )}

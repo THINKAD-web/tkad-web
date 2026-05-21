@@ -60,14 +60,14 @@ function SortableThumb({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={url} alt="" className="h-24 w-full object-cover" />
       {isPrimary ? (
-        <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded bg-cyan-600/90 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-white">
+        <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded bg-cyan-600/90 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase dark:text-white text-gray-900">
           <Star className="h-2.5 w-2.5 fill-current" />
           대표
         </span>
       ) : null}
       <button
         type="button"
-        className="absolute right-1 top-1 flex h-6 w-6 cursor-grab items-center justify-center rounded bg-black/50 text-white touch-none"
+        className="absolute right-1 top-1 flex h-6 w-6 cursor-grab items-center justify-center rounded dark:bg-black bg-white dark:bg-white/5 bg-gray-500 dark:text-white text-gray-900 touch-none"
         {...attributes}
         {...listeners}
         aria-label="순서 변경"
@@ -76,7 +76,7 @@ function SortableThumb({
       </button>
       <button
         type="button"
-        className="absolute bottom-1 right-1 hidden h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white group-hover:flex"
+        className="absolute bottom-1 right-1 hidden h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs dark:text-white text-gray-900 group-hover:flex"
         onClick={onRemove}
         aria-label="삭제"
       >

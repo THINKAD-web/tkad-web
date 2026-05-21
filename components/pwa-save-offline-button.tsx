@@ -93,7 +93,7 @@ export function PwaSaveOfflineButton({ media, className }: Props) {
         "inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition",
         saved
           ? "border-cyan-400/50 bg-cyan-400/15 text-cyan-200"
-          : "border-white/18 bg-white/8 text-white/90 hover:bg-white/12",
+          : "dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-800 hover:bg-white/12",
         className,
       )}
     >

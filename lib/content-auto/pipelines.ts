@@ -4,6 +4,7 @@ import {
   generateGuideArticle,
 } from "@/lib/content-auto/generators";
 import { applySeoPackage } from "@/lib/content-auto/seo";
+import { defaultContentReviewScheduledAt } from "@/lib/content-auto/review-schedule";
 import {
   EDUCATION_TOPIC_POOL,
   GUIDE_TOPIC_POOL,
@@ -88,6 +89,7 @@ export async function runEducationDraftPipeline(opts?: {
     aiModel: resolveModel(),
     internalLinks: seo.internalLinks as Prisma.InputJsonValue,
     publishedAt: null,
+    scheduledAt: defaultContentReviewScheduledAt(),
   };
 
   const saved = opts?.reportId
@@ -144,6 +146,7 @@ export async function runGuideDraftPipeline(opts?: {
     aiModel: resolveModel(),
     internalLinks: seo.internalLinks as Prisma.InputJsonValue,
     publishedAt: null,
+    scheduledAt: defaultContentReviewScheduledAt(),
   };
 
   const saved = opts?.reportId

@@ -88,10 +88,10 @@ function LiveBar({
   ];
 
   const chipClass = darkHero
-    ? "inline-flex items-center gap-2 rounded-lg border border-white/14 bg-white/6 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-white backdrop-blur-sm"
+    ? "inline-flex items-center gap-2 rounded-lg border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest dark:text-white text-gray-900 backdrop-blur-sm"
     : "inline-flex items-center gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-foreground shadow-sm backdrop-blur-sm";
-  const mutedClass = darkHero ? "text-white/55" : "text-muted-foreground";
-  const valueClass = darkHero ? "tabular-nums text-white" : "tabular-nums text-foreground";
+  const mutedClass = darkHero ? "dark:text-white text-gray-500" : "text-muted-foreground";
+  const valueClass = darkHero ? "tabular-nums dark:text-white text-gray-900" : "tabular-nums text-foreground";
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -144,14 +144,14 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
   const liveActiveBrands = useMemo(() => 128 + ((tick % 9) - 4), [tick]);
 
   const tags = [t("heroTag1"), t("heroTag2"), t("heroTag3")];
-  const mutedClass = darkHero ? "text-white/55" : "text-muted-foreground";
+  const mutedClass = darkHero ? "dark:text-white text-gray-500" : "text-muted-foreground";
 
   return (
     <section
       style={{ minHeight: HERO_MIN_HEIGHT }}
       className={cn(
         "tkad-home-hero-neo relative flex w-full shrink-0 items-center overflow-hidden",
-        darkHero ? "bg-[#05050a] text-white" : "bg-background text-foreground",
+        darkHero ? "bg-[#05050a] dark:text-white text-gray-900" : "bg-background text-foreground",
       )}
     >
       <div className="absolute inset-0 z-0">
@@ -204,7 +204,7 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
               <Link
                 href="/media"
                 className={cn(
-                  "tkad-neon-cta inline-flex items-center gap-2 rounded-[14px] px-6 py-3 font-bold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a855f7]",
+                  "tkad-neon-cta inline-flex items-center gap-2 rounded-[14px] px-6 py-3 font-bold dark:text-white text-gray-900 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a855f7]",
                   darkHero
                     ? "focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     : "focus-visible:ring-offset-2",
@@ -218,7 +218,7 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
                 className={cn(
                   "inline-flex items-center px-6 py-3 font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                   darkHero
-                    ? "rounded-2xl border border-white/14 bg-white/6 text-white hover:border-white/22 hover:bg-white/10 focus-visible:ring-white/40 focus-visible:ring-offset-black"
+                    ? "rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-900 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:ring-white/40 focus-visible:ring-offset-black"
                     : "border-2 border-foreground hover:bg-foreground hover:text-background focus-visible:ring-foreground",
                 )}
               >
@@ -232,7 +232,7 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
                   key={tag}
                   className={cn(
                     "border px-3 py-1 font-mono text-xs uppercase tracking-wide",
-                    darkHero ? "border-white/20 text-white/55" : "border-foreground/30 text-muted-foreground",
+                    darkHero ? "dark:border-white/20 border-gray-300 dark:text-white text-gray-500" : "border-foreground/30 text-muted-foreground",
                   )}
                 >
                   {tag}
@@ -253,7 +253,7 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
             <div
               className={cn(
                 darkHero &&
-                  "[&>div]:border-white/10 [&>div]:bg-white/5 [&>div]:shadow-[0_18px_48px_rgba(0,0,0,0.45)]",
+                  "[&>div]:dark:border-white/10 border-gray-200 [&>div]:dark:bg-white/5 bg-gray-50 [&>div]:shadow-[0_18px_48px_rgba(0,0,0,0.45)]",
               )}
             >
               <HomeHeroMapCard pins={mapPins} />

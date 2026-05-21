@@ -533,7 +533,7 @@ export default function MediaBrowseClient({
           <div className="mx-auto mt-1 w-full max-w-xl">
             <div className="tkad-media-hero-search relative">
               <Search
-                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/45 sm:left-4"
+                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 dark:text-white sm:left-4"
                 aria-hidden
               />
               <input
@@ -543,7 +543,7 @@ export default function MediaBrowseClient({
                 placeholder={
                   isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
                 }
-                className="h-11 w-full rounded-2xl border border-white/18 bg-white/8 pl-10 pr-3 text-sm text-white shadow-[0_18px_56px_rgba(0,0,0,0.4)] placeholder:text-white/45 backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 sm:h-12 sm:pl-11 sm:pr-4"
+                className="h-11 w-full rounded-2xl border dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 pl-10 pr-3 text-sm dark:text-white text-gray-900 shadow-[0_18px_56px_rgba(0,0,0,0.4)] placeholder:dark:text-white backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 sm:h-12 sm:pl-11 sm:pr-4"
                 aria-label={isKo ? "매체 검색" : "Search media"}
               />
             </div>
@@ -558,7 +558,7 @@ export default function MediaBrowseClient({
             >
               <Sparkles className="hidden h-3.5 w-3.5 shrink-0 text-violet-300 sm:inline" aria-hidden />
               {tMedia("packagesBrowseLink")}
-              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 text-white/75 sm:inline" aria-hidden />
+              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 dark:text-white text-gray-700 sm:inline" aria-hidden />
             </Link>
             <Link
               href="/contact"
@@ -578,7 +578,7 @@ export default function MediaBrowseClient({
               )}
             >
               {tMedia("heroCtaPlanner")}
-              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 text-white/75 sm:inline sm:h-4 sm:w-4" aria-hidden />
+              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 dark:text-white text-gray-700 sm:inline sm:h-4 sm:w-4" aria-hidden />
             </Link>
           </CategoryHeroCtaRow>
         </CategoryExploreHero>

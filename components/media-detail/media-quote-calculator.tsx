@@ -120,7 +120,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
           type="checkbox"
           checked={includeVat}
           onChange={(e) => setIncludeVat(e.target.checked)}
-          className="rounded border-white/20"
+          className="rounded dark:border-white/20 border-gray-300"
         />
         {isKo ? "VAT 포함 금액 표시" : "Show price including VAT (10%)"}
       </label>

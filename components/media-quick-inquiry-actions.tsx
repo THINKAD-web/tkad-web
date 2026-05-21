@@ -39,7 +39,7 @@ export function MediaQuickInquiryActions({
       <a
         href={SALES_TEL}
         className={cn(
-          "inline-flex items-center justify-center font-bold text-white",
+          "inline-flex items-center justify-center font-bold dark:text-white text-gray-900",
           btn,
           "border border-emerald-400/40 bg-emerald-500/20 hover:bg-emerald-500/30",
         )}

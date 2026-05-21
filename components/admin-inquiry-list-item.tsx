@@ -308,7 +308,7 @@ export default function AdminInquiryListItem({
                     <button
                       type="button"
                       disabled={quoteSendBusy}
-                      className="inline-flex items-center gap-1 rounded-md bg-hermes px-2 py-1 text-xs font-bold text-white hover:bg-hermes/90 disabled:opacity-50"
+                      className="inline-flex items-center gap-1 rounded-md bg-hermes px-2 py-1 text-xs font-bold dark:text-white text-gray-900 hover:bg-hermes/90 disabled:opacity-50"
                       onClick={() => {
                         void (async () => {
                           setQuoteSendBusy(true);
@@ -461,7 +461,7 @@ export default function AdminInquiryListItem({
       ) : null}
 
       {confirmTrashOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-4">
           <div className="w-full max-w-md border-2 border-border bg-card p-5 shadow-2xl">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-rose-700">
               [ 휴지통 이동 확인 ]

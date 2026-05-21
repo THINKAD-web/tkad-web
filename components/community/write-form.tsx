@@ -76,29 +76,29 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="rounded-[26px] border border-white/12 bg-white/6 p-5 shadow-[0_28px_100px_rgba(0,0,0,0.55)] backdrop-blur tkad-neon-border">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+      <div className="rounded-[26px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 shadow-[0_28px_100px_rgba(0,0,0,0.55)] backdrop-blur tkad-neon-border">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ 작성자 ]
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-base font-bold text-white">
+          <span className="text-base font-bold dark:text-white text-gray-900">
             {currentUser.name}
           </span>
           <RoleBadge role={memberRole} locale={locale} />
           {currentUser.company ? (
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/58">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
               {currentUser.company}
             </span>
           ) : null}
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-white/68">
+        <p className="mt-2 text-sm leading-relaxed dark:text-white">
           회원 프로필 기반으로 게시되며, 익명 작성은 지원하지 않습니다.
         </p>
       </div>
 
       <div>
         <label className="block">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
             [ 카테고리 ]
           </span>
         </label>
@@ -113,14 +113,14 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
                 onClick={() => setCategory(cat)}
                 className={`inline-flex min-w-[150px] flex-col items-start gap-1 rounded-[20px] border px-4 py-3 text-left font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                   active
-                    ? "border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.18))] text-white shadow-[0_18px_48px_rgba(99,102,241,0.22)]"
-                    : "border-white/12 bg-white/6 text-white/88 hover:bg-white/10"
+                    ? "border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.18))] dark:text-white text-gray-900 shadow-[0_18px_48px_rgba(99,102,241,0.22)]"
+                    : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 hover:dark:bg-white/10 bg-gray-100"
                 }`}
               >
                 <span>{labels.ko}</span>
                 <span
                   className={`font-mono text-[9px] tracking-tight ${
-                    active ? "text-white/70" : "text-white/48"
+                    active ? "dark:text-white text-gray-600" : "dark:text-white"
                   }`}
                   style={{ textTransform: "none", letterSpacing: 0 }}
                 >
@@ -133,7 +133,7 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
       </div>
 
       <label className="block">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ 제목 ]
         </span>
         <input
@@ -143,15 +143,15 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
           placeholder="제목을 입력해주세요"
           maxLength={COMMUNITY_LIMITS.POST_TITLE_MAX}
           required
-          className="mt-3 w-full rounded-[22px] border border-white/12 bg-white/6 px-4 py-3 text-base font-bold text-white placeholder:text-white/38 focus:border-white/22 focus:outline-none"
+          className="mt-3 w-full rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 text-base font-bold dark:text-white text-gray-900 placeholder:dark:text-white focus:border-white/22 focus:outline-none"
         />
-        <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-white/46">
+        <p className="mt-1 text-right font-mono text-[10px] tabular-nums dark:text-white">
           {title.length} / {COMMUNITY_LIMITS.POST_TITLE_MAX}
         </p>
       </label>
 
       <label className="block">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ 본문 ]
         </span>
         <textarea
@@ -161,9 +161,9 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
           placeholder={`본문을 입력해주세요. (${COMMUNITY_LIMITS.POST_BODY_MIN}-${COMMUNITY_LIMITS.POST_BODY_MAX.toLocaleString()}자)\n\n· 최근 진행한 캠페인 인사이트\n· 매체 운영이나 집행 관련 질문\n· 협업 파트너를 찾는 네트워킹 글\n· 성과와 시행착오를 정리한 후기`}
           maxLength={COMMUNITY_LIMITS.POST_BODY_MAX}
           required
-          className="mt-3 w-full resize-y rounded-[24px] border border-white/12 bg-white/6 px-4 py-4 text-sm text-white placeholder:text-white/38 focus:border-white/22 focus:outline-none"
+          className="mt-3 w-full resize-y rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-4 text-sm dark:text-white text-gray-900 placeholder:dark:text-white focus:border-white/22 focus:outline-none"
         />
-        <p className="mt-1 text-right font-mono text-[10px] tabular-nums text-white/46">
+        <p className="mt-1 text-right font-mono text-[10px] tabular-nums dark:text-white">
           {body.length} / {COMMUNITY_LIMITS.POST_BODY_MAX.toLocaleString()}
         </p>
       </label>
@@ -188,7 +188,7 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
         <button
           type="submit"
           disabled={!canSubmit}
-          className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Send className="h-3.5 w-3.5" />
           {busy ? "전송 중…" : "글 등록"}

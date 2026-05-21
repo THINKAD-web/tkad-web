@@ -9,7 +9,7 @@ import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { FullPageSpinner, Spinner } from "@/components/ui/spinner";
 
 const gradientBtn =
-  "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_28px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95 disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-3 text-sm font-semibold dark:text-white text-gray-900 shadow-[0_8px_28px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95 disabled:opacity-50";
 
 export function JoinTeamClient() {
   const searchParams = useSearchParams();
@@ -100,17 +100,17 @@ export function JoinTeamClient() {
         <Users className="mb-4 h-12 w-12 text-cyan-300" aria-hidden />
         {done ? (
           <>
-            <h1 className="text-2xl font-black text-white">
+            <h1 className="text-2xl font-black dark:text-white text-gray-900">
               {isKo ? "팀에 합류했습니다" : "You joined the team"}
             </h1>
-            <p className="mt-3 text-white/70">{done.teamName}</p>
+            <p className="mt-3 dark:text-white text-gray-600">{done.teamName}</p>
             <Link href="/my/team" className={`${gradientBtn} mt-8`}>
               {isKo ? "팀 관리로 이동" : "Go to team settings"}
             </Link>
           </>
         ) : error ? (
           <>
-            <h1 className="text-xl font-bold text-white">
+            <h1 className="text-xl font-bold dark:text-white text-gray-900">
               {isKo ? "초대를 처리할 수 없습니다" : "Invite unavailable"}
             </h1>
             <p className="mt-3 text-sm text-red-300">{error}</p>
@@ -120,15 +120,15 @@ export function JoinTeamClient() {
           </>
         ) : preview ? (
           <>
-            <h1 className="text-2xl font-black text-white">
+            <h1 className="text-2xl font-black dark:text-white text-gray-900">
               {isKo ? "팀 초대" : "Team invitation"}
             </h1>
-            <p className="mt-3 text-white/75">
+            <p className="mt-3 dark:text-white text-gray-700">
               {isKo
                 ? `${preview.teamName} 팀에 ${preview.roleLabel.ko}(으)로 초대되었습니다.`
                 : `You are invited to "${preview.teamName}" as ${preview.roleLabel.en}.`}
             </p>
-            <p className="mt-2 font-mono text-xs text-white/45">{preview.email}</p>
+            <p className="mt-2 font-mono text-xs dark:text-white">{preview.email}</p>
             <button
               type="button"
               onClick={() => void accept()}

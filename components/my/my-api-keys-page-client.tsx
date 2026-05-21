@@ -30,10 +30,10 @@ type ApiKeyRow = {
 };
 
 const glassCard =
-  "rounded-2xl border border-white/12 bg-white/5 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
+  "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
 
 const inputCls =
-  "h-11 w-full rounded-xl border border-white/12 bg-black/30 px-4 font-mono text-sm text-white placeholder:text-white/40 outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10";
+  "h-11 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 px-4 font-mono text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 outline-none focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/10";
 
 const PLAN_LABEL: Record<string, { ko: string; en: string }> = {
   FREE: { ko: "Free (월 1,000회)", en: "Free (1k/mo)" },
@@ -137,7 +137,7 @@ export function MyApiKeysPageClient() {
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
         <Link
           href="/my"
-          className="mb-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-white/60 hover:text-white"
+          className="mb-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest dark:text-white text-gray-500 hover:dark:text-white text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
           {isKo ? "마이페이지" : "My hub"}
@@ -148,10 +148,10 @@ export function MyApiKeysPageClient() {
             <KeyRound className="h-6 w-6 text-cyan-300" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold dark:text-white text-gray-900">
               {isKo ? "API 키" : "API keys"}
             </h1>
-            <p className="mt-1 text-sm text-white/60">
+            <p className="mt-1 text-sm dark:text-white text-gray-500">
               {isKo
                 ? "대행사 툴에서 싱커드 매체 DB를 연동할 때 사용합니다."
                 : "Use these keys to integrate Synced media in your agency tools."}
@@ -172,14 +172,14 @@ export function MyApiKeysPageClient() {
                 ? "새 키가 발급되었습니다. 아래 값은 다시 표시되지 않습니다."
                 : "New key issued. Copy it now — it won't be shown again."}
             </p>
-            <code className="mt-3 block break-all rounded-lg bg-black/50 p-3 font-mono text-xs text-white">
+            <code className="mt-3 block break-all rounded-lg dark:bg-black bg-white dark:bg-white/5 bg-gray-500 p-3 font-mono text-xs dark:text-white text-gray-900">
               {newSecret}
             </code>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => void copySecret()}
-                className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm text-white hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-lg border dark:border-white/20 border-gray-300 px-3 py-2 text-sm dark:text-white text-gray-900 hover:dark:bg-white/10 bg-gray-100"
               >
                 <Copy className="h-4 w-4" />
                 {isKo ? "복사" : "Copy"}
@@ -187,7 +187,7 @@ export function MyApiKeysPageClient() {
               <button
                 type="button"
                 onClick={() => setNewSecret(null)}
-                className="rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white"
+                className="rounded-lg px-3 py-2 text-sm dark:text-white text-gray-500 hover:dark:text-white text-gray-900"
               >
                 {isKo ? "닫기" : "Dismiss"}
               </button>
@@ -196,7 +196,7 @@ export function MyApiKeysPageClient() {
         ) : null}
 
         <form onSubmit={createKey} className={cn(glassCard, "mb-6")}>
-          <h2 className="text-sm font-semibold text-white">
+          <h2 className="text-sm font-semibold dark:text-white text-gray-900">
             {isKo ? "새 API 키 발급" : "Create API key"}
           </h2>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row">
@@ -224,7 +224,7 @@ export function MyApiKeysPageClient() {
 
         <div className="space-y-3">
           {keys.length === 0 ? (
-            <p className={cn(glassCard, "text-center text-sm text-white/50")}>
+            <p className={cn(glassCard, "text-center text-sm dark:text-white text-gray-400")}>
               {isKo ? "발급된 API 키가 없습니다." : "No API keys yet."}
             </p>
           ) : (
@@ -232,11 +232,11 @@ export function MyApiKeysPageClient() {
               <div key={k.id} className={glassCard}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium text-white">{k.name}</p>
-                    <p className="mt-1 font-mono text-xs text-white/70">
+                    <p className="font-medium dark:text-white text-gray-900">{k.name}</p>
+                    <p className="mt-1 font-mono text-xs dark:text-white text-gray-600">
                       {k.maskedKey}
                     </p>
-                    <p className="mt-2 text-xs text-white/50">
+                    <p className="mt-2 text-xs dark:text-white text-gray-400">
                       {isKo ? "플랜" : "Plan"}:{" "}
                       {PLAN_LABEL[k.plan]?.[isKo ? "ko" : "en"] ?? k.plan}
                     </p>

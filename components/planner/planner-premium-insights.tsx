@@ -21,7 +21,7 @@ export function PlannerPremiumInsightsPanel({ insights, isKo, access }: Props) {
           {insights.gantt.map((row) => (
             <div
               key={row.mediaId}
-              className="absolute top-1 bottom-1 flex items-center overflow-hidden rounded-md px-2 text-[10px] font-bold text-white"
+              className="absolute top-1 bottom-1 flex items-center overflow-hidden rounded-md px-2 text-[10px] font-bold dark:text-white text-gray-900"
               style={{
                 left: `${row.startPct}%`,
                 width: `${row.widthPct}%`,

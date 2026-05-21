@@ -11,12 +11,12 @@ export function GuidesBeginnerFaq({ items, isKo }: Props) {
       {items.map((f, i) => (
         <details
           key={i}
-          className="group rounded-2xl border border-white/12 bg-white/5 px-5 py-4 backdrop-blur open:bg-white/8"
+          className="group rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-5 py-4 backdrop-blur open:dark:bg-white/8 bg-gray-100"
         >
-          <summary className="cursor-pointer list-none text-sm font-bold text-white marker:content-none [&::-webkit-details-marker]:hidden">
+          <summary className="cursor-pointer list-none text-sm font-bold dark:text-white text-gray-900 marker:content-none [&::-webkit-details-marker]:hidden">
             {isKo ? f.questionKo : f.questionEn}
           </summary>
-          <p className="mt-3 text-sm leading-relaxed text-white/72">
+          <p className="mt-3 text-sm leading-relaxed dark:text-white">
             {isKo ? f.answerKo : f.answerEn}
           </p>
         </details>

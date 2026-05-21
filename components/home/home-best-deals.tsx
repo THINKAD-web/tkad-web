@@ -58,7 +58,7 @@ export function HomeBestDeals({
                 glowTheme="purple"
                 density="compact"
                 topRight={
-                  <span className="rounded-md bg-emerald-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
+                  <span className="rounded-md bg-emerald-500/90 px-2 py-0.5 text-[10px] font-bold dark:text-white text-gray-900">
                     {isKo ? m.dealLabelKo : m.dealLabelEn}
                   </span>
                 }

@@ -125,7 +125,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-[18px] border border-white/12 bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(168,85,247,0.92)_52%,rgba(236,72,153,0.88)_100%)] py-3 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition-colors hover:brightness-105 disabled:opacity-60"
+        className="w-full rounded-[18px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(168,85,247,0.92)_52%,rgba(236,72,153,0.88)_100%)] py-3 font-mono text-[11px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition-colors hover:brightness-105 disabled:opacity-60"
       >
         {loading ? t("submitting") : t("submit")}
       </button>

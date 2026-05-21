@@ -148,14 +148,14 @@ export default function MediaOwnerReportsClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-white">데이터 보고서</h2>
-        <p className="mt-1 text-sm text-white/60">
+        <h2 className="text-xl font-bold dark:text-white text-gray-900">데이터 보고서</h2>
+        <p className="mt-1 text-sm dark:text-white text-gray-500">
           영업용 PDF · 월간/연간 성과 · QR·이메일 템플릿
         </p>
       </div>
 
       {access ? (
-        <div className={`${ownerGlassCard} text-sm text-white/80`}>
+        <div className={`${ownerGlassCard} text-sm dark:text-white text-gray-700`}>
           <p>
             플랜: <strong className="text-violet-200">{access.tier}</strong>
             {access.watermark ? " · 워터마크 포함" : " · 화이트라벨"}
@@ -197,7 +197,7 @@ export default function MediaOwnerReportsClient() {
       </div>
 
       {media.length === 0 ? (
-        <p className="text-white/50">등록된 매체가 없습니다.</p>
+        <p className="dark:text-white text-gray-400">등록된 매체가 없습니다.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {media.map((m) => (
@@ -218,13 +218,13 @@ export default function MediaOwnerReportsClient() {
                     className="h-12 w-18 rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="flex h-12 w-16 items-center justify-center rounded-lg bg-white/10 text-xs text-white/40">
+                  <div className="flex h-12 w-16 items-center justify-center rounded-lg dark:bg-white/10 bg-gray-100 text-xs dark:text-white text-gray-400">
                     No img
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-white">{m.name}</p>
-                  <p className="text-xs text-white/50">
+                  <p className="font-semibold dark:text-white text-gray-900">{m.name}</p>
+                  <p className="text-xs dark:text-white text-gray-400">
                     {m.region} · 조회 {m.engagement.viewCount} · 문의{" "}
                     {m.engagement.inquiryCount}
                   </p>
@@ -276,7 +276,7 @@ export default function MediaOwnerReportsClient() {
 
       {qr ? (
         <div className={`${ownerGlassCard} max-w-xs`}>
-          <p className="mb-2 text-sm text-white">광고주용 QR (매체 상세)</p>
+          <p className="mb-2 text-sm dark:text-white text-gray-900">광고주용 QR (매체 상세)</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={qr.dataUrl} alt="QR" className="mx-auto w-full max-w-[200px]" />
           <Button
@@ -293,7 +293,7 @@ export default function MediaOwnerReportsClient() {
 
       {emailPreview ? (
         <div className={`${ownerGlassCard} prose prose-invert max-w-none text-sm`}>
-          <p className="mb-2 font-semibold text-white">광고주 제안 이메일 템플릿</p>
+          <p className="mb-2 font-semibold dark:text-white text-gray-900">광고주 제안 이메일 템플릿</p>
           <div dangerouslySetInnerHTML={{ __html: emailPreview }} />
           <Button
             type="button"

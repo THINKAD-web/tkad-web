@@ -109,7 +109,7 @@ function CheckboxGrid({
           <label
             key={key}
             className={cn(
-              "flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200/60 bg-white/80 px-2.5 py-2 text-[13px] leading-snug transition-colors",
+              "flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200/60 dark:bg-white/8 bg-gray-100 px-2.5 py-2 text-[13px] leading-snug transition-colors",
               checked
                 ? "border-navy/30 bg-navy/[0.06] text-navy ring-1 ring-navy/10"
                 : "text-muted-foreground hover:border-slate-300",
@@ -189,7 +189,7 @@ export function MediaPrecisionFiltersAssistant({
 
   const specialSel = countMap(filters.specialFeature);
 
-  const groupShell = "rounded-xl border border-dashed border-slate-200/70 bg-white/65 p-3.5 shadow-sm sm:p-4";
+  const groupShell = "rounded-xl border border-dashed border-slate-200/70 dark:bg-white/6 bg-gray-500/50 p-3.5 shadow-sm sm:p-4";
 
   return (
     <div
@@ -366,7 +366,7 @@ export function MediaPrecisionFiltersAssistant({
         </section>
 
         {/* 8. 특수 기능 (아코디언) */}
-        <section className="overflow-hidden rounded-xl border border-dashed border-slate-200/70 bg-white/65 shadow-sm">
+        <section className="overflow-hidden rounded-xl border border-dashed border-slate-200/70 dark:bg-white/6 bg-gray-500/50 shadow-sm">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-dashed border-slate-200/80 px-3.5 py-3 sm:px-4">
             <button
               type="button"

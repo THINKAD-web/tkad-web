@@ -23,14 +23,14 @@ export function PwaPushOptIn() {
 
   return (
     <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-3 right-3 z-[60] mx-auto max-w-md md:left-auto md:right-4">
-      <div className="rounded-2xl border border-violet-400/35 bg-black/85 p-4 shadow-xl backdrop-blur">
+      <div className="rounded-2xl border border-violet-400/35 dark:bg-black bg-white dark:bg-white/8 bg-gray-1005 p-4 shadow-xl backdrop-blur">
         <div className="flex gap-3">
           <Bell className="h-5 w-5 shrink-0 text-violet-300" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold text-white">
+            <p className="text-sm font-bold dark:text-white text-gray-900">
               {isKo ? "알림을 받아보시겠어요?" : "Enable notifications?"}
             </p>
-            <p className="mt-1 text-xs text-white/60">
+            <p className="mt-1 text-xs dark:text-white text-gray-500">
               {isKo
                 ? "찜한 매체 예약 가능, 견적 도착, 캠페인 D-1을 알려드립니다."
                 : "Get alerts for favorites, quotes, and campaign reminders."}
@@ -39,7 +39,7 @@ export function PwaPushOptIn() {
               <button
                 type="button"
                 disabled={busy}
-                className="rounded-full bg-violet-500 px-4 py-2 text-xs font-bold text-white"
+                className="rounded-full bg-violet-500 px-4 py-2 text-xs font-bold dark:text-white text-gray-900"
                 onClick={async () => {
                   setBusy(true);
                   await subscribeToWebPush();
@@ -52,7 +52,7 @@ export function PwaPushOptIn() {
               </button>
               <button
                 type="button"
-                className="rounded-full border border-white/20 px-4 py-2 text-xs text-white/70"
+                className="rounded-full border dark:border-white/20 border-gray-300 px-4 py-2 text-xs dark:text-white text-gray-600"
                 onClick={() => {
                   dismissPushPrompt();
                   setVisible(false);
