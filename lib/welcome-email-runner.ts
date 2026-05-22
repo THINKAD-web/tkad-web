@@ -46,6 +46,7 @@ export async function runAdvertiserWelcomeDrip(): Promise<{
       locale: true,
       role: true,
       createdAt: true,
+      trialEndsAt: true,
       proTrialEndsAt: true,
       welcomeDrip: true,
     },
@@ -68,8 +69,9 @@ export async function runAdvertiserWelcomeDrip(): Promise<{
       if (drip?.[row.field]) continue;
 
       if (row.day === 14) {
-        if (!u.proTrialEndsAt) continue;
-        const msLeft = u.proTrialEndsAt.getTime() - Date.now();
+        const ends = u.trialEndsAt ?? u.proTrialEndsAt;
+        if (!ends) continue;
+        const msLeft = new Date(ends).getTime() - Date.now();
         if (msLeft > 4 * MS_DAY || msLeft < 0) continue;
       }
 

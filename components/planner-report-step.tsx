@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import { useTranslations } from "next-intl";
-import { Camera, FileDown, Loader2, Mail, RefreshCw } from "lucide-react";
+import { Camera, FileDown, Loader2, Lock, Mail, RefreshCw } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -14,7 +14,7 @@ import {
   type PlannerMetrics,
 } from "@/lib/planner-logic";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
-import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
+import { formatCpmKrw } from "@/lib/media-price-format";
 import {
   captureElementAsPng,
   defaultPlannerPdfFilename,
@@ -35,7 +35,12 @@ import {
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
-
+import {
+  PlannerNeonCard,
+  PlannerNeonLabel,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
+import { cn } from "@/lib/utils";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 
 function isPdfTimeoutError(e: unknown): boolean {
@@ -87,7 +92,7 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
     return slices.map((s) => ({
       label: props.isKo ? s.labelKo : s.labelEn,
       pct: s.pct,
-      valueMan: s.value,
+      valueWon: s.value,
     }));
   }, [props.portfolio, props.isKo]);
 
@@ -426,18 +431,19 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-8">
       <div className="space-y-2 text-center">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-          [ STEP 6 / REPORT ]
-        </p>
-        <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+        <PlannerNeonLabel>Step 6 / Report</PlannerNeonLabel>
+        <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
           {t("stepReportTitle")}
         </h2>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {t("stepReportDesc")}
-        </p>
+        <p className={plannerNeon.subtext}>{t("stepReportDesc")}</p>
       </div>
 
-      <div className="mx-auto flex w-full justify-center border-2 border-border bg-muted p-4 sm:p-6 lg:p-8">
+      <div
+        className={cn(
+          "mx-auto flex w-full justify-center rounded-2xl border p-4 sm:p-6 lg:p-8",
+          "dark:border-white/10 border-gray-200 dark:bg-white/[0.03] bg-gray-100",
+        )}
+      >
         <PlannerReportPreview
           ref={previewRef}
           isKo={props.isKo}
@@ -481,26 +487,23 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         industryText={props.industryText}
       />
 
-      <div className="border-2 border-border bg-card">
-        <div className="flex flex-col gap-4 border-b-2 border-border p-5 sm:flex-row sm:items-start sm:justify-between">
+      <PlannerNeonCard>
+        <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-              [ PDF DOCUMENT ]
-            </p>
-            <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+            <PlannerNeonLabel>PDF Document</PlannerNeonLabel>
+            <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
               {t("reportPdfDocumentTitle")}
             </h3>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            <p className={cn("mt-1", plannerNeon.subtext)}>
               {t("reportPreviewDesc")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <PlannerPdfDownloadGate
               isKo={props.isKo}
-              userEmail={userEmail}
               onAllowedDownload={downloadPdf}
             >
-              {({ onDownloadClick, checking }) => (
+              {({ onDownloadClick, pdfAllowed, checking }) => (
                 <BtnBlock
                   variant="secondary"
                   size="md"
@@ -509,10 +512,16 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 >
                   {downloading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : !pdfAllowed ? (
+                    <Lock className="h-4 w-4" />
                   ) : (
                     <FileDown className="h-4 w-4" />
                   )}
-                  {t("reportDownloadPdf")}
+                  {!pdfAllowed
+                    ? props.isKo
+                      ? "PDF 보고서 저장 (PRO)"
+                      : "Save PDF (PRO)"
+                    : t("reportDownloadPdf")}
                 </BtnBlock>
               )}
             </PlannerPdfDownloadGate>
@@ -538,7 +547,12 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                   setUserEmail(e.target.value);
                   setEmailSent(false);
                 }}
-                className="h-10 w-full min-w-[14rem] border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:w-56"
+                className={cn(
+                  "h-10 w-full min-w-[14rem] rounded-xl border px-3 text-sm",
+                  "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
+                  "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
+                  "focus:border-violet-400/60 focus:outline-none sm:w-56",
+                )}
               />
               <BtnBlock
                 variant="accent"
@@ -570,22 +584,25 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           </div>
         </div>
         {loading ? (
-          <div className="flex min-h-[8rem] items-center justify-center gap-3 bg-muted py-8 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            {`// `}{t("reportGenerating")}
+          <div
+            className={cn(
+              "flex min-h-[8rem] items-center justify-center gap-3 py-8 text-sm",
+              plannerNeon.subtext,
+            )}
+          >
+            <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
+            {t("reportGenerating")}
           </div>
         ) : error ? (
-          <div className="px-5 py-6">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-              [ ERROR ]
-            </p>
-            <p className="mt-2 font-bold text-foreground">{error}</p>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+          <div className="px-5 py-6 sm:px-6">
+            <PlannerNeonLabel>Error</PlannerNeonLabel>
+            <p className={cn("mt-2 font-bold", plannerNeon.headline)}>{error}</p>
+            <p className={cn("mt-1 text-sm", plannerNeon.subtext)}>
               {t("reportPdfErrorHint")}
             </p>
           </div>
         ) : null}
-      </div>
+      </PlannerNeonCard>
     </div>
   );
 }
@@ -750,20 +767,21 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <div className="border-2 border-border bg-card">
-      <div className="border-b-2 border-border p-5">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-          [ REPORT PREVIEW ]
-        </p>
-        <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+    <PlannerNeonCard>
+      <div className={plannerNeon.cardHeader}>
+        <PlannerNeonLabel>Report Preview</PlannerNeonLabel>
+        <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
           {t("reportPreviewTitle")}
         </h3>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-          {t("reportCompactDesc")}
-        </p>
+        <p className={cn("mt-1", plannerNeon.subtext)}>{t("reportCompactDesc")}</p>
       </div>
-      <div className="space-y-6 p-5">
-        <div className="flex justify-center border-2 border-border bg-muted p-3 sm:p-5">
+      <div className="space-y-6 p-5 sm:p-6">
+        <div
+          className={cn(
+            "flex justify-center rounded-xl border p-3 sm:p-5",
+            "dark:border-white/10 border-gray-200 dark:bg-white/[0.03] bg-gray-100",
+          )}
+        >
           {/* PDF: 보고서 + 효과측정 스냅샷을 한 번에 캡처 */}
           <div ref={compactPreviewRef} className="w-full max-w-[240mm] space-y-6">
             <PlannerReportPreview
@@ -865,7 +883,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                             [ {t("kpiCpm")} ]
                           </p>
                           <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
-                            {formatMediaPriceCompactWon(estCpm, props.isKo ? "ko" : "en")}
+                            {formatCpmKrw(estCpm, props.isKo ? "ko" : "en")}
                           </p>
                           <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
                             {t("kpiCpmHint")}
@@ -983,19 +1001,32 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 border-t-2 border-border pt-6">
-          <BtnBlock
-            variant="accent"
-            size="md"
-            onClick={() => void downloadPdf()}
-            disabled={downloading || capturing}
+          <PlannerPdfDownloadGate
+            isKo={props.isKo}
+            onAllowedDownload={() => void downloadPdf()}
           >
-            {downloading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <FileDown className="h-4 w-4" />
+            {({ onDownloadClick, pdfAllowed, checking }) => (
+              <BtnBlock
+                variant="accent"
+                size="md"
+                onClick={onDownloadClick}
+                disabled={downloading || capturing || checking}
+              >
+                {downloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : !pdfAllowed ? (
+                  <Lock className="h-4 w-4" />
+                ) : (
+                  <FileDown className="h-4 w-4" />
+                )}
+                {!pdfAllowed
+                  ? props.isKo
+                    ? "PDF 보고서 저장 (PRO)"
+                    : "Save PDF (PRO)"
+                  : t("reportDownloadPdf")}
+              </BtnBlock>
             )}
-            {t("reportDownloadPdf")}
-          </BtnBlock>
+          </PlannerPdfDownloadGate>
           <BtnBlock
             variant="secondary"
             size="md"
@@ -1018,7 +1049,12 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                 setUserEmail(e.target.value);
                 setEmailSent(false);
               }}
-              className="h-10 w-full min-w-[12rem] border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:w-52"
+              className={cn(
+                "h-10 w-full min-w-[12rem] rounded-xl border px-3 text-sm sm:w-52",
+                "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
+                "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
+                "focus:border-violet-400/60 focus:outline-none",
+              )}
             />
             <BtnBlock
               variant="secondary"
@@ -1036,6 +1072,6 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           </div>
         </div>
       </div>
-    </div>
+    </PlannerNeonCard>
   );
 }

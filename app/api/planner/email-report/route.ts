@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/constants";
 import { sendEmail, isEmailConfigured } from "@/lib/email/client";
+import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 
 type MediaItem = {
   name: string;
@@ -152,7 +153,7 @@ function buildPlannerReportHtml(data: {
                 ${escapeHtml(m.name)}
               </td>
               <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; text-align: right;">
-                ${typeof m.price === "number" ? numToLocaleString(m.price) + "만원" : "-"}
+                ${typeof m.price === "number" ? numToLocaleString(Math.round(catalogPriceFieldToPriceMan(m.price))) + "만원" : "-"}
               </td>
               <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0;">
                 ${escapeHtml(m.location ?? "")}

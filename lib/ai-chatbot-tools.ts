@@ -9,6 +9,7 @@ import {
   matchesPlannerCategory,
   type PlannerCategory,
 } from "@/lib/planner-logic";
+import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 
 /** JSON Schema object for tool `parameters` (OpenAI / xAI 호환) */
 export type AiChatbotToolInputSchema = {
@@ -42,7 +43,7 @@ function compact(m: MediaItem): AiChatbotMediaCard {
     name: m.name,
     nameEn: m.nameEn,
     location: m.location,
-    price: m.price,
+    price: catalogPriceFieldToPriceMan(m.price),
     pricePeriod: m.pricePeriod,
     type: m.type,
     region: m.region,
@@ -204,8 +205,13 @@ export function executeChatbotTool(
         : 0;
     const lo = Number.isFinite(minPrice) && minPrice >= 0 ? minPrice : 0;
     const limit = clampLimit(input.limit, 15, 25);
-    const matched = catalog.filter((m) => m.price >= lo && m.price <= maxPrice);
-    const sorted = [...matched].sort((a, b) => a.price - b.price);
+    const matched = catalog.filter((m) => {
+      const p = catalogPriceFieldToPriceMan(m.price);
+      return p >= lo && p <= maxPrice;
+    });
+    const sorted = [...matched].sort(
+      (a, b) => catalogPriceFieldToPriceMan(a.price) - catalogPriceFieldToPriceMan(b.price),
+    );
     const items = sorted.slice(0, limit).map(compact);
     return {
       result: {
@@ -261,7 +267,9 @@ export function executeChatbotTool(
       pool = pool.filter((m) => m.type === typeFilter);
     }
     if (maxPrice != null && Number.isFinite(maxPrice) && maxPrice >= 0) {
-      pool = pool.filter((m) => m.price <= maxPrice);
+      pool = pool.filter(
+        (m) => catalogPriceFieldToPriceMan(m.price) <= maxPrice,
+      );
     }
     if (lowerKw) {
       pool = pool.filter((m) => matchesSearchQuery(m, lowerKw));
@@ -269,14 +277,19 @@ export function executeChatbotTool(
 
     const scored = pool.map((m) => {
       let s = 0;
-      if (maxPrice != null && Number.isFinite(maxPrice) && m.price <= maxPrice) {
+      const priceMan = catalogPriceFieldToPriceMan(m.price);
+      if (maxPrice != null && Number.isFinite(maxPrice) && priceMan <= maxPrice) {
         s += 2;
       }
       if (lowerKw && matchesMediaTextQuery(m, lowerKw)) s += 3;
       s += Math.min(2, m.dailyFootTraffic / 200_000);
       return { m, s };
     });
-    scored.sort((a, b) => b.s - a.s || a.m.price - b.m.price);
+    scored.sort(
+      (a, b) =>
+        b.s - a.s ||
+        catalogPriceFieldToPriceMan(a.m.price) - catalogPriceFieldToPriceMan(b.m.price),
+    );
     const items = scored.slice(0, limit).map(({ m }) => compact(m));
     return {
       result: {

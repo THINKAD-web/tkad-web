@@ -20,6 +20,7 @@ import {
 } from "@/lib/api-response";
 import { touchVisitorJourney } from "@/lib/visitor-journey";
 import { ensureMediaOwnerProfile } from "@/lib/media-owner-incentives";
+import { buildTrialGrantData } from "@/lib/check-plan";
 
 export const runtime = "nodejs";
 
@@ -86,6 +87,7 @@ export async function POST(req: Request) {
 
     const passwordHash = await hashPassword(password);
     const appRole = appRoleForCommunityRole(communityRole);
+    const trial = buildTrialGrantData();
     const user = await prisma.user.create({
       data: {
         email,
@@ -97,6 +99,7 @@ export async function POST(req: Request) {
         role: appRole,
         communityRole,
         lastLoginAt: new Date(),
+        ...trial,
       },
       select: { id: true, email: true, name: true, role: true },
     });
@@ -140,9 +143,6 @@ export async function POST(req: Request) {
         .create({ data: { userId: user.id } })
         .catch(() => {});
     }
-
-    const { startProTrialIfEligible } = await import("@/lib/report-access");
-    void startProTrialIfEligible(user.id).catch(console.error);
 
     const res = apiOk(user, { status: 201 });
     res.cookies.set(USER_SESSION_COOKIE, token, userSessionCookieOptions());

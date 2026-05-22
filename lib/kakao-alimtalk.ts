@@ -20,6 +20,7 @@ export const ALIMTALK_TEMPLATE_CODES = [
   "TKAD_OWNER_SETTLEMENT_DONE",
   "TKAD_PROOF_PHOTO_UPLOADED",
   "TKAD_MEDIA_APPLICATION_APPROVED",
+  "TKAD_PRO_TRIAL_EXPIRING",
 ] as const;
 
 export type AlimtalkTemplateCode = (typeof ALIMTALK_TEMPLATE_CODES)[number];
@@ -73,6 +74,10 @@ export const ALIMTALK_TEMPLATE_DEFAULTS: Record<
     subject: "매체 승인",
     body: "등록하신 매체「#{mediaName}」이 승인·노출되었습니다.\n#{link}",
   },
+  TKAD_PRO_TRIAL_EXPIRING: {
+    subject: "PRO 체험 만료 예정",
+    body: "#{name}님, PRO 체험이 3일 후 종료됩니다.\n계속 이용하시려면 구독해주세요 → #{link}",
+  },
 };
 
 export const ALIMTALK_TEMPLATE_LABELS: Record<AlimtalkTemplateCode, string> = {
@@ -87,6 +92,7 @@ export const ALIMTALK_TEMPLATE_LABELS: Record<AlimtalkTemplateCode, string> = {
   TKAD_OWNER_SETTLEMENT_DONE: "매체사·정산 완료",
   TKAD_PROOF_PHOTO_UPLOADED: "인증 사진 업로드",
   TKAD_MEDIA_APPLICATION_APPROVED: "매체사·승인 완료",
+  TKAD_PRO_TRIAL_EXPIRING: "PRO 체험 만료 예정",
 };
 
 export type SendAlimtalkParams = {

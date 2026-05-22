@@ -1,9 +1,10 @@
 import type { MediaItem } from "@/lib/media-data";
+import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 
 /**
  * AI 매체 추천 (규칙 기반)
  *
- * 1. 후보 풀: `budgetMaxMan` > 0 이면 `m.price <= cap` 선필터, 지역은 `regionMatchesMedia`.
+ * 1. 후보 풀: `budgetMaxMan` > 0 이면 `catalogPriceFieldToPriceMan(m.price) <= cap` 선필터, 지역은 `regionMatchesMedia`.
  * 2. 점수: `budgetFit*0.4 + targetMatch*0.3 + region*0.2 + visibility*0.1` (각 0–100 근사).
  * 3. 타겟 매칭: `targetAge` 문자열 파싱 후 연령 밴드 겹침 + 상권·업종·캠페인 목표 가중.
  * 4. `score >= MIN_SCORE` 우선, 부족 시 상위 랭킹으로 최소 MIN_RESULTS(5)건 보장, 상위 30건.
@@ -365,7 +366,7 @@ function subscoreBudget(
 ): number {
   if (budgetCap == null || budgetCap <= 0) return 78;
   const cap = budgetCap;
-  const p = Math.max(0, m.price);
+  const p = catalogPriceFieldToPriceMan(m.price);
   if (p <= 0) return 92;
   const ratio = Math.min(1, p / cap);
   return Math.round(45 + 55 * (1 - ratio));
@@ -408,9 +409,10 @@ function scoreOne(
 
   const budgetFit = subscoreBudget(m, budgetCap);
   if (budgetCap != null && budgetCap > 0) {
+    const priceMan = catalogPriceFieldToPriceMan(m.price);
     reasons.push({
-      ko: `월 ${budgetCap.toLocaleString()}만원 이하 조건 충족 (단가 ${m.price.toLocaleString()}만원/월)`,
-      en: `Price ${m.price.toLocaleString()} ≤ cap ${budgetCap.toLocaleString()} (₩10K units / mo)`,
+      ko: `월 ${budgetCap.toLocaleString()}만원 이하 조건 충족 (단가 ${priceMan.toLocaleString()}만원/월)`,
+      en: `Price ${priceMan.toLocaleString()} ≤ cap ${budgetCap.toLocaleString()} (₩10K units / mo)`,
     });
   } else {
     reasons.push({
@@ -514,7 +516,9 @@ function buildRecommendPool(
   const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
   let pool = [...valid];
   if (budgetCap != null && !opts.skipBudget) {
-    pool = pool.filter((m) => m.price <= budgetCap);
+    pool = pool.filter(
+      (m) => catalogPriceFieldToPriceMan(m.price) <= budgetCap,
+    );
   }
   if (input.region !== "all") {
     pool = pool.filter((m) => regionMatchesMedia(m, input.region));

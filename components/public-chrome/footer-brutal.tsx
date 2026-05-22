@@ -1,118 +1,295 @@
 "use client";
 
 /**
- * FooterBrutal — 공개 네비 IA(`PUBLIC_NAV_GROUPS`)와 동기화된 4컬럼 푸터.
- * 브랜드 | 발견·기획 | 크리에이티브·인사이트 | 연락처
+ * FooterBrutal — 간소화된 3컬럼 푸터 + 사이트맵 풀스크린 모달.
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { BrutalFooter, type BrutalFooterColumn } from "@/components/brutalist";
+import { Link } from "@/i18n/navigation";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { CONTACT_EMAIL } from "@/lib/constants";
-import {
-  buildPublicNavGroups,
-  type ResolvedPublicNavGroup,
-  type ResolvedPublicNavItem,
-} from "@/lib/navigation/build-public-nav";
-import type { PublicNavGroupId } from "@/lib/navigation/public-nav-data";
-import { INDUSTRY_SLUGS } from "@/lib/industry-landing";
+import { buildPublicNavGroups } from "@/lib/navigation/build-public-nav";
+import { buildSitemapSections } from "@/lib/navigation/sitemap-sections";
+import { SitemapModal } from "@/components/public-chrome/sitemap-modal";
 
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
-function footerItemLabel(item: ResolvedPublicNavItem): string {
-  return item.label;
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
 }
 
-function mergeNavGroups(
-  groups: ResolvedPublicNavGroup[],
-  title: string,
-  extraItems: BrutalFooterColumn["items"] = [],
-): BrutalFooterColumn {
-  return {
-    title,
-    items: [
-      ...groups.flatMap((g) =>
-        g.items.map((item) => ({
-          href: item.href,
-          label: footerItemLabel(item),
-        })),
-      ),
-      ...extraItems,
-    ],
-  };
+function KakaoIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden
+    >
+      <path d="M12 3C6.477 3 2 6.463 2 10.714c0 2.742 1.816 5.145 4.545 6.553-.188.688-.682 2.493-.782 2.867-.122.455.168.449.354.327.146-.095 2.307-1.563 3.242-2.2.512.074 1.04.113 1.579.113 5.523 0 10-3.463 10-7.714C21 6.463 16.523 3 12 3z" />
+    </svg>
+  );
 }
 
-function pickGroup(
-  groups: ResolvedPublicNavGroup[],
-  id: PublicNavGroupId,
-): ResolvedPublicNavGroup {
-  const g = groups.find((x) => x.id === id);
-  if (!g) throw new Error(`Missing nav group: ${id}`);
-  return g;
-}
+const coreLinkClass =
+  "text-sm font-medium text-gray-600 transition hover:text-gray-900 dark:text-white/70 dark:hover:text-white";
+
+const legalLinkClass =
+  "text-xs text-gray-500 transition hover:text-gray-700 dark:text-white/50 dark:hover:text-white/80";
+
+const iconLinkClass =
+  "inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-gray-300 hover:text-gray-900 dark:border-white/15 dark:text-white/60 dark:hover:border-white/25 dark:hover:text-white";
 
 export function FooterBrutal() {
   const t = useTranslations();
+  const [sitemapOpen, setSitemapOpen] = useState(false);
+  const year = new Date().getFullYear();
+
   const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
 
-  const columns = useMemo((): BrutalFooterColumn[] => {
-    const discovery = pickGroup(navGroups, "discovery");
-    const planning = pickGroup(navGroups, "planning");
-    const creative = pickGroup(navGroups, "creative");
-    const insights = pickGroup(navGroups, "insights");
-    const academy = pickGroup(navGroups, "academy");
-
-    const industryGuide: BrutalFooterColumn = {
-      title: t("footer.industryGuide"),
-      items: INDUSTRY_SLUGS.map((slug) => ({
-        href: `/industry/${slug}`,
-        label: t(`industryPage.common.industryLabels.${slug}`),
-      })),
+  const sitemapSections = useMemo(() => {
+    const byId = (id: (typeof navGroups)[number]["id"]) => {
+      const group = navGroups.find((g) => g.id === id);
+      if (!group) throw new Error(`Missing nav group: ${id}`);
+      return group;
     };
 
-    return [
-      mergeNavGroups([discovery, planning], t("footer.discoveryPlanning")),
-      industryGuide,
-      mergeNavGroups([creative, insights, academy], t("footer.creativeInsights"), [
-        { href: "/register/media", label: t("footer.mediaPartnerRegister") },
-      ]),
-    ];
+    return buildSitemapSections({
+      discovery: byId("discovery"),
+      planning: byId("planning"),
+      creative: byId("creative"),
+      insights: byId("insights"),
+      academy: byId("academy"),
+      industryGuideLabel: t("footer.industryGuide"),
+      webinarLabel: t("footer.sitemapWebinar"),
+      companyTitle: t("footer.sitemapCompany"),
+      servicesLabel: t("footer.servicesIntro"),
+      mediaRegisterLabel: t("footer.mediaPartnerRegister"),
+      contactLabel: t("nav.contact"),
+    });
   }, [navGroups, t]);
 
-  const contactInfo: BrutalFooterColumn = {
-    title: t("footer.contactInfo"),
-    items: [
-      { href: "/privacy", label: t("footer.privacy") },
-      { href: "/terms", label: t("footer.terms") },
-      { href: "/refund", label: t("footer.refund") },
-      { label: t("footer.address") },
-      { label: t("footer.phone") },
-      { label: CONTACT_EMAIL },
-      {
-        href: KAKAO_CHANNEL_PUBLIC_URL,
-        label: t("footer.kakaoChannel"),
-        external: true,
-      },
-      {
-        href: INSTAGRAM_URL,
-        label: "Instagram · @thinkad_korea",
-        external: true,
-      },
-    ],
-  };
+  const coreLinks = [
+    { href: "/media", label: t("footer.coreMediaSearch") },
+    { href: "/planner", label: t("footer.corePlanner") },
+    { href: "/media/packages", label: t("footer.corePackages") },
+    { href: "/contact", label: t("footer.coreContact") },
+  ] as const;
+
+  const mobileCoreLinks = coreLinks.filter(
+    (link) => link.href === "/media" || link.href === "/contact",
+  );
+
+  const legalLinks = [
+    { href: "/privacy", label: t("footer.privacy") },
+    { href: "/terms", label: t("footer.terms") },
+    { href: "/refund", label: t("footer.refund") },
+  ] as const;
 
   return (
-    <BrutalFooter
-      description={t("footer.description")}
-      brandMeta={
-        <>
-          <p>{t("footer.companyName")}</p>
-          <p>{t("footer.bizNumber")}</p>
-        </>
-      }
-      columns={[...columns, contactInfo]}
-      copyright={t("footer.copyright", { year: new Date().getFullYear() })}
-    />
+    <>
+      <footer
+        id="site-footer"
+        className="tkad-site-footer relative shrink-0 overflow-hidden border-t border-gray-200 bg-gray-50 text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0 hidden dark:block tkad-neon-depth"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 hidden opacity-15 dark:block tkad-neon-grid"
+        />
+
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          {/* Desktop */}
+          <div className="hidden md:grid md:grid-cols-3 md:items-start md:gap-10">
+            <div>
+              <Link
+                href="/"
+                className="inline-block font-mono text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+              >
+                THINK
+                <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
+                  AD
+                </span>
+              </Link>
+              <p className="mt-3 text-sm font-medium text-gray-800 dark:text-white/90">
+                {t("footer.description")}
+              </p>
+              <div className="mt-3 space-y-1 font-mono text-[11px] text-gray-500 dark:text-white/50">
+                <p>{t("footer.companyNameShort")}</p>
+                <p>{t("footer.bizNumber")}</p>
+              </div>
+            </div>
+
+            <nav
+              aria-label={t("footer.coreNavLabel")}
+              className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 text-center"
+            >
+              {coreLinks.map((link, index) => (
+                <span key={link.href} className="inline-flex items-center">
+                  {index > 0 ? (
+                    <span
+                      className="mx-2 text-gray-300 dark:text-white/20"
+                      aria-hidden
+                    >
+                      ·
+                    </span>
+                  ) : null}
+                  <Link href={link.href} className={coreLinkClass}>
+                    {link.label}
+                  </Link>
+                </span>
+              ))}
+            </nav>
+
+            <div className="text-right">
+              <ul className="space-y-1.5 text-sm text-gray-600 dark:text-white/70">
+                <li>
+                  <a
+                    href={`tel:${t("footer.phone").replace(/-/g, "")}`}
+                    className="transition hover:text-gray-900 dark:hover:text-white"
+                  >
+                    {t("footer.phone")}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="transition hover:text-gray-900 dark:hover:text-white"
+                  >
+                    {CONTACT_EMAIL}
+                  </a>
+                </li>
+              </ul>
+              <div className="mt-4 flex justify-end gap-2">
+                <a
+                  href={KAKAO_CHANNEL_PUBLIC_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={iconLinkClass}
+                  aria-label={t("footer.kakaoChannel")}
+                >
+                  <KakaoIcon className="h-4 w-4" />
+                </a>
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={iconLinkClass}
+                  aria-label="Instagram"
+                >
+                  <InstagramIcon className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile */}
+          <div className="space-y-5 md:hidden">
+            <div>
+              <Link
+                href="/"
+                className="inline-block font-mono text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+              >
+                THINK
+                <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
+                  AD
+                </span>
+              </Link>
+              <p className="mt-2 text-sm text-gray-700 dark:text-white/80">
+                {t("footer.description")}
+              </p>
+            </div>
+
+            <div className="space-y-1 text-sm text-gray-600 dark:text-white/70">
+              <p>
+                <a
+                  href={`tel:${t("footer.phone").replace(/-/g, "")}`}
+                  className="transition hover:text-gray-900 dark:hover:text-white"
+                >
+                  {t("footer.phone")}
+                </a>
+              </p>
+              <p>
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="transition hover:text-gray-900 dark:hover:text-white"
+                >
+                  {CONTACT_EMAIL}
+                </a>
+              </p>
+            </div>
+
+            <nav
+              aria-label={t("footer.coreNavLabel")}
+              className="flex flex-wrap gap-2"
+            >
+              {mobileCoreLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 dark:border-white/15 dark:text-white/80 dark:hover:border-white/25 dark:hover:text-white"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+        <div className="relative border-t border-gray-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-gray-800 dark:bg-black/40 sm:px-6">
+          <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+            <span className="text-xs text-gray-500 dark:text-white/50">
+              {t("footer.copyrightShort", { year })}
+            </span>
+            <span className="hidden text-gray-300 dark:text-white/20 sm:inline" aria-hidden>
+              ·
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              {legalLinks.map((link) => (
+                <Link key={link.href} href={link.href} className={legalLinkClass}>
+                  {link.label}
+                </Link>
+              ))}
+              <button
+                type="button"
+                onClick={() => setSitemapOpen(true)}
+                className="rounded-lg border border-gray-200 px-3 py-1 text-xs text-gray-400 transition hover:text-gray-700 dark:border-white/10 dark:text-white/40 dark:hover:text-white"
+              >
+                ⊞ {t("footer.sitemap")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <SitemapModal
+        open={sitemapOpen}
+        onClose={() => setSitemapOpen(false)}
+        sections={sitemapSections}
+        closeLabel={t("footer.sitemapClose")}
+        dialogLabel={t("footer.sitemap")}
+      />
+    </>
   );
 }

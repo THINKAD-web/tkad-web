@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { EmailVerificationBanner } from "@/components/auth/email-verification-banner";
+import { ProTrialBanner, type ProTrialStatus } from "@/components/my/pro-trial-banner";
 import { TeamManagementSection } from "@/components/my/team-management-section";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MyHubTabs, type MyHubTab } from "@/components/my/my-hub-tabs";
@@ -52,6 +53,11 @@ type Me = {
   name: string;
   role: string;
   needsEmailVerification?: boolean;
+  plan?: string;
+  trialStartedAt?: string | null;
+  trialEndsAt?: string | null;
+  trialDaysLeft?: number;
+  trialProgressPct?: number;
 };
 
 type CampaignItem = {
@@ -366,6 +372,19 @@ export function MyHubPageClient() {
         <section className="py-8 sm:py-12 lg:py-14">
           <div className="relative mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:space-y-10 lg:px-8">
           {me.needsEmailVerification && <EmailVerificationBanner />}
+
+          {me.plan === "PRO_TRIAL" && (me.trialDaysLeft ?? 0) > 0 && (
+            <ProTrialBanner
+              trial={{
+                plan: me.plan,
+                trialStartedAt: me.trialStartedAt ?? null,
+                trialEndsAt: me.trialEndsAt ?? null,
+                daysLeft: me.trialDaysLeft ?? 0,
+                progressPct: me.trialProgressPct ?? 0,
+              }}
+              isKo={isKo}
+            />
+          )}
 
           <MyHubTabs
             tabs={tabDefs}

@@ -34,6 +34,10 @@ import {
   formatCatalogPriceFieldWon,
   formatCatalogPricesSumWon,
 } from "@/lib/media-price-format";
+import {
+  PlannerNeonLabel,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
 
 const BASKET_DROP_ID = "basket-drop";
 
@@ -73,10 +77,10 @@ function DraggableCatalogRow({
     <li ref={setNodeRef} style={style} className={cn(isDragging && "opacity-40")}>
       <div
         className={cn(
-          "flex cursor-grab items-start gap-2 border-2 bg-card p-3 text-left transition-colors active:cursor-grabbing",
+          "flex cursor-grab items-start gap-2 rounded-xl border p-3 text-left transition-colors active:cursor-grabbing",
           inBasket
-            ? "border-primary bg-muted"
-            : "border-border hover:bg-muted",
+            ? "border-violet-400/50 dark:bg-violet-500/10 bg-violet-50"
+            : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white hover:border-violet-300/40",
         )}
       >
         <button
@@ -109,10 +113,10 @@ function DraggableCatalogRow({
           disabled={inBasket}
           aria-label={t("addToCampaign")}
           className={cn(
-            "inline-flex h-9 w-9 shrink-0 items-center justify-center border-2 transition-colors disabled:opacity-50",
+            "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-opacity disabled:opacity-50",
             inBasket
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-border bg-card text-foreground hover:bg-foreground hover:text-background",
+              ? "bg-gradient-to-r from-violet-500 to-cyan-400 text-white"
+              : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white hover:opacity-90",
           )}
         >
           <Plus className="h-4 w-4" />
@@ -151,7 +155,7 @@ function SortableBasketRow({
 
   return (
     <li ref={setNodeRef} style={style}>
-      <div className="flex items-start gap-2 border-2 border-border bg-card p-3">
+      <div className="flex items-start gap-2 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-3">
         <button
           type="button"
           className="mt-0.5 touch-none text-muted-foreground hover:text-foreground"
@@ -173,7 +177,7 @@ function SortableBasketRow({
           type="button"
           onClick={onRemove}
           aria-label={t("removeFromCampaign")}
-          className="inline-flex h-8 w-8 shrink-0 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-primary hover:text-primary-foreground hover:border-primary"
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border dark:border-white/10 border-gray-200 text-foreground transition-colors hover:border-pink-400/50 hover:bg-pink-500/10 hover:text-pink-400"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -306,17 +310,13 @@ export default function PlannerMediaSelector({
       onDragCancel={onDragCancel}
     >
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] xl:grid-cols-[minmax(0,1.1fr)_minmax(0,24rem)]">
-        <div className="border-2 border-border bg-card">
-          <div className="border-b-2 border-border p-5">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-              [ MEDIA LIST ]
-            </p>
-            <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+        <div className={cn(plannerNeon.card, "overflow-hidden")}>
+          <div className={plannerNeon.cardHeader}>
+            <PlannerNeonLabel>Media List</PlannerNeonLabel>
+            <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
               {t("mediaListTitle")}
             </h3>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-              {t("mediaListDesc")}
-            </p>
+            <p className={cn("mt-1", plannerNeon.subtext)}>{t("mediaListDesc")}</p>
             <div className="relative mt-3">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -325,18 +325,29 @@ export default function PlannerMediaSelector({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t("mediaSearchPlaceholder")}
                 aria-label={t("mediaSearchPlaceholder")}
-                className="h-10 w-full border-2 border-border bg-card pl-9 pr-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                className={cn(
+                  "h-10 w-full rounded-xl border pl-9 pr-3 text-sm",
+                  "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
+                  "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
+                  "focus:border-violet-400/60 focus:outline-none",
+                )}
               />
             </div>
           </div>
-          <div className="p-4">
+          <div className="p-4 sm:p-5">
             <ul
               className="max-h-[min(52vh,28rem)] space-y-2 overflow-y-auto pr-1"
               role="list"
             >
               {listFiltered.length === 0 ? (
-                <li className="border-2 border-border bg-muted py-10 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {`// `}{t("mediaListEmpty")}
+                <li
+                  className={cn(
+                    "rounded-xl border py-10 text-center text-sm",
+                    "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50",
+                    plannerNeon.subtext,
+                  )}
+                >
+                  {t("mediaListEmpty")}
                 </li>
               ) : (
                 listFiltered.map((m) => (
@@ -352,66 +363,57 @@ export default function PlannerMediaSelector({
                 ))
               )}
             </ul>
-            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              {`// `}{t("dragHint")}
-            </p>
+            <p className={cn("mt-3 text-xs", plannerNeon.subtext)}>{t("dragHint")}</p>
           </div>
         </div>
 
         <div
           className={cn(
-            "-ml-[2px] border-2 border-border bg-card transition-colors lg:mt-0",
-            isOver && "border-primary bg-muted",
+            plannerNeon.card,
+            "transition-colors lg:mt-0",
+            isOver && "border-violet-400/50 dark:bg-violet-500/10",
           )}
         >
-          <div className="border-b-2 border-border p-5">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-              [ CAMPAIGN BASKET ]
-            </p>
+          <div className={plannerNeon.cardHeader}>
+            <PlannerNeonLabel>Campaign Basket</PlannerNeonLabel>
             <div className="mt-2 flex items-start justify-between gap-3">
-              <h3 className="text-lg font-bold tracking-tight text-foreground">
+              <h3 className={cn("text-lg", plannerNeon.headline)}>
                 {t("campaignPanelTitle")}
               </h3>
               <span className="text-right">
-                <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                <span className={cn("block text-xs", plannerNeon.kpiLabel)}>
                   {t("campaignMonthlyTotalLabel")}
                 </span>
-                <span className="block font-mono text-base font-bold tabular-nums text-foreground">
+                <span className={cn("block text-base tabular-nums", plannerNeon.kpiValue)}>
                   {formatCatalogPricesSumWon(
                     basketItems.map((item) => item.price || 0),
                     isKo ? "ko" : "en",
                   )}
-                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
+                  <span className={cn("ml-1 text-[10px] font-normal", plannerNeon.kpiLabel)}>
                     /{isKo ? "월" : "mo"}
                   </span>
                 </span>
               </span>
             </div>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-              {t("campaignPanelDesc")}
-            </p>
+            <p className={cn("mt-1", plannerNeon.subtext)}>{t("campaignPanelDesc")}</p>
           </div>
-          <div className="p-4">
+          <div className="p-4 sm:p-5">
             <div
               ref={setDropRef}
               className={cn(
-                "min-h-[min(52vh,28rem)] border-2 p-3 transition-colors",
+                "min-h-[min(52vh,28rem)] rounded-xl border p-3 transition-colors",
                 isOver
-                  ? "border-primary bg-muted"
-                  : "border-border bg-muted",
+                  ? "border-violet-400/50 dark:bg-violet-500/10 bg-violet-50"
+                  : "dark:border-white/10 border-gray-200 dark:bg-white/[0.02] bg-gray-50",
               )}
             >
               {basketItems.length === 0 ? (
                 <div className="flex h-full min-h-[12rem] flex-col items-center justify-center gap-2 px-4 text-center">
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ EMPTY ]
-                  </p>
-                  <p className="text-sm font-bold tracking-tight text-foreground">
+                  <PlannerNeonLabel>Empty</PlannerNeonLabel>
+                  <p className={cn("text-sm font-bold", plannerNeon.headline)}>
                     {t("emptyCampaign")}
                   </p>
-                  <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
-                    {`// `}{t("dropHint")}
-                  </p>
+                  <p className={cn("text-xs", plannerNeon.subtext)}>{t("dropHint")}</p>
                 </div>
               ) : (
                 <SortableContext

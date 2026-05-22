@@ -13,14 +13,18 @@ import {
   selectBudgetNum,
   usePlannerStore,
 } from "@/lib/planner/store";
-import { BtnBlock } from "@/components/brutalist";
+import {
+  PlannerNeonCard,
+  PlannerNeonLabel,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
 import {
   estimatedCpmWon,
   estimatedMonthlyImpressions,
 } from "@/lib/ai-recommend-metrics";
 import { normalizeVisibilityScore } from "@/lib/planner-logic";
-import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
+import { formatCpmKrw } from "@/lib/media-price-format";
 
 const REASON_COLORS: Record<RecommendReasonKey, string> = {
   matchRegion: "border-border bg-card text-foreground",
@@ -138,69 +142,77 @@ export function PlannerRecommendationPanel({
   };
 
   return (
-    <div className="border-2 border-primary bg-card">
-      <div className="flex flex-col gap-3 border-b-2 border-border p-5 sm:flex-row sm:items-start sm:justify-between">
+    <PlannerNeonCard className="border-violet-400/20">
+      <div className="flex flex-col gap-3 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
         <div className="space-y-1">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            {t("recommendEyebrow")}
-          </p>
-          <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
-            <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+          <PlannerNeonLabel>{t("recommendEyebrow")}</PlannerNeonLabel>
+          <h3
+            className={cn(
+              "flex items-center gap-2 text-lg",
+              plannerNeon.headline,
+            )}
+          >
+            <Sparkles className="h-5 w-5 text-violet-400" aria-hidden />
             {t("recommendHeading")}
           </h3>
-          <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
-            {t("recommendDesc")}
-          </p>
+          <p className={plannerNeon.subtext}>{t("recommendDesc")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <BtnBlock
-            variant="secondary"
-            size="sm"
+          <button
+            type="button"
             onClick={() => setRefreshTick((n) => n + 1)}
             disabled={loading}
+            className={cn(
+              plannerNeon.selectChip,
+              plannerNeon.selectChipIdle,
+              "px-4 py-2 disabled:opacity-50",
+            )}
           >
             <RefreshCw
-              className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              className={cn("mr-1.5 inline h-3.5 w-3.5", loading && "animate-spin")}
               aria-hidden
             />
             {t("recommendRefresh")}
-          </BtnBlock>
-          <BtnBlock
-            variant="accent"
-            size="sm"
+          </button>
+          <button
+            type="button"
             onClick={handleAddAll}
             disabled={loading || recommendations.length === 0}
+            className={cn(plannerNeon.ctaSm, "disabled:opacity-50")}
           >
             {t("recommendAddAll")}
-          </BtnBlock>
+          </button>
         </div>
       </div>
-      <div className="p-5">
+      <div className="p-5 sm:p-6">
         {loading ? (
           <div
-            className="flex items-center justify-center gap-3 py-10 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground"
+            className={cn(
+              "flex items-center justify-center gap-3 py-10 text-sm",
+              plannerNeon.subtext,
+            )}
             role="status"
             aria-live="polite"
           >
-            <span className="inline-block h-4 w-4 animate-spin border-2 border-primary border-t-transparent" />
-            {`// `}{t("recommendLoading")}
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+            {t("recommendLoading")}
           </div>
         ) : recommendations.length === 0 ? (
-          <p className="py-10 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
-            {`// `}{t("recommendEmpty")}
+          <p className={cn("py-10 text-center text-sm", plannerNeon.subtext)}>
+            {t("recommendEmpty")}
           </p>
         ) : (
-          <ul className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {recommendations.map(({ media, reasons }) => {
               const selected = isSelected(media.id);
               return (
                 <li
                   key={media.id}
                   className={cn(
-                    "-mt-[2px] -ml-[2px] flex flex-col gap-2 border-2 p-4 transition-colors",
+                    "flex flex-col gap-2 rounded-xl border p-4 transition-colors",
                     selected
-                      ? "border-primary bg-muted"
-                      : "border-border bg-card hover:bg-muted",
+                      ? "border-violet-400/50 dark:bg-violet-500/10 bg-violet-50"
+                      : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white hover:border-violet-300/40",
                   )}
                 >
                   <div className="min-w-0">
@@ -237,7 +249,7 @@ export function PlannerRecommendationPanel({
                     }
                     if (cpm != null && cpm > 0) {
                       items.push(
-                        `CPM ${formatMediaPriceCompactWon(Math.round(cpm), isKo ? "ko" : "en")}`,
+                        `CPM ${formatCpmKrw(Math.round(cpm), isKo ? "ko" : "en")}`,
                       );
                     }
                     if (items.length === 0) return null;
@@ -270,11 +282,15 @@ export function PlannerRecommendationPanel({
                       ))}
                     </div>
                   ) : null}
-                  <BtnBlock
-                    variant={selected ? "secondary" : "accent"}
-                    size="sm"
+                  <button
+                    type="button"
                     onClick={() => handleToggle(media.id)}
-                    className="mt-auto"
+                    className={cn(
+                      "mt-auto w-full",
+                      selected
+                        ? cn(plannerNeon.selectChip, plannerNeon.selectChipActive, "py-2")
+                        : plannerNeon.ctaSm,
+                    )}
                   >
                     {selected ? (
                       <>
@@ -287,13 +303,13 @@ export function PlannerRecommendationPanel({
                         {t("recommendAdd")}
                       </>
                     )}
-                  </BtnBlock>
+                  </button>
                 </li>
               );
             })}
           </ul>
         )}
       </div>
-    </div>
+    </PlannerNeonCard>
   );
 }

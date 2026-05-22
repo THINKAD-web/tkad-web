@@ -69,7 +69,7 @@ export default function HomeOnboardingTour() {
 
   return (
     <div
-      className="fixed bottom-24 right-4 z-[48] w-[min(100vw-2rem,320px)] md:bottom-8 md:right-8"
+      className="fixed bottom-20 left-1/2 z-[45] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 md:bottom-8 md:left-auto md:right-8 md:w-[min(100vw-2rem,320px)] md:translate-x-0"
       role="dialog"
       aria-label={isKo ? "첫 방문 안내" : "First visit guide"}
     >

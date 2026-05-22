@@ -784,7 +784,19 @@
         "reserved": "예약 진행 중",
         "maintenance": "점검 중"
       },
-      "quoteStripHint": "관심 가는 매체라면 견적서에 담아보세요"
+      "quoteStripHint": "관심 가는 매체라면 견적서에 담아보세요",
+      "tabs": {
+        "location": "위치 & 상권",
+        "traffic": "유동인구",
+        "calendar": "가용 캘린더",
+        "execution": "집행 정보"
+      },
+      "heroKpiExposure": "월 노출",
+      "heroKpiCpm": "CPM",
+      "heroKpiVisibility": "가시성",
+      "executionProcess": "집행 프로세스",
+      "executionNotices": "주의사항",
+      "overviewAccordion": "매체 상세 설명"
     },
     "reviews": {
       "writeTitle": "매체 리뷰 작성",
@@ -1951,7 +1963,19 @@
     "privacy": "개인정보처리방침",
     "terms": "이용약관",
     "refund": "환불 정책",
-    "industryGuide": "업종별 가이드"
+    "industryGuide": "업종별 가이드",
+    "sitemap": "사이트맵",
+    "sitemapClose": "사이트맵 닫기",
+    "sitemapCompany": "회사",
+    "sitemapWebinar": "웨비나",
+    "servicesIntro": "서비스 소개",
+    "coreNavLabel": "주요 메뉴",
+    "coreMediaSearch": "매체 검색",
+    "corePlanner": "AI 플래너",
+    "corePackages": "패키지",
+    "coreContact": "문의하기",
+    "companyNameShort": "주식회사 싱커드",
+    "copyrightShort": "© {year} 주식회사 싱커드"
   },
   "networkMedia": {
     "backToList": "매체 검색",

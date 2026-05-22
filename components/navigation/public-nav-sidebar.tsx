@@ -78,7 +78,7 @@ export function PublicNavSidebar({
                 aria-controls={`nav-panel-${group.id}`}
                 onClick={() => toggle(group.id)}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
+                  "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors md:gap-2.5 md:py-2",
                   "hover:bg-gray-100 dark:hover:bg-white/8",
                   groupActive && "bg-gray-100 dark:bg-white/10",
                   expanded && "bg-gray-50 dark:bg-white/6",
@@ -86,16 +86,16 @@ export function PublicNavSidebar({
               >
                 <span
                   className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors",
+                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition-colors md:h-8 md:w-8",
                     groupActive
                       ? "border-violet-500/35 bg-gradient-to-br from-violet-500/15 to-cyan-400/10 text-violet-700 dark:border-violet-400/35 dark:text-violet-200"
                       : "border-gray-200 bg-white text-gray-600 dark:border-white/12 dark:bg-white/5 dark:text-white/60",
                   )}
                 >
-                  <Icon className="h-4 w-4" aria-hidden />
+                  <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold tracking-tight text-gray-900 dark:text-white">
+                  <span className="block text-xs font-semibold tracking-tight text-gray-900 md:text-sm dark:text-white">
                     {group.label}
                   </span>
                   <span className="mt-0.5 block font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-white/40">
@@ -104,7 +104,7 @@ export function PublicNavSidebar({
                 </span>
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 shrink-0 text-gray-500 transition-transform dark:text-white/50",
+                    "h-3.5 w-3.5 shrink-0 text-gray-500 transition-transform md:h-4 md:w-4 dark:text-white/50",
                     expanded && "rotate-180",
                   )}
                   aria-hidden
@@ -131,7 +131,7 @@ export function PublicNavSidebar({
                             href={item.href}
                             onClick={onNavigate}
                             className={cn(
-                              "group/item flex items-start gap-2 rounded-md px-2.5 py-1.5 transition-colors",
+                              "group/item flex items-start gap-2 rounded-md px-2.5 py-1 transition-colors md:py-1.5",
                               active
                                 ? "bg-gray-100 text-gray-900 ring-1 ring-violet-500/20 dark:bg-white/10 dark:text-white dark:ring-violet-400/25"
                                 : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-white/70 dark:hover:bg-white/6 dark:hover:text-white",
@@ -139,7 +139,7 @@ export function PublicNavSidebar({
                           >
                             <ItemIcon
                               className={cn(
-                                "mt-0.5 h-4 w-4 shrink-0",
+                                "mt-0.5 h-3.5 w-3.5 shrink-0 md:h-4 md:w-4",
                                 active
                                   ? "text-violet-600 dark:text-cyan-300"
                                   : "text-gray-600 group-hover/item:text-gray-900 dark:text-white/60 dark:group-hover/item:text-white",
@@ -148,13 +148,13 @@ export function PublicNavSidebar({
                             />
                             <span className="min-w-0 flex-1">
                               <span className="flex flex-wrap items-center gap-1.5">
-                                <span className="text-xs font-semibold leading-snug">
+                                <span className="text-[11px] font-semibold leading-snug md:text-xs">
                                   {item.label}
                                 </span>
                                 {item.badge ? <NavBetaBadge /> : null}
                               </span>
                               {item.desc ? (
-                                <span className="mt-0.5 block text-[11px] leading-relaxed text-gray-500 dark:text-white/45">
+                                <span className="mt-0.5 block text-[10px] leading-relaxed text-gray-500 md:text-[11px] dark:text-white/45">
                                   {item.desc}
                                 </span>
                               ) : null}

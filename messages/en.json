@@ -783,7 +783,19 @@
         "reserved": "Booking in progress",
         "maintenance": "Maintenance"
       },
-      "quoteStripHint": "Add placements you like to your quote request"
+      "quoteStripHint": "Add placements you like to your quote request",
+      "tabs": {
+        "location": "Location & trade area",
+        "traffic": "Foot traffic",
+        "calendar": "Availability",
+        "execution": "Flight info"
+      },
+      "heroKpiExposure": "Monthly reach",
+      "heroKpiCpm": "CPM",
+      "heroKpiVisibility": "Visibility",
+      "executionProcess": "Booking process",
+      "executionNotices": "Important notes",
+      "overviewAccordion": "Full description"
     },
     "reviews": {
       "writeTitle": "Write a review",
@@ -1951,7 +1963,19 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "refund": "Refund Policy",
-    "industryGuide": "Industry guides"
+    "industryGuide": "Industry guides",
+    "sitemap": "Sitemap",
+    "sitemapClose": "Close sitemap",
+    "sitemapCompany": "Company",
+    "sitemapWebinar": "Webinars",
+    "servicesIntro": "About our services",
+    "coreNavLabel": "Quick links",
+    "coreMediaSearch": "Media search",
+    "corePlanner": "AI Planner",
+    "corePackages": "Packages",
+    "coreContact": "Contact",
+    "companyNameShort": "THINKAD Inc.",
+    "copyrightShort": "© {year} THINKAD Inc."
   },
   "networkMedia": {
     "backToList": "Media search",

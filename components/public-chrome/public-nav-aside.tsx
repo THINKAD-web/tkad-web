@@ -20,7 +20,7 @@ export function PublicNavAside({ className }: Props) {
   return (
     <aside
       className={cn(
-        "tkad-public-nav-aside hidden lg:flex lg:w-[var(--tkad-nav-sidebar-width)] lg:shrink-0 lg:flex-col",
+        "tkad-public-nav-aside hidden lg:flex lg:w-48 lg:shrink-0 lg:flex-col xl:w-56",
         "sticky top-0 z-40 h-[100dvh] border-r border-gray-200 bg-background text-foreground dark:border-white/10 dark:bg-[#05050a] dark:text-white",
         className,
       )}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { useTranslations } from "next-intl";
 import {
   Cell,
   Legend,
@@ -16,22 +15,34 @@ import {
   type BudgetPieSlice,
 } from "@/lib/planner-logic";
 import type { MediaItem } from "@/lib/media-data";
-import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
+import {
+  formatCpmKrw,
+  formatMediaPrice,
+} from "@/lib/media-price-format";
+import { cn } from "@/lib/utils";
+import { useIsPro } from "@/hooks/use-is-pro";
+import {
+  PLANNER_CHART_COLORS,
+  PlannerNeonCard,
+  PlannerNeonLabel,
+  PlannerProGate,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
 
-/**
- * 플래너 결과 화면(Step 6 보고서) — Reach / Frequency / CPM / OTS KPI + 예산 배분 파이.
- *
- * 매체별 Reach·Frequency 는 `computeAdvancedPlannerMetrics()` 의 region-saturation 모형 결과를 사용.
- * Pie 는 recharts (다른 차트들과 일관). 색은 네온 팔레트 보라 / 시안 / 핑크 / 인디고 회전.
- */
-const PIE_COLORS = ["#a855f7", "#22d3ee", "#ec4899", "#7c3aed", "#0ea5e9", "#f43f5e"];
+const PIE_COLORS = [
+  PLANNER_CHART_COLORS.violet,
+  PLANNER_CHART_COLORS.cyan,
+  PLANNER_CHART_COLORS.pink,
+  PLANNER_CHART_COLORS.indigo,
+  "#f43f5e",
+  "#0ea5e9",
+];
 
 type Props = {
   isKo: boolean;
   portfolio: MediaItem[];
   budgetMan: number;
   months: number;
-  /** 단순 노출 합계 (보고서 타 부분과 같은 값) — 중복 카드 표기를 막기 위해 받아옴 */
   totalImpressionsFromMetrics?: number | null;
 };
 
@@ -42,7 +53,7 @@ export function PlannerEffectSimulationPanel({
   months,
   totalImpressionsFromMetrics,
 }: Props) {
-  const t = useTranslations("planner");
+  const { isPro, loading: proLoading } = useIsPro();
 
   const advanced = useMemo(
     () =>
@@ -74,300 +85,237 @@ export function PlannerEffectSimulationPanel({
 
   const heroImpressions =
     totalImpressionsFromMetrics ?? advanced.totalImpressions;
-
-  const tiles = [
-    {
-      key: "reach",
-      label: isKo ? "총 도달 (Reach)" : "Total Reach",
-      value: advanced.uniqueReach.toLocaleString("ko-KR"),
-      hint: isKo
-        ? "지역별 중복 제거 추정 인원"
-        : "Region-saturated unique audience",
-      tone: "primary" as const,
-    },
-    {
-      key: "frequency",
-      label: isKo ? "평균 빈도 (Frequency)" : "Avg Frequency",
-      value: `${advanced.avgFrequency.toFixed(1)}회`,
-      hint: isKo
-        ? "1인당 평균 노출 횟수"
-        : "Average exposures per reached person",
-      tone: "default" as const,
-    },
-    {
-      key: "cpm",
-      label: isKo ? "CPM (1,000회 노출)" : "CPM (per 1,000)",
-      value:
-        advanced.cpmKrw != null
-          ? formatMediaPriceCompactWon(advanced.cpmKrw, "ko-KR")
-          : "—",
-      hint: isKo ? "총 비용 ÷ (총 노출 / 1,000)" : "Budget ÷ (Imp / 1,000)",
-      tone: "default" as const,
-    },
-    {
-      key: "ots",
-      label: isKo ? "OTS (실질 노출 기회)" : "OTS",
-      value: advanced.totalOts.toLocaleString("ko-KR"),
-      hint: isKo
-        ? "가시성 점수 가중 노출 합계"
-        : "Visibility-weighted impressions",
-      tone: "accent" as const,
-    },
-  ];
+  const localeTag = isKo ? "ko-KR" : "en-US";
 
   return (
-    <div className="border-2 border-bx-black bg-bx-white">
-      <div className="border-b-2 border-bx-black p-5">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-          [ {isKo ? "효과 시뮬레이션" : "Effect Simulation"} ]
-        </p>
-        <h3 className="mt-2 text-lg font-bold tracking-tight text-bx-black">
+    <PlannerNeonCard>
+      <div className={plannerNeon.cardHeader}>
+        <PlannerNeonLabel>
+          {isKo ? "효과 시뮬레이션" : "Effect Simulation"}
+        </PlannerNeonLabel>
+        <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
           {isKo
             ? "도달 · 빈도 · CPM · OTS"
             : "Reach · Frequency · CPM · OTS"}
         </h3>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+        <p className={cn("mt-1", plannerNeon.subtext)}>
           {isKo
-            ? `${heroImpressions.toLocaleString("ko-KR")}회 추정 노출 기준의 시뮬레이션입니다. 실제 결과는 매체사 협의·집행 환경에 따라 달라질 수 있습니다.`
-            : `Simulation based on ~${heroImpressions.toLocaleString("en-US")} estimated impressions. Actuals depend on media operator and execution context.`}
+            ? `${heroImpressions.toLocaleString("ko-KR")}회 추정 노출 기준. 실제 결과는 매체·집행 환경에 따라 달라질 수 있습니다.`
+            : `Based on ~${heroImpressions.toLocaleString("en-US")} estimated impressions.`}
         </p>
       </div>
 
-      <div className="space-y-6 p-5">
-        {/* KPI 4 tiles */}
-        <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
-          {tiles.map((tile) => (
-            <div
-              key={tile.key}
-              className={`-mt-[2px] -ml-[2px] border-2 border-bx-black p-4 ${
-                tile.tone === "accent"
-                  ? "bg-bx-black text-bx-white"
-                  : "bg-bx-white"
-              }`}
-            >
-              <p
-                className={`font-mono text-[10px] font-bold uppercase tracking-[0.22em] ${
-                  tile.tone === "accent"
-                    ? "text-bx-accent"
-                    : "text-bx-gray-dim"
-                }`}
-              >
-                [ {tile.label} ]
-              </p>
-              <p
-                className={`mt-2 font-mono text-2xl font-bold tabular-nums ${
-                  tile.tone === "accent"
-                    ? "text-bx-accent"
-                    : tile.tone === "primary"
-                      ? "text-bx-accent"
-                      : "text-bx-black"
-                }`}
-              >
-                {tile.value}
-              </p>
-              <p
-                className={`mt-1 font-mono text-[10px] tracking-tight ${
-                  tile.tone === "accent"
-                    ? "text-bx-white/65"
-                    : "text-bx-gray-dim"
-                }`}
-              >
-                {tile.hint}
-              </p>
-            </div>
-          ))}
+      <div className="space-y-6 p-5 sm:p-6">
+        {/* 기본 KPI — FREE 포함 공개 */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className={plannerNeon.kpiCard}>
+            <p className={plannerNeon.kpiLabel}>
+              {isKo ? "총 노출수" : "Total Impressions"}
+            </p>
+            <p className={cn("mt-1", plannerNeon.kpiValue)}>
+              {heroImpressions.toLocaleString(localeTag)}
+            </p>
+          </div>
+          <div className={plannerNeon.kpiCard}>
+            <p className={plannerNeon.kpiLabel}>
+              {isKo ? "예상 도달 (Reach)" : "Est. Reach"}
+            </p>
+            <p className={cn("mt-1", plannerNeon.kpiValue)}>
+              {advanced.uniqueReach.toLocaleString(localeTag)}
+            </p>
+          </div>
         </div>
 
-        {/* 매체 유형별 예산 배분 — recharts Pie */}
-        {pieData.length > 0 ? (
-          <div className="border-2 border-bx-black bg-bx-white">
-            <div className="border-b-2 border-bx-black p-5">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-                [ {isKo ? "매체 유형별 예산 배분" : "Budget Split by Media Type"} ]
-              </p>
-              <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
-                {isKo
-                  ? "포트폴리오에 포함된 매체의 단가 합계 비중입니다."
-                  : "Share of recommended unit prices by media type."}
-              </p>
-            </div>
-            <div className="grid grid-cols-1 gap-0 lg:grid-cols-[1.3fr,1fr]">
-              <div className="border-r-2 border-bx-black/10 p-3 sm:p-5">
-                <div className="h-[260px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="label"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={56}
-                        outerRadius={100}
-                        paddingAngle={2}
-                        stroke="#0a0a0c"
-                        strokeWidth={2}
-                        isAnimationActive={false}
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell
-                            key={`pie-${entry.key}`}
-                            fill={PIE_COLORS[index % PIE_COLORS.length]}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          fontFamily:
-                            "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                          fontSize: 11,
-                          letterSpacing: "0.04em",
-                          background: "#ffffff",
-                          border: "2px solid #0a0a0c",
-                          borderRadius: 0,
-                        }}
-                        formatter={(value: number, _name: string, item) => {
-                          const pct = (item?.payload as { pct?: number } | undefined)?.pct;
-                          return [
-                            `${value.toLocaleString("ko-KR")}만원${pct != null ? ` (${pct}%)` : ""}`,
-                            "",
-                          ];
-                        }}
-                      />
-                      <Legend
-                        verticalAlign="bottom"
-                        height={32}
-                        iconType="square"
-                        wrapperStyle={{
-                          fontFamily:
-                            "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                          fontSize: 11,
-                          letterSpacing: "0.04em",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+        {/* 상세 시뮬레이션 — PRO / PRO_TRIAL */}
+        {!proLoading ? (
+          <PlannerProGate isPro={isPro} isKo={isKo}>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  {
+                    label: isKo ? "평균 빈도" : "Avg Frequency",
+                    value: `${advanced.avgFrequency.toFixed(1)}${isKo ? "회" : "×"}`,
+                    hint: isKo ? "1인당 평균 노출" : "Exposures per person",
+                  },
+                  {
+                    label: "CPM",
+                    value: formatCpmKrw(advanced.cpmKrw ?? 0, localeTag),
+                    hint: isKo ? "천회당 비용 (원)" : "Cost per 1,000 imp.",
+                  },
+                  {
+                    label: "OTS",
+                    value: advanced.totalOts.toLocaleString(localeTag),
+                    hint: isKo ? "가시성 가중 노출" : "Visibility-weighted",
+                  },
+                  {
+                    label: isKo ? "총 도달" : "Total Reach",
+                    value: advanced.uniqueReach.toLocaleString(localeTag),
+                    hint: isKo ? "중복 제거 추정" : "De-duplicated est.",
+                  },
+                ].map((tile) => (
+                  <div key={tile.label} className={plannerNeon.kpiCard}>
+                    <p className={plannerNeon.kpiLabel}>{tile.label}</p>
+                    <p className={cn("mt-1", plannerNeon.kpiValue)}>{tile.value}</p>
+                    <p className={cn("mt-1", plannerNeon.kpiLabel)}>{tile.hint}</p>
+                  </div>
+                ))}
               </div>
-              <ul className="-ml-[2px] divide-y-2 divide-bx-black/10 border-l-2 border-transparent lg:border-bx-black">
-                {pieData.map((s, i) => (
-                  <li
-                    key={s.key}
-                    className="flex items-center gap-3 px-4 py-3 font-mono text-[11px]"
-                  >
-                    <span
-                      aria-hidden
-                      className="h-3 w-3 shrink-0 border-2 border-bx-black"
-                      style={{
-                        backgroundColor: PIE_COLORS[i % PIE_COLORS.length],
-                      }}
-                    />
-                    <span className="min-w-0 flex-1 text-bx-black">{s.label}</span>
-                    <span className="shrink-0 text-bx-gray-dim">
-                      {s.value.toLocaleString("ko-KR")}만
-                    </span>
-                    <span className="w-12 shrink-0 text-right font-bold tabular-nums text-bx-black">
-                      {s.pct}%
-                    </span>
-                  </li>
-                ))}
-              </ul>
+
+              {pieData.length > 0 ? (
+                <PlannerNeonCard>
+                  <div className={plannerNeon.cardHeader}>
+                    <PlannerNeonLabel>
+                      {isKo ? "예산 배분" : "Budget Split"}
+                    </PlannerNeonLabel>
+                    <p className={cn("mt-1", plannerNeon.subtext)}>
+                      {isKo
+                        ? "포트폴리오 매체 단가(원) 비중"
+                        : "Share of portfolio unit prices (KRW)"}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 p-5 lg:grid-cols-[1.3fr,1fr]">
+                    <div className="h-[260px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={pieData}
+                            dataKey="value"
+                            nameKey="label"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={56}
+                            outerRadius={100}
+                            paddingAngle={2}
+                            stroke="transparent"
+                            isAnimationActive={false}
+                          >
+                            {pieData.map((entry, index) => (
+                              <Cell
+                                key={`pie-${entry.key}`}
+                                fill={PIE_COLORS[index % PIE_COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              fontSize: 12,
+                              borderRadius: 12,
+                              border: "1px solid rgba(255,255,255,0.1)",
+                              background: "rgba(10,10,15,0.92)",
+                              color: "#fff",
+                            }}
+                            formatter={(value: number, _name: string, item) => {
+                              const pct = (item?.payload as { pct?: number })
+                                ?.pct;
+                              return [
+                                `${formatMediaPrice(value, localeTag)}${pct != null ? ` (${pct}%)` : ""}`,
+                                "",
+                              ];
+                            }}
+                          />
+                          <Legend verticalAlign="bottom" height={32} iconType="circle" />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <ul className="divide-y dark:divide-white/10 divide-gray-100">
+                      {pieData.map((s, i) => (
+                        <li
+                          key={s.key}
+                          className="flex items-center gap-3 py-2.5 text-sm"
+                        >
+                          <span
+                            aria-hidden
+                            className="h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{
+                              backgroundColor: PIE_COLORS[i % PIE_COLORS.length],
+                            }}
+                          />
+                          <span className="min-w-0 flex-1 dark:text-white/80 text-gray-700">
+                            {s.label}
+                          </span>
+                          <span className="shrink-0 tabular-nums dark:text-white/50 text-gray-500">
+                            {formatMediaPrice(s.value, localeTag)}
+                          </span>
+                          <span className="w-10 shrink-0 text-right font-semibold tabular-nums dark:text-white text-gray-900">
+                            {s.pct}%
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </PlannerNeonCard>
+              ) : null}
+
+              <PlannerNeonCard>
+                <div className={plannerNeon.cardHeader}>
+                  <PlannerNeonLabel>
+                    {isKo ? "매체별 노출·OTS·CPM" : "Per-Media Metrics"}
+                  </PlannerNeonLabel>
+                </div>
+                <div className="overflow-x-auto p-4 sm:p-5">
+                  <table className="w-full min-w-[36rem] text-left text-sm">
+                    <thead>
+                      <tr className="border-b dark:border-white/10 border-gray-100 dark:text-white/40 text-gray-400">
+                        <th className="px-2 py-2 text-xs uppercase tracking-wider">
+                          {isKo ? "매체" : "Media"}
+                        </th>
+                        <th className="px-2 py-2 text-xs uppercase tracking-wider">
+                          {isKo ? "유형" : "Type"}
+                        </th>
+                        <th className="px-2 py-2 text-right text-xs uppercase tracking-wider">
+                          {isKo ? "총 노출" : "Imp"}
+                        </th>
+                        <th className="px-2 py-2 text-right text-xs uppercase tracking-wider">
+                          OTS
+                        </th>
+                        <th className="px-2 py-2 text-right text-xs uppercase tracking-wider">
+                          CPM
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {advanced.perMedia.map((row) => (
+                        <tr
+                          key={row.id}
+                          className="border-b dark:border-white/5 border-gray-50 dark:text-white/80 text-gray-700"
+                        >
+                          <td className="max-w-[10rem] truncate px-2 py-2 font-medium">
+                            {row.name}
+                          </td>
+                          <td className="px-2 py-2">{row.type}</td>
+                          <td className="px-2 py-2 text-right tabular-nums">
+                            {row.totalImpressions.toLocaleString(localeTag)}
+                          </td>
+                          <td className="px-2 py-2 text-right tabular-nums">
+                            {row.ots.toLocaleString(localeTag)}
+                          </td>
+                          <td className="px-2 py-2 text-right tabular-nums">
+                            {row.cpmKrw != null
+                              ? formatCpmKrw(row.cpmKrw, localeTag)
+                              : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="font-semibold dark:text-white text-gray-900">
+                        <td className="px-2 py-2" colSpan={4}>
+                          {isKo ? "포트폴리오 CPM" : "Portfolio CPM"}
+                        </td>
+                        <td className="px-2 py-2 text-right tabular-nums">
+                          {advanced.cpmKrw != null
+                            ? formatCpmKrw(advanced.cpmKrw, localeTag)
+                            : "—"}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </PlannerNeonCard>
             </div>
-          </div>
+          </PlannerProGate>
         ) : null}
-
-        {/* 매체별 시뮬레이션 표 — 추천 사유의 수치 근거 */}
-        <div className="border-2 border-bx-black bg-bx-white">
-          <div className="border-b-2 border-bx-black p-5">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
-              [ {isKo ? "매체별 노출·OTS·CPM" : "Per-Media Impressions / OTS / CPM"} ]
-            </p>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
-              {isKo
-                ? "AI 추천의 수치 근거 — 일평균 유동인구·가시성·단가를 그대로 반영합니다."
-                : "Numeric grounding for the AI recommendation."}
-            </p>
-          </div>
-          <div className="overflow-x-auto p-3 sm:p-5">
-            <table className="w-full min-w-[36rem] border-collapse text-left text-[12px]">
-              <thead>
-                <tr className="border-b-2 border-bx-black bg-bx-white text-bx-gray-dim">
-                  <th className="px-2 py-2 font-mono text-[10px] uppercase tracking-[0.16em]">
-                    {isKo ? "매체" : "Media"}
-                  </th>
-                  <th className="px-2 py-2 font-mono text-[10px] uppercase tracking-[0.16em]">
-                    {isKo ? "유형" : "Type"}
-                  </th>
-                  <th className="px-2 py-2 text-right font-mono text-[10px] uppercase tracking-[0.16em]">
-                    {isKo ? "총 노출" : "Imp"}
-                  </th>
-                  <th className="px-2 py-2 text-right font-mono text-[10px] uppercase tracking-[0.16em]">
-                    {isKo ? "가시성" : "Visibility"}
-                  </th>
-                  <th className="px-2 py-2 text-right font-mono text-[10px] uppercase tracking-[0.16em]">
-                    OTS
-                  </th>
-                  <th className="px-2 py-2 text-right font-mono text-[10px] uppercase tracking-[0.16em]">
-                    CPM
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {advanced.perMedia.map((row) => (
-                  <tr key={row.id} className="border-b border-bx-black/10">
-                    <td className="max-w-[14rem] truncate px-2 py-2 font-bold text-bx-black">
-                      {row.name}
-                    </td>
-                    <td className="px-2 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-bx-gray-dim">
-                      {row.type}
-                    </td>
-                    <td className="px-2 py-2 text-right tabular-nums text-bx-black">
-                      {row.totalImpressions.toLocaleString("ko-KR")}
-                    </td>
-                    <td className="px-2 py-2 text-right tabular-nums text-bx-gray-dim">
-                      {(row.visibilityNorm * 100).toFixed(0)}/100
-                    </td>
-                    <td className="px-2 py-2 text-right tabular-nums text-bx-black">
-                      {row.ots.toLocaleString("ko-KR")}
-                    </td>
-                    <td className="px-2 py-2 text-right tabular-nums text-bx-gray-dim">
-                      {row.cpmKrw != null
-                        ? formatMediaPriceCompactWon(row.cpmKrw, "ko-KR")
-                        : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2 border-bx-black font-bold">
-                  <td colSpan={2} className="px-2 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-bx-gray-dim">
-                    {isKo ? "합계" : "Total"}
-                  </td>
-                  <td className="px-2 py-3 text-right tabular-nums text-bx-accent">
-                    {advanced.totalImpressions.toLocaleString("ko-KR")}
-                  </td>
-                  <td className="px-2 py-3 text-right tabular-nums text-bx-gray-dim">
-                    —
-                  </td>
-                  <td className="px-2 py-3 text-right tabular-nums text-bx-accent">
-                    {advanced.totalOts.toLocaleString("ko-KR")}
-                  </td>
-                  <td className="px-2 py-3 text-right tabular-nums text-bx-accent">
-                    {advanced.cpmKrw != null
-                      ? formatMediaPriceCompactWon(advanced.cpmKrw, "ko-KR")
-                      : "—"}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-bx-gray-dim">
-          {`// `}
-          {t("reportSummaryDisclaimerShort")}
-        </p>
       </div>
-    </div>
+    </PlannerNeonCard>
   );
 }

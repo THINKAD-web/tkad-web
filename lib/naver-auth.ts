@@ -2,6 +2,7 @@ import type { AppUserRole, CommunityMemberRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { setNaverPending } from "@/lib/naver-oauth-pending";
 import type { NaverProfile } from "@/lib/naver-provider";
+import { buildTrialGrantData } from "@/lib/check-plan";
 
 /** NextAuth `profile()` 매핑 후 또는 네이버 userinfo 원본 */
 export type NaverOAuthProfile = {
@@ -223,6 +224,7 @@ export async function completeNaverSignup(params: {
       emailVerifiedAt: params.email.includes("@oauth.tkad.local")
         ? null
         : new Date(),
+      ...buildTrialGrantData(),
       accounts: {
         create: {
           type: "oauth",

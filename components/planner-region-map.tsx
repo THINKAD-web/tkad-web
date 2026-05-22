@@ -3,6 +3,10 @@
 import { cn } from "@/lib/utils";
 import type { PlannerMapRegion } from "@/lib/planner-logic";
 import { PLANNER_MAP_REGIONS } from "@/lib/planner-logic";
+import {
+  PlannerNeonLabel,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
 
 type Props = {
   selected: ReadonlySet<string>;
@@ -16,7 +20,6 @@ type Props = {
 
 type Zone = {
   id: PlannerMapRegion;
-  /** rough hit path — simplified map */
   d: string;
   cx: number;
   cy: number;
@@ -61,14 +64,15 @@ export function PlannerRegionMap({
   return (
     <div className="space-y-3">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-          [ {title} ]
-        </p>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-          {hint}
-        </p>
+        <PlannerNeonLabel>{title}</PlannerNeonLabel>
+        <p className={cn("mt-1", plannerNeon.subtext)}>{hint}</p>
       </div>
-      <div className="border-2 border-border bg-muted p-3">
+      <div
+        className={cn(
+          plannerNeon.card,
+          "p-3 dark:bg-white/[0.03] bg-gray-50",
+        )}
+      >
         <svg
           viewBox="0 0 340 380"
           className="mx-auto h-auto w-full max-w-md touch-manipulation"
@@ -84,7 +88,7 @@ export function PlannerRegionMap({
             className="tkad-planner-map-korea text-[11px] font-bold tracking-[0.22em]"
             style={{ fontFamily: "JetBrains Mono, monospace" }}
           >
-            [ KOREA ]
+            KOREA
           </text>
           {ZONES.map((z) => {
             const on = selected.has(z.id);
@@ -96,7 +100,7 @@ export function PlannerRegionMap({
                   className={cn(
                     "cursor-pointer transition-colors",
                     on
-                      ? "tkad-planner-map-zone-on fill-primary stroke-[3]"
+                      ? "tkad-planner-map-zone-on fill-violet-500 stroke-[3]"
                       : "tkad-planner-map-zone-off stroke-2",
                   )}
                   onClick={() => onToggle(z.id)}
@@ -128,24 +132,26 @@ export function PlannerRegionMap({
             );
           })}
         </svg>
-        <ul className="mt-4 flex flex-wrap justify-center gap-0">
+        <ul className="mt-4 flex flex-wrap justify-center gap-2">
           {PLANNER_MAP_REGIONS.map((r) => (
-            <li key={r} className="-mt-[2px] -ml-[2px]">
+            <li key={r}>
               <button
                 type="button"
                 onClick={() => onToggle(r)}
                 className={cn(
-                  "border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                  plannerNeon.selectChip,
                   selected.has(r)
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card text-foreground hover:bg-muted",
+                    ? plannerNeon.selectChipActive
+                    : plannerNeon.selectChipIdle,
                 )}
               >
                 {labelFor(r)}
                 <span
                   className={cn(
                     "ml-2 tabular-nums",
-                    selected.has(r) ? "text-primary-foreground/85" : "text-muted-foreground",
+                    selected.has(r)
+                      ? "dark:text-white/70 text-gray-600"
+                      : plannerNeon.subtext,
                   )}
                 >
                   ({counts[r] ?? 0})

@@ -2,6 +2,7 @@ import type { KakaoProfile } from "@auth/core/providers/kakao";
 import type { AppUserRole, CommunityMemberRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { setKakaoPending } from "@/lib/kakao-oauth-pending";
+import { buildTrialGrantData } from "@/lib/check-plan";
 
 export type KakaoSignInInput = {
   providerAccountId: string;
@@ -190,6 +191,7 @@ export async function completeKakaoSignup(params: {
       emailVerifiedAt: params.email.includes("@oauth.tkad.local")
         ? null
         : new Date(),
+      ...buildTrialGrantData(),
       accounts: {
         create: {
           type: "oauth",

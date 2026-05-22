@@ -43,6 +43,10 @@ type Props = {
   attributions?: DataSourceAttribution[];
   /** fusion 패턴이 있으면 stored 대신 사용 */
   fusedStored?: StoredTrafficPattern | null;
+  /** 차트 영역 높이 클래스 (기본 h-56) */
+  chartHeightClass?: string;
+  /** FREE: 시간대 차트만 노출 */
+  hourlyOnly?: boolean;
 };
 
 const HOUR_TICKS = [0, 6, 12, 18, 23];
@@ -77,6 +81,8 @@ export function TrafficCharts({
   isKo,
   attributions,
   fusedStored,
+  chartHeightClass = "h-56",
+  hourlyOnly = false,
 }: Props) {
   const t = useTranslations("mediaDetail.traffic");
   const [tab, setTab] = useState<Tab>("hourly");
@@ -160,8 +166,12 @@ export function TrafficCharts({
             {(
               [
                 ["hourly", t("tabHourly")],
-                ["weekly", t("tabWeekly")],
-                ["monthly", t("tabMonthly")],
+                ...(hourlyOnly
+                  ? []
+                  : ([
+                      ["weekly", t("tabWeekly")],
+                      ["monthly", t("tabMonthly")],
+                    ] as const)),
               ] as const
             ).map(([k, label]) => (
               <button
@@ -186,7 +196,7 @@ export function TrafficCharts({
       <div className="space-y-4 p-5 sm:p-6">
         <div
           role="tabpanel"
-          className="h-56 w-full"
+          className={cn("w-full", chartHeightClass)}
           aria-label={
             tab === "hourly"
               ? t("axisHourly")

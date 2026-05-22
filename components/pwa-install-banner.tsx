@@ -132,8 +132,8 @@ function InstallBannerPanel({
       role="dialog"
       aria-label="앱 설치 안내"
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-[80]",
-        "border-t border-gray-200 bg-white px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg",
+        "fixed bottom-0 left-0 right-0 z-40",
+        "border-t border-gray-200 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg",
         "dark:border-white/10 dark:bg-gray-900",
       )}
     >

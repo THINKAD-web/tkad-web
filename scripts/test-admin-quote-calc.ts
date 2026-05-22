@@ -56,19 +56,16 @@ testCase("monthFactorFromDays", () => {
   expect("15일 = 0.5", monthFactorFromDays(15) === 0.5);
 });
 
-testCase("lineSupplyWon — 만원 단위 가격 (price < 1,000,000)", () => {
-  // price=500 (만원), 1개월, 수량 1 → 5,000,000원
-  const won = lineSupplyWon(500, 1, 1);
+testCase("lineSupplyWon — 원 단위 가격", () => {
+  const won = lineSupplyWon(5_000_000, 1, 1);
   expect("500만원 × 1 = 5,000,000원", won === 5_000_000, `got ${won}`);
-  // 2개월 × 수량 3
-  const won2 = lineSupplyWon(500, 2, 3);
+  const won2 = lineSupplyWon(5_000_000, 2, 3);
   expect("500만원 × 2 × 3 = 30,000,000원", won2 === 30_000_000, `got ${won2}`);
 });
 
-testCase("lineSupplyWon — 원 단위 가격 (price >= 1,000,000)", () => {
-  // price=5000000 (원), 1개월, 1 → 5,000,000원
-  const won = lineSupplyWon(5_000_000, 1, 1);
-  expect("5,000,000원 × 1 × 1 = 5,000,000원", won === 5_000_000, `got ${won}`);
+testCase("lineSupplyWon — 소액 원 단위 (70만원)", () => {
+  const won = lineSupplyWon(700_000, 1, 1);
+  expect("70만원 × 1 = 700,000원", won === 700_000, `got ${won}`);
 });
 
 testCase("computeAdminQuoteTotals — 할인 없음, VAT 별도", () => {

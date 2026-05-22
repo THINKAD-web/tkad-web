@@ -49,7 +49,9 @@ export async function buildMarketInsightsWeeklyEmails(): Promise<
     where: {
       deletedAt: null,
       OR: [
+        { trialEndsAt: { gt: new Date() } },
         { proTrialEndsAt: { gt: new Date() } },
+        { plan: { in: ["PRO_TRIAL", "PRO", "ENTERPRISE"] } },
         {
           subscriptions: {
             some: {

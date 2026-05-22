@@ -3170,8 +3170,11 @@ export default function AdminMediasClient({
                       price: parseInt(e.target.value, 10) || 0,
                     }))
                   }
-                  placeholder="35000000"
+                  placeholder="700000"
                 />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  원 단위로 입력 (예: 70만원 → 700000)
+                </p>
               </div>
               <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 선택 정보
@@ -3347,8 +3350,7 @@ export default function AdminMediasClient({
                 <p className="mb-3 text-[11px] leading-relaxed text-muted-foreground">
                   카드로 편집하면 아래 JSON이 함께 갱신됩니다. 직접 JSON을
                   수정한 뒤에는「JSON → 카드」로 불러오세요. 금액은 원(KRW)
-                  또는 만원 단위 숫자 모두 가능하며, 공개 카탈로그는 100만
-                  미만을 만원으로 해석합니다.
+                  단위로 입력합니다 (예: 70만원 → 700000).
                 </p>
                 <div className="space-y-3">
                   {priceOptDrafts.length === 0 ? (

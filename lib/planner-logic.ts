@@ -1,4 +1,8 @@
 import type { MediaItem } from "@/lib/media-data";
+import {
+  catalogPriceFieldToPriceMan,
+  catalogPriceFieldToWon,
+} from "@/lib/media-price-format";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
 
@@ -132,8 +136,10 @@ export function plannerBlendCpmKrw(
   estimatedMonthlyImpressions: number,
 ): number | null {
   if (portfolio.length === 0 || estimatedMonthlyImpressions <= 0) return null;
-  const sumMan = portfolio.reduce((s, m) => s + m.price, 0);
-  const wonPerMonth = sumMan * 10_000;
+  const wonPerMonth = portfolio.reduce(
+    (s, m) => s + catalogPriceFieldToWon(m.price),
+    0,
+  );
   return Math.round(wonPerMonth / (estimatedMonthlyImpressions / 1000));
 }
 
@@ -148,16 +154,19 @@ export function selectPlannerPortfolio(
   const cap = spendPerMonth * 0.92;
   const scored = filtered.map((m) => ({
     m,
-    score: m.dailyFootTraffic / Math.max(m.price, 1),
+    score:
+      m.dailyFootTraffic /
+      Math.max(catalogPriceFieldToPriceMan(m.price), 0.01),
   }));
   scored.sort((a, b) => b.score - a.score);
   const out: MediaItem[] = [];
   let allocated = 0;
   for (const { m } of scored) {
     if (out.length >= maxItems) break;
-    if (allocated + m.price <= cap) {
+    const priceMan = catalogPriceFieldToPriceMan(m.price);
+    if (allocated + priceMan <= cap) {
       out.push(m);
-      allocated += m.price;
+      allocated += priceMan;
     }
   }
   if (out.length === 0) {
@@ -181,9 +190,10 @@ export function portfolioFromManualSelection(
   let allocated = 0;
   for (const m of orderedItems) {
     if (out.length >= maxItems) break;
-    if (allocated + m.price <= cap) {
+    const priceMan = catalogPriceFieldToPriceMan(m.price);
+    if (allocated + priceMan <= cap) {
       out.push(m);
-      allocated += m.price;
+      allocated += priceMan;
     }
   }
   if (out.length === 0) {
@@ -212,10 +222,14 @@ export function computeBudgetBlurbParts(
   );
   const sample = pool.find((m) => m.price > 0) ?? pool[0];
   if (!sample) return null;
-  const slotsAtMonth = Math.max(1, Math.floor(perMonth / Math.max(sample.price, 1)));
+  const samplePriceMan = catalogPriceFieldToPriceMan(sample.price);
+  const slotsAtMonth = Math.max(
+    1,
+    Math.floor(perMonth / Math.max(samplePriceMan, 0.01)),
+  );
   return {
     sampleName: sample.name,
-    samplePrice: sample.price,
+    samplePrice: samplePriceMan,
     slotsAtMonth,
   };
 }
@@ -262,12 +276,13 @@ export function estimateCpmByCategory(filtered: MediaItem[]): CpmBarPoint[] {
   for (const [key, list] of groups) {
     if (list.length === 0) continue;
     const avgP =
-      list.reduce((s, m) => s + m.price, 0) / Math.max(list.length, 1);
+      list.reduce((s, m) => s + catalogPriceFieldToWon(m.price), 0) /
+      Math.max(list.length, 1);
     const avgD =
       list.reduce((s, m) => s + m.dailyFootTraffic, 0) /
       Math.max(list.length, 1);
     const estImp = Math.max(1, avgD * 30 * visibility);
-    const krwMonth = avgP; // DB price는 이미 원 단위
+    const krwMonth = avgP;
     const cpm = krwMonth / (estImp / 1000);
     out.push({
       key,
@@ -293,7 +308,7 @@ export function budgetSplitByCategory(
   if (portfolio.length === 0) return [];
   const sums = new Map<string, number>();
   for (const m of portfolio) {
-    sums.set(m.type, (sums.get(m.type) ?? 0) + m.price);
+    sums.set(m.type, (sums.get(m.type) ?? 0) + catalogPriceFieldToWon(m.price));
   }
   const total = [...sums.values()].reduce((a, b) => a + b, 0) || 1;
   return [...sums.entries()]
@@ -450,7 +465,7 @@ export function computeAdvancedPlannerMetrics(args: {
 
     const priceWon =
       typeof m.price === "number" && Number.isFinite(m.price) && m.price > 0
-        ? m.price * 10_000
+        ? catalogPriceFieldToWon(m.price)
         : 0;
     const monthlyImp = Math.max(0, monthly);
     const cpmKrw = monthlyImp > 0 && priceWon > 0
@@ -541,13 +556,17 @@ export function computePlannerMetrics(
 ): PlannerMetrics | null {
   if (filtered.length === 0 || months <= 0 || budgetMan <= 0) return null;
 
-  const avgMonthlyPrice =
-    filtered.reduce((s, m) => s + m.price, 0) / filtered.length;
+  const avgMonthlyPriceMan =
+    filtered.reduce((s, m) => s + catalogPriceFieldToPriceMan(m.price), 0) /
+    filtered.length;
   const blendDailyReach =
     filtered.reduce((s, m) => s + m.dailyFootTraffic, 0) / filtered.length;
 
   const spendPerMonth = budgetMan / months;
-  const intensity = Math.min(1.2, spendPerMonth / Math.max(avgMonthlyPrice, 1));
+  const intensity = Math.min(
+    1.2,
+    spendPerMonth / Math.max(avgMonthlyPriceMan, 0.01),
+  );
   const visibility = 0.14 + intensity * 0.1;
 
   const estimatedMonthlyImpressions = Math.round(
@@ -610,7 +629,7 @@ export function computePlannerMetrics(
   }
 
   return {
-    avgMonthlyPrice,
+    avgMonthlyPrice: avgMonthlyPriceMan,
     blendDailyReach,
     estimatedMonthlyImpressions,
     estimatedTotalImpressions,

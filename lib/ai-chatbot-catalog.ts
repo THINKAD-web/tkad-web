@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 
 /** 챗봇 컨텍스트용 경량 매체 스냅샷 */
 export type ChatbotCatalogEntry = {
@@ -34,7 +35,7 @@ export function mediaItemsToChatbotCatalog(
     locationEn: m.locationEn,
     region: m.region,
     type: m.type,
-    price: m.price,
+    price: catalogPriceFieldToPriceMan(m.price),
     city: m.city,
     district: m.district,
     nearbyStations: m.nearbyStations,

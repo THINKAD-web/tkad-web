@@ -1,6 +1,5 @@
 import { getAnthropicClient, resolveModel } from "@/lib/ai-content-generator";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 
 export async function generateChatAiOwnerReply(input: {
   mediaName: string;
@@ -14,10 +13,7 @@ export async function generateChatAiOwnerReply(input: {
 }): Promise<string | null> {
   const client = getAnthropicClient();
   const isKo = input.locale !== "en";
-  const priceLabel = formatCatalogPriceFieldWon(
-    catalogPriceFieldToWon(input.price),
-    input.locale,
-  );
+  const priceLabel = formatCatalogPriceFieldWon(input.price, input.locale);
 
   const fallback = isKo
     ? `「${input.mediaName}」(${input.location}) 참고 정보: 유형 ${input.type}, 월 단가 약 ${priceLabel}. 상세 일정·슬롯은 매체사 확인 후 안내됩니다.`

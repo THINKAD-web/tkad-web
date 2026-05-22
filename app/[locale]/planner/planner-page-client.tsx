@@ -87,10 +87,18 @@ import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
 import { canProceedFromStep } from "@/lib/planner/validation";
 import {
   formatCatalogPriceFieldWon,
+  formatCpmKrw,
   formatMediaPriceCompactWon,
   formatPricePeriodShortLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
+import { useIsPro } from "@/hooks/use-is-pro";
+import {
+  PlannerNeonCard,
+  PlannerNeonLabel,
+  PlannerTrialBanner,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
 import type { HomeAppearance } from "@/lib/home-appearance";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { useTeamPermissions } from "@/lib/use-team-permissions";
@@ -110,7 +118,7 @@ function PlannerNeonPageBody({
   );
   if (appearance === "night") {
     return (
-      <div className="relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
+      <div className="relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 tkad-neon-depth"
@@ -166,6 +174,7 @@ export default function PlannerPageClient({
   const isKo = locale === "ko";
   const { toast } = useToast();
   const landingAppearance = useTkadAppearance();
+  const { showTrialBanner } = useIsPro();
 
   const priceOptionBadge = useCallback(
     (m: MediaItem): string | null => {
@@ -796,59 +805,62 @@ export default function PlannerPageClient({
 
             {/* Step 1 — 캠페인 목표 */}
             {wizardStep === 1 ? (
-              <PlannerCampaignStep1
-                campaignGoal={campaignGoal}
-                goals={GOALS}
-                onSelectGoal={setCampaignGoal}
-              />
+              <>
+                {showTrialBanner ? <PlannerTrialBanner isKo={isKo} /> : null}
+                <PlannerCampaignStep1
+                  campaignGoal={campaignGoal}
+                  goals={GOALS}
+                  onSelectGoal={setCampaignGoal}
+                />
+              </>
             ) : null}
 
             {/* Step 2 — 타깃 · 지역 */}
             {wizardStep === 2 ? (
               <div className="space-y-6">
                 <div className="space-y-2 text-center sm:text-left">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ STEP 2 / TARGET + REGION ]
-                  </p>
-                  <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                  <PlannerNeonLabel>Step 2 / Target + Region</PlannerNeonLabel>
+                  <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
                     {t("stepRegionTitle")}
                   </h2>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {t("stepRegionDesc")}
-                  </p>
+                  <p className={plannerNeon.subtext}>{t("stepRegionDesc")}</p>
                 </div>
 
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ CATEGORY ]
-                    </p>
-                    <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
-                      <Layers className="h-5 w-5 text-primary" />
+                <PlannerNeonCard>
+                  <div className={plannerNeon.cardHeader}>
+                    <PlannerNeonLabel>Category</PlannerNeonLabel>
+                    <h3
+                      className={cn(
+                        "mt-2 flex items-center gap-2 text-lg",
+                        plannerNeon.headline,
+                      )}
+                    >
+                      <Layers className="h-5 w-5 text-violet-400" />
                       {t("category")}
                     </h3>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                    <p className={cn("mt-1", plannerNeon.subtext)}>
                       {t("mediaMixHint")}
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-0 p-5">
+                  <div className="flex flex-wrap gap-2 p-5 sm:p-6">
                     {CATEGORIES.map(({ key, labelKey }) => (
                       <button
                         key={key}
                         type="button"
                         onClick={() => toggleCategory(key)}
                         className={cn(
-                          "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors touch-manipulation",
+                          plannerNeon.selectChip,
+                          "touch-manipulation",
                           categories.has(key)
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border bg-card text-foreground hover:bg-muted",
+                            ? plannerNeon.selectChipActive
+                            : plannerNeon.selectChipIdle,
                         )}
                       >
                         {t(labelKey)}
                       </button>
                     ))}
                   </div>
-                </div>
+                </PlannerNeonCard>
 
                 <PlannerRegionMap
                   selected={selectedRegions}
@@ -860,13 +872,11 @@ export default function PlannerPageClient({
                   countLabel={(n) => t("mapCount", { count: n })}
                 />
 
-                <div className="border-2 border-border bg-card">
-                  <div className="border-b-2 border-border p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("packagesTitle")} ]
-                    </p>
+                <PlannerNeonCard>
+                  <div className={plannerNeon.cardHeader}>
+                    <PlannerNeonLabel>{t("packagesTitle")}</PlannerNeonLabel>
                   </div>
-                  <div className="grid grid-cols-1 gap-0 p-5 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-3 sm:p-6">
                     {(
                       [
                         ["premium", "pkgPremium", "pkgPremiumDesc"],
@@ -878,33 +888,40 @@ export default function PlannerPageClient({
                         key={id}
                         type="button"
                         onClick={() => applyPreset(id)}
-                        className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 text-left transition-colors hover:bg-muted"
+                        className={cn(
+                          plannerNeon.selectChip,
+                          "p-4 text-left",
+                          plannerNeon.selectChipIdle,
+                          "hover:border-violet-300/40",
+                        )}
                       >
-                        <p className="font-bold tracking-tight text-foreground">{t(titleKey)}</p>
-                        <p className="mt-2 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                        <p className={cn("font-bold", plannerNeon.headline)}>
+                          {t(titleKey)}
+                        </p>
+                        <p className={cn("mt-2 text-xs leading-relaxed", plannerNeon.subtext)}>
                           {t(descKey)}
                         </p>
                       </button>
                     ))}
                   </div>
-                </div>
+                </PlannerNeonCard>
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
-                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("ageLabel")} ]
-                    </p>
-                    <div className="flex flex-wrap gap-0">
+                    <PlannerNeonLabel className="mb-3 block">
+                      {t("ageLabel")}
+                    </PlannerNeonLabel>
+                    <div className="flex flex-wrap gap-2">
                       {PLANNER_AGE_KEYS.map((k) => (
                         <button
                           key={k}
                           type="button"
                           onClick={() => setAgeKey(k)}
                           className={cn(
-                            "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                            plannerNeon.selectChip,
                             ageKey === k
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-card text-foreground hover:bg-muted",
+                              ? plannerNeon.selectChipActive
+                              : plannerNeon.selectChipIdle,
                           )}
                         >
                           {t(k)}
@@ -913,20 +930,20 @@ export default function PlannerPageClient({
                     </div>
                   </div>
                   <div>
-                    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("industryLabel")} ]
-                    </p>
-                    <div className="flex flex-wrap gap-0">
+                    <PlannerNeonLabel className="mb-3 block">
+                      {t("industryLabel")}
+                    </PlannerNeonLabel>
+                    <div className="flex flex-wrap gap-2">
                       {PLANNER_INDUSTRY_KEYS.map((k) => (
                         <button
                           key={k}
                           type="button"
                           onClick={() => setIndustryKey(k)}
                           className={cn(
-                            "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                            plannerNeon.selectChip,
                             industryKey === k
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-card text-foreground hover:bg-muted",
+                              ? plannerNeon.selectChipActive
+                              : plannerNeon.selectChipIdle,
                           )}
                         >
                           {t(k)}
@@ -940,22 +957,30 @@ export default function PlannerPageClient({
 
             {/* Step 3 — 예산 · 기간 */}
             {wizardStep === 3 ? (
-              <div className="border-2 border-border bg-card">
-                <div className="border-b-2 border-border p-5">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ STEP 3 / BUDGET + PERIOD ]
-                  </p>
-                  <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
-                    <Wallet className="h-5 w-5 text-primary" />
+              <PlannerNeonCard>
+                <div className={plannerNeon.cardHeader}>
+                  <PlannerNeonLabel>Step 3 / Budget + Period</PlannerNeonLabel>
+                  <h3
+                    className={cn(
+                      "mt-2 flex items-center gap-2 text-lg",
+                      plannerNeon.headline,
+                    )}
+                  >
+                    <Wallet className="h-5 w-5 text-violet-400" />
                     {t("stepBudgetTitle")}
                   </h3>
-                  <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                  <p className={cn("mt-1", plannerNeon.subtext)}>
                     {t("stepBudgetDesc")}
                   </p>
                 </div>
-                <div className="space-y-6 p-5">
+                <div className="space-y-6 p-5 sm:p-6">
                   <div>
-                    <div className="mb-3 flex justify-between font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                    <div
+                      className={cn(
+                        "mb-3 flex justify-between text-xs uppercase tracking-widest",
+                        plannerNeon.kpiLabel,
+                      )}
+                    >
                       <span>{t("budgetSliderMin")}</span>
                       <span>{t("budgetSliderMax")}</span>
                     </div>
@@ -966,35 +991,40 @@ export default function PlannerPageClient({
                       step={500}
                       value={budgetNum}
                       onChange={(e) => setBudget(e.target.value)}
-                      className="h-3 w-full cursor-pointer appearance-none border-2 border-border bg-card"
-                      style={{ accentColor: "#22d3ee" }}
+                      className="h-2 w-full cursor-pointer appearance-none rounded-full dark:bg-white/10 bg-gray-200"
+                      style={{ accentColor: "#8B5CF6" }}
                       aria-label={t("budget")}
                     />
                     <div className="mt-4 flex flex-wrap items-end gap-3">
-                      <div className="flex-1 min-w-[8rem]">
-                        <label className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                          [ {t("budget")} ]
-                        </label>
+                      <div className="min-w-[8rem] flex-1">
+                        <PlannerNeonLabel>{t("budget")}</PlannerNeonLabel>
                         <input
                           inputMode="numeric"
                           value={budget}
                           onChange={(e) =>
                             setBudget(e.target.value.replace(/[^\d]/g, ""))
                           }
-                          className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono font-bold text-foreground focus:border-primary focus:outline-none"
+                          className={cn(
+                            "mt-1 h-11 w-full rounded-xl border px-3 font-bold tabular-nums",
+                            "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
+                            "dark:text-white text-gray-900 focus:border-violet-400/60 focus:outline-none",
+                          )}
                         />
                       </div>
-                      <p className="pb-1 font-mono text-[12px] tracking-tight text-muted-foreground">
+                      <p className={cn("pb-1 text-sm", plannerNeon.subtext)}>
                         {t("budgetPerMonthSummary", {
                           amount: Math.round(budgetNum / Math.max(months, 1)),
                         })}
                       </p>
                     </div>
                     {blurbParts ? (
-                      <p className="mt-4 border-2 border-primary bg-card px-4 py-3 font-mono text-[11px] leading-relaxed tracking-tight text-foreground">
-                        <span className="mr-1 font-bold uppercase tracking-[0.22em] text-primary">
-                          {`// `}
-                        </span>
+                      <p
+                        className={cn(
+                          "mt-4 rounded-xl border px-4 py-3 text-sm leading-relaxed",
+                          "dark:border-violet-500/30 border-violet-200 dark:bg-violet-500/10 bg-violet-50",
+                          plannerNeon.subtext,
+                        )}
+                      >
                         {t("budgetBlurb", {
                           name: blurbParts.sampleName.slice(0, 32),
                           price: blurbParts.samplePrice,
@@ -1004,11 +1034,11 @@ export default function PlannerPageClient({
                     ) : null}
                   </div>
                   <div>
-                    <p className="mb-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    <PlannerNeonLabel className="mb-3 flex items-center gap-2">
                       <CalendarRange className="h-4 w-4" />
-                      [ {t("period")} ]
-                    </p>
-                    <div className="flex flex-wrap gap-0">
+                      {t("period")}
+                    </PlannerNeonLabel>
+                    <div className="flex flex-wrap gap-2">
                       {PLANNER_PERIOD_OPTIONS.map((opt) => {
                         const selected = Math.abs(months - opt.months) < 0.04;
                         return (
@@ -1017,10 +1047,10 @@ export default function PlannerPageClient({
                             type="button"
                             onClick={() => setMonths(opt.months)}
                             className={cn(
-                              "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                              plannerNeon.selectChip,
                               selected
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border bg-card text-foreground hover:bg-muted",
+                                ? plannerNeon.selectChipActive
+                                : plannerNeon.selectChipIdle,
                             )}
                           >
                             {t(opt.labelKey)}
@@ -1030,22 +1060,18 @@ export default function PlannerPageClient({
                     </div>
                   </div>
                 </div>
-              </div>
+              </PlannerNeonCard>
             ) : null}
 
             {/* Step 4 — 매체 선택 (AI 추천 + 직접 탐색) */}
             {wizardStep === 4 ? (
               <div className="space-y-6">
                 <div className="space-y-2 text-center sm:text-left">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ STEP 4 / MEDIA SELECTION ]
-                  </p>
-                  <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                  <PlannerNeonLabel>Step 4 / Media Selection</PlannerNeonLabel>
+                  <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
                     {t("stepMediaTitle")}
                   </h2>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {t("stepMediaDesc")}
-                  </p>
+                  <p className={plannerNeon.subtext}>{t("stepMediaDesc")}</p>
                 </div>
 
                 <PlannerRecommendationPanel
@@ -1054,16 +1080,12 @@ export default function PlannerPageClient({
                   regionLabel={mediaRegionLabel}
                 />
 
-                <div className="space-y-2 border-t-2 border-border pt-6">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    [ MANUAL BROWSE ]
-                  </p>
-                  <h3 className="text-base font-bold tracking-tight text-foreground">
+                <div className="space-y-2 border-t dark:border-white/10 border-gray-100 pt-6">
+                  <PlannerNeonLabel>Manual Browse</PlannerNeonLabel>
+                  <h3 className={cn("text-base", plannerNeon.headline)}>
                     {t("recommendBrowseTitle")}
                   </h3>
-                  <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
-                    {t("recommendBrowseDesc")}
-                  </p>
+                  <p className={plannerNeon.subtext}>{t("recommendBrowseDesc")}</p>
                 </div>
                 <PlannerMediaSelector
                   catalog={catalog}
@@ -1109,7 +1131,7 @@ export default function PlannerPageClient({
               />
             ) : null}
 
-            <div className="flex flex-col-reverse gap-3 border-t-2 border-border pt-6 sm:flex-row sm:justify-between">
+            <div className="flex flex-col-reverse gap-3 border-t dark:border-white/10 border-gray-100 pt-6 sm:flex-row sm:justify-between">
               <BtnBlock
                 variant="secondary"
                 size="md"
@@ -1226,18 +1248,23 @@ export default function PlannerPageClient({
 
             {shareUrl ? (
               <div
-                className="border-2 border-primary bg-card px-4 py-3"
+                className={cn(
+                  plannerNeon.card,
+                  "border-violet-400/30 px-4 py-3",
+                )}
                 role="status"
               >
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                  [ {t("shareBannerTitle")} ]
-                </p>
+                <PlannerNeonLabel>{t("shareBannerTitle")}</PlannerNeonLabel>
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                   <input
                     readOnly
                     value={shareUrl}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="min-w-0 flex-1 border-2 border-border bg-card px-3 py-1.5 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
+                    className={cn(
+                      "min-w-0 flex-1 rounded-xl border px-3 py-1.5 text-xs",
+                      "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
+                      "dark:text-white text-gray-900 focus:border-violet-400/60 focus:outline-none",
+                    )}
                   />
                   <BtnBlock
                     variant="accent"
@@ -1259,17 +1286,20 @@ export default function PlannerPageClient({
                     {t("shareCopy")}
                   </BtnBlock>
                 </div>
-                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {`// `}{t("shareBannerExpiry")}
+                <p className={cn("mt-2 text-xs", plannerNeon.subtext)}>
+                  {t("shareBannerExpiry")}
                 </p>
               </div>
             ) : null}
 
             {filtered.length === 0 ? (
-              <div className="border-2 border-border bg-muted py-12 text-center">
-                <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {`// `}{t("emptyFilter")}
-                </p>
+              <div
+                className={cn(
+                  plannerNeon.card,
+                  "py-12 text-center",
+                )}
+              >
+                <p className={plannerNeon.subtext}>{t("emptyFilter")}</p>
                 <div className="mt-6 flex justify-center">
                   <BtnBlock
                     variant="primary"
@@ -1281,11 +1311,14 @@ export default function PlannerPageClient({
                 </div>
               </div>
             ) : budgetNum < PLANNER_BUDGET_MIN ? (
-              <div className="border-2 border-primary bg-card py-10 text-center text-foreground">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                  [ NEED BUDGET ]
-                </p>
-                <p className="mt-3 font-bold tracking-tight">
+              <div
+                className={cn(
+                  plannerNeon.card,
+                  "border-violet-400/30 py-10 text-center",
+                )}
+              >
+                <PlannerNeonLabel>Need Budget</PlannerNeonLabel>
+                <p className={cn("mt-3 font-bold", plannerNeon.headline)}>
                   {t("needBudget")}
                 </p>
               </div>
@@ -1303,10 +1336,10 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <p className="tkad-glass-surface rounded-[22px] px-4 py-3 text-sm text-foreground">
-                  <span className="font-mono text-[10px] font-black uppercase tracking-[0.22em] tkad-home-accent-text">
-                    [ {t("targetSummaryLabel")} ]
-                  </span>{" "}
+                <p className={cn(plannerNeon.card, "rounded-[22px] px-4 py-3 text-sm")}>
+                  <PlannerNeonLabel className="mr-2 inline">
+                    {t("targetSummaryLabel")}
+                  </PlannerNeonLabel>
                   {(() => {
                     const g = GOALS.find((x) => x.key === campaignGoal);
                     return g ? t(g.titleKey) : "—";
@@ -1331,49 +1364,41 @@ export default function PlannerPageClient({
                         )
                       : 0;
                   return (
-                    <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
-                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                          [ {t("kpiImpressions")} ]
-                        </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-[#22d3ee]">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className={plannerNeon.kpiCard}>
+                        <p className={plannerNeon.kpiLabel}>{t("kpiImpressions")}</p>
+                        <p className="mt-2 text-2xl font-bold tabular-nums text-cyan-400">
                           {metrics.estimatedTotalImpressions.toLocaleString()}
                         </p>
-                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
+                        <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
                           {t("kpiImpressionsHint")}
                         </p>
                       </div>
-                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                          [ {t("kpiReach")} ]
-                        </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
+                      <div className={plannerNeon.kpiCard}>
+                        <p className={plannerNeon.kpiLabel}>{t("kpiReach")}</p>
+                        <p className={cn("mt-2 text-2xl font-bold tabular-nums", plannerNeon.kpiValue)}>
                           {estReach.toLocaleString()}
                         </p>
-                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
+                        <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
                           {t("kpiReachHint")}
                         </p>
                       </div>
-                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                          [ {t("kpiCpm")} ]
+                      <div className={plannerNeon.kpiCard}>
+                        <p className={plannerNeon.kpiLabel}>{t("kpiCpm")}</p>
+                        <p className={cn("mt-2 text-2xl font-bold tabular-nums", plannerNeon.kpiValue)}>
+                          {formatCpmKrw(estCpm, isKo ? "ko" : "en")}
                         </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
-                          {formatMediaPriceCompactWon(estCpm, isKo ? "ko" : "en")}
-                        </p>
-                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
+                        <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
                           {t("kpiCpmHint")}
                         </p>
                       </div>
-                      <div className="tkad-glass-surface -mt-[2px] -ml-[2px] rounded-[22px] p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] tkad-home-accent-text">
-                          [ {t("kpiRoi")} ]
-                        </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-[#22d3ee]">
+                      <div className={plannerNeon.kpiCard}>
+                        <p className={plannerNeon.kpiLabel}>{t("kpiRoi")}</p>
+                        <p className="mt-2 text-2xl font-bold tabular-nums text-violet-400">
                           {metrics.roiExpected}
                           {t("roiUnit")}
                         </p>
-                        <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
+                        <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
                           {t("kpiRoiHint")}
                         </p>
                       </div>
@@ -1383,14 +1408,12 @@ export default function PlannerPageClient({
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ PORTFOLIO ]
-                    </p>
-                    <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+                  <div className="relative border-b dark:border-white/10 border-gray-100 p-5">
+                    <PlannerNeonLabel>Portfolio</PlannerNeonLabel>
+                    <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
                       {t("comboTitle")}
                     </h3>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                    <p className={cn("mt-1 text-sm", plannerNeon.subtext)}>
                       {manualIntersectedPortfolio.length > 0
                         ? t("comboHintManual")
                         : t("comboHint")}
@@ -1419,13 +1442,13 @@ export default function PlannerPageClient({
                           <p className="line-clamp-2 text-sm font-bold tracking-tight text-foreground">
                             {isKo ? m.name : (m.nameEn || m.name) || m.name}
                           </p>
-                          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                            {`// `}{tm(`regions.${m.region}`)} ·{" "}
+                          <p className={cn("mt-1 text-xs uppercase tracking-widest", plannerNeon.subtext)}>
+                            {tm(`regions.${m.region}`)} ·{" "}
                             {isKo
                               ? m.location.slice(0, 40)
                               : (m.locationEn || m.location).slice(0, 40)}
                           </p>
-                          <p className="mt-2 font-mono text-sm font-bold tabular-nums text-primary">
+                          <p className="mt-2 text-sm font-bold tabular-nums text-violet-400">
                             {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
                             <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                               /{isKo ? "월" : "mo"}
@@ -1435,8 +1458,8 @@ export default function PlannerPageClient({
                             const badge = priceOptionBadge(m);
                             if (!badge) return null;
                             return (
-                              <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                                [ {badge} ]
+                              <p className={cn("mt-1 text-[10px] font-medium", plannerNeon.kpiLabel)}>
+                                {badge}
                               </p>
                             );
                           })()}
@@ -1449,42 +1472,34 @@ export default function PlannerPageClient({
                 <div className="grid gap-3 lg:grid-cols-2">
                   <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                     <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                    <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                        [ {t("results")} ]
-                      </p>
+                    <div className="relative border-b dark:border-white/10 border-gray-100 p-5">
+                      <PlannerNeonLabel>{t("results")}</PlannerNeonLabel>
                     </div>
                     <div className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
-                      <div className="tkad-glass-surface rounded-[22px] p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                          [ {t("matchedMedia")} ]
-                        </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
+                      <div className={plannerNeon.kpiCard}>
+                        <p className={plannerNeon.kpiLabel}>{t("matchedMedia")}</p>
+                        <p className={cn("mt-2 text-2xl font-bold tabular-nums", plannerNeon.kpiValue)}>
                           {filtered.length}
-                          <span className="ml-1 text-base text-muted-foreground">
+                          <span className={cn("ml-1 text-base", plannerNeon.subtext)}>
                             {t("countUnit")}
                           </span>
                         </p>
                       </div>
-                      <div className="tkad-glass-surface rounded-[22px] p-4">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                          [ {t("avgMonthlySlot")} ]
-                        </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
+                      <div className={plannerNeon.kpiCard}>
+                        <p className={plannerNeon.kpiLabel}>{t("avgMonthlySlot")}</p>
+                        <p className={cn("mt-2 text-2xl font-bold tabular-nums", plannerNeon.kpiValue)}>
                           {formatCatalogPriceFieldWon(
                             Math.round(metrics.avgMonthlyPrice),
                             isKo ? "ko" : "en",
                           )}
-                          <span className="ml-1 text-sm text-muted-foreground">
+                          <span className={cn("ml-1 text-sm", plannerNeon.subtext)}>
                             /{isKo ? "월" : "mo"}
                           </span>
                         </p>
                       </div>
-                      <div className="tkad-glass-surface rounded-[22px] p-4 sm:col-span-2">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                          [ {t("estMonthlyImp")} ]
-                        </p>
-                        <p className="mt-2 font-mono text-xl font-bold tabular-nums text-foreground">
+                      <div className={cn(plannerNeon.kpiCard, "sm:col-span-2")}>
+                        <p className={plannerNeon.kpiLabel}>{t("estMonthlyImp")}</p>
+                        <p className={cn("mt-2 text-xl font-bold tabular-nums", plannerNeon.kpiValue)}>
                           {metrics.estimatedMonthlyImpressions.toLocaleString()}
                         </p>
                       </div>
@@ -1506,9 +1521,9 @@ export default function PlannerPageClient({
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("chartDailyBarTitle")} ]
-                    </p>
+                    <PlannerNeonLabel className="p-5 pb-0">
+                      {t("chartDailyBarTitle")}
+                    </PlannerNeonLabel>
                   </div>
                   <div className="relative p-5">
                     <PlannerDailyReachBarChart
@@ -1531,9 +1546,9 @@ export default function PlannerPageClient({
                   <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                     <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                     <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                        [ {t("chartCpmTitle")} ]
-                      </p>
+                      <PlannerNeonLabel className="p-5 pb-0">
+                        {t("chartCpmTitle")}
+                      </PlannerNeonLabel>
                     </div>
                     <div className="relative p-5">
                       <PlannerCpmCompareChart
@@ -1548,9 +1563,9 @@ export default function PlannerPageClient({
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("chartMonthCompareTitle")} ]
-                    </p>
+                    <PlannerNeonLabel className="p-5 pb-0">
+                      {t("chartMonthCompareTitle")}
+                    </PlannerNeonLabel>
                   </div>
                   <div className="relative p-5">
                     <PlannerMonthCompareChart
@@ -1571,11 +1586,9 @@ export default function PlannerPageClient({
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ ROI ]
-                    </p>
-                    <h3 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
-                      <TrendingUp className="h-5 w-5 text-primary" />
+                    <PlannerNeonLabel className="p-5 pb-0">ROI</PlannerNeonLabel>
+                    <h3 className={cn("mt-2 flex items-center gap-2 px-5 text-lg", plannerNeon.headline)}>
+                      <TrendingUp className="h-5 w-5 text-violet-400" />
                       {t("roiTitle")}
                     </h3>
                   </div>
@@ -1599,7 +1612,7 @@ export default function PlannerPageClient({
                         </div>
                         <div className="h-3 w-full overflow-hidden rounded-full border dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100">
                           <div
-                            className="h-full bg-primary transition-all duration-500"
+                            className="h-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all duration-500"
                             style={{
                               width: `${Math.min(100, (val / roiMax) * 100)}%`,
                             }}
@@ -1613,10 +1626,10 @@ export default function PlannerPageClient({
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("chartImpLineTitle")} ]
-                    </p>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                    <PlannerNeonLabel className="p-5 pb-0">
+                      {t("chartImpLineTitle")}
+                    </PlannerNeonLabel>
+                    <p className={cn("mt-1 px-5 text-sm", plannerNeon.subtext)}>
                       {t("chartImpTitle")}
                     </p>
                   </div>
@@ -1632,10 +1645,10 @@ export default function PlannerPageClient({
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                      [ {t("chartRoiLineTitle")} ]
-                    </p>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                    <PlannerNeonLabel className="p-5 pb-0">
+                      {t("chartRoiLineTitle")}
+                    </PlannerNeonLabel>
+                    <p className={cn("mt-1 px-5 text-sm", plannerNeon.subtext)}>
                       {t("chartRoiLineHint")}
                     </p>
                   </div>
@@ -1658,13 +1671,11 @@ export default function PlannerPageClient({
                   <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_58%),radial-gradient(circle_at_55%_110%,rgba(236,72,153,0.12),transparent_60%)]" />
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="max-w-xl space-y-2">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                        [ NEXT STEP ]
-                      </p>
-                      <h3 className="text-xl font-bold tracking-tight sm:text-2xl">
+                      <PlannerNeonLabel>Next Step</PlannerNeonLabel>
+                      <h3 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
                         {t("ctaBannerTitle")}
                       </h3>
-                      <p className="text-sm leading-relaxed text-muted-foreground">
+                      <p className={plannerNeon.subtext}>
                         {t("ctaBannerDesc")}
                       </p>
                     </div>

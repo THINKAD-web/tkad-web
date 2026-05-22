@@ -1,5 +1,6 @@
 import { typeLabels, type MediaItem } from "@/lib/media-data";
 import type { MediaCatalogFiltersState } from "@/lib/use-media-catalog-filters";
+import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 
 const PRECISION_FILTER_CATEGORIES: (keyof MediaCatalogFiltersState)[] = [
   "areaSpot",
@@ -119,7 +120,7 @@ function matchesAnySelected(
   });
 }
 
-/** `m.price`는 만원 단위. 구간을 겹치게 해 중가 매체가 한 구간도 못 타지 않게 함 */
+/** `m.price`는 원 단위 — 만원으로 환산해 구간 매칭 */
 const DURATION_PRICE_RULES: Record<string, (price: number) => boolean> = {
   week: (p) => p >= 0 && p <= 1_200,
   two_to_four_weeks: (p) => p > 150 && p <= 6_000,
@@ -173,7 +174,7 @@ export function passesMediaPrecisionFilters(
     ([, v]) => v,
   );
   if (activeDuration.length > 0) {
-    const price = m.price ?? 0;
+    const price = catalogPriceFieldToPriceMan(m.price ?? 0);
     const ok = activeDuration.some(([k]) => {
       const rule = DURATION_PRICE_RULES[k];
       return rule ? rule(price) : false;

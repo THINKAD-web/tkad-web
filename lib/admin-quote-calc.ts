@@ -26,9 +26,7 @@ export function monthFactorFromDays(days: number): number {
 }
 
 /**
- * 매체 DB `price`는 1,000,000 미만이면 "만원" 단위, 이상이면 "원" 단위로 저장되어 있음
- * (lib/media-price-format.ts 의 catalogPriceFieldToWon 규칙). 항상 원(KRW)으로 환산한 뒤
- * 월계수·수량을 곱해 공급가(원)를 반환한다.
+ * 매체 DB `price`는 원(KRW) 단위로 저장됨. 월계수·수량을 곱해 공급가(원)를 반환한다.
  */
 export function lineSupplyWon(
   rawDbPrice: number,

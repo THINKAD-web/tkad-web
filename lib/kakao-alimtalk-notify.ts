@@ -63,6 +63,22 @@ export async function notifyQuoteExpiringSoon(input: {
   });
 }
 
+export async function notifyProTrialExpiringSoon(input: {
+  phone: string;
+  name: string;
+  link: string;
+}): Promise<SendAlimtalkResult> {
+  return sendAlimtalk({
+    to: input.phone,
+    templateCode: "TKAD_PRO_TRIAL_EXPIRING",
+    recvName: input.name,
+    variables: {
+      name: input.name,
+      link: input.link,
+    },
+  });
+}
+
 export async function notifyQuoteSent(input: {
   phone: string;
   name: string;

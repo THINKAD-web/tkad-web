@@ -8,15 +8,11 @@ import {
   ChevronDown,
   ChevronUp,
   ClipboardList,
-  MessageCircle,
   Send,
   Sparkles,
   X,
 } from "lucide-react";
-import {
-  FLOATING_SUPPORT_DOCK_BOTTOM,
-  FLOATING_SUPPORT_DOCK_RIGHT,
-} from "@/lib/floating-support-dock-layout";
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { usePageScrollEdges } from "@/lib/use-page-scroll-edges";
 import { cn } from "@/lib/utils";
 import { SupportChatWidget } from "@/components/support/support-chat-widget";
@@ -37,6 +33,19 @@ const dockPreviewReveal = cn(
   "group-hover/dock-action:max-w-[min(15rem,calc(100vw-6rem))] group-hover/dock-action:opacity-100",
   "group-focus-within/dock-action:max-w-[min(15rem,calc(100vw-6rem))] group-focus-within/dock-action:opacity-100",
 );
+
+function KakaoTalkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      aria-hidden
+      fill="currentColor"
+    >
+      <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.742 1.815 5.146 4.545 6.52-.198.72-.717 2.606-.82 3.01-.13.52.19.512.398.372.165-.11 2.615-1.755 3.676-2.47.387.053.784.08 1.201.08 5.523 0 10-3.477 10-7.8S17.523 3 12 3z" />
+    </svg>
+  );
+}
 
 function DockPreviewRow({
   icon,
@@ -93,13 +102,42 @@ function DockActionWithPreview({
   );
 }
 
+function MobileKakaoChatButton({
+  mounted,
+  label,
+}: {
+  mounted: boolean;
+  label: string;
+}) {
+  return (
+    <a
+      href={KAKAO_CHANNEL_PUBLIC_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "fixed bottom-6 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#FEE500] text-[#191600] shadow-[0_8px_28px_rgba(0,0,0,0.18)] transition-transform hover:scale-105 active:scale-95 md:hidden",
+        !mounted && "pointer-events-none opacity-0",
+      )}
+      style={{
+        bottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))",
+        right: "max(1rem, env(safe-area-inset-right, 0px))",
+      }}
+      aria-label={label}
+      title={label}
+    >
+      <KakaoTalkIcon className="h-6 w-6" />
+    </a>
+  );
+}
+
 export default function FloatingSupportDock() {
   const pathname = usePathname();
   const locale = useLocale();
   const isKo = locale === "ko";
-  const tCommon = useTranslations("common");
   const tQuote = useTranslations("quoteFab");
   const tDock = useTranslations("supportDock");
+  const tChat = useTranslations("supportChat");
+  const tCommon = useTranslations("common");
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [chatMenuOpen, setChatMenuOpen] = useState(false);
   const quotePanelRef = useRef<HTMLDivElement>(null);
@@ -135,15 +173,13 @@ export default function FloatingSupportDock() {
 
   return (
     <>
+      <MobileKakaoChatButton mounted={mounted} label={tChat("kakaoCta")} />
+
       <div
         className={cn(
-          "fixed z-[55] flex flex-col items-end gap-2 sm:bottom-6 sm:right-6",
+          "fixed bottom-6 right-6 z-50 hidden flex-col items-end gap-2 md:flex",
           !mounted && "pointer-events-none opacity-0",
         )}
-        style={{
-          bottom: FLOATING_SUPPORT_DOCK_BOTTOM,
-          right: FLOATING_SUPPORT_DOCK_RIGHT,
-        }}
         aria-label={tDock("regionLabel")}
       >
         {quoteOpen ? (
@@ -283,7 +319,7 @@ export default function FloatingSupportDock() {
             </DockActionWithPreview>
 
             <DockActionWithPreview
-              icon={<MessageCircle className="h-3.5 w-3.5" aria-hidden />}
+              icon={<KakaoTalkIcon className="h-3.5 w-3.5" aria-hidden />}
               title={tDock("chatPreviewTitle")}
               hint={tDock("chatPreviewHint")}
             >

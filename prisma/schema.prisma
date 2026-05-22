@@ -1378,6 +1378,14 @@ enum SubscriptionPlan {
   ENTERPRISE
 }
 
+/// 사용자 요금제 (회원가입 PRO 14일 체험 포함)
+enum UserPlan {
+  FREE
+  PRO_TRIAL
+  PRO
+  ENTERPRISE
+}
+
 enum SubscriptionStatus {
   ACTIVE
   TRIALING
@@ -1413,6 +1421,9 @@ model User {
   emailVerifyTokenExpiresAt DateTime? @map("email_verify_token_expires_at")
   lastLoginAt               DateTime? @map("last_login_at")
   deletedAt       DateTime?            @map("deleted_at")
+  plan                    UserPlan  @default(FREE)
+  trialStartedAt          DateTime? @map("trial_started_at")
+  trialEndsAt             DateTime? @map("trial_ends_at")
   proTrialEndsAt          DateTime? @map("pro_trial_ends_at")
   freeReportDownloads     Int       @default(0) @map("free_report_downloads")
   plannerLeadCaptured     Boolean   @default(false) @map("planner_lead_captured")

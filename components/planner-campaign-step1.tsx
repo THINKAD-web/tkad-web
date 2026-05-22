@@ -5,6 +5,11 @@ import { useTranslations } from "next-intl";
 import { MonitorPlay, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
+import {
+  PlannerNeonCard,
+  PlannerNeonLabel,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
 
 type GoalDef = {
   key: PlannerCampaignGoal;
@@ -37,22 +42,23 @@ export default function PlannerCampaignStep1({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start">
-      <div className="border-2 border-border bg-card">
-        <div className="border-b-2 border-border p-6">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            [ STEP 1 / GOAL ]
-          </p>
-          <h2 className="mt-2 flex items-center gap-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-            <Sparkles className="h-5 w-5 text-primary" />
+      <PlannerNeonCard>
+        <div className={plannerNeon.cardHeader}>
+          <PlannerNeonLabel>Step 1 / Goal</PlannerNeonLabel>
+          <h2
+            className={cn(
+              "mt-2 flex items-center gap-2 text-xl sm:text-2xl",
+              plannerNeon.headline,
+            )}
+          >
+            <Sparkles className="h-5 w-5 text-violet-400" />
             {t("step1Title")}
           </h2>
-          <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-            {t("step1Desc")}
-          </p>
+          <p className={cn("mt-2", plannerNeon.subtext)}>{t("step1Desc")}</p>
         </div>
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           <motion.div
-            className="grid grid-cols-1 gap-0 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2"
             variants={list}
             initial="hidden"
             animate="visible"
@@ -63,26 +69,20 @@ export default function PlannerCampaignStep1({
                   type="button"
                   onClick={() => onSelectGoal(key)}
                   className={cn(
-                    "-mt-[2px] -ml-[2px] h-full w-full border-2 p-5 text-left transition-colors",
+                    plannerNeon.selectChip,
+                    "h-full w-full p-5 text-left",
                     campaignGoal === key
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-card text-foreground hover:bg-muted",
+                      ? plannerNeon.selectChipActive
+                      : plannerNeon.selectChipIdle,
                   )}
                 >
+                  <p className="font-bold tracking-tight">{t(titleKey)}</p>
                   <p
                     className={cn(
-                      "font-bold tracking-tight",
-                      campaignGoal === key ? "text-primary-foreground" : "text-foreground",
-                    )}
-                  >
-                    {t(titleKey)}
-                  </p>
-                  <p
-                    className={cn(
-                      "mt-2 font-mono text-[11px] tracking-tight",
+                      "mt-2 text-xs leading-relaxed",
                       campaignGoal === key
-                        ? "text-primary-foreground/85"
-                        : "text-muted-foreground",
+                        ? "dark:text-white/70 text-gray-600"
+                        : plannerNeon.subtext,
                     )}
                   >
                     {t(descKey)}
@@ -92,23 +92,33 @@ export default function PlannerCampaignStep1({
             ))}
           </motion.div>
         </div>
-      </div>
+      </PlannerNeonCard>
 
       <motion.aside
-        className="border-2 border-border bg-hero-void p-5 text-hero-fg"
+        className={cn(
+          plannerNeon.card,
+          "overflow-hidden dark:bg-gradient-to-br dark:from-violet-950/40 dark:to-cyan-950/20",
+        )}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="space-y-4">
-          <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+        <div className="space-y-4 p-5">
+          <p
+            className={cn(
+              "flex items-center gap-2",
+              plannerNeon.label,
+            )}
+          >
             <MonitorPlay className="h-3.5 w-3.5" aria-hidden />
-            [ {t("step1VisualTitle")} ]
+            {t("step1VisualTitle")}
           </p>
           <motion.div
             className={cn(
-              "relative overflow-hidden border-2 bg-hero-void",
-              campaignGoal ? "border-primary" : "border-hero-fg/30",
+              "relative overflow-hidden rounded-xl border",
+              campaignGoal
+                ? "border-violet-400/50"
+                : "dark:border-white/10 border-gray-200",
             )}
             animate={
               campaignGoal
@@ -116,22 +126,22 @@ export default function PlannerCampaignStep1({
                 : {}
             }
           >
-            <div className="aspect-[2.35/1] w-full bg-hero-void">
+            <div className="aspect-[2.35/1] w-full dark:bg-[#020202]/80 bg-gray-100">
               <div className="flex h-full flex-col items-center justify-center gap-2 px-4 py-6 sm:py-8">
-                <div className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
+                <div className="rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
                   OOH
                 </div>
-                <p className="text-center text-sm font-bold text-hero-fg sm:text-base">
+                <p className={cn("text-center text-sm font-bold sm:text-base", plannerNeon.headline)}>
                   {t("step1VisualFrameLabel")}
                 </p>
-                <p className="max-w-[14rem] text-center font-mono text-[10px] leading-snug tracking-tight text-hero-fg/65 sm:text-xs">
+                <p className={cn("max-w-[14rem] text-center text-xs leading-snug", plannerNeon.subtext)}>
                   {t("step1VisualHint")}
                 </p>
               </div>
             </div>
           </motion.div>
-          <p className="font-mono text-[11px] leading-relaxed tracking-tight text-hero-fg/70">
-            {`// `}{t("step1VisualDesc")}
+          <p className={cn("text-xs leading-relaxed", plannerNeon.subtext)}>
+            {t("step1VisualDesc")}
           </p>
         </div>
       </motion.aside>

@@ -1,4 +1,5 @@
 import { typeLabels, type MediaItem } from "@/lib/media-data";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 
 const META_DESC_MAX = 158;
 const TITLE_MAX = 72;
@@ -132,7 +133,7 @@ export function buildMediaMetaDescription(
     ? Math.round(
         (media.keywordFilter.budgetMin + media.keywordFilter.budgetMax) / 2,
       )
-    : media.price * 10_000;
+    : catalogPriceFieldToWon(media.price);
 
   let base: string;
   if (media.keywordFilter) {

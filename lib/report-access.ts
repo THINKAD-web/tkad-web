@@ -11,6 +11,11 @@ import {
   type AccessCheckResult,
   type ReportFeature,
 } from "@/lib/report-access-shared";
+import {
+  grantProTrialOnSignup,
+  isPro,
+  trialDaysLeft as getTrialDaysLeft,
+} from "@/lib/check-plan";
 
 export type { AccessCheckResult, ReportFeature } from "@/lib/report-access-shared";
 export {
@@ -37,7 +42,7 @@ export function resolveLevelFromPlan(
   plan: SubscriptionPlan,
   status: SubscriptionStatus,
   trialEndsAt: Date | null,
-  proTrialEndsAt: Date | null,
+  userPlan: { plan: string; trialEndsAt: Date | null; proTrialEndsAt: Date | null },
 ): ReportAccessLevel {
   const now = Date.now();
   if (plan === "ENTERPRISE" && status === "ACTIVE") return "ENTERPRISE";
@@ -45,7 +50,8 @@ export function resolveLevelFromPlan(
     if (trialEndsAt && trialEndsAt.getTime() < now) return "MEMBER";
     return "PRO";
   }
-  if (proTrialEndsAt && proTrialEndsAt.getTime() > now) return "PRO";
+  if (userPlan.plan === "ENTERPRISE") return "ENTERPRISE";
+  if (isPro(userPlan)) return "PRO";
   if (plan === "FREE" || status === "EXPIRED" || status === "CANCELLED") {
     return "MEMBER";
   }
@@ -60,6 +66,8 @@ export async function getUserReportLevel(userId: string | null): Promise<ReportA
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
+        plan: true,
+        trialEndsAt: true,
         proTrialEndsAt: true,
         subscriptions: {
           where: { status: { in: ["ACTIVE", "TRIALING", "PAST_DUE"] } },
@@ -73,9 +81,7 @@ export async function getUserReportLevel(userId: string | null): Promise<ReportA
 
     const sub = user.subscriptions[0];
     if (!sub) {
-      if (user.proTrialEndsAt && user.proTrialEndsAt.getTime() > Date.now()) {
-        return "PRO";
-      }
+      if (isPro(user)) return "PRO";
       return "MEMBER";
     }
 
@@ -83,7 +89,7 @@ export async function getUserReportLevel(userId: string | null): Promise<ReportA
       sub.plan,
       sub.status,
       sub.trialEndsAt,
-      user.proTrialEndsAt,
+      user,
     );
   } catch {
     return "MEMBER";
@@ -103,11 +109,11 @@ export async function checkReportAccess(
       try {
         const user = await prisma.user.findUnique({
           where: { id: userId },
-          select: { proTrialEndsAt: true },
+          select: { plan: true, trialEndsAt: true, proTrialEndsAt: true },
         });
-        if (user?.proTrialEndsAt) {
-          const ms = user.proTrialEndsAt.getTime() - Date.now();
-          if (ms > 0) trialDaysLeft = Math.ceil(ms / (86400 * 1000));
+        if (user) {
+          const days = getTrialDaysLeft(user);
+          if (days != null && days > 0) trialDaysLeft = days;
         }
       } catch {
         /* schema drift — treat as allowed without trial metadata */
@@ -129,21 +135,7 @@ export async function checkReportAccess(
 
 /** 첫 가입 PRO 14일 체험 시작 */
 export async function startProTrialIfEligible(userId: string): Promise<void> {
-  if (!isDatabaseConfigured()) return;
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { proTrialEndsAt: true, createdAt: true },
-  });
-  if (!user || user.proTrialEndsAt) return;
-
-  const trialEnds = new Date(user.createdAt);
-  trialEnds.setDate(trialEnds.getDate() + PRO_TRIAL_DAYS);
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: { proTrialEndsAt: trialEnds },
-  });
+  await grantProTrialOnSignup(userId);
 }
 
 /** 플래너 PDF 1회 무료 (리드 수집 후) */

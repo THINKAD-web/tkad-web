@@ -19,7 +19,11 @@ import {
   Trash2,
 } from "lucide-react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
-import { BtnBlock } from "@/components/brutalist";
+import {
+  PlannerNeonCard,
+  PlannerNeonLabel,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
@@ -192,45 +196,39 @@ export default function PlannerSimulationStep3({
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center sm:text-left">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-          [ STEP 5 / LOGO + SIMULATION ]
-        </p>
-        <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+        <PlannerNeonLabel>Step 5 / Logo + Simulation</PlannerNeonLabel>
+        <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
           {t("stepSimTitle")}
         </h2>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {t("stepSimDesc")}
-        </p>
+        <p className={plannerNeon.subtext}>{t("stepSimDesc")}</p>
       </div>
 
-      <div className="border-2 border-border bg-card">
-        <div className="border-b-2 border-border p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            [ CREATIVE UPLOAD ]
-          </p>
-          <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+      <PlannerNeonCard>
+        <div className={plannerNeon.cardHeader}>
+          <PlannerNeonLabel>Creative Upload</PlannerNeonLabel>
+          <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
             {t("creativeUploadTitle")}
           </h3>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+          <p className={cn("mt-1", plannerNeon.subtext)}>
             {t("creativeUploadDesc")}
           </p>
         </div>
-        <div className="p-5">
-          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-stretch">
+        <div className="p-5 sm:p-6">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-stretch">
             <div
               className={cn(
-                "relative border-2 p-6 transition-colors",
+                "relative rounded-xl border p-6 transition-colors",
                 creativeObjectUrl
-                  ? "border-primary bg-muted"
-                  : "border-border bg-muted hover:bg-card",
+                  ? "border-violet-400/50 dark:bg-violet-500/10 bg-violet-50"
+                  : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 hover:border-violet-300/40",
               )}
             >
               <div className="flex flex-col items-center justify-center gap-2 text-center">
-                <ImageUp className="h-8 w-8 text-primary" aria-hidden />
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">
-                  [ {t("creativeUploadCta")} ]
+                <ImageUp className="h-8 w-8 text-violet-400" aria-hidden />
+                <p className={cn("text-sm font-semibold", plannerNeon.headline)}>
+                  {t("creativeUploadCta")}
                 </p>
-                <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
+                <p className={cn("text-xs", plannerNeon.subtext)}>
                   {t("creativeUploadHint")}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
@@ -241,26 +239,33 @@ export default function PlannerSimulationStep3({
                     className="sr-only"
                     onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
                   />
-                  <BtnBlock
-                    variant="accent"
-                    size="md"
+                  <button
+                    type="button"
                     onClick={() => inputRef.current?.click()}
                     disabled={upload.status === "uploading"}
+                    className={cn(
+                      plannerNeon.cta,
+                      "disabled:opacity-50",
+                    )}
                   >
                     {upload.status === "uploading" ? (
                       <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                     ) : null}
                     {t("creativeUploadButton")}
-                  </BtnBlock>
+                  </button>
                   {creativeObjectUrl || creativeUploadedUrl ? (
-                    <BtnBlock
-                      variant="secondary"
-                      size="md"
+                    <button
+                      type="button"
                       onClick={clearCreative}
+                      className={cn(
+                        plannerNeon.selectChip,
+                        plannerNeon.selectChipIdle,
+                        "px-4 py-2",
+                      )}
                     >
                       <Trash2 className="h-4 w-4" />
                       {t("creativeRemove")}
-                    </BtnBlock>
+                    </button>
                   ) : null}
                 </div>
 
@@ -272,18 +277,18 @@ export default function PlannerSimulationStep3({
                     aria-valuemax={100}
                     aria-valuenow={upload.pct}
                   >
-                    <div className="h-2 w-full border-2 border-border bg-card">
+                    <div className="h-2 w-full overflow-hidden rounded-full dark:bg-white/10 bg-gray-200">
                       <div
-                        className="h-full bg-primary transition-all"
+                        className="h-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all"
                         style={{ width: `${upload.pct}%` }}
                       />
                     </div>
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {`// `}{t("creativeUploadProgress", { pct: upload.pct })}
+                    <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
+                      {t("creativeUploadProgress", { pct: upload.pct })}
                     </p>
                   </div>
                 ) : upload.status === "done" ? (
-                  <p className="mt-3 inline-flex items-center gap-1 border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground">
+                  <p className="mt-3 inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
                     <Check className="h-3 w-3" aria-hidden />
                     {t("creativeUploadSuccess")}
                   </p>
@@ -291,11 +296,14 @@ export default function PlannerSimulationStep3({
               </div>
             </div>
 
-            <div className="-ml-[2px] -mt-[2px] space-y-2 border-2 border-border bg-card p-5 lg:mt-0">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                [ {t("creativeSpecTitle")} ]
-              </p>
-              <ul className="space-y-1.5 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+            <div
+              className={cn(
+                plannerNeon.card,
+                "space-y-2 p-5 lg:mt-0",
+              )}
+            >
+              <PlannerNeonLabel>{t("creativeSpecTitle")}</PlannerNeonLabel>
+              <ul className={cn("space-y-1.5 text-xs leading-relaxed", plannerNeon.subtext)}>
                 <li>· {t("creativeSpecTypes")}</li>
                 <li>· {t("creativeSpecRatio")}</li>
                 <li>· {t("creativeSpecTip")}</li>
@@ -303,53 +311,52 @@ export default function PlannerSimulationStep3({
             </div>
           </div>
         </div>
-      </div>
+      </PlannerNeonCard>
 
-      <div className="border-2 border-border bg-card">
-        <div className="border-b-2 border-border p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            [ SIMULATION ]
-          </p>
-          <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+      <PlannerNeonCard>
+        <div className={plannerNeon.cardHeader}>
+          <PlannerNeonLabel>Simulation</PlannerNeonLabel>
+          <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
             {t("simViewTitle")}
           </h3>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
-            {t("simViewDesc")}
-          </p>
+          <p className={cn("mt-1", plannerNeon.subtext)}>{t("simViewDesc")}</p>
         </div>
-        <div className="p-5">
+        <div className="p-5 sm:p-6">
           {creativeObjectUrl || creativeUploadedUrl ? (
-            <div className="mb-4 border-2 border-primary bg-card px-4 py-3">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                [ {t("simCompositeApproxTitle")} ]
-              </p>
-              <p className="mt-1 text-sm leading-relaxed text-foreground">
+            <div className="mb-4 rounded-xl border dark:border-violet-500/30 border-violet-200 dark:bg-violet-500/10 bg-violet-50 px-4 py-3">
+              <PlannerNeonLabel>{t("simCompositeApproxTitle")}</PlannerNeonLabel>
+              <p className={cn("mt-1 text-sm leading-relaxed", plannerNeon.subtext)}>
                 {t("simCompositeApproxBody")}
               </p>
             </div>
           ) : null}
           {mediaCards.length === 0 ? (
-            <div className="border-2 border-border bg-muted py-12 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-              {`// `}{t("simEmpty")}
+            <div
+              className={cn(
+                "rounded-xl border py-12 text-center text-sm",
+                "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50",
+                plannerNeon.subtext,
+              )}
+            >
+              {t("simEmpty")}
             </div>
           ) : (
             <div className="space-y-6">
-              {/* 썸네일 그리드 — 3개 이상일 때 한눈에 비교 */}
               {mediaCards.length >= 2 ? (
                 <div>
-                  <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                    [ {t("simGridLabel")} ]
-                  </p>
-                  <ul className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4">
+                  <PlannerNeonLabel className="mb-3 block">
+                    {t("simGridLabel")}
+                  </PlannerNeonLabel>
+                  <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                     {mediaCards.map((m, i) => (
-                      <li key={m.id} className="-mt-[2px] -ml-[2px]">
+                      <li key={m.id}>
                         <button
                           type="button"
                           className={cn(
-                            "block w-full overflow-hidden border-2 transition-colors",
+                            "block w-full overflow-hidden rounded-xl border-2 transition-colors",
                             i === slideIndex
-                              ? "border-primary"
-                              : "border-border hover:border-primary",
+                              ? "border-violet-400"
+                              : "dark:border-white/10 border-gray-200 hover:border-violet-300/50",
                           )}
                           onClick={() => {
                             setSlideDir((i > slideIndex ? 1 : -1) as 1 | -1);
@@ -378,33 +385,41 @@ export default function PlannerSimulationStep3({
               ) : null}
 
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                  [ {t("simPerMediaLabel")} ]
-                </p>
+                <PlannerNeonLabel>{t("simPerMediaLabel")}</PlannerNeonLabel>
                 <div className="flex items-center gap-2">
                   {(creativeObjectUrl || creativeUploadedUrl) && current ? (
                     <>
-                      <BtnBlock
-                        variant={editing ? "accent" : "secondary"}
-                        size="sm"
+                      <button
+                        type="button"
                         onClick={() => setEditing((v) => !v)}
+                        className={cn(
+                          plannerNeon.selectChip,
+                          editing
+                            ? plannerNeon.selectChipActive
+                            : plannerNeon.selectChipIdle,
+                          "px-3 py-1.5 text-xs",
+                        )}
                       >
-                        <Move className="h-3 w-3" aria-hidden />
+                        <Move className="mr-1 inline h-3 w-3" aria-hidden />
                         {editing ? t("editLogoDone") : t("editLogo")}
-                      </BtnBlock>
+                      </button>
                       {editing && mediaPlacements[current.id] ? (
-                        <BtnBlock
-                          variant="secondary"
-                          size="sm"
+                        <button
+                          type="button"
                           onClick={() => clearMediaPlacement(current.id)}
                           aria-label={t("editLogoReset")}
+                          className={cn(
+                            plannerNeon.selectChip,
+                            plannerNeon.selectChipIdle,
+                            "px-2 py-1.5",
+                          )}
                         >
                           <RotateCcw className="h-3 w-3" aria-hidden />
-                        </BtnBlock>
+                        </button>
                       ) : null}
                     </>
                   ) : null}
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
+                  <p className={cn("text-xs font-bold tabular-nums", plannerNeon.headline)}>
                     {t("simCounter", {
                       current: slideIndex + 1,
                       total: mediaCards.length,
@@ -419,7 +434,7 @@ export default function PlannerSimulationStep3({
                   onClick={goPrev}
                   disabled={slideIndex <= 0}
                   aria-label={t("simPrev")}
-                  className="absolute left-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-30"
+                  className="absolute left-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/10 bg-white/90 text-foreground transition-colors hover:border-violet-400/50 disabled:opacity-30"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -428,12 +443,12 @@ export default function PlannerSimulationStep3({
                   onClick={goNext}
                   disabled={slideIndex >= maxIdx}
                   aria-label={t("simNext")}
-                  className="absolute right-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center border-2 border-border bg-card text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-30"
+                  className="absolute right-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/10 bg-white/90 text-foreground transition-colors hover:border-violet-400/50 disabled:opacity-30"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
 
-                <div className="overflow-hidden border-2 border-border bg-muted">
+                <div className="overflow-hidden rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100">
                   <AnimatePresence
                     initial={false}
                     custom={slideDir === 0 ? 1 : slideDir}
@@ -491,11 +506,11 @@ export default function PlannerSimulationStep3({
                 </div>
               </div>
 
-              <p className="text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                {`// `}{t("simSwipeHint")}
+              <p className={cn("text-center text-xs", plannerNeon.subtext)}>
+                {t("simSwipeHint")}
               </p>
 
-              <div className="flex flex-wrap justify-center gap-1">
+              <div className="flex flex-wrap justify-center gap-1.5">
                 {mediaCards.map((m, i) => (
                   <button
                     key={m.id}
@@ -505,10 +520,10 @@ export default function PlannerSimulationStep3({
                       setSlideIndex(i);
                     }}
                     className={cn(
-                      "h-3 border-2 border-border transition-all",
+                      "h-2 rounded-full transition-all",
                       i === slideIndex
-                        ? "w-8 bg-primary"
-                        : "w-3 bg-card hover:bg-muted",
+                        ? "w-8 bg-gradient-to-r from-violet-500 to-cyan-400"
+                        : "w-2 dark:bg-white/20 bg-gray-300 hover:bg-violet-400/50",
                     )}
                     aria-label={t("simDotLabel", { n: i + 1 })}
                   />
@@ -517,7 +532,7 @@ export default function PlannerSimulationStep3({
             </div>
           )}
         </div>
-      </div>
+      </PlannerNeonCard>
     </div>
   );
 }

@@ -13,31 +13,24 @@ import {
   NAVER_AUTH_LOCALE_COOKIE,
   NAVER_AUTH_REDIRECT_COOKIE,
 } from "@/lib/naver-auth-redirect";
+import {
+  checkNextAuthConfig,
+  isKakaoOAuthConfigured,
+  isNaverOAuthConfigured,
+} from "@/lib/auth-oauth-env";
 
-function authSecret(): string | undefined {
-  return (
-    process.env.AUTH_SECRET?.trim() ||
-    process.env.USER_SESSION_SECRET?.trim() ||
-    undefined
-  );
-}
+const nextAuthConfig = checkNextAuthConfig();
+const authSecretValue = nextAuthConfig.ok ? nextAuthConfig.secret : undefined;
 
-function kakaoConfigured(): boolean {
-  return Boolean(
-    process.env.KAKAO_CLIENT_ID?.trim() &&
-      process.env.KAKAO_CLIENT_SECRET?.trim(),
-  );
-}
-
-function naverConfigured(): boolean {
-  return Boolean(
-    process.env.NAVER_CLIENT_ID?.trim() &&
-      process.env.NAVER_CLIENT_SECRET?.trim(),
+if (!nextAuthConfig.ok) {
+  console.error(
+    "[auth] NextAuth disabled until AUTH_SECRET or USER_SESSION_SECRET is set:",
+    nextAuthConfig.issues.map((i) => i.key).join(", "),
   );
 }
 
 const providers = [
-  ...(kakaoConfigured()
+  ...(isKakaoOAuthConfigured()
     ? [
         Kakao({
           clientId: process.env.KAKAO_CLIENT_ID!,
@@ -45,7 +38,7 @@ const providers = [
         }),
       ]
     : []),
-  ...(naverConfigured()
+  ...(isNaverOAuthConfigured()
     ? [
         NaverProvider({
           clientId: process.env.NAVER_CLIENT_ID!,
@@ -57,7 +50,7 @@ const providers = [
 
 export const { handlers, signIn, auth } = NextAuth({
   trustHost: true,
-  secret: authSecret(),
+  secret: authSecretValue,
   providers,
   session: { strategy: "jwt", maxAge: 60 * 10 },
   callbacks: {
@@ -66,7 +59,7 @@ export const { handlers, signIn, auth } = NextAuth({
       const cookieStore = await cookies();
 
       if (account?.provider === "kakao") {
-        if (!kakaoConfigured()) return false;
+        if (!isKakaoOAuthConfigured()) return false;
         if (!account.providerAccountId) return false;
 
         const redirect =
@@ -102,7 +95,7 @@ export const { handlers, signIn, auth } = NextAuth({
       }
 
       if (account?.provider === "naver") {
-        if (!naverConfigured()) return false;
+        if (!isNaverOAuthConfigured()) return false;
         if (!account.providerAccountId) return false;
 
         const redirect =

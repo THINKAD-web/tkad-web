@@ -196,13 +196,8 @@ export default function MediaBrowseClient({
     [bounds],
   );
 
-  const [budgetMin, setBudgetMin] = useState(0);
-  const [budgetMax, setBudgetMax] = useState(999999999);
-
-  useEffect(() => {
-    setBudgetMin(bounds.minPrice);
-    setBudgetMax(bounds.maxPrice);
-  }, [bounds.minPrice, bounds.maxPrice]);
+  const [budgetMin, setBudgetMin] = useState(PRECISION_BUDGET_MIN_MAN);
+  const [budgetMax, setBudgetMax] = useState(PRECISION_BUDGET_MAX_MAN);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

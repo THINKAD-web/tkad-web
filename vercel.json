@@ -152,6 +152,10 @@
       "schedule": "0 7 * * *"
     },
     {
+      "path": "/api/cron/pro-trial-expiry",
+      "schedule": "0 0 * * *"
+    },
+    {
       "path": "/api/cron/potential-media-outreach",
       "schedule": "0 2 * * *"
     }
