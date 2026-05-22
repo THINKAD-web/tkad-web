@@ -93,7 +93,7 @@ export function CampaignAlimtalkSend({
   if (!campaignId) return null;
 
   return (
-    <div className="rounded-lg border border-border/70 bg-muted/15 p-3">
+    <div className="rounded-2xl border border-border/70 bg-muted/15 p-3">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

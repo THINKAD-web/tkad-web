@@ -346,7 +346,7 @@ export function CreativeUploader({
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ 미리보기 ]
           </p>
-          <div className="mt-3 aspect-[16/10] w-full overflow-hidden rounded-lg border-2 border-border dark:bg-black bg-white dark:bg-white/5 bg-gray-50 bg-white/30">
+          <div className="mt-3 aspect-[16/10] w-full overflow-hidden rounded-2xl border-2 border-border dark:bg-black bg-white dark:bg-white/5 bg-gray-50 bg-white/30">
             {previewUrl ? (
               meta?.kind === "video" ? (
                 <video

@@ -138,7 +138,7 @@ export default function MobileQuickQuoteFloating() {
                   required
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="mt-1 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-3 py-2.5 text-sm dark:text-white text-gray-900"
+                  className="mt-1 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 px-3 py-2.5 text-sm dark:text-white text-gray-900"
                 />
               </label>
               <label className="block">
@@ -149,7 +149,7 @@ export default function MobileQuickQuoteFloating() {
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
                   placeholder={isKo ? "010-0000-0000" : "+82 10-0000-0000"}
-                  className="mt-1 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-3 py-2.5 text-sm dark:text-white text-gray-900"
+                  className="mt-1 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 px-3 py-2.5 text-sm dark:text-white text-gray-900"
                 />
               </label>
               <label className="block">
@@ -159,7 +159,7 @@ export default function MobileQuickQuoteFloating() {
                   value={memo}
                   onChange={(e) => setMemo(e.target.value)}
                   placeholder={isKo ? "캠페인 목표 한 줄" : "One-line campaign goal"}
-                  className="mt-1 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-3 py-2.5 text-sm dark:text-white text-gray-900"
+                  className="mt-1 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 px-3 py-2.5 text-sm dark:text-white text-gray-900"
                 />
               </label>
               <button

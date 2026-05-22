@@ -36,7 +36,7 @@ import {
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
-  formatMediaPriceWonWithSymbol,
+  formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
@@ -600,7 +600,7 @@ function AiResultCard({
             compact && "text-center",
           )}
         >
-          {formatMediaPriceWonWithSymbol(m.price)}
+          {formatCatalogPriceFieldWon(m.price)}
           <span className="text-xs font-normal text-muted-foreground">
             {" "}
             · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}

@@ -71,7 +71,7 @@ const AdminMediaDraggableMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-[260px] animate-pulse rounded-lg bg-slate-100" />
+      <div className="h-[260px] animate-pulse rounded-2xl bg-slate-100" />
     ),
   },
 );
@@ -1792,7 +1792,7 @@ export default function AdminMediasClient({
           onBatchComplete={() => void loadMedias({ showSpinner: false })}
         />
 
-        <div className="rounded-lg border border-border bg-muted/15 px-2 py-2 sm:px-2.5">
+        <div className="rounded-2xl border border-border bg-muted/15 px-2 py-2 sm:px-2.5">
           <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             노출 필터
           </p>
@@ -1867,7 +1867,7 @@ export default function AdminMediasClient({
         </div>
 
         {listError && (
-          <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
             <AlertCircle className="h-4 w-4 shrink-0" />
             {listError}
           </div>
@@ -1880,7 +1880,7 @@ export default function AdminMediasClient({
             search.trim() !== "" ||
             publicFilter !== "all" ||
             availabilityFilter !== "all") && (
-            <div className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
               <span className="min-w-0 leading-snug">
                 필터 또는 검색 때문에 표시되는 매체가 없습니다. (전체{" "}
                 {medias.length}건)
@@ -2699,7 +2699,7 @@ export default function AdminMediasClient({
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 bg-zinc-900/30 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 dark:backdrop-blur-sm"
+            className="absolute inset-0 dark:bg-zinc-900 bg-gray-50/30 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 dark:backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
             aria-hidden
           />
@@ -2817,7 +2817,7 @@ export default function AdminMediasClient({
                 }
               />
 
-              <div className="rounded-lg border-2 border-border bg-muted p-3 bg-muted/60">
+              <div className="rounded-2xl border-2 border-border bg-muted p-3 bg-muted/60">
                 <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-foreground">
                   <MapPin className="h-3.5 w-3.5 text-primary" />
                   주변 정보 미리보기
@@ -3014,7 +3014,7 @@ export default function AdminMediasClient({
               </div>
 
               {form.type.trim() === "mobile" ? (
-                <div className="rounded-lg border border-border bg-muted/40 p-3">
+                <div className="rounded-2xl border border-border bg-muted/40 p-3">
                   <p className="mb-2 text-xs font-semibold text-foreground">
                     이동형 — 서비스 구역 (전국 시·군·구)
                   </p>
@@ -3359,7 +3359,7 @@ export default function AdminMediasClient({
                     priceOptDrafts.map((row, idx) => (
                       <div
                         key={row.key}
-                        className="space-y-2 rounded-lg border-2 border-border bg-card p-3 shadow-sm"
+                        className="space-y-2 rounded-2xl border-2 border-border bg-card p-3 shadow-sm"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-[11px] font-bold text-muted-foreground">
@@ -3654,7 +3654,7 @@ export default function AdminMediasClient({
       {uploadModalOpen && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 bg-zinc-900/30 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 dark:backdrop-blur-sm"
+            className="absolute inset-0 dark:bg-zinc-900 bg-gray-50/30 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 dark:backdrop-blur-sm"
             onClick={() => setUploadModalOpen(false)}
             aria-hidden
           />
@@ -3726,7 +3726,7 @@ export default function AdminMediasClient({
                     return (
                       <div
                         key={`${item.file.name}-${idx}`}
-                        className="flex items-center gap-3 rounded-lg border p-3"
+                        className="flex items-center gap-3 rounded-2xl border p-3"
                       >
                         <Image
                           src={item.preview}
@@ -3848,7 +3848,7 @@ export default function AdminMediasClient({
       {deleteConfirm !== null && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100"
+            className="absolute inset-0 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100"
             onClick={() => setDeleteConfirm(null)}
             aria-hidden
           />

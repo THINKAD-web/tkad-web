@@ -80,7 +80,7 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
       </p>
 
       {/* 통계 3개 */}
-      <dl className="relative mt-5 grid grid-cols-3 gap-2 rounded-xl border border-black/5 dark:bg-black bg-white bg-white/[0.02] p-3 dark:border-white/8 dark:bg-white/[0.04] sm:gap-3 sm:p-4">
+      <dl className="relative mt-5 grid grid-cols-3 gap-2 rounded-xl border border-black/5 dark:bg-black bg-white/[0.02] p-3 dark:border-white/8 dark:bg-white/[0.04] sm:gap-3 sm:p-4">
         <Stat
           icon={<Layers className="h-3.5 w-3.5" />}
           label={cardLabels.media}

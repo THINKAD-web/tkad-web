@@ -12,7 +12,7 @@ export default function RecommendLoading() {
         </div>
       </section>
       <section className="border-t-2 border-border bg-card py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <div className="mb-8 space-y-3">
             <div className="h-10 w-full max-w-2xl animate-pulse border-2 border-border bg-muted" />
             <div className="h-4 w-64 animate-pulse bg-muted" />

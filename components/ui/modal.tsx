@@ -69,7 +69,7 @@ export default function Modal({
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
         className={cn(
-          "tkad-glass-surface relative w-full max-h-[min(92dvh,920px)] animate-fade-in-up overflow-y-auto overscroll-contain rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/45 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:max-h-[90vh]",
+          "tkad-glass-surface relative w-full max-h-[min(92dvh,920px)] animate-fade-in-up overflow-y-auto overscroll-contain rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:max-h-[90vh]",
           className ?? "max-w-lg",
         )}
       >
@@ -82,7 +82,7 @@ export default function Modal({
           type="button"
           onClick={onClose}
           disabled={locked}
-          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900 disabled:pointer-events-none disabled:opacity-50 sm:right-4 sm:top-4 sm:h-8 sm:w-8"
+          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900 disabled:pointer-events-none disabled:opacity-50 sm:right-4 sm:top-4 sm:h-8 sm:w-8"
           aria-label="Close"
         >
           <X className="h-4 w-4" />

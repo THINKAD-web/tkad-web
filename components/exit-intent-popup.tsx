@@ -171,7 +171,7 @@ export default function ExitIntentPopup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={isKo ? "work@company.com" : "work@company.com"}
-              className="w-full rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-4 py-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400"
+              className="w-full rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 px-4 py-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400"
             />
             {error ? <p className="text-sm text-red-300">{error}</p> : null}
             <div className="flex flex-col gap-3 sm:flex-row">

@@ -731,7 +731,7 @@ export default function AdminCampaignsPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {formErr && (
-              <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                 {formErr}
               </div>
             )}
@@ -1197,7 +1197,7 @@ export default function AdminCampaignsPage() {
                       className="text-xs"
                     />
                     {bookingSearchResults.length > 0 && !bookingForm.mediaId && (
-                      <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-navy/15 bg-white shadow-lg">
+                      <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-2xl border border-navy/15 bg-white shadow-lg">
                         {bookingSearchResults.map(m => (
                           <button key={m.id} type="button"
                             className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-xs hover:bg-slate-50"
@@ -1237,7 +1237,7 @@ export default function AdminCampaignsPage() {
                   {mediaBookings.length > 0 && (
                     <div className="mt-2 space-y-1.5">
                       {mediaBookings.map((b, i) => (
-                        <div key={b.id ?? i} className="flex items-center gap-2 rounded-lg border border-navy/10 bg-slate-50/60 px-3 py-2 text-xs">
+                        <div key={b.id ?? i} className="flex items-center gap-2 rounded-2xl border border-navy/10 bg-slate-50/60 px-3 py-2 text-xs">
                           <div className="min-w-0 flex-1">
                             <p className="font-semibold text-foreground">{b.media?.name ?? b.title}</p>
                             <p className="text-muted-foreground">{b.startsAt?.slice(0,10)} ~ {b.endsAt?.slice(0,10)} {b.media?.dailyFootfall ? `· ${b.media.dailyFootfall.toLocaleString()}명/일` : ""}</p>

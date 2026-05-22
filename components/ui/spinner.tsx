@@ -5,9 +5,9 @@ type SpinnerProps = {
 };
 
 const SIZE: Record<NonNullable<SpinnerProps["size"]>, string> = {
-  sm: "w-4 h-4 border-2",
-  md: "w-6 h-6 border-2",
-  lg: "w-10 h-10 border-[3px]",
+  sm: "h-4 w-4 border-2",
+  md: "h-5 w-5 border-2",
+  lg: "h-8 w-8 border-2",
 };
 
 export function Spinner({ size = "md", label, className = "" }: SpinnerProps) {
@@ -45,15 +45,17 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="bg-card border border-border/60 rounded-2xl p-8 sm:p-12 text-center shadow-sm">
-      {icon && <div className="text-4xl mb-3">{icon}</div>}
-      <h3 className="text-base font-semibold text-foreground mb-2">{title}</h3>
-      {description && (
-        <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto leading-relaxed">
-          {description}
-        </p>
+    <div className="ui-empty ui-card-light mx-auto max-w-md">
+      {icon && (
+        <div className="ui-empty-icon flex items-center justify-center text-4xl" aria-hidden>
+          {icon}
+        </div>
       )}
-      {action}
+      <h3 className="ui-empty-title">{title}</h3>
+      {description && (
+        <p className="ui-empty-sub mt-2 max-w-sm">{description}</p>
+      )}
+      {action ? <div className="mt-6 flex justify-center">{action}</div> : null}
     </div>
   );
 }

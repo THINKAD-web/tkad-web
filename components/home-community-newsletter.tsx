@@ -41,7 +41,7 @@ export function HomeCommunityNewsletter({ isKo, className }: Props) {
   return (
     <div
       className={cn(
-        "tkad-neon-border tkad-neon-glow relative overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 bg-white/[0.04] p-5 dark:text-white text-gray-900 backdrop-blur sm:p-6",
+        "tkad-neon-border relative overflow-hidden rounded-[28px] border border-gray-200 bg-white p-5 text-gray-900 shadow-sm dark:border-white/12 dark:bg-white/5 dark:text-white dark:shadow-none sm:p-6",
         className,
       )}
     >
@@ -84,7 +84,7 @@ export function HomeCommunityNewsletter({ isKo, className }: Props) {
             disabled={status === "loading" || status === "success"}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={isKo ? "work@company.com" : "work@company.com"}
-            className="h-11 min-w-0 flex-1 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/35 px-4 font-mono text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-colors focus:border-white/22 focus:ring-2 focus:ring-[#a855f7]/30 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 min-w-0 flex-1 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-4 font-mono text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-colors focus:border-white/22 focus:ring-2 focus:ring-[#a855f7]/30 disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
             type="submit"

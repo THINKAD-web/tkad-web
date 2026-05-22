@@ -1,19 +1,30 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { ui } from "@/lib/ui-classes";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const HEADLINE_GRADIENT =
-  "bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent";
+  "bg-gradient-to-r from-violet-500 via-pink-500 to-cyan-400 bg-clip-text text-transparent";
 
 /** `/media/packages` 히어로 CTA와 동일한 스타일 토큰 */
-export const categoryHeroCtaPrimaryClass =
-  "category-hero-cta-primary inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-7 text-sm font-bold dark:text-white text-gray-900 shadow-[0_18px_48px_rgba(139,92,246,0.35)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+export const categoryHeroCtaPrimaryClass = cn(
+  "category-hero-cta-primary",
+  ui.btnPrimary,
+  "shadow-[0_18px_48px_rgba(139,92,246,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:ring-offset-2",
+);
 
-export const categoryHeroCtaSecondaryClass =
-  "category-hero-cta-secondary inline-flex h-12 items-center justify-center gap-2 rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-7 text-sm font-bold dark:text-white text-gray-900 transition-colors hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+export const categoryHeroCtaSecondaryClass = cn(
+  "category-hero-cta-secondary",
+  ui.btnSecondary,
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 dark:focus-visible:ring-white/40",
+);
 
 /** packages 히어로 통계 카드 */
-export const categoryHeroStatCardClass =
-  "rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 backdrop-blur";
+export const categoryHeroStatCardClass = cn(
+  "category-hero-stat-card ui-card-text",
+  ui.cardLight,
+  ui.cardPadSm,
+);
 
 export function CategoryHeroCtaRow({
   children,
@@ -25,7 +36,7 @@ export function CategoryHeroCtaRow({
   return (
     <div
       className={cn(
-        "flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center",
+        "flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center md:justify-start",
         className,
       )}
     >
@@ -35,7 +46,6 @@ export function CategoryHeroCtaRow({
 }
 
 export type CategoryExploreHeroProps = {
-  /** e.g. `// 01 · MEDIA` */
   code: string;
   headlineBefore: string;
   headlineGradient: string;
@@ -43,32 +53,24 @@ export type CategoryExploreHeroProps = {
   subtitle: string;
   children?: ReactNode;
   className?: string;
-  /** 모바일에서 코드·헤드라인만 슬림 표시 (지도 등) */
   compactOnMobile?: boolean;
-  /** 코드 라인 옆 BETA 뱃지 */
   showBeta?: boolean;
 };
 
-/** 히어로·네비 공통 BETA 뱃지 — 라이트/다크 CSS는 `category-hero-beta-badge` */
 export function CategoryHeroBetaBadge({ className }: { className?: string }) {
   return (
-    <span
-      className={cn(
-        "category-hero-beta-badge inline-flex shrink-0 items-center rounded-md border border-violet-500/50 bg-violet-100 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-violet-900 dark:border-violet-400/45 dark:bg-violet-500/30 dark:text-violet-100",
-        className,
-      )}
-    >
+    <StatusBadge variant="beta" className={cn("category-hero-beta-badge shrink-0", className)}>
       <span aria-hidden className="mr-1 not-italic">
         ✨
       </span>
       BETA
-    </span>
+    </StatusBadge>
   );
 }
 
 function CategoryHeroCodeLine({ code, showBeta }: { code: string; showBeta?: boolean }) {
   return (
-    <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-mono text-sm font-medium tracking-widest text-cyan-400/60">
+    <p className={cn("ui-section-label flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mb-0 font-mono")}>
       <span>{code}</span>
       {showBeta ? <CategoryHeroBetaBadge /> : null}
     </p>
@@ -76,8 +78,7 @@ function CategoryHeroCodeLine({ code, showBeta }: { code: string; showBeta?: boo
 }
 
 /**
- * 매체 탐색·콘텐츠 카테고리 페이지 공통 네온 히어로 (중앙 정렬).
- * `tkad-category-explore-hero` — 라이트 테마에서도 항상 다크(#05050a), packages 페이지와 동일.
+ * 매체·콘텐츠 카테고리 공통 히어로 — 라이트: 밝은 배경 / 다크: 네온 풀블리드.
  */
 export function CategoryExploreHero({
   code,
@@ -93,23 +94,23 @@ export function CategoryExploreHero({
   return (
     <section
       className={cn(
-        "tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] dark:text-white text-gray-900",
+        "tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-gradient-to-b from-gray-50 via-white to-white text-gray-900 dark:from-[#05050a] dark:via-[#05050a] dark:to-[#05050a] dark:bg-[#05050a] dark:text-white",
         className,
       )}
     >
-      <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-      <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+      <div aria-hidden className="absolute inset-0 tkad-neon-depth dark:opacity-100 opacity-0" />
+      <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid dark:opacity-20 opacity-0" />
       <div
         aria-hidden
-        className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+        className="absolute inset-0 tkad-hero-noise opacity-0 mix-blend-overlay dark:opacity-[0.07]"
       />
       <div
         aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+        className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-gray-100/80 dark:bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
       />
       <div
         className={cn(
-          "relative mx-auto flex max-w-7xl flex-col items-center text-center",
+          "ui-container relative flex flex-col items-center text-center md:items-start md:text-left",
           compactOnMobile
             ? "px-4 pb-6 pt-8 sm:px-6 sm:pb-20 sm:pt-20 lg:px-8 lg:pb-24 lg:pt-24"
             : "px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-20 lg:px-8 lg:pb-24 lg:pt-24",
@@ -118,10 +119,8 @@ export function CategoryExploreHero({
         <CategoryHeroCodeLine code={code} showBeta={showBeta} />
         <h1
           className={cn(
-            "mt-4 max-w-4xl text-balance font-bold leading-[1.08] tracking-tight dark:text-white text-gray-900",
-            compactOnMobile
-              ? "text-2xl sm:text-4xl md:text-6xl"
-              : "text-4xl md:text-6xl",
+            "ui-page-headline mt-4 max-w-4xl text-balance",
+            compactOnMobile && "text-2xl sm:text-4xl md:text-6xl",
           )}
         >
           {headlineBefore}
@@ -130,7 +129,7 @@ export function CategoryExploreHero({
         </h1>
         <p
           className={cn(
-            "mx-auto max-w-xl text-lg dark:text-white text-gray-400",
+            "ui-body mx-auto max-w-xl md:mx-0",
             compactOnMobile ? "mt-2 hidden sm:block" : "mt-4",
           )}
         >

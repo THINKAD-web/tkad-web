@@ -85,7 +85,7 @@ export default async function CommunityWritePage({ params }: Props) {
                 </Link>
                 <Link
                   href="/community/members"
-                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/20 px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
+                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/20 px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
                 >
                   <Users className="h-3.5 w-3.5" />
                   {isKo ? "활동 멤버 보기" : "Browse members"}
@@ -161,7 +161,7 @@ export default async function CommunityWritePage({ params }: Props) {
                   <li>{isKo ? "3. 발행 후 댓글과 반응은 멤버 프로필에 연결됩니다." : "3. Replies and reactions stay attached to your member profile."}</li>
                 </ol>
               </div>
-              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 p-5 backdrop-blur">
+              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-5 backdrop-blur">
                 <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   {isKo ? "// note" : "// note"}
                 </p>

@@ -111,7 +111,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
   );
 
   const inputCls =
-    "h-10 rounded-xl border border-border bg-card px-3 font-mono text-sm text-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 dark:text-white text-gray-900";
+    "h-10 rounded-xl border border-border bg-card px-3 font-mono text-sm text-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 dark:text-white text-gray-900";
 
   return (
     <section
@@ -269,7 +269,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
           </div>
         </div>
 
-        <div className="rounded-2xl border-2 border-border bg-muted/30 p-4 dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 sm:p-5">
+        <div className="rounded-2xl border-2 border-border bg-muted/30 p-4 dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 sm:p-5">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
             {isKo ? "견적 요약" : "Quote summary"}
           </p>

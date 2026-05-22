@@ -20,6 +20,7 @@ import {
   estimatedMonthlyImpressions,
 } from "@/lib/ai-recommend-metrics";
 import { normalizeVisibilityScore } from "@/lib/planner-logic";
+import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
 
 const REASON_COLORS: Record<RecommendReasonKey, string> = {
   matchRegion: "border-border bg-card text-foreground",
@@ -236,7 +237,7 @@ export function PlannerRecommendationPanel({
                     }
                     if (cpm != null && cpm > 0) {
                       items.push(
-                        `CPM ₩${Math.round(cpm).toLocaleString("ko-KR")}`,
+                        `CPM ${formatMediaPriceCompactWon(Math.round(cpm), isKo ? "ko" : "en")}`,
                       );
                     }
                     if (items.length === 0) return null;

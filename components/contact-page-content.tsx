@@ -39,7 +39,7 @@ export default function ContactPageContent() {
   return (
     <>
       <section className="bg-muted/40 py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <div className="grid gap-0 lg:grid-cols-5">
             <div className="lg:col-span-3">
               <div className="border-2 border-border bg-card shadow-sm">
@@ -164,7 +164,7 @@ export default function ContactPageContent() {
       </section>
 
       <section className="bg-background py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <p className="text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
             [ DIRECTIONS ]
           </p>

@@ -65,7 +65,7 @@ export function ServicesFaq({ title, items, className }: Props) {
                     )}
                   >
                     <div className="min-h-0 overflow-hidden">
-                      <div className="tkad-services-faq-answer flex items-start gap-3 border-t dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 px-5 pb-4 pt-4 sm:px-6 sm:pb-5">
+                      <div className="tkad-services-faq-answer flex items-start gap-3 border-t dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 px-5 pb-4 pt-4 sm:px-6 sm:pb-5">
                         <span
                           aria-hidden
                           className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 font-mono text-[11px] font-bold dark:text-white text-gray-800"

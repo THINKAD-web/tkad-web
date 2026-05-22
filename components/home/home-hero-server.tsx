@@ -44,7 +44,7 @@ export async function HomeHeroServer({
   return (
     <section
       style={{ minHeight: HERO_MIN_HEIGHT }}
-      className="tkad-home-hero-neo relative flex w-full shrink-0 items-center overflow-hidden bg-[#05050a] dark:text-white text-gray-900"
+      className="tkad-home-hero-neo relative flex w-full shrink-0 items-center overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white"
       data-ab-variant={abVariant}
     >
       <AbHeroImpression page="/" />
@@ -61,23 +61,23 @@ export async function HomeHeroServer({
         <HomeHeroMarquee imageUrls={marqueeImageUrls} />
       </div>
 
-      <div aria-hidden className="absolute inset-0 z-[1] tkad-neon-depth" />
-      <div aria-hidden className="absolute inset-0 z-[1] opacity-20 tkad-neon-grid" />
+      <div aria-hidden className="absolute inset-0 z-[1] hidden tkad-neon-depth dark:block" />
+      <div aria-hidden className="absolute inset-0 z-[1] hidden opacity-20 tkad-neon-grid dark:block" />
       <div
         aria-hidden
-        className="absolute inset-0 z-[1] tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+        className="absolute inset-0 z-[1] hidden tkad-hero-noise opacity-[0.07] mix-blend-overlay dark:block"
       />
-        <div
-          aria-hidden
-          className="absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,rgba(5,5,10,0.55),rgba(5,5,10,0.82),rgba(5,5,10,0.94))]"
-        />
+      <div
+        aria-hidden
+        className="absolute inset-0 z-[1] bg-gradient-to-b from-gray-50/20 via-gray-50/60 to-gray-100 dark:bg-[linear-gradient(to_bottom,rgba(5,5,10,0.55),rgba(5,5,10,0.82),rgba(5,5,10,0.94))]"
+      />
 
         <div className="relative z-[2] mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
           <div className="flex flex-wrap items-center gap-3">
             {liveItems.map((item) => (
               <div
                 key={item.label}
-                className="inline-flex items-center gap-2 rounded-lg border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest dark:text-white text-gray-900 backdrop-blur-sm"
+                className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-100 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-gray-700 backdrop-blur-sm dark:border-white/20 dark:bg-white/10 dark:text-white"
               >
                 {item.live ? (
                   <span className="inline-flex items-center gap-1.5">
@@ -86,21 +86,21 @@ export async function HomeHeroServer({
                       aria-hidden
                     />
                     LIVE
-                    <span className="dark:text-white text-gray-500">•</span>
+                    <span className="text-gray-400 dark:text-white/50">•</span>
                   </span>
                 ) : null}
-                <span className="dark:text-white text-gray-500">{item.label}</span>
-                <span className="tabular-nums dark:text-white text-gray-900">{item.value}</span>
+                <span className="text-gray-500 dark:text-white/60">{item.label}</span>
+                <span className="tabular-nums text-gray-900 dark:text-white">{item.value}</span>
               </div>
             ))}
-            <p className="hidden font-mono text-[11px] font-bold uppercase tracking-widest dark:text-white text-gray-500 sm:block">
+            <p className="hidden font-mono text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/50 sm:block">
               {t("heroVerifiedOnly")}
             </p>
           </div>
 
           <div className="mt-8 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div className="flex flex-col gap-6">
-              <p className="font-mono text-xs tracking-widest dark:text-white text-gray-500">
+              <p className="font-mono text-xs tracking-widest text-gray-400 dark:text-white/50">
                 {t("heroEyebrow")}
               </p>
 
@@ -110,7 +110,7 @@ export async function HomeHeroServer({
                 {t("heroTitleLine2")}
               </h1>
 
-              <p className="max-w-md text-base dark:text-white text-gray-500">{t("heroSubtitle")}</p>
+              <p className="max-w-md text-base text-gray-600 dark:text-white/60">{t("heroSubtitle")}</p>
 
               <div className="flex flex-wrap gap-3">
                 <HomeHeroCta

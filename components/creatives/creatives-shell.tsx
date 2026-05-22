@@ -63,7 +63,7 @@ export function CreativesShell({
             </div>
           </CategoryExploreHero>
         ) : (
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-[#05050a] dark:text-white text-gray-900">
+        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
           <div
@@ -100,7 +100,7 @@ export function CreativesShell({
         )}
 
         <section className="bg-card py-10 sm:py-14">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
+          <div className="ui-container">{children}</div>
         </section>
       </div>
     </HomeLandingDayNight>

@@ -40,7 +40,7 @@ const glassCard =
   "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-6";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/30 px-3 py-2.5 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20";
+  "mt-1.5 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/30 px-3 py-2.5 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20";
 
 const labelClass =
   "block font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500";
@@ -267,7 +267,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
   if (result) {
     return (
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-[#05050a] pb-20">
+        <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-gray-50 pb-20 dark:bg-[#05050a]">
           <div className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-300">
               [ {t("resultEyebrow")} ]
@@ -302,7 +302,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-[#05050a] pb-20">
+      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-gray-50 pb-20 dark:bg-[#05050a]">
         <CategoryExploreHero
           code={`// ${t("heroEyebrow")}`}
           headlineBefore=""
@@ -473,7 +473,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
             {step === 3 ? (
               <div className="relative space-y-4">
                 <h2 className="text-lg font-bold dark:text-white text-gray-900">{t("step3Title")}</h2>
-                <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 p-3">
+                <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 p-3">
                   <p className={labelClass}>{t("loadPlanner")}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <input

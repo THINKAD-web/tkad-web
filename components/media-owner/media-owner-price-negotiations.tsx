@@ -112,7 +112,7 @@ export function MediaOwnerPriceNegotiations() {
           return (
             <li
               key={row.id}
-              className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 p-4"
+              className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 p-4"
             >
               <p className="font-medium dark:text-white text-gray-900">{row.mediaName}</p>
               <p className="mt-1 font-mono text-sm text-violet-200">

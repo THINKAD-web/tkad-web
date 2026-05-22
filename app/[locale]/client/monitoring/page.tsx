@@ -326,7 +326,7 @@ export default function ClientMonitoringPage() {
               {inProgress.map((p) => (
                 <div
                   key={p.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-2"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-2"
                 >
                   <div>
                     <p className="text-sm font-semibold text-navy">{p.title}</p>

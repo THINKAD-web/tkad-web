@@ -1,5 +1,9 @@
 import type { MediaItem } from "@/lib/media-data";
 import {
+  catalogPriceFieldToWon,
+  formatMediaPriceCompactWon,
+} from "@/lib/media-price-format";
+import {
   MEDIA_REGION_ZONES,
   regionZoneLabel,
   type MediaRegionZoneId,
@@ -20,9 +24,9 @@ export type MediaPriceBenchmark = {
 };
 
 export function mediaMonthlyPriceWon(m: MediaItem): number {
-  if (m.price > 0) return m.price;
+  if (m.price > 0) return catalogPriceFieldToWon(m.price);
   const opt = m.priceOptions?.[0]?.price;
-  return opt && opt > 0 ? opt : 0;
+  return opt && opt > 0 ? catalogPriceFieldToWon(opt) : 0;
 }
 
 export function resolveMediaZoneId(m: MediaItem): string | null {
@@ -107,13 +111,5 @@ export function computeMediaPriceBenchmark(
 }
 
 export function formatManWon(n: number, locale: string): string {
-  if (n >= 10_000) {
-    const man = n / 10_000;
-    return locale.startsWith("ko")
-      ? `${man >= 100 ? Math.round(man) : man.toFixed(man >= 10 ? 0 : 1)}만원`
-      : `₩${(n / 10_000).toFixed(0)}M KRW`;
-  }
-  return locale.startsWith("ko")
-    ? `${n.toLocaleString("ko-KR")}원`
-    : `₩${n.toLocaleString("en-US")}`;
+  return formatMediaPriceCompactWon(n, locale);
 }

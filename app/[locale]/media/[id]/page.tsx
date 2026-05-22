@@ -332,17 +332,17 @@ export default async function MediaDetailPage({ params }: Props) {
                       className={
                         media.availability === "reserved"
                           ? "rounded-xl border dark:border-white/18 border-gray-300 dark:bg-white/10 bg-gray-100 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur"
-                          : "rounded-xl border dark:border-white/18 border-gray-300 dark:bg-black bg-white bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 backdrop-blur"
+                          : "rounded-xl border dark:border-white/18 border-gray-300 dark:bg-black bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 backdrop-blur"
                       }
                     >
                       {t(`availability.${media.availability}`)}
                     </span>
                   ) : media.availability === "available" ? (
-                    <span className="rounded-xl border dark:border-white/18 border-gray-300 dark:bg-black bg-white bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 backdrop-blur">
+                    <span className="rounded-xl border dark:border-white/18 border-gray-300 dark:bg-black bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 backdrop-blur">
                       {t("availability.available")}
                     </span>
                   ) : null}
-                  <span className="inline-flex items-center gap-1.5 rounded-xl border dark:border-white/18 border-gray-300 dark:bg-black bg-white bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 backdrop-blur">
+                  <span className="inline-flex items-center gap-1.5 rounded-xl border dark:border-white/18 border-gray-300 dark:bg-black bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 backdrop-blur">
                     <Eye className="h-3.5 w-3.5" aria-hidden />
                     {t("visibilityBadge", {
                       score: performanceMetrics.visibilityScore,

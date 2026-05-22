@@ -94,7 +94,7 @@ export default function AdminApiUsagePage() {
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
       {data?.anomalyAlert ? (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-900 dark:text-amber-100">
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-900 dark:text-amber-100">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
           <p>{data.anomalyAlert}</p>
         </div>

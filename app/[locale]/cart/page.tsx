@@ -136,7 +136,7 @@ export default function CartPage() {
   }
 
   const inputCls =
-    "tkad-auth-input h-11 w-full rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/28 px-4 font-mono text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-all focus:dark:border-white/18 border-gray-300 focus:ring-2 focus:ring-white/12";
+    "tkad-auth-input h-11 w-full rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/28 px-4 font-mono text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-all focus:dark:border-white/18 border-gray-300 focus:ring-2 focus:ring-white/12";
   const labelCls =
     "mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600";
 
@@ -270,7 +270,7 @@ export default function CartPage() {
                     {items.map((it) => (
                       <li
                         key={it.id}
-                        className="flex flex-col gap-3 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:flex-row sm:items-center sm:gap-3 sm:p-4"
+                        className="flex flex-col gap-3 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:flex-row sm:items-center sm:gap-3 sm:p-4"
                       >
                         {it.image ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
@@ -280,7 +280,7 @@ export default function CartPage() {
                             className="h-14 w-14 shrink-0 rounded-[14px] border dark:border-white/10 border-gray-200 object-cover sm:h-16 sm:w-16 sm:rounded-[16px]"
                           />
                         ) : (
-                          <div className="h-14 w-14 shrink-0 rounded-[14px] border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 sm:h-16 sm:w-16 sm:rounded-[16px]" />
+                          <div className="h-14 w-14 shrink-0 rounded-[14px] border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 sm:h-16 sm:w-16 sm:rounded-[16px]" />
                         )}
                         <div className="min-w-0 flex-1">
                           <div className="break-words text-sm font-black leading-snug tracking-tight dark:text-white text-gray-900">
@@ -409,7 +409,7 @@ export default function CartPage() {
 
                     <div className="mt-auto flex flex-col gap-3 border-t dark:border-white/10 border-gray-200 pt-4">
                     {error && (
-                      <div className="rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/35 p-3 font-mono text-[11px] tracking-tight dark:text-white text-gray-800">
+                      <div className="rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 p-3 font-mono text-[11px] tracking-tight dark:text-white text-gray-800">
                         {`// `}{error}
                       </div>
                     )}

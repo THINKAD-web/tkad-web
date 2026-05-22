@@ -197,7 +197,7 @@ export default function AiChatbot({
             type="button"
             onClick={() => setOpen(!open)}
             className={cn(
-              "relative z-10 flex h-12 w-12 items-center justify-center rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:dark:border-white/18 border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25",
+              "relative z-10 flex h-12 w-12 items-center justify-center rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:dark:border-white/18 border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25",
               open
                 ? "dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50"
                 : "bg-[linear-gradient(135deg,rgba(168,85,247,0.9),rgba(34,211,238,0.9),rgba(236,72,153,0.9))] dark:text-white text-gray-900 dark:border-white/14 border-gray-200",
@@ -231,7 +231,7 @@ export default function AiChatbot({
           role="presentation"
         >
           <div
-            className="pointer-events-auto fixed inset-x-3 bottom-3 top-auto z-[56] mx-auto flex max-h-[55vh] min-h-[320px] flex-col overflow-hidden rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/45 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:inset-x-auto sm:bottom-6 sm:right-6 sm:left-auto sm:top-auto sm:mx-0 sm:h-[min(520px,72vh)] sm:max-h-[72vh] sm:min-h-0 sm:w-[392px] sm:max-w-[392px]"
+            className="pointer-events-auto fixed inset-x-3 bottom-3 top-auto z-[56] mx-auto flex max-h-[55vh] min-h-[320px] flex-col overflow-hidden rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:inset-x-auto sm:bottom-6 sm:right-6 sm:left-auto sm:top-auto sm:mx-0 sm:h-[min(520px,72vh)] sm:max-h-[72vh] sm:min-h-0 sm:w-[392px] sm:max-w-[392px]"
             role="dialog"
             aria-label={t("dialogLabel")}
             onClick={(e) => e.stopPropagation()}
@@ -242,7 +242,7 @@ export default function AiChatbot({
               className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
             />
             {/* Header — 검정 단색 + 모노 라벨 */}
-            <div className="relative flex shrink-0 flex-col border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/35">
+            <div className="relative flex shrink-0 flex-col border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/35">
               <div className="flex items-center gap-3 px-4 py-3">
                 <div
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur"
@@ -306,7 +306,7 @@ export default function AiChatbot({
             {panelTab === "chat" ? (
               <>
                 {/* Suggestions */}
-                <div className="relative shrink-0 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 px-3 py-3">
+                <div className="relative shrink-0 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-3 py-3">
                   <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
                     [ {t("suggestionsLabel")} ]
                   </p>
@@ -350,14 +350,14 @@ export default function AiChatbot({
                     </p>
                   ) : null}
                   {error ? (
-                    <p className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/35 px-3 py-2 font-mono text-[12px] tracking-tight dark:text-white text-gray-800">
+                    <p className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 font-mono text-[12px] tracking-tight dark:text-white text-gray-800">
                       {`// `}{error}
                     </p>
                   ) : null}
                 </div>
 
                 {/* Input area */}
-                <div className="relative shrink-0 border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 p-3">
+                <div className="relative shrink-0 border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 p-3">
                   <BtnBlock
                     href="/quote"
                     variant="secondary"
@@ -380,7 +380,7 @@ export default function AiChatbot({
                       }}
                       placeholder={t("placeholder")}
                       rows={2}
-                      className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 px-3 py-2 font-mono text-sm dark:text-white text-gray-900 outline-none placeholder:dark:text-white text-gray-400 focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/15"
+                      className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3 py-2 font-mono text-sm dark:text-white text-gray-900 outline-none placeholder:dark:text-white text-gray-400 focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/15"
                       disabled={loading}
                     />
                     <button
@@ -400,7 +400,7 @@ export default function AiChatbot({
               </>
             ) : panelTab === "compare" ? (
               <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden dark:bg-black bg-white dark:bg-white/10 bg-gray-100">
-                <div className="flex min-w-0 items-center gap-2 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 px-4 py-3">
+                <div className="flex min-w-0 items-center gap-2 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-4 py-3">
                   <BarChart3 className="h-4 w-4 dark:text-white text-gray-700" />
                   <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
                     [ {t("tabCompare")} ]
@@ -432,7 +432,7 @@ export default function AiChatbot({
                       {compareEntries.map((e) => (
                         <li
                           key={e.id}
-                          className="mb-2 flex items-center gap-2 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 px-3 py-2.5 text-xs backdrop-blur transition-colors hover:dark:bg-black bg-white/35"
+                          className="mb-2 flex items-center gap-2 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3 py-2.5 text-xs backdrop-blur transition-colors hover:dark:bg-black bg-white/35"
                         >
                           <span className="min-w-0 flex-1 truncate font-bold tracking-tight dark:text-white text-gray-800">
                             {isKo ? e.name : (e.nameEn || e.name) || e.name}
@@ -451,7 +451,7 @@ export default function AiChatbot({
                   )}
                 </div>
                 {compareEntries.length > 0 ? (
-                  <div className="shrink-0 border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 p-3">
+                  <div className="shrink-0 border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 p-3">
                     <div className="flex gap-0">
                       <BtnBlock
                         variant="secondary"

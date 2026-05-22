@@ -40,7 +40,7 @@ import {
 } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
-  formatMediaPriceWonWithSymbol,
+  formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
@@ -322,7 +322,7 @@ export function MediaMapView({
                         </div>
                         <div className="mt-1.5">
                           <div className="text-base font-bold leading-tight text-navy">
-                            {formatMediaPriceWonWithSymbol(media.price)}
+                            {formatCatalogPriceFieldWon(media.price)}
                             <span className="ml-1 text-[11px] font-semibold text-muted-foreground">
                               ·{" "}
                               {tMedia(
@@ -338,7 +338,7 @@ export function MediaMapView({
                             compact
                             url={`/${locale}${mediaItemDetailPath(media.id)}`}
                             title={isKo ? media.name : (media.nameEn || media.name)}
-                            description={`${formatMediaLocationShort(media, isKo)} - ${formatMediaPriceWonWithSymbol(media.price)} · ${tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}`}
+                            description={`${formatMediaLocationShort(media, isKo)} - ${formatCatalogPriceFieldWon(media.price)} · ${tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}`}
                             locale={locale}
                           />
                         </div>

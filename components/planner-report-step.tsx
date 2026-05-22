@@ -14,6 +14,7 @@ import {
   type PlannerMetrics,
 } from "@/lib/planner-logic";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
+import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
 import {
   captureElementAsPng,
   defaultPlannerPdfFilename,
@@ -864,7 +865,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                             [ {t("kpiCpm")} ]
                           </p>
                           <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
-                            ₩{estCpm.toLocaleString()}
+                            {formatMediaPriceCompactWon(estCpm, props.isKo ? "ko" : "en")}
                           </p>
                           <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
                             {t("kpiCpmHint")}

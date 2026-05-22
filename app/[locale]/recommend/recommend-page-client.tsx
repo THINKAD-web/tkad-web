@@ -295,7 +295,7 @@ export default function RecommendPageClient({
 
 
         <section className="tkad-media-browse-main border-t border-border/60 bg-card py-16 sm:py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="ui-container">
           {similarBanner ? (
             <p className="mb-6 rounded-2xl border border-[#22d3ee]/30 bg-[#22d3ee]/10 px-4 py-3 text-center text-sm font-semibold text-[#0e7490] dark:text-[#22d3ee]">
               {similarBanner}
@@ -553,7 +553,7 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           </div>
 
           <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2">
-            <div className="rounded-2xl border border-white/16 dark:bg-black bg-white bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-800 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
+            <div className="rounded-2xl border border-white/16 dark:bg-black bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-800 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
               TKAD BOT
             </div>
           </div>
@@ -568,7 +568,7 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
         </p>
       </div>
       <div className="space-y-3 rounded-[28px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur">
-        <div className="h-3 w-full overflow-hidden rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/30">
+        <div className="h-3 w-full overflow-hidden rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/30">
           <motion.div
             className="h-full w-2/5 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]"
             animate={{ x: ["-30%", "220%"] }}

@@ -567,13 +567,13 @@ export default function AdminNetworkEditor(props: Props) {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+        <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
       )}
 
-      <div className="flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 text-xs font-medium">
+      <div className="flex gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1 text-xs font-medium">
         <button
           type="button"
           onClick={() => setActiveTab("form")}
@@ -949,7 +949,7 @@ export default function AdminNetworkEditor(props: Props) {
             {locRows.map((row, i) => (
               <div
                 key={i}
-                className="grid gap-2 rounded-lg border border-slate-100 bg-slate-50/80 p-3 sm:grid-cols-2 lg:grid-cols-4"
+                className="grid gap-2 rounded-2xl border border-slate-100 bg-slate-50/80 p-3 sm:grid-cols-2 lg:grid-cols-4"
               >
                 <Input
                   placeholder={t("locName")}

@@ -132,33 +132,33 @@ function InstallBannerPanel({
       role="dialog"
       aria-label="앱 설치 안내"
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-[80] border-t border-[#22d3ee]/30",
-        "bg-[#020202]/95 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md",
-        "shadow-[0_-12px_48px_rgba(34,211,238,0.12)]",
+        "fixed bottom-0 left-0 right-0 z-[80]",
+        "border-t border-gray-200 bg-white px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg",
+        "dark:border-white/10 dark:bg-gray-900",
       )}
     >
       <div className="mx-auto flex max-w-lg items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#22d3ee]/30 bg-[#22d3ee]/10">
-          <Download className="h-5 w-5 text-[#22d3ee]" aria-hidden />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-gray-100 dark:border-[#22d3ee]/30 dark:bg-[#22d3ee]/10">
+          <Download className="h-5 w-5 text-gray-400 dark:text-[#22d3ee]" aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold dark:text-white text-gray-900">
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">
             홈 화면에 추가하면 앱처럼 사용할 수 있어요
           </p>
           {ios && !canNativeInstall ? (
-            <p className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed dark:text-white text-gray-600">
-              <Share className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#22d3ee]" />
-              Safari 하단 <strong className="dark:text-white text-gray-900">공유</strong> →{" "}
-              <strong className="dark:text-white text-gray-900">홈 화면에 추가</strong>
+            <p className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-gray-500 dark:text-white/60">
+              <Share className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-[#22d3ee]" />
+              Safari 하단 <strong className="text-gray-900 dark:text-white">공유</strong> →{" "}
+              <strong className="text-gray-900 dark:text-white">홈 화면에 추가</strong>
             </p>
           ) : android && !canNativeInstall ? (
-            <p className="mt-1 text-xs leading-relaxed dark:text-white text-gray-600">
-              Chrome 메뉴 <strong className="dark:text-white text-gray-900">⋮</strong> →{" "}
-              <strong className="dark:text-white text-gray-900">홈 화면에 추가</strong> 또는{" "}
-              <strong className="dark:text-white text-gray-900">앱 설치</strong>
+            <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-white/60">
+              Chrome 메뉴 <strong className="text-gray-900 dark:text-white">⋮</strong> →{" "}
+              <strong className="text-gray-900 dark:text-white">홈 화면에 추가</strong> 또는{" "}
+              <strong className="text-gray-900 dark:text-white">앱 설치</strong>
             </p>
           ) : (
-            <p className="mt-1 text-xs dark:text-white text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-white/60">
               현장 답사·매체 검색을 더 빠르게 실행할 수 있습니다.
             </p>
           )}
@@ -182,7 +182,7 @@ function InstallBannerPanel({
             <button
               type="button"
               onClick={onDismissForever}
-              className="text-xs font-medium dark:text-white text-gray-400 underline-offset-2 hover:dark:text-white text-gray-500 hover:underline"
+              className="text-xs font-medium text-gray-400 underline-offset-2 hover:text-gray-600 hover:underline dark:text-white/40 dark:hover:text-white/60"
             >
               다시 보지 않기
             </button>
@@ -191,7 +191,7 @@ function InstallBannerPanel({
         <button
           type="button"
           onClick={onDismiss}
-          className="shrink-0 rounded-lg p-1 dark:text-white text-gray-400 hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
+          className="shrink-0 rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
           aria-label="닫기"
         >
           <X className="h-5 w-5" />

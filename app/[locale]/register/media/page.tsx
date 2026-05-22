@@ -45,7 +45,7 @@ export default async function MediaRegisterPage({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon bg-[#0A0A0A]">
+      <div className="tkad-landing-neon bg-gray-50 dark:bg-[#0A0A0A]">
         <CategoryExploreHero
           code="// 07 · MEDIA PARTNER"
           headlineBefore={isKo ? "매체 " : "Register "}

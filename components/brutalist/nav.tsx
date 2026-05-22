@@ -463,7 +463,7 @@ function BrutalNavDropdown({
             "absolute left-1/2 top-full z-[100] mt-3 w-[min(18rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-2xl border py-1 shadow-xl ring-1",
             lightPanel
               ? "border-zinc-200/95 bg-white text-zinc-950 ring-black/[0.06] shadow-xl"
-              : "dark:border-white/12 border-gray-200 bg-zinc-950 text-zinc-50 shadow-[0_24px_80px_rgba(0,0,0,0.85)] ring-white/10",
+              : "dark:border-white/12 border-gray-200 dark:bg-zinc-950 bg-white text-zinc-50 shadow-[0_24px_80px_rgba(0,0,0,0.85)] ring-white/10",
           )}
         >
           {entry.labelEn ? (

@@ -3,7 +3,7 @@
  *
  * 핵심:
  * - 2px 검정 보더, 사각 (radius 0)
- * - 이미지 grayscale(100%) → hover grayscale(0%) 전환
+ * - 이미지 항상 컬러, hover 시 scale
  * - 메타: [번호] [ Type ] · // location · 가격 (모노스페이스)
  *
  * 리스트(/ko/media)·상세 페이지·홈 캐러셀 등에서 재사용.
@@ -28,8 +28,12 @@ export type MediaCardProps = {
   location?: string;
   /** "₩2,400만/월" 등 표시용 가격 문자열 */
   price?: string;
+  /** 좌측 상단 강조 라벨 (예: 베스트 딜 할인율) */
+  topLeft?: ReactNode;
   /** 우측 상단 강조 라벨 (예: VERIFIED, NEW). bx-accent 스타일 */
   topRight?: ReactNode;
+  /** 좌측 하단 강조 라벨 (예: 즉시 집행 가능) */
+  bottomLeft?: ReactNode;
   /** 이미지 위 hover 시 노출되는 오버레이 (예: 노출/CPM 요약) */
   hoverOverlay?: ReactNode;
   /** 랜딩 등 프리미엄 스타일 (rounded + soft shadow) */
@@ -56,7 +60,9 @@ export function MediaCard({
   name,
   location,
   price,
+  topLeft,
   topRight,
+  bottomLeft,
   hoverOverlay,
   premium = false,
   density = "default",
@@ -105,22 +111,32 @@ export function MediaCard({
             fill
             sizes={imageSizes}
             priority={imagePriority}
-            className="object-cover grayscale transition-[filter,transform] duration-700 ease-out group-hover:grayscale-0 group-hover:scale-[1.1] group-focus-within:grayscale-0 group-focus-within:scale-[1.1]"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.1] group-focus-within:scale-[1.1]"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
             [ no image ]
           </div>
         )}
+        {topLeft ? (
+          <div className="absolute left-2 top-2 z-10 max-w-[calc(100%-1rem)]">
+            {topLeft}
+          </div>
+        ) : null}
         {topRight ? (
           <div
             className={cn(
-              "absolute right-0 top-0 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-900",
+              "absolute right-0 top-0 z-10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-900",
               topRightClass,
               premium ? "rounded-bl-2xl border-b border-l border-border/60" : "border-b-2 border-l-2 border-border",
             )}
           >
             {topRight}
+          </div>
+        ) : null}
+        {bottomLeft ? (
+          <div className="absolute bottom-2 left-2 z-10 max-w-[calc(100%-1rem)]">
+            {bottomLeft}
           </div>
         ) : null}
         {hoverOverlay ? (

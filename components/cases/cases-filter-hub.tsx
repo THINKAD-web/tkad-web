@@ -143,7 +143,7 @@ export function CasesFilterHub({
   };
 
   return (
-    <div className="mb-10 space-y-5 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-5 backdrop-blur sm:p-6">
+    <div className="mb-10 space-y-5 rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm backdrop-blur dark:border-white/12 dark:bg-white/8 sm:p-6">
       <FilterGroup
         title={t("filterIndustry")}
         values={CASE_INDUSTRY_TAGS}

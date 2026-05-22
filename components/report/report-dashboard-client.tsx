@@ -74,7 +74,7 @@ export function ReportDashboardClient({ isKo }: { isKo: boolean }) {
   }
   if (err || !data) {
     return (
-      <div className="rounded-lg border-2 border-destructive bg-destructive/10 p-6 text-sm text-destructive">
+      <div className="rounded-2xl border-2 border-destructive bg-destructive/10 p-6 text-sm text-destructive">
         {isKo ? "대시보드를 불러오지 못했습니다." : "Failed to load dashboard."}
         {err ? `: ${err}` : ""}
       </div>

@@ -90,7 +90,7 @@ function MediaDetailQuoteModalBody({
 
       {hasOpts ? (
         <div
-          className="relative mb-5 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:p-4"
+          className="relative mb-5 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:p-4"
           role="radiogroup"
           aria-label={t("quoteModalPriceOptionLabel")}
         >
@@ -112,7 +112,7 @@ function MediaDetailQuoteModalBody({
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/18 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
                     selectedCard
                       ? "border-white/22 dark:bg-white/10 bg-gray-100"
-                      : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 hover:border-white/16 hover:dark:bg-black bg-white bg-white/25",
+                      : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 hover:border-white/16 hover:dark:bg-black bg-white/25",
                   )}
                 >
                   <span
@@ -161,11 +161,11 @@ function MediaDetailQuoteModalBody({
           ) : null}
         </div>
       ) : media.keywordFilter?.priceText ? (
-        <p className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 px-3 py-2.5 text-sm font-semibold dark:text-white text-gray-800 backdrop-blur">
+        <p className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-3 py-2.5 text-sm font-semibold dark:text-white text-gray-800 backdrop-blur">
           {media.keywordFilter.priceText}
         </p>
       ) : (
-        <div className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 px-3 py-3 dark:text-white text-gray-900 backdrop-blur">
+        <div className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-3 py-3 dark:text-white text-gray-900 backdrop-blur">
           <p className="font-mono text-[9px] font-bold uppercase tracking-wider dark:text-white text-gray-500">
             {isKo ? "기준 요금" : "Base rate"}
           </p>

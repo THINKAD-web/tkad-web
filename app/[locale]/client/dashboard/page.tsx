@@ -333,7 +333,7 @@ export default function ClientDashboardPage() {
         </p>
       </SheetHeader>
       <div className="mt-4 flex flex-1 flex-col gap-3 overflow-hidden">
-        <div className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/80 p-3">
+        <div className="flex-1 space-y-3 overflow-y-auto rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
           {chatMessages.map((m) => (
             <div
               key={m.id}

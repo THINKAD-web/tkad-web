@@ -27,7 +27,7 @@ const glassCard =
   "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
 
 const inputCls =
-  "h-11 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 px-4 font-mono text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 outline-none focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/10";
+  "h-11 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-4 font-mono text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 outline-none focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/10";
 
 const PROVIDER_LABEL: Record<string, string> = {
   kakao: "카카오",
@@ -331,7 +331,7 @@ export function MySettingsPageClient() {
                 {data.linkedProviders.map((p) => (
                   <li
                     key={p}
-                    className="flex items-center justify-between rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 px-3 py-2 text-sm dark:text-white text-gray-800"
+                    className="flex items-center justify-between rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 px-3 py-2 text-sm dark:text-white text-gray-800"
                   >
                     <span>{PROVIDER_LABEL[p] ?? p}</span>
                     <span className="font-mono text-[10px] text-emerald-300/90">

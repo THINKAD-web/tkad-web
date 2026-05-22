@@ -429,7 +429,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
           )}
 
           {creativeUrl ? (
-            <div className="rounded-lg border-2 border-border bg-card p-3">
+            <div className="rounded-2xl border-2 border-border bg-card p-3">
               <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
                 {isKo
                   ? creativeId

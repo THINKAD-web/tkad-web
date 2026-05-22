@@ -5,9 +5,10 @@ import { X, ExternalLink, MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { MapMapItem } from "./media-map-types";
+import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
-function formatPrice(v: number, period: string): string {
-  const krw = new Intl.NumberFormat("ko-KR").format(v);
+function formatPrice(v: number, period: string, locale: string): string {
+  const price = formatCatalogPriceFieldWon(v, locale);
   const p =
     period === "month"
       ? "/월"
@@ -18,7 +19,7 @@ function formatPrice(v: number, period: string): string {
           : period === "day"
             ? "/일"
             : "";
-  return `₩${krw}${p}`;
+  return `${price}${p}`;
 }
 
 function formatCompact(n: number): string {
@@ -237,7 +238,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
               </button>
             </div>
             <p className="mt-2 text-sm font-bold tabular-nums text-cyan-300">
-              {formatPrice(item.price, item.pricePeriod)}
+              {formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en")}
             </p>
           </div>
         </div>
@@ -271,12 +272,12 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
         </p>
         <div className="flex gap-3">
           {item.image ? (
-            <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+            <div className="h-20 w-28 shrink-0 overflow-hidden rounded-2xl border border-border bg-muted">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image} alt="" className="h-full w-full object-cover" />
             </div>
           ) : (
-            <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg border border-dashed border-border bg-muted text-[10px] text-muted-foreground">
+            <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-2xl border border-dashed border-border bg-muted text-[10px] text-muted-foreground">
               NO IMG
             </div>
           )}
@@ -301,7 +302,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
               </button>
             </div>
             <p className="mt-2 text-sm font-bold text-primary tabular-nums">
-              {formatPrice(item.price, item.pricePeriod)}
+              {formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en")}
             </p>
           </div>
         </div>
@@ -379,7 +380,11 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
         ) : null}
 
         <dl className="mt-4 grid grid-cols-2 gap-2 text-xs">
-          <SpecBlock dark label={isKo ? "월 단가" : "Monthly"} value={formatPrice(item.price, item.pricePeriod)} />
+          <SpecBlock
+            dark
+            label={isKo ? "월 단가" : "Monthly"}
+            value={formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en")}
+          />
           <SpecBlock
             dark
             label={isKo ? "예상 노출" : "Est. impressions"}
@@ -481,7 +486,7 @@ export function MediaMapDetailSheet({
       aria-label={item.name}
       className={cn(
         "pointer-events-auto fixed z-[100004] flex flex-col overflow-hidden",
-        "border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/90 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl",
+        "border dark:border-white/10 border-gray-200 dark:bg-black bg-white/90 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl",
         "inset-x-auto bottom-4 right-4 top-4 w-[min(420px,calc(100%-2rem))] rounded-2xl",
       )}
     >

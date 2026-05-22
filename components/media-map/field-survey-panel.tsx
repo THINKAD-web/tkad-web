@@ -170,7 +170,7 @@ export function FieldSurveyPanel({
                   </p>
                   {checkedIds.has(it.id) ? (
                     <textarea
-                      className="mt-2 w-full rounded-lg border dark:border-white/15 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-2 py-1 text-xs dark:text-white text-gray-900"
+                      className="mt-2 w-full rounded-lg border dark:border-white/15 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 px-2 py-1 text-xs dark:text-white text-gray-900"
                       rows={2}
                       placeholder={isKo ? "메모" : "Note"}
                       value={notes[it.id] ?? ""}

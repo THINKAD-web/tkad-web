@@ -15,7 +15,7 @@ import {
   effectiveWidthM,
 } from "@/lib/media-filter-advanced";
 import {
-  formatMediaPriceWonWithSymbol,
+  formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
@@ -78,7 +78,7 @@ export function CompareSpecTable({
         key: "price",
         label: t("compareRowPrice"),
         cell: (m) =>
-          `${formatMediaPriceWonWithSymbol(m.price, locale)} · ${t(
+          `${formatCatalogPriceFieldWon(m.price, locale)} · ${t(
             mediaPricePeriodTranslationKey(m.pricePeriod),
           )}`,
         numVal: (m) => m.price > 0 ? m.price : null,
@@ -266,7 +266,7 @@ export function CompareSpecTable({
                           {isKo ? m.name : m.nameEn || m.name}
                         </Link>
                         <p className="mt-1 font-mono text-[10px] font-bold tabular-nums leading-tight text-accent sm:text-[11px]">
-                          {formatMediaPriceWonWithSymbol(m.price, locale)}
+                          {formatCatalogPriceFieldWon(m.price, locale)}
                         </p>
                       </div>
                     </div>

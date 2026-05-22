@@ -129,7 +129,7 @@ function NeonErrorShell({
   return (
     <div
       className={cn(
-        "tkad-landing-neon tkad-planner-neon relative flex min-h-[calc(100vh-72px)] flex-col items-center justify-center overflow-hidden bg-[#05050a] px-4 py-16",
+        "tkad-landing-neon tkad-planner-neon relative flex min-h-[calc(100vh-72px)] flex-col items-center justify-center overflow-hidden bg-gray-50 px-4 py-16 dark:bg-[#05050a]",
         className,
       )}
     >

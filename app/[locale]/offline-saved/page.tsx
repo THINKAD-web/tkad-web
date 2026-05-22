@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { useSavedMediaList } from "@/components/pwa-save-offline-button";
-import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
+import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 export default function OfflineSavedMediaPage() {
@@ -49,7 +49,7 @@ export default function OfflineSavedMediaPage() {
                     <p className="text-xs dark:text-white text-gray-500">
                       {[m.location, m.type].filter(Boolean).join(" · ")}
                       {m.price > 0
-                        ? ` · ${formatMediaPriceWonWithSymbol(m.price)}`
+                        ? ` · ${formatCatalogPriceFieldWon(m.price)}`
                         : ""}
                     </p>
                   </div>

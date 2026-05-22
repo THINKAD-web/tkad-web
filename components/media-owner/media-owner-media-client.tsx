@@ -260,7 +260,7 @@ export function MediaOwnerMediaClient() {
                     .map((b) => (
                       <li
                         key={b.id}
-                        className="flex items-center justify-between rounded-lg dark:bg-black bg-white bg-white/30 px-3 py-2"
+                        className="flex items-center justify-between rounded-lg dark:bg-black bg-white/30 px-3 py-2"
                       >
                         <span className="dark:text-white text-gray-700">
                           {b.startsAt.slice(0, 10)} ~ {b.endsAt.slice(0, 10)}

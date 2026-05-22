@@ -72,7 +72,7 @@ export function FloatingSelectionBar({
             "fixed left-0 right-0 z-[60]",
             variant === "neon"
               ? [
-                  "border-t dark:border-white/12 border-gray-200 bg-[#05050a]/92 backdrop-blur-xl",
+                  "border-t dark:border-white/12 border-gray-200 bg-white/95 dark:bg-[#05050a]/92 backdrop-blur-xl",
                   "shadow-[0_-16px_48px_-8px_rgba(0,0,0,0.65)]",
                   "text-foreground",
                 ]

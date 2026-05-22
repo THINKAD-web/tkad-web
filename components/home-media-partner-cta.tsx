@@ -8,15 +8,15 @@ import { Link } from "@/i18n/navigation";
 export function HomeMediaPartnerCta({ isKo }: { isKo: boolean }) {
   return (
     <section
-      className="relative isolate overflow-hidden border-y dark:border-white/10 border-gray-200 bg-[#05050a] dark:text-white text-gray-900"
+      className="relative isolate overflow-hidden border-y border-gray-200 bg-gradient-to-r from-violet-50/40 via-white to-cyan-50/30 text-gray-900 dark:border-white/10 dark:bg-[#05050a] dark:text-white"
       aria-label={isKo ? "매체사 등록 안내" : "Media partner CTA"}
     >
       {/* 네온 깊이감 + 그리드 (compare / planner 동일 톤) */}
-      <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-      <div aria-hidden className="absolute inset-0 opacity-25 tkad-neon-grid" />
+      <div aria-hidden className="absolute inset-0 hidden dark:block tkad-neon-depth" />
+      <div aria-hidden className="absolute inset-0 hidden opacity-25 dark:block tkad-neon-grid" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-y-12 left-1/2 -z-0 h-[200%] w-[120%] -translate-x-1/2 bg-[radial-gradient(circle_at_30%_50%,rgba(168,85,247,0.32),transparent_55%),radial-gradient(circle_at_75%_50%,rgba(34,211,238,0.28),transparent_55%),radial-gradient(circle_at_50%_50%,rgba(236,72,153,0.18),transparent_60%)]"
+        className="pointer-events-none absolute -inset-y-12 left-1/2 -z-0 hidden h-[200%] w-[120%] -translate-x-1/2 bg-[radial-gradient(circle_at_30%_50%,rgba(168,85,247,0.32),transparent_55%),radial-gradient(circle_at_75%_50%,rgba(34,211,238,0.28),transparent_55%),radial-gradient(circle_at_50%_50%,rgba(236,72,153,0.18),transparent_60%)] dark:block"
       />
 
       <div className="relative mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">

@@ -188,7 +188,7 @@ function AboutContent({
       </section>
 
       <section className="bg-slate-50 py-28 sm:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <div className="grid items-start gap-14 lg:grid-cols-2 lg:gap-20">
             <div className="lg:sticky lg:top-28">
               <SectionHeading
@@ -205,7 +205,7 @@ function AboutContent({
       </section>
 
       <section className="bg-white py-28 sm:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <SectionHeading
             eyebrow={t("about.valuesEyebrow")}
             title={t("about.valuesTitle")}
@@ -235,7 +235,7 @@ function AboutContent({
       </section>
 
       <section className="bg-slate-50 py-28 sm:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <div className="mx-auto max-w-3xl text-center">
             <Users className="mx-auto h-12 w-12 text-gold" aria-hidden />
             <h2 className="mt-4 text-2xl font-bold text-navy sm:text-3xl">

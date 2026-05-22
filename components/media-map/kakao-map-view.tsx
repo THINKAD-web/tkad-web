@@ -1004,7 +1004,7 @@ export default function KakaoMapView({
   if (sdkError) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-transparent p-4">
-        <div className="relative w-full max-w-lg overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/45 px-6 py-8 text-sm dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+        <div className="relative w-full max-w-lg overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 px-6 py-8 text-sm dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
           <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
           <div
             aria-hidden
@@ -1030,8 +1030,8 @@ export default function KakaoMapView({
     >
       <div ref={containerRef} className="h-full w-full min-h-[200px]" />
       {!mapReady && (
-        <div className="absolute inset-0 flex items-center justify-center dark:bg-black bg-white bg-white/25 p-4">
-          <div className="relative w-full max-w-sm overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/45 px-6 py-8 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+        <div className="absolute inset-0 flex items-center justify-center dark:bg-black bg-white/25 p-4">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 px-6 py-8 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
             <div
               aria-hidden
@@ -1042,7 +1042,7 @@ export default function KakaoMapView({
                 LOADING
               </div>
               <div className="text-sm font-semibold dark:text-white text-gray-800">지도 준비 중…</div>
-              <div className="h-2 w-full overflow-hidden rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20">
+              <div className="h-2 w-full overflow-hidden rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20">
                 <div className="h-full w-[42%] animate-[tkadShimmer_1.2s_ease-in-out_infinite] bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]" />
               </div>
             </div>

@@ -27,11 +27,11 @@ export function HomeLaunchBanner() {
     <div
       role="region"
       aria-label={isKo ? "정식 오픈 안내" : "Launch announcement"}
-      className="relative z-40 border-b-2 border-border bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 px-4 py-2.5 text-center text-sm font-semibold dark:text-white text-gray-900 shadow-md"
+      className="relative z-40 border-b-2 border-border bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 px-4 py-2.5 text-center text-sm font-medium text-white shadow-md"
     >
       <Link
         href="/pricing"
-        className="inline-flex flex-wrap items-center justify-center gap-1.5 hover:underline"
+        className="inline-flex flex-wrap items-center justify-center gap-2 text-white hover:underline"
       >
         <span aria-hidden>🎉</span>
         {isKo
@@ -41,7 +41,7 @@ export function HomeLaunchBanner() {
       </Link>
       <button
         type="button"
-        className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 hover:bg-white/20"
+        className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/80 hover:bg-white/20 hover:text-white"
         aria-label={isKo ? "배너 닫기" : "Dismiss banner"}
         onClick={() => {
           try {

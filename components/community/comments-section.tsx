@@ -243,7 +243,7 @@ export function CommunityCommentsSection({
   };
 
   return (
-    <div className="rounded-[32px] border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/18 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur sm:p-8">
+    <div className="rounded-[32px] border dark:border-white/10 border-gray-200 dark:bg-black bg-white/18 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur sm:p-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] dark:text-white">
@@ -263,7 +263,7 @@ export function CommunityCommentsSection({
       </div>
 
       {comments.length === 0 ? (
-        <p className="mt-6 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 p-6 text-center font-mono text-[12px] uppercase tracking-[0.22em] dark:text-white">
+        <p className="mt-6 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-6 text-center font-mono text-[12px] uppercase tracking-[0.22em] dark:text-white">
           {isKo ? "// 첫 댓글을 작성해주세요." : "// be the first to comment"}
         </p>
       ) : (

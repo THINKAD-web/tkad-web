@@ -160,7 +160,7 @@ function ExitGuideSheet({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="work@company.com"
-              className="w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-4 py-3 text-sm dark:text-white text-gray-900"
+              className="w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 px-4 py-3 text-sm dark:text-white text-gray-900"
             />
             <button
               type="submit"

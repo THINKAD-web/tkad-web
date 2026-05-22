@@ -6,7 +6,7 @@
 import { cn } from "@/lib/utils";
 
 function Bone({ className }: { className?: string }) {
-  return <div className={cn("skeleton-shimmer", className)} />;
+  return <div className={cn("ui-skeleton skeleton-shimmer", className)} />;
 }
 
 /**

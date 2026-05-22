@@ -30,6 +30,10 @@ import { useTranslations } from "next-intl";
 import { GripVertical, Plus, Search, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/lib/media-data";
+import {
+  formatCatalogPriceFieldWon,
+  formatCatalogPricesSumWon,
+} from "@/lib/media-price-format";
 
 const BASKET_DROP_ID = "basket-drop";
 
@@ -93,9 +97,9 @@ function DraggableCatalogRow({
             {(isKo ? m.location : (m.locationEn || m.location) || m.location).slice(0, 48)}
           </p>
           <p className="mt-1 font-mono text-xs font-bold tabular-nums text-foreground">
-            ₩{m.price.toLocaleString()}
+            {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
             <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-              {isKo ? "만/월" : "₩10K/mo"}
+              /{isKo ? "월" : "mo"}
             </span>
           </p>
         </div>
@@ -373,9 +377,12 @@ export default function PlannerMediaSelector({
                   {t("campaignMonthlyTotalLabel")}
                 </span>
                 <span className="block font-mono text-base font-bold tabular-nums text-foreground">
-                  ₩{basketMonthlyTotal.toLocaleString()}
+                  {formatCatalogPricesSumWon(
+                    basketItems.map((item) => item.price || 0),
+                    isKo ? "ko" : "en",
+                  )}
                   <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-                    {isKo ? "만/월" : "₩10K/mo"}
+                    /{isKo ? "월" : "mo"}
                   </span>
                 </span>
               </span>

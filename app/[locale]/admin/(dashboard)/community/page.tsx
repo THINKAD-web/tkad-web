@@ -262,7 +262,7 @@ export default function AdminCommunityPage() {
         ))}
       </section>
 
-      <div className="flex w-fit flex-wrap gap-1 rounded-lg border border-border bg-muted/40 p-1">
+      <div className="flex w-fit flex-wrap gap-1 rounded-2xl border border-border bg-muted/40 p-1">
         <button type="button" onClick={() => setTab("posts")} className={tabBtn(tab === "posts")}>
           <MessageSquare className="h-4 w-4 shrink-0" />
           게시글
@@ -284,7 +284,7 @@ export default function AdminCommunityPage() {
           </span>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-muted-foreground">상태</span>
-            <div className="flex w-fit flex-wrap gap-1 rounded-lg border border-border bg-background p-1">
+            <div className="flex w-fit flex-wrap gap-1 rounded-2xl border border-border bg-background p-1">
               {(["all", "published", "hidden", "deleted"] as StatusFilter[]).map((s) => (
                 <button
                   key={s}
@@ -305,7 +305,7 @@ export default function AdminCommunityPage() {
           {tab === "posts" ? (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-muted-foreground">카테고리</span>
-              <div className="flex w-fit max-w-full flex-wrap gap-1 rounded-lg border border-border bg-background p-1">
+              <div className="flex w-fit max-w-full flex-wrap gap-1 rounded-2xl border border-border bg-background p-1">
                 {(["all", ...COMMUNITY_CATEGORIES] as const).map((c) => (
                   <button
                     key={c}
@@ -765,7 +765,7 @@ function ReportsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur-sm dark:bg-white/6 bg-gray-500"
+      className="fixed inset-0 z-[60] flex items-center justify-center dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur-sm dark:bg-white/6 bg-gray-500"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {

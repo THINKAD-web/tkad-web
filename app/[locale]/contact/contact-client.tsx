@@ -197,12 +197,12 @@ export default function ContactPage() {
 
               {/* referral banner */}
               {refSource === "case-study" && caseTitle && (
-                <div className="mb-6 rounded-lg bg-blue-50 p-3 text-sm text-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
+                <div className="mb-6 rounded-2xl bg-blue-50 p-3 text-sm text-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
                   {t("caseRefBanner")}
                 </div>
               )}
               {refSource === "academy" && (
-                <div className="mb-6 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+                <div className="mb-6 rounded-2xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
                   {t("academyRefBanner")}
                 </div>
               )}

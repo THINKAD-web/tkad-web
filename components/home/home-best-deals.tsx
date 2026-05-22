@@ -9,6 +9,17 @@ import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import type { BestDealItem } from "@/lib/best-deals";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";
+
+function dealBadgeClass(dealReason: BestDealItem["dealReason"]) {
+  if (dealReason === "availability") {
+    return "inline-flex rounded-full bg-emerald-500 px-2 py-1 text-xs font-medium text-white shadow-sm";
+  }
+  if (dealReason === "new") {
+    return "inline-flex rounded-full bg-violet-600 px-2 py-1 text-xs font-medium text-white shadow-sm";
+  }
+  return "inline-flex rounded-md bg-gradient-to-r from-violet-600 to-cyan-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm";
+}
+
 export function HomeBestDeals({
   items,
   locale,
@@ -42,8 +53,24 @@ export function HomeBestDeals({
           const name = isKo ? m.name : m.nameEn || m.name;
           const location = isKo ? m.location : m.locationEn || m.location;
           const typeLabel = typeLabels[m.type]?.[isKo ? "ko" : "en"] ?? m.type;
-          const price =
-            m.price > 0 ? formatCatalogPriceFieldWon(m.price, locale) : undefined;
+          const priceText =
+            m.price > 0
+              ? formatCatalogPriceFieldWon(m.price, locale)
+              : isKo
+                ? "문의"
+                : "Inquire";
+          const dealLabel = isKo ? m.dealLabelKo : m.dealLabelEn;
+
+          const topLeft =
+            m.dealReason === "price" || m.dealReason === "new" ? (
+              <span className={dealBadgeClass(m.dealReason)}>{dealLabel}</span>
+            ) : undefined;
+
+          const bottomLeft =
+            m.dealReason === "availability" ? (
+              <span className={dealBadgeClass("availability")}>{dealLabel}</span>
+            ) : undefined;
+
           return (
             <li key={m.id} className="list-none">
               <MediaCard
@@ -53,14 +80,20 @@ export function HomeBestDeals({
                 type={typeLabel}
                 name={name}
                 location={location}
-                price={price}
                 premium
                 glowTheme="purple"
                 density="compact"
-                topRight={
-                  <span className="rounded-md bg-emerald-500/90 px-2 py-0.5 text-[10px] font-bold dark:text-white text-gray-900">
-                    {isKo ? m.dealLabelKo : m.dealLabelEn}
-                  </span>
+                topLeft={topLeft}
+                bottomLeft={bottomLeft}
+                footer={
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      {isKo ? "월 집행가" : "Monthly rate"}
+                    </p>
+                    <p className="font-mono text-[clamp(0.875rem,7cqi,1.375rem)] font-black tabular-nums leading-tight tracking-tight text-foreground">
+                      {priceText}
+                    </p>
+                  </div>
                 }
               />
             </li>

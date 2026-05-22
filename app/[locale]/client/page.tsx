@@ -352,7 +352,7 @@ export default function ClientPortalPage() {
 
 function StatusLegend() {
   return (
-    <div className="rounded-lg bg-slate-50 p-3">
+    <div className="rounded-2xl bg-slate-50 p-3">
       <p className="mb-2 text-[11px] font-medium text-muted-foreground">
         진행 상태 안내
       </p>

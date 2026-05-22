@@ -773,7 +773,7 @@ export default function AdminQuoteNewClient() {
                 />
               </div>
             </div>
-            <div className="rounded-lg border bg-slate-50 px-3 py-2 text-xs text-muted-foreground">
+            <div className="rounded-2xl border bg-slate-50 px-3 py-2 text-xs text-muted-foreground">
               <span className="font-medium text-foreground dark:text-hero-fg">{t("periodSummary")}</span>{" "}
               {t("daysCount", { days })}{" "}
               <Badge variant="secondary" className="ml-1 text-[10px]">
@@ -812,7 +812,7 @@ export default function AdminQuoteNewClient() {
               <span className="mb-2 block text-xs font-medium text-muted-foreground">
                 {t("vatMode")}
               </span>
-              <div className="flex rounded-lg border border-slate-200 p-1">
+              <div className="flex rounded-2xl border border-slate-200 p-1">
                 <button
                   type="button"
                   onClick={() => setVatIncluded(false)}
@@ -864,7 +864,7 @@ export default function AdminQuoteNewClient() {
               {customLines.map((line) => (
                 <div
                   key={line.id}
-                  className="grid items-center gap-2 rounded-lg border border-slate-200 bg-white p-2 sm:grid-cols-[1fr_120px_140px_auto] sm:p-3"
+                  className="grid items-center gap-2 rounded-2xl border border-slate-200 bg-white p-2 sm:grid-cols-[1fr_120px_140px_auto] sm:p-3"
                 >
                   <Input
                     value={line.name}
@@ -1165,39 +1165,39 @@ export default function AdminQuoteNewClient() {
             <p className="text-sm text-amber-700">{t("invalidPeriod")}</p>
           ) : (
             <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
-              <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
+              <div className="flex justify-between gap-4 rounded-2xl border dark:bg-white/8 bg-gray-100 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumSubtotal")}</dt>
                 <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.linesSubtotalWon)}
                 </dd>
               </div>
               {totals.discountTotalWon > 0 ? (
-                <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
+                <div className="flex justify-between gap-4 rounded-2xl border dark:bg-white/8 bg-gray-100 px-3 py-2">
                   <dt className="text-muted-foreground">{t("sumDiscount")}</dt>
                   <dd className="font-semibold tabular-nums text-red-700">
                     −{formatWon(totals.discountTotalWon)}
                   </dd>
                 </div>
               ) : null}
-              <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
+              <div className="flex justify-between gap-4 rounded-2xl border dark:bg-white/8 bg-gray-100 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumAfterDiscount")}</dt>
                 <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.afterDiscountWon)}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
+              <div className="flex justify-between gap-4 rounded-2xl border dark:bg-white/8 bg-gray-100 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumSupply")}</dt>
                 <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.supplyWon)}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4 rounded-lg border dark:bg-white/8 bg-gray-100 px-3 py-2">
+              <div className="flex justify-between gap-4 rounded-2xl border dark:bg-white/8 bg-gray-100 px-3 py-2">
                 <dt className="text-muted-foreground">{t("sumVat")}</dt>
                 <dd className="font-semibold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.vatWon)}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4 rounded-lg border-2 border-accent/50 bg-accent/10 px-3 py-2 sm:col-span-2 lg:col-span-1 dark:bg-accent/15">
+              <div className="flex justify-between gap-4 rounded-2xl border-2 border-accent/50 bg-accent/10 px-3 py-2 sm:col-span-2 lg:col-span-1 dark:bg-accent/15">
                 <dt className="font-semibold text-foreground dark:text-hero-fg">{t("sumTotal")}</dt>
                 <dd className="text-lg font-bold tabular-nums text-foreground dark:text-hero-fg">
                   {formatWon(totals.totalWon)}
@@ -1311,7 +1311,7 @@ export default function AdminQuoteNewClient() {
             </div>
 
             {/* 관리자용 세부 합계 (할인 포함) */}
-            <div className="mx-auto mt-4 max-w-md space-y-1 rounded-lg border bg-white p-4 text-sm">
+            <div className="mx-auto mt-4 max-w-md space-y-1 rounded-2xl border bg-white p-4 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">소계</span>
                 <span className="font-semibold tabular-nums">

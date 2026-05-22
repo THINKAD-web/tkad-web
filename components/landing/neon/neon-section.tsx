@@ -13,19 +13,19 @@ export function NeonSection({ children, className, innerClassName, id }: Props) 
     <section
       id={id}
       className={cn(
-        "tkad-neon-surface relative overflow-hidden bg-[#05050a] py-12 dark:text-white text-gray-900 sm:py-16 md:py-24 lg:py-32 xl:py-40 2xl:py-48",
+        "tkad-neon-surface ui-section-y relative overflow-hidden border-t border-gray-100 bg-white text-gray-900 even:bg-gray-50 dark:border-white/5 dark:bg-[#05050a] dark:text-white dark:even:bg-[#05050a]",
         className,
       )}
     >
-      <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-      <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+      <div aria-hidden className="absolute inset-0 hidden dark:block tkad-neon-depth" />
+      <div aria-hidden className="absolute inset-0 hidden opacity-20 dark:block tkad-neon-grid" />
       <div
         aria-hidden
-        className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+        className="absolute inset-0 hidden tkad-hero-noise opacity-[0.07] mix-blend-overlay dark:block"
       />
       <div
         className={cn(
-          "relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8",
+          "ui-container relative",
           innerClassName,
         )}
       >

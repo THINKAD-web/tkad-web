@@ -35,7 +35,7 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
             <TopLoader />
             {header}
           </ConditionalPublicChrome>
-          <main id="main-content" className="flex min-h-0 flex-1 flex-col">
+          <main id="main-content" className="tkad-app-ui flex min-h-0 flex-1 flex-col">
             <PageTransition>{children}</PageTransition>
           </main>
           <ConditionalPublicChrome>

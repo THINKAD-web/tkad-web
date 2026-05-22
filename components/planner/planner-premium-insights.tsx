@@ -17,7 +17,7 @@ export function PlannerPremiumInsightsPanel({ insights, isKo, access }: Props) {
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
           [ {isKo ? "캠페인 타임라인" : "Campaign timeline"} ]
         </p>
-        <div className="relative mt-4 h-12 rounded-lg bg-muted/40">
+        <div className="relative mt-4 h-12 rounded-2xl bg-muted/40">
           {insights.gantt.map((row) => (
             <div
               key={row.mediaId}

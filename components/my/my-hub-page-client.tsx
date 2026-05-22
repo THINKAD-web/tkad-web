@@ -321,7 +321,7 @@ export function MyHubPageClient() {
   return (
     <HomeLandingDayNight portal>
       <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)]">
-        <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] py-14 dark:text-white text-gray-900 sm:py-20 lg:py-24">
+        <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-gray-50 py-14 text-gray-900 dark:bg-[#05050a] dark:text-white sm:py-20 lg:py-24">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
           <div

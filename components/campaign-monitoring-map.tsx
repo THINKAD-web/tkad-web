@@ -653,7 +653,7 @@ export function CampaignMonitoringMap({
           aria-label={isKo ? "캠페인 위치(데모 지도)" : "Campaign locations (demo map)"}
         >
           <div className="pointer-events-none absolute inset-0 opacity-[0.12] [background-image:linear-gradient(#0f172a_1px,transparent_1px),linear-gradient(90deg,#0f172a_1px,transparent_1px)] [background-size:28px_28px]" />
-          <div className="absolute left-3 top-3 rounded-lg bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-navy shadow-sm backdrop-blur">
+          <div className="absolute left-3 top-3 rounded-2xl bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-navy shadow-sm backdrop-blur">
             {isKo ? "데모 지도 · API 키로 카카오/구글 전환" : "Demo map · add Kakao or Google API key"}
           </div>
           {pins.map((p) => {

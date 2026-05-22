@@ -1,5 +1,9 @@
 import type { MediaItem } from "@/lib/media-data";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import {
+  formatCatalogPriceFieldWon,
+  formatMediaPriceCompactWon,
+  catalogPriceFieldToWon,
+} from "@/lib/media-price-format";
 
 function inferIndustryTags(m: MediaItem, isKo: boolean): string[] {
   const hay = [
@@ -43,16 +47,13 @@ function formatImpressions(m: MediaItem, isKo: boolean): string {
 
 function formatCpm(m: MediaItem, locale: string): string {
   if (m.cpm && m.cpm > 0) {
-    return locale.startsWith("ko")
-      ? `₩${Math.round(m.cpm).toLocaleString("ko-KR")}`
-      : `₩${Math.round(m.cpm).toLocaleString("en-US")}`;
+    return formatMediaPriceCompactWon(Math.round(m.cpm), locale);
   }
   const imp = m.monthlyFootTraffic ?? m.impressions;
   if (imp && imp > 0 && m.price > 0) {
-    const cpm = (m.price / imp) * 1000;
-    return locale.startsWith("ko")
-      ? `₩${Math.round(cpm).toLocaleString("ko-KR")}`
-      : `₩${Math.round(cpm).toLocaleString("en-US")}`;
+    const cpm =
+      (catalogPriceFieldToWon(m.price) / imp) * 1000;
+    return formatMediaPriceCompactWon(Math.round(cpm), locale);
   }
   return "—";
 }

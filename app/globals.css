@@ -1,6 +1,7 @@
 /* Display / mono — 필요 웨이트만 (next/font Pretendard는 layout에서 로드) */
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap");
 @import "tailwindcss";
+@import "./ui-system.css";
 /* v4: JS 설정(darkMode: class 등)을 쓰려면 명시 필요 — 없으면 `dark:` 가 OS 미디어쿼리만 따름(일몰 후 자동 다크) */
 @config "../tailwind.config.ts";
 @plugin "@tailwindcss/typography";
@@ -110,14 +111,13 @@
   --font-mono: "JetBrains Mono", var(--font-geist-mono), ui-monospace,
     SFMono-Regular, Menlo, monospace;
 
-  /* Phase 1: 둥근 모서리 0 강제 — 기존 radius-* 유틸은 모두 0 으로 무력화.
-   * radius-full 도 0 으로 강제 (avatars/pills 까지 사각). */
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
-  --radius-2xl: 0;
-  --radius-full: 0;
+  /* App UI — 표준 radius (카드 2xl · 버튼 xl · 칩 full) */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
 
   /* Elevation 스케일 (일관된 그림자) */
   --shadow-xs: 0 1px 2px rgba(13, 27, 46, 0.04);
@@ -131,14 +131,21 @@
   /* BrutalNav: mobile h-14 (components/brutalist/nav.tsx) */
   --nav-height: 3.5rem;
   /* PublicNavAside — lg+ 고정 사이드바 (components/public-chrome/public-nav-aside.tsx) */
-  --tkad-nav-sidebar-width: 17.5rem;
-  /* Phase 1: --radius 도 0. 일부 컴포넌트가 var(--radius) 를 직접 참조해도 사각이 되도록. */
-  --radius: 0;
+  --tkad-nav-sidebar-width: 13.75rem;
+  --radius: 0.5rem;
   --hermes: #ff6200;
   --hermes-muted: color-mix(in srgb, var(--hermes) 55%, white);
   /* 히어로 등 “항상 어두운” 표면 — 라이트/다크 테마와 무관하게 고정 */
   --hero-void: #020202;
   --hero-fg: #f5f3f0;
+
+  /* App UI surfaces — 라이트 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-subtle: #e5e7eb;
 
   --background: #f4f3f0;
   --foreground: #08080a;
@@ -461,6 +468,13 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: 
 }
 
 .dark {
+  --bg-primary: #020202;
+  --bg-secondary: #0f0f0f;
+  --bg-tertiary: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+
   /* OLED black base */
   --background: #070707;
   --foreground: #f4f2ef;
@@ -619,11 +633,20 @@ body {
     radial-gradient(700px 520px at 72% 18%, rgba(59, 130, 246, 0.08), transparent 60%),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.90), rgba(0, 0, 0, 1));
 }
+html:not(.dark) .tkad-neon-depth {
+  background:
+    radial-gradient(900px 480px at 50% 0%, rgba(139, 92, 246, 0.08), transparent 62%),
+    radial-gradient(700px 400px at 80% 100%, rgba(34, 211, 238, 0.06), transparent 55%),
+    linear-gradient(to bottom, #f9fafb, #ffffff);
+}
 .tkad-neon-grid {
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 84px 84px;
+}
+html:not(.dark) .tkad-neon-grid {
+  background-image: none;
 }
 .tkad-neon-border {
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -929,65 +952,51 @@ main#main-content:has(.tkad-portal-appearance[data-appearance="day"]) {
   --ring: #6366f1;
 }
 
-/* Category explore hero (`/media/packages` 기준) — 라이트 테마에서도 항상 다크 풀블리드 */
-.tkad-category-explore-hero {
-  background: #05050a !important;
-  color: rgb(255 255 255) !important;
-  color-scheme: dark;
+/* Category / home heroes — 라이트·다크 분리 (Tailwind + 아래 토큰) */
+.tkad-category-explore-hero,
+.tkad-home-hero-neo {
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero {
+html:not(.dark) .tkad-category-explore-hero,
+html:not(.dark) .tkad-home-hero-neo,
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero,
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero-neo {
+  background: #f9fafb !important;
+  color: rgb(15 23 42) !important;
+  color-scheme: light;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html:not(.dark) .tkad-category-explore-hero > [aria-hidden],
+html:not(.dark) .tkad-home-hero-neo > [aria-hidden],
+.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero > [aria-hidden],
+.tkad-home-appearance[data-appearance="day"] .tkad-home-hero-neo > [aria-hidden] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+html.dark .tkad-category-explore-hero,
+html.dark .tkad-home-hero-neo,
+.tkad-home-appearance[data-appearance="night"] .tkad-category-explore-hero,
+.tkad-home-appearance[data-appearance="night"] .tkad-home-hero-neo {
   background: #05050a !important;
   color: rgb(255 255 255) !important;
-  -webkit-text-fill-color: currentColor !important;
+  color-scheme: dark;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero > [aria-hidden] {
-  opacity: revert !important;
-  visibility: visible !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .text-white {
-  color: rgb(255 255 255) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .text-white\/50 {
-  color: rgb(255 255 255 / 0.5) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .text-cyan-400\/60 {
-  color: rgb(34 211 238 / 0.6) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .bg-clip-text {
+.tkad-category-explore-hero .bg-clip-text,
+.tkad-home-hero-neo .bg-clip-text {
   -webkit-text-fill-color: transparent !important;
   color: transparent !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-primary,
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-primary *,
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-secondary,
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-secondary * {
+.tkad-category-explore-hero .category-hero-cta-primary,
+.tkad-category-explore-hero .category-hero-cta-primary * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-cta-secondary {
-  border-color: rgb(255 255 255 / 0.14) !important;
-  background-color: rgb(255 255 255 / 0.06) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-stat-card {
-  border-color: rgb(255 255 255 / 0.1) !important;
-  background-color: rgb(255 255 255 / 0.05) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-stat-card dt {
-  color: rgb(255 255 255 / 0.55) !important;
 }
 
 /* BETA 뱃지 — 다크/네온 표면 기본 */
@@ -1014,128 +1023,45 @@ html:not(.dark) .tkad-public-nav-aside .category-hero-beta-badge {
   letter-spacing: 0.14em !important;
 }
 
+html:not(.dark) .tkad-category-explore-hero .category-hero-beta-badge,
 .tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-beta-badge {
-  color: rgb(237 233 254) !important;
+  color: rgb(46 16 101) !important;
   -webkit-text-fill-color: currentColor !important;
+  background-color: rgb(196 181 253) !important;
+  border-color: rgb(109 40 217 / 0.68) !important;
 }
 
-/* Media detail hero (`/media/[id]`) — 라이트 테마에서도 항상 다크 풀블리드 */
+/* Media detail hero — 라이트·다크 분리 */
 .tkad-media-detail-hero {
-  background: #05050a !important;
-  color: rgb(255 255 255) !important;
-  color-scheme: dark;
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
 
+html:not(.dark) .tkad-media-detail-hero,
 .tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero {
+  background: #f9fafb !important;
+  color: rgb(15 23 42) !important;
+  color-scheme: light;
+}
+
+html:not(.dark) .tkad-media-detail-hero > [aria-hidden],
+.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero > [aria-hidden] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+html.dark .tkad-media-detail-hero,
+.tkad-home-appearance[data-appearance="night"] .tkad-media-detail-hero {
   background: #05050a !important;
   color: rgb(255 255 255) !important;
-  -webkit-text-fill-color: currentColor !important;
+  color-scheme: dark;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero > [aria-hidden] {
-  opacity: revert !important;
-  visibility: visible !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .text-white {
-  color: rgb(255 255 255) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .text-muted-foreground {
-  color: rgb(255 255 255 / 0.55) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .text-foreground {
-  color: rgb(255 255 255) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/35"] {
-  color: rgb(255 255 255 / 0.35) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/55"] {
-  color: rgb(255 255 255 / 0.55) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/60"] {
-  color: rgb(255 255 255 / 0.6) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/75"] {
-  color: rgb(255 255 255 / 0.75) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/80"] {
-  color: rgb(255 255 255 / 0.8) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/82"] {
-  color: rgb(255 255 255 / 0.82) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/85"] {
-  color: rgb(255 255 255 / 0.85) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="text-white/90"] {
-  color: rgb(255 255 255 / 0.9) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .bg-clip-text,
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-home-accent-text {
+.tkad-media-detail-hero .bg-clip-text,
+.tkad-media-detail-hero .tkad-home-accent-text {
   -webkit-text-fill-color: transparent !important;
   color: transparent !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-home-accent-text {
-  background-image: var(--home-accent-gradient) !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  text-shadow: none !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="border-white"] {
-  border-color: rgb(255 255 255 / 0.14) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="bg-white/"] {
-  background-color: rgb(255 255 255 / 0.06) !important;
-  box-shadow: 0 28px 120px rgb(0 0 0 / 0.75) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero [class*="bg-black/"] {
-  background-color: rgb(0 0 0 / 0.3) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-neon-border::before {
-  opacity: revert !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-media-detail-hero__back {
-  border-color: rgb(255 255 255 / 0.18) !important;
-  color: rgb(255 255 255 / 0.92) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero .tkad-media-detail-hero__back:hover {
-  background-color: rgb(255 255 255 / 0.08) !important;
-  color: rgb(255 255 255) !important;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .category-hero-beta-badge {
@@ -1361,20 +1287,17 @@ html:not(.dark) .tkad-public-nav-aside .category-hero-beta-badge {
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-category-explore-hero [class*="text-white"],
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-keyword-landing-hero [class*="text-white"],
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-detail-hero [class*="text-white"],
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-home-hero.tkad-category-explore-hero [class*="text-white"] {
-  color: rgb(255 255 255 / 0.92) !important;
-  -webkit-text-fill-color: currentColor !important;
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .category-hero-cta-primary,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .category-hero-cta-primary *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta-clean,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta-clean *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-category-explore-hero .text-white\/50,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-keyword-landing-hero .text-white\/50,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-keyword-landing-hero .text-white\/82 {
-  color: rgb(255 255 255 / 0.55) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
+/* 히어로는 라이트 배경 + text-gray-900 — 예전 “항상 다크 히어로”용 흰 글자 강제 제거 */
 
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon {
   color: var(--home-body) !important;
@@ -1944,8 +1867,8 @@ html:not(.dark) .tkad-glass-surface-soft [class*="bg-white/"] {
   background-color: rgb(248 250 252 / 0.98) !important;
 }
 
-html:not(.dark) .tkad-glass-surface [class*="bg-black/"],
-html:not(.dark) .tkad-glass-surface-soft [class*="bg-black/"] {
+html:not(.dark) .tkad-glass-surface [class*="dark:bg-black bg-white/"],
+html:not(.dark) .tkad-glass-surface-soft [class*="dark:bg-black bg-white/"] {
   background-color: rgb(241 245 249 / 0.98) !important;
 }
 
@@ -2020,9 +1943,9 @@ html:not(.dark) .tkad-budget-widget-panel [class*="bg-white/"] {
   background-color: rgb(248 250 252 / 0.98) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel [class*="bg-black/"],
+.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel [class*="dark:bg-black bg-white/"],
 html:not(.dark) .tkad-budget-widget-panel select,
-html:not(.dark) .tkad-budget-widget-panel [class*="bg-black/"] {
+html:not(.dark) .tkad-budget-widget-panel [class*="dark:bg-black bg-white/"] {
   background-color: rgb(255 255 255 / 0.98) !important;
   color: var(--home-ink, #020617) !important;
 }

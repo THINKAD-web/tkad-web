@@ -54,7 +54,7 @@ export function GuidesBeginnerTimeline({ steps, isKo }: Props) {
                 <h3 className="text-base font-black dark:text-white text-gray-900">
                   {isKo ? step.titleKo : step.titleEn}
                 </h3>
-                <span className="rounded-lg border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/30 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                <span className="rounded-lg border dark:border-white/10 border-gray-200 dark:bg-black bg-white/30 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-500">
                   {isKo ? step.durationKo : step.durationEn}
                 </span>
               </div>

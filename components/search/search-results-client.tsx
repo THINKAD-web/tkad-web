@@ -155,7 +155,7 @@ function SearchResultsInner() {
               name="q"
               defaultValue={q}
               placeholder={t("modalPlaceholder")}
-              className="h-11 min-w-0 flex-1 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 px-4 font-mono text-sm dark:text-white text-gray-900 outline-none focus:border-white/25"
+              className="h-11 min-w-0 flex-1 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-4 font-mono text-sm dark:text-white text-gray-900 outline-none focus:border-white/25"
             />
             <button
               type="submit"

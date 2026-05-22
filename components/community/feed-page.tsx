@@ -185,7 +185,7 @@ export async function CommunityFeedPage({
                       className={`rounded-2xl border px-4 py-3 transition-colors ${
                         active
                           ? "border-white/22 bg-white/12"
-                          : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 hover:dark:bg-white/8 bg-gray-100"
+                          : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 hover:dark:bg-white/8 bg-gray-100"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-3">
@@ -232,7 +232,7 @@ export async function CommunityFeedPage({
                   className={`inline-flex rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                     !activeCategory
                       ? "border-white/22 bg-white/12 dark:text-white text-gray-900"
-                      : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
+                      : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
                   }`}
                 >
                   {isKo ? "전체" : "All"}
@@ -248,7 +248,7 @@ export async function CommunityFeedPage({
                       className={`inline-flex rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                         active
                           ? "border-white/22 bg-white/12 dark:text-white text-gray-900"
-                          : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
+                          : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
                       }`}
                     >
                       {isKo ? labels.shortKo : labels.en}
@@ -273,7 +273,7 @@ export async function CommunityFeedPage({
                   className={`inline-flex rounded-full border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
                     activeSort === option.key
                       ? "border-[#8b5cf6]/60 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.16))] dark:text-white text-gray-900"
-                      : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
+                      : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
                   }`}
                 >
                   {option.label}
@@ -370,7 +370,7 @@ export async function CommunityFeedPage({
                       className={`inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 font-mono text-[11px] font-bold tabular-nums transition-colors ${
                       active
                           ? "border-white/22 bg-white/12 dark:text-white text-gray-900"
-                          : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
+                          : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900"
                     }`}
                   >
                     {n}

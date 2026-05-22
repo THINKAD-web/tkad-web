@@ -17,7 +17,7 @@ export async function IndustryPackageLinks({ slug, locale }: Props) {
 
   return (
     <section className="border-t border-border/80 bg-muted/50 py-12 sm:py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="ui-container">
         <p className="text-xs font-semibold text-muted-foreground sm:text-sm">
           {isKo ? "추천 패키지" : "Recommended packages"}
         </p>

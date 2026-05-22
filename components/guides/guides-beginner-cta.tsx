@@ -33,7 +33,7 @@ export function GuidesBeginnerCta({
           {BEGINNER_TRUST_METRICS.map((m) => (
             <li
               key={m.labelKo}
-              className="rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 px-4 py-4"
+              className="rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 px-4 py-4"
             >
               <p className="text-2xl font-black text-cyan-200">
                 {isKo ? m.valueKo : m.valueEn}

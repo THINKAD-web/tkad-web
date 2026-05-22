@@ -94,7 +94,7 @@ export default function HistoryPage() {
   return (
     <>
       <section className="bg-hero-void py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
@@ -123,7 +123,7 @@ export default function HistoryPage() {
       </section>
 
       <section className="bg-muted py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           {/* Timeline rail */}
           <div className="mb-10 overflow-x-auto">
             <div className="flex min-w-[600px] items-center gap-4 pb-2">

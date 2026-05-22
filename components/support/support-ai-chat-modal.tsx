@@ -31,7 +31,7 @@ function Bubble({
         "max-w-[92%] rounded-2xl border px-3 py-2.5 text-sm leading-relaxed",
         isUser
           ? "ml-auto border-violet-400/30 bg-violet-500/20 dark:text-white text-gray-900"
-          : "mr-auto dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/35 dark:text-white text-gray-800",
+          : "mr-auto dark:border-white/12 border-gray-200 dark:bg-black bg-white/35 dark:text-white text-gray-800",
       )}
     >
       <p className="whitespace-pre-wrap break-words">{content}</p>
@@ -142,7 +142,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.1] tkad-neon-grid"
         />
-        <div className="relative flex shrink-0 items-center gap-3 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/35 px-4 py-3">
+        <div className="relative flex shrink-0 items-center gap-3 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/35 px-4 py-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100">
             <Bot className="h-5 w-5" aria-hidden />
           </div>
@@ -186,7 +186,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
           ) : null}
         </div>
 
-        <div className="relative shrink-0 border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/30 p-3">
+        <div className="relative shrink-0 border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white/30 p-3">
           <div className="mb-2 flex flex-wrap gap-1.5">
             {(["suggestion1", "suggestion2", "suggestion3"] as const).map((key) => (
               <button
@@ -214,7 +214,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
               placeholder={t("aiPlaceholder")}
               rows={2}
               disabled={loading}
-              className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/35 px-3 py-2 text-sm dark:text-white text-gray-900 outline-none placeholder:dark:text-white focus:border-white/22"
+              className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 text-sm dark:text-white text-gray-900 outline-none placeholder:dark:text-white focus:border-white/22"
             />
             <button
               type="button"

@@ -123,7 +123,7 @@ export function CommunityPostInteractions({
             if (goLoginIfNeeded()) return;
             setReportOpen(true);
           }}
-          className="inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
+          className="inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
         >
           <Flag className="h-3.5 w-3.5" />
           {isKo ? "신고" : "Report"}
@@ -208,14 +208,14 @@ export function ReportModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-[#05050a]/72 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 dark:bg-[#05050a]/72 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-[28px] border dark:border-white/12 border-gray-200 bg-[#090912]/92 shadow-[0_40px_140px_rgba(0,0,0,0.82)] backdrop-blur tkad-neon-border">
+      <div className="w-full max-w-md rounded-[28px] border dark:border-white/12 border-gray-200 bg-white dark:bg-[#090912]/92 shadow-[0_40px_140px_rgba(0,0,0,0.82)] backdrop-blur tkad-neon-border">
         <div className="flex items-center justify-between border-b dark:border-white/10 border-gray-200 px-5 py-4">
           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white">
             [ {targetType === "post" ? (isKo ? "게시글 신고" : "Report post") : isKo ? "댓글 신고" : "Report comment"} ]

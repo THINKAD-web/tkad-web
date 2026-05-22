@@ -71,7 +71,7 @@ export default async function ReportDetailPage({ params }: Params) {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-[#05050a] dark:text-white text-gray-900">
+        <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div
             aria-hidden

@@ -97,7 +97,7 @@ import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-l
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import {
-  formatMediaPriceWonWithSymbol,
+  formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { KEYWORD_FILTER_SEARCH_DEBOUNCE_MS } from "@/lib/media-keyword-filter-logic";
@@ -585,7 +585,7 @@ export default function MediaBrowseClient({
       )}
 
       <section className="tkad-media-browse-main border-t border-border/60 bg-card py-10 sm:py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
             <div className="flex flex-col gap-6">
               <MediaScarcitySection
                 catalog={effectiveCatalog}
@@ -948,7 +948,7 @@ export default function MediaBrowseClient({
                                     : mapSelectedMedia.nameEn}
                                 </h3>
                                 <p className="mt-1.5 font-mono text-sm font-bold tabular-nums text-foreground">
-                                  {formatMediaPriceWonWithSymbol(mapSelectedMedia.price)}
+                                  {formatCatalogPriceFieldWon(mapSelectedMedia.price)}
                                   <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                                     ·{" "}
                                     {tMedia(

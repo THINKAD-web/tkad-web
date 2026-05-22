@@ -25,7 +25,7 @@ export function OverallConfidenceBar({
   const color =
     score >= 85 ? "bg-emerald-500" : score >= 70 ? "bg-amber-500" : "bg-orange-500";
   return (
-    <div className="rounded-lg border border-border bg-card p-3">
+    <div className="rounded-2xl border border-border bg-card p-3">
       <div className="flex items-center justify-between text-xs">
         <span className="font-semibold text-muted-foreground">
           {isKo ? "데이터 신뢰도" : "Data confidence"}

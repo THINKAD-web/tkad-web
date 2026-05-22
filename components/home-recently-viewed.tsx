@@ -9,7 +9,7 @@ import {
   type RecentlyViewedRecord,
 } from "@/lib/recently-viewed";
 import { typeLabels } from "@/lib/media-data";
-import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
+import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import ScrollAnimate from "@/components/scroll-animate";
 import { cn } from "@/lib/utils";
 
@@ -40,10 +40,10 @@ export default function HomeRecentlyViewed({ locale }: Props) {
 
   return (
     <section
-      className="border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 py-14 sm:py-16"
+      className="border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 py-14 sm:py-16"
       aria-label={isKo ? "최근에 보신 매체" : "Recently viewed media"}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="ui-container">
         <ScrollAnimate>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -108,7 +108,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                       <span className="truncate">{media.region}</span>
                     </div>
                     <p className="text-sm font-bold tabular-nums dark:text-white text-gray-900">
-                      {formatMediaPriceWonWithSymbol(media.price)}
+                      {formatCatalogPriceFieldWon(media.price)}
                     </p>
                   </div>
                 </Link>

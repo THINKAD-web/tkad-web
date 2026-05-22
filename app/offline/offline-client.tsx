@@ -8,7 +8,7 @@ import {
   type OfflineRecentMediaCard,
 } from "@/lib/recently-viewed-offline";
 import { useSavedMediaList } from "@/components/pwa-save-offline-button";
-import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
+import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
 export function OfflineClient() {
   const [items, setItems] = useState<OfflineRecentMediaCard[]>([]);
@@ -19,7 +19,7 @@ export function OfflineClient() {
   }, []);
 
   return (
-    <div className="tkad-landing-neon tkad-planner-neon relative min-h-screen overflow-hidden bg-[#020202] px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] dark:text-white text-gray-900">
+    <div className="tkad-landing-neon tkad-planner-neon relative min-h-screen overflow-hidden bg-gray-50 dark:bg-[#020202] px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] dark:text-white text-gray-900">
       <OfflineGlow />
       <div className="relative z-10 mx-auto max-w-lg">
         <header className="text-center">
@@ -151,7 +151,7 @@ function OfflineMediaCard({ media }: { media: OfflineRecentMediaCard }) {
           <p className="mt-1 text-xs dark:text-white text-gray-500">
             {[media.location, media.type].filter(Boolean).join(" · ")}
             {media.price != null && media.price > 0
-              ? ` · ${formatMediaPriceWonWithSymbol(media.price)}`
+              ? ` · ${formatCatalogPriceFieldWon(media.price)}`
               : ""}
           </p>
         </div>

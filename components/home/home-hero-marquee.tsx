@@ -27,7 +27,7 @@ export function HomeHeroMarquee({ imageUrls }: Props) {
         {topTrack.map((src, i) => (
           <div
             key={`t-${i}-${src.slice(-24)}`}
-            className="relative h-28 w-48 shrink-0 overflow-hidden rounded-none border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100"
+            className="relative h-28 w-48 shrink-0 overflow-hidden rounded-none border dark:border-white/10 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100"
           >
             <Image
               src={src}
@@ -45,7 +45,7 @@ export function HomeHeroMarquee({ imageUrls }: Props) {
         {bottomTrack.map((src, i) => (
           <div
             key={`b-${i}-${src.slice(-24)}`}
-            className="relative h-28 w-48 shrink-0 overflow-hidden rounded-none border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100"
+            className="relative h-28 w-48 shrink-0 overflow-hidden rounded-none border dark:border-white/10 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100"
           >
             <Image
               src={src}

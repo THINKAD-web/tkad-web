@@ -49,7 +49,7 @@ function DockPreviewRow({
 }) {
   return (
     <div className="flex items-start gap-2.5 rounded-xl border border-white/8 dark:bg-white/5 bg-gray-50 px-2.5 py-2">
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/30 dark:text-white text-gray-800">
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border dark:border-white/10 border-gray-200 dark:bg-black bg-white/30 dark:text-white text-gray-800">
         {icon}
       </span>
       <span className="min-w-0 text-left">
@@ -78,7 +78,7 @@ function DockActionWithPreview({
   return (
     <div className="group/dock-action relative">
       <div className={dockPreviewReveal}>
-        <div className="relative w-[min(15rem,calc(100vw-6rem))] overflow-hidden rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/70 p-2 shadow-[0_20px_64px_rgba(0,0,0,0.65)] backdrop-blur-xl">
+        <div className="relative w-[min(15rem,calc(100vw-6rem))] overflow-hidden rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/70 p-2 shadow-[0_20px_64px_rgba(0,0,0,0.65)] backdrop-blur-xl">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 opacity-[0.1] tkad-neon-grid"
@@ -151,7 +151,7 @@ export default function FloatingSupportDock() {
             ref={quotePanelRef}
             role="dialog"
             aria-label={tQuote("modalTitle")}
-            className="relative w-[min(18rem,calc(100vw-5rem))] overflow-hidden rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 p-4 dark:text-white text-gray-900 shadow-[0_24px_80px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+            className="relative w-[min(18rem,calc(100vw-5rem))] overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 text-gray-900 shadow-xl dark:border-white/12 dark:bg-gray-900 dark:text-white"
           >
             <div
               aria-hidden
@@ -210,8 +210,7 @@ export default function FloatingSupportDock() {
 
         <div
           className={cn(
-            "relative w-[3.25rem] overflow-visible rounded-[22px] border dark:border-white/12 border-gray-200",
-            "dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 shadow-[0_20px_64px_rgba(0,0,0,0.62)] backdrop-blur-xl",
+            "relative w-[3.25rem] overflow-visible rounded-[22px] border border-gray-200 bg-white shadow-xl dark:border-white/12 dark:bg-gray-900 dark:shadow-[0_20px_64px_rgba(0,0,0,0.62)]",
             "ring-1 ring-white/10",
           )}
         >
@@ -225,7 +224,7 @@ export default function FloatingSupportDock() {
           />
 
           <div className="relative border-b dark:border-white/10 border-gray-200 px-2 py-2">
-            <p className="text-center font-mono text-[8px] font-bold uppercase leading-tight tracking-[0.22em] dark:text-white text-gray-400">
+            <p className="text-center font-mono text-[8px] font-bold uppercase leading-tight tracking-[0.22em] text-gray-400 dark:text-white/40">
               {tDock("packageLabel")}
             </p>
           </div>

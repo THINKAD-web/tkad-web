@@ -98,7 +98,7 @@ export default function NewsPage() {
   return (
     <>
       <section className="bg-hero-void py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
             {`// 15 / News`}
           </p>
@@ -149,7 +149,7 @@ export default function NewsPage() {
       </section>
 
       <section className="bg-muted py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => {
               const title = isKo ? item.titleKo : item.titleEn;

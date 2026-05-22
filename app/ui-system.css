@@ -1,0 +1,163 @@
+/**
+ * TKAD App UI — 스크롤바·선택·타이포·카드·버튼·뱃지 전역 유틸
+ * `globals.css` 에서 import.
+ */
+
+/* ── 스크롤바 ── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+:root:not(.dark) ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+
+/* ── 텍스트 선택 ── */
+::selection {
+  background: rgba(139, 92, 246, 0.3);
+  color: inherit;
+}
+
+/* ── 전환 easing (과도한 속성 제외) ── */
+@media (prefers-reduced-motion: no-preference) {
+  a,
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  [data-slot="card"] {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer components {
+  /* 페이지 히어로 */
+  .ui-page-headline {
+    @apply text-4xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white md:text-5xl lg:text-6xl;
+  }
+
+  /* 섹션 h2 */
+  .ui-section-headline {
+    @apply text-xl font-semibold leading-tight tracking-tight text-gray-900 dark:text-white md:text-2xl lg:text-3xl;
+  }
+
+  /* 카드 제목 */
+  .ui-card-title {
+    @apply text-base font-semibold leading-tight text-gray-900 dark:text-white md:text-lg;
+  }
+
+  /* 본문 */
+  .ui-body {
+    @apply text-sm leading-relaxed tracking-normal text-gray-600 dark:text-white/70 md:text-base;
+  }
+
+  /* 캡션 */
+  .ui-caption {
+    @apply text-xs leading-normal tracking-wider uppercase text-gray-400 dark:text-white/40;
+  }
+
+  /* 섹션 라벨 */
+  .ui-section-label {
+    @apply mb-3 text-xs font-medium uppercase tracking-widest text-cyan-600/60 dark:text-cyan-400/60;
+  }
+
+  /* 섹션 간격 */
+  .ui-section-y {
+    @apply py-16 md:py-24;
+  }
+
+  /* 컨테이너 */
+  .ui-container {
+    @apply mx-auto w-full max-w-7xl px-4 md:px-6 lg:px-8;
+  }
+  .ui-container-narrow {
+    @apply mx-auto w-full max-w-4xl px-4 md:px-6 lg:px-8;
+  }
+
+  /* Primary / Secondary / Ghost 버튼 */
+  .ui-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2.5 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-95 md:text-base;
+  }
+  .ui-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 active:scale-95 dark:border-white/20 dark:text-white dark:hover:bg-white/10 md:text-base;
+  }
+  .ui-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 text-sm font-medium text-violet-600 underline-offset-4 transition-colors hover:text-violet-500 hover:underline dark:text-violet-400 dark:hover:text-violet-300 md:text-base;
+  }
+
+  /* 카드 표면 */
+  .ui-card-dark {
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm;
+  }
+  .ui-card-light {
+    @apply rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:shadow-none;
+  }
+
+  /* 상태 뱃지 */
+  .ui-badge-beta {
+    @apply inline-flex items-center rounded-full bg-violet-500/20 px-2 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400;
+  }
+  .ui-badge-new {
+    @apply inline-flex items-center rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs font-medium text-cyan-600 dark:text-cyan-400;
+  }
+  .ui-badge-active {
+    @apply inline-flex items-center rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400;
+  }
+  .ui-badge-pending {
+    @apply inline-flex items-center rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400;
+  }
+  .ui-badge-error {
+    @apply inline-flex items-center rounded-full bg-rose-500/20 px-2 py-0.5 text-xs font-medium text-rose-600 dark:text-rose-400;
+  }
+
+  /* 빈 상태 */
+  .ui-empty {
+    @apply flex flex-col items-center justify-center px-6 py-12 text-center;
+  }
+  .ui-empty-icon {
+    @apply mb-4 h-12 w-12 text-gray-300 dark:text-white/20;
+  }
+  .ui-empty-title {
+    @apply text-sm font-medium text-gray-400 dark:text-white/50;
+  }
+  .ui-empty-sub {
+    @apply mt-1 text-xs text-gray-300 dark:text-white/30;
+  }
+
+  /* 스켈레톤 (쉬머 대체·보조) */
+  .ui-skeleton {
+    @apply animate-pulse rounded-xl bg-gray-200 dark:bg-white/10;
+  }
+  .ui-skeleton-round {
+    @apply animate-pulse rounded-full bg-gray-200 dark:bg-white/10;
+  }
+
+  /* 히어로 정렬: 모바일 중앙 → md+ 좌측 (left 유지 페이지는 className으로 덮어씀) */
+  .ui-hero-align {
+    @apply text-center md:text-left;
+  }
+
+  /* 카드 내부 텍스트 좌측 정렬 */
+  .ui-card-text {
+    @apply text-left;
+  }
+}
+
+/* shadcn Button — gradient primary variant 보조 */
+[data-variant="gradient"] {
+  border-radius: 0.75rem;
+}
+
+/* 로딩 스피너 (버튼 내) */
+.ui-spinner {
+  @apply h-5 w-5 shrink-0 animate-spin text-violet-400;
+}

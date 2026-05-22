@@ -187,7 +187,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
         />
 
         <section className="tkad-media-browse-main border-t border-border/60 bg-card py-12 sm:py-16">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="ui-container">
             <div className="flex flex-col gap-8">
             <div className="min-w-0">
               <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -204,7 +204,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     gridLabel={t("media.browseCardLayoutGrid")}
                     compactLabel={t("media.browseCardLayoutCompact")}
                   />
-                  <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent shadow-sm backdrop-blur dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-foreground">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent shadow-sm backdrop-blur dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 dark:text-foreground">
                     <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
                     <span>{tMedia("browseCatalogVerifiedBadge")}</span>
                   </div>

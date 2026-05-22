@@ -10,7 +10,7 @@ import {
 } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
-  formatMediaPriceWonWithSymbol,
+  formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 
@@ -195,7 +195,7 @@ export default function MediaSearchAutocomplete({
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 mt-1 w-full rounded-lg border bg-white shadow-lg"
+          className="absolute z-50 mt-1 w-full rounded-2xl border bg-white shadow-lg"
         >
           {results.map((media, idx) => (
             <button
@@ -217,7 +217,7 @@ export default function MediaSearchAutocomplete({
                 </div>
               </div>
               <span className="shrink-0 text-right text-[11px] font-semibold leading-tight text-gold-dark">
-                {formatMediaPriceWonWithSymbol(media.price)}
+                {formatCatalogPriceFieldWon(media.price)}
                 <span className="ml-0.5 text-[10px] font-medium text-muted-foreground">
                   · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
                 </span>

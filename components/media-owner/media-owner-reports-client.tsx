@@ -218,7 +218,7 @@ export default function MediaOwnerReportsClient() {
                     className="h-12 w-18 rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="flex h-12 w-16 items-center justify-center rounded-lg dark:bg-white/10 bg-gray-100 text-xs dark:text-white text-gray-400">
+                  <div className="flex h-12 w-16 items-center justify-center rounded-2xl dark:bg-white/10 bg-gray-100 text-xs dark:text-white text-gray-400">
                     No img
                   </div>
                 )}

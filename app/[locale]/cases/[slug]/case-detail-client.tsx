@@ -90,7 +90,7 @@ export default function CaseDetailClient({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-screen bg-[#0A0A0A] dark:text-white text-gray-900">
+      <div className="tkad-landing-neon tkad-planner-neon min-h-screen bg-gray-50 dark:bg-[#0A0A0A] dark:text-white text-gray-900">
         <section className="py-20 sm:py-24">
           <CaseDetailContainer>
             <Link
@@ -166,7 +166,7 @@ export default function CaseDetailClient({
                 {metrics.map((m) => (
                   <div
                     key={m.key}
-                    className="rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-4"
+                    className="rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4"
                   >
                     <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       {isKo ? m.labelKo : m.labelEn}
@@ -239,7 +239,7 @@ export default function CaseDetailClient({
             </div>
 
             {row.resultsKo.length > 0 ? (
-              <div className="mt-10 rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-5 sm:p-6">
+              <div className="mt-10 rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-5 sm:p-6">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
                   [ {t("resultsLabel")} ]
                 </p>

@@ -222,7 +222,7 @@ export default function MediaNetworkDetailClient({
               </Badge>
               <Badge
                 variant="outline"
-                className="border-white/40 dark:bg-black bg-white bg-white/30 text-xs font-semibold dark:text-white text-gray-900"
+                className="border-white/40 dark:bg-black bg-white/30 text-xs font-semibold dark:text-white text-gray-900"
               >
                 {isKo ? typeLb.ko : typeLb.en}
               </Badge>
@@ -230,7 +230,7 @@ export default function MediaNetworkDetailClient({
           </div>
 
           {heroImg ? (
-            <div className="relative flex h-[220px] items-center justify-center rounded-xl dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 sm:h-[260px] lg:h-[280px]">
+            <div className="relative flex h-[220px] items-center justify-center rounded-xl dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 sm:h-[260px] lg:h-[280px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={heroImg}
@@ -268,7 +268,7 @@ export default function MediaNetworkDetailClient({
               ) : null}
             </div>
 
-            <aside className="min-w-0 rounded-2xl border dark:border-white/15 border-gray-200 dark:bg-black bg-white bg-white/35 p-4 text-sm text-slate-100 shadow-lg shadow-black/40 backdrop-blur-md sm:p-5">
+            <aside className="min-w-0 rounded-2xl border dark:border-white/15 border-gray-200 dark:bg-black bg-white/35 p-4 text-sm text-slate-100 shadow-lg shadow-black/40 backdrop-blur-md sm:p-5">
               <div className="grid gap-3 sm:grid-cols-2">
                 <CoreFact
                   icon={CircleDollarSign}

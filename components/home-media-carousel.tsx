@@ -7,10 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
-import {
-  catalogPriceFieldToPriceMan,
-  formatMediaPriceWonWithSymbol,
-} from "@/lib/media-price-format";
+import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import type { MediaItem } from "@/lib/media-data";
 import {
   estimatedCpmWon,
@@ -141,7 +138,7 @@ export function HomeMediaCarousel({
           className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.24),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
         />
 
-        <div className="relative aspect-[16/9] overflow-hidden border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20">
+        <div className="relative aspect-[16/9] overflow-hidden border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/20">
           {getPrimaryMediaImageUrl(media) ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
@@ -169,7 +166,7 @@ export function HomeMediaCarousel({
           ) : null}
 
           {index !== undefined ? (
-            <div className="absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/35 font-mono text-[12px] font-black dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur">
+            <div className="absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/35 font-mono text-[12px] font-black dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur">
               {index}
             </div>
           ) : null}
@@ -323,11 +320,7 @@ export function HomeMediaCarousel({
               typeKey in { digital: 1, static: 1, mobile: 1, network: 1 }
                 ? tm(`types.${typeKey}`)
                 : media.type;
-            const priceMan = catalogPriceFieldToPriceMan(media.price);
-            const priceText = formatMediaPriceWonWithSymbol(
-              priceMan * 10_000,
-              localeForPrice,
-            );
+            const priceText = formatCatalogPriceFieldWon(media.price, localeForPrice);
             const name = isKo ? media.name : media.nameEn || media.name;
             const location = isKo
               ? media.location

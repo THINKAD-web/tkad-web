@@ -161,7 +161,7 @@ export default async function AreaLandingPage({ params }: Props) {
 
           {otherAreas.length > 0 ? (
             <section className="tkad-media-links-footer border-t border-border/80 bg-muted py-12 text-foreground sm:py-16">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="ui-container">
                 <p className="text-xs font-semibold text-muted-foreground sm:text-sm">
                   {isKo ? "다른 지구로 찾기" : "Browse other districts"}
                 </p>

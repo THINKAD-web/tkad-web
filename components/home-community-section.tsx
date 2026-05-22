@@ -57,7 +57,7 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-5 sm:mt-8 lg:mt-10 lg:grid-cols-2 lg:gap-6">
-      <div className="tkad-neon-border tkad-neon-glow relative flex flex-col gap-4 overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 bg-white/[0.04] p-6 dark:text-white text-gray-900 backdrop-blur sm:p-8">
+      <div className="tkad-neon-border relative flex flex-col gap-4 overflow-hidden rounded-[28px] border border-gray-200 bg-white p-6 text-gray-900 shadow-sm dark:border-white/12 dark:bg-white/5 dark:text-white dark:shadow-none sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_55%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_55%)]"
@@ -123,9 +123,9 @@ export function HomeCommunitySection({ posts, locale }: Props) {
                 key={post.id}
                 href={`/community/post/${post.id}`}
                 className={cn(
-                  "tkad-neon-border group relative block overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 bg-white/[0.04] dark:text-white text-gray-900 backdrop-blur transition-all duration-200",
-                  "hover:-translate-y-0.5 hover:border-white/22 hover:bg-white/[0.07] hover:shadow-[0_24px_72px_rgba(0,0,0,0.55)]",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a855f7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05050a]",
+                  "tkad-neon-border group relative block overflow-hidden rounded-[22px] border border-gray-200 bg-white text-gray-900 shadow-sm transition-all duration-200 hover:shadow-md dark:border-white/12 dark:bg-white/5 dark:text-white dark:shadow-none",
+                  "hover:-translate-y-0.5 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md dark:hover:border-white/22 dark:hover:bg-white/[0.07] dark:hover:shadow-[0_24px_72px_rgba(0,0,0,0.55)]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-[#a855f7] dark:focus-visible:ring-offset-[#05050a]",
                 )}
               >
                 <article className="relative flex h-full flex-col gap-3 p-4 sm:p-5">

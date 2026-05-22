@@ -19,7 +19,7 @@ import {
   estimatedMonthlyImpressions,
 } from "@/lib/ai-recommend-metrics";
 import {
-  formatMediaPriceWonWithSymbol,
+  formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { typeLabels } from "@/lib/media-data";
@@ -453,7 +453,7 @@ function Top3DashCard({
       className={cn(
         "relative flex flex-col overflow-hidden rounded-[24px] border-2 border-border bg-card p-4",
         accentRank &&
-          "dark:border-white/14 border-gray-200 bg-[#05050a] dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)]",
+          "dark:border-white/14 border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-[#05050a] dark:text-white dark:shadow-[0_28px_120px_rgba(0,0,0,0.55)] shadow-[0_28px_120px_rgba(0,0,0,0.55)]",
       )}
     >
       {accentRank ? (
@@ -487,7 +487,7 @@ function Top3DashCard({
               className={cn(
                 "inline-flex items-center gap-1 px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-[0.18em]",
                 accentRank
-                  ? "rounded-xl border border-white/22 dark:bg-black bg-white bg-white/25 dark:text-white text-gray-900 backdrop-blur"
+                  ? "rounded-xl border border-white/22 dark:bg-black bg-white/25 dark:text-white text-gray-900 backdrop-blur"
                   : "border-2 border-border bg-hero-void text-accent",
               )}
             >
@@ -547,7 +547,7 @@ function Top3DashCard({
           className={cn(
             "h-3 w-full border-2",
             accentRank
-              ? "dark:border-white/18 border-gray-300 dark:bg-black bg-white bg-white/20"
+              ? "dark:border-white/18 border-gray-300 dark:bg-black bg-white/20"
               : "border-border bg-card",
           )}
         >
@@ -616,7 +616,7 @@ function Top3DashCard({
               accentRank ? "dark:text-white text-gray-900" : "text-foreground",
             )}
           >
-            {formatMediaPriceWonWithSymbol(m.price)}
+            {formatCatalogPriceFieldWon(m.price)}
             <span
               className={cn(
                 "ml-1 text-[10px] font-normal",

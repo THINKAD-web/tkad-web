@@ -303,7 +303,7 @@ export default function AdminCrmPage() {
                 </select>
               </div>
               <div className="flex flex-wrap gap-3 text-sm">
-                <div className="rounded-lg border bg-white px-3 py-2">
+                <div className="rounded-2xl border bg-white px-3 py-2">
                   <p className="text-[10px] font-medium uppercase text-muted-foreground">
                     {t("totalImpressions")}
                   </p>
@@ -311,7 +311,7 @@ export default function AdminCrmPage() {
                     {dashboardStats.totalImp.toLocaleString()}
                   </p>
                 </div>
-                <div className="rounded-lg border bg-white px-3 py-2">
+                <div className="rounded-2xl border bg-white px-3 py-2">
                   <p className="text-[10px] font-medium uppercase text-muted-foreground">
                     {t("activeCampaigns")}
                   </p>
@@ -319,7 +319,7 @@ export default function AdminCrmPage() {
                     {dashboardStats.active}
                   </p>
                 </div>
-                <div className="rounded-lg border bg-white px-3 py-2">
+                <div className="rounded-2xl border bg-white px-3 py-2">
                   <p className="text-[10px] font-medium uppercase text-muted-foreground">
                     {t("avgCtrVsBench")}
                   </p>
@@ -329,7 +329,7 @@ export default function AdminCrmPage() {
                       : "—"}
                   </p>
                 </div>
-                <div className="rounded-lg border bg-white px-3 py-2">
+                <div className="rounded-2xl border bg-white px-3 py-2">
                   <p className="text-[10px] font-medium uppercase text-muted-foreground">
                     {t("totalSpendAccount")}
                   </p>

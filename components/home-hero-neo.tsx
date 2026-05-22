@@ -151,7 +151,9 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
       style={{ minHeight: HERO_MIN_HEIGHT }}
       className={cn(
         "tkad-home-hero-neo relative flex w-full shrink-0 items-center overflow-hidden",
-        darkHero ? "bg-[#05050a] dark:text-white text-gray-900" : "bg-background text-foreground",
+        darkHero
+          ? "bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white"
+          : "bg-gray-50 text-foreground",
       )}
     >
       <div className="absolute inset-0 z-0">

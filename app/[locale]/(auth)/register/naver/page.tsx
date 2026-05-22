@@ -96,7 +96,7 @@ function NaverRegisterForm() {
                   "w-full rounded-[18px] border px-4 py-4 text-left transition-all",
                   role === opt.value
                     ? "border-white/28 bg-white/14 dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
-                    : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 dark:text-white text-gray-600 hover:border-white/16 hover:dark:text-white text-gray-800",
+                    : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 dark:text-white text-gray-600 hover:border-white/16 hover:dark:text-white text-gray-800",
                 )}
               >
                 <p className="font-mono text-sm font-bold tracking-tight">
@@ -110,7 +110,7 @@ function NaverRegisterForm() {
           </div>
 
           {error && (
-            <div className="mt-4 rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/35 px-3 py-2 font-mono text-[12px] tracking-tight dark:text-white text-gray-800">
+            <div className="mt-4 rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 font-mono text-[12px] tracking-tight dark:text-white text-gray-800">
               {`// `}
               {error}
             </div>
@@ -146,7 +146,7 @@ function NaverRegisterForm() {
 function AuthCardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
-      <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/45 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
+      <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
         <AuthCardDecor />
         <div className="relative">{children}</div>
       </div>

@@ -21,16 +21,15 @@ export function PublicNavAside({ className }: Props) {
     <aside
       className={cn(
         "tkad-public-nav-aside hidden lg:flex lg:w-[var(--tkad-nav-sidebar-width)] lg:shrink-0 lg:flex-col",
-        "sticky top-0 z-40 h-[100dvh] border-r border-border/60 bg-background text-foreground",
-        "dark:border-white/10 border-gray-200 dark:bg-[#05050a] dark:text-white text-gray-900",
+        "sticky top-0 z-40 h-[100dvh] border-r border-gray-200 bg-background text-foreground dark:border-white/10 dark:bg-[#05050a] dark:text-white",
         className,
       )}
       aria-label={t("nav.sidebarLabel")}
     >
-      <div className="flex h-16 shrink-0 items-center border-b border-border/60 px-5 dark:border-white/10 border-gray-200">
+      <div className="flex h-14 shrink-0 items-center border-b border-gray-200 px-4 dark:border-white/10">
         <Link
           href="/"
-          className="whitespace-nowrap text-[18px] font-black tracking-tight text-foreground dark:text-white text-gray-900"
+          className="whitespace-nowrap text-lg font-black tracking-tight text-gray-900 dark:text-white"
         >
           <span className="font-black">THINK</span>
           <span className="tkad-home-accent-text font-black">AD</span>

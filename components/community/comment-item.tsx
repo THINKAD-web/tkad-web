@@ -159,7 +159,7 @@ export function CommunityCommentItemCard({
   };
 
   return (
-    <li className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20 p-5 backdrop-blur">
+    <li className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-5 backdrop-blur">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
           <User className="h-3.5 w-3.5 dark:text-white" />

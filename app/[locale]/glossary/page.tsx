@@ -38,7 +38,7 @@ export default async function GlossaryPage({ params }: Props) {
     <>
       {/* Hero */}
       <section className="bg-hero-void py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "용어집" : "GLOSSARY"} ]
           </p>
@@ -59,7 +59,7 @@ export default async function GlossaryPage({ params }: Props) {
 
       {/* TOC — 카테고리 */}
       <section className="border-b-2 border-border bg-muted py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "분류" : "CATEGORIES"} ]
           </p>
@@ -88,7 +88,7 @@ export default async function GlossaryPage({ params }: Props) {
 
       {/* 카테고리별 용어 목록 */}
       <section className="bg-card py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           {CATEGORY_ORDER.map((cat) => {
             const items = grouped.get(cat) ?? [];
             if (items.length === 0) return null;
@@ -167,7 +167,7 @@ export default async function GlossaryPage({ params }: Props) {
 
       {/* CTA */}
       <section className="border-t-2 border-border bg-hero-void py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+        <div className="ui-container text-center">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "다음 단계" : "NEXT"} ]
           </p>

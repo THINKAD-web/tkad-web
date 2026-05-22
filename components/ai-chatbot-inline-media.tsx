@@ -8,7 +8,7 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { typeLabels } from "@/lib/media-data";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 import {
-  formatMediaPriceWonWithSymbol,
+  formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 
@@ -56,7 +56,7 @@ export function AiChatbotMediaCards({
                 {label}
               </p>
               <p className="mt-0.5 text-[11px] font-bold tabular-nums text-gold-dark">
-                {formatMediaPriceWonWithSymbol(m.price)}
+                {formatCatalogPriceFieldWon(m.price)}
                 <span className="font-semibold text-navy/55">
                   {" "}
                   · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}

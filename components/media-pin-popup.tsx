@@ -8,7 +8,7 @@ import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
-  formatMediaPriceWonWithSymbol,
+  formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
@@ -51,7 +51,7 @@ export function MediaPinPopup({
               {formatMediaLocationShort(media, isKo)}
             </p>
             <p className="mt-1 text-sm font-bold text-gold-dark">
-              {formatMediaPriceWonWithSymbol(media.price)}
+              {formatCatalogPriceFieldWon(media.price)}
               <span className="ml-1 text-[11px] font-semibold text-navy/55">
                 · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
               </span>

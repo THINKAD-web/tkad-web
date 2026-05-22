@@ -47,7 +47,7 @@ export function MyHubMediaGridCard({
         aria-label={item.name}
       />
       <div className="relative z-[1] pointer-events-none">
-        <div className="mb-3 aspect-[4/3] overflow-hidden rounded-[18px] border border-border/60 bg-muted/40 dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/30">
+        <div className="mb-3 aspect-[4/3] overflow-hidden rounded-[18px] border border-border/60 bg-muted/40 dark:border-white/10 border-gray-200 dark:bg-black bg-white/30">
           {item.image ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
@@ -73,7 +73,7 @@ export function MyHubMediaGridCard({
             e.stopPropagation();
             onRemove(item.id);
           }}
-          className="pointer-events-auto absolute right-3 top-3 z-[2] inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card/95 text-muted-foreground backdrop-blur transition-colors hover:border-destructive/40 hover:text-destructive dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 dark:hover:text-red-300"
+          className="pointer-events-auto absolute right-3 top-3 z-[2] inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card/95 text-muted-foreground backdrop-blur transition-colors hover:border-destructive/40 hover:text-destructive dark:border-white/14 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 dark:hover:text-red-300"
           aria-label={isKo ? "찜 해제" : "Remove favorite"}
         >
           <X className="h-4 w-4" />

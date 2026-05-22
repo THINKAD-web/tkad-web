@@ -167,7 +167,7 @@ export default function MediaCaseStudyGallery({
                   className="h-full w-full object-cover grayscale transition-[filter,transform] duration-500 ease-out group-hover:grayscale-0 group-hover:scale-[1.02]"
                 />
                 <span
-                  className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-2xl border border-white/16 dark:bg-black bg-white bg-white/35 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur"
+                  className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-2xl border border-white/16 dark:bg-black bg-white/35 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-800 shadow-[0_18px_70px_rgba(0,0,0,0.55)] backdrop-blur"
                   aria-hidden
                 >
                   <ZoomIn className="h-3 w-3" />

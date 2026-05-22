@@ -15,7 +15,7 @@ import {
   typeLabels,
 } from "@/lib/media-data";
 import {
-  formatMediaPriceWonWithSymbol,
+  formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 
@@ -206,7 +206,7 @@ export default function MediaSimilarCarousel({
                   {isKo ? m.name : (m.nameEn || m.name)}
                 </p>
                 <p className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">
-                  {formatMediaPriceWonWithSymbol(m.price)}
+                  {formatCatalogPriceFieldWon(m.price)}
                   <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                     · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
                   </span>

@@ -94,7 +94,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
 
 
         <section className="border-b border-border bg-muted/30 py-8 dark:border-white/10 border-gray-200 dark:bg-[#070712]">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="ui-container">
             <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
               <Link href={reportListHref(null, 1)} className={filterPill(!category)}>
                 {isKo ? "전체" : "All"}
@@ -113,7 +113,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
         </section>
 
         <section className="bg-background py-12 text-foreground sm:py-16 dark:bg-[#030308]">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="ui-container">
             {reports.length === 0 ? (
               <div className="mx-auto max-w-xl rounded-[28px] border border-border bg-card p-10 text-center shadow-[0_24px_80px_rgba(0,0,0,0.08)] dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:backdrop-blur-md dark:shadow-[0_36px_140px_rgba(0,0,0,0.72)]">
                 <p className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">

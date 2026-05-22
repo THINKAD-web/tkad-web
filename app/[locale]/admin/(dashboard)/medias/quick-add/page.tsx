@@ -304,19 +304,19 @@ export default function AdminMediaQuickAddPage() {
             spellCheck={false}
           />
           {parseState.kind === "syntax" && (
-            <div className="flex gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+            <div className="flex gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               {parseState.message}
             </div>
           )}
           {parseState.kind === "schema" && (
-            <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <div className="flex gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               {parseState.message}
             </div>
           )}
           {parseState.kind === "ok" && (
-            <div className="flex gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+            <div className="flex gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
               파싱 성공 · {parseState.items.length}건
             </div>
@@ -431,7 +431,7 @@ function PreviewCard({
           <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
           {preview.location}
         </p>
-        <div className="rounded-lg border-2 border-border bg-muted px-3 py-2 text-xs bg-muted/60">
+        <div className="rounded-2xl border-2 border-border bg-muted px-3 py-2 text-xs bg-muted/60">
           <p className="font-semibold text-foreground">
             저장 유형:{" "}
             <span className="text-primary">{preview.type}</span>{" "}

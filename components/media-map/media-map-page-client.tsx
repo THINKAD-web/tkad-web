@@ -22,6 +22,7 @@ import {
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { CategoryExploreHero } from "@/components/category-explore-hero";
+import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { MediaMapDetailSheet } from "@/components/media-map/media-map-detail-sheet";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 import {
@@ -32,7 +33,7 @@ import {
 
 function NeonLoadingCard({ label }: { label: string }) {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-6 py-10 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 px-6 py-10 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
       <div
         aria-hidden
@@ -43,7 +44,7 @@ function NeonLoadingCard({ label }: { label: string }) {
           LOADING
         </div>
         <div className="text-sm font-semibold dark:text-white text-gray-800">{label}</div>
-        <div className="h-2 w-full overflow-hidden rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/20">
+        <div className="h-2 w-full overflow-hidden rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20">
           <div className="h-full w-[42%] animate-[tkadShimmer_1.2s_ease-in-out_infinite] bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]" />
         </div>
       </div>
@@ -91,11 +92,19 @@ function writeCart(ids: string[]) {
   window.localStorage.setItem(CART_KEY, JSON.stringify(ids));
 }
 
-function formatPrice(v: number, period: string): string {
-  const krw = new Intl.NumberFormat("ko-KR").format(v);
+function formatPrice(v: number, period: string, locale: string): string {
+  const price = formatCatalogPriceFieldWon(v, locale);
   const p =
-    period === "month" ? "/월" : period === "week" ? "/주" : period === "biweekly" ? "/격주" : period === "day" ? "/일" : "";
-  return `₩${krw}${p}`;
+    period === "month"
+      ? "/월"
+      : period === "week"
+        ? "/주"
+        : period === "biweekly"
+          ? "/격주"
+          : period === "day"
+            ? "/일"
+            : "";
+  return `${price}${p}`;
 }
 
 /** SSR-safe 초기 URL 파싱 (hydration warning 방지를 위해 lazy init 으로 사용) */
@@ -537,7 +546,7 @@ export default function MediaMapPageClient() {
                 "pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all max-md:h-9 max-md:justify-center max-md:px-2.5",
                 surveyMode
                   ? "border-cyan-400/50 bg-cyan-400/20"
-                  : "dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 hover:dark:bg-black bg-white bg-white/70",
+                  : "dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 hover:dark:bg-black bg-white/70",
               )}
               aria-label={isKo ? "답사 모드" : "Field survey"}
             >
@@ -568,7 +577,7 @@ export default function MediaMapPageClient() {
         {/* 매체 리스트 — 모바일: 지도·미리보기 아래 */}
         <aside className="order-3 w-full border-t border-border/60 bg-card md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r md:overflow-y-auto">
           <div className="sticky top-0 z-10 border-b border-border/60 bg-card/95 backdrop-blur-md p-3 space-y-3 md:p-4">
-            <div className="tkad-media-map-search-pill group relative flex h-12 items-center rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 shadow-sm backdrop-blur-md transition-all hover:dark:border-white/18 border-gray-300 focus-within:border-white/22 focus-within:ring-2 focus-within:ring-primary/25 focus-within:shadow-md">
+            <div className="tkad-media-map-search-pill group relative flex h-12 items-center rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 shadow-sm backdrop-blur-md transition-all hover:dark:border-white/18 border-gray-300 focus-within:border-white/22 focus-within:ring-2 focus-within:ring-primary/25 focus-within:shadow-md">
             <svg
               className="ml-4 h-[18px] w-[18px] flex-none dark:text-white text-gray-600 transition-colors group-focus-within:dark:text-white text-gray-800"
               viewBox="0 0 24 24"
@@ -591,7 +600,7 @@ export default function MediaMapPageClient() {
           </div>
           <div className="flex items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 px-3 py-2 text-xs font-semibold dark:text-white text-gray-900 shadow-sm backdrop-blur">
+              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 px-3 py-2 text-xs font-semibold dark:text-white text-gray-900 shadow-sm backdrop-blur">
                 <span className="dark:text-white text-gray-600">정렬</span>
                 <select
                   className="border-l dark:border-white/12 border-gray-200 bg-transparent pl-2 text-xs font-semibold dark:text-white text-gray-900 focus:outline-none"
@@ -611,7 +620,7 @@ export default function MediaMapPageClient() {
                 </select>
               </label>
 
-              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 px-3 py-2 text-xs font-semibold dark:text-white text-gray-900 shadow-sm backdrop-blur">
+              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 px-3 py-2 text-xs font-semibold dark:text-white text-gray-900 shadow-sm backdrop-blur">
                 <span className="dark:text-white text-gray-600">타입</span>
                 <select
                   className="border-l dark:border-white/12 border-gray-200 bg-transparent pl-2 text-xs font-semibold dark:text-white text-gray-900 focus:outline-none"
@@ -630,7 +639,7 @@ export default function MediaMapPageClient() {
 
             <div className="flex items-center gap-2 text-xs text-gray-500">
               {loading ? (
-                <span className="inline-flex items-center gap-2 rounded-full border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 px-2.5 py-1 text-[11px] font-semibold dark:text-white text-gray-700 backdrop-blur">
+                <span className="inline-flex items-center gap-2 rounded-full border dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-2.5 py-1 text-[11px] font-semibold dark:text-white text-gray-700 backdrop-blur">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]" />
                   불러오는 중…
                 </span>
@@ -683,7 +692,7 @@ export default function MediaMapPageClient() {
           </div>
 
           {filtersExpanded && false && (
-            <div className="space-y-2 rounded-lg border border-dashed border-border/70 bg-muted/40 p-2.5">
+            <div className="space-y-2 rounded-2xl border border-dashed border-border/70 bg-muted/40 p-2.5">
               <div className="flex gap-2">
                 <select
                   value={filter.type}
@@ -769,7 +778,7 @@ export default function MediaMapPageClient() {
                 </div>
                 <div className="flex items-center justify-between pt-0.5">
                   <span className="text-xs font-bold text-primary tabular-nums">
-                    {formatPrice(it.price, it.pricePeriod)}
+                    {formatPrice(it.price, it.pricePeriod, locale)}
                   </span>
                   <div className="flex items-center gap-1.5">
                     <button
@@ -781,7 +790,7 @@ export default function MediaMapPageClient() {
                       className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${
                         isInCompare(it.id)
                           ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black"
-                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white bg-white/15"
+                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white/15"
                       }`}
                       aria-label={isInCompare(it.id) ? "선택 해제" : "선택"}
                     >
@@ -796,7 +805,7 @@ export default function MediaMapPageClient() {
                       className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${
                         inCart(it.id)
                           ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black"
-                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white bg-white/15"
+                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white/15"
                       }`}
                       aria-label={inCart(it.id) ? "담기 해제" : "담기"}
                     >

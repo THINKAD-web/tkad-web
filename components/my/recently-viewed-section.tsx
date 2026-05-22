@@ -8,7 +8,7 @@ import {
   subscribeRecentlyViewedChanged,
   type RecentlyViewedRecord,
 } from "@/lib/recently-viewed";
-import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
+import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
 export function RecentlyViewedSection() {
   const [items, setItems] = useState<RecentlyViewedRecord[]>([]);
@@ -58,7 +58,7 @@ export function RecentlyViewedSection() {
               {`// `}{m.region} · {m.type}
             </p>
             <p className="mt-1 font-mono text-[10px] tabular-nums text-foreground">
-              {formatMediaPriceWonWithSymbol(m.price)}
+              {formatCatalogPriceFieldWon(m.price)}
             </p>
           </Link>
         ))}

@@ -36,7 +36,7 @@ export default async function ReportDashboardPage({
   return (
     <div className="min-h-screen bg-background">
       <section className="border-b-2 border-black bg-hero-void py-12 sm:py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <p className="flex flex-wrap items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[#FF6600]">
             <span>[ Report ] / Dashboard // ooh activity</span>
             <CategoryHeroBetaBadge />

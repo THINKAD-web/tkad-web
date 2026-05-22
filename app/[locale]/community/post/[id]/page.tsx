@@ -256,7 +256,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                 </p>
                 <Link
                   href="/community/policy"
-                  className="mt-4 inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white bg-white/20 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/20 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
                 >
                   {isKo ? "운영 정책 보기" : "Read policy"}
                 </Link>

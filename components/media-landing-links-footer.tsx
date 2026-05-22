@@ -41,7 +41,7 @@ export function MediaLandingLinksFooter({
 
   return (
     <section className="tkad-media-links-footer border-t border-border/60 bg-transparent pb-14 pt-10 text-foreground sm:pb-16 sm:pt-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="ui-container">
         <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">

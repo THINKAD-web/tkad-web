@@ -9,7 +9,11 @@ import type { PlannerMetrics } from "@/lib/planner-logic";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import { DEFAULT_LOGO_PLACEMENT } from "@/components/planner/composite-preview";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
-import { formatPricePeriodShortLabel, normalizeMediaPricePeriod } from "@/lib/media-price-format";
+import {
+  formatCatalogPriceFieldWon,
+  formatPricePeriodShortLabel,
+  normalizeMediaPricePeriod,
+} from "@/lib/media-price-format";
 
 export type PlannerReportPreviewBudgetSlice = {
   label: string;
@@ -239,9 +243,9 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                       [ {typeLabel(m)} ]
                     </p>
                     <p className="mt-1 font-mono text-sm font-bold tabular-nums text-primary">
-                      ₩{m.price.toLocaleString()}
+                      {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
                       <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-                        {isKo ? "만/월" : "₩10K/mo"}
+                        /{formatPricePeriodShortLabel(m.pricePeriod, isKo ? "ko" : "en")}
                       </span>
                     </p>
                     {(() => {

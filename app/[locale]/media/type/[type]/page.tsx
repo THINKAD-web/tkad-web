@@ -155,7 +155,7 @@ export default async function TypeLandingPage({ params }: Props) {
           )}
 
           <section className="tkad-media-links-footer border-t border-border/80 bg-muted py-12 text-foreground sm:py-16">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="ui-container">
               <p className="text-xs font-semibold text-muted-foreground sm:text-sm">
                 {isKo ? "다른 유형으로 찾기" : "Browse other formats"}
               </p>

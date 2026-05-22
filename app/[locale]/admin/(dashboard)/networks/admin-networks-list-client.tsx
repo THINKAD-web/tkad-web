@@ -101,13 +101,13 @@ export default function AdminNetworksListClient({
       </div>
 
       {error === "db" && (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {t("dbError")}
         </div>
       )}
       {error === "load" && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+        <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {t("loadError")}
         </div>

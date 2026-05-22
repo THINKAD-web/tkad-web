@@ -86,6 +86,8 @@ import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
 import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
 import { canProceedFromStep } from "@/lib/planner/validation";
 import {
+  formatCatalogPriceFieldWon,
+  formatMediaPriceCompactWon,
   formatPricePeriodShortLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
@@ -108,7 +110,7 @@ function PlannerNeonPageBody({
   );
   if (appearance === "night") {
     return (
-      <div className="relative overflow-hidden bg-[#05050a] dark:text-white text-gray-900">
+      <div className="relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 tkad-neon-depth"
@@ -1357,7 +1359,7 @@ export default function PlannerPageClient({
                           [ {t("kpiCpm")} ]
                         </p>
                         <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
-                          ₩{estCpm.toLocaleString()}
+                          {formatMediaPriceCompactWon(estCpm, isKo ? "ko" : "en")}
                         </p>
                         <p className="mt-1 font-mono text-[10px] tracking-tight text-muted-foreground">
                           {t("kpiCpmHint")}
@@ -1424,9 +1426,9 @@ export default function PlannerPageClient({
                               : (m.locationEn || m.location).slice(0, 40)}
                           </p>
                           <p className="mt-2 font-mono text-sm font-bold tabular-nums text-primary">
-                            ₩{m.price.toLocaleString()}
+                            {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
                             <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-                              {isKo ? "만/월" : "₩10K/mo"}
+                              /{isKo ? "월" : "mo"}
                             </span>
                           </p>
                           {(() => {
@@ -1469,9 +1471,12 @@ export default function PlannerPageClient({
                           [ {t("avgMonthlySlot")} ]
                         </p>
                         <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-foreground">
-                          {Math.round(metrics.avgMonthlyPrice).toLocaleString()}
+                          {formatCatalogPriceFieldWon(
+                            Math.round(metrics.avgMonthlyPrice),
+                            isKo ? "ko" : "en",
+                          )}
                           <span className="ml-1 text-sm text-muted-foreground">
-                            {isKo ? "만원/월" : "₩10K/mo"}
+                            /{isKo ? "월" : "mo"}
                           </span>
                         </p>
                       </div>

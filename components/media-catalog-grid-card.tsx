@@ -226,13 +226,13 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           {body}
           {props.quickInquiryOverlay ? (
             <div
-              className="absolute inset-x-0 bottom-0 z-30 flex gap-2 border-t-2 border-border dark:bg-black bg-white bg-white/75 p-2.5 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 max-md:hidden"
+              className="absolute inset-x-0 bottom-0 z-30 flex gap-2 border-t-2 border-border dark:bg-black bg-white/75 p-2.5 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 max-md:hidden"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
             >
-              <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg border-2 border-border bg-card px-2 py-2 text-xs font-bold text-card-foreground">
+              <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-2xl border-2 border-border bg-card px-2 py-2 text-xs font-bold text-card-foreground">
                 <MediaFavoriteButton
                   mediaId={media.id}
                   mediaName={media.name}

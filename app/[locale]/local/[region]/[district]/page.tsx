@@ -233,7 +233,7 @@ export default async function LocalSeoLandingPage({ params }: Props) {
                     <li key={c.id}>
                       <Link
                         href={`/cases/${c.id}`}
-                        className="block rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 p-4 transition-colors hover:border-white/25"
+                        className="block rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 p-4 transition-colors hover:border-white/25"
                       >
                         <p className="font-semibold dark:text-white text-gray-900">
                           {isKo ? c.titleKo : c.titleEn || c.titleKo}

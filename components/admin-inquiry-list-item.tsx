@@ -276,7 +276,7 @@ export default function AdminInquiryListItem({
             />
 
             {item.oohQuoteId ? (
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50/80 p-3">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-3">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-800">
                   [ 자동 견적 초안 ]
                 </p>

@@ -228,7 +228,7 @@ export function OnboardingWizard({
             </div>
           </div>
 
-          <div className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-6 backdrop-blur sm:p-8">
+          <div className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-6 backdrop-blur sm:p-8">
             {step === 1 && (
               <>
                 <h2 className="text-lg font-black dark:text-white text-gray-900">{t("step1Title")}</h2>

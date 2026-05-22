@@ -121,7 +121,7 @@ export function ProSubscriptionCheckout({ isKo, customerName, customerEmail }: P
   }
 
   return (
-    <div className="rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 p-5">
+    <div className="rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 p-5">
       <div id="pro-payment-method" />
       <div id="pro-agreement" className="mt-4" />
       {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}

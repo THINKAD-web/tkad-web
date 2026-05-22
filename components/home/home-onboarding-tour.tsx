@@ -73,35 +73,35 @@ export default function HomeOnboardingTour() {
       role="dialog"
       aria-label={isKo ? "첫 방문 안내" : "First visit guide"}
     >
-      <div className="rounded-2xl border dark:border-white/14 border-gray-200 bg-[#0a0a12]/95 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xl dark:border-white/14 dark:bg-gray-900">
         <div className="flex items-start justify-between gap-2">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300/90">
+          <p className="font-semibold text-gray-900 dark:text-white">
             {isKo ? "안내" : "Guide"}
           </p>
           <button
             type="button"
             onClick={() => dismiss(true)}
-            className="rounded-lg p-1 dark:text-white text-gray-400 hover:dark:bg-white/10 bg-gray-100"
+            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-white/60 dark:hover:bg-white/10"
             aria-label={isKo ? "닫기" : "Close"}
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-2 text-sm font-bold dark:text-white text-gray-900">
+        <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
           {isKo
             ? "안녕하세요! 처음이시면 안내해드릴까요?"
             : "New here? Quick 3-step tour."}
         </p>
 
-        <div className="mt-4 flex gap-3 rounded-xl border dark:border-white/10 border-gray-200 bg-white/[0.04] p-3">
+        <div className="mt-4 flex gap-3 rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/40 to-cyan-500/30">
-            <Icon className="h-5 w-5 dark:text-white text-gray-900" aria-hidden />
+            <Icon className="h-5 w-5 text-cyan-600 dark:text-cyan-400" aria-hidden />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold dark:text-white text-gray-900">
+            <p className="text-sm font-bold text-gray-900 dark:text-white">
               {isKo ? current.titleKo : current.titleEn}
             </p>
-            <p className="mt-0.5 text-xs dark:text-white text-gray-500">
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-white/60">
               {isKo ? current.descKo : current.descEn}
             </p>
           </div>
@@ -113,7 +113,7 @@ export default function HomeOnboardingTour() {
               key={i}
               className={cn(
                 "h-1 flex-1 rounded-full",
-                i === step ? "bg-cyan-400" : "bg-white/15",
+                i === step ? "bg-cyan-600 dark:bg-cyan-400" : "bg-gray-200 dark:bg-white/15",
               )}
             />
           ))}
@@ -124,7 +124,7 @@ export default function HomeOnboardingTour() {
             <button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              className="flex-1 rounded-xl dark:bg-white/10 bg-gray-100 py-2 text-xs font-bold dark:text-white text-gray-900 hover:bg-white/15"
+              className="flex-1 rounded-xl bg-gray-100 py-2 text-xs font-bold text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
             >
               {isKo ? "다음" : "Next"}
             </button>
@@ -132,7 +132,7 @@ export default function HomeOnboardingTour() {
             <Link
               href={current.href}
               onClick={() => dismiss(true)}
-              className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-2 text-center text-xs font-bold dark:text-white text-gray-900"
+              className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-2 text-center text-xs font-bold text-white"
             >
               {isKo ? "시작하기" : "Start"}
             </Link>
@@ -140,7 +140,7 @@ export default function HomeOnboardingTour() {
           <button
             type="button"
             onClick={() => dismiss(true)}
-            className="rounded-xl border dark:border-white/14 border-gray-200 px-3 py-2 text-xs font-semibold dark:text-white text-gray-700"
+            className="rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-700 dark:border-white/14 dark:bg-white/10 dark:text-white"
           >
             {isKo ? "스킵" : "Skip"}
           </button>

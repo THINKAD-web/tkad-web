@@ -349,7 +349,7 @@ export default function AdminNetworkQuickAddClient() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+        <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>

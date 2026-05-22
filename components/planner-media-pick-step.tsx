@@ -11,6 +11,10 @@ import { useTranslations } from "next-intl";
 import { GripVertical, Plus, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
+  formatCatalogPriceFieldWon,
+  formatCatalogPricesSumWon,
+} from "@/lib/media-price-format";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -242,10 +246,8 @@ export default function PlannerMediaPickStep({
                           )}
                         </p>
                         <p className="mt-1 text-xs font-medium text-gold-dark">
-                          ₩{m.price.toLocaleString()}
-                          <span className="text-navy/60">
-                            {isKo ? " 만/월" : " ₩10K/mo"}
-                          </span>
+                          {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
+                          <span className="text-navy/60">/{isKo ? "월" : "mo"}</span>
                         </p>
                       </div>
                       <Button
@@ -291,9 +293,12 @@ export default function PlannerMediaPickStep({
             <span className="text-right text-sm font-extrabold text-gold-dark">
               {t("campaignMonthlyTotalLabel")}
               <span className="ml-2">
-                ₩{basketMonthlyTotal.toLocaleString()}
+                {formatCatalogPricesSumWon(
+                  basketItems.map((item) => item.price || 0),
+                  isKo ? "ko" : "en",
+                )}
                 <span className="ml-1 text-xs font-semibold text-navy/60">
-                  {isKo ? "만/월" : " ₩10K/mo"}
+                  /{isKo ? "월" : "mo"}
                 </span>
               </span>
             </span>

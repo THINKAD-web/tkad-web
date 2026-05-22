@@ -114,7 +114,7 @@ export default function PortfolioPage() {
   return (
     <>
       <section className="bg-hero-void py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
             {`// 13 / Portfolio`}
           </p>
@@ -161,7 +161,7 @@ export default function PortfolioPage() {
       </section>
 
       <section className="bg-muted py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container">
           <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{isKo ? "Total campaigns" : "Total campaigns"}:{" "}
             <span className="font-bold text-accent">

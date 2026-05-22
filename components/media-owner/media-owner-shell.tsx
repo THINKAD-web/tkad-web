@@ -153,4 +153,4 @@ export const ownerGlassCard =
   "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
 
 export const ownerInputCls =
-  "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/30 px-3 font-mono text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/40";
+  "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3 font-mono text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/40";

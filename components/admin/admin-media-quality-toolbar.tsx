@@ -75,7 +75,7 @@ export function AdminMediaQualityToolbar({
   };
 
   return (
-    <div className="rounded-lg border border-border bg-muted/15 px-2 py-2 sm:px-2.5">
+    <div className="rounded-2xl border border-border bg-muted/15 px-2 py-2 sm:px-2.5">
       <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
         데이터 품질
       </p>

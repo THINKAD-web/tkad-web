@@ -68,7 +68,7 @@ export function MediaInquiryDialog({
               aria-hidden
               className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
             />
-            <div className="relative flex items-start justify-between gap-3 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 px-5 py-4">
+            <div className="relative flex items-start justify-between gap-3 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-5 py-4">
               <div className="min-w-0 dark:text-white text-gray-900">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
                   [ INQUIRY · QUOTE ]
@@ -136,7 +136,7 @@ export function MediaInquiryDialog({
                 href="tel:02-515-2772"
                 className="flex items-center gap-3 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 dark:text-white text-gray-800 backdrop-blur transition-colors hover:dark:bg-white/10 bg-gray-100"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/25 dark:text-white text-gray-800">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 dark:text-white text-gray-800">
                   <Phone className="h-4 w-4" strokeWidth={2} />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -151,7 +151,7 @@ export function MediaInquiryDialog({
               </a>
             </div>
 
-            <p className="relative border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white">
+            <p className="relative border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white">
               {`// `}평일 9:30 – 18:30 / 주말·공휴일 휴무
             </p>
           </div>

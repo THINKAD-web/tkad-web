@@ -106,7 +106,7 @@ export default function MediaLightbox({
 
   const overlay = (
     <div
-      className="fixed inset-0 z-[200] flex flex-col dark:bg-black bg-white bg-white/92"
+      className="fixed inset-0 z-[200] flex flex-col dark:bg-black bg-white/92"
       role="dialog"
       aria-modal="true"
       aria-label={labels.expand}
@@ -156,7 +156,7 @@ export default function MediaLightbox({
           onClick={(e) => e.stopPropagation()}
         >
           {imgFailed ? (
-            <div className="rounded-lg border dark:border-white/20 border-gray-300 dark:bg-white/5 bg-gray-50 px-6 py-8 text-center dark:text-white text-gray-900">
+            <div className="rounded-2xl border dark:border-white/20 border-gray-300 dark:bg-white/5 bg-gray-50 px-6 py-8 text-center dark:text-white text-gray-900">
               <p className="text-sm font-medium">이미지를 불러올 수 없습니다.</p>
               <p className="mt-2 text-xs dark:text-white text-gray-600">
                 Could not load image.

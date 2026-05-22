@@ -111,7 +111,7 @@ export function ProposalResultDisplay({
           {proposal.mediaMix.map((row) => (
             <li
               key={row.mediaId}
-              className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 p-4"
+              className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 p-4"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="font-bold dark:text-white text-gray-900">{row.mediaName}</p>

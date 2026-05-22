@@ -24,7 +24,7 @@ export function NeonSectionHead({
       )}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="tkad-neon-border inline-flex max-w-full shrink-0 items-center whitespace-nowrap rounded-2xl bg-gray-50 px-4 py-2 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-gray-700 backdrop-blur dark:bg-white/5 dark:text-white/78">
+        <span className="ui-section-label tkad-neon-border inline-flex max-w-full shrink-0 items-center whitespace-nowrap rounded-xl bg-gray-50 px-3 py-1.5 font-mono font-semibold backdrop-blur dark:bg-white/5">
           <span className="tkad-home-accent-text">[{number}]</span>
           {kicker ? (
             <span className="text-gray-500 dark:text-white/55"> / {kicker}</span>
@@ -38,7 +38,7 @@ export function NeonSectionHead({
         ) : null}
       </div>
 
-      <h2 className="mt-4 text-balance text-[clamp(34px,3.8vw,56px)] font-black leading-[1.02] tracking-[-0.06em] text-foreground dark:text-white dark:[text-shadow:0_24px_120px_rgba(0,0,0,0.88)] sm:mt-5 md:mt-7">
+      <h2 className="ui-section-headline mt-4 text-balance sm:mt-5 md:mt-7 dark:[text-shadow:0_24px_120px_rgba(0,0,0,0.88)]">
         {title}
       </h2>
     </header>

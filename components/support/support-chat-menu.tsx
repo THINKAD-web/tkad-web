@@ -24,7 +24,7 @@ export function SupportChatMenu({ open, onClose, hours, onOpenAi }: Props) {
     <div
       role="dialog"
       aria-label={t("menuLabel")}
-      className="relative w-[min(20rem,calc(100vw-5rem))] overflow-hidden rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/6 bg-gray-500/50 dark:text-white text-gray-900 shadow-[0_24px_80px_rgba(0,0,0,0.75)] backdrop-blur-xl"
+      className="relative w-[min(20rem,calc(100vw-5rem))] overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-xl dark:border-white/12 dark:bg-gray-900 dark:text-white"
     >
       <div
         aria-hidden
@@ -33,10 +33,10 @@ export function SupportChatMenu({ open, onClose, hours, onOpenAi }: Props) {
       <div className="relative p-4">
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300/90">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40">
               {t("brandEyebrow")}
             </p>
-            <p className="mt-1 text-base font-black tracking-tight">
+            <p className="mt-1 text-base font-semibold tracking-tight text-gray-900 dark:text-white">
               {t("brandTitle")}
             </p>
           </div>
@@ -50,7 +50,7 @@ export function SupportChatMenu({ open, onClose, hours, onOpenAi }: Props) {
           </button>
         </div>
 
-        <p className="text-sm leading-relaxed dark:text-white text-gray-700">{t("greeting")}</p>
+        <p className="text-sm leading-relaxed text-gray-500 dark:text-white/60">{t("greeting")}</p>
 
         <div
           className={cn(
@@ -108,7 +108,7 @@ export function SupportChatMenu({ open, onClose, hours, onOpenAi }: Props) {
                   onClose();
                   onOpenAi();
                 }}
-                className="flex w-full items-center gap-3 rounded-xl border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-3 text-sm font-bold dark:text-white text-gray-900 transition hover:bg-white/15"
+                className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-100 px-3 py-3 text-sm font-bold text-gray-700 transition hover:bg-gray-200 dark:border-white/14 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
               >
                 <Bot className="h-5 w-5 shrink-0" aria-hidden />
                 {t("aiCta")}
@@ -119,9 +119,9 @@ export function SupportChatMenu({ open, onClose, hours, onOpenAi }: Props) {
             <a
               href={PHONE_HREF}
               onClick={onClose}
-              className="flex w-full items-center gap-3 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-3 text-sm font-semibold dark:text-white text-gray-900 transition hover:dark:bg-white/10 bg-gray-100"
+              className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-100 px-3 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 dark:border-white/12 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
             >
-              <Phone className="h-5 w-5 shrink-0 text-cyan-300" aria-hidden />
+              <Phone className="h-5 w-5 shrink-0 text-cyan-600 dark:text-cyan-400" aria-hidden />
               {t("phoneCta")}
             </a>
           </li>

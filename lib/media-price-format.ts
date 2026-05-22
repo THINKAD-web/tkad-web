@@ -16,39 +16,101 @@ export function catalogPriceFieldToPriceMan(value: number): number {
   return catalogPriceFieldToWon(value) / 10_000;
 }
 
-/** DB·카탈로그 `price`는 원(₩) 단위 */
-export function formatMediaPriceWon(wonUnits: number, locale = "ko-KR"): string {
-  return `${wonUnits.toLocaleString(locale)}원`;
+/**
+ * 원화 컴팩트 표기 (사이트 공통 표준).
+ * - 100만원 미만: ₩50만
+ * - 100~9,999만원: ₩1,500만
+ * - 1억 이상: ₩1.2억
+ */
+export function formatMediaPriceCompactWon(
+  wonUnits: number,
+  locale = "ko-KR",
+): string {
+  if (!Number.isFinite(wonUnits) || wonUnits <= 0) {
+    return locale.startsWith("ko") ? "문의" : "Inquire";
+  }
+
+  const isKo = locale.startsWith("ko");
+  const man = wonUnits / 10_000;
+
+  if (isKo) {
+    if (man >= 10_000) {
+      const eok = man / 10_000;
+      const eokText =
+        eok >= 10
+          ? Math.round(eok).toLocaleString("ko-KR")
+          : (Math.round(eok * 10) / 10).toLocaleString("ko-KR");
+      return `₩${eokText}억`;
+    }
+    if (man >= 100) {
+      return `₩${Math.round(man).toLocaleString("ko-KR")}만`;
+    }
+    return `₩${Math.round(man)}만`;
+  }
+
+  if (wonUnits >= 100_000_000) {
+    const b = wonUnits / 100_000_000;
+    return `₩${b >= 10 ? Math.round(b) : (Math.round(b * 10) / 10)}B`;
+  }
+  if (wonUnits >= 1_000_000) {
+    return `₩${Math.round(wonUnits / 1_000_000)}M`;
+  }
+  return `₩${Math.round(wonUnits).toLocaleString("en-US")}`;
 }
 
+/** 원(₩) 단위 — 컴팩트 ₩ 표기 */
 export function formatMediaPriceWonWithSymbol(
   wonUnits: number,
   locale = "ko-KR",
 ): string {
-  return `₩${wonUnits.toLocaleString(locale)}`;
+  return formatMediaPriceCompactWon(wonUnits, locale);
 }
 
+/** 원(₩) 단위 — 컴팩트 + «원» 접미 (PDF·견적서 등) */
+export function formatMediaPriceWon(wonUnits: number, locale = "ko-KR"): string {
+  const compact = formatMediaPriceCompactWon(wonUnits, locale);
+  if (locale.startsWith("ko")) {
+    return `${compact.replace(/^₩/, "")}원`;
+  }
+  return compact;
+}
+
+/** 카탈로그 `price` 필드(만원/원 혼재) → 컴팩트 ₩ */
 export function formatCatalogPriceFieldWon(
   value: number,
   locale = "ko-KR",
 ): string {
-  if (!value || value <= 0) return "문의";
-  return formatMediaPriceWonWithSymbol(catalogPriceFieldToWon(value), locale);
+  if (!value || value <= 0) {
+    return locale.startsWith("ko") ? "문의" : "Inquire";
+  }
+  return formatMediaPriceCompactWon(catalogPriceFieldToWon(value), locale);
+}
+
+/** @deprecated alias — `formatCatalogPriceFieldWon` 과 동일 */
+export function formatCatalogPriceFieldCompact(
+  value: number,
+  locale = "ko-KR",
+): string {
+  return formatCatalogPriceFieldWon(value, locale);
+}
+
+/** 여러 카탈로그 가격 합계(만원 단위 합) → 컴팩트 ₩ */
+export function formatCatalogPricesSumWon(
+  values: readonly number[],
+  locale = "ko-KR",
+): string {
+  const total = values.reduce((s, v) => s + catalogPriceFieldToWon(v), 0);
+  return formatMediaPriceCompactWon(total, locale);
 }
 
 /**
- * 상세·모달용: 한국어 locale에서는 `60,000,000원` 형태(통화 기호 없이), 그 외는 ₩ 표기.
+ * 상세·모달용 — 공개 UI와 동일한 컴팩트 표기.
  */
 export function formatCatalogPriceKrwLong(
   value: number,
   locale: string,
 ): string {
-  const won = catalogPriceFieldToWon(value);
-  const isKo = locale === "ko" || locale.startsWith("ko");
-  if (isKo) {
-    return `${won.toLocaleString("ko-KR")}원`;
-  }
-  return formatMediaPriceWonWithSymbol(won, "en-US");
+  return formatCatalogPriceFieldWon(value, locale);
 }
 
 export function normalizeMediaPricePeriod(

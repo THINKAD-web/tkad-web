@@ -16,6 +16,7 @@ import {
   type BudgetPieSlice,
 } from "@/lib/planner-logic";
 import type { MediaItem } from "@/lib/media-data";
+import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
 
 /**
  * 플래너 결과 화면(Step 6 보고서) — Reach / Frequency / CPM / OTS KPI + 예산 배분 파이.
@@ -96,7 +97,10 @@ export function PlannerEffectSimulationPanel({
     {
       key: "cpm",
       label: isKo ? "CPM (1,000회 노출)" : "CPM (per 1,000)",
-      value: advanced.cpmKrw != null ? `₩${advanced.cpmKrw.toLocaleString("ko-KR")}` : "—",
+      value:
+        advanced.cpmKrw != null
+          ? formatMediaPriceCompactWon(advanced.cpmKrw, "ko-KR")
+          : "—",
       hint: isKo ? "총 비용 ÷ (총 노출 / 1,000)" : "Budget ÷ (Imp / 1,000)",
       tone: "default" as const,
     },
@@ -328,7 +332,7 @@ export function PlannerEffectSimulationPanel({
                     </td>
                     <td className="px-2 py-2 text-right tabular-nums text-bx-gray-dim">
                       {row.cpmKrw != null
-                        ? `₩${row.cpmKrw.toLocaleString("ko-KR")}`
+                        ? formatMediaPriceCompactWon(row.cpmKrw, "ko-KR")
                         : "—"}
                     </td>
                   </tr>
@@ -350,7 +354,7 @@ export function PlannerEffectSimulationPanel({
                   </td>
                   <td className="px-2 py-3 text-right tabular-nums text-bx-accent">
                     {advanced.cpmKrw != null
-                      ? `₩${advanced.cpmKrw.toLocaleString("ko-KR")}`
+                      ? formatMediaPriceCompactWon(advanced.cpmKrw, "ko-KR")
                       : "—"}
                   </td>
                 </tr>

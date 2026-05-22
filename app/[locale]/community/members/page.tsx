@@ -91,7 +91,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
       "inline-flex items-center justify-center rounded-full border px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
       active
         ? "border-white/22 bg-white/12 dark:text-white text-gray-900"
-        : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:border-white/16 hover:dark:text-white text-gray-700",
+        : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:border-white/16 hover:dark:text-white text-gray-700",
     );
 
   const regionTabCls = (active: boolean) =>
@@ -99,7 +99,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
       "inline-flex items-center justify-center rounded-full border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors sm:px-4",
       active
         ? "border-cyan-400/35 bg-cyan-500/10 text-cyan-100"
-        : "dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 dark:text-white hover:border-white/16 hover:dark:text-white text-gray-700",
+        : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:border-white/16 hover:dark:text-white text-gray-700",
     );
 
   return (

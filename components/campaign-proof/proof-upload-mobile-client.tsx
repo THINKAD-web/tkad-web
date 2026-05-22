@@ -131,7 +131,7 @@ export function ProofUploadMobileClient({
         <label className="mt-6 block">
           <span className="text-xs dark:text-white text-gray-500">{isKo ? "매체" : "Media"}</span>
           <select
-            className="mt-1 h-11 w-full rounded-xl border dark:border-white/15 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 px-3 text-sm dark:text-white text-gray-900"
+            className="mt-1 h-11 w-full rounded-xl border dark:border-white/15 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 px-3 text-sm dark:text-white text-gray-900"
             value={mediaPick}
             onChange={(e) => setMediaPick(e.target.value)}
           >

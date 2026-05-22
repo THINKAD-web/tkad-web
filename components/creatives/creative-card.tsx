@@ -75,7 +75,7 @@ export function CreativeCard({
               "absolute right-2 bottom-2 flex h-7 w-7 items-center justify-center rounded-full border-2 transition-colors",
               selected
                 ? "border-accent bg-accent text-accent-foreground"
-                : "border-white/60 dark:bg-black bg-white bg-white/30 dark:text-white text-gray-700 backdrop-blur",
+                : "border-white/60 dark:bg-black bg-white/30 dark:text-white text-gray-700 backdrop-blur",
             )}
             aria-hidden
           >

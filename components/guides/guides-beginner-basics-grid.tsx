@@ -148,7 +148,7 @@ function MediaTypesDetail({ isKo }: { isKo: boolean }) {
       {MEDIA_TYPE_DETAILS.map((m) => (
         <div
           key={m.nameKo}
-          className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 p-4"
+          className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 p-4"
         >
           <h4 className="text-sm font-black dark:text-white text-gray-900">
             {isKo ? m.nameKo : m.nameEn}
@@ -173,7 +173,7 @@ function CpmDetail({ isKo }: { isKo: boolean }) {
     <>
       <BulletList items={isKo ? ["CPM = 광고비 ÷ (예상 노출 ÷ 1,000)"] : ["CPM = spend ÷ (estimated impressions ÷ 1,000)"]} />
       <SubLabel>{example.title}</SubLabel>
-      <div className="mt-2 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/25 p-4 font-mono text-xs leading-relaxed dark:text-white text-gray-700">
+      <div className="mt-2 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 p-4 font-mono text-xs leading-relaxed dark:text-white text-gray-700">
         {example.lines.map((line) => (
           <p key={line}>{line}</p>
         ))}
@@ -238,7 +238,7 @@ function BudgetDetail({ isKo }: { isKo: boolean }) {
           return (
             <div
               key={g.industryKo}
-              className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white bg-white/20 p-4"
+              className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 p-4"
             >
               <h4 className="text-sm font-black dark:text-white text-gray-900">
                 {isKo ? g.industryKo : g.industryEn}

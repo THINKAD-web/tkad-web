@@ -172,7 +172,7 @@ export function CampaignAnalyticsClient({
           {kpiCards.map((card) => (
             <div
               key={card.label}
-              className={`rounded-[20px] border dark:border-white/12 border-gray-200 bg-gradient-to-br ${card.accent} dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur`}
+              className={`rounded-[20px] border dark:border-white/12 border-gray-200 bg-gradient-to-br ${card.accent} dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur`}
             >
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500">
                 {card.label}
@@ -184,7 +184,7 @@ export function CampaignAnalyticsClient({
           ))}
         </section>
 
-        <section className="mt-8 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
+        <section className="mt-8 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
           <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
             {isKo ? "노출 추이" : "Impression trend"}
           </h2>
@@ -273,7 +273,7 @@ export function CampaignAnalyticsClient({
         </section>
 
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <section className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
+          <section className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
             <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
               {isKo ? "매체별 기여도" : "Media contribution"}
             </h2>
@@ -357,7 +357,7 @@ export function CampaignAnalyticsClient({
             </ul>
           </section>
 
-          <section className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
+          <section className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
             <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
               {isKo ? "지역별 커버리지" : "Regional coverage"}
             </h2>
@@ -384,7 +384,7 @@ export function CampaignAnalyticsClient({
           </section>
         </div>
 
-        <section className="mt-8 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
+        <section className="mt-8 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
           <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
             {isKo ? "집행 인증 사진" : "Proof photos"}
           </h2>
@@ -512,7 +512,7 @@ function RegionShareRow({
 
 function AnalyticsShell({ children }: { children: ReactNode }) {
   return (
-    <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-[#0A0A0A] px-4 py-8 dark:text-white text-gray-900">
+    <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-gray-50 px-4 dark:bg-[#0A0A0A] py-8 dark:text-white text-gray-900">
       <div className="mx-auto max-w-6xl">{children}</div>
     </div>
   );

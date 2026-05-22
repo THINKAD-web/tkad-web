@@ -5,7 +5,7 @@ import { NeonErrorPage } from "@/components/public-chrome/neon-error-page";
 export default function RootNotFound() {
   return (
     <html lang="ko">
-      <body className="m-0 bg-[#05050a] antialiased">
+      <body className="m-0 bg-gray-50 dark:bg-[#05050a] antialiased">
         <NeonErrorPage
           standalone
           code="404"
