@@ -2,6 +2,7 @@ import type { CampaignMapMediaType, CampaignMapPin } from "@/lib/campaign-monito
 import { getDataDrivenSimilarMedia } from "@/lib/media-similar";
 import {
   filterDisplayableMediaImageUrls,
+  resolvePublicMediaImageUrl,
   getPreferredMediaImageUrl,
 } from "@/lib/optimized-image-url";
 
@@ -279,12 +280,15 @@ export function buildCaseStudyGalleryItems(
  * 없으면 null — 목업(Picsum) 대신 플레이스홀더 UI를 쓰려 할 때 사용.
  */
 export function getPrimaryMediaImageUrl(m: MediaItem): string | null {
-  return getPreferredMediaImageUrl(dedupeImageUrls(m.sampleImages ?? []));
+  const raw = getPreferredMediaImageUrl(dedupeImageUrls(m.sampleImages ?? []));
+  return raw ? resolvePublicMediaImageUrl(raw) : null;
 }
 
 /** 상세·갤러리: Bunny CDN 업로드만 (Cloudinary 종료) */
 export function getMediaDetailGalleryUrls(m: MediaItem): string[] {
-  return filterDisplayableMediaImageUrls(dedupeImageUrls(m.sampleImages ?? []));
+  return filterDisplayableMediaImageUrls(dedupeImageUrls(m.sampleImages ?? []))
+    .map((url) => resolvePublicMediaImageUrl(url))
+    .filter((url): url is string => Boolean(url));
 }
 
 /**

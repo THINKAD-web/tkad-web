@@ -1,8 +1,10 @@
 /**
- * CDN 이미지 URL — 카탈로그/카드 표시용.
- * Bunny: 브라우저 직접 로드 (Pull Zone이 Vercel IP fetch 차단 → next/image 502 방지)
- * Cloudinary: 계정 종료로 표시 제외
+ * CDN 이미지 URL — 카탈로그/카드/상세 표시용.
+ * Bunny Pull Zone 미설정(403) 시 Storage API 프록시(/api/bunny-media)로 제공.
+ * Cloudinary: 계정 종료로 표시 제외.
  */
+
+import { isBunnyStorageConfigured } from "@/lib/bunny-storage";
 
 const CLOUDINARY_HOST = /(^|\.)res\.cloudinary\.com$/i;
 const BUNNY_CDN = /\.b-cdn\.net$/i;
@@ -55,9 +57,52 @@ export function getPreferredMediaImageUrl(
   return filterDisplayableMediaImageUrls(urls)[0] ?? null;
 }
 
-/** Bunny CDN은 next/image optimizer 우회 (서버 fetch 403/502 방지) */
+/** Bunny CDN URL → 스토리지 존 내 object path */
+export function bunnyObjectPathFromPublicUrl(
+  url: string | null | undefined,
+): string | null {
+  const raw = url?.trim();
+  if (!raw || !isBunnyMediaUrl(raw)) return null;
+  try {
+    const path = new URL(raw).pathname.replace(/^\/+/, "");
+    return path || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Pull Zone 장애 시 Storage API same-origin 프록시 URL */
+export function buildBunnyMediaProxyUrl(
+  url: string | null | undefined,
+): string | null {
+  if (!isBunnyStorageConfigured()) return null;
+  const path = bunnyObjectPathFromPublicUrl(url);
+  if (!path) return null;
+  const encoded = path
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  return `/api/bunny-media/${encoded}`;
+}
+
+/** Bunny·프록시 URL은 next/image optimizer 우회 */
 export function shouldUseUnoptimizedImage(url: string | null | undefined): boolean {
-  return isBunnyMediaUrl(url);
+  const raw = url?.trim();
+  if (!raw) return false;
+  return isBunnyMediaUrl(raw) || raw.startsWith("/api/bunny-media/");
+}
+
+/** 공개 표시용 — Bunny는 프록시 우선, Cloudinary 제외 */
+export function resolvePublicMediaImageUrl(
+  url: string | null | undefined,
+): string | null {
+  const raw = url?.trim();
+  if (!raw || isCloudinaryMediaUrl(raw)) return null;
+  if (isBunnyMediaUrl(raw)) {
+    return buildBunnyMediaProxyUrl(raw) ?? raw;
+  }
+  return raw;
 }
 
 export type ResolvedCatalogImage = {
@@ -65,14 +110,18 @@ export type ResolvedCatalogImage = {
   unoptimized: boolean;
 };
 
-/** 카탈로그/카드용 src — Bunny raw URL + unoptimized, 기타는 transform 후 optimizer */
+/** 카탈로그/카드용 src — Bunny는 Storage 프록시 우선 */
 export function resolveCatalogImageSrc(
   url: string | null | undefined,
 ): ResolvedCatalogImage | null {
   const raw = url?.trim();
   if (!raw || isCloudinaryMediaUrl(raw)) return null;
-  if (isBunnyMediaUrl(raw)) {
+  if (raw.startsWith("/api/bunny-media/")) {
     return { src: raw, unoptimized: true };
+  }
+  if (isBunnyMediaUrl(raw)) {
+    const src = buildBunnyMediaProxyUrl(raw) ?? raw;
+    return { src, unoptimized: true };
   }
   const optimized = optimizeImageUrl(raw, { width: 800, quality: 80, forceWebp: true });
   return optimized ? { src: optimized, unoptimized: false } : null;
@@ -113,6 +162,8 @@ export function optimizeThumbnailUrl(url: string | null | undefined): string | n
 export function optimizeHeroMarqueeUrl(url: string | null | undefined): string | null {
   const raw = url?.trim();
   if (!raw || isCloudinaryMediaUrl(raw)) return null;
-  if (isBunnyMediaUrl(raw)) return raw;
+  if (isBunnyMediaUrl(raw)) {
+    return buildBunnyMediaProxyUrl(raw) ?? raw;
+  }
   return optimizeImageUrl(raw, { width: 480, quality: 75 });
 }
