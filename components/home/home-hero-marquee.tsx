@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { optimizeHeroMarqueeUrl } from "@/lib/optimized-image-url";
+import { optimizeHeroMarqueeUrl, shouldUseUnoptimizedImage } from "@/lib/optimized-image-url";
 
 type Props = {
   imageUrls: string[];
@@ -37,6 +37,7 @@ export function HomeHeroMarquee({ imageUrls }: Props) {
               className="object-cover"
               loading={i < 4 ? "eager" : "lazy"}
               priority={i < 2}
+              unoptimized={shouldUseUnoptimizedImage(src)}
             />
           </div>
         ))}
@@ -54,6 +55,7 @@ export function HomeHeroMarquee({ imageUrls }: Props) {
               sizes="192px"
               className="object-cover"
               loading="lazy"
+              unoptimized={shouldUseUnoptimizedImage(src)}
             />
           </div>
         ))}

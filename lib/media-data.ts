@@ -1,5 +1,9 @@
 import type { CampaignMapMediaType, CampaignMapPin } from "@/lib/campaign-monitoring-mock";
 import { getDataDrivenSimilarMedia } from "@/lib/media-similar";
+import {
+  filterDisplayableMediaImageUrls,
+  getPreferredMediaImageUrl,
+} from "@/lib/optimized-image-url";
 
 export type MediaCaseStudyPhoto = {
   url: string;
@@ -275,14 +279,12 @@ export function buildCaseStudyGalleryItems(
  * 없으면 null — 목업(Picsum) 대신 플레이스홀더 UI를 쓰려 할 때 사용.
  */
 export function getPrimaryMediaImageUrl(m: MediaItem): string | null {
-  const urls = dedupeImageUrls(m.sampleImages ?? []);
-  const first = urls[0]?.trim();
-  return first || null;
+  return getPreferredMediaImageUrl(dedupeImageUrls(m.sampleImages ?? []));
 }
 
-/** 상세·갤러리: 업로드된 이미지만 (Picsum 폴백 없음) */
+/** 상세·갤러리: Bunny CDN 업로드만 (Cloudinary 종료) */
 export function getMediaDetailGalleryUrls(m: MediaItem): string[] {
-  return dedupeImageUrls(m.sampleImages ?? []);
+  return filterDisplayableMediaImageUrls(dedupeImageUrls(m.sampleImages ?? []));
 }
 
 /**

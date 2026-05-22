@@ -5,7 +5,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
 import { buildMediaImageAlt } from "@/lib/media-image-seo";
-import { optimizeThumbnailUrl } from "@/lib/optimized-image-url";
+import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 
 type Props = {
@@ -55,7 +55,9 @@ export function MediaCatalogThumbnail({
       ? primaryImageUrl?.trim() || null
       : fromItem;
   const rawUrl = primary || fallbackUrl?.trim() || null;
-  const imageUrl = rawUrl ? optimizeThumbnailUrl(rawUrl) : null;
+  const resolved = rawUrl ? resolveCatalogImageSrc(rawUrl) : null;
+  const imageUrl = resolved?.src ?? null;
+  const imageUnoptimized = resolved?.unoptimized ?? false;
   const [failed, setFailed] = useState(false);
   const showPlaceholder = !imageUrl || failed;
 
@@ -89,6 +91,7 @@ export function MediaCatalogThumbnail({
             fill
             sizes={sizes}
             priority={priority}
+            unoptimized={imageUnoptimized}
             className={cn(
               "object-cover",
               imgClassName,

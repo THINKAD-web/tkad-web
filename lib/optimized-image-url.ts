@@ -1,7 +1,7 @@
 /**
- * CDN 이미지 URL 최적화 — next/image 와 함께 사용.
- * Cloudinary: f_auto,q_auto,w_*
- * Bunny (*.b-cdn.net): width + quality 쿼리
+ * CDN 이미지 URL — 카탈로그/카드 표시용.
+ * Bunny: 브라우저 직접 로드 (Pull Zone이 Vercel IP fetch 차단 → next/image 502 방지)
+ * Cloudinary: 계정 종료로 표시 제외
  */
 
 const CLOUDINARY_HOST = /(^|\.)res\.cloudinary\.com$/i;
@@ -10,16 +10,80 @@ const BUNNY_CDN = /\.b-cdn\.net$/i;
 export type OptimizeImageOptions = {
   width?: number;
   quality?: number;
-  /** 썸네일 등 — Cloudinary f_webp 강제 */
   forceWebp?: boolean;
 };
+
+export function isCloudinaryMediaUrl(url: string | null | undefined): boolean {
+  const raw = url?.trim();
+  if (!raw) return false;
+  try {
+    const host = new URL(raw).hostname.toLowerCase();
+    return CLOUDINARY_HOST.test(host) || host.endsWith("cloudinary.com");
+  } catch {
+    return false;
+  }
+}
+
+export function isBunnyMediaUrl(url: string | null | undefined): boolean {
+  const raw = url?.trim();
+  if (!raw) return false;
+  try {
+    return BUNNY_CDN.test(new URL(raw).hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+}
+
+/** Bunny만 노출. Cloudinary(삭제됨) 등은 제외. */
+export function filterDisplayableMediaImageUrls(
+  urls: readonly string[],
+): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const u of urls) {
+    const s = typeof u === "string" ? u.trim() : "";
+    if (!s || seen.has(s) || !isBunnyMediaUrl(s)) continue;
+    seen.add(s);
+    out.push(s);
+  }
+  return out;
+}
+
+export function getPreferredMediaImageUrl(
+  urls: readonly string[],
+): string | null {
+  return filterDisplayableMediaImageUrls(urls)[0] ?? null;
+}
+
+/** Bunny CDN은 next/image optimizer 우회 (서버 fetch 403/502 방지) */
+export function shouldUseUnoptimizedImage(url: string | null | undefined): boolean {
+  return isBunnyMediaUrl(url);
+}
+
+export type ResolvedCatalogImage = {
+  src: string;
+  unoptimized: boolean;
+};
+
+/** 카탈로그/카드용 src — Bunny raw URL + unoptimized, 기타는 transform 후 optimizer */
+export function resolveCatalogImageSrc(
+  url: string | null | undefined,
+): ResolvedCatalogImage | null {
+  const raw = url?.trim();
+  if (!raw || isCloudinaryMediaUrl(raw)) return null;
+  if (isBunnyMediaUrl(raw)) {
+    return { src: raw, unoptimized: true };
+  }
+  const optimized = optimizeImageUrl(raw, { width: 800, quality: 80, forceWebp: true });
+  return optimized ? { src: optimized, unoptimized: false } : null;
+}
 
 export function optimizeImageUrl(
   url: string | null | undefined,
   opts: OptimizeImageOptions = {},
 ): string | null {
   const raw = url?.trim();
-  if (!raw) return null;
+  if (!raw || isCloudinaryMediaUrl(raw)) return null;
 
   const width = opts.width ?? 800;
   const quality = opts.quality ?? 80;
@@ -28,24 +92,12 @@ export function optimizeImageUrl(
     const parsed = new URL(raw);
     const host = parsed.hostname.toLowerCase();
 
-    if (CLOUDINARY_HOST.test(host) || host.endsWith("cloudinary.com")) {
-      const parts = parsed.pathname.split("/upload/");
-      if (parts.length === 2) {
-        const format = opts.forceWebp ? "f_webp" : "f_auto";
-        const transform = `${format},q_auto,w_${width}`;
-        if (!parts[1]!.startsWith("f_") && !parts[1]!.startsWith("c_")) {
-          parsed.pathname = `${parts[0]}/upload/${transform}/${parts[1]}`;
-          return parsed.toString();
-        }
-      }
+    if (isBunnyMediaUrl(raw)) {
       return raw;
     }
 
-    if (BUNNY_CDN.test(host)) {
-      parsed.searchParams.set("width", String(width));
-      parsed.searchParams.set("quality", String(quality));
-      parsed.searchParams.set("format", "webp");
-      return parsed.toString();
+    if (CLOUDINARY_HOST.test(host) || host.endsWith("cloudinary.com")) {
+      return null;
     }
   } catch {
     return raw;
@@ -54,11 +106,13 @@ export function optimizeImageUrl(
   return raw;
 }
 
-/** 썸네일·카드용 (WebP는 next/image formats 설정으로 처리) */
 export function optimizeThumbnailUrl(url: string | null | undefined): string | null {
-  return optimizeImageUrl(url, { width: 800, quality: 80, forceWebp: true });
+  return resolveCatalogImageSrc(url)?.src ?? null;
 }
 
 export function optimizeHeroMarqueeUrl(url: string | null | undefined): string | null {
-  return optimizeImageUrl(url, { width: 480, quality: 75 });
+  const raw = url?.trim();
+  if (!raw || isCloudinaryMediaUrl(raw)) return null;
+  if (isBunnyMediaUrl(raw)) return raw;
+  return optimizeImageUrl(raw, { width: 480, quality: 75 });
 }

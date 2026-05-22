@@ -8,11 +8,14 @@ import {
   type MediaPriceOption,
   type MediaPricePeriodKey,
 } from "@/lib/media-data";
+import {
+  filterDisplayableMediaImageUrls,
+  optimizeHeroMarqueeUrl,
+} from "@/lib/optimized-image-url";
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail";
 import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
-import { optimizeHeroMarqueeUrl } from "@/lib/optimized-image-url";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 
 /** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
@@ -97,9 +100,11 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
   const lat = m.latitude ?? 37.5665;
   const lng = m.longitude ?? 126.978;
   const daily = m.dailyFootfall ?? 0;
-  const imgs = dedupeImageUrls(
-    [...(m.image ? [m.image] : []), ...(m.extractedImages ?? [])].filter(
-      (x): x is string => typeof x === "string" && Boolean(x.trim()),
+  const imgs = filterDisplayableMediaImageUrls(
+    dedupeImageUrls(
+      [...(m.image ? [m.image] : []), ...(m.extractedImages ?? [])].filter(
+        (x): x is string => typeof x === "string" && Boolean(x.trim()),
+      ),
     ),
   );
 

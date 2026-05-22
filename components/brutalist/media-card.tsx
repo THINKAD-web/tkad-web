@@ -11,7 +11,7 @@
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { optimizeThumbnailUrl } from "@/lib/optimized-image-url";
+import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
 import { cn } from "@/lib/utils";
 
 export type MediaCardProps = {
@@ -72,7 +72,7 @@ export function MediaCard({
   imageSizes = "(max-width: 640px) 45vw, 320px",
   className,
 }: MediaCardProps) {
-  const optimizedSrc = imageSrc ? optimizeThumbnailUrl(imageSrc) : null;
+  const resolved = imageSrc ? resolveCatalogImageSrc(imageSrc) : null;
   const compact = density === "compact";
   const topRightClass =
     premium && glowTheme === "purple"
@@ -104,13 +104,14 @@ export function MediaCard({
           imageAspect === "16/9" ? "aspect-[16/9]" : "aspect-[4/3]",
         )}
       >
-        {optimizedSrc ? (
+        {resolved ? (
           <Image
-            src={optimizedSrc}
+            src={resolved.src}
             alt={imageAlt ?? ""}
             fill
             sizes={imageSizes}
             priority={imagePriority}
+            unoptimized={resolved.unoptimized}
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.1] group-focus-within:scale-[1.1]"
           />
         ) : (
