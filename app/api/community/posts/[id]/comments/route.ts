@@ -76,6 +76,9 @@ export async function POST(req: NextRequest, { params }: Params) {
       authorEmail: me.email ?? null,
       authorIp: ip,
     });
+    void import("@/lib/points").then(({ awardPoints }) =>
+      awardPoints(me.id, "COMMUNITY_COMMENT", created.id).catch(() => {}),
+    );
     return NextResponse.json(
       {
         ok: true,

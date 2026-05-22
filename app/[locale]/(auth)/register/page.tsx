@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
@@ -10,7 +11,25 @@ import type { CommunityMemberRole } from "@/lib/community/types";
 import { getOrCreateTrackingSessionId } from "@/lib/tracking/client";
 
 export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <HomeLandingDayNight>
+          <div className="flex min-h-[50vh] items-center justify-center">
+            <Spinner />
+          </div>
+        </HomeLandingDayNight>
+      }
+    >
+      <RegisterPageInner />
+    </Suspense>
+  );
+}
+
+function RegisterPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteRefUserId = searchParams.get("ref")?.trim() ?? "";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,6 +76,7 @@ export default function RegisterPage() {
           company: company || undefined,
           communityRole,
           sessionId: getOrCreateTrackingSessionId() || undefined,
+          inviteRefUserId: inviteRefUserId || undefined,
         }),
       });
       const data = await res.json();

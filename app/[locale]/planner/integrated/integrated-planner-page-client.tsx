@@ -1,0 +1,587 @@
+"use client";
+
+import { useCallback, useMemo } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Wallet,
+  Send,
+} from "lucide-react";
+import { BtnBlock } from "@/components/brutalist";
+import { CategoryExploreHero } from "@/components/category-explore-hero";
+import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
+import PlannerMediaSelector from "@/components/planner-media-selector";
+import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
+import { PlannerRegionMap } from "@/components/planner-region-map";
+import {
+  PLANNER_AGE_KEYS,
+  PLANNER_BUDGET_MAX,
+  PLANNER_BUDGET_MIN,
+  PLANNER_INDUSTRY_KEYS,
+  type PlannerCampaignGoal,
+  type PlannerCategory,
+  type PlannerMapRegion,
+} from "@/lib/planner/types";
+import {
+  INTEGRATED_LAST_INPUT_STEP as LAST_STEP,
+} from "@/lib/planner/integrated-types";
+import {
+  selectIntegratedBudgetNum,
+  useIntegratedPlannerStore,
+} from "@/lib/planner/integrated-store";
+import { canProceedIntegratedStep } from "@/lib/planner/integrated-validation";
+import {
+  countPlannerMediaByRegion,
+  filterPlannerMediaMulti,
+  portfolioFromManualSelection,
+} from "@/lib/planner-logic";
+import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
+import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
+import { recommendDigitalChannels } from "@/lib/planner/recommend-digital";
+import { computeIntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics";
+import type { MediaItem } from "@/lib/media-data";
+import { useToast } from "@/components/toast-provider";
+import { cn } from "@/lib/utils";
+import {
+  PlannerNeonCard,
+  PlannerNeonLabel,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
+import { IntegratedPlannerStepper } from "@/components/planner/integrated/integrated-stepper";
+import { IntegratedOohRecommendationPanel } from "@/components/planner/integrated/integrated-ooh-recommendation-panel";
+import { IntegratedDigitalRecommendationPanel } from "@/components/planner/integrated/digital-recommendation-panel";
+import { IntegratedReportStep } from "@/components/planner/integrated/integrated-report-step";
+import { IntegratedCampaignDashboard } from "@/components/planner/integrated/integrated-dashboard";
+
+const GOALS: {
+  key: PlannerCampaignGoal;
+  titleKey: string;
+  descKey: string;
+}[] = [
+  { key: "brand", titleKey: "goalBrand", descKey: "goalBrandDesc" },
+  { key: "launch", titleKey: "goalLaunch", descKey: "goalLaunchDesc" },
+  { key: "event", titleKey: "goalEvent", descKey: "goalEventDesc" },
+  { key: "sales", titleKey: "goalSales", descKey: "goalSalesDesc" },
+  { key: "local", titleKey: "goalLocal", descKey: "goalLocalDesc" },
+];
+
+const CATEGORIES: {
+  key: PlannerCategory;
+  labelKey: "catDigital" | "catStatic" | "catMobile";
+}[] = [
+  { key: "digital", labelKey: "catDigital" },
+  { key: "static", labelKey: "catStatic" },
+  { key: "mobile", labelKey: "catMobile" },
+];
+
+type Props = {
+  catalog: MediaItem[];
+  databaseEmpty: boolean;
+};
+
+export default function IntegratedPlannerPageClient({
+  catalog,
+  databaseEmpty,
+}: Props) {
+  const t = useTranslations("planner");
+  const ti = useTranslations("plannerIntegrated");
+  const tm = useTranslations("media");
+  const locale = useLocale();
+  const isKo = locale === "ko";
+  const { toast } = useToast();
+
+  const wizardStep = useIntegratedPlannerStore((s) => s.wizardStep);
+  const campaignGoal = useIntegratedPlannerStore((s) => s.campaignGoal);
+  const regions = useIntegratedPlannerStore((s) => s.regions);
+  const categoriesArr = useIntegratedPlannerStore((s) => s.categories);
+  const budget = useIntegratedPlannerStore((s) => s.budget);
+  const budgetNum = useIntegratedPlannerStore(selectIntegratedBudgetNum);
+  const months = useIntegratedPlannerStore((s) => s.months);
+  const ageKey = useIntegratedPlannerStore((s) => s.ageKey);
+  const industryKey = useIntegratedPlannerStore((s) => s.industryKey);
+  const campaignMediaIds = useIntegratedPlannerStore((s) => s.campaignMediaIds);
+  const digitalChannelIds = useIntegratedPlannerStore((s) => s.digitalChannelIds);
+  const digitalBudgetPct = useIntegratedPlannerStore((s) => s.digitalBudgetPct);
+  const creativeObjectUrl = useIntegratedPlannerStore((s) => s.creativeObjectUrl);
+  const creativeUploadedUrl = useIntegratedPlannerStore(
+    (s) => s.creativeUploadedUrl,
+  );
+  const mediaPlacements = useIntegratedPlannerStore((s) => s.mediaPlacements);
+
+  const setWizardStep = useIntegratedPlannerStore((s) => s.setWizardStep);
+  const goNextStep = useIntegratedPlannerStore((s) => s.goNextStep);
+  const goPrevStep = useIntegratedPlannerStore((s) => s.goPrevStep);
+  const setCampaignGoal = useIntegratedPlannerStore((s) => s.setCampaignGoal);
+  const toggleRegion = useIntegratedPlannerStore((s) => s.toggleRegion);
+  const toggleCategory = useIntegratedPlannerStore((s) => s.toggleCategory);
+  const setBudget = useIntegratedPlannerStore((s) => s.setBudget);
+  const setMonths = useIntegratedPlannerStore((s) => s.setMonths);
+  const setAgeKey = useIntegratedPlannerStore((s) => s.setAgeKey);
+  const setIndustryKey = useIntegratedPlannerStore((s) => s.setIndustryKey);
+  const setCampaignMediaIds = useIntegratedPlannerStore(
+    (s) => s.setCampaignMediaIds,
+  );
+  const setCreativeObjectUrl = useIntegratedPlannerStore(
+    (s) => s.setCreativeObjectUrl,
+  );
+  const setCreativeUploadedUrl = useIntegratedPlannerStore(
+    (s) => s.setCreativeUploadedUrl,
+  );
+  const setMediaPlacement = useIntegratedPlannerStore((s) => s.setMediaPlacement);
+  const clearMediaPlacement = useIntegratedPlannerStore(
+    (s) => s.clearMediaPlacement,
+  );
+  const applyPreset = useIntegratedPlannerStore((s) => s.applyPreset);
+
+  const selectedRegions = useMemo(() => new Set(regions), [regions]);
+  const categories = useMemo(() => new Set(categoriesArr), [categoriesArr]);
+
+  const filtered = useMemo(
+    () => filterPlannerMediaMulti(catalog, selectedRegions, categories),
+    [catalog, selectedRegions, categories],
+  );
+
+  const regionCounts = useMemo(
+    () => countPlannerMediaByRegion(catalog, categories),
+    [catalog, categories],
+  );
+
+  const manualIntersectedPortfolio = useMemo(() => {
+    if (campaignMediaIds.length === 0) return [];
+    const byId = new Map(catalog.map((m) => [m.id, m]));
+    const allowed = new Set(filtered.map((m) => m.id));
+    const ordered: MediaItem[] = [];
+    for (const id of campaignMediaIds) {
+      const m = byId.get(id);
+      if (m && allowed.has(id)) ordered.push(m);
+    }
+    return ordered;
+  }, [campaignMediaIds, catalog, filtered]);
+
+  const portfolio = useMemo(() => {
+    if (manualIntersectedPortfolio.length === 0 || budgetNum < PLANNER_BUDGET_MIN)
+      return [];
+    return portfolioFromManualSelection(
+      manualIntersectedPortfolio,
+      budgetNum,
+      months,
+    );
+  }, [manualIntersectedPortfolio, budgetNum, months]);
+
+  const selectedMediaOrdered = useMemo(() => {
+    const byId = new Map(catalog.map((m) => [m.id, m]));
+    return campaignMediaIds
+      .map((id) => byId.get(id))
+      .filter((m): m is MediaItem => Boolean(m));
+  }, [campaignMediaIds, catalog]);
+
+  const digitalResult = useMemo(
+    () =>
+      recommendDigitalChannels({
+        goal: campaignGoal,
+        regions,
+        portfolio,
+        budgetMan: budgetNum,
+        digitalBudgetPct,
+      }),
+    [campaignGoal, regions, portfolio, budgetNum, digitalBudgetPct],
+  );
+
+  const integratedMetrics = useMemo(
+    () =>
+      computeIntegratedCampaignMetrics({
+        portfolio,
+        budgetMan: budgetNum,
+        months,
+        digitalBudgetPct,
+        digitalChannelIds,
+        regions,
+        goal: campaignGoal,
+      }),
+    [
+      portfolio,
+      budgetNum,
+      months,
+      digitalBudgetPct,
+      digitalChannelIds,
+      regions,
+      campaignGoal,
+    ],
+  );
+
+  const mapLabel = useCallback(
+    (r: PlannerMapRegion) =>
+      r === "national" ? t("regionNationalShort") : tm(`regions.${r}`),
+    [t, tm],
+  );
+
+  const mediaRegionLabel = useCallback(
+    (region: string) =>
+      region === "national"
+        ? t("regionNationalShort")
+        : tm(`regions.${region}`),
+    [t, tm],
+  );
+
+  const regionsText = useMemo(
+    () =>
+      regions
+        .map((r) => mapLabel(r as PlannerMapRegion))
+        .join(isKo ? ", " : ", "),
+    [regions, mapLabel, isKo],
+  );
+
+  const goalTitle = useMemo(() => {
+    const g = GOALS.find((x) => x.key === campaignGoal);
+    return g ? t(g.titleKey) : "—";
+  }, [campaignGoal, t]);
+
+  const periodDisplay = useMemo(
+    () =>
+      formatPlannerPeriodDisplay(months, (key, values) =>
+        values != null ? t(key, values) : t(key),
+      ),
+    [months, t],
+  );
+
+  const goNext = useCallback(() => {
+    const check = canProceedIntegratedStep(
+      useIntegratedPlannerStore.getState(),
+      wizardStep,
+    );
+    if (!check.ok) {
+      toast("error", check.errorKey === "needDigitalChannel" ? ti("needDigitalChannel") : t(check.errorKey as "selectGoal"));
+      return;
+    }
+    goNextStep();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [wizardStep, goNextStep, toast, t, ti]);
+
+  if (databaseEmpty) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <h1 className="text-xl font-bold">{t("preparingMedia")}</h1>
+        <p className="mt-2 text-muted-foreground">{t("preparingMediaDesc")}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tkad-planner-neon min-h-screen bg-background pb-20">
+      <CategoryExploreHero
+        code="INTEGRATED PLANNER"
+        headlineBefore={isKo ? "OOH + " : "OOH + "}
+        headlineGradient={isKo ? "디지털 통합" : "Digital Integrated"}
+        headlineAfter={isKo ? " 캠페인 플래너" : " Campaign Planner"}
+        subtitle={ti("subtitle")}
+        showBeta
+      />
+
+      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        {wizardStep <= LAST_STEP ? (
+          <IntegratedPlannerStepper
+            currentStep={wizardStep}
+            stepOfLabel={ti("stepOf", {
+              current: wizardStep,
+              total: LAST_STEP,
+            })}
+            onStepClick={(s) => setWizardStep(s)}
+          />
+        ) : null}
+
+        {wizardStep <= LAST_STEP ? (
+          <div
+            className={cn(
+              "mx-auto space-y-8",
+              wizardStep >= 4 ? "max-w-7xl" : "max-w-3xl",
+            )}
+          >
+            {wizardStep === 1 ? (
+              <PlannerCampaignStep1
+                campaignGoal={campaignGoal}
+                goals={GOALS}
+                onSelectGoal={setCampaignGoal}
+              />
+            ) : null}
+
+            {wizardStep === 2 ? (
+              <div className="space-y-6">
+                <div>
+                  <PlannerNeonLabel>{ti("step2Label")}</PlannerNeonLabel>
+                  <h2 className={cn("mt-2 text-xl font-bold", plannerNeon.headline)}>
+                    {t("stepRegionTitle")}
+                  </h2>
+                </div>
+                <PlannerNeonCard>
+                  <div className="flex flex-wrap gap-2 p-5">
+                    {CATEGORIES.map(({ key, labelKey }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleCategory(key)}
+                        className={cn(
+                          plannerNeon.selectChip,
+                          categories.has(key)
+                            ? plannerNeon.selectChipActive
+                            : plannerNeon.selectChipIdle,
+                        )}
+                      >
+                        {t(labelKey)}
+                      </button>
+                    ))}
+                  </div>
+                </PlannerNeonCard>
+                <PlannerRegionMap
+                  selected={selectedRegions}
+                  counts={regionCounts}
+                  onToggle={toggleRegion}
+                  labelFor={mapLabel}
+                  title={t("mapTitle")}
+                  hint={t("mapHint")}
+                  countLabel={(n) => t("mapCount", { count: n })}
+                />
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {(
+                    [
+                      ["premium", "pkgPremium"],
+                      ["national", "pkgNational"],
+                      ["value", "pkgValue"],
+                    ] as const
+                  ).map(([id, titleKey]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => applyPreset(id)}
+                      className={cn(
+                        plannerNeon.selectChip,
+                        plannerNeon.selectChipIdle,
+                        "p-4 text-left",
+                      )}
+                    >
+                      {t(titleKey)}
+                    </button>
+                  ))}
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="flex flex-wrap gap-2">
+                    {PLANNER_AGE_KEYS.map((k) => (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => setAgeKey(k)}
+                        className={cn(
+                          plannerNeon.selectChip,
+                          ageKey === k
+                            ? plannerNeon.selectChipActive
+                            : plannerNeon.selectChipIdle,
+                        )}
+                      >
+                        {t(k)}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {PLANNER_INDUSTRY_KEYS.map((k) => (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => setIndustryKey(k)}
+                        className={cn(
+                          plannerNeon.selectChip,
+                          industryKey === k
+                            ? plannerNeon.selectChipActive
+                            : plannerNeon.selectChipIdle,
+                        )}
+                      >
+                        {t(k)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {wizardStep === 3 ? (
+              <PlannerNeonCard>
+                <div className={plannerNeon.cardHeader}>
+                  <PlannerNeonLabel>{ti("step3Label")}</PlannerNeonLabel>
+                  <h3 className={cn("mt-2 flex items-center gap-2 text-lg font-bold", plannerNeon.headline)}>
+                    <Wallet className="h-5 w-5 text-violet-400" />
+                    {t("stepBudgetTitle")}
+                  </h3>
+                </div>
+                <div className="space-y-6 p-5 sm:p-6">
+                  <input
+                    type="range"
+                    min={PLANNER_BUDGET_MIN}
+                    max={PLANNER_BUDGET_MAX}
+                    step={500}
+                    value={budgetNum}
+                    onChange={(e) => setBudget(e.target.value)}
+                    className="w-full accent-violet-500"
+                  />
+                  <input
+                    inputMode="numeric"
+                    value={budget}
+                    onChange={(e) =>
+                      setBudget(e.target.value.replace(/[^\d]/g, ""))
+                    }
+                    className="h-11 w-full rounded-xl border px-3 font-bold dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    {PLANNER_PERIOD_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setMonths(opt.months)}
+                        className={cn(
+                          plannerNeon.selectChip,
+                          Math.abs(months - opt.months) < 0.04
+                            ? plannerNeon.selectChipActive
+                            : plannerNeon.selectChipIdle,
+                        )}
+                      >
+                        {t(opt.labelKey)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </PlannerNeonCard>
+            ) : null}
+
+            {wizardStep === 4 ? (
+              <div className="space-y-6">
+                <div>
+                  <PlannerNeonLabel>{ti("step4Label")}</PlannerNeonLabel>
+                  <h2 className={cn("text-xl font-bold", plannerNeon.headline)}>
+                    {t("stepMediaTitle")}
+                  </h2>
+                </div>
+                <IntegratedOohRecommendationPanel
+                  catalog={filtered.length ? filtered : catalog}
+                  isKo={isKo}
+                  regionLabel={mediaRegionLabel}
+                />
+                <PlannerMediaSelector
+                  catalog={filtered.length ? filtered : catalog}
+                  campaignMediaIds={campaignMediaIds}
+                  setCampaignMediaIds={setCampaignMediaIds}
+                  isKo={isKo}
+                  regionLabel={mediaRegionLabel}
+                />
+              </div>
+            ) : null}
+
+            {wizardStep === 5 ? (
+              <div className="space-y-6">
+                <div>
+                  <PlannerNeonLabel>{ti("step5Label")}</PlannerNeonLabel>
+                  <h2 className={cn("text-xl font-bold", plannerNeon.headline)}>
+                    {ti("digitalTabTitle")}
+                  </h2>
+                  <p className={cn("mt-2 text-sm", plannerNeon.subtext)}>
+                    {ti("digitalTabDesc")}
+                  </p>
+                </div>
+                <IntegratedDigitalRecommendationPanel
+                  portfolio={portfolio}
+                  isKo={isKo}
+                />
+              </div>
+            ) : null}
+
+            {wizardStep === 6 ? (
+              <PlannerSimulationStep3
+                selectedMedia={selectedMediaOrdered}
+                creativeObjectUrl={creativeObjectUrl}
+                setCreativeObjectUrl={setCreativeObjectUrl}
+                creativeUploadedUrl={creativeUploadedUrl}
+                setCreativeUploadedUrl={setCreativeUploadedUrl}
+                mediaPlacements={mediaPlacements}
+                setMediaPlacement={setMediaPlacement}
+                clearMediaPlacement={clearMediaPlacement}
+              />
+            ) : null}
+
+            {wizardStep === 7 && integratedMetrics ? (
+              <IntegratedReportStep
+                isKo={isKo}
+                goalTitle={goalTitle}
+                budgetNum={budgetNum}
+                periodDisplay={periodDisplay}
+                regionsText={regionsText}
+                portfolio={portfolio}
+                digitalResult={digitalResult}
+                metrics={integratedMetrics}
+              />
+            ) : null}
+
+            <div className="flex justify-between gap-3 pb-8">
+              <BtnBlock
+                variant="secondary"
+                size="md"
+                onClick={goPrevStep}
+                disabled={wizardStep <= 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                {t("back")}
+              </BtnBlock>
+              <BtnBlock variant="accent" size="md" onClick={goNext}>
+                {wizardStep === LAST_STEP ? (
+                  <>
+                    {ti("viewDashboard")}
+                    <ChevronRight className="h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    {t("next")}
+                    <ChevronRight className="h-4 w-4" />
+                  </>
+                )}
+              </BtnBlock>
+            </div>
+          </div>
+        ) : integratedMetrics ? (
+          <div className="mx-auto max-w-7xl space-y-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <BtnBlock
+                variant="secondary"
+                size="md"
+                onClick={() => setWizardStep(LAST_STEP)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                {t("back")}
+              </BtnBlock>
+              <div className="flex flex-wrap gap-2">
+                <BtnBlock href="/contact" variant="accent" size="md">
+                  <Send className="h-4 w-4" />
+                  {t("ctaQuote")}
+                </BtnBlock>
+                <BtnBlock href="/planner" variant="secondary" size="md">
+                  {ti("oohOnlyPlanner")}
+                </BtnBlock>
+              </div>
+            </div>
+            <IntegratedCampaignDashboard
+              metrics={integratedMetrics}
+              isKo={isKo}
+              months={Math.round(months)}
+            />
+            <p className="text-center text-xs text-muted-foreground">
+              {t("disclaimer")}
+            </p>
+          </div>
+        ) : null}
+
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          {ti("classicPlannerLink")}{" "}
+          <Link href="/planner" className="font-semibold text-primary underline">
+            {t("title")}
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}

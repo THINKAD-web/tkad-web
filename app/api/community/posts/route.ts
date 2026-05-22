@@ -93,6 +93,9 @@ export async function POST(req: NextRequest) {
       authorUserId: me.id,
       authorIp: ip,
     });
+    void import("@/lib/points").then(({ awardPoints }) =>
+      awardPoints(me.id, "COMMUNITY_POST", created.id).catch(() => {}),
+    );
     return NextResponse.json({ ok: true, id: created.id }, { status: 201 });
   } catch (e) {
     console.error("[community.posts.POST]", e);

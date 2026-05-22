@@ -390,8 +390,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   }, []);
 
   const popularIds = useMemo(
-    () => new Set(["1", "2", "3", "8", "9"]),
-    [],
+    () =>
+      new Set(
+        catalog
+          .filter((m) =>
+            m.trustBadges?.some(
+              (b) => b.id === "popular" || b.id === "hot_week",
+            ),
+          )
+          .map((m) => m.id),
+      ),
+    [catalog],
   );
 
   const updateField = useCallback((field: keyof FormState, value: string) => {

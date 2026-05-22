@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import ToastProvider from "@/components/toast-provider";
+import { PointToastListener } from "@/components/points/point-toast-listener";
 import ConditionalPublicChrome from "@/components/conditional-public-chrome";
 import TopLoader from "@/components/top-loader";
 import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
@@ -23,6 +24,7 @@ type Props = {
 export default function LocaleRootBody({ skipLinkLabel, header, children }: Props) {
   return (
     <ToastProvider>
+      <PointToastListener />
       <a href="#main-content" className="skip-link">
         {skipLinkLabel}
       </a>

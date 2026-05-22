@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { EmailVerificationBanner } from "@/components/auth/email-verification-banner";
 import { ProTrialBanner, type ProTrialStatus } from "@/components/my/pro-trial-banner";
+import { PointsCheckInCard } from "@/components/my/points-check-in-card";
+import { PointsHistoryTab } from "@/components/my/points-history-tab";
 import { TeamManagementSection } from "@/components/my/team-management-section";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MyHubTabs, type MyHubTab } from "@/components/my/my-hub-tabs";
@@ -58,6 +60,7 @@ type Me = {
   trialEndsAt?: string | null;
   trialDaysLeft?: number;
   trialProgressPct?: number;
+  pointBalance?: number;
 };
 
 type CampaignItem = {
@@ -111,7 +114,8 @@ function parseHubTab(value: string | null): MyHubTab | null {
     value === "favorites" ||
     value === "planner" ||
     value === "recent" ||
-    value === "team"
+    value === "team" ||
+    value === "points"
   ) {
     return value;
   }
@@ -165,6 +169,7 @@ export function MyHubPageClient() {
       { key: "favorites" as const, label: t("tabs.favorites"), icon: Heart },
       { key: "planner" as const, label: t("tabs.planner"), icon: LayoutList },
       { key: "recent" as const, label: t("tabs.recent"), icon: Clock },
+      { key: "points" as const, label: t("tabs.points"), icon: Sparkles },
       { key: "team" as const, label: t("tabs.team"), icon: Users },
     ],
     [t],
@@ -385,6 +390,8 @@ export function MyHubPageClient() {
               isKo={isKo}
             />
           )}
+
+          <PointsCheckInCard />
 
           <MyHubTabs
             tabs={tabDefs}
@@ -641,6 +648,15 @@ export function MyHubPageClient() {
                   ) : null}
                 </div>
               )}
+            </section>
+          )}
+
+          {tab === "points" && (
+            <section aria-labelledby="my-points-heading">
+              <h2 id="my-points-heading" className="sr-only">
+                {t("tabs.points")}
+              </h2>
+              <PointsHistoryTab />
             </section>
           )}
 

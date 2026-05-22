@@ -90,6 +90,10 @@ export async function POST(
     meta: { mediaId, reviewId: review.id },
   });
 
+  void import("@/lib/points").then(({ awardPoints }) =>
+    awardPoints(user.id, "REVIEW_WRITE", review.id).catch(() => {}),
+  );
+
   return NextResponse.json({
     ok: true,
     reviewId: review.id,

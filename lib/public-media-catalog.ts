@@ -269,7 +269,10 @@ export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
     const dbItems = rowsWithCoverage.map(prismaMediaToMediaItem);
     const { attachReviewStatsToMediaItems } = await import("@/lib/media-reviews");
     const withReviews = await attachReviewStatsToMediaItems(dbItems);
-    return appendNetworksIfAny(withReviews);
+    const { attachMediaTrustToMediaItems } = await import(
+      "@/lib/media-trust-catalog"
+    );
+    return appendNetworksIfAny(await attachMediaTrustToMediaItems(withReviews));
   } catch (e) {
     // CLAUDE.md: 공개 카탈로그는 DB 가 진실. 컬럼 drift·일시 장애시
     // 목업으로 조용히 떨어지면 운영자가 알아채지 못함. 명시적으로 로깅.

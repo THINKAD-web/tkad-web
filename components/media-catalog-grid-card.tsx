@@ -20,6 +20,9 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS } from "@/components/media-catalog-shared";
 import { MediaAvailabilityBadge } from "@/components/media-availability-badge";
 import { MediaRatingBadge } from "@/components/media/media-rating-badge";
+import { MediaTrustBadges } from "@/components/media/media-trust-badges";
+import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
+import { pickTrustBadgesForThumbnail } from "@/lib/media-trust";
 import type { AvailabilityTier } from "@/lib/media-availability-stats";
 import { trackGaEvent } from "@/lib/ga-events";
 
@@ -92,6 +95,15 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           })}
         </div>
       ) : null}
+      {pickTrustBadgesForThumbnail(media.trustBadges).map((b, i) => (
+        <div
+          key={b.id}
+          className="absolute left-0 z-10 max-w-[calc(100%-0.5rem)] border-b-2 border-r-2 border-border bg-card/95 px-2 py-1 font-mono text-[10px] font-bold tracking-wide backdrop-blur-sm"
+          style={{ top: `${i * 1.75}rem` }}
+        >
+          {b.emoji} {isKo ? b.labelKo : b.labelEn}
+        </div>
+      ))}
       {props.variant === "link" ? props.topLeftSlot : null}
       {props.variant === "selectable" ? (
         <div
@@ -177,6 +189,22 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
           isKo={isKo}
           className="mt-0.5"
         />
+        {media.trustScore != null ? (
+          <MediaTrustScoreBadge
+            score={media.trustScore}
+            isKo={isKo}
+            compact
+            className="mt-1"
+          />
+        ) : null}
+        {media.trustBadges && media.trustBadges.length > 2 ? (
+          <MediaTrustBadges
+            badges={media.trustBadges.slice(2)}
+            isKo={isKo}
+            compact
+            className="mt-1"
+          />
+        ) : null}
         <p
           className={cn(
             "mt-0.5 break-words font-black tabular-nums leading-snug",

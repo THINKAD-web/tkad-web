@@ -3,6 +3,7 @@ import type { MediaAnalyticsReport } from "@/lib/media-report-analytics";
 import type { AccessCheckResult } from "@/lib/report-access-shared";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
 import type { MediaItem } from "@/lib/media-data";
+import type { MediaRecentBrandsData } from "@/lib/insights/media-recent-brands";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaDetailHeroSection } from "@/components/media-detail/media-detail-hero-section";
 import { MediaDetailPageLayout } from "@/components/media-detail/media-detail-page-layout";
@@ -31,6 +32,7 @@ type Props = {
   analyticsReport: MediaAnalyticsReport;
   detailAccess: AccessCheckResult;
   competitorAccess: AccessCheckResult;
+  recentBrands: MediaRecentBrandsData;
   similar: SimilarItem[];
   hasPriceOptions: boolean;
   priceOptions?: MediaItem["priceOptions"];
@@ -93,6 +95,7 @@ export function MediaDetailPageView({
   analyticsReport,
   detailAccess,
   competitorAccess,
+  recentBrands,
   similar,
   hasPriceOptions,
   priceOptions,
@@ -165,6 +168,7 @@ export function MediaDetailPageView({
                 analyticsReport={analyticsReport}
                 detailAccess={detailAccess}
                 competitorAccess={competitorAccess}
+                recentBrands={recentBrands}
               />
             ),
             calendar: (

@@ -267,11 +267,12 @@ export function BrutalNav({
                 <li key={group.id} className="shrink-0">
                   <button
                     type="button"
+                    data-tour={`${group.id}-group`}
                     onClick={() => {
                       setMobileExpandedGroupId(group.id);
                       setMobileOpen(true);
                     }}
-                    className="inline-flex max-w-[10rem] touch-manipulation items-center gap-1.5 truncate rounded-full border border-zinc-300/90 bg-white px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900"
+                    className="inline-flex max-w-[10rem] touch-manipulation items-center gap-1.5 truncate rounded-full border border-zinc-300/90 bg-gray-100 px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 dark:bg-white/10 dark:text-white"
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
                     {group.label}
@@ -284,7 +285,7 @@ export function BrutalNav({
                   <li key={navLeafKey(leaf)} className="shrink-0">
                     <Link
                       href={leaf.href}
-                      className="inline-flex max-w-[11rem] touch-manipulation truncate rounded-full border border-zinc-300/90 bg-white px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900"
+                      className="inline-flex max-w-[11rem] touch-manipulation truncate rounded-full border border-zinc-300/90 bg-gray-100 px-3 py-1.5 text-[11px] font-semibold leading-none tracking-tight text-zinc-900 shadow-sm dark:border-white/14 dark:bg-white/10 dark:text-white"
                     >
                       {leaf.label}
                     </Link>
@@ -334,7 +335,7 @@ export function BrutalNav({
                           <Link
                             href={leaf.href}
                             onClick={() => setMobileOpen(false)}
-                            className="flex min-h-[3.25rem] items-center gap-2 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white text-gray-900 dark:hover:dark:bg-white/6 bg-gray-50"
+                            className="flex min-h-[3.25rem] items-center gap-2 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:bg-transparent dark:text-white dark:hover:bg-white/6"
                           >
                             {leaf.label}
                             {leaf.badge ? <NavBetaBadge /> : null}
@@ -348,7 +349,7 @@ export function BrutalNav({
                     <Link
                       href={entry.href}
                       onClick={() => setMobileOpen(false)}
-                      className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white text-gray-900 dark:hover:dark:bg-white/6 bg-gray-50"
+                      className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:bg-transparent dark:text-white dark:hover:bg-white/6"
                     >
                       {entry.label}
                     </Link>
@@ -436,6 +437,7 @@ function BrutalNavDropdown({
     >
       <button
         type="button"
+        data-tour={entry.id ? `${entry.id}-group` : undefined}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
@@ -503,6 +505,14 @@ function BrutalNavDropdown({
                 <li key={navLeafKey(leaf)}>
                   <Link
                     href={leaf.href}
+                    data-tour={
+                      leaf.navKey === "map-search" || leaf.navKey === "media-planner"
+                        ? leaf.navKey
+                        : (leaf as { id?: string }).id === "map-search" ||
+                            (leaf as { id?: string }).id === "media-planner"
+                          ? (leaf as { id?: string }).id
+                          : undefined
+                    }
                     role="menuitem"
                     onClick={() => setOpen(false)}
                     className={cn(

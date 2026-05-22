@@ -31,6 +31,7 @@ export function UnifiedSearchTrigger({ className, compact }: Props) {
     <>
       <button
         type="button"
+        data-tour="search"
         onClick={() => setOpen(true)}
         className={cn(
           "flex w-full min-w-0 items-stretch overflow-hidden rounded-xl border-2 border-border/40 bg-card/80 text-left shadow-sm backdrop-blur-sm transition-colors hover:border-accent/40 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:hover:dark:border-white/20 border-gray-300",

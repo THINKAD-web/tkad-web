@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/user-session";
 import { userNeedsEmailVerification } from "@/lib/user-email";
 import { apiOk, apiServerError } from "@/lib/api-response";
 import { trialDaysLeft, trialProgressPct } from "@/lib/check-plan";
+import { getPointBalance } from "@/lib/points";
 
 export const runtime = "nodejs";
 
@@ -40,6 +41,8 @@ export async function GET() {
         }
       : null;
 
+    const pointBalance = await getPointBalance(user.id);
+
     return apiOk({
       ...user,
       phone: row?.phone ?? null,
@@ -49,6 +52,7 @@ export async function GET() {
       trialEndsAt: row?.trialEndsAt?.toISOString() ?? null,
       trialDaysLeft: planUser ? (trialDaysLeft(planUser) ?? 0) : 0,
       trialProgressPct: planUser ? trialProgressPct(planUser) : 0,
+      pointBalance,
     });
   } catch (e) {
     return apiServerError(e, "auth/session");

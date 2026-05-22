@@ -36,6 +36,7 @@ import { useToast } from "@/components/toast-provider";
 import {
   CompositePreview,
   DEFAULT_LOGO_PLACEMENT,
+  type CompositeLogoPlacement,
 } from "@/components/planner/composite-preview";
 import { usePlannerStore } from "@/lib/planner/store";
 import { Move, RotateCcw } from "lucide-react";
@@ -46,6 +47,10 @@ type Props = {
   setCreativeObjectUrl: Dispatch<SetStateAction<string | null>>;
   creativeUploadedUrl: string | null;
   setCreativeUploadedUrl: (url: string | null) => void;
+  /** 통합 플래너 등 외부 store 사용 시 placement 오버라이드 */
+  mediaPlacements?: Record<string, CompositeLogoPlacement>;
+  setMediaPlacement?: (mediaId: string, placement: CompositeLogoPlacement) => void;
+  clearMediaPlacement?: (mediaId: string) => void;
 };
 
 type UploadState =
@@ -69,6 +74,9 @@ export default function PlannerSimulationStep3({
   setCreativeObjectUrl,
   creativeUploadedUrl,
   setCreativeUploadedUrl,
+  mediaPlacements: mediaPlacementsProp,
+  setMediaPlacement: setMediaPlacementProp,
+  clearMediaPlacement: clearMediaPlacementProp,
 }: Props) {
   const t = useTranslations("planner");
   const { toast } = useToast();
@@ -79,11 +87,12 @@ export default function PlannerSimulationStep3({
     creativeUploadedUrl ? { status: "done" } : { status: "idle" },
   );
   const [editing, setEditing] = useState(false);
-  const mediaPlacements = usePlannerStore((s) => s.mediaPlacements);
-  const setMediaPlacement = usePlannerStore((s) => s.setMediaPlacement);
-  const clearMediaPlacement = usePlannerStore(
-    (s) => s.clearMediaPlacement,
-  );
+  const storePlacements = usePlannerStore((s) => s.mediaPlacements);
+  const storeSetPlacement = usePlannerStore((s) => s.setMediaPlacement);
+  const storeClearPlacement = usePlannerStore((s) => s.clearMediaPlacement);
+  const mediaPlacements = mediaPlacementsProp ?? storePlacements;
+  const setMediaPlacement = setMediaPlacementProp ?? storeSetPlacement;
+  const clearMediaPlacement = clearMediaPlacementProp ?? storeClearPlacement;
 
   const mediaCards = useMemo(
     () =>

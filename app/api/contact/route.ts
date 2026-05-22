@@ -28,6 +28,7 @@ import {
 import { createInquiryQuoteDraft } from "@/lib/inquiry-quote-draft";
 import { notifyMediaOwnersForMediaIds } from "@/lib/media-owner-inquiry-notify";
 import { recordConversion } from "@/lib/tracking/record";
+import { getCurrentUser } from "@/lib/user-session";
 
 export const dynamic = "force-dynamic";
 
@@ -325,6 +326,15 @@ export async function POST(request: NextRequest) {
     void notifyInquiryReceived({ phone: phoneVal, name: nameVal }).catch((err) => {
       console.error("[contact] alimtalk:", err);
     });
+  }
+
+  const sessionUser = await getCurrentUser();
+  if (sessionUser && inquiryId) {
+    void import("@/lib/points").then(({ awardPoints }) =>
+      awardPoints(sessionUser.id, "INQUIRY_SUBMIT", `inquiry-${sessionUser.id}`).catch(
+        () => {},
+      ),
+    );
   }
 
   return json({ success: true }, { status: 201 });

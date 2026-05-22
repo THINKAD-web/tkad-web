@@ -8,6 +8,7 @@ import { Megaphone, ShoppingCart, User as UserIcon } from "lucide-react";
 import {
   headerChromeSignupButtonClass,
   headerChromeTextButtonClass,
+  headerMobileMenuRowClass,
 } from "@/components/public-chrome/header-chrome-buttons";
 import { HeaderProfileDropdown } from "@/components/header-profile-dropdown";
 import { useCart } from "@/lib/cart";
@@ -15,7 +16,13 @@ import { HeaderFavoritesLink } from "@/components/header-favorites-link";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 
-type Session = { id: string; email: string; name: string; role: string } | null;
+type Session = {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  pointBalance?: number;
+} | null;
 
 function useSession() {
   const pathname = usePathname();
@@ -41,8 +48,7 @@ function useSession() {
   return { session, loaded };
 }
 
-const menuRowClass =
-  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white text-gray-900 dark:hover:dark:bg-white/6 bg-gray-50";
+const menuRowClass = headerMobileMenuRowClass;
 
 export function HeaderUserMenu({
   onNavigate,
@@ -100,6 +106,13 @@ export function HeaderUserMenu({
         ) : (
           <div className="space-y-2 px-5 py-4">
             <Link
+              href="/guide/how-to-use"
+              onClick={onNavigate}
+              className={`${headerChromeTextButtonClass} min-h-11 w-full`}
+            >
+              {t("usageGuide")}
+            </Link>
+            <Link
               href="/login"
               onClick={onNavigate}
               className={`${headerChromeTextButtonClass} min-h-11 w-full`}
@@ -153,10 +166,19 @@ export function HeaderUserMenu({
             myPageLabel={t("myPage")}
             campaignsLabel={t("myCampaigns")}
             logoutLabel={t("logout")}
+            pointsShopLabel={t("pointsShop")}
+            referralLabel={t("referralInvite")}
           />
         </>
       ) : (
         <>
+          <Link
+            href="/guide/how-to-use"
+            onClick={onNavigate}
+            className="inline-flex h-9 items-center rounded-full px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60 dark:text-white text-gray-900 dark:hover:dark:bg-white/10 bg-gray-100"
+          >
+            {t("usageGuide")}
+          </Link>
           <Link
             href="/login"
             onClick={onNavigate}

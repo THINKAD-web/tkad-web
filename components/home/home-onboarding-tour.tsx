@@ -1,45 +1,73 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Compass, GitCompare, MessageSquare, X } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const STORAGE_KEY = "tkad-home-tour-v1";
+const STORAGE_KEY = "tkad-home-tour-v2";
 
-const STEPS = [
+type TourStep = {
+  selector: string;
+  titleKo: string;
+  titleEn: string;
+  descKo: string;
+  descEn: string;
+};
+
+const STEPS: TourStep[] = [
   {
-    icon: Compass,
-    titleKo: "매체 검색",
-    titleEn: "Browse media",
-    descKo: "지역·유형·예산으로 검증 매체를 찾아보세요.",
-    descEn: "Filter verified placements by region, type, and budget.",
-    href: "/media",
+    selector: '[data-tour="search"]',
+    titleKo: "매체를 검색해보세요",
+    titleEn: "Search for media",
+    descKo: "매체명·지역·키워드로 빠르게 찾을 수 있어요. ⌘K 단축키도 지원합니다.",
+    descEn: "Find placements by name, region, or keyword. ⌘K shortcut supported.",
   },
   {
-    icon: GitCompare,
-    titleKo: "비교",
-    titleEn: "Compare",
-    descKo: "후보 매체를 나란히 비교해 최적 조합을 고르세요.",
-    descEn: "Compare candidates side by side.",
-    href: "/compare",
+    selector: '[data-tour="discovery-group"]',
+    titleKo: "지도로도 찾을 수 있어요",
+    titleEn: "Browse on the map",
+    descKo: "발견하기 메뉴에서 지도 검색으로 위치 기반 탐색을 시작해 보세요.",
+    descEn: "Open Discover → map search to explore by location.",
   },
   {
-    icon: MessageSquare,
-    titleKo: "견적 요청",
-    titleEn: "Get a quote",
-    descKo: "3분 안에 견적·상담을 요청할 수 있습니다.",
-    descEn: "Request a quote in minutes.",
-    href: "/quote",
+    selector: '[data-tour="planning-group"]',
+    titleKo: "AI 플래너로 자동 설계",
+    titleEn: "Let AI plan for you",
+    descKo: "기획하기 → 미디어 플래너에서 예산·목표에 맞는 조합을 추천받으세요.",
+    descEn: "Planning → Media planner recommends the best mix for your goals.",
   },
-] as const;
+];
+
+type Rect = { top: number; left: number; width: number; height: number };
+
+function measureTarget(selector: string): Rect | null {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  if (r.width < 2 || r.height < 2) return null;
+  const pad = 6;
+  return {
+    top: Math.max(8, r.top - pad),
+    left: Math.max(8, r.left - pad),
+    width: r.width + pad * 2,
+    height: r.height + pad * 2,
+  };
+}
 
 export default function HomeOnboardingTour() {
   const locale = useLocale();
   const isKo = locale.startsWith("ko");
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const [targetRect, setTargetRect] = useState<Rect | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const updateRect = useCallback(() => {
+    const stepDef = STEPS[step];
+    if (!stepDef) return;
+    setTargetRect(measureTarget(stepDef.selector));
+  }, [step]);
 
   useEffect(() => {
     try {
@@ -51,61 +79,116 @@ export default function HomeOnboardingTour() {
     return () => window.clearTimeout(t);
   }, []);
 
-  const dismiss = useCallback((permanent: boolean) => {
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const apply = () => setIsMobile(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    updateRect();
+    const onScroll = () => updateRect();
+    window.addEventListener("resize", onScroll);
+    window.addEventListener("scroll", onScroll, true);
+    return () => {
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", onScroll, true);
+    };
+  }, [open, step, updateRect]);
+
+  const dismissPermanent = useCallback(() => {
     setOpen(false);
-    if (permanent) {
-      try {
-        localStorage.setItem(STORAGE_KEY, "1");
-      } catch {
-        /* ignore */
-      }
+    try {
+      localStorage.setItem(STORAGE_KEY, "1");
+    } catch {
+      /* ignore */
     }
+  }, []);
+
+  const dismissSession = useCallback(() => {
+    setOpen(false);
   }, []);
 
   if (!open) return null;
 
   const current = STEPS[step];
-  const Icon = current.icon;
+  const popupStyle: React.CSSProperties = isMobile
+    ? {
+        position: "fixed",
+        left: "50%",
+        bottom: "5.5rem",
+        transform: "translateX(-50%)",
+        width: "min(calc(100vw - 2rem), 22rem)",
+        zIndex: 50,
+      }
+    : targetRect
+      ? {
+          position: "fixed",
+          top: targetRect.top + targetRect.height + 12,
+          left: Math.min(
+            Math.max(16, targetRect.left),
+            window.innerWidth - Math.min(320, window.innerWidth - 32) - 16,
+          ),
+          width: "min(20rem, calc(100vw - 2rem))",
+          zIndex: 50,
+        }
+      : {
+          position: "fixed",
+          right: 16,
+          bottom: 16,
+          width: "min(20rem, calc(100vw - 2rem))",
+          zIndex: 50,
+        };
 
   return (
-    <div
-      className="fixed bottom-20 left-1/2 z-[45] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 md:bottom-8 md:left-auto md:right-8 md:w-[min(100vw-2rem,320px)] md:translate-x-0"
-      role="dialog"
-      aria-label={isKo ? "첫 방문 안내" : "First visit guide"}
-    >
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xl dark:border-white/14 dark:bg-gray-900">
+    <>
+      <div
+        className="fixed inset-0 z-[44] bg-black/45 backdrop-blur-[1px]"
+        aria-hidden
+        onClick={dismissSession}
+      />
+      {targetRect ? (
+        <div
+          className="pointer-events-none fixed z-[45] rounded-xl ring-2 ring-cyan-400/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"
+          style={{
+            top: targetRect.top,
+            left: targetRect.left,
+            width: targetRect.width,
+            height: targetRect.height,
+          }}
+          aria-hidden
+        />
+      ) : null}
+
+      <div
+        role="dialog"
+        aria-label={isKo ? "첫 방문 안내" : "First visit guide"}
+        className="rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl dark:border-white/14 dark:bg-gray-900"
+        style={popupStyle}
+      >
         <div className="flex items-start justify-between gap-2">
-          <p className="font-semibold text-gray-900 dark:text-white">
-            {isKo ? "안내" : "Guide"}
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+            {isKo ? "안내" : "Guide"} · {step + 1}/{STEPS.length}
           </p>
           <button
             type="button"
-            onClick={() => dismiss(true)}
+            onClick={dismissSession}
             className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-white/60 dark:hover:bg-white/10"
-            aria-label={isKo ? "닫기" : "Close"}
+            aria-label={isKo ? "스킵" : "Skip"}
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
-          {isKo
-            ? "안녕하세요! 처음이시면 안내해드릴까요?"
-            : "New here? Quick 3-step tour."}
-        </p>
 
-        <div className="mt-4 flex gap-3 rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/40 to-cyan-500/30">
-            <Icon className="h-5 w-5 text-cyan-600 dark:text-cyan-400" aria-hidden />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-gray-900 dark:text-white">
-              {isKo ? current.titleKo : current.titleEn}
-            </p>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-white/60">
-              {isKo ? current.descKo : current.descEn}
-            </p>
-          </div>
-        </div>
+        <p className="mt-2 text-sm font-bold text-gray-900 dark:text-white">
+          {isKo ? current.titleKo : current.titleEn}
+        </p>
+        <p className="mt-1.5 text-xs leading-relaxed text-gray-500 dark:text-white/65">
+          {isKo ? current.descKo : current.descEn}
+        </p>
 
         <div className="mt-3 flex gap-1">
           {STEPS.map((_, i) => (
@@ -113,39 +196,39 @@ export default function HomeOnboardingTour() {
               key={i}
               className={cn(
                 "h-1 flex-1 rounded-full",
-                i === step ? "bg-cyan-600 dark:bg-cyan-400" : "bg-gray-200 dark:bg-white/15",
+                i === step ? "bg-cyan-500" : "bg-gray-200 dark:bg-white/15",
               )}
             />
           ))}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           {step < STEPS.length - 1 ? (
             <button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              className="flex-1 rounded-xl bg-gray-100 py-2 text-xs font-bold text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+              className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-2.5 text-xs font-bold text-white"
             >
               {isKo ? "다음" : "Next"}
             </button>
           ) : (
-            <Link
-              href={current.href}
-              onClick={() => dismiss(true)}
-              className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-2 text-center text-xs font-bold text-white"
+            <button
+              type="button"
+              onClick={dismissPermanent}
+              className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-2.5 text-xs font-bold text-white"
             >
-              {isKo ? "시작하기" : "Start"}
-            </Link>
+              {isKo ? "시작하기" : "Got it"}
+            </button>
           )}
           <button
             type="button"
-            onClick={() => dismiss(true)}
-            className="rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-700 dark:border-white/14 dark:bg-white/10 dark:text-white"
+            onClick={dismissPermanent}
+            className="rounded-xl px-3 py-2.5 text-[11px] font-semibold text-muted-foreground underline-offset-2 hover:underline"
           >
-            {isKo ? "스킵" : "Skip"}
+            {isKo ? "다시 보지 않기" : "Don't show again"}
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }

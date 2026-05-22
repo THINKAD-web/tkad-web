@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  BarChart3,
   BookMarked,
   BookOpen,
   ClipboardList,
@@ -31,11 +32,13 @@ export type PublicNavItemId =
   | "map-search"
   | "ai-recommend"
   | "media-planner"
+  | "integrated-planner"
   | "package-proposal"
   | "creative-library"
   | "dooh-playlists"
   | "creative-studio"
   | "trend-report"
+  | "competitive-intel"
   | "success-cases"
   | "academy-content"
   | "advertiser-guide";
@@ -73,6 +76,12 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     icon: ClipboardList,
     items: [
       { id: "media-planner", href: "/planner", icon: Lightbulb, beta: true },
+      {
+        id: "integrated-planner",
+        href: "/planner/integrated",
+        icon: Sparkles,
+        beta: true,
+      },
       { id: "package-proposal", href: "/media/packages", icon: Package },
     ],
   },
@@ -90,6 +99,11 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     icon: LineChart,
     items: [
       { id: "trend-report", href: "/report", icon: LineChart },
+      {
+        id: "competitive-intel",
+        href: "/insights/competitive",
+        icon: BarChart3,
+      },
       { id: "success-cases", href: "/cases", icon: Trophy },
     ],
   },

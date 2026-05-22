@@ -7,6 +7,8 @@ import {
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { buildMediaCardHoverOverlay } from "@/lib/media-card-hover";
+import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
+import { pickTrustBadgesForThumbnail, trustBadgeLabel } from "@/lib/media-trust";
 
 type Props = {
   items: MediaItem[];
@@ -52,10 +54,30 @@ export function HomeMediaGridServer({
               density={density}
               hoverOverlay={buildMediaCardHoverOverlay(m, locale)}
               footer={
-                m.recommendReason ? (
-                  <p className="mt-1 line-clamp-1 font-mono text-[10px] font-semibold tracking-wide text-muted-foreground">
-                    {m.recommendReason}
-                  </p>
+                <>
+                  {m.trustScore != null ? (
+                    <MediaTrustScoreBadge
+                      score={m.trustScore}
+                      isKo={isKo}
+                      compact
+                      className="mt-1"
+                    />
+                  ) : null}
+                  {m.recommendReason ? (
+                    <p className="mt-1 line-clamp-1 font-mono text-[10px] font-semibold tracking-wide text-muted-foreground">
+                      {m.recommendReason}
+                    </p>
+                  ) : null}
+                </>
+              }
+              topLeft={
+                pickTrustBadgesForThumbnail(m.trustBadges, 1)[0] ? (
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-wide">
+                    {trustBadgeLabel(
+                      pickTrustBadgesForThumbnail(m.trustBadges, 1)[0]!,
+                      isKo,
+                    )}
+                  </span>
                 ) : undefined
               }
               topRight={

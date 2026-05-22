@@ -40,6 +40,8 @@ import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { RelatedCases } from "@/components/media-detail/related-cases";
 import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
+import { enrichMediaWithTrust } from "@/lib/media-trust-catalog";
+import { attachReviewStatsToMediaItems } from "@/lib/media-reviews";
 import { getCurrentUser } from "@/lib/user-session";
 import { checkReportAccess } from "@/lib/report-access";
 import {
@@ -53,6 +55,7 @@ import TrackMediaView from "@/components/track-media-view";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { MediaDetailPageView } from "@/components/media-detail/media-detail-page-view";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
+import { getMediaRecentBrands } from "@/lib/insights/media-recent-brands";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
@@ -106,8 +109,10 @@ export default async function MediaDetailPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const { id: idStr } = await params;
-  const media = await resolveMediaForDetail(idStr);
+  let media = await resolveMediaForDetail(idStr);
   if (!media) notFound();
+  [media] = await attachReviewStatsToMediaItems([media]);
+  media = await enrichMediaWithTrust(media);
 
   const catalog = await fetchPublicMediaCatalog();
   const user = await getCurrentUser();
@@ -140,6 +145,7 @@ export default async function MediaDetailPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const tMedia = await getTranslations({ locale, namespace: "media" });
   const isKo = locale === "ko";
+  const recentBrands = await getMediaRecentBrands(media.id, media.region, isKo);
   const periodLabel = t(
     mediaDetailPricePeriodTranslationKey(media.pricePeriod),
   );
@@ -251,6 +257,7 @@ export default async function MediaDetailPage({ params }: Props) {
         analyticsReport={analyticsReport}
         detailAccess={detailAccess}
         competitorAccess={competitorAccess}
+        recentBrands={recentBrands}
         similar={similar}
         hasPriceOptions={hasPriceOptions}
         priceOptions={priceOptions}

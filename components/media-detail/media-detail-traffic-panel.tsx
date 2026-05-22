@@ -6,6 +6,11 @@ import MediaDetailPerformance from "@/components/media-detail-performance";
 import { TrafficChartsLazy } from "@/components/media-detail/traffic-charts-lazy";
 import { MediaAnalyticsReportSection } from "@/components/media-detail/media-analytics-report";
 import { CompetitorOohSection } from "@/components/media-detail/data-fusion-panels";
+import {
+  MediaRecentBrandsPanel,
+  MediaRecentBrandsTeaser,
+} from "@/components/media-detail/media-recent-brands-panel";
+import type { MediaRecentBrandsData } from "@/lib/insights/media-recent-brands";
 import type { MediaAnalyticsReport } from "@/lib/media-report-analytics";
 import type { AccessCheckResult } from "@/lib/report-access-shared";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
@@ -24,6 +29,7 @@ type Props = {
   analyticsReport: MediaAnalyticsReport;
   detailAccess: AccessCheckResult;
   competitorAccess: AccessCheckResult;
+  recentBrands: MediaRecentBrandsData;
 };
 
 export function MediaDetailTrafficPanel({
@@ -38,6 +44,7 @@ export function MediaDetailTrafficPanel({
   analyticsReport,
   detailAccess,
   competitorAccess,
+  recentBrands,
 }: Props) {
   const { isPro } = useIsPro();
 
@@ -68,6 +75,14 @@ export function MediaDetailTrafficPanel({
             isKo={isKo}
             access={competitorAccess}
           />
+          <MediaRecentBrandsPanel
+            data={recentBrands}
+            isKo={isKo}
+            access={competitorAccess}
+          />
+          {!competitorAccess.allowed ? (
+            <MediaRecentBrandsTeaser data={recentBrands} isKo={isKo} />
+          ) : null}
         </div>
       </PlannerProGate>
     </div>

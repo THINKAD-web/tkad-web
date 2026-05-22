@@ -15,6 +15,8 @@ import {
   formatMediaPriceWonWithSymbol,
   mediaDetailPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
+import { MediaExecutionSummary, MediaTrustScoreBadge } from "@/components/media/media-trust-score";
+import { MediaTrustBadges } from "@/components/media/media-trust-badges";
 import { resolveMediaCpmWon } from "@/lib/compare-quote";
 import { cn } from "@/lib/utils";
 
@@ -165,6 +167,27 @@ export function MediaDetailHeroSection({
                     {tag}
                   </span>
                 ))}
+              </div>
+            ) : null}
+            {media.trustBadges && media.trustBadges.length > 0 ? (
+              <MediaTrustBadges
+                badges={media.trustBadges}
+                isKo={isKo}
+                className="mt-3"
+              />
+            ) : null}
+            {media.trustScore != null || media.executionCount != null ? (
+              <div className="mt-3 space-y-1.5">
+                {media.trustScore != null ? (
+                  <MediaTrustScoreBadge score={media.trustScore} isKo={isKo} />
+                ) : null}
+                {media.executionCount != null ? (
+                  <MediaExecutionSummary
+                    count={media.executionCount}
+                    monthsAgo={media.lastExecutionMonthsAgo ?? null}
+                    isKo={isKo}
+                  />
+                ) : null}
               </div>
             ) : null}
             <p className="mt-3 flex items-center gap-2 text-sm dark:text-white/70 text-gray-600">

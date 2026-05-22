@@ -57,6 +57,52 @@ export async function uploadOohContractPdf(
   });
 }
 
+/** 운영자 매뉴얼 PDF — `tkad/admin/manual` */
+export async function uploadOperatorManualPdf(
+  pdfBuffer: Buffer,
+): Promise<{ url: string; publicId: string }> {
+  const c = getCloudinaryCredentials();
+  if (!c) {
+    throw new Error("Cloudinary not configured");
+  }
+  cloudinary.config({
+    cloud_name: c.cloudName,
+    api_key: c.apiKey,
+    api_secret: c.apiSecret,
+  });
+
+  const folder =
+    process.env.CLOUDINARY_MANUAL_FOLDER?.trim() || "tkad/admin/manual";
+  const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const safeId = `thinkad-operator-manual-${stamp}`;
+
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "raw",
+        folder,
+        public_id: safeId,
+        overwrite: true,
+        format: "pdf",
+      },
+      (err, result) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        const url = result?.secure_url;
+        const publicId = result?.public_id;
+        if (!url || !publicId) {
+          reject(new Error("Cloudinary upload returned no URL"));
+          return;
+        }
+        resolve({ url, publicId });
+      },
+    );
+    stream.end(pdfBuffer);
+  });
+}
+
 /** 아카데미 다운로드 PDF — `tkad/academy` */
 export async function uploadAcademyPdf(
   pdfBuffer: Buffer,

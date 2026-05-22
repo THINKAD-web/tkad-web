@@ -34,6 +34,7 @@ import { HomeMediaPartnerCta } from "@/components/home-media-partner-cta";
 import { getCurrentUser } from "@/lib/user-session";
 import { getUserPreferenceByUserId } from "@/lib/user-preference";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { mergeMediaTrustFromCatalog } from "@/lib/media-trust-catalog";
 import { HomePersonalizedMedia } from "@/components/home/home-personalized-media";
 import { HomeBudgetWidget } from "@/components/home/home-budget-widget";
 import { HomeSocialProof } from "@/components/home/home-social-proof";
@@ -92,6 +93,23 @@ export default async function HomePage({ params }: Props) {
 
   const bestDealItems = pickBestDeals(fullCatalog, 8);
 
+  const featuredCatalogWithTrust = mergeMediaTrustFromCatalog(
+    featuredCatalog,
+    fullCatalog,
+  );
+  const weeklyPopularWithTrust = mergeMediaTrustFromCatalog(
+    weeklyPopularCatalog,
+    fullCatalog,
+  );
+  const newMediaWithTrust = mergeMediaTrustFromCatalog(
+    newMediaCatalog,
+    fullCatalog,
+  );
+  const instantBookingWithTrust = mergeMediaTrustFromCatalog(
+    instantBookingCatalog,
+    fullCatalog,
+  );
+
   const personalizedItems = user
     ? await recommendPersonalizedHomeMedia(
         user.id,
@@ -103,17 +121,17 @@ export default async function HomePage({ params }: Props) {
     : [];
 
   const weeklyPopularItems = attachRecommendReason(
-    weeklyPopularCatalog,
+    weeklyPopularWithTrust,
     "weekly_popular",
     locale,
   );
   const newMediaItems = attachRecommendReason(
-    newMediaCatalog,
+    newMediaWithTrust,
     "new_listing",
     locale,
   );
   const instantBookingItems = attachRecommendReason(
-    instantBookingCatalog,
+    instantBookingWithTrust,
     "instant_booking",
     locale,
   );
@@ -126,7 +144,7 @@ export default async function HomePage({ params }: Props) {
       locale={locale}
       t={t}
       th={th}
-      featuredCatalog={featuredCatalog}
+      featuredCatalog={featuredCatalogWithTrust}
       weeklyPopularItems={weeklyPopularItems}
       newMediaItems={newMediaItems}
       instantBookingItems={instantBookingItems}

@@ -159,7 +159,19 @@ export default function MediaBrowseClient({
   const [mapPopupOpen, setMapPopupOpen] = useState(false);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
-  const popularIds = new Set(["1", "2", "3", "8", "9"]);
+  const popularIds = useMemo(
+    () =>
+      new Set(
+        catalog
+          .filter((m) =>
+            m.trustBadges?.some(
+              (b) => b.id === "popular" || b.id === "hot_week",
+            ),
+          )
+          .map((m) => m.id),
+      ),
+    [catalog],
+  );
   const [sortBy, setSortBy] = useState<
     | "default"
     | "newest"

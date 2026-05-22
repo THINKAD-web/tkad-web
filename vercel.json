@@ -156,6 +156,10 @@
       "schedule": "0 0 * * *"
     },
     {
+      "path": "/api/cron/points-expiry",
+      "schedule": "30 0 * * *"
+    },
+    {
       "path": "/api/cron/potential-media-outreach",
       "schedule": "0 2 * * *"
     }

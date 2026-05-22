@@ -35,6 +35,7 @@ import {
   Kanban,
   TrendingUp,
   Mail,
+  Gift,
 } from "lucide-react";
 
 function SignOutButton({ locale, label }: { locale: string; label: string }) {
@@ -59,6 +60,7 @@ const navDefs = [
   { href: "/admin/monitoring", key: "monitoring" as const, icon: Radar },
   { href: "/admin/launch-monitor", key: "launchMonitor" as const, icon: Activity },
   { href: "/admin/health", key: "linkHealth" as const, icon: Radar },
+  { href: "/admin/manual", key: "operatorManual" as const, icon: FileText },
   // 2) 영업/리드
   { href: "/admin/inquiries", key: "inquiries" as const, icon: MessageSquareText },
   { href: "/admin/biddings", key: "biddings" as const, icon: ClipboardList },
@@ -87,6 +89,7 @@ const navDefs = [
   { href: "/admin/media-hub", key: "mediaHub" as const, icon: Database },
   // 6) 사람/권한
   { href: "/admin/users", key: "users" as const, icon: UserCog },
+  { href: "/admin/points", key: "points" as const, icon: Gift },
   // 7) 분석/도구
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
   { href: "/admin/funnel", key: "funnel" as const, icon: BarChart3 },

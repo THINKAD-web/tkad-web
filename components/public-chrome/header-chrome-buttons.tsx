@@ -1,6 +1,9 @@
 import { cn } from "@/lib/utils";
 
-/** 헤더 우측 — 로그인·언어·테마 등 공통 호버(네온 violet→cyan) */
+/** 모바일 햄버거 패널 — 찜·알림·장바구니 등 행 (다크: 부모 배경 상속, 라이트: hover만) */
+export const headerMobileMenuRowClass =
+  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:bg-transparent dark:text-white dark:hover:bg-white/6";
+
 const headerChromeHover =
   "transition-all duration-300 hover:border-violet-400/55 hover:bg-gradient-to-br hover:from-violet-500 hover:to-cyan-400 hover:dark:text-white text-gray-900 hover:shadow-[0_0_28px_rgba(168,85,247,0.32),0_0_16px_rgba(34,211,238,0.22)] dark:hover:border-cyan-400/40 dark:hover:from-violet-500 dark:hover:to-cyan-400 dark:hover:dark:text-white text-gray-900 dark:hover:shadow-[0_0_32px_rgba(168,85,247,0.38),0_0_20px_rgba(34,211,238,0.28)]";
 

@@ -111,6 +111,12 @@ export async function POST(request: NextRequest) {
       },
       select: { id: true, expiresAt: true },
     });
+    if (sessionUser && parsed.data.saveMode === "share") {
+      const kst = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      void import("@/lib/points").then(({ awardPoints }) =>
+        awardPoints(sessionUser.id, "PLANNER_COMPLETE", kst).catch(() => {}),
+      );
+    }
     return NextResponse.json({
       id: created.id,
       expiresAt: created.expiresAt.toISOString(),

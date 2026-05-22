@@ -1,10 +1,14 @@
-import { Suspense } from "react";
-import { JoinTeamClient } from "@/components/join-team-client";
+import { redirect } from "@/i18n/navigation";
 
-export default function JoinTeamPage() {
-  return (
-    <Suspense fallback={null}>
-      <JoinTeamClient />
-    </Suspense>
-  );
+type Props = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ ref?: string }>;
+};
+
+/** `/join?ref=userId` → 회원가입 + 초대 추적 */
+export default async function JoinPage({ params, searchParams }: Props) {
+  const { locale } = await params;
+  const { ref } = await searchParams;
+  const q = ref?.trim() ? `?ref=${encodeURIComponent(ref.trim())}` : "";
+  redirect({ href: `/register${q}`, locale });
 }

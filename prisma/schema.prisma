@@ -1477,8 +1477,83 @@ model User {
   chatRoomsAsOwner        ChatRoom[] @relation("ChatOwner")
   chatMessages            ChatMessage[]
 
+  referredByUserId String? @map("referred_by_user_id")
+  referredBy       User?   @relation("UserReferrals", fields: [referredByUserId], references: [id], onDelete: SetNull)
+  referrals        User[]  @relation("UserReferrals")
+  userPoint        UserPoint?
+  pointTransactions PointTransaction[]
+  pointCredits     UserPointCredit[]
+
   @@index([email])
+  @@index([referredByUserId])
   @@map("users")
+}
+
+enum PointEventType {
+  SIGNUP
+  REVIEW_WRITE
+  REVIEW_HELPFUL
+  COMMUNITY_POST
+  COMMUNITY_COMMENT
+  REFERRAL
+  MEDIA_REGISTER
+  INQUIRY_SUBMIT
+  DAILY_CHECK
+  PLANNER_COMPLETE
+  REDEEM_PRO_DAY
+  REDEEM_PRO_WEEK
+  REDEEM_PRO_MONTH
+  REDEEM_REPORT
+  REDEEM_MEDIA_DETAIL
+  ADMIN_ADJUST
+  EXPIRED
+}
+
+model UserPoint {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  balance     Int      @default(0)
+  totalEarned Int      @default(0) @map("total_earned")
+  totalSpent  Int      @default(0) @map("total_spent")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_points")
+}
+
+model PointTransaction {
+  id          String         @id @default(cuid())
+  userId      String         @map("user_id")
+  type        PointEventType
+  amount      Int
+  description String         @db.VarChar(200)
+  refId       String?        @map("ref_id") @db.VarChar(64)
+  balanceAfter Int?          @map("balance_after")
+  expiresAt   DateTime?      @map("expires_at")
+  expiredAt   DateTime?      @map("expired_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, refId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([expiresAt, expiredAt])
+  @@map("point_transactions")
+}
+
+model UserPointCredit {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  creditType    String   @map("credit_type") @db.VarChar(32)
+  remainingUses Int      @default(1) @map("remaining_uses")
+  expiresAt     DateTime? @map("expires_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, creditType])
+  @@map("user_point_credits")
 }
 
 /// Web Push 구독 (PWA 알림)

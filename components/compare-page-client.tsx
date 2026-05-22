@@ -60,12 +60,21 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
     [issuedStamp.ymd],
   );
 
-  const popularIds = useMemo(
-    () => new Set(["1", "2", "3", "8", "9"]),
-    [],
-  );
-
   const visibleItems = items;
+
+  const popularIds = useMemo(
+    () =>
+      new Set(
+        visibleItems
+          .filter((m) =>
+            m.trustBadges?.some(
+              (b) => b.id === "popular" || b.id === "hot_week",
+            ),
+          )
+          .map((m) => m.id),
+      ),
+    [visibleItems],
+  );
 
   // 표만 캡처하는 기존 PDF (이미지 저장 시 동일 영역 사용)
   const handleComparePdfDownload = useCallback(async () => {

@@ -144,6 +144,14 @@ export interface MediaItem {
   averageRating?: number;
   /** 승인된 리뷰 수 */
   reviewCount?: number;
+  /** 신뢰 점수 1–100 */
+  trustScore?: number;
+  /** 신뢰·집행 뱃지 */
+  trustBadges?: import("@/lib/media-trust").MediaTrustBadge[];
+  /** 확정 Booking 기반 누적 집행 횟수 */
+  executionCount?: number;
+  /** 최근 집행으로부터 경과 개월 수 */
+  lastExecutionMonthsAgo?: number | null;
   /** 이동형(`mobile`) 서비스 구역 — 전국 시·군·구 행정코드(5자리). 공개 지도 폴리곤에 사용 */
   coverageDistrictCodes?: string[];
 }

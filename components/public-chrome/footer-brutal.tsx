@@ -201,6 +201,14 @@ export function FooterBrutal() {
                   <InstagramIcon className="h-4 w-4" />
                 </a>
               </div>
+              <p className="mt-4 text-right">
+                <Link
+                  href="/guide/how-to-use"
+                  className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  {t("footer.usageGuideLink")}
+                </Link>
+              </p>
             </div>
           </div>
 
@@ -237,6 +245,14 @@ export function FooterBrutal() {
                 >
                   {CONTACT_EMAIL}
                 </a>
+              </p>
+              <p className="pt-1">
+                <Link
+                  href="/guide/how-to-use"
+                  className="text-sm font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  {t("footer.usageGuideLink")}
+                </Link>
               </p>
             </div>
 

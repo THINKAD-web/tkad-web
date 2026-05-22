@@ -21,6 +21,7 @@ import {
 import { touchVisitorJourney } from "@/lib/visitor-journey";
 import { ensureMediaOwnerProfile } from "@/lib/media-owner-incentives";
 import { buildTrialGrantData } from "@/lib/check-plan";
+import { awardPoints, processReferralSignup } from "@/lib/points";
 
 export const runtime = "nodejs";
 
@@ -47,6 +48,8 @@ const Body = z.object({
   communityRole: z.enum(COMMUNITY_SIGNUP_ROLES).default("ADVERTISER"),
   sessionId: z.string().min(8).max(64).optional(),
   referralCode: z.string().max(16).optional(),
+  /** 친구 초대 userId (?ref=) */
+  inviteRefUserId: z.string().min(8).max(64).optional(),
 });
 
 const limiter = rateLimit({ limit: 5, windowMs: 60 * 60 * 1000 });
@@ -76,6 +79,7 @@ export async function POST(req: Request) {
       communityRole,
       sessionId,
       referralCode,
+      inviteRefUserId,
     } = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -142,6 +146,16 @@ export async function POST(req: Request) {
       void prisma.userWelcomeDrip
         .create({ data: { userId: user.id } })
         .catch(() => {});
+    }
+
+    void awardPoints(user.id, "SIGNUP", `signup-${user.id}`).catch((err) =>
+      console.error("[auth/register] signup points", err),
+    );
+
+    if (inviteRefUserId && inviteRefUserId !== user.id) {
+      void processReferralSignup(user.id, inviteRefUserId).catch((err) =>
+        console.error("[auth/register] referral points", err),
+      );
     }
 
     const res = apiOk(user, { status: 201 });

@@ -6,6 +6,7 @@ import { useLocale } from "next-intl";
 import { Bell } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { headerMobileMenuRowClass } from "@/components/public-chrome/header-chrome-buttons";
 
 type NotificationItem = {
   id: string;
@@ -19,8 +20,7 @@ type NotificationItem = {
 
 const DROPDOWN_LIMIT = 5;
 
-const menuRowClass =
-  "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:text-white text-gray-900 dark:hover:dark:bg-white/6 bg-gray-50";
+const menuRowClass = headerMobileMenuRowClass;
 
 export function HeaderNotificationsBell({
   onNavigate,
