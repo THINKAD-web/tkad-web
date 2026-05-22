@@ -25,6 +25,7 @@ export default async function RefundPage({ params }: Props) {
       relatedLinks={[
         { href: "/terms", label: isKo ? "이용약관" : "Terms of Service" },
         { href: "/privacy", label: isKo ? "개인정보처리방침" : "Privacy Policy" },
+        { href: "/guarantee", label: isKo ? "성과 보증 정책" : "Performance Guarantee" },
       ]}
     />
   );

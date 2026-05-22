@@ -1940,9 +1940,15 @@ model MediaReviewHelpful {
 
 model CommunityPost {
   id           String   @id @default(cuid())
-  category     String // "insight" | "qna" | "networking" | "review"
+  category     String // notice | free | media_recommend | execution_review | collaboration (+ legacy aliases)
   title        String   @db.VarChar(200)
   body         String   @db.Text
+  /**
+   * 카테고리별 부가 데이터 — media_recommend: budgetWon/region/industry,
+   * execution_review: mediaId/rating/mediaReviewId
+   */
+  metadata     Json?
+  isPinned     Boolean  @default(false) @map("is_pinned")
   authorName   String   @map("author_name") @db.VarChar(50)
   /**
    * 가입 사용자 글일 때 User.id, 익명일 때 null

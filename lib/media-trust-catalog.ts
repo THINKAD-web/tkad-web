@@ -281,21 +281,74 @@ async function fetchOwnerResponseMinutesByMediaIds(
   return out;
 }
 
+/** 완료 캠페인 현장 인증 사진 — 매체별 건수 */
+export async function fetchCertifiedPhotoCountsByMediaIds(
+  ids: string[],
+): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  for (const id of ids) out.set(id, 0);
+  if (!isDatabaseConfigured() || ids.length === 0) return out;
+
+  const db = getPrisma();
+  const bookings = await db.mediaBooking
+    .findMany({
+      where: {
+        mediaId: { in: ids },
+        status: "confirmed",
+        campaign: {
+          status: "completed",
+          proofPhotos: { some: {} },
+        },
+      },
+      select: {
+        mediaId: true,
+        media: { select: { name: true } },
+        campaign: {
+          select: {
+            proofPhotos: { select: { id: true, mediaName: true } },
+          },
+        },
+      },
+    })
+    .catch(() => []);
+
+  for (const b of bookings) {
+    if (!b.campaign) continue;
+    const proofs = b.campaign.proofPhotos;
+    const mediaName = b.media?.name ?? "";
+    const matched = proofs.filter(
+      (p) => !p.mediaName?.trim() || p.mediaName === mediaName,
+    );
+    const count = matched.length > 0 ? matched.length : proofs.length;
+    if (count > 0) {
+      out.set(b.mediaId, (out.get(b.mediaId) ?? 0) + count);
+    }
+  }
+  return out;
+}
+
 export async function attachMediaTrustToMediaItems(
   items: MediaItem[],
 ): Promise<MediaItem[]> {
   if (items.length === 0) return items;
 
   const ids = items.map((m) => m.id);
-  const [ctx, execMap, responseMap] = await Promise.all([
+  const [ctx, execMap, responseMap, certifiedMap] = await Promise.all([
     fetchTrustBadgeContext(),
     fetchExecutionStatsByMediaIds(ids),
     fetchOwnerResponseMinutesByMediaIds(ids),
+    fetchCertifiedPhotoCountsByMediaIds(ids),
   ]);
 
   return items.map((item) => {
     const execution = execMap.get(item.id) ?? emptyExecutionStats();
-    const trustBadges = computeTrustBadges(item, ctx, execution);
+    const certifiedPhotoCount = certifiedMap.get(item.id) ?? 0;
+    const trustBadges = computeTrustBadges(
+      item,
+      ctx,
+      execution,
+      certifiedPhotoCount,
+    );
     const trustScore = computeTrustScore(
       item,
       execution,
@@ -307,6 +360,9 @@ export async function attachMediaTrustToMediaItems(
       trustScore,
       executionCount: execution.totalCount,
       lastExecutionMonthsAgo: execution.monthsSinceLast,
+      performanceGuaranteed: trustBadges.some(
+        (b) => b.id === "performance_guaranteed",
+      ),
     };
   });
 }

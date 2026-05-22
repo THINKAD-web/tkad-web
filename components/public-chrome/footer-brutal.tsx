@@ -102,6 +102,7 @@ export function FooterBrutal() {
     { href: "/privacy", label: t("footer.privacy") },
     { href: "/terms", label: t("footer.terms") },
     { href: "/refund", label: t("footer.refund") },
+    { href: "/guarantee", label: t("footer.guarantee") },
   ] as const;
 
   return (

@@ -8,6 +8,7 @@ import {
   MediaOwnerPageLoader,
   ownerGlassCard,
 } from "@/components/media-owner/media-owner-shell";
+import { MediaOwnerRevenueCalculator } from "@/components/media-owner/media-owner-revenue-calculator";
 
 type Stats = {
   mediaCount: number;
@@ -71,6 +72,12 @@ export function MediaOwnerDashboardClient() {
 
   return (
     <div className="space-y-6">
+      <MediaOwnerRevenueCalculator
+        locale={locale}
+        variant="portal"
+        registerAnchor="/register/media"
+      />
+
       <div>
         <h2 className="text-2xl font-bold dark:text-white text-gray-900">
           {isKo ? "대시보드" : "Dashboard"}

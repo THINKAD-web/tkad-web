@@ -56,6 +56,8 @@ import {
   PlannerCpmCompareChart,
   PlannerMonthCompareChart,
 } from "@/components/planner-charts";
+import { PredictionAccuracyBanner } from "@/components/planner/prediction-accuracy-banner";
+import type { PlatformPredictionAccuracy } from "@/lib/prediction-accuracy";
 import { PlannerRegionMap } from "@/components/planner-region-map";
 import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
 import PlannerMediaSelector from "@/components/planner-media-selector";
@@ -162,11 +164,13 @@ const CATEGORIES: {
 type Props = {
   catalog: MediaItem[];
   databaseEmpty: boolean;
+  predictionAccuracy: PlatformPredictionAccuracy;
 };
 
 export default function PlannerPageClient({
   catalog,
   databaseEmpty,
+  predictionAccuracy,
 }: Props) {
   const t = useTranslations("planner");
   const tm = useTranslations("media");
@@ -1324,6 +1328,11 @@ export default function PlannerPageClient({
               </div>
             ) : metrics ? (
               <>
+                <PredictionAccuracyBanner
+                  accuracy={predictionAccuracy}
+                  isKo={isKo}
+                />
+
                 <div className="tkad-glass-surface relative flex flex-col gap-2 overflow-hidden rounded-[22px] px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="flex flex-wrap items-center gap-2">

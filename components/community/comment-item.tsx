@@ -19,6 +19,40 @@ type Props = {
   ) => Promise<{ ok: boolean; error?: string }>;
 };
 
+function renderCommentBody(body: string) {
+  const parts = body.split(/(\[[^\]]+\]\([^)]+\))/g);
+  return parts.map((part, i) => {
+    const match = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
+    if (match) {
+      const [, label, href] = match;
+      const internal = href.startsWith("/");
+      if (internal) {
+        return (
+          <Link
+            key={`${i}-${href}`}
+            href={href}
+            className="font-semibold text-violet-300 underline underline-offset-2 hover:text-violet-200"
+          >
+            {label}
+          </Link>
+        );
+      }
+      return (
+        <a
+          key={`${i}-${href}`}
+          href={href}
+          className="font-semibold text-violet-300 underline underline-offset-2"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {label}
+        </a>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 function fmtRelative(iso: string, locale: string) {
   const date = new Date(iso);
   const diff = Date.now() - date.getTime();
@@ -233,7 +267,7 @@ export function CommunityCommentItemCard({
         </div>
       ) : (
         <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed dark:text-white">
-          {comment.body}
+          {renderCommentBody(comment.body)}
         </p>
       )}
 

@@ -17,6 +17,11 @@ import {
   computeAvgVisibility,
 } from "@/lib/campaign-kpis";
 import {
+  computeCampaignPredictionVariance,
+  formatImpressionsCompact,
+  formatVariancePct,
+} from "@/lib/prediction-accuracy";
+import {
   CampaignReportDocument,
   CampaignReportHero,
   ReportBody,
@@ -133,6 +138,10 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
   const stats = computeCampaignBaseStats(data.mediaBookings);
   const totalAmount2 = computeCampaignTotalAmount(data.financialDocs);
   const plannerKpis = computeCampaignPlannerKpis(stats, totalAmount2);
+  const predictionVariance = computeCampaignPredictionVariance(
+    data.mediaBookings,
+    data.proofPhotos?.length ?? 0,
+  );
 
   // NOTE: 규칙 준수(새 산식/평가/추천 금지)를 위해 "매체별 추정 CPM" 등
   // 추가 계산(안분/추정) 기반 효율 분석 섹션은 표시하지 않습니다.
@@ -501,6 +510,43 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                   })}
                 </div>
               ) : null}
+            </ReportSection>
+          )}
+
+          {predictionVariance && (
+            <ReportSection>
+              <SectionTitle>예측 vs 실측</SectionTitle>
+              <StatGrid cols={3}>
+                <StatCard
+                  label="예측 노출"
+                  value={formatImpressionsCompact(
+                    predictionVariance.predictedImpressions,
+                  )}
+                  suffix="회"
+                />
+                <StatCard
+                  label="실측 노출"
+                  value={formatImpressionsCompact(
+                    predictionVariance.actualImpressions,
+                  )}
+                  suffix="회"
+                  variant="accent"
+                />
+                <StatCard
+                  label="오차율"
+                  value={formatVariancePct(predictionVariance.variancePct, "ko")}
+                  variant={
+                    Math.abs(predictionVariance.variancePct) <= 10
+                      ? "accent"
+                      : "default"
+                  }
+                />
+              </StatGrid>
+              <SectionNote>
+                {predictionVariance.hasProofData
+                  ? "현장 인증 사진·매체 실측 데이터를 반영한 집행 후 노출입니다. 예측 모델(유동 × 0.4)과 비교해 플랫폼 예측 정확도를 누적 개선합니다."
+                  : "인증 사진이 업로드되면 실측 노출이 보정·확정됩니다. 현재는 매체 DB 기준 추정치입니다."}
+              </SectionNote>
             </ReportSection>
           )}
 

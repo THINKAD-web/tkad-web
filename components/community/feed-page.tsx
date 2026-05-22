@@ -191,7 +191,7 @@ export async function CommunityFeedPage({
                       <div className="flex items-center justify-between gap-3">
                         <div>
                           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900">
-                            {isKo ? labels.shortKo : labels.en}
+                            {labels.emoji} {isKo ? labels.shortKo : labels.en}
                           </p>
                           <p className="mt-1 text-sm leading-relaxed dark:text-white">
                             {isKo ? labels.description.ko : labels.description.en}

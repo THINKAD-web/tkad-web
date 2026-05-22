@@ -5,6 +5,7 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { pageAlternates } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/user-session";
 import { ArrowLeft, Shield, Sparkles, Users } from "lucide-react";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { CommunityWriteForm } from "@/components/community/write-form";
 import { CommunityMemberRequiredPanel } from "@/components/community/member-required-panel";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -36,6 +37,7 @@ export default async function CommunityWritePage({ params }: Props) {
   setRequestLocale(locale);
   const isKo = locale === "ko";
   const me = await getCurrentUser();
+  const catalog = await fetchPublicMediaCatalog().catch(() => []);
 
   return (
     <HomeLandingDayNight>
@@ -129,6 +131,7 @@ export default async function CommunityWritePage({ params }: Props) {
               {me ? (
                 <CommunityWriteForm
                   locale={locale}
+                  catalog={catalog}
                   currentUser={{
                     name: me.name,
                     company: me.company,

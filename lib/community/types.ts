@@ -5,63 +5,84 @@
  */
 
 export const COMMUNITY_CATEGORIES = [
-  "insight",
-  "qna",
-  "networking",
-  "review",
+  "notice",
+  "free",
+  "media_recommend",
+  "execution_review",
+  "collaboration",
 ] as const;
 export type CommunityCategory = (typeof COMMUNITY_CATEGORIES)[number];
 
 export const COMMUNITY_CATEGORY_LABELS: Record<
   CommunityCategory,
   {
+    emoji: string;
     ko: string;
     en: string;
     shortKo: string;
     description: { ko: string; en: string };
   }
 > = {
-  insight: {
-    ko: "인사이트",
-    en: "Insights",
-    shortKo: "인사이트",
+  notice: {
+    emoji: "📢",
+    ko: "공지사항",
+    en: "Notices",
+    shortKo: "공지",
     description: {
-      ko: "OOH 업계 트렌드, 데이터, 운영 인사이트를 나누는 공간",
-      en: "Share OOH industry trends, data, and field insights",
+      ko: "THINKAD 운영팀 공지 및 업데이트",
+      en: "Official THINKAD announcements and updates",
     },
   },
-  qna: {
-    ko: "질문 · 토론",
-    en: "Q&A",
-    shortKo: "질문/토론",
+  free: {
+    emoji: "💬",
+    ko: "자유게시판",
+    en: "Open Board",
+    shortKo: "자유",
     description: {
-      ko: "매체 선정, 단가, 진행 방식에 대한 질문과 답변",
-      en: "Ask and answer questions on media selection, costs, and execution",
+      ko: "OOH 실무 팁, 질문, 업계 이야기를 자유롭게 나누는 공간",
+      en: "Share OOH tips, questions, and industry conversations",
     },
   },
-  networking: {
-    ko: "네트워킹",
-    en: "Networking",
-    shortKo: "네트워킹",
+  media_recommend: {
+    emoji: "🔍",
+    ko: "매체 추천 요청",
+    en: "Media Recommendations",
+    shortKo: "매체 추천",
     description: {
-      ko: "협업 파트너를 찾고 업계 연결을 만드는 커뮤니티",
-      en: "Find collaborators and build relationships across the OOH industry",
+      ko: "예산·지역·업종을 입력하면 AI가 추천 매체 3곳을 안내합니다",
+      en: "Enter budget, region, and industry — AI suggests 3 matching media",
     },
   },
-  review: {
-    ko: "캠페인 후기",
-    en: "Campaign Reviews",
-    shortKo: "캠페인 후기",
+  execution_review: {
+    emoji: "📊",
+    ko: "집행 후기",
+    en: "Execution Reviews",
+    shortKo: "집행 후기",
     description: {
-      ko: "실제 집행 경험, 성과, 시행착오를 공유하는 후기",
-      en: "Share execution outcomes, lessons learned, and campaign reviews",
+      ko: "실제 집행 경험 공유 — 매체 리뷰로도 등록되며 200P 지급",
+      en: "Share flight outcomes — also posted as a media review (+200P)",
+    },
+  },
+  collaboration: {
+    emoji: "🤝",
+    ko: "협업 구해요",
+    en: "Collaboration",
+    shortKo: "협업",
+    description: {
+      ko: "공동 구매, 파트너, 대행 협업 파트너를 찾는 게시판",
+      en: "Find co-buy partners, agencies, and collaboration opportunities",
     },
   },
 };
 
+/** DB·URL 레거시 카테고리 → 현재 카테고리 */
 const COMMUNITY_CATEGORY_ALIASES: Record<string, CommunityCategory> = {
-  qa: "qna",
-  recommend: "networking",
+  insight: "free",
+  qna: "free",
+  qa: "free",
+  review: "execution_review",
+  networking: "collaboration",
+  recommend: "media_recommend",
 };
 
 export function normalizeCommunityCategory(value: unknown): CommunityCategory | null {
@@ -70,6 +91,24 @@ export function normalizeCommunityCategory(value: unknown): CommunityCategory | 
     return value as CommunityCategory;
   }
   return COMMUNITY_CATEGORY_ALIASES[value] ?? null;
+}
+
+/** Prisma where 절 — 레거시 DB 값 포함 */
+export function resolveCommunityCategoryWhere(
+  category: CommunityCategory,
+): string | { in: string[] } {
+  switch (category) {
+    case "free":
+      return { in: ["free", "insight", "qna", "qa"] };
+    case "media_recommend":
+      return { in: ["media_recommend", "recommend"] };
+    case "execution_review":
+      return { in: ["execution_review", "review"] };
+    case "collaboration":
+      return { in: ["collaboration", "networking"] };
+    default:
+      return category;
+  }
 }
 
 export const COMMUNITY_MEMBER_ROLES = [
@@ -153,7 +192,7 @@ export type CommunityPostListItem = {
   id: string;
   category: CommunityCategory;
   title: string;
-  bodyExcerpt: string; // 본문 첫 N자
+  bodyExcerpt: string;
   authorName: string;
   isAnonymous: boolean;
   author: CommunityAuthorSummary | null;
@@ -162,7 +201,8 @@ export type CommunityPostListItem = {
   likeCount: number;
   viewCount: number;
   commentCount: number;
-  createdAt: string; // ISO
+  isPinned?: boolean;
+  createdAt: string;
   updatedAt: string;
 };
 
@@ -189,9 +229,26 @@ export type CommunityMemberListItem = CommunityAuthorSummary & {
   postCount: number;
   commentCount: number;
   latestActivityAt: string | null;
-  /** 계정 생성일 (가입일) */
   joinedAt: string;
 };
+
+export const COMMUNITY_REGION_OPTIONS = [
+  { value: "seoul_gangnam", ko: "서울 강남·테헤란", en: "Seoul Gangnam" },
+  { value: "seoul_hongdae", ko: "서울 홍대·마포", en: "Seoul Hongdae" },
+  { value: "seoul", ko: "서울 전역", en: "Seoul" },
+  { value: "busan", ko: "부산", en: "Busan" },
+  { value: "jeju", ko: "제주", en: "Jeju" },
+  { value: "national", ko: "전국", en: "Nationwide" },
+] as const;
+
+export const COMMUNITY_INDUSTRY_OPTIONS = [
+  { value: "indFb", ko: "F&B·식음료", en: "F&B" },
+  { value: "indRetail", ko: "리테일·유통", en: "Retail" },
+  { value: "indTech", ko: "IT·테크", en: "Tech" },
+  { value: "indFinance", ko: "금융", en: "Finance" },
+  { value: "indEnt", ko: "엔터·문화", en: "Entertainment" },
+  { value: "indOther", ko: "기타", en: "Other" },
+] as const;
 
 // ── 정책 상수 ──
 export const COMMUNITY_LIMITS = {
@@ -202,24 +259,15 @@ export const COMMUNITY_LIMITS = {
   COMMENT_BODY_MAX: 500,
   AUTHOR_NAME_MAX: 50,
   EXCERPT_LEN: 180,
-  /** 신고 누적 시 자동 hidden */
   REPORT_AUTO_HIDE_THRESHOLD: 3,
-  /** 익명 글: IP 당 시간당 글 한도 */
   ANON_POST_PER_HOUR: 5,
-  /** 익명 댓글: IP 당 시간당 댓글 한도 */
   ANON_COMMENT_PER_HOUR: 20,
-  /** 가입 사용자: 글/댓글 모두 시간당 한도 (관대) */
   USER_POST_PER_HOUR: 20,
   USER_COMMENT_PER_HOUR: 60,
   USER_REPORT_PER_HOUR: 40,
-  /** 페이지 당 글 수 */
   PAGE_SIZE: 20,
-  /** 홈 섹션 카드 수 */
   HOME_SECTION_SIZE: 3,
-  /** 멤버 디렉터리 페이지 크기 */
   MEMBER_DIRECTORY_PAGE_SIZE: 20,
-  /** 프로필 한 줄 소개 */
   PROFILE_BIO_MAX: 500,
-  /** 프로필 지역 문자열 */
   PROFILE_REGION_MAX: 40,
 } as const;

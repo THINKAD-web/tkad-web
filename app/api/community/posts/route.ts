@@ -7,6 +7,10 @@ import {
 } from "@/lib/community/queries";
 import { validateCommunityPostInput } from "@/lib/community/validate";
 import {
+  handleCommunityPostCreated,
+  mapExecutionReviewError,
+} from "@/lib/community/post-handlers";
+import {
   COMMUNITY_LIMITS,
   type CommunityCategory,
 } from "@/lib/community/types";
@@ -42,7 +46,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(result);
 }
 
-/** POST /api/community/posts — 작성. Turnstile + rate limit + 검증. */
+/** POST /api/community/posts — 작성. */
 export async function POST(req: NextRequest) {
   const ip = getRequestIp(req);
   let body: unknown;
@@ -55,7 +59,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  // honeypot
   if ((body as Record<string, unknown>).website) {
     return NextResponse.json({ ok: true, id: "trap" }, { status: 201 });
   }
@@ -76,6 +79,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (validated.value.category === "notice" && me.role !== "admin") {
+    return NextResponse.json(
+      { error: "공지사항은 운영팀만 작성할 수 있습니다." },
+      { status: 403 },
+    );
+  }
+
   if (!userPostLimiter.check(`u:${me.id}`)) {
     return NextResponse.json(
       { error: "잠시 후 다시 시도해주세요. (작성 한도 초과)" },
@@ -92,11 +102,52 @@ export async function POST(req: NextRequest) {
       authorEmail: me.email ?? null,
       authorUserId: me.id,
       authorIp: ip,
+      metadata: validated.value.metadata,
+      isPinned: validated.value.category === "notice",
     });
-    void import("@/lib/points").then(({ awardPoints }) =>
-      awardPoints(me.id, "COMMUNITY_POST", created.id).catch(() => {}),
+
+    let handlerResult: { mediaReviewId?: string } = {};
+    try {
+      handlerResult = await handleCommunityPostCreated({
+        postId: created.id,
+        category: validated.value.category,
+        title: validated.value.title,
+        body: validated.value.body,
+        metadata: validated.value.metadata,
+        authorUserId: me.id,
+        authorName: me.name,
+        locale: me.locale ?? "ko",
+      });
+    } catch (e) {
+      const mapped = mapExecutionReviewError(e);
+      if (mapped) {
+        return NextResponse.json(
+          { error: mapped.error, field: mapped.field },
+          { status: mapped.status },
+        );
+      }
+      throw e;
+    }
+
+    const { awardPoints } = await import("@/lib/points");
+    if (validated.value.category === "execution_review" && handlerResult.mediaReviewId) {
+      void awardPoints(me.id, "REVIEW_WRITE", handlerResult.mediaReviewId).catch(
+        () => {},
+      );
+    } else {
+      void awardPoints(me.id, "COMMUNITY_POST", created.id).catch(() => {});
+    }
+
+    return NextResponse.json(
+      {
+        ok: true,
+        id: created.id,
+        mediaReviewId: handlerResult.mediaReviewId,
+        pointsAwarded:
+          validated.value.category === "execution_review" ? 200 : 100,
+      },
+      { status: 201 },
     );
-    return NextResponse.json({ ok: true, id: created.id }, { status: 201 });
   } catch (e) {
     console.error("[community.posts.POST]", e);
     return NextResponse.json(

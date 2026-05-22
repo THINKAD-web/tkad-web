@@ -2,6 +2,10 @@ import { getCurrentUser } from "@/lib/user-session";
 import { apiError } from "@/lib/api-response";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { isMediaOwnerPortalRole } from "@/lib/media-owner-role";
+import {
+  MEDIA_OWNER_FEE_RATE,
+  calcNetFromGross,
+} from "@/lib/media-owner-constants";
 
 export async function requireMediaOwner() {
   const user = await getCurrentUser();
@@ -73,12 +77,4 @@ export function anonymizeAdvertiserIndustry(
   return labels[Math.abs(h) % labels.length]!;
 }
 
-export const MEDIA_OWNER_FEE_RATE = 0.15;
-
-export function calcNetFromGross(grossWon: number): {
-  feeWon: number;
-  netWon: number;
-} {
-  const feeWon = Math.round(grossWon * MEDIA_OWNER_FEE_RATE);
-  return { feeWon, netWon: grossWon - feeWon };
-}
+export { MEDIA_OWNER_FEE_RATE, calcNetFromGross };

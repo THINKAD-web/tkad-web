@@ -73,7 +73,7 @@ export function CommunityPostCard({
                 "rounded-full dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 dark:text-white text-gray-900",
             )}
           >
-            {isKo ? labels.shortKo : labels.en}
+            {labels.emoji} {isKo ? labels.shortKo : labels.en}
           </span>
           <span
             className={cn(

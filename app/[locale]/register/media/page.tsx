@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { pageAlternates } from "@/lib/seo";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaRegisterNeonClient } from "./media-register-neon-client";
+import { MediaOwnerRevenueCalculator } from "@/components/media-owner/media-owner-revenue-calculator";
+import { NeonSection } from "@/components/landing/neon/neon-section";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
 import {
@@ -67,6 +69,14 @@ export default async function MediaRegisterPage({
             </Link>
           </CategoryHeroCtaRow>
         </CategoryExploreHero>
+
+        <NeonSection className="pb-4 pt-0">
+          <MediaOwnerRevenueCalculator
+            locale={locale}
+            variant="landing"
+            registerAnchor="#register-form"
+          />
+        </NeonSection>
 
         <div id="register-form">
           <MediaRegisterNeonClient />
