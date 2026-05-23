@@ -40,7 +40,7 @@ import { RelatedCases } from "@/components/media-detail/related-cases";
 import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
 import {
   fetchPublicMediaCatalog,
-  getAllMediaSlugsForStaticParams,
+  getMediaSlugsForStaticBuild,
   resolveMediaForDetail,
 } from "@/lib/public-media-catalog";
 import { enrichMediaWithTrust } from "@/lib/media-trust-catalog";
@@ -68,9 +68,16 @@ import {
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
 export const revalidate = 3600;
+export const dynamicParams = true;
+
+/** Vercel build: pre-render top media only; rest ISR on demand. */
+const BUILD_STATIC_SLUG_LIMIT =
+  process.env.VERCEL === "1"
+    ? Number(process.env.MEDIA_STATIC_BUILD_LIMIT ?? 100)
+    : undefined;
 
 export async function generateStaticParams() {
-  const slugs = await getAllMediaSlugsForStaticParams();
+  const slugs = await getMediaSlugsForStaticBuild(BUILD_STATIC_SLUG_LIMIT);
   const keywordIds = getAllKeywordFilterMediaIds().map(String);
   const merged = [...new Set([...slugs, ...keywordIds])];
   return merged.map((slug) => ({ slug }));

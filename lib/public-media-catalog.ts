@@ -663,3 +663,46 @@ export async function getAllMediaSlugsForStaticParams(): Promise<string[]> {
     return getAllMediaIds().map(String);
   }
 }
+
+/**
+ * Slugs to pre-render at build time. On Vercel, cap count to avoid build timeout;
+ * remaining pages render on first request (ISR via revalidate).
+ */
+export async function getMediaSlugsForStaticBuild(
+  limit?: number,
+): Promise<string[]> {
+  if (!isDatabaseConfigured()) {
+    const ids = getAllMediaIds().map(String);
+    return limit ? ids.slice(0, limit) : ids;
+  }
+  try {
+    const db = getPrisma();
+    const take = limit && limit > 0 ? limit : undefined;
+    const popular = await db.media.findMany({
+      where: { isActive: true, isPopular: true },
+      select: { id: true, slug: true },
+      orderBy: { updatedAt: "desc" },
+      ...(take ? { take } : {}),
+    });
+    const popularSlugs = popular.map((r) => r.slug?.trim() || r.id);
+    if (!take || popularSlugs.length >= take) {
+      return take ? popularSlugs.slice(0, take) : popularSlugs;
+    }
+    const rest = await db.media.findMany({
+      where: {
+        isActive: true,
+        id: { notIn: popular.map((r) => r.id) },
+      },
+      select: { id: true, slug: true },
+      orderBy: { updatedAt: "desc" },
+      take: take - popularSlugs.length,
+    });
+    return [
+      ...popularSlugs,
+      ...rest.map((r) => r.slug?.trim() || r.id),
+    ];
+  } catch {
+    const all = getAllMediaIds().map(String);
+    return limit ? all.slice(0, limit) : all;
+  }
+}
